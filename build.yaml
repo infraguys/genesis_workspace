@@ -1,0 +1,10 @@
+targets:
+  $default:
+    builders:
+      injectable:
+        generate_for:
+          - lib/core/dependency_injection/di.dart
+      json_serializable:
+        generate_for:
+          - lib/data/*/dto/**.dart
+          - lib/data/*/api/**.dart
