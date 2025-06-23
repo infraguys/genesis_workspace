@@ -4,4 +4,5 @@ import 'package:genesis_workspace/features/authentication/domain/entities/api_ke
 abstract class AuthRepository {
   Future<ApiKeyEntity> fetchApiKey(ApiKeyRequestDto body);
   Future<void> saveToken({required String token, required String email});
+  Future<void> deleteToken();
 }

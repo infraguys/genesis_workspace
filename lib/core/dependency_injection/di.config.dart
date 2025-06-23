@@ -19,8 +19,12 @@ import 'package:genesis_workspace/features/authentication/data/repositories_impl
     as _i44;
 import 'package:genesis_workspace/features/authentication/domain/repositories/auth_repository.dart'
     as _i1022;
+import 'package:genesis_workspace/features/authentication/domain/usecases/delete_token_use_case.dart'
+    as _i433;
 import 'package:genesis_workspace/features/authentication/domain/usecases/fetch_api_key_use_case.dart'
     as _i799;
+import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart'
+    as _i75;
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart'
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
@@ -36,6 +40,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
+    gh.factory<_i75.GetTokenUseCase>(() => _i75.GetTokenUseCase());
     gh.factory<_i862.AuthCubit>(() => _i862.AuthCubit());
     gh.lazySingleton<_i361.Dio>(() => coreModule.dio());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
@@ -52,6 +57,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i433.DeleteTokenUseCase>(
+      () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
     return this;
   }

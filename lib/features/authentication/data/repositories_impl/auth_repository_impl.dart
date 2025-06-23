@@ -29,4 +29,14 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> deleteToken() async {
+    try {
+      await tokenStorage.deleteToken();
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
 }

@@ -7,7 +7,7 @@ class GetTokenUseCase {
 
   GetTokenUseCase();
 
-  Future<String?> call({required String email, required String token}) async {
+  Future<String?> call() async {
     return tokenStorage.getToken();
   }
 }
