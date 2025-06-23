@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:injectable/injectable.dart';
 
@@ -15,4 +16,7 @@ abstract class CoreModule {
     );
     return dio;
   }
+
+  @lazySingleton
+  FlutterSecureStorage secureStorage() => FlutterSecureStorage();
 }
