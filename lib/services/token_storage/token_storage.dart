@@ -4,19 +4,16 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'file_token_storage.dart';
 import 'secure_token_storage.dart';
-import 'web_token_storage.dart';
 
 abstract class TokenStorage {
-  Future<void> saveToken(String token);
+  Future<void> saveToken({required String token, required String email});
   Future<String?> getToken();
   Future<void> deleteToken();
 }
 
 class TokenStorageFactory {
   static TokenStorage create() {
-    if (kIsWeb) {
-      return WebTokenStorage();
-    } else if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS || kIsWeb) {
       return SecureTokenStorage();
     } else if (Platform.isWindows || Platform.isLinux) {
       return FileTokenStorage();

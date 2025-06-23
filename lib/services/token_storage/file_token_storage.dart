@@ -14,9 +14,9 @@ class FileTokenStorage implements TokenStorage {
   }
 
   @override
-  Future<void> saveToken(String token) async {
+  Future<void> saveToken({required String token, required String email}) async {
     final file = await _getFile();
-    await file.writeAsString(token, flush: true);
+    await file.writeAsString("$email:$token", flush: true);
   }
 
   @override

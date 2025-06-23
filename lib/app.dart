@@ -1,40 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 
 import 'features/authentication/presentation/auth.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class WorkspaceApp extends StatelessWidget {
+  const WorkspaceApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Workspace',
       theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MultiBlocProvider(
+        providers: [BlocProvider(create: (_) => getIt<AuthCubit>())],
+        child: Auth(),
+      ),
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Auth();
   }
 }

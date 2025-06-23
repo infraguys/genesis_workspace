@@ -21,6 +21,8 @@ import 'package:genesis_workspace/features/authentication/domain/repositories/au
     as _i1022;
 import 'package:genesis_workspace/features/authentication/domain/usecases/fetch_api_key_use_case.dart'
     as _i799;
+import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart'
+    as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
 import 'package:get_it/get_it.dart' as _i174;
@@ -47,6 +49,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i799.FetchApiKeyUseCase>(
       () => _i799.FetchApiKeyUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i643.SaveTokenUseCase>(
+      () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
     return this;
   }
