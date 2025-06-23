@@ -7,6 +7,6 @@ class Main {
   static Future<void> startApp() async {
     WidgetsFlutterBinding.ensureInitialized();
     configureDependencies();
-    runApp(const MyApp());
+    runApp(const WorkspaceApp());
   }
 }

@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/services/token_storage/token_interceptor.dart';
+import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
 
 @module
@@ -14,6 +16,8 @@ abstract class CoreModule {
         receiveTimeout: const Duration(seconds: 10),
       ),
     );
+    final tokenStorage = TokenStorageFactory.create();
+    dio.interceptors.add(TokenInterceptor(tokenStorage));
     return dio;
   }
 

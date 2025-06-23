@@ -7,7 +7,8 @@ class SecureTokenStorage implements TokenStorage {
   final _storage = getIt<FlutterSecureStorage>();
 
   @override
-  Future<void> saveToken(String token) => _storage.write(key: TokenStorageKeys.token, value: token);
+  Future<void> saveToken({required String token, required String email}) =>
+      _storage.write(key: TokenStorageKeys.token, value: "$email:$token");
 
   @override
   Future<String?> getToken() => _storage.read(key: TokenStorageKeys.token);
