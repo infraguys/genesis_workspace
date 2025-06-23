@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart' hide Headers;
-import 'package:genesis_workspace/data/authentication/dto/fetch_api_key_response_dto.dart';
+import 'package:genesis_workspace/features/authentication/data/dto/fetch_api_key_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'auth_api_client.g.dart';

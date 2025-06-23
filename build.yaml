@@ -4,7 +4,9 @@ targets:
       injectable:
         generate_for:
           - lib/core/dependency_injection/di.dart
+          - lib/features/*/data/repositories_impl/**.dart
+          - lib/features/*/domain/usecases/**.dart
       json_serializable:
         generate_for:
-          - lib/data/*/dto/**.dart
-          - lib/data/*/api/**.dart
+          - lib/features/*/data/dto/**.dart
+          - lib/features/*/data/api/**.dart
