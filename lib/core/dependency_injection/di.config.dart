@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart'
@@ -35,6 +36,9 @@ extension GetItInjectableX on _i174.GetIt {
     final coreModule = _$CoreModule();
     gh.factory<_i862.AuthCubit>(() => _i862.AuthCubit());
     gh.lazySingleton<_i361.Dio>(() => coreModule.dio());
+    gh.lazySingleton<_i558.FlutterSecureStorage>(
+      () => coreModule.secureStorage(),
+    );
     gh.factory<_i672.AuthRemoteDataSource>(
       () => _i672.AuthRemoteDataSourceImpl(),
     );
