@@ -4,7 +4,7 @@ import 'package:genesis_workspace/features/authentication/domain/entities/api_ke
 import 'package:genesis_workspace/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:injectable/injectable.dart';
 
-@Injectable(as: AuthRepository)
+@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
