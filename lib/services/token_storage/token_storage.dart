@@ -1,6 +1,4 @@
-import 'dart:io' show Platform;
-
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 
 import 'file_token_storage.dart';
 import 'secure_token_storage.dart';
@@ -13,9 +11,13 @@ abstract class TokenStorage {
 
 class TokenStorageFactory {
   static TokenStorage create() {
-    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS || kIsWeb) {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        kIsWeb) {
       return SecureTokenStorage();
-    } else if (Platform.isWindows || Platform.isLinux) {
+    } else if (defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
       return FileTokenStorage();
     } else {
       throw UnsupportedError('Unsupported platform');
