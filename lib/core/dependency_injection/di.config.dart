@@ -52,14 +52,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(gh<_i672.AuthRemoteDataSource>()),
     );
+    gh.factory<_i433.DeleteTokenUseCase>(
+      () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
+    );
     gh.factory<_i799.FetchApiKeyUseCase>(
       () => _i799.FetchApiKeyUseCase(gh<_i1022.AuthRepository>()),
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
-    );
-    gh.factory<_i433.DeleteTokenUseCase>(
-      () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
     return this;
   }
