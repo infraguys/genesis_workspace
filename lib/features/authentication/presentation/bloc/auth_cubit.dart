@@ -22,11 +22,11 @@ class AuthCubit extends Cubit<AuthState> {
     state.isPending = true;
     emit(state.copyWith(isPending: state.isPending));
     try {
-      final ApiKeyEntity response = await _fetchApiKeyUseCase.call(
-        'agent@genesis.team',
-        '6T+b09N.WYsCiV,0YOHzs',
-      );
-      inspect(response);
+      // final ApiKeyEntity response = await _fetchApiKeyUseCase.call(
+      //   'agent@genesis.team',
+      //   '6T+b09N.WYsCiV,0YOHzs',
+      // );
+      final ApiKeyEntity response = await _fetchApiKeyUseCase.call(username, password);
       await _saveTokenUseCase.call(email: response.email, token: response.apiKey);
       state.isAuthorized = true;
       emit(state.copyWith(isAuthorized: state.isAuthorized));
