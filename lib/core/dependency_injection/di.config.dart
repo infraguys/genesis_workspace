@@ -13,6 +13,14 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
+import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart'
+    as _i451;
+import 'package:genesis_workspace/data/users/repositories_impl/users_repository_impl.dart'
+    as _i675;
+import 'package:genesis_workspace/domain/users/repositories/users_repository.dart'
+    as _i125;
+import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart'
+    as _i988;
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart'
     as _i672;
 import 'package:genesis_workspace/features/authentication/data/repositories_impl/auth_repository_impl.dart'
@@ -46,8 +54,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
     );
+    gh.factory<_i451.UsersRemoteDataSource>(
+      () => _i451.UsersRemoteDataSourceImpl(),
+    );
     gh.factory<_i672.AuthRemoteDataSource>(
       () => _i672.AuthRemoteDataSourceImpl(),
+    );
+    gh.factory<_i125.UsersRepository>(
+      () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
     );
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(gh<_i672.AuthRemoteDataSource>()),
@@ -60,6 +74,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i988.GetSubscribedChannelsUseCase>(
+      () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
     );
     return this;
   }

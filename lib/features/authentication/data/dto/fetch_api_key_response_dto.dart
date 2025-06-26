@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/features/authentication/domain/entities/api_key_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'fetch_api_key_response_dto.g.dart';
@@ -26,4 +27,6 @@ class FetchApiKeyResponseDto {
       _$FetchApiKeyResponseDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$FetchApiKeyResponseDtoToJson(this);
+
+  ApiKeyEntity toEntity() => ApiKeyEntity(apiKey: apiKey, email: email, userId: userId);
 }
