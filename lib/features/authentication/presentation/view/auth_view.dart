@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
+import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +17,8 @@ class AuthView extends StatefulWidget {
 class _AuthViewState extends State<AuthView> {
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
+
+  final _formKey = GlobalKey<FormState>();
 
   bool _obscureText = true;
 
@@ -41,7 +44,6 @@ class _AuthViewState extends State<AuthView> {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (BuildContext context, state) {
         if (state.isAuthorized) {
@@ -59,9 +61,10 @@ class _AuthViewState extends State<AuthView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 12,
                 children: [
-                  FlutterLogo(size: 64),
+                  GenesisLogo(size: 90),
                   TextFormField(
                     controller: _usernameController,
+                    autofillHints: [AutofillHints.email],
                     onTapOutside: (_) {
                       FocusScope.of(context).unfocus();
                     },
@@ -70,6 +73,8 @@ class _AuthViewState extends State<AuthView> {
                     keyboardType: TextInputType.emailAddress,
                   ),
                   TextFormField(
+                    autofillHints: [AutofillHints.password],
+
                     controller: _passwordController,
                     obscureText: _obscureText,
                     onTapOutside: (_) {

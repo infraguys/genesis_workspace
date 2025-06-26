@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart';
 import 'package:genesis_workspace/features/authentication/data/dto/api_key_request_dto.dart';
+import 'package:genesis_workspace/features/authentication/data/dto/fetch_api_key_response_dto.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/api_key_entity.dart';
 import 'package:genesis_workspace/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
@@ -16,8 +17,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<ApiKeyEntity> fetchApiKey(ApiKeyRequestDto body) async {
-    final dto = await remoteDataSource.fetchApiKey(body);
-    return ApiKeyEntity(apiKey: dto.apiKey, email: dto.email, userId: dto.userId);
+    final FetchApiKeyResponseDto dto = await remoteDataSource.fetchApiKey(body);
+    return dto.toEntity();
   }
 
   @override

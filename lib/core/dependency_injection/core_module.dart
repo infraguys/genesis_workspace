@@ -12,8 +12,8 @@ abstract class CoreModule {
     final dio = Dio(
       BaseOptions(
         baseUrl: "${AppConstants.baseUrl}/api/v1",
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        // connectTimeout: const Duration(seconds: 10),
+        // receiveTimeout: const Duration(seconds: 10),
       ),
     );
     final tokenStorage = TokenStorageFactory.create();
