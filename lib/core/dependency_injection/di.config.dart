@@ -13,14 +13,26 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
+import 'package:genesis_workspace/data/real_time_events/datasources/real_time_events_data_soure.dart'
+    as _i735;
+import 'package:genesis_workspace/data/real_time_events/repositories_impl/real_time_events_repository_impl.dart'
+    as _i506;
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart'
     as _i451;
 import 'package:genesis_workspace/data/users/repositories_impl/users_repository_impl.dart'
     as _i675;
+import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
+    as _i703;
+import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart'
+    as _i1039;
+import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart'
+    as _i477;
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart'
     as _i125;
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart'
     as _i988;
+import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
+    as _i194;
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart'
     as _i672;
 import 'package:genesis_workspace/features/authentication/data/repositories_impl/auth_repository_impl.dart'
@@ -37,6 +49,8 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
+import 'package:genesis_workspace/services/real_time/real_time_service.dart'
+    as _i82;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -50,15 +64,26 @@ extension GetItInjectableX on _i174.GetIt {
     final coreModule = _$CoreModule();
     gh.factory<_i75.GetTokenUseCase>(() => _i75.GetTokenUseCase());
     gh.factory<_i862.AuthCubit>(() => _i862.AuthCubit());
+    gh.factory<_i1039.GetEventsByQueueIdUseCase>(
+      () => _i1039.GetEventsByQueueIdUseCase(),
+    );
+    gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
     gh.lazySingleton<_i361.Dio>(() => coreModule.dio());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
     );
+    gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
     );
+    gh.factory<_i703.RealTimeEventsRepository>(
+      () => _i506.RealTimeEventsRepositoryImpl(),
+    );
     gh.factory<_i672.AuthRemoteDataSource>(
       () => _i672.AuthRemoteDataSourceImpl(),
+    );
+    gh.factory<_i735.RealTimeEventsDataSource>(
+      () => _i735.RealTimeEventsDataSourceImpl(),
     );
     gh.factory<_i125.UsersRepository>(
       () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
@@ -77,6 +102,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i988.GetSubscribedChannelsUseCase>(
       () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i194.GetUsersUseCase>(
+      () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
     );
     return this;
   }
