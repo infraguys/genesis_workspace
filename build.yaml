@@ -8,6 +8,7 @@ targets:
           - lib/features/**/domain/usecases/**.dart
           - lib/data/**/datasources/**.dart
           - lib/data/**/repositories_impl/**.dart
+          - lib/services/real_time/**.dart
       json_serializable:
         generate_for:
           - lib/features/**/data/dto/**.dart

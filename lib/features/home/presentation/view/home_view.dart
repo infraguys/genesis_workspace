@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/home/presentation/bloc/home_cubit.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -22,6 +26,7 @@ class _HomeViewState extends State<HomeView> {
       ),
       body: Center(
         child: Column(
+          spacing: 12,
           children: [
             Text("Authorized. This is home page"),
             ElevatedButton(
@@ -37,10 +42,21 @@ class _HomeViewState extends State<HomeView> {
               },
               child: Text("Get subscribed channels"),
             ),
+            ElevatedButton(onPressed: () async {}, child: Text("Connect to real time events")),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  final GetUsersUseCase getUsers = getIt<GetUsersUseCase>();
+                  await getUsers.call();
+                } catch (e) {
+                  inspect(e);
+                }
+              },
+              child: Text("Get Users"),
+            ),
           ],
         ),
       ),
     );
-    ;
   }
 }
