@@ -5,12 +5,21 @@ class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
   final RealTimeEventsApiClient apiClient = RealTimeEventsApiClient(getIt<Dio>());
 
   @override
-  Future<void> getEventsByQueueId(GetEventsByQueueIdBodyDto body) async {
-    return await apiClient.getEventsByQueueId(body.queueId, body.lastEventId);
+  Future<EventByQueueIdResponseDto> getEventsByQueueId(GetEventsByQueueIdBodyDto body) async {
+    try {
+      final response = await apiClient.getEventsByQueueId(body.queueId, body.lastEventId);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
   Future<RegisterQueueResponseDto> registerQueue(RegisterQueueRequestBodyDto requestDto) async {
-    return await apiClient.registerQueue(requestDto);
+    try {
+      return await apiClient.registerQueue(requestDto);
+    } catch (e) {
+      rethrow;
+    }
   }
 }
