@@ -9,6 +9,10 @@ class RegisterQueueUseCase {
   final RealTimeEventsRepository repository = getIt<RealTimeEventsRepository>();
 
   Future<RegisterQueueEntity> call(RegisterQueueRequestBodyEntity body) async {
-    return await repository.registerQueue(body);
+    try {
+      return await repository.registerQueue(body);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

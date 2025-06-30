@@ -49,6 +49,8 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
+import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
+    as _i573;
 import 'package:genesis_workspace/services/real_time/real_time_service.dart'
     as _i82;
 import 'package:get_it/get_it.dart' as _i174;
@@ -72,6 +74,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
     );
+    gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
     gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
@@ -100,11 +103,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
-    gh.factory<_i988.GetSubscribedChannelsUseCase>(
-      () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
-    );
     gh.factory<_i194.GetUsersUseCase>(
       () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i988.GetSubscribedChannelsUseCase>(
+      () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
     );
     return this;
   }

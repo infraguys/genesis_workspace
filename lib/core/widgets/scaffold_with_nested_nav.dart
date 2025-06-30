@@ -1,47 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:go_router/go_router.dart';
 
-class ScaffoldWithNestedNavigation extends StatelessWidget {
+class ScaffoldWithNestedNavigation extends StatefulWidget {
   const ScaffoldWithNestedNavigation({Key? key, required this.navigationShell})
     : super(key: key ?? const ValueKey('ScaffoldWithNestedNavigation'));
   final StatefulNavigationShell navigationShell;
 
+  @override
+  State<ScaffoldWithNestedNavigation> createState() => _ScaffoldWithNestedNavigationState();
+}
+
+class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
+  late final Future _future;
   void _goBranch(int index) {
-    navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
+
+  @override
+  void initState() {
+    _future = context.read<RealTimeCubit>().init();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    context.read<RealTimeCubit>().dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          if (currentSize(context) > ScreenSize.tablet) ...[
-            NavigationRail(
-              selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: _goBranch,
-              labelType: NavigationRailLabelType.all,
-              destinations: const [
-                NavigationRailDestination(label: Text('Section A'), icon: Icon(Icons.home)),
-                NavigationRailDestination(label: Text('Section B'), icon: Icon(Icons.settings)),
+    return FutureBuilder(
+      future: _future,
+      builder: (context, asyncSnapshot) {
+        return Scaffold(
+          body: Row(
+            children: [
+              if (currentSize(context) > ScreenSize.tablet) ...[
+                NavigationRail(
+                  selectedIndex: widget.navigationShell.currentIndex,
+                  onDestinationSelected: _goBranch,
+                  labelType: NavigationRailLabelType.all,
+                  destinations: const [
+                    NavigationRailDestination(label: Text('Home'), icon: Icon(Icons.home)),
+                    NavigationRailDestination(label: Text('Settings'), icon: Icon(Icons.settings)),
+                  ],
+                ),
+                const VerticalDivider(thickness: 1, width: 1),
               ],
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-          ],
-          Expanded(child: navigationShell),
-        ],
-      ),
-      bottomNavigationBar: currentSize(context) > ScreenSize.tablet
-          ? null
-          : BottomNavigationBar(
-              currentIndex: navigationShell.currentIndex,
-              onTap: _goBranch,
-              items: const [
-                BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.home)),
-                BottomNavigationBarItem(label: 'Settings', icon: Icon(Icons.settings)),
-              ],
-              // onDestinationSelected: _goBranch,
-            ),
+              Expanded(child: widget.navigationShell),
+            ],
+          ),
+          bottomNavigationBar: currentSize(context) > ScreenSize.tablet
+              ? null
+              : BottomNavigationBar(
+                  currentIndex: widget.navigationShell.currentIndex,
+                  onTap: _goBranch,
+                  items: const [
+                    BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.home)),
+                    BottomNavigationBarItem(label: 'Settings', icon: Icon(Icons.settings)),
+                  ],
+                  // onDestinationSelected: _goBranch,
+                ),
+        );
+      },
     );
   }
 }
