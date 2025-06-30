@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,7 @@ class Routes {
   static const String auth = '/auth';
   static const String home = '/home';
   static const String settings = '/settings';
+  static const String chat = '/chat';
 }
 
 final router = GoRouter(
@@ -48,6 +50,7 @@ final router = GoRouter(
                 );
               },
             ),
+            GoRoute(path: Routes.chat, name: Routes.chat, builder: (context, state) => Chat()),
           ],
         ),
         StatefulShellBranch(

@@ -13,6 +13,12 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
+import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart'
+    as _i253;
+import 'package:genesis_workspace/data/messages/datasources/messages_data_source_impl.dart'
+    as _i695;
+import 'package:genesis_workspace/data/messages/repositories_impl/messages_repository_impl.dart'
+    as _i971;
 import 'package:genesis_workspace/data/real_time_events/datasources/real_time_events_data_soure.dart'
     as _i735;
 import 'package:genesis_workspace/data/real_time_events/repositories_impl/real_time_events_repository_impl.dart'
@@ -21,6 +27,10 @@ import 'package:genesis_workspace/data/users/datasources/users_remote_data_sourc
     as _i451;
 import 'package:genesis_workspace/data/users/repositories_impl/users_repository_impl.dart'
     as _i675;
+import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
+    as _i857;
+import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart'
+    as _i207;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
     as _i703;
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart'
@@ -70,6 +80,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
+    gh.factory<_i207.GetMessagesUseCase>(() => _i207.GetMessagesUseCase());
     gh.lazySingleton<_i361.Dio>(() => coreModule.dio());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
@@ -79,6 +90,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
     );
+    gh.factory<_i857.MessagesRepository>(() => _i971.MessagesRepositoryImpl());
+    gh.factory<_i253.MessagesDataSource>(() => _i695.MessagesDataSourceImpl());
     gh.factory<_i703.RealTimeEventsRepository>(
       () => _i506.RealTimeEventsRepositoryImpl(),
     );
