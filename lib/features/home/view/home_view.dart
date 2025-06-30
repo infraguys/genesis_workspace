@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/home/bloc/home_cubit.dart';
 import 'package:genesis_workspace/features/home/view/user_avatar.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -45,6 +47,9 @@ class _HomeViewState extends State<HomeView> {
                 itemBuilder: (BuildContext context, int index) {
                   final UserEntity user = state.users[index];
                   return ListTile(
+                    onTap: () {
+                      context.pushNamed(Routes.chat);
+                    },
                     title: Text(user.fullName),
                     subtitle: state.typingUsers.contains(user.userId)
                         ? Text("Typing...")
