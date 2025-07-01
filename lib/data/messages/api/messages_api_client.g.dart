@@ -18,12 +18,20 @@ class _MessagesApiClient implements MessagesApiClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<MessagesResponseDto> getMessages(MessagesRequestDto body) async {
+  Future<MessagesResponseDto> getMessages(
+    String anchor,
+    String? narrow,
+    int? numBefore,
+  ) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'anchor': anchor,
+      r'narrow': narrow,
+      r'num_before': numBefore,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(body.toJson());
+    const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<MessagesResponseDto>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(

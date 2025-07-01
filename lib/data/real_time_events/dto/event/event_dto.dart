@@ -1,6 +1,5 @@
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/message_event_dto.dart';
-import 'package:genesis_workspace/data/real_time_events/dto/event/presence_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/typing_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/unsupported_event_dto.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/event_entity.dart';
@@ -19,7 +18,7 @@ EventDto parseEventDto(Map<String, dynamic> json) {
 
   final type = EventType.values.firstWhere(
     (e) => e.toJson() == typeRaw,
-    orElse: () => throw UnsupportedError('Unknown event type: $typeRaw'),
+    orElse: () => EventType.unsupported,
   );
 
   switch (type) {
@@ -27,8 +26,6 @@ EventDto parseEventDto(Map<String, dynamic> json) {
       return TypingEventDto.fromJson(json);
     case EventType.message:
       return MessageEventDto.fromJson(json);
-    case EventType.presence:
-      return PresenceEventDto.fromJson(json);
     default:
       return UnsupportedEventDto.fromJson(json);
   }

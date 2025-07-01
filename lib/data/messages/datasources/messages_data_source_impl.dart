@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
@@ -13,7 +15,9 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   @override
   Future<MessagesResponseDto> getMessages(MessagesRequestDto body) async {
     try {
-      return await apiClient.getMessages(body);
+      final anchor = body.anchor;
+      final narrowString = jsonEncode(body.narrow?.map((e) => e.toJson()).toList());
+      return await apiClient.getMessages(anchor, narrowString, 100);
     } catch (e) {
       rethrow;
     }

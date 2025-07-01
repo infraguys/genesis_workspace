@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
@@ -48,6 +49,7 @@ class RealTimeService {
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueId!, lastEventId: lastEventId),
       );
+      inspect(response);
       switch (response.events.last.type) {
         case EventType.typing:
           _typingEventsController.add(response.events.last as TypingEventEntity);
@@ -55,8 +57,13 @@ class RealTimeService {
           break;
       }
       return response;
-    } catch (e) {
-      rethrow;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400 && e.response?.data['code'] == 'BAD_EVENT_QUEUE_ID') {
+        await registerQueue();
+        return await getLastEvent();
+      } else {
+        rethrow;
+      }
     }
   }
 

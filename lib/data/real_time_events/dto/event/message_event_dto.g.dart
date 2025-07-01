@@ -25,6 +25,7 @@ Map<String, dynamic> _$MessageEventDtoToJson(MessageEventDto instance) =>
 const _$EventTypeEnumMap = {
   EventType.typing: 'typing',
   EventType.message: 'message',
-  EventType.presence: 'presence',
   EventType.heartbeat: 'heartbeat',
+  EventType.presence: 'presence',
+  EventType.unsupported: 'unsupported',
 };

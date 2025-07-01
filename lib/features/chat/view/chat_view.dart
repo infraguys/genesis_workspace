@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 
@@ -24,7 +26,12 @@ class _ChatViewState extends State<ChatView> {
             ElevatedButton(
               onPressed: () async {
                 final GetMessagesUseCase _useCase = getIt<GetMessagesUseCase>();
-                final body = MessagesRequestEntity(anchor: 0);
+                final body = MessagesRequestEntity(
+                  anchor: MessageAnchor.newest,
+                  narrow: [
+                    MessageNarrowEntity(operator: NarrowOperator.dm, operand: [11]),
+                  ],
+                );
                 final response = await _useCase.call(body);
                 inspect(response);
               },

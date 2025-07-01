@@ -8,11 +8,13 @@ enum EventType {
   @JsonValue('message')
   message,
 
+  @JsonValue('heartbeat')
+  heartbeat,
+
   @JsonValue('presence')
   presence,
 
-  @JsonValue('heartbeat')
-  heartbeat,
+  unsupported,
 
   // static EventType fromJson(String value) {
   //   switch (value) {
@@ -46,10 +48,10 @@ extension EventTypeX on EventType {
         return 'typing';
       case EventType.message:
         return 'message';
-      case EventType.presence:
-        return 'presence';
       case EventType.heartbeat:
         return 'heartbeat';
+      default:
+        return 'unsupported';
     }
   }
 }
