@@ -22,6 +22,7 @@ Map<String, dynamic> _$UnsupportedEventDtoToJson(
 const _$EventTypeEnumMap = {
   EventType.typing: 'typing',
   EventType.message: 'message',
-  EventType.presence: 'presence',
   EventType.heartbeat: 'heartbeat',
+  EventType.presence: 'presence',
+  EventType.unsupported: 'unsupported',
 };

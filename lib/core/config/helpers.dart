@@ -1,9 +1,9 @@
 String? validateEmail(String? value) {
-  const emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+  final emailRegex = RegExp(r'^[\w.+-]+@([\w-]+\.)+[\w-]{2,}$');
 
   if (value == null || value.isEmpty) {
     return 'Please enter your email';
-  } else if (!RegExp(emailRegex).hasMatch(value)) {
+  } else if (!RegExp(emailRegex.pattern).hasMatch(value)) {
     return 'Enter a valid email address';
   }
   return null;

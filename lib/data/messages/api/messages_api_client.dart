@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart' hide Headers;
-import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -10,5 +9,9 @@ abstract class MessagesApiClient {
   factory MessagesApiClient(Dio dio, {String? baseUrl}) = _MessagesApiClient;
 
   @GET('/messages')
-  Future<MessagesResponseDto> getMessages(@Body() MessagesRequestDto body);
+  Future<MessagesResponseDto> getMessages(
+    @Query("anchor") String anchor,
+    @Query("narrow") String? narrow,
+    @Query("num_before") int? numBefore,
+  );
 }
