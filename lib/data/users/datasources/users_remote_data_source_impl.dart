@@ -21,4 +21,13 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<OwnUserResponseDto> getOwnUser() async {
+    try {
+      return apiClient.getOwnUser();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

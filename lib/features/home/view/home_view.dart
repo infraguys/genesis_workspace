@@ -48,7 +48,7 @@ class _HomeViewState extends State<HomeView> {
                   final UserEntity user = state.users[index];
                   return ListTile(
                     onTap: () {
-                      context.pushNamed(Routes.chat);
+                      context.pushNamed(Routes.chat, extra: user);
                     },
                     title: Text(user.fullName),
                     subtitle: state.typingUsers.contains(user.userId)

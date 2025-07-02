@@ -13,5 +13,7 @@ abstract class MessagesApiClient {
     @Query("anchor") String anchor,
     @Query("narrow") String? narrow,
     @Query("num_before") int? numBefore,
+    @Query("num_after") int? numAfter,
+    @Query("apply_markdown") bool? applyMarkdown,
   );
 }

@@ -39,6 +39,8 @@ import 'package:genesis_workspace/domain/real_time_events/usecases/register_queu
     as _i477;
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart'
     as _i125;
+import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart'
+    as _i547;
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart'
     as _i988;
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
@@ -59,6 +61,8 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
+    as _i766;
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
     as _i573;
 import 'package:genesis_workspace/services/real_time/real_time_service.dart'
@@ -87,6 +91,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
     gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
+    gh.lazySingleton<_i766.ProfileCubit>(() => _i766.ProfileCubit());
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
     );
@@ -121,6 +126,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i988.GetSubscribedChannelsUseCase>(
       () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i547.GetOwnUserUseCase>(
+      () => _i547.GetOwnUserUseCase(gh<_i125.UsersRepository>()),
     );
     return this;
   }

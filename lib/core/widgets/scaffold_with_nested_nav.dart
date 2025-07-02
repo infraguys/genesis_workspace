@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/features/home/view/user_avatar.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +17,7 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
   late final Future _future;
+
   void _goBranch(int index) {
     widget.navigationShell.goBranch(
       index,
@@ -24,7 +27,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   @override
   void initState() {
-    _future = context.read<RealTimeCubit>().init();
+    _future = Future.wait<void>([
+      context.read<RealTimeCubit>().init(),
+      context.read<ProfileCubit>().getOwnUser(),
+    ]);
     super.initState();
   }
 
@@ -49,6 +55,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   labelType: NavigationRailLabelType.all,
                   destinations: const [
                     NavigationRailDestination(label: Text('Home'), icon: Icon(Icons.home)),
+                    NavigationRailDestination(label: Text('Profile'), icon: Icon(Icons.settings)),
                     NavigationRailDestination(label: Text('Settings'), icon: Icon(Icons.settings)),
                   ],
                 ),
@@ -62,8 +69,16 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               : BottomNavigationBar(
                   currentIndex: widget.navigationShell.currentIndex,
                   onTap: _goBranch,
-                  items: const [
+                  items: [
                     BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.home)),
+                    BottomNavigationBarItem(
+                      label: 'Profile',
+                      icon: BlocBuilder<ProfileCubit, ProfileState>(
+                        builder: (context, state) {
+                          return UserAvatar(avatarUrl: state.user?.avatarUrl);
+                        },
+                      ),
+                    ),
                     BottomNavigationBarItem(label: 'Settings', icon: Icon(Icons.settings)),
                   ],
                   // onDestinationSelected: _goBranch,
