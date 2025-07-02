@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart' hide Headers;
+import 'package:genesis_workspace/data/users/dto/own_user_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
@@ -14,4 +15,7 @@ abstract class UsersApiClient {
 
   @GET('/users')
   Future<UsersResponseDto> getUsers();
+
+  @GET('/users/me')
+  Future<OwnUserResponseDto> getOwnUser();
 }

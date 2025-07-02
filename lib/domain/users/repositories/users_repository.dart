@@ -4,4 +4,5 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 abstract class UsersRepository {
   Future<List<SubscriptionEntity>> getSubscribedChannels();
   Future<List<UserEntity>> getUsers();
+  Future<UserEntity> getOwnUser();
 }

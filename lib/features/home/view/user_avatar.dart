@@ -9,7 +9,12 @@ class UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (avatarUrl != null && avatarUrl!.isNotEmpty) {
-      final String fullUrl = "${AppConstants.baseUrl}$avatarUrl";
+      String fullUrl;
+      if (avatarUrl!.contains("http")) {
+        fullUrl = avatarUrl!;
+      } else {
+        fullUrl = "${AppConstants.baseUrl}$avatarUrl";
+      }
       return CircleAvatar(
         backgroundImage: NetworkImage(fullUrl),
         backgroundColor: Colors.grey[200],

@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/profile/profile.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:go_router/go_router.dart';
@@ -13,12 +15,14 @@ import '../features/home/home.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
+final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
 class Routes {
   static const String splashScreen = '/';
   static const String auth = '/auth';
   static const String home = '/home';
   static const String settings = '/settings';
+  static const String profile = '/profile';
   static const String chat = '/chat';
 }
 
@@ -50,14 +54,22 @@ final router = GoRouter(
                 );
               },
             ),
-            GoRoute(path: Routes.chat, name: Routes.chat, builder: (context, state) => Chat()),
           ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorProfileKey,
+          routes: [GoRoute(path: Routes.profile, builder: (context, state) => const Profile())],
         ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorSettingsKey,
           routes: [GoRoute(path: Routes.settings, builder: (context, state) => const Settings())],
         ),
       ],
+    ),
+    GoRoute(
+      path: Routes.chat,
+      name: Routes.chat,
+      builder: (context, state) => Chat(user: state.extra as UserEntity),
     ),
     GoRoute(
       path: Routes.splashScreen,

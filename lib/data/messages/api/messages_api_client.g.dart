@@ -22,12 +22,16 @@ class _MessagesApiClient implements MessagesApiClient {
     String anchor,
     String? narrow,
     int? numBefore,
+    int? numAfter,
+    bool? applyMarkdown,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'anchor': anchor,
       r'narrow': narrow,
       r'num_before': numBefore,
+      r'num_after': numAfter,
+      r'apply_markdown': applyMarkdown,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};

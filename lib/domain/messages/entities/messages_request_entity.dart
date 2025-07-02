@@ -4,11 +4,17 @@ import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity
 class MessagesRequestEntity {
   final MessageAnchor anchor;
   final List<MessageNarrowEntity>? narrow;
+  final int? numBefore;
+  final int? numAfter;
 
-  MessagesRequestEntity({required this.anchor, this.narrow});
+  MessagesRequestEntity({required this.anchor, this.narrow, this.numBefore, this.numAfter});
 
-  MessagesRequestDto toDto() =>
-      MessagesRequestDto(anchor: anchor.name, narrow: narrow?.map((e) => e.toDto()).toList());
+  MessagesRequestDto toDto() => MessagesRequestDto(
+    anchor: anchor.name,
+    narrow: narrow?.map((e) => e.toDto()).toList(),
+    numBefore: numBefore,
+    numAfter: numAfter,
+  );
 }
 
 enum MessageAnchor { newest, oldest, first_unread }

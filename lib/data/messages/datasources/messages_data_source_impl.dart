@@ -17,7 +17,13 @@ class MessagesDataSourceImpl implements MessagesDataSource {
     try {
       final anchor = body.anchor;
       final narrowString = jsonEncode(body.narrow?.map((e) => e.toJson()).toList());
-      return await apiClient.getMessages(anchor, narrowString, 100);
+      return await apiClient.getMessages(
+        anchor,
+        narrowString,
+        body.numBefore,
+        body.numAfter,
+        false,
+      );
     } catch (e) {
       rethrow;
     }
