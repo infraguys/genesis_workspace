@@ -1,5 +1,4 @@
 import 'package:genesis_workspace/data/real_time_events/dto/event/message_recipient_dto.dart';
-import 'package:genesis_workspace/data/real_time_events/dto/recipient_dto.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/message_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -10,7 +9,7 @@ class MessageDto {
   final int id;
 
   @JsonKey(name: 'avatar_url')
-  final String avatarUrl;
+  final String? avatarUrl;
 
   final String content;
 
@@ -52,7 +51,7 @@ class MessageDto {
     required this.senderEmail,
     required this.displayRecipient,
     required this.type,
-    required this.avatarUrl,
+    this.avatarUrl,
     required this.contentType,
   });
 

@@ -20,7 +20,7 @@ MessageDto _$MessageDtoFromJson(Map<String, dynamic> json) => MessageDto(
       .map((e) => MessageRecipientDto.fromJson(e as Map<String, dynamic>))
       .toList(),
   type: json['type'] as String,
-  avatarUrl: json['avatar_url'] as String,
+  avatarUrl: json['avatar_url'] as String?,
   contentType: json['content_type'] as String,
 );
 
