@@ -6,12 +6,14 @@ part 'recipient_dto.g.dart';
 @JsonSerializable()
 class RecipientDto {
   final String email;
-  @JsonKey(name: 'user_id')
   final int userId;
 
   RecipientDto({required this.email, required this.userId});
 
-  factory RecipientDto.fromJson(Map<String, dynamic> json) => _$RecipientDtoFromJson(json);
+  factory RecipientDto.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] ?? json['user_id'] ?? -1;
+    return RecipientDto(email: json['email'], userId: id);
+  }
 
   Map<String, dynamic> toJson() => _$RecipientDtoToJson(this);
 

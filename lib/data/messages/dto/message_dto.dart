@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/data/real_time_events/dto/recipient_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -15,6 +16,8 @@ class MessageDto {
   final int senderId;
   @JsonKey(name: "sender_full_name")
   final String senderFullName;
+  @JsonKey(name: "display_recipient")
+  final List<RecipientDto> displayRecipient;
 
   MessageDto({
     required this.id,
@@ -23,6 +26,7 @@ class MessageDto {
     required this.content,
     required this.senderId,
     required this.senderFullName,
+    required this.displayRecipient,
   });
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);
@@ -36,5 +40,6 @@ class MessageDto {
     content: content,
     senderId: senderId,
     senderFullName: senderFullName,
+    displayRecipient: displayRecipient.map((e) => e.toEntity()).toList(),
   );
 }
