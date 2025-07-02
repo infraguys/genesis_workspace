@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
@@ -26,6 +27,9 @@ class RealTimeService {
 
   final _typingEventsController = StreamController<TypingEventEntity>.broadcast();
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
+
+  final _messagesEventsController = StreamController<MessageEventEntity>.broadcast();
+  Stream<MessageEventEntity> get messagesEventsStream => _messagesEventsController.stream;
 
   Future<RegisterQueueEntity> registerQueue() async {
     try {
@@ -49,12 +53,15 @@ class RealTimeService {
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueId!, lastEventId: lastEventId),
       );
-      inspect(response);
-      switch (response.events.last.type) {
-        case EventType.typing:
-          _typingEventsController.add(response.events.last as TypingEventEntity);
-        default:
-          break;
+      for (var event in response.events) {
+        switch (event.type) {
+          case EventType.typing:
+            _typingEventsController.add(response.events.last as TypingEventEntity);
+          case EventType.message:
+            _messagesEventsController.add(response.events.last as MessageEventEntity);
+          default:
+            break;
+        }
       }
       return response;
     } on DioException catch (e) {

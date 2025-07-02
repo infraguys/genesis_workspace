@@ -8,8 +8,8 @@ part of 'recipient_dto.dart';
 
 RecipientDto _$RecipientDtoFromJson(Map<String, dynamic> json) => RecipientDto(
   email: json['email'] as String,
-  userId: (json['user_id'] as num).toInt(),
+  userId: (json['userId'] as num).toInt(),
 );
 
 Map<String, dynamic> _$RecipientDtoToJson(RecipientDto instance) =>
-    <String, dynamic>{'email': instance.email, 'user_id': instance.userId};
+    <String, dynamic>{'email': instance.email, 'userId': instance.userId};

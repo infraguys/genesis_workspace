@@ -1,6 +1,6 @@
+import 'package:genesis_workspace/data/messages/dto/message_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
-import 'package:genesis_workspace/data/real_time_events/dto/message_dto.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 

@@ -22,6 +22,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   late final UserEntity _myUser;
   late final TextEditingController _messageController;
 
+  String _currentText = '';
+
   void _scrollToBottom() {
     if (_controller.hasClients) {
       _controller.jumpTo(_controller.position.maxScrollExtent);
@@ -33,16 +35,23 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    _future = context.read<ChatCubit>().getMessages(widget.userEntity.userId);
+    _myUser = context.read<ProfileCubit>().state.user!;
+
+    _future = context.read<ChatCubit>().getMessages(
+      chatId: widget.userEntity.userId,
+      myUserId: _myUser.userId,
+    );
     _controller = ScrollController();
     _messageController = TextEditingController();
-    _myUser = context.read<ProfileCubit>().state.user!;
+
+    _messageController.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
+    _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     super.dispose();
   }
@@ -56,6 +65,12 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     });
   }
 
+  void _onTextChanged() {
+    setState(() {
+      _currentText = _messageController.text;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -66,12 +81,19 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           spacing: 8,
           children: [
             UserAvatar(avatarUrl: widget.userEntity.avatarUrl),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.userEntity.fullName),
-                Text("typing...", style: TextStyle(fontSize: 11)),
-              ],
+            BlocBuilder<ChatCubit, ChatState>(
+              builder: (context, state) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.userEntity.fullName),
+                    Text(
+                      state.typingId == widget.userEntity.userId ? "typing..." : "Online",
+                      style: TextStyle(fontSize: 11),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -99,66 +121,92 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                 child: Column(
                   children: [
                     Expanded(
-                      child: ListView.separated(
-                        controller: _controller,
-                        itemCount: state.messages.length,
-                        padding: EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12),
-                        separatorBuilder: (BuildContext context, int index) {
-                          return SizedBox(height: 12);
+                      child: GestureDetector(
+                        onTap: () {
+                          FocusScope.of(context).unfocus();
                         },
-                        itemBuilder: (BuildContext context, int index) {
-                          final MessageEntity message = state.messages[index];
-                          final bool isMyMessage = message.senderId == _myUser.userId;
-                          return Align(
-                            alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width * 0.7,
-                              ),
-                              child: Row(
-                                spacing: 8,
-                                mainAxisAlignment: isMyMessage
-                                    ? MainAxisAlignment.end
-                                    : MainAxisAlignment.start,
-                                children: [
-                                  !isMyMessage
-                                      ? UserAvatar(avatarUrl: message.avatarUrl)
-                                      : SizedBox(),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                    decoration: BoxDecoration(
-                                      color: isMyMessage
-                                          ? theme.colorScheme.secondaryContainer.withAlpha(128)
-                                          : theme.colorScheme.secondaryContainer,
-                                      borderRadius: BorderRadius.circular(12),
+                        child: state.messages.isEmpty
+                            ? Center(child: Text("No messages here yet..."))
+                            : ListView.separated(
+                                controller: _controller,
+                                itemCount: state.messages.length,
+                                padding: EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12),
+                                separatorBuilder: (BuildContext context, int index) {
+                                  return SizedBox(height: 12);
+                                },
+                                itemBuilder: (BuildContext context, int index) {
+                                  final MessageEntity message = state.messages[index];
+                                  final bool isMyMessage = message.senderId == _myUser.userId;
+                                  return Align(
+                                    alignment: isMyMessage
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: MediaQuery.of(context).size.width * 0.7,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: isMyMessage
+                                            ? MainAxisAlignment.end
+                                            : MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          if (!isMyMessage)
+                                            UserAvatar(avatarUrl: message.avatarUrl),
+                                          if (!isMyMessage) const SizedBox(width: 8),
+
+                                          /// 👉 Добавляем Expanded
+                                          Expanded(
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                vertical: 4,
+                                                horizontal: 8,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: isMyMessage
+                                                    ? theme.colorScheme.secondaryContainer
+                                                          .withAlpha(128)
+                                                    : theme.colorScheme.secondaryContainer,
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    message.senderFullName,
+                                                    style: theme.textTheme.labelSmall,
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    message.content,
+                                                    softWrap: true,
+                                                    overflow: TextOverflow.visible,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          message.senderFullName,
-                                          style: theme.textTheme.labelSmall,
-                                        ),
-                                        Text(message.content),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                  );
+                                },
                               ),
-                            ),
-                          );
-                        },
                       ),
                     ),
-                    // Divider(),
                     MessageInput(
                       controller: _messageController,
-                      onSend: _messageController.text.isNotEmpty
+                      isMessagePending: state.isMessagePending,
+                      onSend: _currentText.isNotEmpty
                           ? () async {
-                              await context.read<ChatCubit>().sendMessage(
-                                chatId: widget.userEntity.userId,
-                                content: _messageController.text,
-                              );
+                              final content = _messageController.text;
+                              _messageController.clear();
+                              try {
+                                await context.read<ChatCubit>().sendMessage(
+                                  chatId: widget.userEntity.userId,
+                                  content: content,
+                                );
+                              } catch (e) {}
                             }
                           : null,
                     ),

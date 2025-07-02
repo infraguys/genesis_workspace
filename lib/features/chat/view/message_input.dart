@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/extensions.dart';
 
 class MessageInput extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback? onSend;
+  final bool isMessagePending;
 
-  const MessageInput({super.key, required this.controller, this.onSend});
+  const MessageInput({
+    super.key,
+    required this.controller,
+    this.onSend,
+    required this.isMessagePending,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,23 +32,13 @@ class MessageInput extends StatelessWidget {
               ),
               child: TextField(
                 controller: controller,
-                onTapOutside: (_) {
-                  FocusScope.of(context).unfocus();
-                },
                 minLines: 1,
                 maxLines: 4,
                 decoration: const InputDecoration(border: InputBorder.none, hintText: "Message"),
               ),
             ),
           ),
-          Material(
-            color: theme.colorScheme.primary,
-            shape: const CircleBorder(),
-            child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: onSend,
-            ),
-          ),
+          ElevatedButton(onPressed: onSend, child: Icon(Icons.send)).pending(isMessagePending),
         ],
       ),
     );
