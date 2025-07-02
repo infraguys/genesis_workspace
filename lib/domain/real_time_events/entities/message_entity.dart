@@ -12,7 +12,7 @@ class MessageEntity {
   final String senderEmail;
   final List<RecipientEntity> displayRecipient;
   final String type;
-  final String avatarUrl;
+  final String? avatarUrl;
   final String contentType;
 
   MessageEntity({
