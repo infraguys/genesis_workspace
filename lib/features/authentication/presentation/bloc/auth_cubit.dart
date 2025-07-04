@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/api_key_entity.dart';
@@ -22,18 +23,16 @@ class AuthCubit extends Cubit<AuthState> {
     state.isPending = true;
     emit(state.copyWith(isPending: state.isPending));
     try {
-      // final ApiKeyEntity response = await _fetchApiKeyUseCase.call(
-      //   'agent@tokens.team',
-      //   '6T+b09N.WYsCiV,0YOHzs',
-      // );
       final ApiKeyEntity response = await _fetchApiKeyUseCase.call(username, password);
       await _saveTokenUseCase.call(email: response.email, token: response.apiKey);
       state.isAuthorized = true;
-      emit(state.copyWith(isAuthorized: state.isAuthorized));
-    } catch (e) {
-      inspect(e);
-      state.isAuthorized = false;
-      emit(state.copyWith(isAuthorized: state.isAuthorized));
+      state.errorMessage = null;
+      emit(state.copyWith(isAuthorized: state.isAuthorized, errorMessage: state.errorMessage));
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        state.errorMessage = e.response!.data['msg'];
+        emit(state.copyWith(errorMessage: state.errorMessage));
+      }
     }
     state.isPending = false;
     emit(state.copyWith(isPending: state.isPending));
@@ -64,13 +63,15 @@ class AuthCubit extends Cubit<AuthState> {
 class AuthState {
   bool isPending;
   bool isAuthorized;
+  String? errorMessage;
 
-  AuthState({required this.isPending, required this.isAuthorized});
+  AuthState({required this.isPending, required this.isAuthorized, this.errorMessage});
 
-  AuthState copyWith({bool? isPending, bool? isAuthorized}) {
+  AuthState copyWith({bool? isPending, bool? isAuthorized, String? errorMessage}) {
     return AuthState(
       isPending: isPending ?? this.isPending,
       isAuthorized: isAuthorized ?? this.isAuthorized,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }

@@ -95,6 +95,8 @@ class _AuthViewState extends State<AuthView> {
                       ),
                     ),
                   ),
+                  if (state.errorMessage != null)
+                    Text(state.errorMessage!, style: TextStyle(color: Colors.red)),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
