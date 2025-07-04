@@ -30,4 +30,13 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<void> setTyping(TypingRequestDto body) async {
+    try {
+      return apiClient.setTyping(body.type, body.op, jsonEncode(body.to));
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -47,6 +47,8 @@ import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_
     as _i988;
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
     as _i194;
+import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart'
+    as _i487;
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart'
     as _i672;
 import 'package:genesis_workspace/features/authentication/data/repositories_impl/auth_repository_impl.dart'
@@ -113,6 +115,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i116.SendMessageUseCase>(
       () => _i116.SendMessageUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i487.SetTypingUseCase>(
+      () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
     );
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(gh<_i672.AuthRemoteDataSource>()),

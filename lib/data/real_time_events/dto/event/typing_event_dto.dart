@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/recipient_dto.dart';
@@ -11,7 +12,7 @@ part 'typing_event_dto.g.dart';
 class TypingEventDto extends EventDto {
   @JsonKey(name: 'message_type')
   final String messageType;
-  final String op;
+  final TypingEventOp op;
   final SenderDto sender;
   final List<RecipientDto> recipients;
 

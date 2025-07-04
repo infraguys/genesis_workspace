@@ -96,5 +96,6 @@ class RealTimeService {
   void stopPolling() {
     _isPolling = false;
     _typingEventsController.close();
+    _messagesEventsController.close();
   }
 }

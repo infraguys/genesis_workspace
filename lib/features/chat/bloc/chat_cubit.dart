@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
+import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
@@ -13,6 +14,8 @@ import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 
 part 'chat_state.dart';
@@ -26,6 +29,7 @@ class ChatCubit extends Cubit<ChatState> {
           typingId: null,
           myUserId: null,
           isMessagePending: false,
+          selfTypingOp: TypingEventOp.stop,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -36,6 +40,7 @@ class ChatCubit extends Cubit<ChatState> {
 
   final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
   final SendMessageUseCase _sendMessageUseCase = getIt<SendMessageUseCase>();
+  final SetTypingUseCase _setTypingUseCase = getIt<SetTypingUseCase>();
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -60,6 +65,19 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
+  changeTyping({required int chatId, required TypingEventOp op}) async {
+    if (state.selfTypingOp != op) {
+      state.selfTypingOp = op;
+      try {
+        await _setTypingUseCase.call(
+          TypingRequestEntity(type: SendMessageType.direct, op: op, to: [chatId]),
+        );
+      } catch (e) {
+        inspect(e);
+      }
+    }
+  }
+
   Future<void> sendMessage({required int chatId, required String content}) async {
     state.isMessagePending = true;
     emit(state.copyWith(isMessagePending: state.isMessagePending));
@@ -76,7 +94,7 @@ class ChatCubit extends Cubit<ChatState> {
 
   void _onTypingEvents(TypingEventEntity event) {
     final senderId = event.sender.userId;
-    final isWriting = event.op == 'start' && senderId == state.chatId;
+    final isWriting = event.op == TypingEventOp.start && senderId == state.chatId;
 
     if (isWriting) {
       state.typingId = senderId;

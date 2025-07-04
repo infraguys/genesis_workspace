@@ -6,6 +6,7 @@ class ChatState {
   int? typingId;
   int? myUserId;
   bool isMessagePending;
+  TypingEventOp selfTypingOp;
 
   ChatState({
     required this.messages,
@@ -13,6 +14,7 @@ class ChatState {
     this.typingId,
     this.myUserId,
     required this.isMessagePending,
+    required this.selfTypingOp,
   });
 
   ChatState copyWith({
@@ -21,6 +23,7 @@ class ChatState {
     int? typingId,
     int? myUserId,
     bool? isMessagePending,
+    TypingEventOp? selfTypingOp,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -28,6 +31,7 @@ class ChatState {
       typingId: typingId ?? this.typingId,
       myUserId: myUserId ?? this.myUserId,
       isMessagePending: isMessagePending ?? this.isMessagePending,
+      selfTypingOp: selfTypingOp ?? this.selfTypingOp,
     );
   }
 }
