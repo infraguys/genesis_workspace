@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
@@ -65,10 +66,14 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     });
   }
 
-  void _onTextChanged() {
+  Future<void> _onTextChanged() async {
     setState(() {
       _currentText = _messageController.text;
     });
+    context.read<ChatCubit>().changeTyping(
+      chatId: widget.userEntity.userId,
+      op: _currentText.isEmpty ? TypingEventOp.stop : TypingEventOp.start,
+    );
   }
 
   @override
