@@ -53,9 +53,16 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   selectedIndex: widget.navigationShell.currentIndex,
                   onDestinationSelected: _goBranch,
                   labelType: NavigationRailLabelType.all,
-                  destinations: const [
+                  destinations: [
                     NavigationRailDestination(label: Text('Home'), icon: Icon(Icons.home)),
-                    NavigationRailDestination(label: Text('Profile'), icon: Icon(Icons.settings)),
+                    NavigationRailDestination(
+                      label: Text('Profile'),
+                      icon: BlocBuilder<ProfileCubit, ProfileState>(
+                        builder: (context, state) {
+                          return UserAvatar(avatarUrl: state.user?.avatarUrl);
+                        },
+                      ),
+                    ),
                     NavigationRailDestination(label: Text('Settings'), icon: Icon(Icons.settings)),
                   ],
                 ),
