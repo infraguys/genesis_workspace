@@ -29,6 +29,8 @@ class ChatCubit extends Cubit<ChatState> {
           typingId: null,
           myUserId: null,
           isMessagePending: false,
+          isLoadingMore: false,
+          isAllMessagesLoaded: false,
           selfTypingOp: TypingEventOp.stop,
         ),
       ) {
@@ -50,22 +52,57 @@ class ChatCubit extends Cubit<ChatState> {
     state.myUserId = myUserId;
     try {
       final body = MessagesRequestEntity(
-        anchor: MessageAnchor.oldest,
+        anchor: MessageAnchor.firstUnread(),
         narrow: [
           MessageNarrowEntity(operator: NarrowOperator.dm, operand: [chatId]),
         ],
-        numBefore: 100,
-        numAfter: 100,
+        numBefore: 25,
+        numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(body);
+      state.isAllMessagesLoaded = response.foundOldest;
+      state.lastMessageId = response.messages.first.id;
       state.messages = response.messages;
-      emit(state.copyWith(messages: state.messages));
+      emit(
+        state.copyWith(messages: state.messages, isAllMessagesLoaded: state.isAllMessagesLoaded),
+      );
     } catch (e) {
       inspect(e);
     }
   }
 
-  changeTyping({required int chatId, required TypingEventOp op}) async {
+  Future<void> loadMoreMessages() async {
+    if (!state.isAllMessagesLoaded) {
+      state.isLoadingMore = true;
+      emit(state.copyWith(isLoadingMore: state.isLoadingMore));
+      try {
+        final body = MessagesRequestEntity(
+          anchor: MessageAnchor.id(state.lastMessageId ?? 0),
+          narrow: [
+            MessageNarrowEntity(operator: NarrowOperator.dm, operand: [state.chatId ?? 0]),
+          ],
+          numBefore: 25,
+          numAfter: 0,
+        );
+        final response = await _getMessagesUseCase.call(body);
+        state.lastMessageId = response.messages.first.id;
+        state.isAllMessagesLoaded = response.foundOldest;
+        state.messages = [...response.messages, ...state.messages];
+        state.isLoadingMore = false;
+        emit(
+          state.copyWith(
+            messages: state.messages,
+            isLoadingMore: state.isLoadingMore,
+            isAllMessagesLoaded: state.isAllMessagesLoaded,
+          ),
+        );
+      } catch (e) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> changeTyping({required int chatId, required TypingEventOp op}) async {
     if (state.selfTypingOp != op) {
       state.selfTypingOp = op;
       try {

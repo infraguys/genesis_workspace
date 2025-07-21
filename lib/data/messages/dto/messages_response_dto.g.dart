@@ -14,6 +14,7 @@ MessagesResponseDto _$MessagesResponseDtoFromJson(Map<String, dynamic> json) =>
           .map((e) => MessageDto.fromJson(e as Map<String, dynamic>))
           .toList(),
       anchor: (json['anchor'] as num).toInt(),
+      foundOldest: json['found_oldest'] as bool,
     );
 
 Map<String, dynamic> _$MessagesResponseDtoToJson(
@@ -23,4 +24,5 @@ Map<String, dynamic> _$MessagesResponseDtoToJson(
   'result': instance.result,
   'messages': instance.messages,
   'anchor': instance.anchor,
+  'found_oldest': instance.foundOldest,
 };

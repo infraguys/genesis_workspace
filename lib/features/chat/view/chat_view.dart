@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
-import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
+import 'package:genesis_workspace/features/chat/view/message_item.dart';
 import 'package:genesis_workspace/features/home/view/user_avatar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 
@@ -25,9 +25,10 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
   String _currentText = '';
 
-  void _scrollToBottom() {
-    if (_controller.hasClients) {
-      _controller.jumpTo(_controller.position.maxScrollExtent);
+  void _onScroll() {
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !context.read<ChatCubit>().state.isLoadingMore) {
+      context.read<ChatCubit>().loadMoreMessages();
     }
   }
 
@@ -42,7 +43,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       chatId: widget.userEntity.userId,
       myUserId: _myUser.userId,
     );
-    _controller = ScrollController();
+    _controller = ScrollController()..addListener(_onScroll);
     _messageController = TextEditingController();
 
     _messageController.addListener(_onTextChanged);
@@ -51,19 +52,12 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _controller.dispose();
+    _controller
+      ..removeListener(_onScroll)
+      ..dispose();
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeMetrics() {
-    super.didChangeMetrics();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom();
-    });
   }
 
   Future<void> _onTextChanged() async {
@@ -116,9 +110,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           }
           return BlocBuilder<ChatCubit, ChatState>(
             builder: (context, state) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _scrollToBottom();
-              });
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
@@ -132,70 +123,33 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                         },
                         child: state.messages.isEmpty
                             ? Center(child: Text("No messages here yet..."))
-                            : ListView.separated(
-                                controller: _controller,
-                                itemCount: state.messages.length,
-                                padding: EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12),
-                                separatorBuilder: (BuildContext context, int index) {
-                                  return SizedBox(height: 12);
-                                },
-                                itemBuilder: (BuildContext context, int index) {
-                                  final MessageEntity message = state.messages[index];
-                                  final bool isMyMessage = message.senderId == _myUser.userId;
-                                  return Align(
-                                    alignment: isMyMessage
-                                        ? Alignment.centerRight
-                                        : Alignment.centerLeft,
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: MediaQuery.of(context).size.width * 0.7,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: isMyMessage
-                                            ? MainAxisAlignment.end
-                                            : MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          if (!isMyMessage)
-                                            UserAvatar(avatarUrl: message.avatarUrl),
-                                          if (!isMyMessage) const SizedBox(width: 8),
+                            : Column(
+                                children: [
+                                  if (state.isLoadingMore) const LinearProgressIndicator(),
+                                  Expanded(
+                                    child: ListView.separated(
+                                      controller: _controller,
+                                      reverse: true,
+                                      itemCount: state.messages.length,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ).copyWith(bottom: 12),
+                                      separatorBuilder: (BuildContext context, int index) {
+                                        return SizedBox(height: 12);
+                                      },
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final message = state.messages.reversed.toList()[index];
 
-                                          /// 👉 Добавляем Expanded
-                                          Expanded(
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                vertical: 4,
-                                                horizontal: 8,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: isMyMessage
-                                                    ? theme.colorScheme.secondaryContainer
-                                                          .withAlpha(128)
-                                                    : theme.colorScheme.secondaryContainer,
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    message.senderFullName,
-                                                    style: theme.textTheme.labelSmall,
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    message.content,
-                                                    softWrap: true,
-                                                    overflow: TextOverflow.visible,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        final isMyMessage = message.senderId == _myUser.userId;
+
+                                        return MessageItem(
+                                          isMyMessage: isMyMessage,
+                                          message: message,
+                                        );
+                                      },
                                     ),
-                                  );
-                                },
+                                  ),
+                                ],
                               ),
                       ),
                     ),
