@@ -7,6 +7,7 @@ import 'package:genesis_workspace/features/chat/view/message_input.dart';
 import 'package:genesis_workspace/features/chat/view/message_item.dart';
 import 'package:genesis_workspace/features/home/view/user_avatar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class ChatView extends StatefulWidget {
   final UserEntity userEntity;
@@ -30,6 +31,16 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
         !context.read<ChatCubit>().state.isLoadingMore) {
       context.read<ChatCubit>().loadMoreMessages();
     }
+  }
+
+  Future<void> _onTextChanged() async {
+    setState(() {
+      _currentText = _messageController.text;
+    });
+    await context.read<ChatCubit>().changeTyping(
+      chatId: widget.userEntity.userId,
+      op: _currentText.isEmpty ? TypingEventOp.stop : TypingEventOp.start,
+    );
   }
 
   @override
@@ -58,16 +69,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     super.dispose();
-  }
-
-  Future<void> _onTextChanged() async {
-    setState(() {
-      _currentText = _messageController.text;
-    });
-    context.read<ChatCubit>().changeTyping(
-      chatId: widget.userEntity.userId,
-      op: _currentText.isEmpty ? TypingEventOp.stop : TypingEventOp.start,
-    );
   }
 
   @override
@@ -139,12 +140,24 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       },
                                       itemBuilder: (BuildContext context, int index) {
                                         final message = state.messages.reversed.toList()[index];
-
                                         final isMyMessage = message.senderId == _myUser.userId;
 
-                                        return MessageItem(
-                                          isMyMessage: isMyMessage,
-                                          message: message,
+                                        return VisibilityDetector(
+                                          key: Key('message-${message.id}'),
+                                          onVisibilityChanged: (info) {
+                                            final visiblePercentage = info.visibleFraction * 100;
+
+                                            if (visiblePercentage > 50 &&
+                                                (message.flags == null || message.flags!.isEmpty)) {
+                                              context.read<ChatCubit>().scheduleMarkAsRead(
+                                                message.id,
+                                              );
+                                            }
+                                          },
+                                          child: MessageItem(
+                                            isMyMessage: isMyMessage,
+                                            message: message,
+                                          ),
                                         );
                                       },
                                     ),
