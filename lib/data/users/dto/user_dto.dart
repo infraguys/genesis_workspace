@@ -26,8 +26,6 @@ class UserDto {
   final bool isActive;
   @JsonKey(name: 'date_joined')
   final String dateJoined;
-  @JsonKey(name: 'delivery_email')
-  final String deliveryEmail;
   @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
 
@@ -44,7 +42,6 @@ class UserDto {
     required this.timezone,
     required this.isActive,
     required this.dateJoined,
-    required this.deliveryEmail,
     this.avatarUrl,
   });
 

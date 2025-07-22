@@ -4,6 +4,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/features/home/view/user_avatar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
 class ScaffoldWithNestedNavigation extends StatefulWidget {
@@ -56,7 +57,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   onDestinationSelected: _goBranch,
                   labelType: NavigationRailLabelType.all,
                   destinations: [
-                    NavigationRailDestination(label: Text('Home'), icon: Icon(Icons.home)),
+                    NavigationRailDestination(
+                      label: Text(context.t.direct_messages),
+                      icon: Icon(Icons.people),
+                    ),
                     NavigationRailDestination(
                       label: Text('Profile'),
                       icon: BlocBuilder<ProfileCubit, ProfileState>(
@@ -79,7 +83,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   currentIndex: widget.navigationShell.currentIndex,
                   onTap: _goBranch,
                   items: [
-                    BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.home)),
+                    BottomNavigationBarItem(
+                      label: context.t.direct_messages,
+                      icon: Icon(Icons.people),
+                    ),
                     BottomNavigationBarItem(
                       label: 'Profile',
                       icon: BlocBuilder<ProfileCubit, ProfileState>(

@@ -2,5 +2,6 @@
   "password_cant_be_empty": "Password can not be empty",
   "password": "Password",
   "login": "Login",
-  "profile": "Profile"
+  "profile": "Profile",
+  "direct_messages": "Direct Messages"
 }

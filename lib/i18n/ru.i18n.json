@@ -2,5 +2,6 @@
   "password_cant_be_empty": "Пароль не может быть пустым",
   "password": "Пароль",
   "login": "Войти",
-  "profile": "Профиль"
+  "profile": "Профиль",
+  "direct_messages": "Личные сообщения"
 }

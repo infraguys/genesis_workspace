@@ -19,7 +19,6 @@ UserDto _$UserDtoFromJson(Map<String, dynamic> json) => UserDto(
   timezone: json['timezone'] as String,
   isActive: json['is_active'] as bool,
   dateJoined: json['date_joined'] as String,
-  deliveryEmail: json['delivery_email'] as String,
   avatarUrl: json['avatar_url'] as String?,
 );
 
@@ -36,6 +35,5 @@ Map<String, dynamic> _$UserDtoToJson(UserDto instance) => <String, dynamic>{
   'timezone': instance.timezone,
   'is_active': instance.isActive,
   'date_joined': instance.dateJoined,
-  'delivery_email': instance.deliveryEmail,
   'avatar_url': instance.avatarUrl,
 };

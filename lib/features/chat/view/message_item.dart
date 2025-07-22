@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/features/home/view/user_avatar.dart';
 
@@ -39,15 +40,31 @@ class MessageItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 8,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(message.senderFullName, style: theme.textTheme.labelSmall),
-                        const SizedBox(height: 2),
-                        Text(message.content, softWrap: true, overflow: TextOverflow.visible),
-                      ],
-                    ),
+                    currentSize(context) <= ScreenSize.tablet
+                        ? Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(message.senderFullName, style: theme.textTheme.labelSmall),
+                                const SizedBox(height: 2),
+                                Text(
+                                  message.content,
+                                  softWrap: true,
+                                  overflow: TextOverflow.visible,
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(message.senderFullName, style: theme.textTheme.labelSmall),
+                              const SizedBox(height: 2),
+                              Text(message.content, softWrap: true, overflow: TextOverflow.visible),
+                            ],
+                          ),
                     isRead
                         ? Icon(Icons.done_all, color: theme.colorScheme.primary, size: 12)
                         : Icon(Icons.done, color: Colors.blueGrey, size: 12),
