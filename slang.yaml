@@ -1,0 +1,11 @@
+base_locale: en
+fallback_strategy: base_locale
+string_interpolation: braces
+locale_handling: true
+flutter_integration: true
+flat_map: false
+translate_var: t
+param_case: camel
+translation_class_visibility: public
+input_directory: lib/i18n
+output_directory: lib/i18n/generated

@@ -4,6 +4,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 
 class WorkspaceApp extends StatelessWidget {
@@ -18,6 +19,7 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<ProfileCubit>()),
       ],
       child: MaterialApp.router(
+        locale: TranslationProvider.of(context).flutterLocale,
         title: 'Workspace',
         routerConfig: router,
         theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),

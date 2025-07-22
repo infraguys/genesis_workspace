@@ -71,6 +71,8 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
     as _i766;
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
     as _i573;
+import 'package:genesis_workspace/services/localization/localization_service.dart'
+    as _i435;
 import 'package:genesis_workspace/services/real_time/real_time_service.dart'
     as _i82;
 import 'package:get_it/get_it.dart' as _i174;
@@ -86,18 +88,21 @@ extension GetItInjectableX on _i174.GetIt {
     final coreModule = _$CoreModule();
     gh.factory<_i75.GetTokenUseCase>(() => _i75.GetTokenUseCase());
     gh.factory<_i862.AuthCubit>(() => _i862.AuthCubit());
+    gh.factory<_i207.GetMessagesUseCase>(() => _i207.GetMessagesUseCase());
     gh.factory<_i1039.GetEventsByQueueIdUseCase>(
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
-    gh.factory<_i207.GetMessagesUseCase>(() => _i207.GetMessagesUseCase());
     gh.lazySingleton<_i361.Dio>(() => coreModule.dio());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
     );
     gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
-    gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
     gh.lazySingleton<_i766.ProfileCubit>(() => _i766.ProfileCubit());
+    gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
+    gh.lazySingleton<_i435.LocalizationService>(
+      () => _i435.LocalizationService(),
+    );
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
     );
@@ -115,11 +120,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i125.UsersRepository>(
       () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
     );
-    gh.factory<_i116.SendMessageUseCase>(
-      () => _i116.SendMessageUseCase(gh<_i857.MessagesRepository>()),
-    );
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i116.SendMessageUseCase>(
+      () => _i116.SendMessageUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
@@ -136,14 +141,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.factory<_i547.GetOwnUserUseCase>(
+      () => _i547.GetOwnUserUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i194.GetUsersUseCase>(
       () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i988.GetSubscribedChannelsUseCase>(
       () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i547.GetOwnUserUseCase>(
-      () => _i547.GetOwnUserUseCase(gh<_i125.UsersRepository>()),
     );
     return this;
   }

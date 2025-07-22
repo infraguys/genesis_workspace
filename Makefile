@@ -3,3 +3,6 @@ generate:
 
 watch:
 	fvm flutter pub run build_runner watch
+
+slang:
+	fvm dart run slang
