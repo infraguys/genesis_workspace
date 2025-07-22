@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
@@ -31,6 +32,10 @@ class RealTimeService {
   final _messagesEventsController = StreamController<MessageEventEntity>.broadcast();
   Stream<MessageEventEntity> get messagesEventsStream => _messagesEventsController.stream;
 
+  final _messageFlagsEventsController = StreamController<UpdateMessageFlagsEntity>.broadcast();
+  Stream<UpdateMessageFlagsEntity> get messagesFlagsEventsStream =>
+      _messageFlagsEventsController.stream;
+
   Future<RegisterQueueEntity> registerQueue() async {
     try {
       final RegisterQueueEntity response = await _registerQueueUseCase.call(
@@ -53,18 +58,44 @@ class RealTimeService {
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueId!, lastEventId: lastEventId),
       );
-      for (var event in response.events) {
-        switch (event.type) {
-          case EventType.typing:
+      switch (response.events.last.type) {
+        case EventType.typing:
+          if (response.events.last is TypingEventEntity) {
             _typingEventsController.add(response.events.last as TypingEventEntity);
-          case EventType.message:
+          }
+        case EventType.message:
+          if (response.events.last is MessageEventEntity) {
             _messagesEventsController.add(response.events.last as MessageEventEntity);
-          default:
-            break;
-        }
+          }
+        case EventType.updateMessageFlags:
+          if (response.events.last is UpdateMessageFlagsEntity) {
+            _messageFlagsEventsController.add(response.events.last as UpdateMessageFlagsEntity);
+          }
+        default:
+          break;
       }
+
+      // for (var event in response.events) {
+      //   switch (event.type) {
+      //     case EventType.typing:
+      //       if (response.events.last is TypingEventEntity) {
+      //         _typingEventsController.add(response.events.last as TypingEventEntity);
+      //       }
+      //     case EventType.message:
+      //       if (response.events.last is MessageEventEntity) {
+      //         _messagesEventsController.add(response.events.last as MessageEventEntity);
+      //       }
+      //     case EventType.updateMessageFlags:
+      //       if (response.events.last is UpdateMessageFlagsEntity) {
+      //         _messageFlagsEventsController.add(response.events.last as UpdateMessageFlagsEntity);
+      //       }
+      //     default:
+      //       break;
+      //   }
+      // }
       return response;
     } on DioException catch (e) {
+      inspect(e);
       if (e.response?.statusCode == 400 && e.response?.data['code'] == 'BAD_EVENT_QUEUE_ID') {
         await registerQueue();
         return await getLastEvent();

@@ -14,31 +14,10 @@ enum EventType {
   @JsonValue('presence')
   presence,
 
-  unsupported,
+  @JsonValue('update_message_flags')
+  updateMessageFlags,
 
-  // static EventType fromJson(String value) {
-  //   switch (value) {
-  //     case 'typing':
-  //       return EventType.typing;
-  //     case 'message':
-  //       return EventType.message;
-  //     case 'presence':
-  //       return EventType.presence;
-  //     default:
-  //       throw UnsupportedError('Unknown event type: $value');
-  //   }
-  // }
-  //
-  // String toJson() {
-  //   switch (this) {
-  //     case EventType.typing:
-  //       return 'typing';
-  //     case EventType.message:
-  //       return 'message';
-  //     case EventType.presence:
-  //       return 'presence';
-  //   }
-  // }
+  unsupported,
 }
 
 extension EventTypeX on EventType {
@@ -50,8 +29,27 @@ extension EventTypeX on EventType {
         return 'message';
       case EventType.heartbeat:
         return 'heartbeat';
+      case EventType.updateMessageFlags:
+        return 'update_message_flags';
       default:
         return 'unsupported';
+    }
+  }
+
+  static EventType fromJson(String value) {
+    switch (value) {
+      case 'typing':
+        return EventType.typing;
+      case 'message':
+        return EventType.message;
+      case 'heartbeat':
+        return EventType.heartbeat;
+      case 'presence':
+        return EventType.presence;
+      case 'update_message_flags':
+        return EventType.updateMessageFlags;
+      default:
+        return EventType.unsupported;
     }
   }
 }

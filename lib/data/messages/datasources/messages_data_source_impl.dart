@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
@@ -34,7 +33,6 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   @override
   Future<void> sendMessage(SendMessageRequestDto body) async {
     try {
-      inspect(jsonEncode(body.to));
       await apiClient.sendMessage(body.type, jsonEncode(body.to), body.content);
     } catch (e) {
       rethrow;

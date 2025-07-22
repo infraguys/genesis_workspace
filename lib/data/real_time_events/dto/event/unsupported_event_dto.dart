@@ -9,8 +9,17 @@ part 'unsupported_event_dto.g.dart';
 class UnsupportedEventDto extends EventDto {
   UnsupportedEventDto({required int id, required EventType type}) : super(id: id, type: type);
 
-  factory UnsupportedEventDto.fromJson(Map<String, dynamic> json) =>
-      _$UnsupportedEventDtoFromJson(json);
+  // factory UnsupportedEventDto.fromJson(Map<String, dynamic> json) =>
+  //     _$UnsupportedEventDtoFromJson(json);
+
+  factory UnsupportedEventDto.fromJson(Map<String, dynamic> json) {
+    return UnsupportedEventDto(
+      id: json['id'],
+      type: EventType.values.contains(json['type'])
+          ? EventTypeX.fromJson(json['type'])
+          : EventType.unsupported,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$UnsupportedEventDtoToJson(this);
 

@@ -8,6 +8,7 @@ class MessageEntity {
   final int senderId;
   final List<RecipientEntity> displayRecipient;
   final String senderFullName;
+  final List<String>? flags;
 
   MessageEntity({
     required this.id,
@@ -17,5 +18,28 @@ class MessageEntity {
     required this.senderId,
     required this.senderFullName,
     required this.displayRecipient,
+    this.flags,
   });
+
+  MessageEntity copyWith({
+    int? id,
+    bool? isMeMessage,
+    String? avatarUrl,
+    String? content,
+    int? senderId,
+    String? senderFullName,
+    List<RecipientEntity>? displayRecipient,
+    List<String>? flags,
+  }) {
+    return MessageEntity(
+      id: id ?? this.id,
+      isMeMessage: isMeMessage ?? this.isMeMessage,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      content: content ?? this.content,
+      senderId: senderId ?? this.senderId,
+      senderFullName: senderFullName ?? this.senderFullName,
+      displayRecipient: displayRecipient ?? this.displayRecipient,
+      flags: flags ?? this.flags,
+    );
+  }
 }

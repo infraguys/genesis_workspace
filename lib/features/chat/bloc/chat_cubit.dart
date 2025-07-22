@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
@@ -14,6 +15,7 @@ import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
@@ -36,6 +38,9 @@ class ChatCubit extends Cubit<ChatState> {
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
+    _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
+      _onMessageFlagsEvents,
+    );
   }
 
   final RealTimeService _realTimeService = getIt<RealTimeService>();
@@ -46,13 +51,14 @@ class ChatCubit extends Cubit<ChatState> {
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
   Future<void> getMessages({required int chatId, required int myUserId}) async {
     state.chatId = chatId;
     state.myUserId = myUserId;
     try {
       final body = MessagesRequestEntity(
-        anchor: MessageAnchor.firstUnread(),
+        anchor: MessageAnchor.newest(),
         narrow: [
           MessageNarrowEntity(operator: NarrowOperator.dm, operand: [chatId]),
         ],
@@ -142,7 +148,6 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    inspect(event);
     bool isThisChatMessage =
         event.message.displayRecipient.any((recipient) => recipient.userId == state.myUserId) &&
         event.message.displayRecipient.any((recipient) => recipient.userId == state.chatId);
@@ -150,5 +155,19 @@ class ChatCubit extends Cubit<ChatState> {
       state.messages = [...state.messages, event.message];
       emit(state.copyWith(messages: state.messages));
     }
+  }
+
+  void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+    event.messages.forEach((messageId) {
+      if (event.flag == MessageFlag.read) {
+        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        final int index = state.messages.indexOf(message);
+        MessageEntity changedMessage = message.copyWith(
+          flags: [...message.flags ?? [], MessageFlag.read.name],
+        );
+        state.messages[index] = changedMessage;
+      }
+    });
+    emit(state.copyWith(messages: state.messages));
   }
 }
