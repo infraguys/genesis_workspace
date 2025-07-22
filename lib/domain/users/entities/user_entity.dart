@@ -35,7 +35,6 @@ class UserEntity {
       timezone: timezone,
       isActive: isActive,
       dateJoined: "",
-      deliveryEmail: email,
       avatarUrl: avatarUrl,
     );
   }
