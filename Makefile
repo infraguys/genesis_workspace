@@ -1,11 +1,11 @@
 generate:
-	fvm flutter pub run build_runner build --delete-conflicting-outputs
+	flutter pub run build_runner build --delete-conflicting-outputs
 
 watch:
-	fvm flutter pub run build_runner watch
+	flutter pub run build_runner watch
 
 slang:
-	fvm dart run slang
+	flutter pub run slang
 
 clean:
 	flutter clean
@@ -23,3 +23,5 @@ ci_stage:
 	make generate
 	make slang
 	flutter build web --release -t lib/stage.dart
+
+.PHONY: generate watch slang clean ci_prod ci_stage
