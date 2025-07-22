@@ -1,0 +1,94 @@
+name: build & deploy
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      build_target:
+        description: 'Build target'
+        required: true
+        default: 'ci_stage'
+        type: choice
+        options:
+        - ci_stage
+        - ci_prod
+
+env:
+  REPO_ENDPOINT: http://10.20.0.1:8081
+  CORE_ENDPOINT: http://10.20.0.2:11010
+  NODE_UUID: 3ea35d89-fc3c-43d1-82fe-40980edbf617
+  PROJECT_ID: d4ef38ee-2667-4931-90fd-c858d4bc5f1c
+  # All vars you need to pass to build the flutter app goes here with prefix "UI_BUILD_ENV_".
+  # There is a build python script `make_ui_build_env.py` that handles these variables and
+  # form a json file. For instance, if you need to pass `api_url="https://console.genesis-core.tech/api"`
+  # variable, you need to set `UI_BUILD_ENV_api_url` environment variable and the result file will be:
+  # {
+  #   "api_url": "https://console.genesis-core.tech/api"
+  # }
+
+jobs:
+  build:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Genesis Workspace
+        env:
+            DEV_KEYS: ${{ secrets.DEV_KEYS }}
+            UI_BUILD_ENV_BUILD_TARGET: ${{ github.event.inputs.build_target }}
+        run: |
+          set -eux
+
+          # Install DevTools
+          rm -fr venv
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install genesis-devtools
+
+          echo "${DEV_KEYS}" > dev-keys.txt
+
+          genesis build $(pwd) -i dev-keys.txt
+
+          # Temporary upload step is done in the build script
+          VERSION="$(genesis get-version .)"
+          echo "${VERSION}" > version.txt
+          ELEMENT_PATH="/var/lib/repository/genesis_workspace"
+
+          rm -fr "${ELEMENT_PATH}/${VERSION}"
+          mkdir -p "${ELEMENT_PATH}/${VERSION}"
+          mv output/genesis-workspace.raw "${ELEMENT_PATH}/${VERSION}/"
+          cd ${ELEMENT_PATH}/${VERSION}/ && \
+            sha256sum genesis-workspace.raw >> ${ELEMENT_PATH}/${VERSION}/SHA256SUMS
+      - name: Upload the image version
+        uses: actions/upload-artifact@v4
+        with:
+          name: image_version
+          path: version.txt
+  deploy:
+    runs-on: self-hosted
+    needs: [build]
+    steps:
+      - name: Download image version for deployment
+        uses: actions/download-artifact@v4
+        with:
+          name: image_version
+      - name: Deploy Genesis Workspace
+        env:
+          CORE_USER: ${{ secrets.CORE_USER }}
+          CORE_PASSWORD: ${{ secrets.CORE_PASSWORD }}
+        run: |
+          set -eux
+
+          VERSION=$(cat version.txt)
+
+          # Install CI tools
+          rm -fr venv
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install genesis-ci-tools
+
+          genesis-ci -e $CORE_ENDPOINT -u $CORE_USER -p $CORE_PASSWORD nodes add-or-update \
+            -u $NODE_UUID \
+            -p $PROJECT_ID \
+            -i "${REPO_ENDPOINT}/genesis_workspace/${VERSION}/genesis-workspace.raw"
