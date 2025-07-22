@@ -7,7 +7,7 @@ watch:
 slang:
 	fvm dart run slang
 
-flutter_clean:
+clean:
 	fvm flutter clean
 	fvm flutter pub get
 
