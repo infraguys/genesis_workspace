@@ -8,8 +8,9 @@ slang:
 	fvm dart run slang
 
 clean:
-	fvm flutter clean
-	fvm flutter pub get
+	flutter clean
+	yes | flutter pub cache clean
+	flutter pub get
 
 ci_prod:
 	make clean
