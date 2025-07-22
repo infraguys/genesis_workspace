@@ -18,6 +18,7 @@ class MessageDto {
   final String senderFullName;
   @JsonKey(name: "display_recipient")
   final List<RecipientDto> displayRecipient;
+  final List<String>? flags;
 
   MessageDto({
     required this.id,
@@ -27,6 +28,7 @@ class MessageDto {
     required this.senderId,
     required this.senderFullName,
     required this.displayRecipient,
+    this.flags,
   });
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);
@@ -41,5 +43,6 @@ class MessageDto {
     senderId: senderId,
     senderFullName: senderFullName,
     displayRecipient: displayRecipient.map((e) => e.toEntity()).toList(),
+    flags: flags,
   );
 }

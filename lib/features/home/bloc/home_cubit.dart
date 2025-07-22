@@ -42,7 +42,6 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> getUsers() async {
     try {
       final response = await _getUsersUseCase.call();
-      inspect(response);
       state.users = response;
       emit(state.copyWith(users: state.users));
     } catch (e) {

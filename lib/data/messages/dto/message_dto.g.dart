@@ -16,6 +16,7 @@ MessageDto _$MessageDtoFromJson(Map<String, dynamic> json) => MessageDto(
   displayRecipient: (json['display_recipient'] as List<dynamic>)
       .map((e) => RecipientDto.fromJson(e as Map<String, dynamic>))
       .toList(),
+  flags: (json['flags'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 
 Map<String, dynamic> _$MessageDtoToJson(MessageDto instance) =>
@@ -27,4 +28,5 @@ Map<String, dynamic> _$MessageDtoToJson(MessageDto instance) =>
       'sender_id': instance.senderId,
       'sender_full_name': instance.senderFullName,
       'display_recipient': instance.displayRecipient,
+      'flags': instance.flags,
     };

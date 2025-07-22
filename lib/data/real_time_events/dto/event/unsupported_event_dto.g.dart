@@ -24,5 +24,6 @@ const _$EventTypeEnumMap = {
   EventType.message: 'message',
   EventType.heartbeat: 'heartbeat',
   EventType.presence: 'presence',
+  EventType.updateMessageFlags: 'update_message_flags',
   EventType.unsupported: 'unsupported',
 };

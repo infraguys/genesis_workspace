@@ -11,17 +11,17 @@ part 'real_time_state.dart';
 class RealTimeCubit extends Cubit<RealTimeState> {
   RealTimeCubit() : super(RealTimeState());
 
-  final RealTimeService realTimeService = getIt<RealTimeService>();
+  final RealTimeService _realTimeService = getIt<RealTimeService>();
 
-  init() async {
+  Future<void> init() async {
     try {
-      await realTimeService.startPolling();
+      await _realTimeService.startPolling();
     } catch (e) {
       inspect(e);
     }
   }
 
-  dispose() {
-    realTimeService.stopPolling();
+  void dispose() {
+    _realTimeService.stopPolling();
   }
 }

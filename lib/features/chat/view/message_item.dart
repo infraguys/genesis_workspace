@@ -9,35 +9,48 @@ class MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isRead = message.flags?.contains('read') ?? false;
     final theme = Theme.of(context);
     return Align(
       alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-        child: Row(
-          mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          // fit: StackFit.expand,
           children: [
-            if (!isMyMessage) UserAvatar(avatarUrl: message.avatarUrl),
-            if (!isMyMessage) const SizedBox(width: 8),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                decoration: BoxDecoration(
-                  color: isMyMessage
-                      ? theme.colorScheme.secondaryContainer.withAlpha(128)
-                      : theme.colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(12),
+            Row(
+              mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!isMyMessage) UserAvatar(avatarUrl: message.avatarUrl),
+                if (!isMyMessage) const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: isMyMessage
+                          ? theme.colorScheme.secondaryContainer.withAlpha(128)
+                          : theme.colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(message.senderFullName, style: theme.textTheme.labelSmall),
+                        const SizedBox(height: 2),
+                        Text(message.content, softWrap: true, overflow: TextOverflow.visible),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(message.senderFullName, style: theme.textTheme.labelSmall),
-                    const SizedBox(height: 2),
-                    Text(message.content, softWrap: true, overflow: TextOverflow.visible),
-                  ],
-                ),
-              ),
+              ],
+            ),
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: isRead
+                  ? Icon(Icons.done_all, color: theme.colorScheme.primary, size: 12)
+                  : Icon(Icons.check, color: Colors.blueGrey, size: 12),
             ),
           ],
         ),
