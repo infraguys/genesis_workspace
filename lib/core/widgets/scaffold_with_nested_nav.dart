@@ -17,6 +17,7 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
   late final Future _future;
+  late final RealTimeCubit _realTimeCubit;
 
   void _goBranch(int index) {
     widget.navigationShell.goBranch(
@@ -31,12 +32,13 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
     ]);
+    _realTimeCubit = context.read<RealTimeCubit>();
     super.initState();
   }
 
   @override
   void dispose() {
-    context.read<RealTimeCubit>().dispose();
+    _realTimeCubit.dispose();
     super.dispose();
   }
 

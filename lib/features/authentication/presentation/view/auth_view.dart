@@ -4,6 +4,7 @@ import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
@@ -82,12 +83,12 @@ class _AuthViewState extends State<AuthView> {
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Password can not be empty';
+                        return context.t.password_cant_be_empty;
                       }
                       return null;
                     },
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: context.t.password,
                       hintText: 'cucumber123',
                       suffixIcon: IconButton(
                         icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
@@ -106,7 +107,7 @@ class _AuthViewState extends State<AuthView> {
                         );
                       }
                     },
-                    child: Text("Login"),
+                    child: Text(context.t.login),
                   ).pending(state.isPending),
                 ],
               ),

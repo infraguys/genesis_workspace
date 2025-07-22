@@ -16,7 +16,11 @@ class MessageDto {
   final int senderId;
   @JsonKey(name: "sender_full_name")
   final String senderFullName;
-  @JsonKey(name: "display_recipient")
+  @JsonKey(
+    name: "display_recipient",
+    fromJson: _displayRecipientFromJson,
+    toJson: _displayRecipientToJson,
+  )
   final List<RecipientDto> displayRecipient;
   final List<String>? flags;
 
@@ -45,4 +49,17 @@ class MessageDto {
     displayRecipient: displayRecipient.map((e) => e.toEntity()).toList(),
     flags: flags,
   );
+
+  static List<RecipientDto> _displayRecipientFromJson(dynamic json) {
+    if (json is String) {
+      return [];
+    } else if (json is List) {
+      return json.map((e) => RecipientDto.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  static dynamic _displayRecipientToJson(List<RecipientDto>? recipients) {
+    return recipients?.map((e) => e.toJson()).toList();
+  }
 }

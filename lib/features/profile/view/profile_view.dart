@@ -1,10 +1,44 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(title: Text(context.t.profile)),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () async {
+              final _getMessagesUseCase = getIt<GetMessagesUseCase>();
+              final response = await _getMessagesUseCase.call(
+                MessagesRequestEntity(anchor: MessageAnchor.newest(), numBefore: 1000, numAfter: 0),
+              );
+              inspect(response);
+            },
+            child: Text("Get messages"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              LocaleSettings.setLocale(AppLocale.ru);
+            },
+            child: Text("Set ru"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              LocaleSettings.setLocale(AppLocale.en);
+            },
+            child: Text("Set en"),
+          ),
+        ],
+      ),
+    );
   }
 }
