@@ -3,6 +3,7 @@ import 'package:genesis_workspace/data/messages/datasources/messages_data_source
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_response_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart';
 import 'package:injectable/injectable.dart';
 
@@ -24,6 +25,15 @@ class MessagesRepositoryImpl implements MessagesRepository {
   Future<void> sendMessage(SendMessageRequestEntity body) async {
     try {
       await dataSource.sendMessage(body.toDto());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateMessagesFlags(UpdateMessagesFlagsRequestEntity body) async {
+    try {
+      await dataSource.updateMessagesFlags(body.toDto());
     } catch (e) {
       rethrow;
     }

@@ -33,6 +33,8 @@ import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case
     as _i207;
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart'
     as _i116;
+import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart'
+    as _i664;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
     as _i703;
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart'
@@ -115,6 +117,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i116.SendMessageUseCase>(
       () => _i116.SendMessageUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i664.UpdateMessagesFlagsUseCase>(
+      () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),

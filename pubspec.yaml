@@ -19,8 +19,9 @@ dependencies:
   get_it: ^8.0.3
   flutter_secure_storage: ^9.2.4
   path_provider: ^2.1.5
-  go_router: ^15.2.3
+  go_router: ^16.0.0
   flutter_svg: ^2.2.0
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   flutter_test:
