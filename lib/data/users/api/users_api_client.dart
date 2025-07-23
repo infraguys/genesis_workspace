@@ -13,7 +13,7 @@ abstract class UsersApiClient {
   factory UsersApiClient(Dio dio, {String? baseUrl}) = _UsersApiClient;
 
   @GET('/users')
-  Future<UsersResponseDto> getUsers();
+  Future<UsersResponseDto> getUsers(@Query('client_gravatar') bool clientGravatar);
 
   @GET('/users/me')
   Future<OwnUserResponseDto> getOwnUser();

@@ -42,7 +42,7 @@ class UserDto {
     required this.timezone,
     required this.isActive,
     required this.dateJoined,
-    this.avatarUrl,
+    required this.avatarUrl,
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) => _$UserDtoFromJson(json);

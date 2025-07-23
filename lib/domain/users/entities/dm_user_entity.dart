@@ -10,6 +10,7 @@ class DmUserEntity extends UserEntity {
     required super.fullName,
     required super.timezone,
     required super.isActive,
+    super.avatarUrl,
     required this.unreadMessages,
   });
 }

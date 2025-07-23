@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -47,6 +49,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                 itemCount: state.users.length,
                 itemBuilder: (BuildContext context, int index) {
                   final DmUserEntity user = state.users[index];
+                  inspect(user);
                   return ListTile(
                     onTap: () {
                       context.pushNamed(Routes.chat, extra: user);
