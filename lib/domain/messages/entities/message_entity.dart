@@ -1,4 +1,4 @@
-import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
+import 'package:genesis_workspace/core/enums/message_type.dart';
 
 class MessageEntity {
   final int id;
@@ -6,9 +6,10 @@ class MessageEntity {
   final String? avatarUrl;
   final String content;
   final int senderId;
-  final List<RecipientEntity> displayRecipient;
+  final dynamic displayRecipient;
   final String senderFullName;
   final List<String>? flags;
+  final MessageType type;
 
   MessageEntity({
     required this.id,
@@ -18,6 +19,7 @@ class MessageEntity {
     required this.senderId,
     required this.senderFullName,
     required this.displayRecipient,
+    required this.type,
     this.flags,
   });
 
@@ -28,8 +30,9 @@ class MessageEntity {
     String? content,
     int? senderId,
     String? senderFullName,
-    List<RecipientEntity>? displayRecipient,
+    dynamic displayRecipient,
     List<String>? flags,
+    MessageType? type,
   }) {
     return MessageEntity(
       id: id ?? this.id,
@@ -40,6 +43,7 @@ class MessageEntity {
       senderFullName: senderFullName ?? this.senderFullName,
       displayRecipient: displayRecipient ?? this.displayRecipient,
       flags: flags ?? this.flags,
+      type: type ?? this.type,
     );
   }
 }

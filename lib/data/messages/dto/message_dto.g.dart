@@ -16,6 +16,7 @@ MessageDto _$MessageDtoFromJson(Map<String, dynamic> json) => MessageDto(
   displayRecipient: MessageDto._displayRecipientFromJson(
     json['display_recipient'],
   ),
+  type: $enumDecode(_$MessageTypeEnumMap, json['type']),
   flags: (json['flags'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 
@@ -31,4 +32,10 @@ Map<String, dynamic> _$MessageDtoToJson(MessageDto instance) =>
         instance.displayRecipient,
       ),
       'flags': instance.flags,
+      'type': _$MessageTypeEnumMap[instance.type]!,
     };
+
+const _$MessageTypeEnumMap = {
+  MessageType.private: 'private',
+  MessageType.stream: 'stream',
+};

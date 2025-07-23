@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
-import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -46,16 +46,19 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
               return ListView.builder(
                 itemCount: state.users.length,
                 itemBuilder: (BuildContext context, int index) {
-                  final UserEntity user = state.users[index];
+                  final DmUserEntity user = state.users[index];
                   return ListTile(
                     onTap: () {
                       context.pushNamed(Routes.chat, extra: user);
                     },
                     title: Text(user.fullName),
                     subtitle: state.typingUsers.contains(user.userId)
-                        ? Text("Typing...")
-                        : Text("Online"),
+                        ? Text("${context.t.typing}...")
+                        : Text(context.t.online),
                     leading: UserAvatar(avatarUrl: user.avatarUrl),
+                    trailing: user.unreadMessagesCount > 0
+                        ? Text(user.unreadMessagesCount.toString())
+                        : SizedBox(),
                   );
                 },
               );

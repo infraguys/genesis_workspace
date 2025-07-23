@@ -44,6 +44,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get login => 'Login';
 	String get profile => 'Profile';
 	String get direct_messages => 'Direct Messages';
+	String get typing => 'Typing';
+	String get online => 'Online';
 }
 
 /// Flat map(s) containing all translations.
@@ -56,6 +58,8 @@ extension on Translations {
 			case 'login': return 'Login';
 			case 'profile': return 'Profile';
 			case 'direct_messages': return 'Direct Messages';
+			case 'typing': return 'Typing';
+			case 'online': return 'Online';
 			default: return null;
 		}
 	}
