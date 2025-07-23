@@ -48,6 +48,7 @@ class UserEntity {
     fullName: fullName,
     timezone: timezone,
     isActive: isActive,
+    avatarUrl: avatarUrl,
     unreadMessages: {},
   );
 }

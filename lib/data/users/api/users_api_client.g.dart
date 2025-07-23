@@ -18,9 +18,11 @@ class _UsersApiClient implements UsersApiClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<UsersResponseDto> getUsers() async {
+  Future<UsersResponseDto> getUsers(bool clientGravatar) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'client_gravatar': clientGravatar,
+    };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<UsersResponseDto>(

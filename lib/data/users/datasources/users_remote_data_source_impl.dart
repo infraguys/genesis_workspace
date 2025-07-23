@@ -16,7 +16,8 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   @override
   Future<UsersResponseDto> getUsers() async {
     try {
-      return apiClient.getUsers();
+      final bool clientGravatar = false;
+      return apiClient.getUsers(clientGravatar);
     } catch (e) {
       rethrow;
     }
