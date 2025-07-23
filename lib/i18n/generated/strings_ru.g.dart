@@ -37,4 +37,6 @@ class TranslationsRu extends Translations {
 	@override String get login => 'Войти';
 	@override String get profile => 'Профиль';
 	@override String get direct_messages => 'Личные сообщения';
+	@override String get typing => 'Печатает';
+	@override String get online => 'В сети';
 }

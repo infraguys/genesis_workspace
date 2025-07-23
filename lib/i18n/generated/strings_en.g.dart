@@ -39,4 +39,6 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get login => 'Login';
 	String get profile => 'Profile';
 	String get direct_messages => 'Direct Messages';
+	String get typing => 'Typing';
+	String get online => 'Online';
 }

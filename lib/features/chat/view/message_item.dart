@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/features/home/view/user_avatar.dart';
+import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 
 class MessageItem extends StatelessWidget {
   final bool isMyMessage;
