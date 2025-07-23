@@ -14,7 +14,7 @@ class Splash extends StatelessWidget {
       builder: (context, state) {
         return SplashView(
           onInitializationComplete: () {
-            state.isAuthorized ? context.go(Routes.home) : context.go(Routes.auth);
+            state.isAuthorized ? context.go(Routes.directMessages) : context.go(Routes.auth);
           },
         );
       },

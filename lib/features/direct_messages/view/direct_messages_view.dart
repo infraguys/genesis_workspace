@@ -2,23 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
-import 'package:genesis_workspace/features/home/bloc/home_cubit.dart';
+import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+class DirectMessagesView extends StatefulWidget {
+  const DirectMessagesView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<DirectMessagesView> createState() => _DirectMessagesViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _DirectMessagesViewState extends State<DirectMessagesView> {
   late final Future _future;
 
   @override
   void initState() {
-    _future = context.read<HomeCubit>().getUsers();
+    _future = context.read<DirectMessagesCubit>().getUsers();
     super.initState();
   }
 
@@ -27,7 +28,7 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Home'),
+        title: Text(context.t.direct_messages),
       ),
       body: FutureBuilder(
         future: _future,
@@ -40,7 +41,7 @@ class _HomeViewState extends State<HomeView> {
               return Center(child: Text("Some error..."));
             }
           }
-          return BlocBuilder<HomeCubit, HomeState>(
+          return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
             builder: (context, state) {
               return ListView.builder(
                 itemCount: state.users.length,
@@ -63,5 +64,6 @@ class _HomeViewState extends State<HomeView> {
         },
       ),
     );
+    ;
   }
 }

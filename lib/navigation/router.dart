@@ -4,16 +4,16 @@ import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/direct_messages/direct_messages.dart';
 import 'package:genesis_workspace/features/profile/profile.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/authentication/presentation/auth.dart';
-import '../features/home/home.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
+final _shellNavigatorDMKey = GlobalKey<NavigatorState>(debugLabel: 'shellDM');
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
 final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
@@ -21,6 +21,7 @@ class Routes {
   static const String splashScreen = '/';
   static const String auth = '/auth';
   static const String home = '/home';
+  static const String directMessages = '/direct-messages';
   static const String settings = '/settings';
   static const String profile = '/profile';
   static const String chat = '/chat';
@@ -37,14 +38,14 @@ final router = GoRouter(
       },
       branches: [
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorHomeKey,
+          navigatorKey: _shellNavigatorDMKey,
           routes: [
             GoRoute(
-              path: Routes.home,
+              path: Routes.directMessages,
               pageBuilder: (context, state) {
                 return CustomTransitionPage(
                   key: state.pageKey,
-                  child: const Home(),
+                  child: const DirectMessages(),
                   transitionsBuilder: (context, animation, secondaryAnimation, child) {
                     return FadeTransition(
                       opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),

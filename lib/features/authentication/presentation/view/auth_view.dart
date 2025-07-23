@@ -48,7 +48,7 @@ class _AuthViewState extends State<AuthView> {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (BuildContext context, state) {
         if (state.isAuthorized) {
-          context.go(Routes.home);
+          context.go(Routes.directMessages);
         }
       },
       builder: (context, state) {

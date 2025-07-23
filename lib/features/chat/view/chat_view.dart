@@ -5,7 +5,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
 import 'package:genesis_workspace/features/chat/view/message_item.dart';
-import 'package:genesis_workspace/features/home/view/user_avatar.dart';
+import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 

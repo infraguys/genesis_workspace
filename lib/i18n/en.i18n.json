@@ -3,5 +3,7 @@
   "password": "Password",
   "login": "Login",
   "profile": "Profile",
-  "direct_messages": "Direct Messages"
+  "direct_messages": "Direct Messages",
+  "typing": "Typing",
+  "online": "Online"
 }

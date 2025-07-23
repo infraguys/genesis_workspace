@@ -3,5 +3,7 @@
   "password": "Пароль",
   "login": "Войти",
   "profile": "Профиль",
-  "direct_messages": "Личные сообщения"
+  "direct_messages": "Личные сообщения",
+  "typing": "Печатает",
+  "online": "В сети"
 }
