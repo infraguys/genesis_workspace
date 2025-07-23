@@ -2,7 +2,7 @@ part of 'direct_messages_cubit.dart';
 
 class DirectMessagesState {
   bool isUsersPending;
-  List<UserEntity> users;
+  List<DmUserEntity> users;
   List<int> typingUsers;
 
   DirectMessagesState({
@@ -12,7 +12,7 @@ class DirectMessagesState {
   });
 
   DirectMessagesState copyWith({
-    List<UserEntity>? users,
+    List<DmUserEntity>? users,
     bool? isUsersPending,
     List<int>? typingUsers,
   }) {

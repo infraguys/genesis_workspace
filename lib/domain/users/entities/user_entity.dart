@@ -1,4 +1,5 @@
 import 'package:genesis_workspace/data/users/dto/user_dto.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 
 class UserEntity {
   final String email;
@@ -38,4 +39,15 @@ class UserEntity {
       avatarUrl: avatarUrl,
     );
   }
+
+  DmUserEntity toDmUser() => DmUserEntity(
+    email: email,
+    userId: userId,
+    role: role,
+    isBot: isBot,
+    fullName: fullName,
+    timezone: timezone,
+    isActive: isActive,
+    unreadMessagesCount: 0,
+  );
 }

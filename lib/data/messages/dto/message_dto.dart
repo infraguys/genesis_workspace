@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/recipient_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -21,8 +22,9 @@ class MessageDto {
     fromJson: _displayRecipientFromJson,
     toJson: _displayRecipientToJson,
   )
-  final List<RecipientDto> displayRecipient;
+  final dynamic displayRecipient;
   final List<String>? flags;
+  final MessageType type;
 
   MessageDto({
     required this.id,
@@ -32,6 +34,7 @@ class MessageDto {
     required this.senderId,
     required this.senderFullName,
     required this.displayRecipient,
+    required this.type,
     this.flags,
   });
 
@@ -46,13 +49,16 @@ class MessageDto {
     content: content,
     senderId: senderId,
     senderFullName: senderFullName,
-    displayRecipient: displayRecipient.map((e) => e.toEntity()).toList(),
+    displayRecipient: displayRecipient is List
+        ? displayRecipient.map((e) => e.toEntity()).toList()
+        : displayRecipient,
     flags: flags,
+    type: type,
   );
 
-  static List<RecipientDto> _displayRecipientFromJson(dynamic json) {
+  static dynamic _displayRecipientFromJson(dynamic json) {
     if (json is String) {
-      return [];
+      return json;
     } else if (json is List) {
       return json.map((e) => RecipientDto.fromJson(e as Map<String, dynamic>)).toList();
     }

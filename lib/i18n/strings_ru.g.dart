@@ -41,6 +41,8 @@ class TranslationsRu implements Translations {
 	@override String get login => 'Войти';
 	@override String get profile => 'Профиль';
 	@override String get direct_messages => 'Личные сообщения';
+	@override String get typing => 'Печатает';
+	@override String get online => 'В сети';
 }
 
 /// Flat map(s) containing all translations.
@@ -53,6 +55,8 @@ extension on TranslationsRu {
 			case 'login': return 'Войти';
 			case 'profile': return 'Профиль';
 			case 'direct_messages': return 'Личные сообщения';
+			case 'typing': return 'Печатает';
+			case 'online': return 'В сети';
 			default: return null;
 		}
 	}
