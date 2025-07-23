@@ -45,18 +45,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
-  void _onTypingEvents(TypingEventEntity event) {
-    final isWriting = event.op == TypingEventOp.start;
-    final senderId = event.sender.userId;
-
-    if (isWriting) {
-      state.typingUsers.add(senderId);
-    } else {
-      state.typingUsers.remove(senderId);
-    }
-    emit(state.copyWith(typingUsers: state.typingUsers));
-  }
-
   Future<void> getUsers() async {
     try {
       final messagesBody = MessagesRequestEntity(
@@ -94,6 +82,18 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     } catch (e) {
       inspect(e);
     }
+  }
+
+  void _onTypingEvents(TypingEventEntity event) {
+    final isWriting = event.op == TypingEventOp.start;
+    final senderId = event.sender.userId;
+
+    if (isWriting) {
+      state.typingUsers.add(senderId);
+    } else {
+      state.typingUsers.remove(senderId);
+    }
+    emit(state.copyWith(typingUsers: state.typingUsers));
   }
 
   void _onMessageEvents(MessageEventEntity event) {
