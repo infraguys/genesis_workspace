@@ -1,7 +1,7 @@
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 
 class DmUserEntity extends UserEntity {
-  int unreadMessagesCount;
+  Set<int> unreadMessages;
   DmUserEntity({
     required super.email,
     required super.userId,
@@ -10,6 +10,6 @@ class DmUserEntity extends UserEntity {
     required super.fullName,
     required super.timezone,
     required super.isActive,
-    required this.unreadMessagesCount,
+    required this.unreadMessages,
   });
 }

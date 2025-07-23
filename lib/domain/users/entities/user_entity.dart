@@ -48,6 +48,6 @@ class UserEntity {
     fullName: fullName,
     timezone: timezone,
     isActive: isActive,
-    unreadMessagesCount: 0,
+    unreadMessages: {},
   );
 }
