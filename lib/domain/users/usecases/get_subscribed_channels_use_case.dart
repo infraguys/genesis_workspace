@@ -4,11 +4,11 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class GetSubscribedChannelsUseCase {
-  final UsersRepository repository;
+  final UsersRepository _repository;
 
-  GetSubscribedChannelsUseCase(this.repository);
+  GetSubscribedChannelsUseCase(this._repository);
 
-  Future<List<SubscriptionEntity>> call() async {
-    return await repository.getSubscribedChannels();
+  Future<List<SubscriptionEntity>> call(bool includeSubscribers) async {
+    return await _repository.getSubscribedChannels(includeSubscribers);
   }
 }

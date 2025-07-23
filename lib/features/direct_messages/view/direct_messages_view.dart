@@ -28,7 +28,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(context.t.direct_messages),
+        title: Text(context.t.navBar.directMessages),
       ),
       body: FutureBuilder(
         future: _future,

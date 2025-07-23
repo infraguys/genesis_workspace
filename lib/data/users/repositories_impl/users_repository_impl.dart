@@ -14,9 +14,11 @@ class UsersRepositoryImpl implements UsersRepository {
   UsersRepositoryImpl(this.usersRemoteDataSource);
 
   @override
-  Future<List<SubscriptionEntity>> getSubscribedChannels() async {
+  Future<List<SubscriptionEntity>> getSubscribedChannels(bool includeSubscribers) async {
     try {
-      final SubscriptionsResponseDto dto = await usersRemoteDataSource.getSubscribedChannels();
+      final SubscriptionsResponseDto dto = await usersRemoteDataSource.getSubscribedChannels(
+        includeSubscribers,
+      );
       List<SubscriptionEntity> result = dto.subscriptions.map((e) => e.toEntity()).toList();
       return result;
     } catch (e) {

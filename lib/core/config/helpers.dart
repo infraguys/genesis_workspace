@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 String? validateEmail(String? value) {
@@ -26,4 +27,11 @@ class ToListAsJsonStringConverter implements JsonConverter<List<String>, String>
   String toJson(List<String> object) {
     return json.encode(object);
   }
+}
+
+Color parseColor(String hexColor) {
+  final buffer = StringBuffer();
+  if (hexColor.length == 6 || hexColor.length == 7) buffer.write('ff');
+  buffer.write(hexColor.replaceFirst('#', ''));
+  return Color(int.parse(buffer.toString(), radix: 16));
 }

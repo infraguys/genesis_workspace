@@ -5,9 +5,9 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   final UsersApiClient apiClient = UsersApiClient(getIt<Dio>());
 
   @override
-  Future<SubscriptionsResponseDto> getSubscribedChannels() async {
+  Future<SubscriptionsResponseDto> getSubscribedChannels(bool includeSubscribers) async {
     try {
-      return apiClient.getSubscribedChannels();
+      return apiClient.getSubscribedChannels(includeSubscribers);
     } catch (e) {
       rethrow;
     }

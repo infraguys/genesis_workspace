@@ -12,7 +12,7 @@ import 'package:injectable/injectable.dart';
 part 'users_remote_data_source_impl.dart';
 
 abstract class UsersRemoteDataSource {
-  Future<SubscriptionsResponseDto> getSubscribedChannels();
+  Future<SubscriptionsResponseDto> getSubscribedChannels(bool includeSubscribers);
   Future<UsersResponseDto> getUsers();
   Future<OwnUserResponseDto> getOwnUser();
   Future<void> setTyping(TypingRequestDto body);

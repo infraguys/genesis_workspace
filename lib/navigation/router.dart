@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/direct_messages.dart';
 import 'package:genesis_workspace/features/profile/profile.dart';
@@ -14,6 +15,7 @@ import '../features/authentication/presentation/auth.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorDMKey = GlobalKey<NavigatorState>(debugLabel: 'shellDM');
+final _shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
 final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
@@ -22,6 +24,7 @@ class Routes {
   static const String auth = '/auth';
   static const String home = '/home';
   static const String directMessages = '/direct-messages';
+  static const String channels = '/channels';
   static const String settings = '/settings';
   static const String profile = '/profile';
   static const String chat = '/chat';
@@ -56,6 +59,10 @@ final router = GoRouter(
               },
             ),
           ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorChannelsKey,
+          routes: [GoRoute(path: Routes.channels, builder: (context, state) => const Channels())],
         ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorProfileKey,

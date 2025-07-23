@@ -2,8 +2,12 @@
   "password_cant_be_empty": "Пароль не может быть пустым",
   "password": "Пароль",
   "login": "Войти",
-  "profile": "Профиль",
-  "direct_messages": "Личные сообщения",
   "typing": "Печатает",
-  "online": "В сети"
+  "online": "В сети",
+  "navBar": {
+    "directMessages": "Личные сообщения",
+    "settings": "Настройки",
+    "profile": "Профиль",
+    "channels": "Каналы"
+  }
 }

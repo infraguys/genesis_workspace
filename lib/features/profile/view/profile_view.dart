@@ -13,7 +13,7 @@ class ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.t.profile)),
+      appBar: AppBar(title: Text(context.t.navBar.profile)),
       body: Column(
         children: [
           ElevatedButton(

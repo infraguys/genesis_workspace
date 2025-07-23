@@ -58,18 +58,25 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   labelType: NavigationRailLabelType.all,
                   destinations: [
                     NavigationRailDestination(
-                      label: Text(context.t.direct_messages),
+                      label: Text(context.t.navBar.directMessages),
                       icon: Icon(Icons.people),
                     ),
                     NavigationRailDestination(
-                      label: Text('Profile'),
+                      label: Text(context.t.navBar.channels),
+                      icon: Icon(Icons.chat),
+                    ),
+                    NavigationRailDestination(
+                      label: Text(context.t.navBar.profile),
                       icon: BlocBuilder<ProfileCubit, ProfileState>(
                         builder: (context, state) {
                           return UserAvatar(avatarUrl: state.user?.avatarUrl);
                         },
                       ),
                     ),
-                    NavigationRailDestination(label: Text('Settings'), icon: Icon(Icons.settings)),
+                    NavigationRailDestination(
+                      label: Text(context.t.navBar.settings),
+                      icon: Icon(Icons.settings),
+                    ),
                   ],
                 ),
                 const VerticalDivider(thickness: 1, width: 1),
@@ -81,21 +88,29 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               ? null
               : BottomNavigationBar(
                   currentIndex: widget.navigationShell.currentIndex,
+                  type: BottomNavigationBarType.shifting,
                   onTap: _goBranch,
                   items: [
                     BottomNavigationBarItem(
-                      label: context.t.direct_messages,
+                      label: context.t.navBar.directMessages,
                       icon: Icon(Icons.people),
                     ),
                     BottomNavigationBarItem(
-                      label: 'Profile',
+                      label: context.t.navBar.channels,
+                      icon: Icon(Icons.chat),
+                    ),
+                    BottomNavigationBarItem(
+                      label: context.t.navBar.profile,
                       icon: BlocBuilder<ProfileCubit, ProfileState>(
                         builder: (context, state) {
                           return UserAvatar(avatarUrl: state.user?.avatarUrl);
                         },
                       ),
                     ),
-                    BottomNavigationBarItem(label: 'Settings', icon: Icon(Icons.settings)),
+                    BottomNavigationBarItem(
+                      label: context.t.navBar.settings,
+                      icon: Icon(Icons.settings),
+                    ),
                   ],
                   // onDestinationSelected: _goBranch,
                 ),

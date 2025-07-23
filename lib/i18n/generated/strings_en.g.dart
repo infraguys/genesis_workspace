@@ -37,8 +37,20 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get password_cant_be_empty => 'Password can not be empty';
 	String get password => 'Password';
 	String get login => 'Login';
-	String get profile => 'Profile';
-	String get direct_messages => 'Direct Messages';
 	String get typing => 'Typing';
 	String get online => 'Online';
+	late final TranslationsNavBarEn navBar = TranslationsNavBarEn.internal(_root);
+}
+
+// Path: navBar
+class TranslationsNavBarEn {
+	TranslationsNavBarEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get directMessages => 'Direct Messages';
+	String get settings => 'Settings';
+	String get profile => 'Profile';
+	String get channels => 'Channels';
 }
