@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 
 class MessageItem extends StatelessWidget {
   final bool isMyMessage;
@@ -65,9 +65,9 @@ class MessageItem extends StatelessWidget {
                               Text(message.content, softWrap: true, overflow: TextOverflow.visible),
                             ],
                           ),
-                    isRead
-                        ? Icon(Icons.done_all, color: theme.colorScheme.primary, size: 12)
-                        : Icon(Icons.done, color: Colors.blueGrey, size: 12),
+                    (isRead || isMyMessage)
+                        ? SizedBox()
+                        : Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
                   ],
                 ),
               ),
