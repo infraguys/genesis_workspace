@@ -129,6 +129,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i988.GetSubscribedChannelsUseCase>(
+      () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(gh<_i672.AuthRemoteDataSource>()),
     );
@@ -146,9 +149,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i194.GetUsersUseCase>(
       () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i988.GetSubscribedChannelsUseCase>(
-      () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
     );
     return this;
   }

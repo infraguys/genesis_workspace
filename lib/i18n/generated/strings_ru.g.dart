@@ -35,8 +35,20 @@ class TranslationsRu extends Translations {
 	@override String get password_cant_be_empty => 'Пароль не может быть пустым';
 	@override String get password => 'Пароль';
 	@override String get login => 'Войти';
-	@override String get profile => 'Профиль';
-	@override String get direct_messages => 'Личные сообщения';
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
+	@override late final TranslationsNavBarRu navBar = TranslationsNavBarRu._(_root);
+}
+
+// Path: navBar
+class TranslationsNavBarRu extends TranslationsNavBarEn {
+	TranslationsNavBarRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get directMessages => 'Личные сообщения';
+	@override String get settings => 'Настройки';
+	@override String get profile => 'Профиль';
+	@override String get channels => 'Каналы';
 }

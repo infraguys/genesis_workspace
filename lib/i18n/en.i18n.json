@@ -2,8 +2,12 @@
   "password_cant_be_empty": "Password can not be empty",
   "password": "Password",
   "login": "Login",
-  "profile": "Profile",
-  "direct_messages": "Direct Messages",
   "typing": "Typing",
-  "online": "Online"
+  "online": "Online",
+  "navBar": {
+    "directMessages": "Direct Messages",
+    "settings": "Settings",
+    "profile": "Profile",
+    "channels": "Channels"
+  }
 }

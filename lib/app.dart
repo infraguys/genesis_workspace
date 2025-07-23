@@ -7,6 +7,8 @@ import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 
+import 'core/config/theme.dart';
+
 class WorkspaceApp extends StatelessWidget {
   const WorkspaceApp({super.key});
 
@@ -22,7 +24,7 @@ class WorkspaceApp extends StatelessWidget {
         locale: TranslationProvider.of(context).flutterLocale,
         title: 'Workspace',
         routerConfig: router,
-        theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+        theme: theme,
       ),
     );
   }

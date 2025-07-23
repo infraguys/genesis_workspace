@@ -12,9 +12,6 @@ part 'users_api_client.g.dart';
 abstract class UsersApiClient {
   factory UsersApiClient(Dio dio, {String? baseUrl}) = _UsersApiClient;
 
-  @GET('/users/me/subscriptions')
-  Future<SubscriptionsResponseDto> getSubscribedChannels();
-
   @GET('/users')
   Future<UsersResponseDto> getUsers();
 
@@ -26,5 +23,10 @@ abstract class UsersApiClient {
     @Query('type') SendMessageType type,
     @Query('op') TypingEventOp op,
     @Query('to') String to,
+  );
+
+  @GET('/users/me/subscriptions')
+  Future<SubscriptionsResponseDto> getSubscribedChannels(
+    @Query('include_subscribers') bool includeSubscribers,
   );
 }

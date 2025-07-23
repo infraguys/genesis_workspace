@@ -3,7 +3,7 @@ import 'package:genesis_workspace/domain/users/entities/typing_request_entity.da
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 
 abstract class UsersRepository {
-  Future<List<SubscriptionEntity>> getSubscribedChannels();
+  Future<List<SubscriptionEntity>> getSubscribedChannels(bool includeSubscribers);
   Future<List<UserEntity>> getUsers();
   Future<UserEntity> getOwnUser();
   Future<void> setTyping(TypingRequestEntity body);
