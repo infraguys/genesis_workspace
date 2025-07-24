@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -20,7 +22,7 @@ class ProfileView extends StatelessWidget {
               final response = await _getMessagesUseCase.call(
                 MessagesRequestEntity(
                   anchor: MessageAnchor.firstUnread(),
-                  numBefore: 1000,
+                  numBefore: 5000,
                   numAfter: 0,
                 ),
               );
@@ -31,6 +33,7 @@ class ProfileView extends StatelessWidget {
                   return true;
                 }
               }).toList();
+              inspect(response);
             },
             child: Text("Get messages"),
           ),

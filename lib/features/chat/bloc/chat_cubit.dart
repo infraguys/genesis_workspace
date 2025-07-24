@@ -205,4 +205,13 @@ class ChatCubit extends Cubit<ChatState> {
       // Optional: retry or log error
     }
   }
+
+  @override
+  Future<void> close() {
+    _typingEventsSubscription.cancel();
+    _messagesEventsSubscription.cancel();
+    _messageFlagsSubscription.cancel();
+    _readMessageDebounceTimer?.cancel();
+    return super.close();
+  }
 }
