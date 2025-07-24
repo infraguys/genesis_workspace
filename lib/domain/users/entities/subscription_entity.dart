@@ -1,3 +1,5 @@
+import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
+
 class SubscriptionEntity {
   final String name;
   final List<int> subscribers;
@@ -12,4 +14,13 @@ class SubscriptionEntity {
     required this.description,
     required this.color,
   });
+
+  ChannelEntity toChannelEntity() => ChannelEntity(
+    name: name,
+    subscribers: subscribers,
+    streamId: streamId,
+    description: description,
+    color: color,
+    topics: [],
+  );
 }

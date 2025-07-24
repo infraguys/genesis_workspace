@@ -1,11 +1,15 @@
 part of 'channels_cubit.dart';
 
 class ChannelsState {
-  List<SubscriptionEntity> channels;
+  List<ChannelEntity> channels;
+  int? pendingTopicsId;
 
-  ChannelsState({required this.channels});
+  ChannelsState({required this.channels, this.pendingTopicsId});
 
-  ChannelsState copyWith({List<SubscriptionEntity>? channels}) {
-    return ChannelsState(channels: channels ?? this.channels);
+  ChannelsState copyWith({List<ChannelEntity>? channels, int? pendingTopicsId}) {
+    return ChannelsState(
+      channels: channels ?? this.channels,
+      pendingTopicsId: pendingTopicsId ?? this.pendingTopicsId,
+    );
   }
 }

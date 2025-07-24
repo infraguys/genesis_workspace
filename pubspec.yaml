@@ -25,6 +25,7 @@ dependencies:
   slang: ^4.7.3
   slang_flutter: ^4.7.0
   shared_preferences: ^2.5.3
+  skeletonizer: ^2.1.0+1
 
 dev_dependencies:
   flutter_test:

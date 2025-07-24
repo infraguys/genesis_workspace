@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class ChannelsView extends StatefulWidget {
   const ChannelsView({super.key});
@@ -39,7 +40,6 @@ class ChannelsViewState extends State<ChannelsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Channels')),
-      // floatingActionButton: IconButton(onPressed: () {}, icon: Icon(Icons.add)),
       body: FutureBuilder(
         future: _future,
         builder: (BuildContext context, snapshot) {
@@ -57,26 +57,40 @@ class ChannelsViewState extends State<ChannelsView> {
                 itemCount: state.channels.length,
                 itemBuilder: (context, index) {
                   final channel = state.channels[index];
-                  final topics = _mockTopics();
-
                   return ExpansionTile(
                     title: Text(channel.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(channel.description),
+                    subtitle: channel.description.isNotEmpty ? Text(channel.description) : null,
                     leading: CircleAvatar(
                       backgroundColor: parseColor(channel.color),
                       child: Text(channel.name.characters.first.toUpperCase()),
                     ),
-                    children: topics
-                        .map(
-                          (topic) => ListTile(
-                            title: Text(topic),
-                            leading: const Icon(Icons.topic),
-                            onTap: () {
-                              // Обработай переход к сообщениям топика
+                    onExpansionChanged: (isExpanded) {
+                      if (isExpanded) {
+                        context.read<ChannelsCubit>().getChannelTopics(channel.streamId);
+                      }
+                    },
+                    children: [
+                      Skeletonizer(
+                        enabled: state.pendingTopicsId == channel.streamId,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: 400),
+                          child: ListView.builder(
+                            itemCount: channel.topics.isEmpty ? 3 : channel.topics.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                  channel.topics.isEmpty
+                                      ? 'Loading...'
+                                      : channel.topics[index].name,
+                                ),
+                                leading: Icon(Icons.topic),
+                              );
                             },
                           ),
-                        )
-                        .toList(),
+                        ),
+                      ),
+                    ],
                   );
                 },
               );
