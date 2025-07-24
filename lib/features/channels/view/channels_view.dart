@@ -85,6 +85,13 @@ class ChannelsViewState extends State<ChannelsView> {
                                       : channel.topics[index].name,
                                 ),
                                 leading: Icon(Icons.topic),
+                                onTap: state.pendingTopicsId != channel.streamId
+                                    ? () async {
+                                        context.read<ChannelsCubit>().getChannelMessages(
+                                          channel.streamId,
+                                        );
+                                      }
+                                    : null,
                               );
                             },
                           ),

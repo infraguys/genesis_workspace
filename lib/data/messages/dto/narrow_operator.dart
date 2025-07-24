@@ -4,6 +4,8 @@ import 'package:json_annotation/json_annotation.dart';
 enum NarrowOperator {
   @JsonValue('dm')
   dm,
+  @JsonValue('channel')
+  channel,
 }
 
 extension NarrowOperatorToJson on NarrowOperator {
@@ -11,6 +13,8 @@ extension NarrowOperatorToJson on NarrowOperator {
     switch (this) {
       case NarrowOperator.dm:
         return 'dm';
+      case NarrowOperator.channel:
+        return 'channel';
     }
   }
 }

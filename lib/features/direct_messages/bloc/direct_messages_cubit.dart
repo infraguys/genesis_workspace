@@ -7,18 +7,15 @@ import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
-import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/messages_response_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
-import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
+import 'package:genesis_workspace/services/messages/messages_service.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 
 part 'direct_messages_state.dart';
@@ -35,15 +32,14 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     );
   }
 
-  final RegisterQueueUseCase _registerQueue = getIt<RegisterQueueUseCase>();
-  final GetEventsByQueueIdUseCase _getEvents = getIt<GetEventsByQueueIdUseCase>();
   final _getMessagesUseCase = getIt<GetMessagesUseCase>();
-
   final GetUsersUseCase _getUsersUseCase = getIt<GetUsersUseCase>();
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+
+  final MessagesService _messagesService = getIt<MessagesService>();
 
   Future<void> getUsers() async {
     try {
@@ -52,21 +48,11 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
         numBefore: 1000,
         numAfter: 0,
       );
-      final responses = await Future.wait([
-        _getUsersUseCase.call(),
-        _getMessagesUseCase.call(messagesBody),
-      ]);
+      final response = await _getUsersUseCase.call();
 
-      final List<UserEntity> users = responses[0] as List<UserEntity>;
-      final MessagesResponseEntity messages = responses[1] as MessagesResponseEntity;
+      final List<UserEntity> users = response;
 
-      List<MessageEntity> unreadMessages = messages.messages.where((message) {
-        if (message.flags != null) {
-          return !message.flags!.contains('read');
-        } else {
-          return true;
-        }
-      }).toList();
+      final unreadMessages = _messagesService.unreadMessages;
 
       state.users = users.map((user) => user.toDmUser()).toList();
       for (var user in state.users) {
@@ -115,5 +101,13 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       }).toList();
       emit(state.copyWith(users: users));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _typingEventsSubscription.cancel();
+    _messagesEventsSubscription.cancel();
+    _messageFlagsSubscription.cancel();
+    return super.close();
   }
 }
