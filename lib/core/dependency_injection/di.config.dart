@@ -47,6 +47,8 @@ import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.da
     as _i547;
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart'
     as _i988;
+import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart'
+    as _i699;
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
     as _i194;
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart'
@@ -129,8 +131,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i547.GetOwnUserUseCase>(
+      () => _i547.GetOwnUserUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i194.GetUsersUseCase>(
+      () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i988.GetSubscribedChannelsUseCase>(
       () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i699.GetTopicsUseCase>(
+      () => _i699.GetTopicsUseCase(gh<_i125.UsersRepository>()),
     );
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(gh<_i672.AuthRemoteDataSource>()),
@@ -143,12 +154,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
-    );
-    gh.factory<_i547.GetOwnUserUseCase>(
-      () => _i547.GetOwnUserUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i194.GetUsersUseCase>(
-      () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
     );
     return this;
   }

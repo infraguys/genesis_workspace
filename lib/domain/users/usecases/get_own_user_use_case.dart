@@ -4,13 +4,13 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class GetOwnUserUseCase {
-  final UsersRepository repository;
+  final UsersRepository _repository;
 
-  GetOwnUserUseCase(this.repository);
+  GetOwnUserUseCase(this._repository);
 
   Future<UserEntity> call() async {
     try {
-      return await repository.getOwnUser();
+      return await _repository.getOwnUser();
     } catch (e) {
       rethrow;
     }

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -33,7 +31,6 @@ class ProfileView extends StatelessWidget {
                   return true;
                 }
               }).toList();
-              inspect(unreadMessages);
             },
             child: Text("Get messages"),
           ),
