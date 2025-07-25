@@ -35,6 +35,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     _future = Future.wait<void>([
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
+      _messagesService.init(),
       _messagesService.getLastMessages(),
     ]);
     _realTimeCubit = context.read<RealTimeCubit>();
@@ -44,6 +45,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   @override
   void dispose() {
     _realTimeCubit.dispose();
+    _messagesService.dispose();
     super.dispose();
   }
 

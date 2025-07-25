@@ -22,5 +22,6 @@ class SubscriptionEntity {
     description: description,
     color: color,
     topics: [],
+    unreadMessages: {},
   );
 }

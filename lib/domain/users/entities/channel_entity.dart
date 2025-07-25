@@ -3,6 +3,7 @@ import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 
 class ChannelEntity extends SubscriptionEntity {
   List<TopicEntity> topics;
+  Set<int> unreadMessages = {};
   ChannelEntity({
     required super.name,
     required super.subscribers,
@@ -10,5 +11,6 @@ class ChannelEntity extends SubscriptionEntity {
     required super.description,
     required super.color,
     required this.topics,
+    required this.unreadMessages,
   });
 }

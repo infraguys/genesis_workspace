@@ -60,9 +60,13 @@ class ChannelsViewState extends State<ChannelsView> {
                   return ExpansionTile(
                     title: Text(channel.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: channel.description.isNotEmpty ? Text(channel.description) : null,
-                    leading: CircleAvatar(
-                      backgroundColor: parseColor(channel.color),
-                      child: Text(channel.name.characters.first.toUpperCase()),
+                    leading: Badge.count(
+                      count: channel.unreadMessages.length,
+                      isLabelVisible: channel.unreadMessages.isNotEmpty,
+                      child: CircleAvatar(
+                        backgroundColor: parseColor(channel.color),
+                        child: Text(channel.name.characters.first.toUpperCase()),
+                      ),
                     ),
                     onExpansionChanged: (isExpanded) {
                       if (isExpanded) {
@@ -78,6 +82,12 @@ class ChannelsViewState extends State<ChannelsView> {
                             itemCount: channel.topics.isEmpty ? 3 : channel.topics.length,
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
+                              Widget? trailing;
+                              if (channel.topics.isNotEmpty) {
+                                trailing = channel.topics[index].unreadMessages.isNotEmpty
+                                    ? Text("${channel.topics[index].unreadMessages.length}")
+                                    : null;
+                              }
                               return ListTile(
                                 title: Text(
                                   channel.topics.isEmpty
@@ -85,6 +95,7 @@ class ChannelsViewState extends State<ChannelsView> {
                                       : channel.topics[index].name,
                                 ),
                                 leading: Icon(Icons.topic),
+                                trailing: trailing,
                                 onTap: state.pendingTopicsId != channel.streamId
                                     ? () async {
                                         context.read<ChannelsCubit>().getChannelMessages(
