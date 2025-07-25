@@ -9,13 +9,11 @@ part of 'message_narrow_dto.dart';
 MessageNarrowDto _$MessageNarrowDtoFromJson(Map<String, dynamic> json) =>
     MessageNarrowDto(
       operator: json['operator'] as String,
-      operand: (json['operand'] as List<dynamic>)
-          .map((e) => (e as num).toInt())
-          .toList(),
+      operand: MessageNarrowDto._operandFromJson(json['operand']),
     );
 
 Map<String, dynamic> _$MessageNarrowDtoToJson(MessageNarrowDto instance) =>
     <String, dynamic>{
       'operator': instance.operator,
-      'operand': instance.operand,
+      'operand': MessageNarrowDto._operandToJson(instance.operand),
     };

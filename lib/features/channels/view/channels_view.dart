@@ -98,7 +98,7 @@ class ChannelsViewState extends State<ChannelsView> {
                                     onTap: state.pendingTopicsId != channel.streamId
                                         ? () async {
                                             context.read<ChannelsCubit>().getChannelMessages(
-                                              channel.streamId,
+                                              channel.name,
                                             );
                                           }
                                         : null,
