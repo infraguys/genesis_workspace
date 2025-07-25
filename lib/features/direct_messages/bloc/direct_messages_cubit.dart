@@ -83,10 +83,12 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   }
 
   void _onMessageEvents(MessageEventEntity event) {
+    inspect(event);
     final message = event.message;
     final sender = state.users.firstWhere((user) => user.userId == message.senderId);
     final indexOfSender = state.users.indexOf(sender);
-    if (message.flags == null || !message.flags!.contains('read')) {
+    if ((message.flags == null || !message.flags!.contains('read')) &&
+        message.type == MessageType.private) {
       sender.unreadMessages.add(message.id);
     }
     state.users[indexOfSender] = sender;

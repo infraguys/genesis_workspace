@@ -10,6 +10,8 @@ class MessageEntity {
   final String senderFullName;
   final List<String>? flags;
   final MessageType type;
+  final int? streamId;
+  final String subject;
 
   MessageEntity({
     required this.id,
@@ -21,7 +23,11 @@ class MessageEntity {
     required this.displayRecipient,
     required this.type,
     this.flags,
+    this.streamId,
+    required this.subject,
   });
+
+  bool get hasUnreadMessages => flags == null || (flags != null && !flags!.contains('read'));
 
   MessageEntity copyWith({
     int? id,
@@ -33,6 +39,8 @@ class MessageEntity {
     dynamic displayRecipient,
     List<String>? flags,
     MessageType? type,
+    int? streamId,
+    String? subject,
   }) {
     return MessageEntity(
       id: id ?? this.id,
@@ -44,6 +52,8 @@ class MessageEntity {
       displayRecipient: displayRecipient ?? this.displayRecipient,
       flags: flags ?? this.flags,
       type: type ?? this.type,
+      streamId: streamId ?? this.streamId,
+      subject: subject ?? this.subject,
     );
   }
 }

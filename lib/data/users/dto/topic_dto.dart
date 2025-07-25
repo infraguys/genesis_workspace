@@ -14,5 +14,5 @@ class TopicDto {
   factory TopicDto.fromJson(Map<String, dynamic> json) => _$TopicDtoFromJson(json);
   Map<String, dynamic> toJson() => _$TopicDtoToJson(this);
 
-  TopicEntity toEntity() => TopicEntity(maxId: maxId, name: name);
+  TopicEntity toEntity() => TopicEntity(maxId: maxId, name: name, unreadMessages: {});
 }
