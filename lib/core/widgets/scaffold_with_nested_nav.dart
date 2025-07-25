@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -21,7 +22,8 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
   late final Future _future;
   late final RealTimeCubit _realTimeCubit;
-  final MessagesService _messagesService = getIt<MessagesService>();
+
+  final messagesService = getIt<MessagesService>();
 
   void _goBranch(int index) {
     widget.navigationShell.goBranch(
@@ -32,11 +34,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   @override
   void initState() {
-    _future = Future.wait<void>([
+    _future = Future.wait([
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
-      _messagesService.init(),
-      _messagesService.getLastMessages(),
+      context.read<MessagesCubit>().getLastMessages(),
     ]);
     _realTimeCubit = context.read<RealTimeCubit>();
     super.initState();
@@ -45,7 +46,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   @override
   void dispose() {
     _realTimeCubit.dispose();
-    _messagesService.dispose();
     super.dispose();
   }
 

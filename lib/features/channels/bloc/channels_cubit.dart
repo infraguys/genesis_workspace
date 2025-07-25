@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
@@ -16,7 +17,6 @@ import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
-import 'package:genesis_workspace/services/messages/messages_service.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 
 part 'channels_state.dart';
@@ -39,25 +39,20 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
-  final MessagesService _messagesService = getIt<MessagesService>();
-
   Future<void> getChannels() async {
     try {
       final response = await _getSubscribedChannelsUseCase.call(true);
       final channels = response.map((e) => e.toChannelEntity()).toList();
-      for (var message in _messagesService.unreadMessages) {
-        if (message.type == MessageType.stream && message.hasUnreadMessages) {
-          final channel = channels.firstWhere((channel) => channel.streamId == message.streamId);
-          channel.unreadMessages.add(message.id);
-        }
-      }
       emit(state.copyWith(channels: channels));
     } catch (e) {
       inspect(e);
     }
   }
 
-  Future<void> getChannelTopics(int streamId) async {
+  Future<void> getChannelTopics({
+    required int streamId,
+    required List<MessageEntity> unreadMessages,
+  }) async {
     state.pendingTopicsId = streamId;
     emit(state.copyWith(pendingTopicsId: state.pendingTopicsId));
     try {
@@ -65,17 +60,32 @@ class ChannelsCubit extends Cubit<ChannelsState> {
       state.pendingTopicsId = null;
       final indexOfChannel = state.channels.indexWhere((element) => element.streamId == streamId);
       final channel = state.channels[indexOfChannel];
+
       channel.topics = response;
-      for (var message in _messagesService.unreadMessages) {
+      for (var message in unreadMessages) {
         if (message.type == MessageType.stream && message.hasUnreadMessages) {
-          final topic = channel.topics.firstWhere((topic) => topic.name == message.subject);
-          topic.unreadMessages.add(message.id);
+          final TopicEntity? topic = channel.topics
+              .where((topic) => topic.name == message.subject)
+              .firstOrNull;
+          topic?.unreadMessages.add(message.id);
         }
       }
       emit(state.copyWith(pendingTopicsId: state.pendingTopicsId, channels: state.channels));
     } catch (e) {
       inspect(e);
     }
+  }
+
+  void setUnreadMessages(List<MessageEntity> unreadMessages) {
+    final channels = [...state.channels];
+    for (var message in unreadMessages) {
+      if (message.type == MessageType.stream && message.hasUnreadMessages) {
+        final channel = channels.firstWhere((channel) => channel.streamId == message.streamId);
+        channel.unreadMessages.add(message.id);
+      }
+    }
+    state.channels = channels;
+    emit(state.copyWith(channels: state.channels));
   }
 
   Future<void> getChannelMessages(int streamId) async {
@@ -118,6 +128,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       final channels = state.channels.map((channel) {
         channel.unreadMessages.removeAll(event.messages);
+        channel.topics.forEach((topic) {
+          topic.unreadMessages.removeAll(event.messages);
+        });
         return channel;
       }).toList();
       emit(state.copyWith(channels: channels));

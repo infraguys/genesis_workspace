@@ -69,6 +69,8 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
+import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
+    as _i592;
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
     as _i766;
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
@@ -108,6 +110,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i435.LocalizationService(),
     );
     gh.lazySingleton<_i409.MessagesService>(() => _i409.MessagesService());
+    gh.lazySingleton<_i592.MessagesCubit>(() => _i592.MessagesCubit());
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
     );
