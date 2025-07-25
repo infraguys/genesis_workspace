@@ -7,7 +7,7 @@ import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
-import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
@@ -15,7 +15,6 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/update_
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
-import 'package:genesis_workspace/services/messages/messages_service.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 
 part 'direct_messages_state.dart';
@@ -39,35 +38,28 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
-  final MessagesService _messagesService = getIt<MessagesService>();
-
   Future<void> getUsers() async {
     try {
-      final messagesBody = MessagesRequestEntity(
-        anchor: MessageAnchor.newest(),
-        numBefore: 1000,
-        numAfter: 0,
-      );
       final response = await _getUsersUseCase.call();
 
       final List<UserEntity> users = response;
-
-      final unreadMessages = _messagesService.unreadMessages;
-
       state.users = users.map((user) => user.toDmUser()).toList();
-      for (var user in state.users) {
-        user.unreadMessages = unreadMessages
-            .where(
-              (message) =>
-                  (message.senderId == user.userId) && (message.type == MessageType.private),
-            )
-            .map((message) => message.id)
-            .toSet();
-      }
       emit(state.copyWith(users: state.users));
     } catch (e) {
       inspect(e);
     }
+  }
+
+  setUnreadMessages(List<MessageEntity> unreadMessages) {
+    for (var user in state.users) {
+      user.unreadMessages = unreadMessages
+          .where(
+            (message) => (message.senderId == user.userId) && (message.type == MessageType.private),
+          )
+          .map((message) => message.id)
+          .toSet();
+    }
+    emit(state.copyWith(users: state.users));
   }
 
   void _onTypingEvents(TypingEventEntity event) {
@@ -87,8 +79,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     final message = event.message;
     final sender = state.users.firstWhere((user) => user.userId == message.senderId);
     final indexOfSender = state.users.indexOf(sender);
-    if ((message.flags == null || !message.flags!.contains('read')) &&
-        message.type == MessageType.private) {
+    if (message.hasUnreadMessages && message.type == MessageType.private) {
       sender.unreadMessages.add(message.id);
     }
     state.users[indexOfSender] = sender;

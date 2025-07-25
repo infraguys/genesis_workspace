@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -19,8 +20,13 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
 
   @override
   void initState() {
-    _future = context.read<DirectMessagesCubit>().getUsers();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _future = context.read<DirectMessagesCubit>().getUsers();
+    super.didChangeDependencies();
   }
 
   @override
@@ -30,35 +36,40 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(context.t.navBar.directMessages),
       ),
-      body: FutureBuilder(
-        future: _future,
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return Center(child: Text("Some error..."));
-            }
-          }
-          return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
-            builder: (context, state) {
-              return ListView.builder(
-                itemCount: state.users.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final DmUserEntity user = state.users[index];
-                  return ListTile(
-                    onTap: () {
-                      context.pushNamed(Routes.chat, extra: user);
+      body: BlocBuilder<MessagesCubit, MessagesState>(
+        builder: (context, messagesState) {
+          context.read<DirectMessagesCubit>().setUnreadMessages(messagesState.unreadMessages);
+          return FutureBuilder(
+            future: _future,
+            builder: (BuildContext context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return Center(child: Text("Some error..."));
+                }
+              }
+              return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
+                builder: (context, state) {
+                  return ListView.builder(
+                    itemCount: state.users.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final DmUserEntity user = state.users[index];
+                      return ListTile(
+                        onTap: () {
+                          context.pushNamed(Routes.chat, extra: user);
+                        },
+                        title: Text(user.fullName),
+                        subtitle: state.typingUsers.contains(user.userId)
+                            ? Text("${context.t.typing}...")
+                            : Text(context.t.online),
+                        leading: UserAvatar(avatarUrl: user.avatarUrl),
+                        trailing: user.unreadMessages.isNotEmpty
+                            ? Text(user.unreadMessages.length.toString())
+                            : SizedBox(),
+                      );
                     },
-                    title: Text(user.fullName),
-                    subtitle: state.typingUsers.contains(user.userId)
-                        ? Text("${context.t.typing}...")
-                        : Text(context.t.online),
-                    leading: UserAvatar(avatarUrl: user.avatarUrl),
-                    trailing: user.unreadMessages.isNotEmpty
-                        ? Text(user.unreadMessages.length.toString())
-                        : SizedBox(),
                   );
                 },
               );
@@ -67,6 +78,5 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
         },
       ),
     );
-    ;
   }
 }
