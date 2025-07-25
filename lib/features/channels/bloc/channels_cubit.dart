@@ -88,14 +88,12 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     emit(state.copyWith(channels: state.channels));
   }
 
-  Future<void> getChannelMessages(int streamId) async {
+  Future<void> getChannelMessages(String streamName) async {
     try {
       final response = await _getMessagesUseCase.call(
         MessagesRequestEntity(
           anchor: MessageAnchor.newest(),
-          narrow: [
-            MessageNarrowEntity(operator: NarrowOperator.channel, operand: [streamId]),
-          ],
+          narrow: [MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamName)],
           numBefore: 25,
           numAfter: 0,
         ),
