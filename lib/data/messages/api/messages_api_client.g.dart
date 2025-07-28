@@ -24,6 +24,7 @@ class _MessagesApiClient implements MessagesApiClient {
     int? numBefore,
     int? numAfter,
     bool? applyMarkdown,
+    bool? clientGravatar,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
@@ -32,6 +33,7 @@ class _MessagesApiClient implements MessagesApiClient {
       r'num_before': numBefore,
       r'num_after': numAfter,
       r'apply_markdown': applyMarkdown,
+      r'client_gravatar': clientGravatar,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};

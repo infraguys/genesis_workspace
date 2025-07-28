@@ -18,6 +18,7 @@ abstract class MessagesApiClient {
     @Query("num_before") int? numBefore,
     @Query("num_after") int? numAfter,
     @Query("apply_markdown") bool? applyMarkdown,
+    @Query("client_gravatar") bool? clientGravatar,
   );
 
   @POST('/messages')

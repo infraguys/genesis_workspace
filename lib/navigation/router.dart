@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
-import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -85,7 +84,7 @@ final router = GoRouter(
     GoRoute(
       path: Routes.channelChat,
       name: Routes.channelChat,
-      builder: (context, state) => ChannelChat(channel: state.extra as ChannelEntity),
+      builder: (context, state) => ChannelChat(extra: state.extra as ChannelChatExtra),
     ),
     GoRoute(
       path: Routes.splashScreen,

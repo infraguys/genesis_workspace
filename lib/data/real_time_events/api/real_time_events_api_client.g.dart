@@ -51,11 +51,13 @@ class _RealTimeEventsApiClient implements RealTimeEventsApiClient {
   Future<EventByQueueIdResponseDto> getEventsByQueueId(
     String queueId,
     int lastEventId,
+    bool dontBlock,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'queue_id': queueId,
       r'last_event_id': lastEventId,
+      r'dont_block': dontBlock,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;

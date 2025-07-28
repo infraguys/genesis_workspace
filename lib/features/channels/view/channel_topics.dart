@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
+import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +21,7 @@ class _ChannelTopicsState extends State<ChannelTopics> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerLowest),
+      decoration: BoxDecoration(color: theme.colorScheme.primaryContainer),
       height: MediaQuery.sizeOf(context).height,
       child: BlocBuilder<ChannelsCubit, ChannelsState>(
         builder: (context, state) {
@@ -51,8 +50,13 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                     trailing: trailing,
                     onTap: state.pendingTopicsId != widget.channel!.streamId
                         ? () async {
-                            inspect(widget.channel);
-                            context.pushNamed(Routes.channelChat, extra: widget.channel);
+                            context.pushNamed(
+                              Routes.channelChat,
+                              extra: ChannelChatExtra(
+                                channel: widget.channel!,
+                                topicEntity: topic!,
+                              ),
+                            );
                           }
                         : null,
                   );

@@ -1,21 +1,25 @@
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
-import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
+import 'package:genesis_workspace/core/enums/typing_message_type.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/sender_entity.dart';
 
 class TypingEventEntity extends EventEntity {
-  final String messageType;
+  final TypingMessageType messageType;
   final TypingEventOp op;
   final SenderEntity sender;
-  final List<RecipientEntity> recipients;
+  final List<RecipientEntity>? recipients;
+  final int? streamId;
+  final String? topic;
 
   TypingEventEntity({
-    required int id,
-    required EventType type,
+    required super.id,
+    required super.type,
     required this.messageType,
     required this.op,
     required this.sender,
-    required this.recipients,
-  }) : super(id: id, type: type);
+    this.recipients,
+    this.streamId,
+    this.topic,
+  });
 }

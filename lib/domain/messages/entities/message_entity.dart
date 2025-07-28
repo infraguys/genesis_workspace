@@ -56,4 +56,21 @@ class MessageEntity {
       subject: subject ?? this.subject,
     );
   }
+
+  /// ✅ Fake factory for skeleton/loading state
+  factory MessageEntity.fake({bool isMe = false}) {
+    return MessageEntity(
+      id: 0,
+      isMeMessage: isMe,
+      avatarUrl: null,
+      content: 'Loading message content...', // Placeholder text
+      senderId: isMe ? 999 : 123,
+      senderFullName: isMe ? 'You' : 'Sender Name',
+      displayRecipient: null,
+      flags: [],
+      type: MessageType.stream,
+      streamId: null,
+      subject: 'Loading...',
+    );
+  }
 }

@@ -74,25 +74,6 @@ class RealTimeService {
         default:
           break;
       }
-
-      // for (var event in response.events) {
-      //   switch (event.type) {
-      //     case EventType.typing:
-      //       if (response.events.last is TypingEventEntity) {
-      //         _typingEventsController.add(response.events.last as TypingEventEntity);
-      //       }
-      //     case EventType.message:
-      //       if (response.events.last is MessageEventEntity) {
-      //         _messagesEventsController.add(response.events.last as MessageEventEntity);
-      //       }
-      //     case EventType.updateMessageFlags:
-      //       if (response.events.last is UpdateMessageFlagsEntity) {
-      //         _messageFlagsEventsController.add(response.events.last as UpdateMessageFlagsEntity);
-      //       }
-      //     default:
-      //       break;
-      //   }
-      // }
       return response;
     } on DioException catch (e) {
       inspect(e);

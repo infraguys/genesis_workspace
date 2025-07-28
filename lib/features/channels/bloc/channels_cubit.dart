@@ -21,7 +21,14 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   final _realTimeService = getIt<RealTimeService>();
 
   ChannelsCubit()
-    : super(ChannelsState(channels: [], pendingTopicsId: null, selectedChannelId: null)) {
+    : super(
+        ChannelsState(
+          channels: [],
+          pendingTopicsId: null,
+          selectedChannelId: null,
+          selectedTopic: null,
+        ),
+      ) {
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
       _onMessageFlagsEvents,
@@ -111,9 +118,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       final channels = state.channels.map((channel) {
         channel.unreadMessages.removeAll(event.messages);
-        channel.topics.forEach((topic) {
+        for (var topic in channel.topics) {
           topic.unreadMessages.removeAll(event.messages);
-        });
+        }
         return channel;
       }).toList();
       emit(state.copyWith(channels: channels));

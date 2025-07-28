@@ -10,9 +10,11 @@ class TypingRequestDto {
   final SendMessageType type;
   final TypingEventOp op;
   @ToListAsJsonStringConverter()
-  final List<int> to;
-
-  TypingRequestDto({required this.type, required this.op, required this.to});
+  final List<int>? to;
+  @JsonKey(name: 'stream_id')
+  final int? streamId;
+  final String? topic;
+  TypingRequestDto({required this.type, required this.op, this.to, this.streamId, this.topic});
 
   Map<String, dynamic> toJson() => _$TypingRequestDtoToJson(this);
 }
