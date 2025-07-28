@@ -3,6 +3,8 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/enums/message_flag.dart';
+import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
@@ -42,7 +44,16 @@ class MessagesCubit extends Cubit<MessagesState> {
     emit(state.copyWith(messages: messages, unreadMessages: state.unreadMessages));
   }
 
-  _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {}
+  _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+    final newUnreadMessages = [...state.unreadMessages];
+
+    if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
+      event.messages.forEach((message) {
+        newUnreadMessages.removeWhere((unreadMessage) => unreadMessage.id == message);
+      });
+    }
+    emit(state.copyWith(unreadMessages: newUnreadMessages));
+  }
 
   Future<void> getLastMessages() async {
     try {
