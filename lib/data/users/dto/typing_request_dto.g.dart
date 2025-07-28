@@ -10,7 +10,11 @@ TypingRequestDto _$TypingRequestDtoFromJson(Map<String, dynamic> json) =>
     TypingRequestDto(
       type: $enumDecode(_$SendMessageTypeEnumMap, json['type']),
       op: $enumDecode(_$TypingEventOpEnumMap, json['op']),
-      to: (json['to'] as List<dynamic>).map((e) => (e as num).toInt()).toList(),
+      to: (json['to'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList(),
+      streamId: (json['stream_id'] as num?)?.toInt(),
+      topic: json['topic'] as String?,
     );
 
 Map<String, dynamic> _$TypingRequestDtoToJson(TypingRequestDto instance) =>
@@ -18,6 +22,8 @@ Map<String, dynamic> _$TypingRequestDtoToJson(TypingRequestDto instance) =>
       'type': _$SendMessageTypeEnumMap[instance.type]!,
       'op': _$TypingEventOpEnumMap[instance.op]!,
       'to': instance.to,
+      'stream_id': instance.streamId,
+      'topic': instance.topic,
     };
 
 const _$SendMessageTypeEnumMap = {

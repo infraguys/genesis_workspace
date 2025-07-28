@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
+import 'package:genesis_workspace/core/widgets/message_item.dart';
+import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
-import 'package:genesis_workspace/features/chat/view/message_item.dart';
-import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class ChatView extends StatefulWidget {
@@ -101,9 +103,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       body: FutureBuilder(
         future: _future,
         builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) {
               return Center(child: Text("Error"));
@@ -111,6 +110,10 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           }
           return BlocBuilder<ChatCubit, ChatState>(
             builder: (context, state) {
+              if (state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting) {
+                return Expanded(child: Center(child: Text("No messages here yet...")));
+              }
+
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
@@ -122,8 +125,24 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                         onTap: () {
                           FocusScope.of(context).unfocus();
                         },
-                        child: state.messages.isEmpty
-                            ? Center(child: Text("No messages here yet..."))
+                        child: snapshot.connectionState == ConnectionState.waiting
+                            ? Skeletonizer(
+                                enabled: true,
+                                child: ListView.separated(
+                                  itemCount: 15,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ).copyWith(bottom: 12),
+                                  itemBuilder: (context, index) {
+                                    return MessageItem(
+                                      isMyMessage: index % 2 == 0, // alternate sender
+                                      message: MessageEntity.fake(),
+                                      isSkeleton: true, // enable skeleton mode
+                                    );
+                                  },
+                                ),
+                              )
                             : Column(
                                 children: [
                                   if (state.isLoadingMore) const LinearProgressIndicator(),

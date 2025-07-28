@@ -17,5 +17,6 @@ abstract class RealTimeEventsApiClient {
   Future<EventByQueueIdResponseDto> getEventsByQueueId(
     @Query('queue_id') String queueId,
     @Query("last_event_id") int lastEventId,
+    @Query("dont_block") bool dontBlock,
   );
 }

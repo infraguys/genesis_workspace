@@ -7,7 +7,12 @@ class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
   @override
   Future<EventByQueueIdResponseDto> getEventsByQueueId(GetEventsByQueueIdBodyDto body) async {
     try {
-      final response = await apiClient.getEventsByQueueId(body.queueId, body.lastEventId);
+      final bool dontBlock = false;
+      final response = await apiClient.getEventsByQueueId(
+        body.queueId,
+        body.lastEventId,
+        dontBlock,
+      );
       return response;
     } catch (e) {
       rethrow;

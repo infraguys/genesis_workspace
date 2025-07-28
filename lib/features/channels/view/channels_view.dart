@@ -31,9 +31,6 @@ class ChannelsViewState extends State<ChannelsView> {
         final renderBox = context.findRenderObject() as RenderBox?;
         if (renderBox != null && mounted) {
           _measuredWidth = renderBox.size.width;
-          // setState(() {
-          //   _measuredWidth = renderBox.size.width;
-          // });
         }
       }
     });
@@ -90,7 +87,7 @@ class ChannelsViewState extends State<ChannelsView> {
                         itemBuilder: (context, index) {
                           final channel = state.channels[index];
                           return InkWell(
-                            highlightColor: theme.colorScheme.surfaceContainerLowest,
+                            highlightColor: theme.colorScheme.primaryContainer,
                             onTap: () async {
                               context.read<ChannelsCubit>().selectChannel(channel.streamId);
                               await context.read<ChannelsCubit>().getChannelTopics(
@@ -112,7 +109,7 @@ class ChannelsViewState extends State<ChannelsView> {
                                         padding: EdgeInsets.all(6),
                                         decoration: BoxDecoration(
                                           color: state.selectedChannelId == channel.streamId
-                                              ? theme.colorScheme.surfaceContainerLowest
+                                              ? theme.colorScheme.primaryContainer
                                               : null,
                                         ),
                                         child: CircleAvatar(
@@ -154,6 +151,16 @@ class ChannelsViewState extends State<ChannelsView> {
                       ),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              color: Theme.of(
+                                context,
+                              ).dividerColor.withValues(alpha: 0.3), // or any custom color
+                              width: 1, // border thickness
+                            ),
+                          ),
+                        ),
                         width: state.selectedChannelId != null
                             ? MediaQuery.sizeOf(context).width - _measuredWidth
                             : 0,

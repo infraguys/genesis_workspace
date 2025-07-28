@@ -23,7 +23,9 @@ abstract class UsersApiClient {
   Future<void> setTyping(
     @Query('type') SendMessageType type,
     @Query('op') TypingEventOp op,
-    @Query('to') String to,
+    @Query('to') String? to,
+    @Query('stream_id') int? streamId,
+    @Query('topic') String? topic,
   );
 
   @GET('/users/me/subscriptions')

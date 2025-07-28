@@ -10,22 +10,29 @@ TypingEventDto _$TypingEventDtoFromJson(Map<String, dynamic> json) =>
     TypingEventDto(
       id: (json['id'] as num).toInt(),
       type: $enumDecode(_$EventTypeEnumMap, json['type']),
-      messageType: json['message_type'] as String,
+      messageType: $enumDecode(
+        _$TypingMessageTypeEnumMap,
+        json['message_type'],
+      ),
       op: $enumDecode(_$TypingEventOpEnumMap, json['op']),
       sender: SenderDto.fromJson(json['sender'] as Map<String, dynamic>),
-      recipients: (json['recipients'] as List<dynamic>)
-          .map((e) => RecipientDto.fromJson(e as Map<String, dynamic>))
+      recipients: (json['recipients'] as List<dynamic>?)
+          ?.map((e) => RecipientDto.fromJson(e as Map<String, dynamic>))
           .toList(),
+      streamId: (json['stream_id'] as num?)?.toInt(),
+      topic: json['topic'] as String?,
     );
 
 Map<String, dynamic> _$TypingEventDtoToJson(TypingEventDto instance) =>
     <String, dynamic>{
       'id': instance.id,
       'type': _$EventTypeEnumMap[instance.type]!,
-      'message_type': instance.messageType,
+      'message_type': _$TypingMessageTypeEnumMap[instance.messageType]!,
       'op': _$TypingEventOpEnumMap[instance.op]!,
       'sender': instance.sender.toJson(),
-      'recipients': instance.recipients.map((e) => e.toJson()).toList(),
+      'recipients': instance.recipients?.map((e) => e.toJson()).toList(),
+      'stream_id': instance.streamId,
+      'topic': instance.topic,
     };
 
 const _$EventTypeEnumMap = {
@@ -35,6 +42,11 @@ const _$EventTypeEnumMap = {
   EventType.presence: 'presence',
   EventType.updateMessageFlags: 'update_message_flags',
   EventType.unsupported: 'unsupported',
+};
+
+const _$TypingMessageTypeEnumMap = {
+  TypingMessageType.direct: 'direct',
+  TypingMessageType.stream: 'stream',
 };
 
 const _$TypingEventOpEnumMap = {
