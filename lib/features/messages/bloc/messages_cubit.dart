@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -59,14 +61,15 @@ class MessagesCubit extends Cubit<MessagesState> {
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
         numBefore: 5000,
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      state.messages = response.messages;
-      state.unreadMessages = response.messages
-          .where((message) => message.hasUnreadMessages)
-          .toList();
+      // state.messages = response.messages;
+      state.unreadMessages = response.messages;
+      // .where((message) => message.hasUnreadMessages)
+      // .toList();
       emit(state.copyWith(messages: state.messages, unreadMessages: state.unreadMessages));
     } catch (e) {
       inspect(e);
