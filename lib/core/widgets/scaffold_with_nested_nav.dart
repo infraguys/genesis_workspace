@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -99,11 +100,29 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   items: [
                     BottomNavigationBarItem(
                       label: context.t.navBar.directMessages,
-                      icon: Icon(Icons.people),
+                      icon: BlocBuilder<MessagesCubit, MessagesState>(
+                        builder: (context, state) {
+                          return Badge(
+                            isLabelVisible: state.unreadMessages.any(
+                              (message) => message.type == MessageType.private,
+                            ),
+                            child: Icon(Icons.people),
+                          );
+                        },
+                      ),
                     ),
                     BottomNavigationBarItem(
                       label: context.t.navBar.channels,
-                      icon: Icon(Icons.chat),
+                      icon: BlocBuilder<MessagesCubit, MessagesState>(
+                        builder: (context, state) {
+                          return Badge(
+                            isLabelVisible: state.unreadMessages.any(
+                              (message) => message.type == MessageType.stream,
+                            ),
+                            child: Icon(Icons.chat),
+                          );
+                        },
+                      ),
                     ),
                     BottomNavigationBarItem(
                       label: context.t.navBar.profile,
