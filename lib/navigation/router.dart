@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
+import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/direct_messages.dart';
@@ -28,6 +30,7 @@ class Routes {
   static const String settings = '/settings';
   static const String profile = '/profile';
   static const String chat = '/chat';
+  static const String channelChat = '/channel-chat';
 }
 
 final router = GoRouter(
@@ -78,6 +81,11 @@ final router = GoRouter(
       path: Routes.chat,
       name: Routes.chat,
       builder: (context, state) => Chat(user: state.extra as UserEntity),
+    ),
+    GoRoute(
+      path: Routes.channelChat,
+      name: Routes.channelChat,
+      builder: (context, state) => ChannelChat(channel: state.extra as ChannelEntity),
     ),
     GoRoute(
       path: Routes.splashScreen,

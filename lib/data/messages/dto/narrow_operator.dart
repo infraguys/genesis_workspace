@@ -6,6 +6,8 @@ enum NarrowOperator {
   dm,
   @JsonValue('channel')
   channel,
+  @JsonValue('is')
+  isFilter,
 }
 
 extension NarrowOperatorToJson on NarrowOperator {
@@ -15,6 +17,8 @@ extension NarrowOperatorToJson on NarrowOperator {
         return 'dm';
       case NarrowOperator.channel:
         return 'channel';
+      case NarrowOperator.isFilter:
+        return 'is';
     }
   }
 }

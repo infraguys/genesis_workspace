@@ -7,5 +7,5 @@ class MessageNarrowEntity {
 
   MessageNarrowEntity({required this.operator, required this.operand});
 
-  MessageNarrowDto toDto() => MessageNarrowDto(operand: operand, operator: operator.name);
+  MessageNarrowDto toDto() => MessageNarrowDto(operand: operand, operator: operator.toJson());
 }
