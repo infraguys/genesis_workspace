@@ -59,32 +59,46 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           body: Row(
             children: [
               if (currentSize(context) > ScreenSize.tablet) ...[
-                NavigationRail(
-                  selectedIndex: widget.navigationShell.currentIndex,
-                  onDestinationSelected: _goBranch,
-                  labelType: NavigationRailLabelType.all,
-                  destinations: [
-                    NavigationRailDestination(
-                      label: Text(context.t.navBar.directMessages),
-                      icon: Icon(Icons.people),
-                    ),
-                    NavigationRailDestination(
-                      label: Text(context.t.navBar.channels),
-                      icon: Icon(Icons.chat),
-                    ),
-                    NavigationRailDestination(
-                      label: Text(context.t.navBar.profile),
-                      icon: BlocBuilder<ProfileCubit, ProfileState>(
-                        builder: (context, state) {
-                          return UserAvatar(avatarUrl: state.user?.avatarUrl);
-                        },
-                      ),
-                    ),
-                    NavigationRailDestination(
-                      label: Text(context.t.navBar.settings),
-                      icon: Icon(Icons.settings),
-                    ),
-                  ],
+                BlocBuilder<MessagesCubit, MessagesState>(
+                  builder: (context, state) {
+                    return NavigationRail(
+                      selectedIndex: widget.navigationShell.currentIndex,
+                      onDestinationSelected: _goBranch,
+                      labelType: NavigationRailLabelType.all,
+                      destinations: [
+                        NavigationRailDestination(
+                          label: Text(context.t.navBar.directMessages),
+                          icon: Badge(
+                            isLabelVisible: state.unreadMessages.any(
+                              (message) => message.type == MessageType.private,
+                            ),
+                            child: Icon(Icons.people),
+                          ),
+                        ),
+                        NavigationRailDestination(
+                          label: Text(context.t.navBar.channels),
+                          icon: Badge(
+                            isLabelVisible: state.unreadMessages.any(
+                              (message) => message.type == MessageType.stream,
+                            ),
+                            child: Icon(Icons.chat),
+                          ),
+                        ),
+                        NavigationRailDestination(
+                          label: Text(context.t.navBar.profile),
+                          icon: BlocBuilder<ProfileCubit, ProfileState>(
+                            builder: (context, state) {
+                              return UserAvatar(avatarUrl: state.user?.avatarUrl);
+                            },
+                          ),
+                        ),
+                        NavigationRailDestination(
+                          label: Text(context.t.navBar.settings),
+                          icon: Icon(Icons.settings),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const VerticalDivider(thickness: 1, width: 1),
               ],
@@ -93,51 +107,47 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           ),
           bottomNavigationBar: currentSize(context) > ScreenSize.tablet
               ? null
-              : BottomNavigationBar(
-                  currentIndex: widget.navigationShell.currentIndex,
-                  type: BottomNavigationBarType.shifting,
-                  onTap: _goBranch,
-                  items: [
-                    BottomNavigationBarItem(
-                      label: context.t.navBar.directMessages,
-                      icon: BlocBuilder<MessagesCubit, MessagesState>(
-                        builder: (context, state) {
-                          return Badge(
+              : BlocBuilder<MessagesCubit, MessagesState>(
+                  builder: (context, state) {
+                    return BottomNavigationBar(
+                      currentIndex: widget.navigationShell.currentIndex,
+                      type: BottomNavigationBarType.shifting,
+                      onTap: _goBranch,
+                      items: [
+                        BottomNavigationBarItem(
+                          label: context.t.navBar.directMessages,
+                          icon: Badge(
                             isLabelVisible: state.unreadMessages.any(
                               (message) => message.type == MessageType.private,
                             ),
                             child: Icon(Icons.people),
-                          );
-                        },
-                      ),
-                    ),
-                    BottomNavigationBarItem(
-                      label: context.t.navBar.channels,
-                      icon: BlocBuilder<MessagesCubit, MessagesState>(
-                        builder: (context, state) {
-                          return Badge(
+                          ),
+                        ),
+                        BottomNavigationBarItem(
+                          label: context.t.navBar.channels,
+                          icon: Badge(
                             isLabelVisible: state.unreadMessages.any(
                               (message) => message.type == MessageType.stream,
                             ),
                             child: Icon(Icons.chat),
-                          );
-                        },
-                      ),
-                    ),
-                    BottomNavigationBarItem(
-                      label: context.t.navBar.profile,
-                      icon: BlocBuilder<ProfileCubit, ProfileState>(
-                        builder: (context, state) {
-                          return UserAvatar(avatarUrl: state.user?.avatarUrl);
-                        },
-                      ),
-                    ),
-                    BottomNavigationBarItem(
-                      label: context.t.navBar.settings,
-                      icon: Icon(Icons.settings),
-                    ),
-                  ],
-                  // onDestinationSelected: _goBranch,
+                          ),
+                        ),
+                        BottomNavigationBarItem(
+                          label: context.t.navBar.profile,
+                          icon: BlocBuilder<ProfileCubit, ProfileState>(
+                            builder: (context, state) {
+                              return UserAvatar(avatarUrl: state.user?.avatarUrl);
+                            },
+                          ),
+                        ),
+                        BottomNavigationBarItem(
+                          label: context.t.navBar.settings,
+                          icon: Icon(Icons.settings),
+                        ),
+                      ],
+                      // onDestinationSelected: _goBranch,
+                    );
+                  },
                 ),
         );
       },
