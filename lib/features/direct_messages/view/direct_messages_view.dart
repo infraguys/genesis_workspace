@@ -67,9 +67,10 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                             ? Text("${context.t.typing}...")
                             : Text(context.t.online),
                         leading: UserAvatar(avatarUrl: user.avatarUrl),
-                        trailing: user.unreadMessages.isNotEmpty
-                            ? Text(user.unreadMessages.length.toString())
-                            : SizedBox(),
+                        trailing: Badge.count(
+                          count: user.unreadMessages.length,
+                          isLabelVisible: user.unreadMessages.isNotEmpty,
+                        ),
                       );
                     },
                   );

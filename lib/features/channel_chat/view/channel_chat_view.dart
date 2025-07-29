@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/helpers.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -8,6 +10,7 @@ import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -35,6 +38,22 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     }
   }
 
+  Future<void> _scrollToBottom({bool animated = true}) async {
+    if (!_controller.hasClients) return;
+
+    final position = _controller.position.maxScrollExtent;
+
+    if (animated) {
+      await _controller.animateTo(
+        position,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    } else {
+      _controller.jumpTo(position);
+    }
+  }
+
   Future<void> _onTextChanged() async {
     setState(() {
       _currentText = _messageController.text;
@@ -47,19 +66,18 @@ class _ChannelChatViewState extends State<ChannelChatView> {
   @override
   void didChangeDependencies() {
     _myUser = context.read<ProfileCubit>().state.user!;
+    context.read<ChannelChatCubit>().setChannel(widget.extra.channel);
+    context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
     _future = context.read<ChannelChatCubit>().getChannelMessages(widget.extra.channel.name);
     _controller = ScrollController()..addListener(_onScroll);
     _messageController = TextEditingController();
-
-    context.read<ChannelChatCubit>().setChannel(widget.extra.channel);
-    context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
-
     _messageController.addListener(_onTextChanged);
     super.didChangeDependencies();
   }
 
   @override
   void didUpdateWidget(covariant ChannelChatView oldWidget) {
+    context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
     context.read<ChannelChatCubit>().getChannelMessages(
       widget.extra.channel.name,
       didUpdateWidget:
@@ -74,6 +92,8 @@ class _ChannelChatViewState extends State<ChannelChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: parseColor(widget.extra.channel.color),
+        centerTitle: currentSize(context) <= ScreenSize.lTablet,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -105,7 +125,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                 child: Column(
                   children: [
                     if (state.messages.isEmpty && snapshot.connectionState == ConnectionState.done)
-                      Expanded(child: Center(child: Text("No messages here yet...")))
+                      Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
                     else
                       Expanded(
                         child: GestureDetector(

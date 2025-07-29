@@ -42,6 +42,7 @@ class TranslationsRu implements Translations {
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
 	@override late final _TranslationsNavBarRu navBar = _TranslationsNavBarRu._(_root);
+	@override String get selectAnyChannel => 'Выберите любой канал';
 }
 
 // Path: navBar
@@ -71,6 +72,7 @@ extension on TranslationsRu {
 			case 'navBar.settings': return 'Настройки';
 			case 'navBar.profile': return 'Профиль';
 			case 'navBar.channels': return 'Каналы';
+			case 'selectAnyChannel': return 'Выберите любой канал';
 			default: return null;
 		}
 	}

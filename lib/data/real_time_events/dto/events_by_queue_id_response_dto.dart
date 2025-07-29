@@ -20,7 +20,6 @@ class EventByQueueIdResponseDto {
     return EventByQueueIdResponseDto(
       result: json['result'] as String,
       msg: json['msg'] as String,
-      // queueId: json['queue_id'] as String,
       events: rawEvents.map((e) => parseEventDto(e as Map<String, dynamic>)).toList(),
     );
   }

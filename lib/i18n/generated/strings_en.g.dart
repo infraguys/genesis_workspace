@@ -40,6 +40,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get typing => 'Typing';
 	String get online => 'Online';
 	late final TranslationsNavBarEn navBar = TranslationsNavBarEn.internal(_root);
+	String get selectAnyChannel => 'Select any channel';
+	String get allMessages => 'All messages';
+	String get noMessagesHereYet => 'No messages here yet...';
 }
 
 // Path: navBar
