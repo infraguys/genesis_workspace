@@ -6,6 +6,7 @@ flutter_integration: true
 flat_map: false
 translate_var: t
 param_case: camel
+key_case: camel
 translation_class_visibility: public
 input_directory: lib/i18n
 output_directory: lib/i18n/generated

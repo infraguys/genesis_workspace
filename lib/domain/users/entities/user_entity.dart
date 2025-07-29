@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/data/users/dto/user_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 
@@ -50,5 +51,7 @@ class UserEntity {
     isActive: isActive,
     avatarUrl: avatarUrl,
     unreadMessages: {},
+    presenceStatus: PresenceStatus.idle,
+    presenceTimestamp: 0,
   );
 }

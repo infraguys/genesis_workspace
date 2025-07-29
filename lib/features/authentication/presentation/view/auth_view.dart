@@ -83,7 +83,7 @@ class _AuthViewState extends State<AuthView> {
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return context.t.password_cant_be_empty;
+                        return context.t.passwordCantBeEmpty;
                       }
                       return null;
                     },

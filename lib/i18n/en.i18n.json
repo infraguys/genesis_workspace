@@ -4,14 +4,31 @@
   "login": "Login",
   "typing": "Typing",
   "online": "Online",
-  "navBar": {
-    "directMessages": "Direct Messages",
+  "nav_bar": {
+    "direct_messages": "Direct Messages",
     "settings": "Settings",
     "profile": "Profile",
     "channels": "Channels"
   },
-  "selectAnyChannel": "Select any channel",
-  "allMessages": "All messages",
-  "noMessagesHereYet": "No messages here yet...",
-  "copy": "Copy"
+  "select_any_channel": "Select any channel",
+  "all_messages": "All messages",
+  "no_messages_here_yet": "No messages here yet...",
+  "copy": "Copy",
+  "was_online": "was online {time} ago",
+  "was_online_just_now": "was online just now",
+  "time_ago": {
+    "just_now": "just now",
+    "minutes": {
+      "one": "{n} minute",
+      "other": "{n} minutes"
+    },
+    "hours": {
+      "one": "{n} hour",
+      "other": "{n} hours"
+    },
+    "days": {
+      "one": "{n} day",
+      "other": "{n} days"
+    }
+  }
 }

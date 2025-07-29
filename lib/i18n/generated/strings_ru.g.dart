@@ -32,9 +32,9 @@ class TranslationsRu extends Translations {
 	TranslationsRu $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsRu(meta: meta ?? this.$meta);
 
 	// Translations
-	@override String get password_cant_be_empty => 'Пароль не может быть пустым';
+	@override String get passwordCantBeEmpty => 'Пароль не может быть пустым';
 	@override String get password => 'Пароль';
-	@override String get login => 'Войти';
+	@override String get login => 'Вход';
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
 	@override late final TranslationsNavBarRu navBar = TranslationsNavBarRu._(_root);
@@ -42,6 +42,9 @@ class TranslationsRu extends Translations {
 	@override String get allMessages => 'Все сообщения';
 	@override String get noMessagesHereYet => 'Здесь пока нет сообщений...';
 	@override String get copy => 'Копировать';
+	@override String wasOnline({required Object time}) => 'Был(а) в сети ${time} назад';
+	@override String get wasOnlineJustNow => 'Был(а) в сети только что';
+	@override late final TranslationsTimeAgoRu timeAgo = TranslationsTimeAgoRu._(_root);
 }
 
 // Path: navBar
@@ -55,4 +58,32 @@ class TranslationsNavBarRu extends TranslationsNavBarEn {
 	@override String get settings => 'Настройки';
 	@override String get profile => 'Профиль';
 	@override String get channels => 'Каналы';
+}
+
+// Path: timeAgo
+class TranslationsTimeAgoRu extends TranslationsTimeAgoEn {
+	TranslationsTimeAgoRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get justNow => 'только что';
+	@override String minutes({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
+		one: '${n} минуту',
+		few: '${n} минуты',
+		many: '${n} минут',
+		other: '${n} минут',
+	);
+	@override String hours({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
+		one: '${n} час',
+		few: '${n} часа',
+		many: '${n} часов',
+		other: '${n} часов',
+	);
+	@override String days({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
+		one: '${n} день',
+		few: '${n} дня',
+		many: '${n} дней',
+		other: '${n} дней',
+	);
 }

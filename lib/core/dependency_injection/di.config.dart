@@ -45,6 +45,8 @@ import 'package:genesis_workspace/domain/real_time_events/usecases/register_queu
     as _i477;
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart'
     as _i125;
+import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart'
+    as _i837;
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart'
     as _i547;
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart'
@@ -153,6 +155,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i699.GetTopicsUseCase>(
       () => _i699.GetTopicsUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i837.GetAllPresencesUseCase>(
+      () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
     );
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(gh<_i672.AuthRemoteDataSource>()),

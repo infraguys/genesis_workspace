@@ -44,21 +44,49 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get login => 'Login';
 	String get typing => 'Typing';
 	String get online => 'Online';
-	late final TranslationsNavBarEn navBar = TranslationsNavBarEn._(_root);
-	String get selectAnyChannel => 'Select any channel';
+	late final TranslationsNavBarEn nav_bar = TranslationsNavBarEn._(_root);
+	String get select_any_channel => 'Select any channel';
+	String get all_messages => 'All messages';
+	String get no_messages_here_yet => 'No messages here yet...';
+	String get copy => 'Copy';
+	String get was_online => 'was online {time} ago';
+	String get was_online_just_now => 'was online just now';
+	late final TranslationsTimeAgoEn time_ago = TranslationsTimeAgoEn._(_root);
 }
 
-// Path: navBar
+// Path: nav_bar
 class TranslationsNavBarEn {
 	TranslationsNavBarEn._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	String get directMessages => 'Direct Messages';
+	String get direct_messages => 'Direct Messages';
 	String get settings => 'Settings';
 	String get profile => 'Profile';
 	String get channels => 'Channels';
+}
+
+// Path: time_ago
+class TranslationsTimeAgoEn {
+	TranslationsTimeAgoEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get just_now => 'just now';
+	String minutes({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '{n} minute',
+		other: '{n} minutes',
+	);
+	String hours({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '{n} hour',
+		other: '{n} hours',
+	);
+	String days({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '{n} day',
+		other: '{n} days',
+	);
 }
 
 /// Flat map(s) containing all translations.
@@ -71,11 +99,29 @@ extension on Translations {
 			case 'login': return 'Login';
 			case 'typing': return 'Typing';
 			case 'online': return 'Online';
-			case 'navBar.directMessages': return 'Direct Messages';
-			case 'navBar.settings': return 'Settings';
-			case 'navBar.profile': return 'Profile';
-			case 'navBar.channels': return 'Channels';
-			case 'selectAnyChannel': return 'Select any channel';
+			case 'nav_bar.direct_messages': return 'Direct Messages';
+			case 'nav_bar.settings': return 'Settings';
+			case 'nav_bar.profile': return 'Profile';
+			case 'nav_bar.channels': return 'Channels';
+			case 'select_any_channel': return 'Select any channel';
+			case 'all_messages': return 'All messages';
+			case 'no_messages_here_yet': return 'No messages here yet...';
+			case 'copy': return 'Copy';
+			case 'was_online': return 'was online {time} ago';
+			case 'was_online_just_now': return 'was online just now';
+			case 'time_ago.just_now': return 'just now';
+			case 'time_ago.minutes': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+				one: '{n} minute',
+				other: '{n} minutes',
+			);
+			case 'time_ago.hours': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+				one: '{n} hour',
+				other: '{n} hours',
+			);
+			case 'time_ago.days': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+				one: '{n} day',
+				other: '{n} days',
+			);
 			default: return null;
 		}
 	}

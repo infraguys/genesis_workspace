@@ -2,6 +2,7 @@ import 'package:dio/dio.dart' hide Headers;
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/data/users/dto/own_user_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/presences_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/topics_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
@@ -14,7 +15,13 @@ abstract class UsersApiClient {
   factory UsersApiClient(Dio dio, {String? baseUrl}) = _UsersApiClient;
 
   @GET('/users')
-  Future<UsersResponseDto> getUsers(@Query('client_gravatar') bool clientGravatar);
+  Future<UsersResponseDto> getUsers(
+    @Query('client_gravatar') bool clientGravatar,
+    @Query('include_custom_profile_fields') bool includeCustomProfileFields,
+  );
+
+  @GET('/realm/presence')
+  Future<PresencesResponseDto> getAllPresences();
 
   @GET('/users/me')
   Future<OwnUserResponseDto> getOwnUser();

@@ -222,7 +222,6 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    inspect(event);
     bool isThisChatMessage = event.message.displayRecipient == state.channel!.name;
     if (isThisChatMessage) {
       state.messages = [...state.messages, event.message];
