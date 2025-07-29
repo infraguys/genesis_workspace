@@ -12,5 +12,7 @@
   },
   "selectAnyChannel": "Выберите любой канал",
   "allMessages": "Все сообщения",
-  "noMessagesHereYet": "Здесь пока нет сообщений..."
+  "noMessagesHereYet": "Здесь пока нет сообщений...",
+  "copy": "Копировать"
+
 }
