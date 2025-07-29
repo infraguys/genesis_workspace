@@ -83,7 +83,11 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
       final response = await _getMessagesUseCase.call(
         MessagesRequestEntity(
           anchor: MessageAnchor.newest(),
-          narrow: [MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamName)],
+          narrow: [
+            MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamName),
+            if (state.topic != null)
+              MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+          ],
           numBefore: 25,
           numAfter: 0,
         ),
@@ -113,7 +117,11 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
       try {
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
-          narrow: [MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamName)],
+          narrow: [
+            MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamName),
+            if (state.topic != null)
+              MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+          ],
           numBefore: 25,
           numAfter: 0,
         );

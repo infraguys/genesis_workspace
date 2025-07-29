@@ -38,6 +38,9 @@ class TranslationsRu extends Translations {
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
 	@override late final TranslationsNavBarRu navBar = TranslationsNavBarRu._(_root);
+	@override String get selectAnyChannel => 'Выберите любой канал';
+	@override String get allMessages => 'Все сообщения';
+	@override String get noMessagesHereYet => 'Здесь пока нет сообщений...';
 }
 
 // Path: navBar

@@ -74,12 +74,12 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   Future<void> getChannels() async {
     try {
       final response = await _getSubscribedChannelsUseCase.call(true);
-      await getUnreadMessages();
-      final channels = response.map((e) => e.toChannelEntity()).toList();
-      emit(state.copyWith(channels: channels));
+      state.channels = response.map((e) => e.toChannelEntity()).toList();
+      emit(state.copyWith(channels: state.channels));
     } catch (e) {
       inspect(e);
     }
+    await getUnreadMessages();
   }
 
   Future<void> getUnreadMessages() async {
@@ -92,18 +92,19 @@ class ChannelsCubit extends Cubit<ChannelsState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       state.unreadMessages = response.messages;
-      for (var channel in state.channels) {
+      final channels = [...state.channels];
+      for (var channel in channels) {
         channel.unreadMessages = state.unreadMessages
-            .where(
-              (message) =>
-                  (message.streamId == channel.streamId) &&
+            .where((message) {
+              return (message.streamId == channel.streamId) &&
                   (message.type == MessageType.stream) &&
-                  message.senderId != state.selfUser?.userId,
-            )
+                  (message.senderId != state.selfUser?.userId);
+            })
             .map((message) => message.id)
             .toSet();
       }
-      emit(state.copyWith(unreadMessages: state.unreadMessages));
+      state.channels = channels;
+      emit(state.copyWith(unreadMessages: state.unreadMessages, channels: state.channels));
     } catch (e) {
       inspect(e);
     }

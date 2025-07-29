@@ -20,7 +20,7 @@ class ChannelsViewState extends State<ChannelsView> {
   final GlobalKey _avatarContainerKey = GlobalKey();
   double _measuredWidth = 0;
 
-  static const double desktopChannelsWidth = 440;
+  static const double desktopChannelsWidth = 400;
 
   @override
   void initState() {
@@ -34,7 +34,7 @@ class ChannelsViewState extends State<ChannelsView> {
       if (context != null) {
         final renderBox = context.findRenderObject() as RenderBox?;
         if (renderBox != null && mounted) {
-          _measuredWidth = renderBox.size.width;
+          _measuredWidth = renderBox.size.width + 16;
         }
       }
     });
@@ -85,6 +85,15 @@ class ChannelsViewState extends State<ChannelsView> {
                   if (state.channels.isNotEmpty) {
                     _measureAvatarWidth();
                   }
+
+                  final channelsWidth = currentSize(context) > ScreenSize.lTablet
+                      ? desktopChannelsWidth
+                      : (MediaQuery.sizeOf(context).width -
+                            (currentSize(context) > ScreenSize.tablet ? 114 : 0));
+
+                  final double topicsWidth = state.selectedChannelId != null
+                      ? channelsWidth - _measuredWidth
+                      : 0;
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -112,55 +121,54 @@ class ChannelsViewState extends State<ChannelsView> {
                                       unreadMessages: state.unreadMessages,
                                     );
                                   },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 12),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    decoration: BoxDecoration(
+                                      color: state.selectedChannelId == channel.streamId
+                                          ? theme.colorScheme.primaryContainer
+                                          : null,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        Row(
-                                          spacing: 8,
-                                          children: [
-                                            AnimatedContainer(
-                                              key: index == 0 ? _avatarContainerKey : null,
-                                              duration: const Duration(milliseconds: 200),
-                                              padding: EdgeInsets.all(6),
-                                              decoration: BoxDecoration(
-                                                color: state.selectedChannelId == channel.streamId
-                                                    ? theme.colorScheme.primaryContainer
-                                                    : null,
-                                              ),
-                                              child: CircleAvatar(
-                                                backgroundColor: parseColor(channel.color),
-                                                child: Text(
-                                                  channel.name.characters.first.toUpperCase(),
-                                                ),
-                                              ),
+                                        Container(
+                                          key: index == 0 ? _avatarContainerKey : null,
+                                          padding: const EdgeInsets.all(6),
+                                          child: CircleAvatar(
+                                            backgroundColor: parseColor(channel.color),
+                                            child: Text(
+                                              channel.name.characters.first.toUpperCase(),
                                             ),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  channel.name,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                if (channel.description.isNotEmpty)
-                                                  ConstrainedBox(
-                                                    constraints: BoxConstraints(
-                                                      maxWidth:
-                                                          MediaQuery.sizeOf(context).width * 0.8,
-                                                    ),
-                                                    child: Text(
-                                                      channel.description,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(fontSize: 12),
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ],
+                                          ),
                                         ),
+                                        const SizedBox(width: 8),
+
+                                        // Имя и описание
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                channel.name,
+                                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              if (channel.description.isNotEmpty)
+                                                Text(
+                                                  channel.description,
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: const TextStyle(fontSize: 12),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+
+                                        // Бейдж
                                         Badge.count(
                                           count: channel.unreadMessages.length,
                                           isLabelVisible: channel.unreadMessages.isNotEmpty,
@@ -181,19 +189,19 @@ class ChannelsViewState extends State<ChannelsView> {
                                     ).dividerColor.withValues(alpha: 0.3), // or any custom color
                                     width: 1, // border thickness
                                   ),
+                                  right: BorderSide(
+                                    color: Theme.of(context).dividerColor.withValues(
+                                      alpha:
+                                          (currentSize(context) > ScreenSize.lTablet &&
+                                              state.selectedChannelId != null)
+                                          ? 0.3
+                                          : 0,
+                                    ), // or any custom color
+                                    width: 1, // border thickness
+                                  ),
                                 ),
                               ),
-                              constraints: BoxConstraints(
-                                maxWidth: state.selectedChannelId != null
-                                    ? (currentSize(context) > ScreenSize.lTablet
-                                              ? desktopChannelsWidth
-                                              : (MediaQuery.sizeOf(context).width -
-                                                    (currentSize(context) > ScreenSize.tablet
-                                                        ? 114
-                                                        : 0))) -
-                                          _measuredWidth
-                                    : 0,
-                              ),
+                              constraints: BoxConstraints(maxWidth: topicsWidth),
                               child: ChannelTopics(
                                 channel: state.selectedChannelId != null
                                     ? state.channels.firstWhere((channel) {
@@ -205,16 +213,16 @@ class ChannelsViewState extends State<ChannelsView> {
                           ],
                         ),
                       ),
-                      if (currentSize(context) > ScreenSize.lTablet &&
-                          state.selectedChannel != null)
-                        Expanded(
-                          child: ChannelChat(
-                            extra: ChannelChatExtra(
-                              channel: state.selectedChannel!,
-                              topicEntity: state.selectedTopic,
-                            ),
-                          ),
-                        ),
+                      (currentSize(context) > ScreenSize.lTablet && state.selectedChannel != null)
+                          ? Expanded(
+                              child: ChannelChat(
+                                extra: ChannelChatExtra(
+                                  channel: state.selectedChannel!,
+                                  topicEntity: state.selectedTopic,
+                                ),
+                              ),
+                            )
+                          : Expanded(child: Center(child: Text(context.t.selectAnyChannel))),
                     ],
                   );
                 },

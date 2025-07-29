@@ -9,5 +9,8 @@
     "settings": "Настройки",
     "profile": "Профиль",
     "channels": "Каналы"
-  }
+  },
+  "selectAnyChannel": "Выберите любой канал",
+  "allMessages": "Все сообщения",
+  "noMessagesHereYet": "Здесь пока нет сообщений..."
 }

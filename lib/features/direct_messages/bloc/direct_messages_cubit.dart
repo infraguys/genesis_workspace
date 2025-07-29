@@ -59,10 +59,9 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   Future<void> getUsers() async {
     try {
       final response = await _getUsersUseCase.call();
-      await getUnreadMessages();
-
       final List<UserEntity> users = response;
       state.users = users.map((user) => user.toDmUser()).toList();
+      await getUnreadMessages();
       emit(state.copyWith(users: state.users));
     } catch (e) {
       inspect(e);
@@ -79,7 +78,10 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       state.unreadMessages = response.messages;
-      for (var user in state.users) {
+      final users = state.users;
+      inspect(users);
+      for (var user in users) {
+        final indexOfUser = users.indexOf(user);
         user.unreadMessages = state.unreadMessages
             .where(
               (message) =>
@@ -90,7 +92,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
             .map((message) => message.id)
             .toSet();
       }
-      emit(state.copyWith(unreadMessages: state.unreadMessages));
+      emit(state.copyWith(unreadMessages: state.unreadMessages, users: state.users));
     } catch (e) {
       inspect(e);
     }

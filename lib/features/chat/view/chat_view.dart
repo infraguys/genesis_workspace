@@ -8,6 +8,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -33,6 +34,10 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
         !context.read<ChatCubit>().state.isLoadingMore) {
       context.read<ChatCubit>().loadMoreMessages();
     }
+  }
+
+  void _scrollToBottom() {
+    _controller.jumpTo(_controller.position.maxScrollExtent);
   }
 
   Future<void> _onTextChanged() async {
@@ -117,7 +122,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                 child: Column(
                   children: [
                     state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting
-                        ? Expanded(child: Center(child: Text("No messages here yet...")))
+                        ? Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
                         : Expanded(
                             child: GestureDetector(
                               onTap: () {

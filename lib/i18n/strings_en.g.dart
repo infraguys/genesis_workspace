@@ -45,6 +45,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get typing => 'Typing';
 	String get online => 'Online';
 	late final TranslationsNavBarEn navBar = TranslationsNavBarEn._(_root);
+	String get selectAnyChannel => 'Select any channel';
 }
 
 // Path: navBar
@@ -74,6 +75,7 @@ extension on Translations {
 			case 'navBar.settings': return 'Settings';
 			case 'navBar.profile': return 'Profile';
 			case 'navBar.channels': return 'Channels';
+			case 'selectAnyChannel': return 'Select any channel';
 			default: return null;
 		}
 	}
