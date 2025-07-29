@@ -50,8 +50,10 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
   setSelfUser(UserEntity? user) {
-    state.selfUser = user;
-    emit(state.copyWith(selfUser: state.selfUser));
+    if (state.selfUser == null) {
+      state.selfUser = user;
+      emit(state.copyWith(selfUser: state.selfUser));
+    }
   }
 
   Future<void> getUsers() async {

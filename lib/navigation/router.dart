@@ -38,7 +38,6 @@ final router = GoRouter(
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        // the UI shell
         return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
       },
       branches: [

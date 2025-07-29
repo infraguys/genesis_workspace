@@ -6,9 +6,9 @@ ScreenSize currentSize(BuildContext context) {
     case (> 1440):
       return ScreenSize.desktop;
     case (<= 1440 && > 1024):
-      return ScreenSize.lTablet;
-    case (<= 1024 && > 768):
       return ScreenSize.laptop;
+    case (<= 1024 && > 768):
+      return ScreenSize.lTablet;
     case (<= 768 && > 425):
       return ScreenSize.tablet;
     case (<= 425):

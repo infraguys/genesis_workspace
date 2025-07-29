@@ -7,9 +7,9 @@ import 'package:genesis_workspace/features/channel_chat/view/channel_chat_view.d
 
 class ChannelChatExtra {
   final ChannelEntity channel;
-  final TopicEntity topicEntity;
+  final TopicEntity? topicEntity;
 
-  ChannelChatExtra({required this.channel, required this.topicEntity});
+  ChannelChatExtra({required this.channel, this.topicEntity});
 }
 
 class ChannelChat extends StatelessWidget {

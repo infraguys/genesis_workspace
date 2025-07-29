@@ -41,6 +41,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
           selfTypingOp: TypingEventOp.stop,
           topic: null,
           pendingToMarkAsRead: {},
+          isMessagesPending: false,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -73,7 +74,11 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     emit(state.copyWith(topic: state.topic));
   }
 
-  Future<void> getChannelMessages(String streamName) async {
+  Future<void> getChannelMessages(String streamName, {bool? didUpdateWidget}) async {
+    if (didUpdateWidget == true) {
+      state.isMessagesPending = true;
+      emit(state.copyWith(isMessagesPending: state.isMessagesPending));
+    }
     try {
       final response = await _getMessagesUseCase.call(
         MessagesRequestEntity(
@@ -86,15 +91,17 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
       state.messages = response.messages;
       state.isAllMessagesLoaded = response.foundOldest;
       state.lastMessageId = response.messages.first.id;
+      state.isMessagesPending = false;
       emit(
         state.copyWith(
           messages: state.messages,
-          isMessagePending: state.isMessagePending,
           isAllMessagesLoaded: state.isAllMessagesLoaded,
+          isMessagesPending: state.isMessagesPending,
         ),
       );
-      inspect(response);
     } catch (e) {
+      state.isMessagePending = false;
+      emit(state.copyWith(isMessagesPending: state.isMessagesPending));
       inspect(e);
     }
   }
