@@ -12,5 +12,6 @@
   },
   "selectAnyChannel": "Select any channel",
   "allMessages": "All messages",
-  "noMessagesHereYet": "No messages here yet..."
+  "noMessagesHereYet": "No messages here yet...",
+  "copy": "Copy"
 }

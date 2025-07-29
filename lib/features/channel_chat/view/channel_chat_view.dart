@@ -78,11 +78,14 @@ class _ChannelChatViewState extends State<ChannelChatView> {
   @override
   void didUpdateWidget(covariant ChannelChatView oldWidget) {
     context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
+    print(
+      "${oldWidget.extra.channel != widget.extra.channel}"
+      ","
+      "${oldWidget.extra.topicEntity != widget.extra.topicEntity}",
+    );
     context.read<ChannelChatCubit>().getChannelMessages(
       widget.extra.channel.name,
-      didUpdateWidget:
-          oldWidget.extra.channel != widget.extra.channel &&
-          oldWidget.extra.topicEntity != widget.extra.topicEntity,
+      didUpdateWidget: oldWidget.extra.topicEntity != widget.extra.topicEntity,
     );
     _messageController.clear();
     super.didUpdateWidget(oldWidget);
@@ -154,7 +157,8 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                 )
                               : Column(
                                   children: [
-                                    if (state.isLoadingMore) const LinearProgressIndicator(),
+                                    if (state.isLoadingMore || state.isMessagesPending)
+                                      const LinearProgressIndicator(),
                                     Expanded(
                                       child: ListView.separated(
                                         controller: _controller,
@@ -186,6 +190,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                             child: MessageItem(
                                               isMyMessage: isMyMessage,
                                               message: message,
+                                              showTopic: widget.extra.topicEntity == null,
                                             ),
                                           );
                                         },

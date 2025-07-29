@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class MessageItem extends StatelessWidget {
   final bool isMyMessage;
   final MessageEntity message;
-  final bool isSkeleton; // <-- Added flag for skeleton mode
+  final bool isSkeleton;
+  final bool showTopic;
 
   const MessageItem({
     super.key,
     required this.isMyMessage,
     required this.message,
-    this.isSkeleton = false, // default false
+    this.isSkeleton = false,
+    this.showTopic = false,
   });
 
   @override
@@ -26,11 +30,27 @@ class MessageItem extends StatelessWidget {
 
     final senderName = isSkeleton
         ? Container(height: 10, width: 80, color: theme.colorScheme.surfaceVariant)
-        : Text(message.senderFullName, style: theme.textTheme.labelSmall);
+        : Text(message.senderFullName, style: theme.textTheme.titleSmall);
 
     final messageContent = isSkeleton
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceVariant)
-        : Text(message.content, softWrap: true, overflow: TextOverflow.visible);
+        : SelectableText(
+            message.content,
+            contextMenuBuilder: (context, editableTextState) {
+              return AdaptiveTextSelectionToolbar.buttonItems(
+                anchors: editableTextState.contextMenuAnchors,
+                buttonItems: [
+                  ContextMenuButtonItem(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: message.content));
+                      ContextMenuController.removeAny();
+                    },
+                    label: context.t.copy,
+                  ),
+                ],
+              );
+            },
+          );
 
     return Skeletonizer(
       enabled: isSkeleton,
@@ -62,7 +82,24 @@ class MessageItem extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
-                          children: [senderName, const SizedBox(height: 2), messageContent],
+                          children: [
+                            Row(
+                              children: [
+                                senderName,
+                                if (showTopic)
+                                  Skeleton.ignore(
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.arrow_right, size: 16),
+                                        Text(message.subject, style: theme.textTheme.labelSmall),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            messageContent,
+                          ],
                         ),
                       ),
                       (isRead || isMyMessage || isSkeleton)

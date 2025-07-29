@@ -5,6 +5,7 @@ import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
+import 'package:genesis_workspace/features/channels/view/topic_item.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +20,9 @@ class ChannelTopics extends StatefulWidget {
 }
 
 class _ChannelTopicsState extends State<ChannelTopics> {
+  Widget selectedTopic(ThemeData theme) =>
+      Icon(Icons.circle, color: theme.colorScheme.primary, size: 10);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -30,23 +34,30 @@ class _ChannelTopicsState extends State<ChannelTopics> {
           if (widget.channel == null) {
             return SizedBox.expand();
           }
+
           return Skeletonizer(
             enabled: state.pendingTopicsId == widget.channel!.streamId,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 400),
               child: ListView.builder(
                 itemCount: widget.channel!.topics.isEmpty ? 3 : widget.channel!.topics.length + 1,
-                shrinkWrap: true,
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    return ListTile(
-                      title: Text(
-                        widget.channel!.topics.isEmpty ? 'Loading...' : context.t.allMessages,
-                      ),
-                      leading: Icon(Icons.topic),
-                      trailing: widget.channel!.unreadMessages.isNotEmpty
-                          ? Text("${widget.channel!.unreadMessages.length}")
-                          : null,
+                    Widget? firstTrailing;
+
+                    if (widget.channel!.unreadMessages.isNotEmpty) {
+                      firstTrailing = Text("${widget.channel!.unreadMessages.length}");
+                    }
+
+                    if (state.selectedTopic == null && state.selectedChannel != null) {
+                      firstTrailing = selectedTopic(theme);
+                    }
+                    return TopicItem(
+                      topicName: widget.channel!.topics.isEmpty
+                          ? 'Loading...'
+                          : context.t.allMessages,
+                      channel: widget.channel!,
+                      trailing: firstTrailing,
                       onTap: state.pendingTopicsId != widget.channel!.streamId
                           ? () async {
                               if (currentSize(context) > ScreenSize.lTablet) {
@@ -67,13 +78,17 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                   Widget? trailing;
                   if (widget.channel!.topics.isNotEmpty) {
                     topic = widget.channel!.topics[index];
-                    trailing = topic.unreadMessages.isNotEmpty
-                        ? Text("${topic.unreadMessages.length}")
-                        : null;
+                    if (topic.unreadMessages.isNotEmpty) {
+                      trailing = Text("${topic.unreadMessages.length}");
+                    }
+                    if (topic == state.selectedTopic) {
+                      trailing = selectedTopic(theme);
+                    }
                   }
-                  return ListTile(
-                    title: Text(widget.channel!.topics.isEmpty ? 'Loading...' : topic!.name),
-                    leading: Icon(Icons.topic),
+
+                  return TopicItem(
+                    topicName: widget.channel!.topics.isEmpty ? 'Loading...' : topic!.name,
+                    channel: widget.channel!,
                     trailing: trailing,
                     onTap: state.pendingTopicsId != widget.channel!.streamId
                         ? () async {

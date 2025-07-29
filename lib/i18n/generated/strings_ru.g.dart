@@ -41,6 +41,7 @@ class TranslationsRu extends Translations {
 	@override String get selectAnyChannel => 'Выберите любой канал';
 	@override String get allMessages => 'Все сообщения';
 	@override String get noMessagesHereYet => 'Здесь пока нет сообщений...';
+	@override String get copy => 'Копировать';
 }
 
 // Path: navBar

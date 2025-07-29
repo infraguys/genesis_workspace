@@ -43,6 +43,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get selectAnyChannel => 'Select any channel';
 	String get allMessages => 'All messages';
 	String get noMessagesHereYet => 'No messages here yet...';
+	String get copy => 'Copy';
 }
 
 // Path: navBar
