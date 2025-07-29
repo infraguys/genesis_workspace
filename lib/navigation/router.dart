@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
-import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/channels.dart';
@@ -78,7 +78,7 @@ final router = GoRouter(
     GoRoute(
       path: Routes.chat,
       name: Routes.chat,
-      builder: (context, state) => Chat(user: state.extra as UserEntity),
+      builder: (context, state) => Chat(user: state.extra as DmUserEntity),
     ),
     GoRoute(
       path: Routes.channelChat,
