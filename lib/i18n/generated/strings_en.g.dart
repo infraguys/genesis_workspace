@@ -34,7 +34,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	Translations $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => Translations(meta: meta ?? this.$meta);
 
 	// Translations
-	String get password_cant_be_empty => 'Password can not be empty';
+	String get passwordCantBeEmpty => 'Password can not be empty';
 	String get password => 'Password';
 	String get login => 'Login';
 	String get typing => 'Typing';
@@ -44,6 +44,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get allMessages => 'All messages';
 	String get noMessagesHereYet => 'No messages here yet...';
 	String get copy => 'Copy';
+	String wasOnline({required Object time}) => 'was online ${time} ago';
+	String get wasOnlineJustNow => 'was online just now';
+	late final TranslationsTimeAgoEn timeAgo = TranslationsTimeAgoEn.internal(_root);
 }
 
 // Path: navBar
@@ -57,4 +60,26 @@ class TranslationsNavBarEn {
 	String get settings => 'Settings';
 	String get profile => 'Profile';
 	String get channels => 'Channels';
+}
+
+// Path: timeAgo
+class TranslationsTimeAgoEn {
+	TranslationsTimeAgoEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get justNow => 'just now';
+	String minutes({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} minute',
+		other: '${n} minutes',
+	);
+	String hours({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} hour',
+		other: '${n} hours',
+	);
+	String days({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} day',
+		other: '${n} days',
+	);
 }

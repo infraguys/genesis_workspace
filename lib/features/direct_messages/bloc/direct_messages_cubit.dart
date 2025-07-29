@@ -17,6 +17,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 
@@ -44,6 +45,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   final _getMessagesUseCase = getIt<GetMessagesUseCase>();
   final GetUsersUseCase _getUsersUseCase = getIt<GetUsersUseCase>();
+  final GetAllPresencesUseCase _getAllPresencesUseCase = getIt<GetAllPresencesUseCase>();
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -61,7 +63,23 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final response = await _getUsersUseCase.call();
       final List<UserEntity> users = response;
       state.users = users.map((user) => user.toDmUser()).toList();
-      await getUnreadMessages();
+      await Future.wait([getUnreadMessages(), getAllPresences()]);
+      emit(state.copyWith(users: state.users));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> getAllPresences() async {
+    try {
+      final response = await _getAllPresencesUseCase.call();
+      response.presences.forEach((user, presence) {
+        final indexOfUser = state.users.indexWhere((u) => u.email == user);
+        if (indexOfUser != -1) {
+          state.users[indexOfUser].presenceStatus = presence.aggregated.status;
+          state.users[indexOfUser].presenceTimestamp = presence.aggregated.timestamp;
+        }
+      });
       emit(state.copyWith(users: state.users));
     } catch (e) {
       inspect(e);
@@ -79,9 +97,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final response = await _getMessagesUseCase.call(messagesBody);
       state.unreadMessages = response.messages;
       final users = state.users;
-      inspect(users);
       for (var user in users) {
-        final indexOfUser = users.indexOf(user);
         user.unreadMessages = state.unreadMessages
             .where(
               (message) =>

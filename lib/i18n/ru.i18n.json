@@ -1,18 +1,40 @@
 {
   "password_cant_be_empty": "Пароль не может быть пустым",
   "password": "Пароль",
-  "login": "Войти",
+  "login": "Вход",
   "typing": "Печатает",
   "online": "В сети",
-  "navBar": {
-    "directMessages": "Личные сообщения",
+  "nav_bar": {
+    "direct_messages": "Личные сообщения",
     "settings": "Настройки",
     "profile": "Профиль",
     "channels": "Каналы"
   },
-  "selectAnyChannel": "Выберите любой канал",
-  "allMessages": "Все сообщения",
-  "noMessagesHereYet": "Здесь пока нет сообщений...",
-  "copy": "Копировать"
-
+  "select_any_channel": "Выберите любой канал",
+  "all_messages": "Все сообщения",
+  "no_messages_here_yet": "Здесь пока нет сообщений...",
+  "copy": "Копировать",
+  "was_online": "Был(а) в сети {time} назад",
+  "was_online_just_now": "Был(а) в сети только что",
+  "time_ago": {
+    "just_now": "только что",
+    "minutes": {
+      "one": "{n} минуту",
+      "few": "{n} минуты",
+      "many": "{n} минут",
+      "other": "{n} минут"
+    },
+    "hours": {
+      "one": "{n} час",
+      "few": "{n} часа",
+      "many": "{n} часов",
+      "other": "{n} часов"
+    },
+    "days": {
+      "one": "{n} день",
+      "few": "{n} дня",
+      "many": "{n} дней",
+      "other": "{n} дней"
+    }
+  }
 }

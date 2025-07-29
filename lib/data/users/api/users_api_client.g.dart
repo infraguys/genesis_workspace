@@ -18,10 +18,14 @@ class _UsersApiClient implements UsersApiClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<UsersResponseDto> getUsers(bool clientGravatar) async {
+  Future<UsersResponseDto> getUsers(
+    bool clientGravatar,
+    bool includeCustomProfileFields,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'client_gravatar': clientGravatar,
+      r'include_custom_profile_fields': includeCustomProfileFields,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
@@ -39,6 +43,33 @@ class _UsersApiClient implements UsersApiClient {
     late UsersResponseDto _value;
     try {
       _value = UsersResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<PresencesResponseDto> getAllPresences() async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<PresencesResponseDto>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/realm/presence',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late PresencesResponseDto _value;
+    try {
+      _value = PresencesResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

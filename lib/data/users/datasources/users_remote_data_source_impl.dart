@@ -17,7 +17,8 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   Future<UsersResponseDto> getUsers() async {
     try {
       final bool clientGravatar = false;
-      return apiClient.getUsers(clientGravatar);
+      final bool includeCustomProfileFields = true;
+      return apiClient.getUsers(clientGravatar, includeCustomProfileFields);
     } catch (e) {
       rethrow;
     }
@@ -51,6 +52,15 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   Future<TopicsResponseDto> getChannelTopics(int streamId) async {
     try {
       return await apiClient.getChannelTopics(streamId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<PresencesResponseDto> getAllPresences() async {
+    try {
+      return await apiClient.getAllPresences();
     } catch (e) {
       rethrow;
     }

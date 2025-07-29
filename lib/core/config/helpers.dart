@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 String? validateEmail(String? value) {
@@ -34,4 +35,24 @@ Color parseColor(String hexColor) {
   if (hexColor.length == 6 || hexColor.length == 7) buffer.write('ff');
   buffer.write(hexColor.replaceFirst('#', ''));
   return Color(int.parse(buffer.toString(), radix: 16));
+}
+
+String timeAgoText(BuildContext context, DateTime lastSeen) {
+  final now = DateTime.now();
+  final diff = now.difference(lastSeen);
+
+  if (diff.inMinutes < 1) {
+    return context.t.timeAgo.justNow;
+  } else if (diff.inHours < 1) {
+    return context.t.timeAgo.minutes(n: diff.inMinutes);
+  } else if (diff.inDays < 1) {
+    return context.t.timeAgo.hours(n: diff.inHours);
+  } else {
+    return context.t.timeAgo.days(n: diff.inDays);
+  }
+}
+
+bool isJustNow(DateTime lastSeen) {
+  final diff = DateTime.now().difference(lastSeen);
+  return diff.inMinutes < 1;
 }
