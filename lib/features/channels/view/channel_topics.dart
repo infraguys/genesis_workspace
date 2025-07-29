@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -50,13 +51,20 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                     trailing: trailing,
                     onTap: state.pendingTopicsId != widget.channel!.streamId
                         ? () async {
-                            context.pushNamed(
-                              Routes.channelChat,
-                              extra: ChannelChatExtra(
+                            if (currentSize(context) > ScreenSize.lTablet) {
+                              context.read<ChannelsCubit>().openTopic(
                                 channel: widget.channel!,
-                                topicEntity: topic!,
-                              ),
-                            );
+                                topic: widget.channel!.topics[index],
+                              );
+                            } else {
+                              context.pushNamed(
+                                Routes.channelChat,
+                                extra: ChannelChatExtra(
+                                  channel: widget.channel!,
+                                  topicEntity: topic!,
+                                ),
+                              );
+                            }
                           }
                         : null,
                   );

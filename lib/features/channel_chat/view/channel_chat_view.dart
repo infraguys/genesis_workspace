@@ -59,6 +59,18 @@ class _ChannelChatViewState extends State<ChannelChatView> {
   }
 
   @override
+  void didUpdateWidget(covariant ChannelChatView oldWidget) {
+    context.read<ChannelChatCubit>().getChannelMessages(
+      widget.extra.channel.name,
+      didUpdateWidget:
+          oldWidget.extra.channel != widget.extra.channel &&
+          oldWidget.extra.topicEntity != widget.extra.topicEntity,
+    );
+    _messageController.clear();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -69,10 +81,11 @@ class _ChannelChatViewState extends State<ChannelChatView> {
               widget.extra.channel.name,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(
-              widget.extra.topicEntity.name,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
-            ),
+            if (widget.extra.topicEntity != null)
+              Text(
+                widget.extra.topicEntity!.name,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+              ),
           ],
         ),
       ),
@@ -99,7 +112,9 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                           onTap: () {
                             FocusScope.of(context).unfocus();
                           },
-                          child: snapshot.connectionState == ConnectionState.waiting
+                          child:
+                              (snapshot.connectionState == ConnectionState.waiting ||
+                                  state.isMessagesPending)
                               ? Skeletonizer(
                                   enabled: true,
                                   child: ListView.separated(
@@ -171,7 +186,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                 await context.read<ChannelChatCubit>().sendMessage(
                                   streamId: widget.extra.channel.streamId,
                                   content: content,
-                                  topic: widget.extra.topicEntity.name,
+                                  topic: widget.extra.topicEntity?.name,
                                 );
                               } catch (e) {}
                             }

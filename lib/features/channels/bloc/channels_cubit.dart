@@ -6,11 +6,16 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
@@ -27,6 +32,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
           pendingTopicsId: null,
           selectedChannelId: null,
           selectedTopic: null,
+          unreadMessages: [],
+          selfUser: null,
+          selectedChannel: null,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
@@ -38,20 +46,64 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase =
       getIt<GetSubscribedChannelsUseCase>();
   final GetTopicsUseCase _getTopicsUseCase = getIt<GetTopicsUseCase>();
+  final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
-  void selectChannel(int? id) {
+  void selectChannelId(int? id) {
     state.selectedChannelId = id;
     emit(state.copyWith(selectedChannelId: state.selectedChannelId));
+  }
+
+  void openTopic({required ChannelEntity channel, TopicEntity? topic}) {
+    state.selectedChannel = channel;
+    state.selectedTopic = topic;
+    emit(
+      state.copyWith(selectedChannel: state.selectedChannel, selectedTopic: state.selectedTopic),
+    );
+  }
+
+  setSelfUser(UserEntity? user) {
+    if (state.selfUser == null) {
+      state.selfUser = user;
+      emit(state.copyWith(selfUser: state.selfUser));
+    }
   }
 
   Future<void> getChannels() async {
     try {
       final response = await _getSubscribedChannelsUseCase.call(true);
+      await getUnreadMessages();
       final channels = response.map((e) => e.toChannelEntity()).toList();
       emit(state.copyWith(channels: channels));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> getUnreadMessages() async {
+    try {
+      final messagesBody = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
+        numBefore: 5000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase.call(messagesBody);
+      state.unreadMessages = response.messages;
+      for (var channel in state.channels) {
+        channel.unreadMessages = state.unreadMessages
+            .where(
+              (message) =>
+                  (message.streamId == channel.streamId) &&
+                  (message.type == MessageType.stream) &&
+                  message.senderId != state.selfUser?.userId,
+            )
+            .map((message) => message.id)
+            .toSet();
+      }
+      emit(state.copyWith(unreadMessages: state.unreadMessages));
     } catch (e) {
       inspect(e);
     }

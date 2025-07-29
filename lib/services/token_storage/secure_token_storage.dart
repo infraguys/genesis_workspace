@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 
@@ -7,8 +9,14 @@ class SecureTokenStorage implements TokenStorage {
   final _storage = getIt<FlutterSecureStorage>();
 
   @override
-  Future<void> saveToken({required String token, required String email}) =>
-      _storage.write(key: TokenStorageKeys.token, value: "$email:$token");
+  Future<void> saveToken({required String token, required String email}) {
+    try {
+      return _storage.write(key: TokenStorageKeys.token, value: "$email:$token");
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
 
   @override
   Future<String?> getToken() => _storage.read(key: TokenStorageKeys.token);

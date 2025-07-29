@@ -11,6 +11,7 @@ class ChannelChatState {
   int? typingUserId;
   TypingEventOp selfTypingOp;
   Set<int> pendingToMarkAsRead;
+  bool isMessagesPending;
 
   ChannelChatState({
     required this.messages,
@@ -23,6 +24,7 @@ class ChannelChatState {
     required this.selfTypingOp,
     this.topic,
     required this.pendingToMarkAsRead,
+    required this.isMessagesPending,
   });
 
   ChannelChatState copyWith({
@@ -36,6 +38,7 @@ class ChannelChatState {
     TypingEventOp? selfTypingOp,
     TopicEntity? topic,
     Set<int>? pendingToMarkAsRead,
+    bool? isMessagesPending,
   }) {
     return ChannelChatState(
       messages: messages ?? this.messages,
@@ -48,6 +51,7 @@ class ChannelChatState {
       selfTypingOp: selfTypingOp ?? this.selfTypingOp,
       topic: topic ?? this.topic,
       pendingToMarkAsRead: pendingToMarkAsRead ?? this.pendingToMarkAsRead,
+      isMessagesPending: isMessagesPending ?? this.isMessagesPending,
     );
   }
 }
