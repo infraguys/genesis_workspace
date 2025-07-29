@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
+import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -98,12 +99,18 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
                 final timeAgo = timeAgoText(context, lastSeen);
 
-                Widget? userStatus = Text(
-                  isJustNow(lastSeen)
-                      ? context.t.wasOnlineJustNow
-                      : context.t.wasOnline(time: timeAgo),
-                  style: theme.textTheme.labelSmall,
-                );
+                Widget? userStatus;
+
+                if (widget.userEntity.presenceStatus == PresenceStatus.active) {
+                  userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
+                } else {
+                  userStatus = Text(
+                    isJustNow(lastSeen)
+                        ? context.t.wasOnlineJustNow
+                        : context.t.wasOnline(time: timeAgo),
+                    style: theme.textTheme.labelSmall,
+                  );
+                }
 
                 if (state.typingId == widget.userEntity.userId) {
                   userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);

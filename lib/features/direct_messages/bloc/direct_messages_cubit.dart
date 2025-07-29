@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
@@ -64,7 +65,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final List<UserEntity> users = response;
       state.users = users.map((user) => user.toDmUser()).toList();
       await Future.wait([getUnreadMessages(), getAllPresences()]);
-      emit(state.copyWith(users: state.users));
+      _sortUsers();
     } catch (e) {
       inspect(e);
     }
@@ -80,10 +81,34 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           state.users[indexOfUser].presenceTimestamp = presence.aggregated.timestamp;
         }
       });
-      emit(state.copyWith(users: state.users));
     } catch (e) {
       inspect(e);
     }
+  }
+
+  void _sortUsers() {
+    final sortedUsers = [...state.users];
+    sortedUsers.sort((user1, user2) {
+      // 1️⃣ Сортируем по количеству непрочитанных сообщений (по убыванию)
+      final unreadDiff = user2.unreadMessages.length.compareTo(user1.unreadMessages.length);
+      if (unreadDiff != 0) return unreadDiff;
+
+      // 2️⃣ Сортируем по статусу: active > idle > остальные
+      final isActive1 = user1.presenceStatus == PresenceStatus.active;
+      final isActive2 = user2.presenceStatus == PresenceStatus.active;
+      if (isActive1 && !isActive2) return -1;
+      if (!isActive1 && isActive2) return 1;
+
+      final isIdle1 = user1.presenceStatus == PresenceStatus.idle;
+      final isIdle2 = user2.presenceStatus == PresenceStatus.idle;
+      if (isIdle1 && !isIdle2) return -1;
+      if (!isIdle1 && isIdle2) return 1;
+
+      // 3️⃣ Если все равны — сортируем по имени
+      return user1.fullName.compareTo(user2.fullName);
+    });
+
+    emit(state.copyWith(users: sortedUsers));
   }
 
   Future<void> getUnreadMessages() async {
@@ -108,7 +133,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
             .map((message) => message.id)
             .toSet();
       }
-      emit(state.copyWith(unreadMessages: state.unreadMessages, users: state.users));
+      emit(state.copyWith(unreadMessages: state.unreadMessages));
     } catch (e) {
       inspect(e);
     }
@@ -140,7 +165,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
         sender.unreadMessages.add(message.id);
       }
       state.users[indexOfSender] = sender;
-      emit(state.copyWith(users: state.users));
+      _sortUsers();
     }
   }
 
@@ -150,7 +175,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
         user.unreadMessages.removeAll(event.messages);
         return user;
       }).toList();
-      emit(state.copyWith(users: users));
+      state.users = users;
+      _sortUsers();
     }
   }
 
