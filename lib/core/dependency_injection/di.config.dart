@@ -37,6 +37,8 @@ import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags
     as _i664;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
     as _i703;
+import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart'
+    as _i435;
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart'
     as _i1039;
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart'
@@ -127,6 +129,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i125.UsersRepository>(
       () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
+    );
+    gh.factory<_i435.DeleteQueueUseCase>(
+      () => _i435.DeleteQueueUseCase(gh<_i703.RealTimeEventsRepository>()),
     );
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),

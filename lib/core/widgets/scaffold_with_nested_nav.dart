@@ -109,43 +109,47 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               ? null
               : BlocBuilder<MessagesCubit, MessagesState>(
                   builder: (context, state) {
-                    return BottomNavigationBar(
-                      currentIndex: widget.navigationShell.currentIndex,
-                      type: BottomNavigationBarType.shifting,
-                      onTap: _goBranch,
-                      items: [
-                        BottomNavigationBarItem(
-                          label: context.t.navBar.directMessages,
-                          icon: Badge(
-                            isLabelVisible: state.unreadMessages.any(
-                              (message) => message.type == MessageType.private,
+                    return BlocBuilder<ProfileCubit, ProfileState>(
+                      builder: (context, profileState) {
+                        return BottomNavigationBar(
+                          currentIndex: widget.navigationShell.currentIndex,
+                          type: BottomNavigationBarType.shifting,
+                          onTap: _goBranch,
+                          items: [
+                            BottomNavigationBarItem(
+                              label: context.t.navBar.directMessages,
+                              icon: Badge(
+                                isLabelVisible: state.unreadMessages.any(
+                                  (message) =>
+                                      (message.type == MessageType.private &&
+                                      message.senderId != profileState.user?.userId),
+                                ),
+                                child: Icon(Icons.people),
+                              ),
                             ),
-                            child: Icon(Icons.people),
-                          ),
-                        ),
-                        BottomNavigationBarItem(
-                          label: context.t.navBar.channels,
-                          icon: Badge(
-                            isLabelVisible: state.unreadMessages.any(
-                              (message) => message.type == MessageType.stream,
+                            BottomNavigationBarItem(
+                              label: context.t.navBar.channels,
+                              icon: Badge(
+                                isLabelVisible: state.unreadMessages.any(
+                                  (message) =>
+                                      (message.type == MessageType.stream &&
+                                      message.senderId != profileState.user?.userId),
+                                ),
+                                child: Icon(Icons.chat),
+                              ),
                             ),
-                            child: Icon(Icons.chat),
-                          ),
-                        ),
-                        BottomNavigationBarItem(
-                          label: context.t.navBar.profile,
-                          icon: BlocBuilder<ProfileCubit, ProfileState>(
-                            builder: (context, state) {
-                              return UserAvatar(avatarUrl: state.user?.avatarUrl);
-                            },
-                          ),
-                        ),
-                        BottomNavigationBarItem(
-                          label: context.t.navBar.settings,
-                          icon: Icon(Icons.settings),
-                        ),
-                      ],
-                      // onDestinationSelected: _goBranch,
+                            BottomNavigationBarItem(
+                              label: context.t.navBar.profile,
+                              icon: UserAvatar(avatarUrl: profileState.user?.avatarUrl),
+                            ),
+                            BottomNavigationBarItem(
+                              label: context.t.navBar.settings,
+                              icon: Icon(Icons.settings),
+                            ),
+                          ],
+                          // onDestinationSelected: _goBranch,
+                        );
+                      },
                     );
                   },
                 ),

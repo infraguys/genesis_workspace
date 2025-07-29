@@ -6,4 +6,5 @@ import 'package:genesis_workspace/domain/real_time_events/entities/register_queu
 abstract class RealTimeEventsRepository {
   Future<RegisterQueueEntity> registerQueue(RegisterQueueRequestBodyEntity request);
   Future<EventsByQueueIdResponseEntity> getEventsByQueueId(EventsByQueueIdRequestBodyEntity body);
+  Future<void> deleteQueue(String queueId);
 }

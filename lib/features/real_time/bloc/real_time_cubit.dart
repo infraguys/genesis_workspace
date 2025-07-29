@@ -21,7 +21,7 @@ class RealTimeCubit extends Cubit<RealTimeState> {
     }
   }
 
-  void dispose() {
-    _realTimeService.stopPolling();
+  Future<void> dispose() async {
+    await _realTimeService.stopPolling();
   }
 }

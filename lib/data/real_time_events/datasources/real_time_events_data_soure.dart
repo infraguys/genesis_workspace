@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/real_time_events/api/real_time_events_api_client.dart';
@@ -13,6 +11,6 @@ part 'real_time_events_data_soure_impl.dart';
 
 abstract class RealTimeEventsDataSource {
   Future<RegisterQueueResponseDto> registerQueue(RegisterQueueRequestBodyDto requestDto);
-
   Future<EventByQueueIdResponseDto> getEventsByQueueId(GetEventsByQueueIdBodyDto body);
+  Future<void> deleteQueue(String queueId);
 }

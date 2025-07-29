@@ -19,4 +19,7 @@ abstract class RealTimeEventsApiClient {
     @Query("last_event_id") int lastEventId,
     @Query("dont_block") bool dontBlock,
   );
+
+  @DELETE('/events')
+  Future<void> deleteQueue(@Query('queue_id') String queueId);
 }

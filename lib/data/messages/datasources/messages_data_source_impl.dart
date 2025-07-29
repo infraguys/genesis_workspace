@@ -38,7 +38,13 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   @override
   Future<void> sendMessage(SendMessageRequestDto body) async {
     try {
-      await apiClient.sendMessage(body.type, jsonEncode(body.to), body.content);
+      await apiClient.sendMessage(
+        body.type,
+        jsonEncode(body.to),
+        body.content,
+        body.streamId,
+        body.topic,
+      );
     } catch (e) {
       rethrow;
     }
