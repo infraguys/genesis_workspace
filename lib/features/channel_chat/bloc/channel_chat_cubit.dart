@@ -11,8 +11,10 @@ import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
@@ -53,6 +55,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
   final SetTypingUseCase _setTypingUseCase = getIt<SetTypingUseCase>();
   final _updateMessagesFlagsUseCase = getIt<UpdateMessagesFlagsUseCase>();
+  final SendMessageUseCase _sendMessageUseCase = getIt<SendMessageUseCase>();
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -125,6 +128,26 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     }
   }
 
+  Future<void> sendMessage({required int streamId, required String content, String? topic}) async {
+    state.isMessagePending = true;
+    emit(state.copyWith(isMessagePending: state.isMessagePending));
+    final SendMessageType type = SendMessageType.stream;
+    final body = SendMessageRequestEntity(
+      type: type,
+      to: [streamId],
+      content: content,
+      topic: topic,
+      streamId: streamId,
+    );
+    try {
+      await _sendMessageUseCase.call(body);
+    } catch (e) {
+      inspect(e);
+    }
+    state.isMessagePending = false;
+    emit(state.copyWith(isMessagePending: state.isMessagePending));
+  }
+
   Future<void> changeTyping({required TypingEventOp op}) async {
     if (state.selfTypingOp != op) {
       state.selfTypingOp = op;
@@ -172,7 +195,6 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   }
 
   void _onTypingEvents(TypingEventEntity event) {
-    inspect(event);
     final senderId = event.sender.userId;
     // final isWriting = event.op == TypingEventOp.start && senderId == state.chatId;
 

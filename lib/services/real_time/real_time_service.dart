@@ -12,6 +12,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/events_by_que
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_request_body_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 import 'package:injectable/injectable.dart';
@@ -20,6 +21,7 @@ import 'package:injectable/injectable.dart';
 class RealTimeService {
   final RegisterQueueUseCase _registerQueueUseCase = getIt<RegisterQueueUseCase>();
   final GetEventsByQueueIdUseCase _getEventsByQueueIdUseCase = getIt<GetEventsByQueueIdUseCase>();
+  final DeleteQueueUseCase _deleteQueueUseCase = getIt<DeleteQueueUseCase>();
 
   int lastEventId = -1;
   String? queueId;
@@ -105,9 +107,12 @@ class RealTimeService {
   }
 
   /// Остановка цикла
-  void stopPolling() {
+  Future<void> stopPolling() async {
     _isPolling = false;
     _typingEventsController.close();
     _messagesEventsController.close();
+    if (queueId != null) {
+      await _deleteQueueUseCase.call(queueId!);
+    }
   }
 }

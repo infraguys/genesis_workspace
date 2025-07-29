@@ -82,6 +82,25 @@ class _RealTimeEventsApiClient implements RealTimeEventsApiClient {
     return _value;
   }
 
+  @override
+  Future<void> deleteQueue(String queueId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'queue_id': queueId};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<void>(
+      Options(method: 'DELETE', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/events',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    await _dio.fetch<void>(_options);
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

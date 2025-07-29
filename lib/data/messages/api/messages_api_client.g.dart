@@ -64,13 +64,18 @@ class _MessagesApiClient implements MessagesApiClient {
     SendMessageType type,
     String to,
     String content,
+    int? streamId,
+    String? topic,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'type': type.name,
       r'to': to,
       r'content': content,
+      r'stream_id': streamId,
+      r'topic': topic,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(

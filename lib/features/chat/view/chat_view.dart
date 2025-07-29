@@ -110,81 +110,83 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           }
           return BlocBuilder<ChatCubit, ChatState>(
             builder: (context, state) {
-              if (state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting) {
-                return Expanded(child: Center(child: Text("No messages here yet...")));
-              }
-
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
                 padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                 child: Column(
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          FocusScope.of(context).unfocus();
-                        },
-                        child: snapshot.connectionState == ConnectionState.waiting
-                            ? Skeletonizer(
-                                enabled: true,
-                                child: ListView.separated(
-                                  itemCount: 15,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ).copyWith(bottom: 12),
-                                  itemBuilder: (context, index) {
-                                    return MessageItem(
-                                      isMyMessage: index % 2 == 0, // alternate sender
-                                      message: MessageEntity.fake(),
-                                      isSkeleton: true, // enable skeleton mode
-                                    );
-                                  },
-                                ),
-                              )
-                            : Column(
-                                children: [
-                                  if (state.isLoadingMore) const LinearProgressIndicator(),
-                                  Expanded(
-                                    child: ListView.separated(
-                                      controller: _controller,
-                                      reverse: true,
-                                      itemCount: state.messages.length,
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                      ).copyWith(bottom: 12),
-                                      separatorBuilder: (BuildContext context, int index) {
-                                        return SizedBox(height: 12);
-                                      },
-                                      itemBuilder: (BuildContext context, int index) {
-                                        final message = state.messages.reversed.toList()[index];
-                                        final isMyMessage = message.senderId == _myUser.userId;
+                    state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting
+                        ? Expanded(child: Center(child: Text("No messages here yet...")))
+                        : Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                FocusScope.of(context).unfocus();
+                              },
+                              child: snapshot.connectionState == ConnectionState.waiting
+                                  ? Skeletonizer(
+                                      enabled: true,
+                                      child: ListView.separated(
+                                        itemCount: 15,
+                                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ).copyWith(bottom: 12),
+                                        itemBuilder: (context, index) {
+                                          return MessageItem(
+                                            isMyMessage: index % 2 == 0, // alternate sender
+                                            message: MessageEntity.fake(),
+                                            isSkeleton: true, // enable skeleton mode
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Column(
+                                      children: [
+                                        if (state.isLoadingMore) const LinearProgressIndicator(),
+                                        Expanded(
+                                          child: ListView.separated(
+                                            controller: _controller,
+                                            reverse: true,
+                                            itemCount: state.messages.length,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ).copyWith(bottom: 12),
+                                            separatorBuilder: (BuildContext context, int index) {
+                                              return SizedBox(height: 12);
+                                            },
+                                            itemBuilder: (BuildContext context, int index) {
+                                              final message = state.messages.reversed
+                                                  .toList()[index];
+                                              final isMyMessage =
+                                                  message.senderId == _myUser.userId;
 
-                                        return VisibilityDetector(
-                                          key: Key('message-${message.id}'),
-                                          onVisibilityChanged: (info) {
-                                            final visiblePercentage = info.visibleFraction * 100;
+                                              return VisibilityDetector(
+                                                key: Key('message-${message.id}'),
+                                                onVisibilityChanged: (info) {
+                                                  final visiblePercentage =
+                                                      info.visibleFraction * 100;
 
-                                            if (visiblePercentage > 50 &&
-                                                (message.flags == null || message.flags!.isEmpty)) {
-                                              context.read<ChatCubit>().scheduleMarkAsRead(
-                                                message.id,
+                                                  if (visiblePercentage > 50 &&
+                                                      (message.flags == null ||
+                                                          message.flags!.isEmpty)) {
+                                                    context.read<ChatCubit>().scheduleMarkAsRead(
+                                                      message.id,
+                                                    );
+                                                  }
+                                                },
+                                                child: MessageItem(
+                                                  isMyMessage: isMyMessage,
+                                                  message: message,
+                                                ),
                                               );
-                                            }
-                                          },
-                                          child: MessageItem(
-                                            isMyMessage: isMyMessage,
-                                            message: message,
+                                            },
                                           ),
-                                        );
-                                      },
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
+                            ),
+                          ),
                     MessageInput(
                       controller: _messageController,
                       isMessagePending: state.isMessagePending,

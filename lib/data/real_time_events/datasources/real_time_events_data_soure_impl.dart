@@ -27,4 +27,13 @@ class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<void> deleteQueue(String queueId) async {
+    try {
+      await apiClient.deleteQueue(queueId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

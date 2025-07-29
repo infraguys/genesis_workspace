@@ -26,6 +26,8 @@ abstract class MessagesApiClient {
     @Query("type") SendMessageType type,
     @Query("to") String to,
     @Query("content") String content,
+    @Query("stream_id") int? streamId,
+    @Query("topic") String? topic,
   );
 
   @POST('/messages/flags')

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -36,9 +36,11 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(context.t.navBar.directMessages),
       ),
-      body: BlocBuilder<MessagesCubit, MessagesState>(
-        builder: (context, messagesState) {
-          context.read<DirectMessagesCubit>().setUnreadMessages(messagesState.unreadMessages);
+      body: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: (context, state) {
+          if (state.user != null) {
+            context.read<DirectMessagesCubit>().setSelfUser(state.user);
+          }
           return FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
