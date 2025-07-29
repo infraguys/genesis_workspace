@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
@@ -13,7 +15,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class ChatView extends StatefulWidget {
-  final UserEntity userEntity;
+  final DmUserEntity userEntity;
 
   const ChatView({super.key, required this.userEntity});
 
@@ -90,15 +92,26 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
             UserAvatar(avatarUrl: widget.userEntity.avatarUrl),
             BlocBuilder<ChatCubit, ChatState>(
               builder: (context, state) {
+                final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+                  (widget.userEntity.presenceTimestamp * 1000).toInt(),
+                );
+
+                final timeAgo = timeAgoText(context, lastSeen);
+
+                Widget? userStatus = Text(
+                  isJustNow(lastSeen)
+                      ? context.t.wasOnlineJustNow
+                      : context.t.wasOnline(time: timeAgo),
+                  style: theme.textTheme.labelSmall,
+                );
+
+                if (state.typingId == widget.userEntity.userId) {
+                  userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
+                }
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.userEntity.fullName),
-                    Text(
-                      state.typingId == widget.userEntity.userId ? "typing..." : "Online",
-                      style: TextStyle(fontSize: 11),
-                    ),
-                  ],
+                  children: [Text(widget.userEntity.fullName), userStatus],
                 );
               },
             ),
