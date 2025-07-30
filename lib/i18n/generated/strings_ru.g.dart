@@ -45,6 +45,7 @@ class TranslationsRu extends Translations {
 	@override String wasOnline({required Object time}) => 'Был(а) в сети ${time} назад';
 	@override String get wasOnlineJustNow => 'Был(а) в сети только что';
 	@override late final TranslationsTimeAgoRu timeAgo = TranslationsTimeAgoRu._(_root);
+	@override String get search => 'Поиск';
 }
 
 // Path: navBar

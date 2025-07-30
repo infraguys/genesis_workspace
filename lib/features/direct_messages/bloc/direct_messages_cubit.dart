@@ -31,6 +31,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     : super(
         DirectMessagesState(
           users: [],
+          filteredUsers: [],
           isUsersPending: false,
           typingUsers: [],
           selfUser: null,
@@ -63,7 +64,11 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     try {
       final response = await _getUsersUseCase.call();
       final List<UserEntity> users = response;
-      state.users = users.map((user) => user.toDmUser()).toList();
+      final mappedUsers = users.map((user) => user.toDmUser()).toList();
+
+      state.users = mappedUsers;
+      state.filteredUsers = mappedUsers;
+
       await Future.wait([getUnreadMessages(), getAllPresences()]);
       _sortUsers();
     } catch (e) {
@@ -84,6 +89,21 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     } catch (e) {
       inspect(e);
     }
+  }
+
+  void searchUsers(String query) {
+    if (query.isEmpty) {
+      emit(state.copyWith(filteredUsers: [...state.users]));
+      return;
+    }
+
+    final lowerQuery = query.toLowerCase();
+    final filtered = state.users.where((user) {
+      return user.fullName.toLowerCase().contains(lowerQuery) ||
+          user.email.toLowerCase().contains(lowerQuery);
+    }).toList();
+
+    emit(state.copyWith(filteredUsers: filtered));
   }
 
   void _sortUsers() {
@@ -108,7 +128,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       return user1.fullName.compareTo(user2.fullName);
     });
 
-    emit(state.copyWith(users: sortedUsers));
+    emit(state.copyWith(users: sortedUsers, filteredUsers: sortedUsers));
   }
 
   Future<void> getUnreadMessages() async {

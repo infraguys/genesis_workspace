@@ -47,6 +47,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String wasOnline({required Object time}) => 'was online ${time} ago';
 	String get wasOnlineJustNow => 'was online just now';
 	late final TranslationsTimeAgoEn timeAgo = TranslationsTimeAgoEn.internal(_root);
+	String get search => 'Search';
 }
 
 // Path: navBar
