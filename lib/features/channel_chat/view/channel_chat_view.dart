@@ -11,6 +11,7 @@ import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -118,6 +119,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
 
           return BlocBuilder<ChannelChatCubit, ChannelChatState>(
             builder: (context, state) {
+              final reversedMessages = state.messages.reversed.toList();
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
@@ -160,35 +162,95 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                       child: ListView.separated(
                                         controller: _controller,
                                         reverse: true,
-                                        itemCount: state.messages.length,
-                                        padding: EdgeInsets.symmetric(
+                                        itemCount: reversedMessages.length,
+                                        padding: const EdgeInsets.symmetric(
                                           horizontal: 12,
                                         ).copyWith(bottom: 12),
-                                        separatorBuilder: (BuildContext context, int index) {
-                                          return SizedBox(height: 12);
-                                        },
+                                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                                         itemBuilder: (BuildContext context, int index) {
-                                          final message = state.messages.reversed.toList()[index];
+                                          final message = reversedMessages[index];
                                           final isMyMessage = message.senderId == _myUser.userId;
 
-                                          return VisibilityDetector(
-                                            key: Key('message-${message.id}'),
-                                            onVisibilityChanged: (info) {
-                                              final visiblePercentage = info.visibleFraction * 100;
+                                          final currentDate = DateTime.fromMillisecondsSinceEpoch(
+                                            message.timestamp * 1000,
+                                          );
 
-                                              if (visiblePercentage > 50 &&
-                                                  (message.flags == null ||
-                                                      message.flags!.isEmpty)) {
-                                                context.read<ChannelChatCubit>().scheduleMarkAsRead(
-                                                  message.id,
-                                                );
-                                              }
-                                            },
-                                            child: MessageItem(
-                                              isMyMessage: isMyMessage,
-                                              message: message,
-                                              showTopic: widget.extra.topicEntity == null,
-                                            ),
+                                          DateTime? nextDate;
+                                          if (index < reversedMessages.length - 1) {
+                                            final nextMessage = reversedMessages[index + 1];
+                                            nextDate = DateTime.fromMillisecondsSinceEpoch(
+                                              nextMessage.timestamp * 1000,
+                                            );
+                                          }
+
+                                          bool showDateLabel = false;
+                                          if (nextDate == null) {
+                                            // Последнее сообщение в списке - всегда метку не показываем (чтобы не было лишней надписи)
+                                            showDateLabel =
+                                                true; // Можно показать, если хочешь метку на первом сообщении (самом старом)
+                                          } else {
+                                            // Если день следующего сообщения отличается от текущего, показываем метку
+                                            showDateLabel =
+                                                currentDate.year != nextDate.year ||
+                                                currentDate.month != nextDate.month ||
+                                                currentDate.day != nextDate.day;
+                                          }
+
+                                          // Корректируем метку, чтобы "Сегодня" было только над первым сообщением сегодняшнего дня
+                                          String? dateLabel;
+                                          if (showDateLabel) {
+                                            final now = DateTime.now();
+                                            final diff = now.difference(currentDate).inDays;
+
+                                            if (diff == 0) {
+                                              dateLabel = context.t.dateLabels.today;
+                                            } else if (diff == 1) {
+                                              dateLabel = context.t.dateLabels.yesterday;
+                                            } else {
+                                              dateLabel = DateFormat.yMMMMd(
+                                                LocaleSettings.currentLocale.languageCode,
+                                              ).format(currentDate);
+                                            }
+                                          }
+
+                                          return Column(
+                                            children: [
+                                              if (showDateLabel)
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                                  child: Center(
+                                                    child: Text(
+                                                      dateLabel ?? '',
+                                                      style: Theme.of(context).textTheme.labelMedium
+                                                          ?.copyWith(
+                                                            color: Theme.of(
+                                                              context,
+                                                            ).colorScheme.onSurfaceVariant,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              VisibilityDetector(
+                                                key: Key('message-${message.id}'),
+                                                onVisibilityChanged: (info) {
+                                                  final visiblePercentage =
+                                                      info.visibleFraction * 100;
+                                                  if (visiblePercentage > 50 &&
+                                                      (message.flags == null ||
+                                                          message.flags!.isEmpty)) {
+                                                    context
+                                                        .read<ChannelChatCubit>()
+                                                        .scheduleMarkAsRead(message.id);
+                                                  }
+                                                },
+                                                child: MessageItem(
+                                                  isMyMessage: isMyMessage,
+                                                  message: message,
+                                                  showTopic: widget.extra.topicEntity == null,
+                                                ),
+                                              ),
+                                            ],
                                           );
                                         },
                                       ),

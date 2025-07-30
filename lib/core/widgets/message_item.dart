@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class MessageItem extends StatelessWidget {
@@ -18,6 +19,12 @@ class MessageItem extends StatelessWidget {
     this.isSkeleton = false,
     this.showTopic = false,
   });
+
+  /// Форматирует timestamp в строку времени (например, 14:35)
+  String _formatTime(int timestamp) {
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    return DateFormat('HH:mm').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +57,16 @@ class MessageItem extends StatelessWidget {
                 ],
               );
             },
+          );
+
+    final messageTime = isSkeleton
+        ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceVariant)
+        : Text(
+            _formatTime(message.timestamp),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 10,
+            ),
           );
 
     return Skeletonizer(
@@ -102,9 +119,17 @@ class MessageItem extends StatelessWidget {
                           ],
                         ),
                       ),
-                      (isRead || isMyMessage || isSkeleton)
-                          ? const SizedBox()
-                          : Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          messageTime,
+                          const SizedBox(height: 2),
+                          (isRead || isMyMessage || isSkeleton)
+                              ? const SizedBox()
+                              : Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
+                        ],
+                      ),
                     ],
                   ),
                 ),

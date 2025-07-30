@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/enums/presence_status.dart';
-import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
+import 'package:genesis_workspace/features/direct_messages/view/dm_search_field.dart';
+import 'package:genesis_workspace/features/direct_messages/view/user_tile.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/navigation/router.dart';
-import 'package:go_router/go_router.dart';
 
 class DirectMessagesView extends StatefulWidget {
   const DirectMessagesView({super.key});
@@ -43,18 +40,26 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
           children: [
             Expanded(child: Text(context.t.navBar.directMessages)),
             if (currentSize(context) > ScreenSize.tablet)
-              SizedBox(width: 250, child: _buildSearchField(context)),
+              SizedBox(
+                width: 250,
+                child: DmSearchField(
+                  searchController: _searchController,
+                  searchUsers: context.read<DirectMessagesCubit>().searchUsers,
+                ),
+              ),
           ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
         ),
       ),
       body: Column(
         children: [
           if (currentSize(context) <= ScreenSize.tablet)
-            Padding(padding: const EdgeInsets.all(8.0), child: _buildSearchField(context)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DmSearchField(
+                searchController: _searchController,
+                searchUsers: context.read<DirectMessagesCubit>().searchUsers,
+              ),
+            ),
           Expanded(
             child: BlocBuilder<ProfileCubit, ProfileState>(
               builder: (context, profileState) {
@@ -88,7 +93,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                           itemBuilder: (context, index) {
                             final DmUserEntity user = state.filteredUsers[index];
 
-                            return _buildUserTile(context, theme, user, state);
+                            return UserTile(user: user);
                           },
                         );
                       },
@@ -100,65 +105,6 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSearchField(BuildContext context) {
-    final cubit = context.read<DirectMessagesCubit>();
-    return TextField(
-      controller: _searchController,
-      onChanged: cubit.searchUsers,
-      decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.search),
-        hintText: context.t.search,
-        filled: true,
-        isDense: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserTile(
-    BuildContext context,
-    ThemeData theme,
-    DmUserEntity user,
-    DirectMessagesState state,
-  ) {
-    Widget? subtitle;
-
-    if (state.typingUsers.contains(user.userId)) {
-      subtitle = Text("${context.t.typing}...");
-    } else if (user.presenceStatus == PresenceStatus.active) {
-      subtitle = Row(
-        spacing: 8,
-        children: [
-          Text(context.t.online, style: theme.textTheme.labelSmall),
-          const Icon(Icons.circle, color: Colors.green, size: 10),
-        ],
-      );
-    } else {
-      final lastSeen = DateTime.fromMillisecondsSinceEpoch((user.presenceTimestamp * 1000).toInt());
-      final timeAgo = timeAgoText(context, lastSeen);
-
-      subtitle = Text(
-        isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
-        style: theme.textTheme.labelSmall,
-      );
-    }
-
-    return ListTile(
-      onTap: () => context.pushNamed(Routes.chat, extra: user),
-      title: Text(user.fullName, overflow: TextOverflow.ellipsis),
-      subtitle: subtitle,
-      leading: UserAvatar(avatarUrl: user.avatarUrl),
-      trailing: Badge.count(
-        count: user.unreadMessages.length,
-        isLabelVisible: user.unreadMessages.isNotEmpty,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
     );
   }
 }

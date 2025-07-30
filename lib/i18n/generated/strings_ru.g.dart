@@ -47,6 +47,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsTimeAgoRu timeAgo = TranslationsTimeAgoRu._(_root);
 	@override String get search => 'Поиск';
 	@override late final TranslationsSettingsRu settings = TranslationsSettingsRu._(_root);
+	@override late final TranslationsDateLabelsRu dateLabels = TranslationsDateLabelsRu._(_root);
 }
 
 // Path: navBar
@@ -58,7 +59,7 @@ class TranslationsNavBarRu extends TranslationsNavBarEn {
 	// Translations
 	@override String get directMessages => 'Личные сообщения';
 	@override String get settings => 'Настройки';
-	@override String get profile => 'Профиль';
+	@override String get feed => 'Лента';
 	@override String get channels => 'Каналы';
 }
 
@@ -99,4 +100,15 @@ class TranslationsSettingsRu extends TranslationsSettingsEn {
 	// Translations
 	@override String get language => 'Язык';
 	@override String get logout => 'Выйти';
+}
+
+// Path: dateLabels
+class TranslationsDateLabelsRu extends TranslationsDateLabelsEn {
+	TranslationsDateLabelsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get today => 'Сегодня';
+	@override String get yesterday => 'Вчера';
 }

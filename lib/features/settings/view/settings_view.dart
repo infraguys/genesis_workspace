@@ -22,7 +22,6 @@ class SettingsView extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          // 🔵 Языковые настройки
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(context.t.settings.language),
@@ -42,8 +41,6 @@ class SettingsView extends StatelessWidget {
             ),
           ),
           const Divider(),
-
-          // 🔴 Кнопка выхода
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ElevatedButton.icon(
