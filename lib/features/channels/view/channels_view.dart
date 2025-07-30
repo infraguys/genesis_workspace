@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
+import 'package:genesis_workspace/features/channels/view/channel_item.dart';
 import 'package:genesis_workspace/features/channels/view/channel_topics.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -113,66 +113,11 @@ class ChannelsViewState extends State<ChannelsView> {
                               separatorBuilder: (_, _) => SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final channel = state.channels[index];
-                                return InkWell(
-                                  highlightColor: theme.colorScheme.primaryContainer,
-                                  onTap: () async {
-                                    context.read<ChannelsCubit>().selectChannelId(channel.streamId);
-                                    context.read<ChannelsCubit>().openTopic(channel: channel);
-                                    await context.read<ChannelsCubit>().getChannelTopics(
-                                      streamId: channel.streamId,
-                                    );
-                                  },
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    decoration: BoxDecoration(
-                                      color: state.selectedChannelId == channel.streamId
-                                          ? theme.colorScheme.primaryContainer
-                                          : null,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          key: index == 0 ? _avatarContainerKey : null,
-                                          padding: const EdgeInsets.all(6),
-                                          child: CircleAvatar(
-                                            backgroundColor: parseColor(channel.color),
-                                            child: Text(
-                                              channel.name.characters.first.toUpperCase(),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                channel.name,
-                                                style: const TextStyle(fontWeight: FontWeight.bold),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              if (channel.description.isNotEmpty)
-                                                Text(
-                                                  channel.description,
-                                                  maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: const TextStyle(fontSize: 12),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                        Badge.count(
-                                          count: channel.unreadMessages.length,
-                                          isLabelVisible: channel.unreadMessages.isNotEmpty,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                return ChannelItem(
+                                  channel: channel,
+                                  index: index,
+                                  selectedChannelId: state.selectedChannelId,
+                                  avatarContainerKey: _avatarContainerKey,
                                 );
                               },
                             ),

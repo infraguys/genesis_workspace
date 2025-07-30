@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
-import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
@@ -85,12 +84,8 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                           ),
                         ),
                         NavigationRailDestination(
-                          label: Text(context.t.navBar.profile),
-                          icon: BlocBuilder<ProfileCubit, ProfileState>(
-                            builder: (context, state) {
-                              return UserAvatar(avatarUrl: state.user?.avatarUrl);
-                            },
-                          ),
+                          label: Text(context.t.navBar.feed),
+                          icon: Icon(Icons.all_inbox),
                         ),
                         NavigationRailDestination(
                           label: Text(context.t.navBar.settings),
@@ -139,8 +134,8 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                               ),
                             ),
                             BottomNavigationBarItem(
-                              label: context.t.navBar.profile,
-                              icon: UserAvatar(avatarUrl: profileState.user?.avatarUrl),
+                              label: context.t.navBar.feed,
+                              icon: Icon(Icons.all_inbox),
                             ),
                             BottomNavigationBarItem(
                               label: context.t.navBar.settings,

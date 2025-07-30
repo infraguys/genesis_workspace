@@ -52,6 +52,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get was_online => 'was online {time} ago';
 	String get was_online_just_now => 'was online just now';
 	late final TranslationsTimeAgoEn time_ago = TranslationsTimeAgoEn._(_root);
+	String get search => 'Search';
+	late final TranslationsSettingsEn settings = TranslationsSettingsEn._(_root);
 }
 
 // Path: nav_bar
@@ -63,7 +65,7 @@ class TranslationsNavBarEn {
 	// Translations
 	String get direct_messages => 'Direct Messages';
 	String get settings => 'Settings';
-	String get profile => 'Profile';
+	String get feed => 'Feed';
 	String get channels => 'Channels';
 }
 
@@ -89,6 +91,17 @@ class TranslationsTimeAgoEn {
 	);
 }
 
+// Path: settings
+class TranslationsSettingsEn {
+	TranslationsSettingsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get language => 'Language';
+	String get logout => 'Logout';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -101,7 +114,7 @@ extension on Translations {
 			case 'online': return 'Online';
 			case 'nav_bar.direct_messages': return 'Direct Messages';
 			case 'nav_bar.settings': return 'Settings';
-			case 'nav_bar.profile': return 'Profile';
+			case 'nav_bar.feed': return 'Feed';
 			case 'nav_bar.channels': return 'Channels';
 			case 'select_any_channel': return 'Select any channel';
 			case 'all_messages': return 'All messages';
@@ -122,6 +135,9 @@ extension on Translations {
 				one: '{n} day',
 				other: '{n} days',
 			);
+			case 'search': return 'Search';
+			case 'settings.language': return 'Language';
+			case 'settings.logout': return 'Logout';
 			default: return null;
 		}
 	}

@@ -28,6 +28,7 @@ class MessageDto {
   @JsonKey(name: "stream_id")
   final int? streamId;
   final String subject;
+  final int timestamp;
 
   MessageDto({
     required this.id,
@@ -41,6 +42,7 @@ class MessageDto {
     this.flags,
     this.streamId,
     required this.subject,
+    required this.timestamp,
   });
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);
@@ -61,6 +63,7 @@ class MessageDto {
     type: type,
     streamId: streamId,
     subject: subject,
+    timestamp: timestamp,
   );
 
   static dynamic _displayRecipientFromJson(dynamic json) {

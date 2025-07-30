@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:injectable/injectable.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @lazySingleton
@@ -12,12 +11,10 @@ class LocalizationService {
   init() async {
     _prefs = await SharedPreferences.getInstance();
     final languageCode = _prefs.getString(SharedPrefsKeys.locale);
-    inspect(languageCode);
-
     if (languageCode != null) {
-      LocaleSettings.setLocale(
-        AppLocale.values.firstWhere((locale) => locale.languageCode == languageCode),
-      );
+      final locale = AppLocale.values.firstWhere((locale) => locale.languageCode == languageCode);
+      LocaleSettings.setLocale(locale);
+      await initializeDateFormatting();
     } else {
       LocaleSettings.useDeviceLocale();
     }

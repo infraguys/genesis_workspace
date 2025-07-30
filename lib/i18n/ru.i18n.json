@@ -7,7 +7,7 @@
   "nav_bar": {
     "direct_messages": "Личные сообщения",
     "settings": "Настройки",
-    "profile": "Профиль",
+    "feed": "Лента",
     "channels": "Каналы"
   },
   "select_any_channel": "Выберите любой канал",
@@ -41,5 +41,9 @@
   "settings": {
     "language": "Язык",
     "logout": "Выйти"
+  },
+  "date_labels": {
+    "today": "Сегодня",
+    "yesterday": "Вчера"
   }
 }

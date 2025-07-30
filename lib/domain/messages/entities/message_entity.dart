@@ -12,6 +12,7 @@ class MessageEntity {
   final MessageType type;
   final int? streamId;
   final String subject;
+  final int timestamp;
 
   MessageEntity({
     required this.id,
@@ -25,6 +26,7 @@ class MessageEntity {
     this.flags,
     this.streamId,
     required this.subject,
+    required this.timestamp,
   });
 
   bool get hasUnreadMessages => flags == null || (flags != null && !flags!.contains('read'));
@@ -41,6 +43,7 @@ class MessageEntity {
     MessageType? type,
     int? streamId,
     String? subject,
+    int? timestamp,
   }) {
     return MessageEntity(
       id: id ?? this.id,
@@ -54,6 +57,7 @@ class MessageEntity {
       type: type ?? this.type,
       streamId: streamId ?? this.streamId,
       subject: subject ?? this.subject,
+      timestamp: timestamp ?? this.timestamp,
     );
   }
 
@@ -71,6 +75,7 @@ class MessageEntity {
       type: MessageType.stream,
       streamId: null,
       subject: 'Loading...',
+      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).toInt(),
     );
   }
 }

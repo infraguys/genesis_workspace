@@ -38,7 +38,7 @@ class TranslationsRu implements Translations {
 	// Translations
 	@override String get password_cant_be_empty => 'Пароль не может быть пустым';
 	@override String get password => 'Пароль';
-	@override String get login => 'Вход';
+	@override String get login => 'Войти';
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
 	@override late final _TranslationsNavBarRu nav_bar = _TranslationsNavBarRu._(_root);
@@ -46,9 +46,11 @@ class TranslationsRu implements Translations {
 	@override String get all_messages => 'Все сообщения';
 	@override String get no_messages_here_yet => 'Здесь пока нет сообщений...';
 	@override String get copy => 'Копировать';
-	@override String get was_online => 'Был(а) в сети {time} назад';
-	@override String get was_online_just_now => 'Был(а) в сети только что';
+	@override String get was_online => 'был(а) онлайн {time} назад';
+	@override String get was_online_just_now => 'был(а) онлайн только что';
 	@override late final _TranslationsTimeAgoRu time_ago = _TranslationsTimeAgoRu._(_root);
+	@override String get search => 'Поиск';
+	@override late final _TranslationsSettingsRu settings = _TranslationsSettingsRu._(_root);
 }
 
 // Path: nav_bar
@@ -60,7 +62,7 @@ class _TranslationsNavBarRu implements TranslationsNavBarEn {
 	// Translations
 	@override String get direct_messages => 'Личные сообщения';
 	@override String get settings => 'Настройки';
-	@override String get profile => 'Профиль';
+	@override String get feed => 'Лента';
 	@override String get channels => 'Каналы';
 }
 
@@ -76,20 +78,31 @@ class _TranslationsTimeAgoRu implements TranslationsTimeAgoEn {
 		one: '{n} минуту',
 		few: '{n} минуты',
 		many: '{n} минут',
-		other: '{n} минут',
+		other: '{n} минуты',
 	);
 	@override String hours({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
 		one: '{n} час',
 		few: '{n} часа',
 		many: '{n} часов',
-		other: '{n} часов',
+		other: '{n} часа',
 	);
 	@override String days({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
 		one: '{n} день',
 		few: '{n} дня',
 		many: '{n} дней',
-		other: '{n} дней',
+		other: '{n} дня',
 	);
+}
+
+// Path: settings
+class _TranslationsSettingsRu implements TranslationsSettingsEn {
+	_TranslationsSettingsRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get language => 'Язык';
+	@override String get logout => 'Выйти';
 }
 
 /// Flat map(s) containing all translations.
@@ -99,38 +112,41 @@ extension on TranslationsRu {
 		switch (path) {
 			case 'password_cant_be_empty': return 'Пароль не может быть пустым';
 			case 'password': return 'Пароль';
-			case 'login': return 'Вход';
+			case 'login': return 'Войти';
 			case 'typing': return 'Печатает';
 			case 'online': return 'В сети';
 			case 'nav_bar.direct_messages': return 'Личные сообщения';
 			case 'nav_bar.settings': return 'Настройки';
-			case 'nav_bar.profile': return 'Профиль';
+			case 'nav_bar.feed': return 'Лента';
 			case 'nav_bar.channels': return 'Каналы';
 			case 'select_any_channel': return 'Выберите любой канал';
 			case 'all_messages': return 'Все сообщения';
 			case 'no_messages_here_yet': return 'Здесь пока нет сообщений...';
 			case 'copy': return 'Копировать';
-			case 'was_online': return 'Был(а) в сети {time} назад';
-			case 'was_online_just_now': return 'Был(а) в сети только что';
+			case 'was_online': return 'был(а) онлайн {time} назад';
+			case 'was_online_just_now': return 'был(а) онлайн только что';
 			case 'time_ago.just_now': return 'только что';
 			case 'time_ago.minutes': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
 				one: '{n} минуту',
 				few: '{n} минуты',
 				many: '{n} минут',
-				other: '{n} минут',
+				other: '{n} минуты',
 			);
 			case 'time_ago.hours': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
 				one: '{n} час',
 				few: '{n} часа',
 				many: '{n} часов',
-				other: '{n} часов',
+				other: '{n} часа',
 			);
 			case 'time_ago.days': return ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
 				one: '{n} день',
 				few: '{n} дня',
 				many: '{n} дней',
-				other: '{n} дней',
+				other: '{n} дня',
 			);
+			case 'search': return 'Поиск';
+			case 'settings.language': return 'Язык';
+			case 'settings.logout': return 'Выйти';
 			default: return null;
 		}
 	}

@@ -7,7 +7,7 @@
   "nav_bar": {
     "direct_messages": "Direct Messages",
     "settings": "Settings",
-    "profile": "Profile",
+    "feed": "Feed",
     "channels": "Channels"
   },
   "select_any_channel": "Select any channel",
@@ -35,5 +35,9 @@
   "settings": {
     "language": "Language",
     "logout": "Logout"
+  },
+  "date_labels": {
+    "today": "Today",
+    "yesterday": "Yesterday"
   }
 }
