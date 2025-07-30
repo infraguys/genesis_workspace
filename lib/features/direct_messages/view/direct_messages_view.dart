@@ -19,12 +19,16 @@ class DirectMessagesView extends StatefulWidget {
 }
 
 class _DirectMessagesViewState extends State<DirectMessagesView> {
-  late final Future _future;
   final TextEditingController _searchController = TextEditingController();
+  late final Future _future;
+  bool _isFutureInitialized = false;
 
   @override
   void didChangeDependencies() {
-    _future = context.read<DirectMessagesCubit>().getUsers();
+    if (!_isFutureInitialized) {
+      _future = context.read<DirectMessagesCubit>().getUsers();
+      _isFutureInitialized = true;
+    }
     super.didChangeDependencies();
   }
 
@@ -41,6 +45,10 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
             if (currentSize(context) >= ScreenSize.mobile)
               SizedBox(width: 250, child: _buildSearchField(context)),
           ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
         ),
       ),
       body: Column(

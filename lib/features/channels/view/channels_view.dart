@@ -47,6 +47,7 @@ class ChannelsViewState extends State<ChannelsView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(context.t.navBar.channels),
+        backgroundColor: theme.colorScheme.inversePrimary,
         leading: BlocBuilder<ChannelsCubit, ChannelsState>(
           builder: (context, state) {
             if (state.selectedChannelId != null) {
