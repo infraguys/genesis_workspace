@@ -6,6 +6,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/services/localization/localization_service.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -39,13 +40,15 @@ class ProfileView extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              LocaleSettings.setLocale(AppLocale.ru);
+              final localizationService = getIt<LocalizationService>();
+              localizationService.setLocale(AppLocale.ru);
             },
             child: Text("Set ru"),
           ),
           ElevatedButton(
             onPressed: () {
-              LocaleSettings.setLocale(AppLocale.en);
+              final localizationService = getIt<LocalizationService>();
+              localizationService.setLocale(AppLocale.en);
             },
             child: Text("Set en"),
           ),

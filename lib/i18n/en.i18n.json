@@ -31,5 +31,9 @@
       "other": "{n} days"
     }
   },
-  "search": "Search"
+  "search": "Search",
+  "settings": {
+    "language": "Language",
+    "logout": "Logout"
+  }
 }

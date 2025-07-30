@@ -34,7 +34,7 @@ class TranslationsRu extends Translations {
 	// Translations
 	@override String get passwordCantBeEmpty => 'Пароль не может быть пустым';
 	@override String get password => 'Пароль';
-	@override String get login => 'Вход';
+	@override String get login => 'Войти';
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
 	@override late final TranslationsNavBarRu navBar = TranslationsNavBarRu._(_root);
@@ -42,10 +42,11 @@ class TranslationsRu extends Translations {
 	@override String get allMessages => 'Все сообщения';
 	@override String get noMessagesHereYet => 'Здесь пока нет сообщений...';
 	@override String get copy => 'Копировать';
-	@override String wasOnline({required Object time}) => 'Был(а) в сети ${time} назад';
-	@override String get wasOnlineJustNow => 'Был(а) в сети только что';
+	@override String wasOnline({required Object time}) => 'был(а) онлайн ${time} назад';
+	@override String get wasOnlineJustNow => 'был(а) онлайн только что';
 	@override late final TranslationsTimeAgoRu timeAgo = TranslationsTimeAgoRu._(_root);
 	@override String get search => 'Поиск';
+	@override late final TranslationsSettingsRu settings = TranslationsSettingsRu._(_root);
 }
 
 // Path: navBar
@@ -73,18 +74,29 @@ class TranslationsTimeAgoRu extends TranslationsTimeAgoEn {
 		one: '${n} минуту',
 		few: '${n} минуты',
 		many: '${n} минут',
-		other: '${n} минут',
+		other: '${n} минуты',
 	);
 	@override String hours({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
 		one: '${n} час',
 		few: '${n} часа',
 		many: '${n} часов',
-		other: '${n} часов',
+		other: '${n} часа',
 	);
 	@override String days({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(n,
 		one: '${n} день',
 		few: '${n} дня',
 		many: '${n} дней',
-		other: '${n} дней',
+		other: '${n} дня',
 	);
+}
+
+// Path: settings
+class TranslationsSettingsRu extends TranslationsSettingsEn {
+	TranslationsSettingsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get language => 'Язык';
+	@override String get logout => 'Выйти';
 }
