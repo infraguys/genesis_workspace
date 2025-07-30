@@ -78,11 +78,6 @@ class _ChannelChatViewState extends State<ChannelChatView> {
   @override
   void didUpdateWidget(covariant ChannelChatView oldWidget) {
     context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
-    print(
-      "${oldWidget.extra.channel != widget.extra.channel}"
-      ","
-      "${oldWidget.extra.topicEntity != widget.extra.topicEntity}",
-    );
     context.read<ChannelChatCubit>().getChannelMessages(
       widget.extra.channel.name,
       didUpdateWidget: oldWidget.extra.topicEntity != widget.extra.topicEntity,

@@ -52,7 +52,7 @@ class ChannelsViewState extends State<ChannelsView> {
             if (state.selectedChannelId != null) {
               return IconButton(
                 onPressed: () {
-                  context.read<ChannelsCubit>().selectChannelId(null);
+                  context.read<ChannelsCubit>().closeChannel();
                 },
                 icon: Icon(Icons.arrow_back_ios),
               );
@@ -118,7 +118,6 @@ class ChannelsViewState extends State<ChannelsView> {
                                     context.read<ChannelsCubit>().selectChannelId(channel.streamId);
                                     await context.read<ChannelsCubit>().getChannelTopics(
                                       streamId: channel.streamId,
-                                      unreadMessages: state.unreadMessages,
                                     );
                                   },
                                   child: AnimatedContainer(
@@ -146,8 +145,6 @@ class ChannelsViewState extends State<ChannelsView> {
                                           ),
                                         ),
                                         const SizedBox(width: 8),
-
-                                        // Имя и описание
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,8 +164,6 @@ class ChannelsViewState extends State<ChannelsView> {
                                             ],
                                           ),
                                         ),
-
-                                        // Бейдж
                                         Badge.count(
                                           count: channel.unreadMessages.length,
                                           isLabelVisible: channel.unreadMessages.isNotEmpty,
@@ -184,10 +179,8 @@ class ChannelsViewState extends State<ChannelsView> {
                               decoration: BoxDecoration(
                                 border: Border(
                                   left: BorderSide(
-                                    color: Theme.of(
-                                      context,
-                                    ).dividerColor.withValues(alpha: 0.3), // or any custom color
-                                    width: 1, // border thickness
+                                    color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                                    width: 1,
                                   ),
                                   right: BorderSide(
                                     color: Theme.of(context).dividerColor.withValues(
@@ -196,8 +189,8 @@ class ChannelsViewState extends State<ChannelsView> {
                                               state.selectedChannelId != null)
                                           ? 0.3
                                           : 0,
-                                    ), // or any custom color
-                                    width: 1, // border thickness
+                                    ),
+                                    width: 1,
                                   ),
                                 ),
                               ),
@@ -213,7 +206,9 @@ class ChannelsViewState extends State<ChannelsView> {
                           ],
                         ),
                       ),
-                      (currentSize(context) > ScreenSize.lTablet && state.selectedChannel != null)
+                      (currentSize(context) > ScreenSize.lTablet &&
+                              state.selectedChannel != null &&
+                              state.selectedChannelId != null)
                           ? Expanded(
                               child: ChannelChat(
                                 extra: ChannelChatExtra(

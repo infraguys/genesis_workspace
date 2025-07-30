@@ -56,6 +56,17 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     emit(state.copyWith(selectedChannelId: state.selectedChannelId));
   }
 
+  void closeChannel() {
+    state.selectedChannelId = null;
+    state.selectedChannel = null;
+    emit(
+      state.copyWith(
+        selectedChannel: state.selectedChannel,
+        selectedChannelId: state.selectedChannelId,
+      ),
+    );
+  }
+
   void openTopic({required ChannelEntity channel, TopicEntity? topic}) {
     state.selectedChannel = channel;
     state.selectedTopic = topic;
@@ -110,10 +121,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     }
   }
 
-  Future<void> getChannelTopics({
-    required int streamId,
-    required List<MessageEntity> unreadMessages,
-  }) async {
+  Future<void> getChannelTopics({required int streamId}) async {
     state.pendingTopicsId = streamId;
     emit(state.copyWith(pendingTopicsId: state.pendingTopicsId));
     try {
@@ -123,7 +131,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
       final channel = state.channels[indexOfChannel];
 
       channel.topics = response;
-      for (var message in unreadMessages) {
+      for (var message in state.unreadMessages) {
         if (message.type == MessageType.stream && message.hasUnreadMessages) {
           final TopicEntity? topic = channel.topics
               .where((topic) => topic.name == message.subject)
@@ -151,24 +159,29 @@ class ChannelsCubit extends Cubit<ChannelsState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
-    final channels = state.channels;
+    final channels = [...state.channels];
     if (message.type == MessageType.stream && message.hasUnreadMessages) {
+      state.unreadMessages.add(message);
       final channel = channels.firstWhere((channel) => channel.streamId == message.streamId);
+      final indexOfChannel = channels.indexOf(channel);
       channel.unreadMessages.add(message.id);
-
-      final TopicEntity? topic = channels
-          .firstWhere((channel) => channel.streamId == message.streamId)
-          .topics
-          .firstWhere((topic) => topic.name == message.subject);
-      if (message.subject == topic?.name) {
-        topic!.unreadMessages.add(message.id);
+      channels[indexOfChannel] = channel;
+      if (channel.topics.isNotEmpty) {
+        final TopicEntity? topic = channel.topics.firstWhere(
+          (topic) => topic.name == message.subject,
+        );
+        if (message.subject == topic?.name) {
+          topic!.unreadMessages.add(message.id);
+        }
       }
     }
-    emit(state.copyWith(channels: channels));
+    state.channels = channels;
+    emit(state.copyWith(channels: state.channels, unreadMessages: state.unreadMessages));
   }
 
   void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
+      state.unreadMessages.removeWhere((message) => event.messages.contains(message.id));
       final channels = state.channels.map((channel) {
         channel.unreadMessages.removeAll(event.messages);
         for (var topic in channel.topics) {
@@ -176,7 +189,8 @@ class ChannelsCubit extends Cubit<ChannelsState> {
         }
         return channel;
       }).toList();
-      emit(state.copyWith(channels: channels));
+      state.channels = channels;
+      emit(state.copyWith(channels: state.channels, unreadMessages: state.unreadMessages));
     }
   }
 }
