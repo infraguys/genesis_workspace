@@ -48,6 +48,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get wasOnlineJustNow => 'was online just now';
 	late final TranslationsTimeAgoEn timeAgo = TranslationsTimeAgoEn.internal(_root);
 	String get search => 'Search';
+	late final TranslationsSettingsEn settings = TranslationsSettingsEn.internal(_root);
 }
 
 // Path: navBar
@@ -83,4 +84,15 @@ class TranslationsTimeAgoEn {
 		one: '${n} day',
 		other: '${n} days',
 	);
+}
+
+// Path: settings
+class TranslationsSettingsEn {
+	TranslationsSettingsEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get language => 'Language';
+	String get logout => 'Logout';
 }

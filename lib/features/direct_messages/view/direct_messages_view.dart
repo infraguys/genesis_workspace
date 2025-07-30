@@ -42,7 +42,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
         title: Row(
           children: [
             Expanded(child: Text(context.t.navBar.directMessages)),
-            if (currentSize(context) >= ScreenSize.mobile)
+            if (currentSize(context) > ScreenSize.tablet)
               SizedBox(width: 250, child: _buildSearchField(context)),
           ],
         ),
@@ -53,7 +53,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
       ),
       body: Column(
         children: [
-          if (currentSize(context) <= ScreenSize.mobile)
+          if (currentSize(context) <= ScreenSize.tablet)
             Padding(padding: const EdgeInsets.all(8.0), child: _buildSearchField(context)),
           Expanded(
             child: BlocBuilder<ProfileCubit, ProfileState>(
