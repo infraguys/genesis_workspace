@@ -80,7 +80,9 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
     context.read<ChannelChatCubit>().getChannelMessages(
       widget.extra.channel.name,
-      didUpdateWidget: oldWidget.extra.topicEntity != widget.extra.topicEntity,
+      didUpdateWidget:
+          (oldWidget.extra.topicEntity != widget.extra.topicEntity ||
+          oldWidget.extra.channel != widget.extra.channel),
     );
     _messageController.clear();
     super.didUpdateWidget(oldWidget);

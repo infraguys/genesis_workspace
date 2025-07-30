@@ -116,6 +116,7 @@ class ChannelsViewState extends State<ChannelsView> {
                                   highlightColor: theme.colorScheme.primaryContainer,
                                   onTap: () async {
                                     context.read<ChannelsCubit>().selectChannelId(channel.streamId);
+                                    context.read<ChannelsCubit>().openTopic(channel: channel);
                                     await context.read<ChannelsCubit>().getChannelTopics(
                                       streamId: channel.streamId,
                                     );
