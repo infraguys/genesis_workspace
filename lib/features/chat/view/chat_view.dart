@@ -4,6 +4,7 @@ import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
+import 'package:genesis_workspace/core/widgets/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
@@ -13,7 +14,6 @@ import 'package:genesis_workspace/features/chat/view/message_input.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 class ChatView extends StatefulWidget {
   final DmUserEntity userEntity;
@@ -166,49 +166,11 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                         },
                                       ),
                                     )
-                                  : Column(
-                                      children: [
-                                        if (state.isLoadingMore) const LinearProgressIndicator(),
-                                        Expanded(
-                                          child: ListView.separated(
-                                            controller: _controller,
-                                            reverse: true,
-                                            itemCount: state.messages.length,
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                            ).copyWith(bottom: 12),
-                                            separatorBuilder: (BuildContext context, int index) {
-                                              return SizedBox(height: 12);
-                                            },
-                                            itemBuilder: (BuildContext context, int index) {
-                                              final message = state.messages.reversed
-                                                  .toList()[index];
-                                              final isMyMessage =
-                                                  message.senderId == _myUser.userId;
-
-                                              return VisibilityDetector(
-                                                key: Key('message-${message.id}'),
-                                                onVisibilityChanged: (info) {
-                                                  final visiblePercentage =
-                                                      info.visibleFraction * 100;
-
-                                                  if (visiblePercentage > 50 &&
-                                                      (message.flags == null ||
-                                                          message.flags!.isEmpty)) {
-                                                    context.read<ChatCubit>().scheduleMarkAsRead(
-                                                      message.id,
-                                                    );
-                                                  }
-                                                },
-                                                child: MessageItem(
-                                                  isMyMessage: isMyMessage,
-                                                  message: message,
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
+                                  : MessagesList(
+                                      messages: state.messages,
+                                      isLoadingMore: state.isLoadingMore,
+                                      controller: _controller,
+                                      onRead: context.read<ChatCubit>().scheduleMarkAsRead,
                                     ),
                             ),
                           ),
