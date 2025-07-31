@@ -118,7 +118,6 @@ class _ChannelChatViewState extends State<ChannelChatView> {
 
           return BlocBuilder<ChannelChatCubit, ChannelChatState>(
             builder: (context, state) {
-              final reversedMessages = state.messages.reversed.toList();
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
@@ -139,61 +138,27 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                               ? Skeletonizer(
                                   enabled: true,
                                   child: ListView.separated(
-                                    itemCount: 15,
+                                    itemCount: 20,
                                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 12,
                                     ).copyWith(bottom: 12),
                                     itemBuilder: (context, index) {
                                       return MessageItem(
-                                        isMyMessage: index % 2 == 0, // alternate sender
+                                        isMyMessage: index % 5 == 0,
                                         message: MessageEntity.fake(),
-                                        isSkeleton: true, // enable skeleton mode
+                                        isSkeleton: true,
+                                        messageOrder: MessageUIOrder.single,
                                       );
                                     },
                                   ),
                                 )
-                              : Column(
-                                  children: [
-                                    if (state.isLoadingMore || state.isMessagesPending)
-                                      const LinearProgressIndicator(),
-                                    Expanded(
-                                      child: MessagesList(
-                                        messages: state.messages,
-                                        controller: _controller,
-                                        showTopic: widget.extra.topicEntity == null,
-                                        onRead: context.read<ChannelChatCubit>().scheduleMarkAsRead,
-                                      ),
-                                      // child: ListView.separated(
-                                      //   controller: _controller,
-                                      //   reverse: true,
-                                      //   itemCount: reversedMessages.length,
-                                      //   padding: const EdgeInsets.symmetric(
-                                      //     horizontal: 12,
-                                      //   ).copyWith(bottom: 12),
-                                      //   separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                      //   itemBuilder: (BuildContext context, int index) {
-                                      //     final message = reversedMessages[index];
-                                      //     final isMyMessage = message.senderId == _myUser.userId;
-                                      //
-                                      //     return VisibilityDetector(
-                                      //       key: Key('message-${message.id}'),
-                                      //       onVisibilityChanged: (info) {
-                                      //         final visiblePercentage = info.visibleFraction * 100;
-                                      //         if (visiblePercentage > 50 &&
-                                      //             (message.flags == null ||
-                                      //                 message.flags!.isEmpty)) {}
-                                      //       },
-                                      //       child: MessageItem(
-                                      //         isMyMessage: isMyMessage,
-                                      //         message: message,
-                                      //         showTopic: widget.extra.topicEntity == null,
-                                      //       ),
-                                      //     );
-                                      //   },
-                                      // ),
-                                    ),
-                                  ],
+                              : MessagesList(
+                                  messages: state.messages,
+                                  controller: _controller,
+                                  showTopic: widget.extra.topicEntity == null,
+                                  isLoadingMore: state.isLoadingMore || state.isMessagesPending,
+                                  onRead: context.read<ChannelChatCubit>().scheduleMarkAsRead,
                                 ),
                         ),
                       ),

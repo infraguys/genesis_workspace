@@ -1,88 +1,260 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:intl/intl.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class MessagesList extends StatelessWidget {
+class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
   final ScrollController? controller;
   final void Function(int id)? onRead;
   final bool showTopic;
+  final bool isLoadingMore;
+
   const MessagesList({
     super.key,
     required this.messages,
     this.controller,
     this.onRead,
     this.showTopic = false,
+    required this.isLoadingMore,
   });
 
   @override
+  State<MessagesList> createState() => _MessagesListState();
+}
+
+class _MessagesListState extends State<MessagesList> {
+  String? _currentDayLabel;
+  bool _showDayLabel = false;
+  bool _showScrollToBottom = false;
+  Timer? _hideTimer;
+
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = widget.controller ?? ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _hideTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_showDayLabel) {
+      setState(() => _showDayLabel = true);
+    }
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 2), () {
+      setState(() => _showDayLabel = false);
+    });
+
+    final threshold = 200.0;
+    final isNearBottom =
+        _scrollController.offset <= _scrollController.position.minScrollExtent + threshold;
+
+    if (_showScrollToBottom == isNearBottom) {
+      setState(() {
+        _showScrollToBottom = !isNearBottom;
+      });
+    }
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.minScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final reversedMessages = messages.reversed.toList();
+    final reversedMessages = widget.messages.reversed.toList();
     final UserEntity? _myUser = context.read<ProfileCubit>().state.user;
-    return ListView.separated(
-      controller: controller,
-      reverse: true,
-      itemCount: reversedMessages.length - 1,
-      padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12),
-      separatorBuilder: (BuildContext context, int index) {
-        final MessageEntity message = reversedMessages[index];
-        final MessageEntity nextMessage = reversedMessages[index + 1];
 
-        final bool isNewUser = message.senderId != nextMessage.senderId;
-        return SizedBox(height: isNewUser ? 12 : 2);
-      },
-      itemBuilder: (BuildContext context, int index) {
-        final MessageEntity message = reversedMessages[index];
-        final MessageEntity nextMessage = reversedMessages[index + 1];
-        final MessageEntity? prevMessage = index != 0 ? reversedMessages[index - 1] : null;
-        MessageUIOrder messageOrder = MessageUIOrder.middle;
+    return Column(
+      children: [
+        if (widget.isLoadingMore) const LinearProgressIndicator(),
+        Expanded(
+          child: Stack(
+            children: [
+              ListView.separated(
+                controller: _scrollController,
+                reverse: true,
+                itemCount: reversedMessages.length - 1,
+                padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
+                separatorBuilder: (BuildContext context, int index) {
+                  final message = reversedMessages[index];
+                  final nextMessage = reversedMessages[index + 1];
 
-        final bool isNewUser = message.senderId != nextMessage.senderId;
-        final bool prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
-        final bool isMessageMiddle =
-            message.senderId == nextMessage.senderId && message.senderId == prevMessage?.senderId;
-        final bool isSingle = prevOtherUser && isNewUser;
+                  final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
+                  final nextMessageDate = DateTime.fromMillisecondsSinceEpoch(
+                    nextMessage.timestamp * 1000,
+                  );
 
-        if (index == 0) {
-          if (isNewUser) {
-            messageOrder = MessageUIOrder.lastSingle;
-          } else {
-            messageOrder = MessageUIOrder.last;
-          }
-        } else if (isSingle) {
-          messageOrder = MessageUIOrder.single;
-        } else if (isNewUser) {
-          messageOrder = MessageUIOrder.first;
-        } else if (isMessageMiddle) {
-          messageOrder = MessageUIOrder.middle;
-        } else if (prevOtherUser) {
-          messageOrder = MessageUIOrder.last;
-        }
+                  final isNewDay =
+                      messageDate.day != nextMessageDate.day ||
+                      messageDate.month != nextMessageDate.month ||
+                      messageDate.year != nextMessageDate.year;
 
-        final bool isMyMessage = message.senderId == _myUser?.userId;
+                  if (isNewDay) {
+                    return MessageDayLabel(label: _getDayLabel(context, messageDate));
+                  }
+                  final isNewUser = message.senderId != nextMessage.senderId;
+                  return SizedBox(height: isNewUser ? 12 : 2);
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  final message = reversedMessages[index];
+                  final nextMessage = reversedMessages[index + 1];
+                  final prevMessage = index != 0 ? reversedMessages[index - 1] : null;
 
-        return VisibilityDetector(
-          key: Key('message-${message.id}'),
-          onVisibilityChanged: (info) {
-            final visiblePercentage = info.visibleFraction * 100;
-            if (visiblePercentage > 50 && (message.flags == null || message.flags!.isEmpty)) {
-              if (onRead != null) {
-                onRead!(message.id);
-              }
-            }
-          },
-          child: MessageItem(
-            isMyMessage: isMyMessage,
-            message: message,
-            messageOrder: messageOrder,
-            showTopic: showTopic,
+                  final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
+                  final isMyMessage = message.senderId == _myUser?.userId;
+
+                  // Определяем порядок отображения пузырей сообщений
+                  final isNewUser = message.senderId != nextMessage.senderId;
+                  final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
+                  final isMessageMiddle =
+                      message.senderId == nextMessage.senderId &&
+                      message.senderId == prevMessage?.senderId;
+                  final isSingle = prevOtherUser && isNewUser;
+
+                  MessageUIOrder messageOrder;
+                  if (index == 0) {
+                    messageOrder = isNewUser ? MessageUIOrder.lastSingle : MessageUIOrder.last;
+                  } else if (isSingle) {
+                    messageOrder = MessageUIOrder.single;
+                  } else if (isNewUser) {
+                    messageOrder = MessageUIOrder.first;
+                  } else if (isMessageMiddle) {
+                    messageOrder = MessageUIOrder.middle;
+                  } else if (prevOtherUser) {
+                    messageOrder = MessageUIOrder.last;
+                  } else {
+                    messageOrder = MessageUIOrder.middle;
+                  }
+
+                  return VisibilityDetector(
+                    key: Key('message-${message.id}'),
+                    onVisibilityChanged: (info) {
+                      final visiblePercentage = info.visibleFraction * 100;
+                      if (visiblePercentage > 50) {
+                        final label = _getDayLabel(context, messageDate);
+                        if (_currentDayLabel != label) {
+                          setState(() => _currentDayLabel = label);
+                        }
+                      }
+                      if (visiblePercentage > 50 &&
+                          (message.flags == null || message.flags!.isEmpty)) {
+                        widget.onRead?.call(message.id);
+                      }
+                    },
+                    child: MessageItem(
+                      isMyMessage: isMyMessage,
+                      message: message,
+                      messageOrder: messageOrder,
+                      showTopic: widget.showTopic,
+                    ),
+                  );
+                },
+              ),
+
+              // Лейбл даты при скролле
+              Positioned(
+                top: 8,
+                left: 0,
+                right: 0,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 100),
+                  opacity: _showDayLabel && _currentDayLabel != null ? 1.0 : 0.0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+                        ],
+                      ),
+                      child: Text(
+                        _currentDayLabel ?? '',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Кнопка "Scroll to Bottom"
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: _showScrollToBottom ? 1.0 : 0.0,
+                  child: IgnorePointer(
+                    ignoring: !_showScrollToBottom,
+                    child: FloatingActionButton(
+                      mini: true,
+                      onPressed: _scrollToBottom,
+                      child: const Icon(Icons.arrow_downward),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ],
+    );
+  }
+
+  String _getDayLabel(BuildContext context, DateTime date) {
+    final today = DateTime.now();
+    if (_isToday(date, today)) {
+      return context.t.dateLabels.today;
+    } else if (_isYesterday(date, today)) {
+      return context.t.dateLabels.yesterday;
+    } else {
+      return DateFormat.yMMMMd(LocaleSettings.currentLocale.languageCode).format(date);
+    }
+  }
+
+  bool _isToday(DateTime date, DateTime today) =>
+      date.day == today.day && date.month == today.month && date.year == today.year;
+
+  bool _isYesterday(DateTime date, DateTime today) {
+    final y = today.subtract(const Duration(days: 1));
+    return date.day == y.day && date.month == y.month && date.year == y.year;
+  }
+}
+
+class MessageDayLabel extends StatelessWidget {
+  final String label;
+  const MessageDayLabel({super.key, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [Text(label, style: Theme.of(context).textTheme.labelMedium)],
+      ),
     );
   }
 }
