@@ -9,7 +9,15 @@ import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case
 part 'feed_state.dart';
 
 class FeedCubit extends Cubit<FeedState> {
-  FeedCubit() : super(FeedState(messages: []));
+  FeedCubit()
+    : super(
+        FeedState(
+          messages: [],
+          isLoadingMore: false,
+          isAllMessagesLoaded: false,
+          lastMessageId: null,
+        ),
+      );
 
   final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
 
@@ -22,9 +30,46 @@ class FeedCubit extends Cubit<FeedState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       state.messages = response.messages;
-      emit(state.copyWith(messages: state.messages));
+      state.isAllMessagesLoaded = response.foundOldest;
+      state.lastMessageId = response.messages.first.id;
+
+      emit(
+        state.copyWith(
+          messages: state.messages,
+          isAllMessagesLoaded: state.isAllMessagesLoaded,
+          lastMessageId: state.lastMessageId,
+        ),
+      );
     } catch (e) {
       inspect(e);
+    }
+  }
+
+  Future<void> loadMoreMessages() async {
+    if (!state.isAllMessagesLoaded) {
+      state.isLoadingMore = true;
+      emit(state.copyWith(isLoadingMore: state.isLoadingMore));
+      try {
+        final body = MessagesRequestEntity(
+          anchor: MessageAnchor.id(state.lastMessageId ?? 0),
+          numBefore: 150,
+          numAfter: 0,
+        );
+        final response = await _getMessagesUseCase.call(body);
+        state.lastMessageId = response.messages.first.id;
+        state.isAllMessagesLoaded = response.foundOldest;
+        state.messages = [...response.messages, ...state.messages];
+        state.isLoadingMore = false;
+        emit(
+          state.copyWith(
+            messages: state.messages,
+            isLoadingMore: state.isLoadingMore,
+            isAllMessagesLoaded: state.isAllMessagesLoaded,
+          ),
+        );
+      } catch (e) {
+        inspect(e);
+      }
     }
   }
 }

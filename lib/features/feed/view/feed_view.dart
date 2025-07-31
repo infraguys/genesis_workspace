@@ -13,11 +13,26 @@ class FeedView extends StatefulWidget {
 
 class _MixedFeedViewState extends State<FeedView> {
   late final Future _future;
+  late final ScrollController _scrollController;
+
+  void _onScroll() {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+        !context.read<FeedCubit>().state.isLoadingMore) {
+      context.read<FeedCubit>().loadMoreMessages();
+    }
+  }
 
   @override
   void didChangeDependencies() {
+    _scrollController = ScrollController()..addListener(_onScroll);
     _future = context.read<FeedCubit>().getMessages();
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,7 +57,12 @@ class _MixedFeedViewState extends State<FeedView> {
                   return Center(child: Text("Some error...."));
                 }
               }
-              return MessagesList(messages: state.messages, showTopic: true);
+              return MessagesList(
+                controller: _scrollController,
+                messages: state.messages,
+                isLoadingMore: state.isLoadingMore,
+                showTopic: true,
+              );
             },
           ),
         );
