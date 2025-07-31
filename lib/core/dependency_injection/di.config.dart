@@ -81,8 +81,6 @@ import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
     as _i573;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
-import 'package:genesis_workspace/services/messages/messages_service.dart'
-    as _i409;
 import 'package:genesis_workspace/services/real_time/real_time_service.dart'
     as _i82;
 import 'package:get_it/get_it.dart' as _i174;
@@ -111,7 +109,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i592.MessagesCubit>(() => _i592.MessagesCubit());
     gh.lazySingleton<_i766.ProfileCubit>(() => _i766.ProfileCubit());
     gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
-    gh.lazySingleton<_i409.MessagesService>(() => _i409.MessagesService());
     gh.lazySingleton<_i435.LocalizationService>(
       () => _i435.LocalizationService(),
     );

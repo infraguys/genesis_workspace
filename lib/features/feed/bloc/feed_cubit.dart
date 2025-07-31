@@ -1,28 +1,28 @@
 import 'dart:developer';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
-import 'package:injectable/injectable.dart';
 
-@lazySingleton
-class MessagesService {
-  List<MessageEntity> messages = [];
-  List<MessageEntity> unreadMessages = [];
+part 'feed_state.dart';
 
-  final _getMessagesUseCase = getIt<GetMessagesUseCase>();
+class FeedCubit extends Cubit<FeedState> {
+  FeedCubit() : super(FeedState(messages: []));
 
-  Future<void> getLastMessages() async {
+  final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
+
+  Future<void> getMessages() async {
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
-        numBefore: 5000,
+        numBefore: 150,
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      messages = response.messages;
-      unreadMessages = response.messages.where((message) => message.hasUnreadMessages).toList();
+      state.messages = response.messages;
+      emit(state.copyWith(messages: state.messages));
     } catch (e) {
       inspect(e);
     }

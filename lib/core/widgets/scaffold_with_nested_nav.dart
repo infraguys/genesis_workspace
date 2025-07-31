@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/services/messages/messages_service.dart';
 import 'package:go_router/go_router.dart';
 
 class ScaffoldWithNestedNavigation extends StatefulWidget {
@@ -22,8 +20,6 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
   late final Future _future;
   late final RealTimeCubit _realTimeCubit;
-
-  final messagesService = getIt<MessagesService>();
 
   void _goBranch(int index) {
     widget.navigationShell.goBranch(
