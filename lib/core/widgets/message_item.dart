@@ -6,11 +6,14 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+enum MessageUIOrder { first, last, middle, single, lastSingle }
+
 class MessageItem extends StatelessWidget {
   final bool isMyMessage;
   final MessageEntity message;
   final bool isSkeleton;
   final bool showTopic;
+  final MessageUIOrder messageOrder;
 
   const MessageItem({
     super.key,
@@ -18,9 +21,9 @@ class MessageItem extends StatelessWidget {
     required this.message,
     this.isSkeleton = false,
     this.showTopic = false,
+    this.messageOrder = MessageUIOrder.middle,
   });
 
-  /// Форматирует timestamp в строку времени (например, 14:35)
   String _formatTime(int timestamp) {
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     return DateFormat('HH:mm').format(date);
@@ -32,7 +35,7 @@ class MessageItem extends StatelessWidget {
     final isRead = message.flags?.contains('read') ?? false;
 
     final avatar = isSkeleton
-        ? const CircleAvatar(radius: 20) // Skeleton avatar
+        ? const CircleAvatar(radius: 20)
         : UserAvatar(avatarUrl: message.avatarUrl);
 
     final senderName = isSkeleton
@@ -69,26 +72,82 @@ class MessageItem extends StatelessWidget {
             ),
           );
 
+    BorderRadius? messageRadius;
+
+    if (isMyMessage) {
+      switch (messageOrder) {
+        case MessageUIOrder.last:
+          messageRadius = BorderRadius.only(
+            topLeft: Radius.zero,
+            topRight: Radius.zero,
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.zero,
+          );
+        case MessageUIOrder.first:
+          messageRadius = BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+          );
+        case MessageUIOrder.single || MessageUIOrder.lastSingle:
+          messageRadius = BorderRadius.circular(12).copyWith(bottomRight: Radius.zero);
+        case MessageUIOrder.middle:
+          messageRadius = BorderRadius.zero;
+      }
+    } else {
+      switch (messageOrder) {
+        case MessageUIOrder.last:
+          messageRadius = BorderRadius.only(
+            topLeft: Radius.zero,
+            topRight: Radius.zero,
+            bottomLeft: Radius.zero,
+            bottomRight: Radius.circular(12),
+          );
+        case MessageUIOrder.first:
+          messageRadius = BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+          );
+        case MessageUIOrder.single || MessageUIOrder.lastSingle:
+          messageRadius = BorderRadius.circular(12).copyWith(bottomLeft: Radius.zero);
+        case MessageUIOrder.middle:
+          messageRadius = BorderRadius.zero;
+      }
+    }
+
+    final bool showAvatar =
+        !isMyMessage &&
+        (messageOrder == MessageUIOrder.last ||
+            messageOrder == MessageUIOrder.single ||
+            messageOrder == MessageUIOrder.lastSingle);
+    final bool showSenderName =
+        messageOrder == MessageUIOrder.first ||
+        messageOrder == MessageUIOrder.single ||
+        messageOrder == MessageUIOrder.lastSingle;
+
     return Skeletonizer(
       enabled: isSkeleton,
       child: Align(
         alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+          constraints: BoxConstraints(
+            maxWidth: (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (!isMyMessage) ...[avatar, const SizedBox(width: 8)],
+              if (showAvatar) ...[avatar, const SizedBox(width: 4)],
+              if (!showAvatar) SizedBox(width: 44),
               Flexible(
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  constraints: (showAvatar) ? BoxConstraints(minHeight: 40) : null,
                   decoration: BoxDecoration(
                     color: isMyMessage
                         ? theme.colorScheme.secondaryContainer.withAlpha(128)
                         : theme.colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: messageRadius,
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -100,20 +159,21 @@ class MessageItem extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                senderName,
-                                if (showTopic)
-                                  Skeleton.ignore(
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.arrow_right, size: 16),
-                                        Text(message.subject, style: theme.textTheme.labelSmall),
-                                      ],
+                            if (showSenderName)
+                              Row(
+                                children: [
+                                  senderName,
+                                  if (showTopic && message.subject.isNotEmpty)
+                                    Skeleton.ignore(
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.arrow_right, size: 16),
+                                          Text(message.subject, style: theme.textTheme.labelSmall),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                              ],
-                            ),
+                                ],
+                              ),
                             const SizedBox(height: 2),
                             messageContent,
                           ],

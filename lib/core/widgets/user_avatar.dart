@@ -3,8 +3,9 @@ import 'package:genesis_workspace/core/config/constants.dart';
 
 class UserAvatar extends StatelessWidget {
   final String? avatarUrl;
+  final double? radius;
 
-  const UserAvatar({super.key, required this.avatarUrl});
+  const UserAvatar({super.key, required this.avatarUrl, this.radius});
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +17,7 @@ class UserAvatar extends StatelessWidget {
         fullUrl = "${AppConstants.baseUrl}$avatarUrl";
       }
       return CircleAvatar(
+        radius: radius,
         backgroundImage: NetworkImage(fullUrl),
         backgroundColor: Colors.grey[200],
       );
