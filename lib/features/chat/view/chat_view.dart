@@ -170,8 +170,55 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       messages: state.messages,
                                       isLoadingMore: state.isLoadingMore,
                                       controller: _controller,
-                                      onRead: context.read<ChatCubit>().scheduleMarkAsRead,
+                                      onRead: (id) {
+                                        context.read<ChatCubit>().scheduleMarkAsRead(id);
+                                      },
+                                      showTopic: true,
                                     ),
+                              // : Column(
+                              //     children: [
+                              //       if (state.isLoadingMore) const LinearProgressIndicator(),
+                              //       Expanded(
+                              //         child: ListView.separated(
+                              //           controller: _controller,
+                              //           reverse: true,
+                              //           itemCount: state.messages.length,
+                              //           padding: EdgeInsets.symmetric(
+                              //             horizontal: 12,
+                              //           ).copyWith(bottom: 12),
+                              //           separatorBuilder: (BuildContext context, int index) {
+                              //             return SizedBox(height: 12);
+                              //           },
+                              //           itemBuilder: (BuildContext context, int index) {
+                              //             final message = state.messages.reversed
+                              //                 .toList()[index];
+                              //             final isMyMessage =
+                              //                 message.senderId == _myUser.userId;
+                              //
+                              //             return VisibilityDetector(
+                              //               key: Key('message-${message.id}'),
+                              //               onVisibilityChanged: (info) {
+                              //                 final visiblePercentage =
+                              //                     info.visibleFraction * 100;
+                              //
+                              //                 if (visiblePercentage > 50 &&
+                              //                     (message.flags == null ||
+                              //                         message.flags!.isEmpty)) {
+                              //                   context.read<ChatCubit>().scheduleMarkAsRead(
+                              //                     message.id,
+                              //                   );
+                              //                 }
+                              //               },
+                              //               child: MessageItem(
+                              //                 isMyMessage: isMyMessage,
+                              //                 message: message,
+                              //               ),
+                              //             );
+                              //           },
+                              //         ),
+                              //       ),
+                              //     ],
+                              //   ),
                             ),
                           ),
                     MessageInput(
