@@ -22,7 +22,7 @@ class MenuView extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text(context.t.inbox),
+            title: Text(context.t.inbox.title),
             leading: Icon(Icons.inbox),
             trailing: Icon(Icons.arrow_right),
             onTap: () async {

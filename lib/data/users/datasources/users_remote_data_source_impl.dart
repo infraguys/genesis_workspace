@@ -65,4 +65,13 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<UserByIdResponseDto> getUserById(int userId) async {
+    try {
+      return await apiClient.getUserById(userId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
