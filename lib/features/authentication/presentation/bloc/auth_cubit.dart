@@ -8,7 +8,9 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/delete
 import 'package:genesis_workspace/features/authentication/domain/usecases/fetch_api_key_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart';
+import 'package:injectable/injectable.dart';
 
+@lazySingleton
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthState(isPending: false, isAuthorized: false));
 
