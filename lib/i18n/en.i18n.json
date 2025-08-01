@@ -41,5 +41,10 @@
     "today": "Today",
     "yesterday": "Yesterday"
   },
-  "inbox": "Inbox"
+  "inbox": {
+    "title": "Inbox",
+    "no_messages": "No messages",
+    "dm_tab": "Direct messages",
+    "channels_tab": "Channels"
+  }
 }

@@ -39,10 +39,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     }
   }
 
-  void _scrollToBottom() {
-    _controller.jumpTo(_controller.position.maxScrollExtent);
-  }
-
   Future<void> _onTextChanged() async {
     setState(() {
       _currentText = _messageController.text;

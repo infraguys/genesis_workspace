@@ -51,7 +51,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get search => 'Search';
 	late final TranslationsSettingsEn settings = TranslationsSettingsEn.internal(_root);
 	late final TranslationsDateLabelsEn dateLabels = TranslationsDateLabelsEn.internal(_root);
-	String get inbox => 'Inbox';
+	late final TranslationsInboxEn inbox = TranslationsInboxEn.internal(_root);
 }
 
 // Path: navBar
@@ -109,4 +109,17 @@ class TranslationsDateLabelsEn {
 	// Translations
 	String get today => 'Today';
 	String get yesterday => 'Yesterday';
+}
+
+// Path: inbox
+class TranslationsInboxEn {
+	TranslationsInboxEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Inbox';
+	String get noMessages => 'No messages';
+	String get dmTab => 'Direct messages';
+	String get channelsTab => 'Channels';
 }

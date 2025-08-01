@@ -77,4 +77,14 @@ class UsersRepositoryImpl implements UsersRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<UserEntity> getUserById(int userId) async {
+    try {
+      final response = await usersRemoteDataSource.getUserById(userId);
+      return response.user.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

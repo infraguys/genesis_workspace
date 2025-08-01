@@ -11,4 +11,5 @@ abstract class UsersRepository {
   Future<void> setTyping(TypingRequestEntity body);
   Future<List<TopicEntity>> getChannelTopics(int streamId);
   Future<PresencesResponseEntity> getAllPresences();
+  Future<UserEntity> getUserById(int userId);
 }

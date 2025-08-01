@@ -151,7 +151,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
       type: type,
       to: [streamId],
       content: content,
-      topic: topic,
+      topic: topic ?? '',
       streamId: streamId,
     );
     try {

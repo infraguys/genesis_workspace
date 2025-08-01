@@ -8,6 +8,7 @@ import 'package:genesis_workspace/data/users/dto/presences_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/topics_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/typing_request_dto.dart';
+import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
 import 'package:injectable/injectable.dart';
 
@@ -20,4 +21,5 @@ abstract class UsersRemoteDataSource {
   Future<void> setTyping(TypingRequestDto body);
   Future<TopicsResponseDto> getChannelTopics(int streamId);
   Future<PresencesResponseDto> getAllPresences();
+  Future<UserByIdResponseDto> getUserById(int userId);
 }

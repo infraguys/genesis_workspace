@@ -5,6 +5,7 @@ import 'package:genesis_workspace/data/users/dto/own_user_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/presences_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/topics_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -19,6 +20,9 @@ abstract class UsersApiClient {
     @Query('client_gravatar') bool clientGravatar,
     @Query('include_custom_profile_fields') bool includeCustomProfileFields,
   );
+
+  @GET('/users/{user_id}')
+  Future<UserByIdResponseDto> getUserById(@Path('user_id') int userId);
 
   @GET('/realm/presence')
   Future<PresencesResponseDto> getAllPresences();
