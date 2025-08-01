@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/messages_list.dart';
+import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/features/feed/bloc/feed_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -41,11 +42,7 @@ class _MixedFeedViewState extends State<FeedView> {
     return BlocBuilder<FeedCubit, FeedState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(context.t.navBar.feed),
-            backgroundColor: theme.colorScheme.inversePrimary,
-            centerTitle: true,
-          ),
+          appBar: WorkspaceAppBar(title: context.t.navBar.feed),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {

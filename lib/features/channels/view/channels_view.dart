@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/features/channels/view/channel_item.dart';
@@ -45,9 +46,8 @@ class ChannelsViewState extends State<ChannelsView> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.t.navBar.channels),
-        backgroundColor: theme.colorScheme.inversePrimary,
+      appBar: WorkspaceAppBar(
+        title: context.t.navBar.channels,
         leading: BlocBuilder<ChannelsCubit, ChannelsState>(
           builder: (context, state) {
             if (state.selectedChannelId != null) {
