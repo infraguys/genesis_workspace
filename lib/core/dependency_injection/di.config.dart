@@ -71,8 +71,6 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/get_to
     as _i75;
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart'
     as _i643;
-import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
-    as _i862;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
@@ -95,7 +93,6 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
     gh.factory<_i75.GetTokenUseCase>(() => _i75.GetTokenUseCase());
-    gh.factory<_i862.AuthCubit>(() => _i862.AuthCubit());
     gh.factory<_i207.GetMessagesUseCase>(() => _i207.GetMessagesUseCase());
     gh.factory<_i1039.GetEventsByQueueIdUseCase>(
       () => _i1039.GetEventsByQueueIdUseCase(),

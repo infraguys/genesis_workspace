@@ -17,7 +17,7 @@ class WorkspaceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => getIt<AuthCubit>()..checkToken()),
+        BlocProvider(create: (_) => AuthCubit()..checkToken()),
         BlocProvider(create: (_) => getIt<RealTimeCubit>()),
         BlocProvider(create: (_) => getIt<ProfileCubit>()),
         BlocProvider(create: (_) => getIt<MessagesCubit>()),
