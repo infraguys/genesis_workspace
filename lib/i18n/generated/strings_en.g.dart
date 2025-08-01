@@ -40,6 +40,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get typing => 'Typing';
 	String get online => 'Online';
 	late final TranslationsNavBarEn navBar = TranslationsNavBarEn.internal(_root);
+	String get feed => 'Feed';
 	String get selectAnyChannel => 'Select any channel';
 	String get allMessages => 'All messages';
 	String get noMessagesHereYet => 'No messages here yet...';
@@ -50,6 +51,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get search => 'Search';
 	late final TranslationsSettingsEn settings = TranslationsSettingsEn.internal(_root);
 	late final TranslationsDateLabelsEn dateLabels = TranslationsDateLabelsEn.internal(_root);
+	String get inbox => 'Inbox';
 }
 
 // Path: navBar
@@ -61,7 +63,7 @@ class TranslationsNavBarEn {
 	// Translations
 	String get directMessages => 'Direct Messages';
 	String get settings => 'Settings';
-	String get feed => 'Feed';
+	String get menu => 'Menu';
 	String get channels => 'Channels';
 }
 

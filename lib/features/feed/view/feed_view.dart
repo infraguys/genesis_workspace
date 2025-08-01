@@ -42,7 +42,7 @@ class _MixedFeedViewState extends State<FeedView> {
     return BlocBuilder<FeedCubit, FeedState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: context.t.navBar.feed),
+          appBar: WorkspaceAppBar(title: context.t.feed),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {

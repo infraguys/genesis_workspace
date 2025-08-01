@@ -3,11 +3,13 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/api_key_entity.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/delete_token_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/fetch_api_key_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart';
+import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
@@ -17,7 +19,9 @@ class AuthCubit extends Cubit<AuthState> {
   final FetchApiKeyUseCase _fetchApiKeyUseCase = getIt<FetchApiKeyUseCase>();
   final SaveTokenUseCase _saveTokenUseCase = getIt<SaveTokenUseCase>();
   final GetTokenUseCase _getTokenUseCase = getIt<GetTokenUseCase>();
+  final DeleteQueueUseCase _deleteQueueUseCase = getIt<DeleteQueueUseCase>();
   final DeleteTokenUseCase _deleteTokenUseCase = getIt<DeleteTokenUseCase>();
+  final RealTimeService _realTimeService = getIt<RealTimeService>();
 
   Future<void> login(String username, String password) async {
     state.isPending = true;
@@ -40,6 +44,8 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     try {
+      final queueId = _realTimeService.queueId;
+      await _deleteQueueUseCase.call(queueId!);
       await _deleteTokenUseCase.call();
       state.isAuthorized = false;
       emit(state.copyWith(isAuthorized: state.isAuthorized));

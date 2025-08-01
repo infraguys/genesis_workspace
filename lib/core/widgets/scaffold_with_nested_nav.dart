@@ -80,8 +80,8 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                           ),
                         ),
                         NavigationRailDestination(
-                          label: Text(context.t.navBar.feed),
-                          icon: Icon(Icons.all_inbox),
+                          label: Text(context.t.navBar.menu),
+                          icon: Icon(Icons.menu),
                         ),
                         NavigationRailDestination(
                           label: Text(context.t.navBar.settings),
@@ -130,8 +130,8 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                               ),
                             ),
                             BottomNavigationBarItem(
-                              label: context.t.navBar.feed,
-                              icon: Icon(Icons.all_inbox),
+                              label: context.t.navBar.menu,
+                              icon: Icon(Icons.menu),
                             ),
                             BottomNavigationBarItem(
                               label: context.t.navBar.settings,

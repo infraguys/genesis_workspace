@@ -7,9 +7,10 @@
   "nav_bar": {
     "direct_messages": "Direct Messages",
     "settings": "Settings",
-    "feed": "Feed",
+    "menu": "Menu",
     "channels": "Channels"
   },
+  "feed": "Feed",
   "select_any_channel": "Select any channel",
   "all_messages": "All messages",
   "no_messages_here_yet": "No messages here yet...",
@@ -39,5 +40,6 @@
   "date_labels": {
     "today": "Today",
     "yesterday": "Yesterday"
-  }
+  },
+  "inbox": "Inbox"
 }
