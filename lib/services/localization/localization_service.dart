@@ -14,9 +14,10 @@ class LocalizationService {
     if (languageCode != null) {
       final locale = AppLocale.values.firstWhere((locale) => locale.languageCode == languageCode);
       LocaleSettings.setLocale(locale);
-      await initializeDateFormatting();
+      await initializeDateFormatting(locale.languageCode);
     } else {
       LocaleSettings.useDeviceLocale();
+      await initializeDateFormatting('en');
     }
   }
 
@@ -24,6 +25,7 @@ class LocalizationService {
   Future<void> setLocale(AppLocale locale) async {
     await _prefs.setString(SharedPrefsKeys.locale, locale.languageCode);
     LocaleSettings.setLocale(locale);
+    await initializeDateFormatting(locale.languageCode);
   }
 
   /// Возвращает текущую выбранную локаль
