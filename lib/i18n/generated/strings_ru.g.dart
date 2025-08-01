@@ -38,6 +38,7 @@ class TranslationsRu extends Translations {
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
 	@override late final TranslationsNavBarRu navBar = TranslationsNavBarRu._(_root);
+	@override String get feed => 'Лента';
 	@override String get selectAnyChannel => 'Выберите любой канал';
 	@override String get allMessages => 'Все сообщения';
 	@override String get noMessagesHereYet => 'Здесь пока нет сообщений...';
@@ -48,6 +49,7 @@ class TranslationsRu extends Translations {
 	@override String get search => 'Поиск';
 	@override late final TranslationsSettingsRu settings = TranslationsSettingsRu._(_root);
 	@override late final TranslationsDateLabelsRu dateLabels = TranslationsDateLabelsRu._(_root);
+	@override String get inbox => 'Входящие';
 }
 
 // Path: navBar
@@ -59,7 +61,7 @@ class TranslationsNavBarRu extends TranslationsNavBarEn {
 	// Translations
 	@override String get directMessages => 'Личные сообщения';
 	@override String get settings => 'Настройки';
-	@override String get feed => 'Лента';
+	@override String get menu => 'Меню';
 	@override String get channels => 'Каналы';
 }
 

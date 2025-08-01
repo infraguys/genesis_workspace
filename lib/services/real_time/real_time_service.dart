@@ -99,7 +99,6 @@ class RealTimeService {
         lastEventId = lastEvent.events.last.id;
       } catch (e) {
         inspect(e);
-        // Можно подождать немного, чтобы не спамить сервер при ошибках
         await Future.delayed(Duration(seconds: 2));
         // _isPolling = false;
       }
@@ -111,8 +110,5 @@ class RealTimeService {
     _isPolling = false;
     _typingEventsController.close();
     _messagesEventsController.close();
-    if (queueId != null) {
-      await _deleteQueueUseCase.call(queueId!);
-    }
   }
 }

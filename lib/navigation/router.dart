@@ -8,6 +8,8 @@ import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/direct_messages.dart';
 import 'package:genesis_workspace/features/feed/feed.dart';
+import 'package:genesis_workspace/features/inbox/inbox.dart';
+import 'package:genesis_workspace/features/menu/menu.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +20,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorDMKey = GlobalKey<NavigatorState>(debugLabel: 'shellDM');
 final _shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
-final _shellNavigatorMixedFeedKey = GlobalKey<NavigatorState>(debugLabel: 'shellMixedFeed');
+final _shellNavigatorMenuKey = GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
 class Routes {
   static const String splashScreen = '/';
@@ -30,6 +32,7 @@ class Routes {
   static const String feed = '/feed';
   static const String chat = '/chat';
   static const String channelChat = '/channel-chat';
+  static const String inbox = '/inbox';
 }
 
 final router = GoRouter(
@@ -66,8 +69,21 @@ final router = GoRouter(
           routes: [GoRoute(path: Routes.channels, builder: (context, state) => const Channels())],
         ),
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorMixedFeedKey,
-          routes: [GoRoute(path: Routes.feed, builder: (context, state) => const Feed())],
+          navigatorKey: _shellNavigatorMenuKey,
+          routes: [
+            GoRoute(
+              path: Routes.feed,
+              builder: (context, state) => const Menu(),
+              routes: [
+                GoRoute(path: Routes.feed, name: Routes.feed, builder: (context, state) => Feed()),
+                GoRoute(
+                  path: Routes.inbox,
+                  name: Routes.inbox,
+                  builder: (context, state) => Inbox(),
+                ),
+              ],
+            ),
+          ],
         ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorSettingsKey,

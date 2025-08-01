@@ -7,9 +7,10 @@
   "nav_bar": {
     "direct_messages": "Личные сообщения",
     "settings": "Настройки",
-    "feed": "Лента",
+    "menu": "Меню",
     "channels": "Каналы"
   },
+  "feed": "Лента",
   "select_any_channel": "Выберите любой канал",
   "all_messages": "Все сообщения",
   "no_messages_here_yet": "Здесь пока нет сообщений...",
@@ -45,5 +46,6 @@
   "date_labels": {
     "today": "Сегодня",
     "yesterday": "Вчера"
-  }
+  },
+  "inbox": "Входящие"
 }
