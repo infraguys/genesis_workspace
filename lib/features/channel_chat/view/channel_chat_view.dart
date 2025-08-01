@@ -158,7 +158,9 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                   controller: _controller,
                                   showTopic: widget.extra.topicEntity == null,
                                   isLoadingMore: state.isLoadingMore || state.isMessagesPending,
-                                  onRead: context.read<ChannelChatCubit>().scheduleMarkAsRead,
+                                  onRead: (id) {
+                                    context.read<ChannelChatCubit>().scheduleMarkAsRead(id);
+                                  },
                                 ),
                         ),
                       ),

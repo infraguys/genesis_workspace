@@ -34,21 +34,23 @@ class _MessagesListState extends State<MessagesList> {
   String? _currentDayLabel;
   bool _showDayLabel = false;
   bool _showScrollToBottom = false;
-  Timer? _hideTimer;
+  Timer? _dayLabelTimer;
 
   late final ScrollController _scrollController;
+  late final UserEntity? _myUser;
 
   @override
   void initState() {
     super.initState();
     _scrollController = widget.controller ?? ScrollController();
     _scrollController.addListener(_onScroll);
+    _myUser = context.read<ProfileCubit>().state.user;
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
-    _hideTimer?.cancel();
+    _dayLabelTimer?.cancel();
     super.dispose();
   }
 
@@ -56,14 +58,15 @@ class _MessagesListState extends State<MessagesList> {
     if (!_showDayLabel) {
       setState(() => _showDayLabel = true);
     }
-    _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 2), () {
+    _dayLabelTimer?.cancel();
+    _dayLabelTimer = Timer(const Duration(seconds: 2), () {
       setState(() => _showDayLabel = false);
     });
 
-    final threshold = 200.0;
+    final showScrollToBottomOffset = 200.0;
     final isNearBottom =
-        _scrollController.offset <= _scrollController.position.minScrollExtent + threshold;
+        _scrollController.offset <=
+        _scrollController.position.minScrollExtent + showScrollToBottomOffset;
 
     if (_showScrollToBottom == isNearBottom) {
       setState(() {
@@ -83,7 +86,6 @@ class _MessagesListState extends State<MessagesList> {
   @override
   Widget build(BuildContext context) {
     final reversedMessages = widget.messages.reversed.toList();
-    final UserEntity? _myUser = context.read<ProfileCubit>().state.user;
 
     return Column(
       children: [
@@ -94,7 +96,7 @@ class _MessagesListState extends State<MessagesList> {
               ListView.separated(
                 controller: _scrollController,
                 reverse: true,
-                itemCount: reversedMessages.length - 1,
+                itemCount: reversedMessages.length,
                 padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
                 separatorBuilder: (BuildContext context, int index) {
                   final message = reversedMessages[index];
@@ -118,17 +120,22 @@ class _MessagesListState extends State<MessagesList> {
                 },
                 itemBuilder: (BuildContext context, int index) {
                   final message = reversedMessages[index];
-                  final nextMessage = reversedMessages[index + 1];
-                  final prevMessage = index != 0 ? reversedMessages[index - 1] : null;
+                  final MessageEntity? nextMessage =
+                      (reversedMessages.length > 1 && index != reversedMessages.length - 1)
+                      ? reversedMessages[index + 1]
+                      : null;
+                  final MessageEntity? prevMessage = index != 0
+                      ? reversedMessages[index - 1]
+                      : null;
 
                   final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
                   final isMyMessage = message.senderId == _myUser?.userId;
 
                   // Определяем порядок отображения пузырей сообщений
-                  final isNewUser = message.senderId != nextMessage.senderId;
+                  final isNewUser = message.senderId != nextMessage?.senderId;
                   final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
                   final isMessageMiddle =
-                      message.senderId == nextMessage.senderId &&
+                      message.senderId == nextMessage?.senderId &&
                       message.senderId == prevMessage?.senderId;
                   final isSingle = prevOtherUser && isNewUser;
 
@@ -158,7 +165,9 @@ class _MessagesListState extends State<MessagesList> {
                         }
                       }
                       if (visiblePercentage > 50 &&
-                          (message.flags == null || message.flags!.isEmpty)) {
+                          (message.flags == null ||
+                              message.flags!.isEmpty ||
+                              (message.flags != null && !message.flags!.contains('read')))) {
                         widget.onRead?.call(message.id);
                       }
                     },
