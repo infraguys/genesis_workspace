@@ -28,13 +28,16 @@ class RealTimeService {
 
   bool _isPolling = false;
 
-  final _typingEventsController = StreamController<TypingEventEntity>.broadcast();
+  StreamController<TypingEventEntity> _typingEventsController =
+      StreamController<TypingEventEntity>.broadcast();
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
 
-  final _messagesEventsController = StreamController<MessageEventEntity>.broadcast();
+  StreamController<MessageEventEntity> _messagesEventsController =
+      StreamController<MessageEventEntity>.broadcast();
   Stream<MessageEventEntity> get messagesEventsStream => _messagesEventsController.stream;
 
-  final _messageFlagsEventsController = StreamController<UpdateMessageFlagsEntity>.broadcast();
+  StreamController<UpdateMessageFlagsEntity> _messageFlagsEventsController =
+      StreamController<UpdateMessageFlagsEntity>.broadcast();
   Stream<UpdateMessageFlagsEntity> get messagesFlagsEventsStream =>
       _messageFlagsEventsController.stream;
 
@@ -89,6 +92,15 @@ class RealTimeService {
   }
 
   Future<void> startPolling() async {
+    if (_messageFlagsEventsController.isClosed) {
+      _messageFlagsEventsController = StreamController<UpdateMessageFlagsEntity>.broadcast();
+    }
+    if (_messagesEventsController.isClosed) {
+      _messagesEventsController = StreamController<MessageEventEntity>.broadcast();
+    }
+    if (_typingEventsController.isClosed) {
+      _typingEventsController = StreamController<TypingEventEntity>.broadcast();
+    }
     await registerQueue();
     if (_isPolling) return;
     _isPolling = true;
@@ -110,5 +122,6 @@ class RealTimeService {
     _isPolling = false;
     _typingEventsController.close();
     _messagesEventsController.close();
+    _messageFlagsEventsController.close();
   }
 }

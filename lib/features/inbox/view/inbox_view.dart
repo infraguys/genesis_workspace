@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/inbox/bloc/inbox_cubit.dart';
+import 'package:genesis_workspace/features/inbox/view/section_header.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class InboxView extends StatefulWidget {
   const InboxView({super.key});
@@ -44,29 +49,35 @@ class _InboxViewState extends State<InboxView> {
                 );
               }
 
-              final groupedDM = _groupBySender(state.dmMessages);
               final groupedChannels = _groupByChannelAndTopic(state.channelMessages);
 
               return ListView(
                 padding: const EdgeInsets.all(12),
                 children: [
-                  if (groupedDM.isNotEmpty) _buildSectionHeader(context.t.inbox.dmTab, context),
-                  ...groupedDM.entries.map(
-                    (user) => ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      title: Text(user.key, style: Theme.of(context).textTheme.bodyMedium),
-                      trailing: _buildUnreadBadge(user.value.length, context),
-                      onTap: () async {
-                        // final UserEntity user = await context.read<InboxCubit>().getUserById(message);
-                        // context.pushNamed(Routes.chat, arguments: name);
-                      },
-                    ),
+                  if (state.dmMessages.isNotEmpty) SectionHeader(title: context.t.inbox.dmTab),
+                  ListView.builder(
+                    itemCount: state.dmMessages.length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      final user = state.dmMessages.entries.elementAt(index);
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(user.key, style: Theme.of(context).textTheme.bodyMedium),
+                        trailing: _buildUnreadBadge(user.value.length, context),
+                        onTap: () async {
+                          final UserEntity userEntity = await context
+                              .read<InboxCubit>()
+                              .getUserById(user.value.first.senderId);
+                          final DmUserEntity dmUser = userEntity.toDmUser();
+                          context.pushNamed(Routes.chat, extra: dmUser);
+                        },
+                      );
+                    },
                   ),
-
                   if (groupedChannels.isNotEmpty) const SizedBox(height: 16),
-                  if (groupedChannels.isNotEmpty)
-                    _buildSectionHeader(context.t.inbox.channelsTab, context),
+                  if (groupedChannels.isNotEmpty) SectionHeader(title: context.t.inbox.channelsTab),
                   ...groupedChannels.entries.map(
                     (entry) => _buildChannelTile(entry.key, entry.value, context),
                   ),
@@ -76,20 +87,6 @@ class _InboxViewState extends State<InboxView> {
           ),
         );
       },
-    );
-  }
-
-  /// Заголовок секции
-  Widget _buildSectionHeader(String title, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 
