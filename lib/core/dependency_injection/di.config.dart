@@ -59,6 +59,8 @@ import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
     as _i194;
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart'
     as _i487;
+import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart'
+    as _i832;
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart'
     as _i672;
 import 'package:genesis_workspace/features/authentication/data/repositories_impl/auth_repository_impl.dart'
@@ -149,17 +151,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i699.GetTopicsUseCase>(
       () => _i699.GetTopicsUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i773.GetUserByIdUseCase>(
+      () => _i773.GetUserByIdUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i194.GetUsersUseCase>(
       () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i832.UpdatePresenceUseCase>(
+      () => _i832.UpdatePresenceUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i988.GetSubscribedChannelsUseCase>(
       () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i773.GetUserByIdUseCase>(
-      () => _i773.GetUserByIdUseCase(gh<_i125.UsersRepository>()),
     );
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(gh<_i672.AuthRemoteDataSource>()),

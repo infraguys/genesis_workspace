@@ -1,12 +1,11 @@
+import 'package:genesis_workspace/data/common/dto/response_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'own_user_response_dto.g.dart';
 
 @JsonSerializable()
-class OwnUserResponseDto {
-  final String result;
-  final String msg;
+class OwnUserResponseDto extends ResponseDto {
   @JsonKey(name: "user_id")
   final int userId;
   @JsonKey(name: "is_bot")
@@ -22,8 +21,8 @@ class OwnUserResponseDto {
   final bool isActive;
 
   OwnUserResponseDto({
-    required this.result,
-    required this.msg,
+    required super.result,
+    required super.msg,
     required this.userId,
     required this.isBot,
     required this.fullName,

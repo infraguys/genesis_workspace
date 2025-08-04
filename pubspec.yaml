@@ -30,6 +30,7 @@ dependencies:
   skeletonizer: ^2.1.0+1
   equatable: ^2.0.7
   intl: ^0.20.2
+  in_app_idle_detector: ^0.0.1
 
 dev_dependencies:
   flutter_test:

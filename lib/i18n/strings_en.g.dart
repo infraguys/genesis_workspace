@@ -45,6 +45,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get typing => 'Typing';
 	String get online => 'Online';
 	late final TranslationsNavBarEn nav_bar = TranslationsNavBarEn._(_root);
+	String get feed => 'Feed';
 	String get select_any_channel => 'Select any channel';
 	String get all_messages => 'All messages';
 	String get no_messages_here_yet => 'No messages here yet...';
@@ -54,6 +55,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsTimeAgoEn time_ago = TranslationsTimeAgoEn._(_root);
 	String get search => 'Search';
 	late final TranslationsSettingsEn settings = TranslationsSettingsEn._(_root);
+	late final TranslationsDateLabelsEn date_labels = TranslationsDateLabelsEn._(_root);
+	late final TranslationsInboxEn inbox = TranslationsInboxEn._(_root);
 }
 
 // Path: nav_bar
@@ -65,7 +68,7 @@ class TranslationsNavBarEn {
 	// Translations
 	String get direct_messages => 'Direct Messages';
 	String get settings => 'Settings';
-	String get feed => 'Feed';
+	String get menu => 'Menu';
 	String get channels => 'Channels';
 }
 
@@ -102,6 +105,30 @@ class TranslationsSettingsEn {
 	String get logout => 'Logout';
 }
 
+// Path: date_labels
+class TranslationsDateLabelsEn {
+	TranslationsDateLabelsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get today => 'Today';
+	String get yesterday => 'Yesterday';
+}
+
+// Path: inbox
+class TranslationsInboxEn {
+	TranslationsInboxEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Inbox';
+	String get no_messages => 'No unread messages';
+	String get dm_tab => 'Direct messages';
+	String get channels_tab => 'Channels';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -114,8 +141,9 @@ extension on Translations {
 			case 'online': return 'Online';
 			case 'nav_bar.direct_messages': return 'Direct Messages';
 			case 'nav_bar.settings': return 'Settings';
-			case 'nav_bar.feed': return 'Feed';
+			case 'nav_bar.menu': return 'Menu';
 			case 'nav_bar.channels': return 'Channels';
+			case 'feed': return 'Feed';
 			case 'select_any_channel': return 'Select any channel';
 			case 'all_messages': return 'All messages';
 			case 'no_messages_here_yet': return 'No messages here yet...';
@@ -138,6 +166,12 @@ extension on Translations {
 			case 'search': return 'Search';
 			case 'settings.language': return 'Language';
 			case 'settings.logout': return 'Logout';
+			case 'date_labels.today': return 'Today';
+			case 'date_labels.yesterday': return 'Yesterday';
+			case 'inbox.title': return 'Inbox';
+			case 'inbox.no_messages': return 'No unread messages';
+			case 'inbox.dm_tab': return 'Direct messages';
+			case 'inbox.channels_tab': return 'Channels';
 			default: return null;
 		}
 	}

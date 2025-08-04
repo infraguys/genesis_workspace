@@ -74,4 +74,18 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<UpdatePresenceResponseDto> updatePresence(UpdatePresenceRequestDto body) async {
+    try {
+      return await apiClient.updatePresence(
+        body.lastUpdateId,
+        body.newUserInput,
+        body.status,
+        body.pingOnly,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

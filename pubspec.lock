@@ -469,6 +469,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  in_app_idle_detector:
+    dependency: "direct main"
+    description:
+      name: in_app_idle_detector
+      sha256: "44b90c86cf4f84fc2f688e56dd901c71ca590e15c0aa5c48045316fb4dd77fef"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   injectable:
     dependency: "direct main"
     description:

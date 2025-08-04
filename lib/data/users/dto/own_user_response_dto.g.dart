@@ -22,8 +22,8 @@ OwnUserResponseDto _$OwnUserResponseDtoFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$OwnUserResponseDtoToJson(OwnUserResponseDto instance) =>
     <String, dynamic>{
-      'result': instance.result,
       'msg': instance.msg,
+      'result': instance.result,
       'user_id': instance.userId,
       'is_bot': instance.isBot,
       'full_name': instance.fullName,
