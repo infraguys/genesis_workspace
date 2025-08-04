@@ -14,7 +14,7 @@ import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.
 part 'inbox_state.dart';
 
 class InboxCubit extends Cubit<InboxState> {
-  InboxCubit() : super(InboxState(dmMessages: [], channelMessages: []));
+  InboxCubit() : super(InboxState(dmMessages: {}, channelMessages: []));
 
   final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
   final GetUserByIdUseCase _getUserByIdUseCase = getIt<GetUserByIdUseCase>();
@@ -29,18 +29,29 @@ class InboxCubit extends Cubit<InboxState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
 
-      final dmMessages = <MessageEntity>[];
+      final _dmMessages = <MessageEntity>[];
       final channelMessages = <MessageEntity>[];
 
       for (var message in response.messages) {
         if (message.type == MessageType.private) {
-          dmMessages.add(message);
+          _dmMessages.add(message);
         } else if (message.type == MessageType.stream) {
           channelMessages.add(message);
         }
       }
 
-      emit(state.copyWith(dmMessages: dmMessages, channelMessages: channelMessages));
+      _dmMessages.forEach((message) {
+        final senderFullName = message.senderFullName;
+        state.dmMessages.putIfAbsent(senderFullName, () => []).add(message);
+      });
+
+      emit(
+        state.copyWith(
+          dmMessages: state.dmMessages,
+          channelMessages: channelMessages,
+          // dmMessagesCount: state.dmMessagesCount,
+        ),
+      );
     } catch (e) {
       inspect(e);
     }
