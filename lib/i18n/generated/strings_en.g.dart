@@ -119,7 +119,7 @@ class TranslationsInboxEn {
 
 	// Translations
 	String get title => 'Inbox';
-	String get noMessages => 'No messages';
+	String get noMessages => 'No unread messages';
 	String get dmTab => 'Direct messages';
 	String get channelsTab => 'Channels';
 }

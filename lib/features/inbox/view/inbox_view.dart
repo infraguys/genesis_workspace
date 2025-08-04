@@ -41,21 +41,29 @@ class _InboxViewState extends State<InboxView> {
 
               final hasMessages = state.dmMessages.isNotEmpty || state.channelMessages.isNotEmpty;
               if (!hasMessages) {
-                return Center(
-                  child: Text(
-                    context.t.inbox.noMessages,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Icon(Icons.all_inbox, color: Colors.lightGreen),
+                    Center(
+                      child: Text(
+                        context.t.inbox.noMessages,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
                 );
               }
 
-              final groupedChannels = _groupByChannelAndTopic(state.channelMessages);
+              // final groupedChannels = _groupByChannelAndTopic(state.channelMessages);
 
               return ListView(
                 padding: const EdgeInsets.all(12),
                 children: [
                   if (state.dmMessages.isNotEmpty) SectionHeader(title: context.t.inbox.dmTab),
                   ListView.builder(
+                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                     itemCount: state.dmMessages.length,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -65,7 +73,7 @@ class _InboxViewState extends State<InboxView> {
                         contentPadding: EdgeInsets.zero,
                         dense: true,
                         title: Text(user.key, style: Theme.of(context).textTheme.bodyMedium),
-                        trailing: _buildUnreadBadge(user.value.length, context),
+                        trailing: Badge.count(count: user.value.length),
                         onTap: () async {
                           final UserEntity userEntity = await context
                               .read<InboxCubit>()
@@ -76,9 +84,10 @@ class _InboxViewState extends State<InboxView> {
                       );
                     },
                   ),
-                  if (groupedChannels.isNotEmpty) const SizedBox(height: 16),
-                  if (groupedChannels.isNotEmpty) SectionHeader(title: context.t.inbox.channelsTab),
-                  ...groupedChannels.entries.map(
+                  if (state.channelMessages.isNotEmpty) const SizedBox(height: 16),
+                  if (state.channelMessages.isNotEmpty)
+                    SectionHeader(title: context.t.inbox.channelsTab),
+                  ...state.channelMessages.entries.map(
                     (entry) => _buildChannelTile(entry.key, entry.value, context),
                   ),
                 ],
@@ -101,11 +110,12 @@ class _InboxViewState extends State<InboxView> {
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: const EdgeInsets.only(left: 16),
+      initiallyExpanded: true,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(child: Text(channelName, style: Theme.of(context).textTheme.bodyMedium)),
-          _buildUnreadBadge(totalCount, context),
+          Badge.count(count: totalCount),
         ],
       ),
       children: topics.entries.map((entry) {
@@ -114,40 +124,12 @@ class _InboxViewState extends State<InboxView> {
           contentPadding: EdgeInsets.zero,
           dense: true,
           title: Text(topicName, style: Theme.of(context).textTheme.bodySmall),
-          trailing: _buildUnreadBadge(entry.value.length, context),
+          trailing: Badge.count(count: entry.value.length),
           onTap: () {
             // TODO: переход в конкретный топик
           },
         );
       }).toList(),
     );
-  }
-
-  /// Бейдж количества сообщений
-  Widget _buildUnreadBadge(int count, BuildContext context) {
-    return Badge.count(count: count);
-  }
-
-  /// Группировка личных сообщений по отправителю
-  Map<String, List<MessageEntity>> _groupBySender(List<MessageEntity> messages) {
-    final Map<String, List<MessageEntity>> grouped = {};
-    for (var msg in messages) {
-      grouped.putIfAbsent(msg.senderFullName, () => []).add(msg);
-    }
-    return grouped;
-  }
-
-  /// Группировка каналов: Channel -> {Topic -> [Messages]}
-  Map<String, Map<String, List<MessageEntity>>> _groupByChannelAndTopic(
-    List<MessageEntity> messages,
-  ) {
-    final Map<String, Map<String, List<MessageEntity>>> grouped = {};
-    for (var msg in messages) {
-      final channel = msg.displayRecipient ?? 'Unknown';
-      final topic = msg.subject.isEmpty ? '' : msg.subject;
-      grouped.putIfAbsent(channel, () => {});
-      grouped[channel]!.putIfAbsent(topic, () => []).add(msg);
-    }
-    return grouped;
   }
 }

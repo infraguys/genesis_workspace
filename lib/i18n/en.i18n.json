@@ -43,7 +43,7 @@
   },
   "inbox": {
     "title": "Inbox",
-    "no_messages": "No messages",
+    "no_messages": "No unread messages",
     "dm_tab": "Direct messages",
     "channels_tab": "Channels"
   }
