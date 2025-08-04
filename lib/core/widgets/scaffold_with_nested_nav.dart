@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
+import 'package:in_app_idle_detector/in_app_idle_detector.dart';
 
 class ScaffoldWithNestedNavigation extends StatefulWidget {
   const ScaffoldWithNestedNavigation({Key? key, required this.navigationShell})
@@ -28,8 +31,37 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     );
   }
 
+  void _initIdleDetector() {
+    InAppIdleDetector.initialize(
+      timeout: Duration(minutes: 1),
+      onIdle: () async {
+        final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
+          lastUpdateId: -1,
+          status: PresenceStatus.idle,
+          newUserInput: false,
+          pingOnly: true,
+        );
+        await context.read<ProfileCubit>().updatePresence(body);
+      },
+      onActive: () async {
+        final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
+          lastUpdateId: -1,
+          status: PresenceStatus.active,
+          newUserInput: true,
+          pingOnly: true,
+        );
+        await context.read<ProfileCubit>().updatePresence(body);
+      },
+    );
+  }
+
+  void _pauseIdleDetector() {
+    InAppIdleDetector.pause();
+  }
+
   @override
   void initState() {
+    _initIdleDetector();
     _future = Future.wait([
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
@@ -41,6 +73,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   @override
   void dispose() {
+    _pauseIdleDetector();
     _realTimeCubit.dispose();
     super.dispose();
   }

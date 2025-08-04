@@ -5,6 +5,8 @@ import 'package:genesis_workspace/domain/users/entities/presences_response_entit
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_presence_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -83,6 +85,16 @@ class UsersRepositoryImpl implements UsersRepository {
     try {
       final response = await usersRemoteDataSource.getUserById(userId);
       return response.user.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpdatePresenceResponseEntity> updatePresence(UpdatePresenceRequestEntity body) async {
+    try {
+      final response = await usersRemoteDataSource.updatePresence(body.toDto());
+      return response.toEntity();
     } catch (e) {
       rethrow;
     }

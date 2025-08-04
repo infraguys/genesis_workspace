@@ -1,14 +1,13 @@
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/domain/common/entities/response_entity.dart';
 
-class PresencesResponseEntity {
-  final String msg;
-  final String result;
+class PresencesResponseEntity extends ResponseEntity {
   final double serverTimestamp;
   final Map<String, PresenceEntity> presences;
 
   PresencesResponseEntity({
-    required this.msg,
-    required this.result,
+    required super.msg,
+    required super.result,
     required this.serverTimestamp,
     required this.presences,
   });

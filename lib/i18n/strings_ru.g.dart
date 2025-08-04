@@ -42,6 +42,7 @@ class TranslationsRu implements Translations {
 	@override String get typing => 'Печатает';
 	@override String get online => 'В сети';
 	@override late final _TranslationsNavBarRu nav_bar = _TranslationsNavBarRu._(_root);
+	@override String get feed => 'Лента';
 	@override String get select_any_channel => 'Выберите любой канал';
 	@override String get all_messages => 'Все сообщения';
 	@override String get no_messages_here_yet => 'Здесь пока нет сообщений...';
@@ -51,6 +52,8 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsTimeAgoRu time_ago = _TranslationsTimeAgoRu._(_root);
 	@override String get search => 'Поиск';
 	@override late final _TranslationsSettingsRu settings = _TranslationsSettingsRu._(_root);
+	@override late final _TranslationsDateLabelsRu date_labels = _TranslationsDateLabelsRu._(_root);
+	@override late final _TranslationsInboxRu inbox = _TranslationsInboxRu._(_root);
 }
 
 // Path: nav_bar
@@ -62,7 +65,7 @@ class _TranslationsNavBarRu implements TranslationsNavBarEn {
 	// Translations
 	@override String get direct_messages => 'Личные сообщения';
 	@override String get settings => 'Настройки';
-	@override String get feed => 'Лента';
+	@override String get menu => 'Меню';
 	@override String get channels => 'Каналы';
 }
 
@@ -105,6 +108,30 @@ class _TranslationsSettingsRu implements TranslationsSettingsEn {
 	@override String get logout => 'Выйти';
 }
 
+// Path: date_labels
+class _TranslationsDateLabelsRu implements TranslationsDateLabelsEn {
+	_TranslationsDateLabelsRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get today => 'Сегодня';
+	@override String get yesterday => 'Вчера';
+}
+
+// Path: inbox
+class _TranslationsInboxRu implements TranslationsInboxEn {
+	_TranslationsInboxRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Входящие';
+	@override String get no_messages => 'Все сообщения прочитаны';
+	@override String get dm_tab => 'Личные сообщения';
+	@override String get channels_tab => 'Каналы';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsRu {
@@ -117,8 +144,9 @@ extension on TranslationsRu {
 			case 'online': return 'В сети';
 			case 'nav_bar.direct_messages': return 'Личные сообщения';
 			case 'nav_bar.settings': return 'Настройки';
-			case 'nav_bar.feed': return 'Лента';
+			case 'nav_bar.menu': return 'Меню';
 			case 'nav_bar.channels': return 'Каналы';
+			case 'feed': return 'Лента';
 			case 'select_any_channel': return 'Выберите любой канал';
 			case 'all_messages': return 'Все сообщения';
 			case 'no_messages_here_yet': return 'Здесь пока нет сообщений...';
@@ -147,6 +175,12 @@ extension on TranslationsRu {
 			case 'search': return 'Поиск';
 			case 'settings.language': return 'Язык';
 			case 'settings.logout': return 'Выйти';
+			case 'date_labels.today': return 'Сегодня';
+			case 'date_labels.yesterday': return 'Вчера';
+			case 'inbox.title': return 'Входящие';
+			case 'inbox.no_messages': return 'Все сообщения прочитаны';
+			case 'inbox.dm_tab': return 'Личные сообщения';
+			case 'inbox.channels_tab': return 'Каналы';
 			default: return null;
 		}
 	}
