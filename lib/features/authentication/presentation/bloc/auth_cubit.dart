@@ -57,7 +57,8 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(isAuthorized: state.isAuthorized));
   }
 
-  void devLogout() async {
+  Future<void> devLogout() async {
+    await _deleteTokenUseCase.call();
     state.isAuthorized = false;
     emit(state.copyWith(isAuthorized: state.isAuthorized));
   }
