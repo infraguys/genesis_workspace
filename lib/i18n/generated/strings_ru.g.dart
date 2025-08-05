@@ -50,6 +50,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsSettingsRu settings = TranslationsSettingsRu._(_root);
 	@override late final TranslationsDateLabelsRu dateLabels = TranslationsDateLabelsRu._(_root);
 	@override late final TranslationsInboxRu inbox = TranslationsInboxRu._(_root);
+	@override late final TranslationsMentionsRu mentions = TranslationsMentionsRu._(_root);
 }
 
 // Path: navBar
@@ -126,4 +127,15 @@ class TranslationsInboxRu extends TranslationsInboxEn {
 	@override String get noMessages => 'Все сообщения прочитаны';
 	@override String get dmTab => 'Личные сообщения';
 	@override String get channelsTab => 'Каналы';
+}
+
+// Path: mentions
+class TranslationsMentionsRu extends TranslationsMentionsEn {
+	TranslationsMentionsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Упоминания';
+	@override String get noMentions => 'Нет упоминаний';
 }

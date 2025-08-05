@@ -29,6 +29,14 @@ class MenuView extends StatelessWidget {
               await context.pushNamed(Routes.inbox);
             },
           ),
+          ListTile(
+            title: Text(context.t.mentions.title),
+            leading: Icon(Icons.alternate_email),
+            trailing: Icon(Icons.arrow_right),
+            onTap: () async {
+              await context.pushNamed(Routes.mentions);
+            },
+          ),
         ],
       ),
     );

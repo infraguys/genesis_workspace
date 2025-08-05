@@ -32,13 +32,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
   String _currentText = '';
 
-  void _onScroll() {
-    if (_controller.offset >= _controller.position.maxScrollExtent &&
-        !context.read<ChatCubit>().state.isLoadingMore) {
-      context.read<ChatCubit>().loadMoreMessages();
-    }
-  }
-
   Future<void> _onTextChanged() async {
     setState(() {
       _currentText = _messageController.text;
@@ -60,7 +53,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       chatId: widget.userEntity.userId,
       myUserId: _myUser.userId,
     );
-    _controller = ScrollController()..addListener(_onScroll);
+    _controller = ScrollController();
     _messageController = TextEditingController();
 
     _messageController.addListener(_onTextChanged);
@@ -69,9 +62,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _controller
-      ..removeListener(_onScroll)
-      ..dispose();
+    _controller.dispose();
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     super.dispose();
@@ -169,6 +160,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       onRead: (id) {
                                         context.read<ChatCubit>().scheduleMarkAsRead(id);
                                       },
+                                      loadMore: context.read<ChatCubit>().loadMoreMessages,
                                       showTopic: true,
                                     ),
                               // : Column(

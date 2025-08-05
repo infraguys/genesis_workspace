@@ -9,6 +9,7 @@ import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/direct_messages.dart';
 import 'package:genesis_workspace/features/feed/feed.dart';
 import 'package:genesis_workspace/features/inbox/inbox.dart';
+import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/menu/menu.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
@@ -33,6 +34,7 @@ class Routes {
   static const String chat = '/chat';
   static const String channelChat = '/channel-chat';
   static const String inbox = '/inbox';
+  static const String mentions = '/mentions';
 }
 
 final router = GoRouter(
@@ -80,6 +82,11 @@ final router = GoRouter(
                   path: Routes.inbox,
                   name: Routes.inbox,
                   builder: (context, state) => Inbox(),
+                ),
+                GoRoute(
+                  path: Routes.mentions,
+                  name: Routes.mentions,
+                  builder: (context, state) => Mentions(),
                 ),
               ],
             ),

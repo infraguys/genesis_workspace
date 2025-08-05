@@ -52,6 +52,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsSettingsEn settings = TranslationsSettingsEn.internal(_root);
 	late final TranslationsDateLabelsEn dateLabels = TranslationsDateLabelsEn.internal(_root);
 	late final TranslationsInboxEn inbox = TranslationsInboxEn.internal(_root);
+	late final TranslationsMentionsEn mentions = TranslationsMentionsEn.internal(_root);
 }
 
 // Path: navBar
@@ -122,4 +123,15 @@ class TranslationsInboxEn {
 	String get noMessages => 'No unread messages';
 	String get dmTab => 'Direct messages';
 	String get channelsTab => 'Channels';
+}
+
+// Path: mentions
+class TranslationsMentionsEn {
+	TranslationsMentionsEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Mentions';
+	String get noMentions => 'No mentions';
 }

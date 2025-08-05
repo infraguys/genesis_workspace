@@ -12,16 +12,18 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
-  final ScrollController? controller;
+  final ScrollController controller;
   final void Function(int id)? onRead;
+  final void Function()? loadMore;
   final bool showTopic;
   final bool isLoadingMore;
 
   const MessagesList({
     super.key,
     required this.messages,
-    this.controller,
+    required this.controller,
     this.onRead,
+    this.loadMore,
     this.showTopic = false,
     required this.isLoadingMore,
   });
@@ -42,7 +44,7 @@ class _MessagesListState extends State<MessagesList> {
   @override
   void initState() {
     super.initState();
-    _scrollController = widget.controller ?? ScrollController();
+    _scrollController = widget.controller;
     _scrollController.addListener(_onScroll);
     _myUser = context.read<ProfileCubit>().state.user;
   }
@@ -55,6 +57,12 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void _onScroll() {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+        !widget.isLoadingMore) {
+      if (widget.loadMore != null) {
+        widget.loadMore!();
+      }
+    }
     if (!_showDayLabel) {
       setState(() => _showDayLabel = true);
     }

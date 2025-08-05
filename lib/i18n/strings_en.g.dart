@@ -57,6 +57,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsSettingsEn settings = TranslationsSettingsEn._(_root);
 	late final TranslationsDateLabelsEn date_labels = TranslationsDateLabelsEn._(_root);
 	late final TranslationsInboxEn inbox = TranslationsInboxEn._(_root);
+	late final TranslationsMentionsEn mentions = TranslationsMentionsEn._(_root);
 }
 
 // Path: nav_bar
@@ -129,6 +130,17 @@ class TranslationsInboxEn {
 	String get channels_tab => 'Channels';
 }
 
+// Path: mentions
+class TranslationsMentionsEn {
+	TranslationsMentionsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Mentions';
+	String get no_mentions => 'No mentions';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -172,6 +184,8 @@ extension on Translations {
 			case 'inbox.no_messages': return 'No unread messages';
 			case 'inbox.dm_tab': return 'Direct messages';
 			case 'inbox.channels_tab': return 'Channels';
+			case 'mentions.title': return 'Mentions';
+			case 'mentions.no_mentions': return 'No mentions';
 			default: return null;
 		}
 	}
