@@ -54,6 +54,7 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsSettingsRu settings = _TranslationsSettingsRu._(_root);
 	@override late final _TranslationsDateLabelsRu date_labels = _TranslationsDateLabelsRu._(_root);
 	@override late final _TranslationsInboxRu inbox = _TranslationsInboxRu._(_root);
+	@override late final _TranslationsMentionsRu mentions = _TranslationsMentionsRu._(_root);
 }
 
 // Path: nav_bar
@@ -132,6 +133,17 @@ class _TranslationsInboxRu implements TranslationsInboxEn {
 	@override String get channels_tab => 'Каналы';
 }
 
+// Path: mentions
+class _TranslationsMentionsRu implements TranslationsMentionsEn {
+	_TranslationsMentionsRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Упоминания';
+	@override String get no_mentions => 'Нет упоминаний';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsRu {
@@ -181,6 +193,8 @@ extension on TranslationsRu {
 			case 'inbox.no_messages': return 'Все сообщения прочитаны';
 			case 'inbox.dm_tab': return 'Личные сообщения';
 			case 'inbox.channels_tab': return 'Каналы';
+			case 'mentions.title': return 'Упоминания';
+			case 'mentions.no_mentions': return 'Нет упоминаний';
 			default: return null;
 		}
 	}

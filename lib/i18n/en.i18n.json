@@ -46,5 +46,9 @@
     "no_messages": "No unread messages",
     "dm_tab": "Direct messages",
     "channels_tab": "Channels"
+  },
+  "mentions": {
+   "title": "Mentions",
+    "no_mentions": "No mentions"
   }
 }
