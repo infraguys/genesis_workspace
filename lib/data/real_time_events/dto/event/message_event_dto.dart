@@ -12,11 +12,11 @@ class MessageEventDto extends EventDto {
   final List<String> flags;
 
   MessageEventDto({
-    required int id,
-    required EventType type,
+    required super.id,
+    required super.type,
     required this.message,
     required this.flags,
-  }) : super(id: id, type: type);
+  });
 
   factory MessageEventDto.fromJson(Map<String, dynamic> json) => _$MessageEventDtoFromJson(json);
 

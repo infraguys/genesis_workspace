@@ -45,23 +45,23 @@ class InboxCubit extends Cubit<InboxState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
 
-      final _dmMessages = <MessageEntity>[];
-      final _channelMessages = <MessageEntity>[];
+      final dmMessages = <MessageEntity>[];
+      final channelMessages = <MessageEntity>[];
 
       for (var message in response.messages) {
         if (message.type == MessageType.private) {
-          _dmMessages.add(message);
+          dmMessages.add(message);
         } else if (message.type == MessageType.stream) {
-          _channelMessages.add(message);
+          channelMessages.add(message);
         }
       }
 
-      for (var message in _dmMessages) {
+      for (var message in dmMessages) {
         final senderFullName = message.senderFullName;
         state.dmMessages.putIfAbsent(senderFullName, () => []).add(message);
       }
 
-      for (var msg in _channelMessages) {
+      for (var msg in channelMessages) {
         final channel = msg.displayRecipient ?? 'Unknown';
         final topic = msg.subject.isEmpty ? '' : msg.subject;
         state.channelMessages.putIfAbsent(channel, () => {});
@@ -108,13 +108,13 @@ class InboxCubit extends Cubit<InboxState> {
         for (var user in state.dmMessages.keys) {
           state.dmMessages[user]?.removeWhere((msg) => msg.id == eventMessage);
         }
-        state.channelMessages.keys.forEach((channelName) {
+        for (var channelName in state.channelMessages.keys) {
           state.channelMessages[channelName]?.keys.forEach((topic) {
             state.channelMessages[channelName]![topic]?.removeWhere(
               (msg) => msg.id == eventMessage,
             );
           });
-        });
+        }
       }
     }
     Map<String, List<MessageEntity>> updatedDmMessages = state.dmMessages;

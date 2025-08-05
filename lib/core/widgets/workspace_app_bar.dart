@@ -5,8 +5,7 @@ class WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final PreferredSize? bottom;
 
-  const WorkspaceAppBar({Key? key, required this.title, this.leading, this.bottom})
-    : super(key: key);
+  const WorkspaceAppBar({super.key, required this.title, this.leading, this.bottom});
 
   @override
   Widget build(BuildContext context) {

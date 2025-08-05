@@ -50,9 +50,9 @@ class MessagesCubit extends Cubit<MessagesState> {
     final newUnreadMessages = [...state.unreadMessages];
 
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
-      event.messages.forEach((message) {
+      for (var message in event.messages) {
         newUnreadMessages.removeWhere((unreadMessage) => unreadMessage.id == message);
-      });
+      }
     }
     emit(state.copyWith(unreadMessages: newUnreadMessages));
   }

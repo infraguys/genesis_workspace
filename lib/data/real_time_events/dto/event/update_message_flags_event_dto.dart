@@ -15,13 +15,13 @@ class UpdateMessageFlagsEventDto extends EventDto {
   final bool all;
 
   UpdateMessageFlagsEventDto({
-    required int id,
-    required EventType type,
+    required super.id,
+    required super.type,
     required this.op,
     required this.flag,
     required this.messages,
     required this.all,
-  }) : super(id: id, type: type);
+  });
 
   factory UpdateMessageFlagsEventDto.fromJson(Map<String, dynamic> json) =>
       _$UpdateMessageFlagsEventDtoFromJson(json);

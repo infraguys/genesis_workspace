@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class SplashView extends StatefulWidget {
   final VoidCallback onInitializationComplete;
 
-  const SplashView({Key? key, required this.onInitializationComplete}) : super(key: key);
+  const SplashView({super.key, required this.onInitializationComplete});
 
   @override
   State<SplashView> createState() => _SplashViewState();

@@ -7,7 +7,7 @@ part 'unsupported_event_dto.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class UnsupportedEventDto extends EventDto {
-  UnsupportedEventDto({required int id, required EventType type}) : super(id: id, type: type);
+  UnsupportedEventDto({required super.id, required super.type});
 
   // factory UnsupportedEventDto.fromJson(Map<String, dynamic> json) =>
   //     _$UnsupportedEventDtoFromJson(json);
