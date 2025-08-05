@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
@@ -35,6 +38,7 @@ class Routes {
   static const String channelChat = '/channel-chat';
   static const String inbox = '/inbox';
   static const String mentions = '/mentions';
+  static const String imageFullScreen = '/image-full-screen';
 }
 
 final router = GoRouter(
@@ -136,6 +140,22 @@ final router = GoRouter(
         return CustomTransitionPage(
           key: state.pageKey,
           child: const Auth(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: Routes.imageFullScreen,
+      name: Routes.imageFullScreen,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: ImageFullScreen(imageBytes: state.extra as Uint8List),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
