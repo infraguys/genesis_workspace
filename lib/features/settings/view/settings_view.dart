@@ -76,7 +76,7 @@ class SettingsView extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () async {
-                  context.read<AuthCubit>().devLogout();
+                  await context.read<AuthCubit>().devLogout();
                   context.go(Routes.auth);
                 },
                 icon: const Icon(Icons.logout),

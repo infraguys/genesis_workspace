@@ -38,6 +38,12 @@ class _MentionsViewState extends State<MentionsView> {
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (state.messages.isEmpty) {
+                return Center(child: Text(context.t.mentions.noMentions));
+              }
               return MessagesList(
                 controller: _scrollController,
                 messages: state.messages,

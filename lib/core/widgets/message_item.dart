@@ -48,21 +48,11 @@ class MessageItem extends StatelessWidget {
         : HtmlWidget(
             message.content,
             customStylesBuilder: (element) {
-              // if (element.classes.contains('user-mention')) {
-              //   return {'font-weight': '600'};
-              // }
+              if (element.classes.contains('user-mention')) {
+                return {'font-weight': '600'};
+              }
             },
             customWidgetBuilder: (element) {
-              if (element.classes.contains('user-mention')) {
-                return Container(
-                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text("Mention"),
-                );
-              }
               if (element.attributes.containsValue('image/png')) {
                 return AuthorizedImage(url: '${AppConstants.baseUrl}${element.attributes['src']}');
               }
