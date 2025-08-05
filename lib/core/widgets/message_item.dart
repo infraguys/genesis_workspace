@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -44,23 +47,40 @@ class MessageItem extends StatelessWidget {
 
     final messageContent = isSkeleton
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceVariant)
-        : SelectableText(
+        : HtmlWidget(
             message.content,
-            contextMenuBuilder: (context, editableTextState) {
-              return AdaptiveTextSelectionToolbar.buttonItems(
-                anchors: editableTextState.contextMenuAnchors,
-                buttonItems: [
-                  ContextMenuButtonItem(
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: message.content));
-                      ContextMenuController.removeAny();
-                    },
-                    label: context.t.copy,
-                  ),
-                ],
-              );
+            customWidgetBuilder: (element) {
+              if (element.attributes.containsValue('image/png')) {
+                inspect(element);
+                return AuthorizedImage(url: '${AppConstants.baseUrl}${element.attributes['src']}');
+              }
+              if (element.attributes.values.any((value) => value.contains('Снимок экрана'))) {
+                // return SizedBox();
+              }
+              return null;
+            },
+            onTapUrl: (String? url) async {
+              print(url);
+              return true;
             },
           );
+    // : SelectableText(
+    //     message.content,
+    //     contextMenuBuilder: (context, editableTextState) {
+    //       return AdaptiveTextSelectionToolbar.buttonItems(
+    //         anchors: editableTextState.contextMenuAnchors,
+    //         buttonItems: [
+    //           ContextMenuButtonItem(
+    //             onPressed: () {
+    //               Clipboard.setData(ClipboardData(text: message.content));
+    //               ContextMenuController.removeAny();
+    //             },
+    //             label: context.t.copy,
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
 
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceVariant)
