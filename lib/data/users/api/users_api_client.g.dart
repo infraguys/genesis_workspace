@@ -222,6 +222,33 @@ class _UsersApiClient implements UsersApiClient {
   }
 
   @override
+  Future<ChannelByIdResponseDto> getChannelById(int streamId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ChannelByIdResponseDto>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/streams/${streamId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ChannelByIdResponseDto _value;
+    try {
+      _value = ChannelByIdResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<UpdatePresenceResponseDto> updatePresence(
     int? lastUpdateId,
     bool? newUserInput,
