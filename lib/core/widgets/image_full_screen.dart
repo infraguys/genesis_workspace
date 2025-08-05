@@ -46,7 +46,7 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
         onTap: () => context.pop,
         child: PhotoView(
           scaleStateController: scaleStateController,
-          minScale: PhotoViewComputedScale.covered * 1,
+          minScale: PhotoViewComputedScale.contained * 1,
           maxScale: PhotoViewComputedScale.covered * 2,
           heroAttributes: PhotoViewHeroAttributes(tag: widget.imageBytes.toString()),
           backgroundDecoration: const BoxDecoration(color: Colors.black),
