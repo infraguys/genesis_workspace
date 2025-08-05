@@ -82,6 +82,12 @@ class InboxCubit extends Cubit<InboxState> {
     }
   }
 
+  Future<void> getChannelById() async {
+    try {} catch (e) {
+      rethrow;
+    }
+  }
+
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
     if (message.type == MessageType.private) {
@@ -98,11 +104,6 @@ class InboxCubit extends Cubit<InboxState> {
 
   void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
-      // for (var user in state.dmMessages.keys) {
-      //   for (var eventMessage in event.messages) {
-      //     state.dmMessages[user]?.removeWhere((msg) => msg.id == eventMessage);
-      //   }
-      // }
       for (var eventMessage in event.messages) {
         for (var user in state.dmMessages.keys) {
           state.dmMessages[user]?.removeWhere((msg) => msg.id == eventMessage);
