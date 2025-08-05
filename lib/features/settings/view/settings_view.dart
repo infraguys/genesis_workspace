@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
@@ -64,6 +65,30 @@ class SettingsView extends StatelessWidget {
               ),
             ),
           ),
+          if (kDebugMode)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.error,
+                  foregroundColor: theme.colorScheme.onError,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () async {
+                  context.read<AuthCubit>().devLogout();
+                  context.go(Routes.auth);
+                },
+                icon: const Icon(Icons.logout),
+                label: Text(
+                  "Dev logout",
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onError,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

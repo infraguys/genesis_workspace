@@ -51,9 +51,13 @@ class AuthCubit extends Cubit<AuthState> {
       newUserInput: true,
       pingOnly: true,
     );
-    await _updatePresenceUseCase.call(body);
-    await _deleteQueueUseCase.call(queueId!);
+    await Future.wait([_updatePresenceUseCase.call(body), _deleteQueueUseCase.call(queueId)]);
     await _deleteTokenUseCase.call();
+    state.isAuthorized = false;
+    emit(state.copyWith(isAuthorized: state.isAuthorized));
+  }
+
+  void devLogout() async {
     state.isAuthorized = false;
     emit(state.copyWith(isAuthorized: state.isAuthorized));
   }

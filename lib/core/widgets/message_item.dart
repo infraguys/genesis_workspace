@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -49,9 +47,23 @@ class MessageItem extends StatelessWidget {
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceVariant)
         : HtmlWidget(
             message.content,
+            customStylesBuilder: (element) {
+              // if (element.classes.contains('user-mention')) {
+              //   return {'font-weight': '600'};
+              // }
+            },
             customWidgetBuilder: (element) {
+              if (element.classes.contains('user-mention')) {
+                return Container(
+                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text("Mention"),
+                );
+              }
               if (element.attributes.containsValue('image/png')) {
-                inspect(element);
                 return AuthorizedImage(url: '${AppConstants.baseUrl}${element.attributes['src']}');
               }
               if (element.attributes.values.any((value) => value.contains('Снимок экрана'))) {
