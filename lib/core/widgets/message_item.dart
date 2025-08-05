@@ -40,17 +40,18 @@ class MessageItem extends StatelessWidget {
         : UserAvatar(avatarUrl: message.avatarUrl);
 
     final senderName = isSkeleton
-        ? Container(height: 10, width: 80, color: theme.colorScheme.surfaceVariant)
+        ? Container(height: 10, width: 80, color: theme.colorScheme.surfaceContainerHighest)
         : Text(message.senderFullName, style: theme.textTheme.titleSmall);
 
     final messageContent = isSkeleton
-        ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceVariant)
+        ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceContainerHighest)
         : HtmlWidget(
             message.content,
             customStylesBuilder: (element) {
               if (element.classes.contains('user-mention')) {
                 return {'font-weight': '600'};
               }
+              return null;
             },
             customWidgetBuilder: (element) {
               if (element.attributes.containsValue('image/png')) {
@@ -85,7 +86,7 @@ class MessageItem extends StatelessWidget {
     //   );
 
     final messageTime = isSkeleton
-        ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceVariant)
+        ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
         : Text(
             _formatTime(message.timestamp),
             style: theme.textTheme.labelSmall?.copyWith(
@@ -177,6 +178,11 @@ class MessageItem extends StatelessWidget {
                     spacing: 8,
                     children: [
                       Expanded(
+                        flex:
+                            (messageOrder == MessageUIOrder.single ||
+                                messageOrder == MessageUIOrder.lastSingle)
+                            ? 0
+                            : 1,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,

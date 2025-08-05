@@ -230,7 +230,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   }
 
   void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
-    event.messages.forEach((messageId) {
+    for (var messageId in event.messages) {
       if (event.flag == MessageFlag.read) {
         MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
         final int index = state.messages.indexOf(message);
@@ -239,7 +239,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
         );
         state.messages[index] = changedMessage;
       }
-    });
+    }
     emit(state.copyWith(messages: state.messages));
   }
 

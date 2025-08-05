@@ -135,6 +135,7 @@ final router = GoRouter(
         if (context.read<AuthCubit>().state.isAuthorized) {
           return Routes.home;
         }
+        return null;
       },
       pageBuilder: (context, state) {
         return CustomTransitionPage(

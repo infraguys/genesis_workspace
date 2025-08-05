@@ -167,11 +167,11 @@ class ChannelsCubit extends Cubit<ChannelsState> {
       channel.unreadMessages.add(message.id);
       channels[indexOfChannel] = channel;
       if (channel.topics.isNotEmpty) {
-        final TopicEntity? topic = channel.topics.firstWhere(
+        final TopicEntity topic = channel.topics.firstWhere(
           (topic) => topic.name == message.subject,
         );
-        if (message.subject == topic?.name) {
-          topic!.unreadMessages.add(message.id);
+        if (message.subject == topic.name) {
+          topic.unreadMessages.add(message.id);
         }
       }
     }

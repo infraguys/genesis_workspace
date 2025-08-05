@@ -21,15 +21,15 @@ class TypingEventDto extends EventDto {
   final String? topic;
 
   TypingEventDto({
-    required int id,
-    required EventType type,
+    required super.id,
+    required super.type,
     required this.messageType,
     required this.op,
     required this.sender,
     this.recipients,
     this.streamId,
     this.topic,
-  }) : super(id: id, type: type);
+  });
 
   factory TypingEventDto.fromJson(Map<String, dynamic> json) => _$TypingEventDtoFromJson(json);
 
