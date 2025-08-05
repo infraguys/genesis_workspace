@@ -6,9 +6,11 @@ class DeleteQueueUseCase {
   final RealTimeEventsRepository _repository;
   DeleteQueueUseCase(this._repository);
 
-  Future<void> call(String queueId) async {
+  Future<void> call(String? queueId) async {
     try {
-      await _repository.deleteQueue(queueId);
+      if (queueId != null) {
+        await _repository.deleteQueue(queueId);
+      }
     } catch (e) {
       rethrow;
     }
