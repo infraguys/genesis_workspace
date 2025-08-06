@@ -72,7 +72,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Row(
           spacing: 8,
@@ -125,7 +125,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                // padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                padding: EdgeInsetsGeometry.zero,
                 child: Column(
                   children: [
                     state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting
