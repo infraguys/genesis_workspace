@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/inbox/bloc/inbox_cubit.dart';
 import 'package:genesis_workspace/features/inbox/view/section_header.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -89,7 +91,7 @@ class _InboxViewState extends State<InboxView> {
                   if (state.channelMessages.isNotEmpty)
                     SectionHeader(title: context.t.inbox.channelsTab),
                   ...state.channelMessages.entries.map(
-                    (entry) => ExpansionTile(
+                    (channelMessage) => ExpansionTile(
                       tilePadding: EdgeInsets.zero,
                       childrenPadding: const EdgeInsets.only(left: 16),
                       initiallyExpanded: true,
@@ -97,24 +99,37 @@ class _InboxViewState extends State<InboxView> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Text(entry.key, style: Theme.of(context).textTheme.bodyMedium),
+                            child: Text(
+                              channelMessage.key,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
-                          Badge.count(count: entry.value.length),
+                          Badge.count(count: channelMessage.value.length),
                         ],
                       ),
-                      children: entry.value.entries.map((entry) {
+                      children: channelMessage.value.entries.map((entry) {
                         final topicName = entry.key.isEmpty ? context.t.allMessages : entry.key;
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
                           title: Text(topicName, style: Theme.of(context).textTheme.bodySmall),
                           trailing: Badge.count(count: entry.value.length),
-                          onTap: () {
-                            // final ChannelChatExtra extra = ChannelChatExtra(
-                            //   channel: channel,
-                            //   topicEntity: TopicEntity(name: topicName),
-                            // );
-                            // context.pushNamed(Routes.channelChat, extra: entry.value);
+                          onTap: () async {
+                            final streamId = entry.value.first.streamId;
+                            final topicName = entry.value.first.subject;
+                            final maxId = entry.value.last.id;
+                            final channel = await context.read<InboxCubit>().getChannelById(
+                              streamId!,
+                            );
+                            final ChannelChatExtra extra = ChannelChatExtra(
+                              channel: channel.toChannelEntity(),
+                              topicEntity: TopicEntity(
+                                name: topicName,
+                                maxId: maxId,
+                                unreadMessages: {},
+                              ),
+                            );
+                            context.pushNamed(Routes.channelChat, extra: extra);
                           },
                         );
                       }).toList(),
@@ -128,15 +143,4 @@ class _InboxViewState extends State<InboxView> {
       },
     );
   }
-
-  /// Канал с раскрывающимися топиками
-  // Widget _buildChannelTile(
-  //   String channelName, //key
-  //   Map<String, List<MessageEntity>> topics, // value
-  //   BuildContext context,
-  // ) {
-  //   final totalCount = topics.values.fold<int>(0, (sum, list) => sum + list.length);
-  //
-  //   return
-  // }
 }
