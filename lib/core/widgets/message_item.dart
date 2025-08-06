@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -47,6 +50,7 @@ class MessageItem extends StatelessWidget {
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceContainerHighest)
         : HtmlWidget(
             message.content,
+            factoryBuilder: () => MyWidgetFactory(),
             customStylesBuilder: (element) {
               if (element.classes.contains('user-mention')) {
                 return {'font-weight': '600'};
@@ -57,8 +61,8 @@ class MessageItem extends StatelessWidget {
               if (element.attributes.containsValue('image/png')) {
                 return AuthorizedImage(url: '${AppConstants.baseUrl}${element.attributes['src']}');
               }
-              if (element.attributes.values.any((value) => value.contains('Снимок экрана'))) {
-                // return SizedBox();
+              if (element.classes.contains('emoji')) {
+                inspect(element);
               }
               return null;
             },
@@ -224,3 +228,5 @@ class MessageItem extends StatelessWidget {
     );
   }
 }
+
+class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}
