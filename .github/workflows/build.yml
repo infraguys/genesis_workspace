@@ -14,9 +14,10 @@ on:
         - ci_prod
 
 env:
+  ARTIFACTS_PATH: artifacts
   REPO_ENDPOINT: http://10.20.0.1:8081
   CORE_ENDPOINT: http://10.20.0.2:11010
-  NODE_UUID: 3ea35d89-fc3c-43d1-82fe-40980edbf617
+  NODE_NS_UUID: 3ea35d89-fc3c-43d1-82fe-40980edbf617
   PROJECT_ID: d4ef38ee-2667-4931-90fd-c858d4bc5f1c
   # All vars you need to pass to build the flutter app goes here with prefix "UI_BUILD_ENV_".
   # There is a build python script `make_ui_build_env.py` that handles these variables and
@@ -37,8 +38,21 @@ jobs:
         env:
             DEV_KEYS: ${{ secrets.DEV_KEYS }}
             UI_BUILD_ENV_BUILD_TARGET: ${{ github.event.inputs.build_target }}
+            PROD_URL: ${{ secrets.PROD_URL }}
+            DEV_URL: ${{ secrets.DEV_URL }}
         run: |
           set -eux
+          mkdir -p ${ARTIFACTS_PATH}
+          BUILD_TARGET="${UI_BUILD_ENV_BUILD_TARGET:-ci_stage}"
+
+          # Node UUID based on the build target
+          python3 -c "import uuid; print(uuid.uuid5(uuid.UUID(\"${NODE_NS_UUID}\"),\"${BUILD_TARGET}\"))" > "${ARTIFACTS_PATH}/node_uuid.txt"
+
+          if [[ "${UI_BUILD_ENV_BUILD_TARGET}" == "ci_prod" ]]; then
+            export UI_BUILD_ENV_prod_url="${PROD_URL}"
+          else
+            export UI_BUILD_ENV_dev_url="${DEV_URL}"
+          fi
 
           # Install DevTools
           rm -fr venv
@@ -52,7 +66,7 @@ jobs:
 
           # Temporary upload step is done in the build script
           VERSION="$(genesis get-version .)"
-          echo "${VERSION}" > version.txt
+          echo "${VERSION}" > "${ARTIFACTS_PATH}/version.txt"
           ELEMENT_PATH="/var/lib/repository/genesis_workspace"
 
           rm -fr "${ELEMENT_PATH}/${VERSION}"
@@ -60,19 +74,20 @@ jobs:
           mv output/genesis-workspace.raw "${ELEMENT_PATH}/${VERSION}/"
           cd ${ELEMENT_PATH}/${VERSION}/ && \
             sha256sum genesis-workspace.raw >> ${ELEMENT_PATH}/${VERSION}/SHA256SUMS
-      - name: Upload the image version
+      - name: Upload the build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: image_version
-          path: version.txt
+          name: build_artifacts
+          path: artifacts/
+      
   deploy:
     runs-on: self-hosted
     needs: [build]
     steps:
-      - name: Download image version for deployment
+      - name: Download the build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: image_version
+          name: build_artifacts
       - name: Deploy Genesis Workspace
         env:
           CORE_USER: ${{ secrets.CORE_USER }}
@@ -80,7 +95,8 @@ jobs:
         run: |
           set -eux
 
-          VERSION=$(cat version.txt)
+          VERSION=$(cat ${ARTIFACTS_PATH}/version.txt)
+          NODE_UUID=$(cat ${ARTIFACTS_PATH}/node_uuid.txt)
 
           # Install CI tools
           rm -fr venv
