@@ -51,6 +51,7 @@ dependencies:
   intl: ^0.20.2
   path_provider: ^2.1.5
   emoji_picker_flutter: ^4.3.0
+  keyboard_height_plugin: ^0.1.5
 
 
 dev_dependencies:

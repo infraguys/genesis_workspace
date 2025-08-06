@@ -1,6 +1,8 @@
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
+import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
@@ -20,13 +22,25 @@ class MessageInput extends StatefulWidget {
 
 class _MessageInputState extends State<MessageInput> {
   bool _showEmojiPicker = true;
+  double _keyboardHeight = 0;
+  final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
 
   final FocusNode _textFieldFocusNode = FocusNode();
 
   @override
+  void initState() {
+    super.initState();
+    _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
+      inspect(height);
+      setState(() {
+        _keyboardHeight = height;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final emojiHeight = MediaQuery.of(context).viewInsets.bottom;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -34,7 +48,8 @@ class _MessageInputState extends State<MessageInput> {
           padding: const EdgeInsets.symmetric(
             horizontal: 6,
             vertical: 4,
-          ).copyWith(bottom: (_textFieldFocusNode.hasFocus || _showEmojiPicker) ? 10 : 30),
+            // ).copyWith(bottom: (_textFieldFocusNode.hasFocus || _showEmojiPicker) ? 10 : 30),
+          ).copyWith(bottom: 30),
           decoration: BoxDecoration(color: theme.colorScheme.surface),
           child: Row(
             spacing: 8,
@@ -59,33 +74,33 @@ class _MessageInputState extends State<MessageInput> {
                       border: InputBorder.none,
                       hintText: "Message",
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            if (_showEmojiPicker) {
-                              // Если открыт эмодзи-пикер → переключаем на клавиатуру
-                              _showEmojiPicker = false;
-                              FocusScope.of(context).requestFocus(_textFieldFocusNode);
-                            } else {
-                              // Если клавиатура открыта → переключаем на эмодзи-пикер
-                              _showEmojiPicker = true;
-                              FocusScope.of(context).unfocus();
-                            }
-                          });
-                        },
-                        icon: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder: (child, animation) => RotationTransition(
-                            turns: child.key == const ValueKey('emoji')
-                                ? Tween<double>(begin: 0.75, end: 1.0).animate(animation)
-                                : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
-                            child: FadeTransition(opacity: animation, child: child),
-                          ),
-                          child: _showEmojiPicker
-                              ? const Icon(Icons.keyboard, key: ValueKey('keyboard'))
-                              : const Icon(Icons.emoji_emotions, key: ValueKey('emoji')),
-                        ),
-                      ),
+                      // suffixIcon: IconButton(
+                      //   onPressed: () {
+                      //     setState(() {
+                      //       if (_showEmojiPicker) {
+                      //         // Если открыт эмодзи-пикер → переключаем на клавиатуру
+                      //         _showEmojiPicker = false;
+                      //         FocusScope.of(context).requestFocus(_textFieldFocusNode);
+                      //       } else {
+                      //         // Если клавиатура открыта → переключаем на эмодзи-пикер
+                      //         _showEmojiPicker = true;
+                      //         FocusScope.of(context).unfocus();
+                      //       }
+                      //     });
+                      //   },
+                      //   icon: AnimatedSwitcher(
+                      //     duration: const Duration(milliseconds: 200),
+                      //     transitionBuilder: (child, animation) => RotationTransition(
+                      //       turns: child.key == const ValueKey('emoji')
+                      //           ? Tween<double>(begin: 0.75, end: 1.0).animate(animation)
+                      //           : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
+                      //       child: FadeTransition(opacity: animation, child: child),
+                      //     ),
+                      //     child: _showEmojiPicker
+                      //         ? const Icon(Icons.keyboard, key: ValueKey('keyboard'))
+                      //         : const Icon(Icons.emoji_emotions, key: ValueKey('emoji')),
+                      //   ),
+                      // ),
                     ),
                   ),
                 ),
@@ -97,16 +112,17 @@ class _MessageInputState extends State<MessageInput> {
             ],
           ),
         ),
-        Container(
-          height: 336,
-          child: EmojiPicker(
-            textEditingController: widget.controller,
-            config: Config(
-              height: emojiHeight,
-              bottomActionBarConfig: BottomActionBarConfig(enabled: false),
-            ),
-          ),
-        ),
+        // AnimatedContainer(
+        //   height: _keyboardHeight,
+        //   duration: Duration(milliseconds: 300),
+        //   child: EmojiPicker(
+        //     textEditingController: widget.controller,
+        //     config: Config(
+        //       height: _keyboardHeight,
+        //       bottomActionBarConfig: BottomActionBarConfig(enabled: false),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

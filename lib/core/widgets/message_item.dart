@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
@@ -62,7 +60,7 @@ class MessageItem extends StatelessWidget {
                 return AuthorizedImage(url: '${AppConstants.baseUrl}${element.attributes['src']}');
               }
               if (element.classes.contains('emoji')) {
-                inspect(element);
+                // inspect(element);
               }
               return null;
             },
