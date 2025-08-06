@@ -48,9 +48,8 @@ ln -sv "$FLUTTER_SDK_PATH/bin/flutter" "/usr/local/bin/flutter"
 
 cd "$WORK_DIR"
 
-# Uncomment when we need environment variables
 # Prepare the environment
-# python3 genesis/images/make_ui_build_env.py
+python3 genesis/images/make_ui_build_env.py
 
 # Build the application
 make "$BUILD_TARGET"
