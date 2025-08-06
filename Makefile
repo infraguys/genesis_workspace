@@ -22,13 +22,13 @@ ci_prod:
 	make clean
 	make generate
 	make slang
-	flutter build web --release -t lib/prod.dart
+	flutter build web --release -t lib/prod.dart --dart-define-from-file=env.json
 
 ci_stage:
 	make clean
 	make generate
 	make slang
-	flutter build web --release -t lib/stage.dart
+	flutter build web --release -t lib/stage.dart --dart-define-from-file=env.json
 
 build-prod-apk:
 	flutter build apk --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
