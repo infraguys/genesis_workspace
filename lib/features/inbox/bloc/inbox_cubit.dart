@@ -13,7 +13,9 @@ import 'package:genesis_workspace/domain/messages/entities/messages_request_enti
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 
@@ -34,6 +36,7 @@ class InboxCubit extends Cubit<InboxState> {
 
   final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
   final GetUserByIdUseCase _getUserByIdUseCase = getIt<GetUserByIdUseCase>();
+  final _getSubscribedChannelsUseCase = getIt<GetSubscribedChannelsUseCase>();
 
   Future<void> getLastMessages() async {
     try {
@@ -82,8 +85,12 @@ class InboxCubit extends Cubit<InboxState> {
     }
   }
 
-  Future<void> getChannelById() async {
-    try {} catch (e) {
+  Future<SubscriptionEntity> getChannelById(int streamId) async {
+    try {
+      final channels = await _getSubscribedChannelsUseCase.call(false);
+
+      return channels.firstWhere((channel) => channel.streamId == streamId);
+    } catch (e) {
       rethrow;
     }
   }

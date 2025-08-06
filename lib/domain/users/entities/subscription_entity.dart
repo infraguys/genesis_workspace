@@ -2,7 +2,7 @@ import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 
 class SubscriptionEntity {
   final String name;
-  final List<int> subscribers;
+  final List<int>? subscribers;
   final int streamId;
   final String description;
   final String color;

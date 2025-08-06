@@ -6,7 +6,7 @@ part 'subscription_dto.g.dart';
 @JsonSerializable()
 class SubscriptionDto {
   final String name;
-  final List<int> subscribers;
+  final List<int>? subscribers;
   @JsonKey(name: 'stream_id')
   final int streamId;
   final String description;
@@ -14,7 +14,7 @@ class SubscriptionDto {
 
   SubscriptionDto({
     required this.name,
-    required this.subscribers,
+    this.subscribers,
     required this.streamId,
     required this.description,
     required this.color,

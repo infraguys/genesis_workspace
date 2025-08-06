@@ -9,8 +9,8 @@ part of 'subscription_dto.dart';
 SubscriptionDto _$SubscriptionDtoFromJson(Map<String, dynamic> json) =>
     SubscriptionDto(
       name: json['name'] as String,
-      subscribers: (json['subscribers'] as List<dynamic>)
-          .map((e) => (e as num).toInt())
+      subscribers: (json['subscribers'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
           .toList(),
       streamId: (json['stream_id'] as num).toInt(),
       description: json['description'] as String,
