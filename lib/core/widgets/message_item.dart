@@ -178,11 +178,6 @@ class MessageItem extends StatelessWidget {
                     spacing: 8,
                     children: [
                       Expanded(
-                        flex:
-                            (messageOrder == MessageUIOrder.single ||
-                                messageOrder == MessageUIOrder.lastSingle)
-                            ? 0
-                            : 1,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,

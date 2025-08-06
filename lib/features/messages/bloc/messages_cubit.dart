@@ -48,13 +48,23 @@ class MessagesCubit extends Cubit<MessagesState> {
 
   _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
     final newUnreadMessages = [...state.unreadMessages];
-
+    final newMessages = [...state.messages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
-      for (var message in event.messages) {
-        newUnreadMessages.removeWhere((unreadMessage) => unreadMessage.id == message);
+      for (var messageId in event.messages) {
+        newUnreadMessages.removeWhere((unreadMessage) => unreadMessage.id == messageId);
+        for (var message in state.messages) {
+          final indexOf = state.messages.indexOf(message);
+          if (message.id == messageId) {
+            if (newMessages[indexOf].flags != null) {
+              newMessages[indexOf].flags!.add('read');
+            } else {
+              newMessages[indexOf].flags = ['read'];
+            }
+          }
+        }
       }
     }
-    emit(state.copyWith(unreadMessages: newUnreadMessages));
+    emit(state.copyWith(unreadMessages: newUnreadMessages, messages: newMessages));
   }
 
   Future<void> getLastMessages() async {

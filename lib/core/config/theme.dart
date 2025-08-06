@@ -11,7 +11,7 @@ final _bottomNavBarTheme = BottomNavigationBarThemeData(
   elevation: 8.0, // Elevation (shadow)
   // --- Selected item properties ---
   selectedItemColor: Colors.deepPurple, // Color of the icon and label of the selected item
-  selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
+  selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.0),
   selectedIconTheme: IconThemeData(
     size: 28.0,
     // color: Colors.blueAccent, // Usually inherited from selectedItemColor
