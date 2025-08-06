@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
@@ -58,9 +57,6 @@ class _InboxViewState extends State<InboxView> {
                   ],
                 );
               }
-
-              // final groupedChannels = _groupByChannelAndTopic(state.channelMessages);
-              inspect(state.channelMessages);
               return ListView(
                 padding: const EdgeInsets.all(12),
                 children: [
@@ -76,14 +72,19 @@ class _InboxViewState extends State<InboxView> {
                         contentPadding: EdgeInsets.zero,
                         dense: true,
                         title: Text(user.key, style: Theme.of(context).textTheme.bodyMedium),
-                        trailing: Badge.count(count: user.value.length),
-                        onTap: () async {
-                          final UserEntity userEntity = await context
-                              .read<InboxCubit>()
-                              .getUserById(user.value.first.senderId);
-                          final DmUserEntity dmUser = userEntity.toDmUser();
-                          context.pushNamed(Routes.chat, extra: dmUser);
-                        },
+                        trailing: state.pendingId == user.value.first.senderId
+                            ? CupertinoActivityIndicator()
+                            : Badge.count(count: user.value.length),
+                        onTap: state.pendingId != null
+                            ? null
+                            : () async {
+                                final userId = user.value.first.senderId;
+                                final UserEntity userEntity = await context
+                                    .read<InboxCubit>()
+                                    .getUserById(userId);
+                                final DmUserEntity dmUser = userEntity.toDmUser();
+                                context.pushNamed(Routes.chat, extra: dmUser);
+                              },
                       );
                     },
                   ),
@@ -113,24 +114,28 @@ class _InboxViewState extends State<InboxView> {
                           contentPadding: EdgeInsets.zero,
                           dense: true,
                           title: Text(topicName, style: Theme.of(context).textTheme.bodySmall),
-                          trailing: Badge.count(count: entry.value.length),
-                          onTap: () async {
-                            final streamId = entry.value.first.streamId;
-                            final topicName = entry.value.first.subject;
-                            final maxId = entry.value.last.id;
-                            final channel = await context.read<InboxCubit>().getChannelById(
-                              streamId!,
-                            );
-                            final ChannelChatExtra extra = ChannelChatExtra(
-                              channel: channel.toChannelEntity(),
-                              topicEntity: TopicEntity(
-                                name: topicName,
-                                maxId: maxId,
-                                unreadMessages: {},
-                              ),
-                            );
-                            context.pushNamed(Routes.channelChat, extra: extra);
-                          },
+                          trailing: state.pendingId == entry.value.first.streamId
+                              ? CupertinoActivityIndicator()
+                              : Badge.count(count: entry.value.length),
+                          onTap: state.pendingId != null
+                              ? null
+                              : () async {
+                                  final streamId = entry.value.first.streamId;
+                                  final topicName = entry.value.first.subject;
+                                  final maxId = entry.value.last.id;
+                                  final channel = await context.read<InboxCubit>().getChannelById(
+                                    streamId!,
+                                  );
+                                  final ChannelChatExtra extra = ChannelChatExtra(
+                                    channel: channel.toChannelEntity(),
+                                    topicEntity: TopicEntity(
+                                      name: topicName,
+                                      maxId: maxId,
+                                      unreadMessages: {},
+                                    ),
+                                  );
+                                  context.pushNamed(Routes.channelChat, extra: extra);
+                                },
                         );
                       }).toList(),
                     ),

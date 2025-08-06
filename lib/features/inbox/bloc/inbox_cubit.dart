@@ -78,19 +78,31 @@ class InboxCubit extends Cubit<InboxState> {
   }
 
   Future<UserEntity> getUserById(int userId) async {
+    state.pendingId = userId;
+    emit(state.copyWith(pendingId: state.pendingId));
     try {
-      return await _getUserByIdUseCase.call(userId);
+      final UserEntity user = await _getUserByIdUseCase.call(userId);
+      state.pendingId = null;
+      emit(state.copyWith(pendingId: state.pendingId));
+      return user;
     } catch (e) {
+      state.pendingId = null;
+      emit(state.copyWith(pendingId: state.pendingId));
       rethrow;
     }
   }
 
   Future<SubscriptionEntity> getChannelById(int streamId) async {
+    state.pendingId = streamId;
+    emit(state.copyWith(pendingId: state.pendingId));
     try {
       final channels = await _getSubscribedChannelsUseCase.call(false);
-
+      state.pendingId = null;
+      emit(state.copyWith(pendingId: state.pendingId));
       return channels.firstWhere((channel) => channel.streamId == streamId);
     } catch (e) {
+      state.pendingId = null;
+      emit(state.copyWith(pendingId: state.pendingId));
       rethrow;
     }
   }

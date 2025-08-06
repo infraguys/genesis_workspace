@@ -12,29 +12,45 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+
+  #State managment:
   flutter_bloc: ^9.1.1
+
+  #api
   retrofit: ^4.4.2
   json_annotation: ^4.9.0
   dio: ^5.8.0+1
+
+  #di
   injectable: ^2.5.0
   get_it: ^8.0.3
+
+  #local db/storage
   flutter_secure_storage: ^9.2.4
-  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+
+
+  #router
   go_router: ^16.0.0
+
+  #ui
   flutter_svg: ^2.2.0
   visibility_detector: ^0.4.0+2
   slang: ^4.7.3
   slang_flutter: ^4.7.0
-  shared_preferences: ^2.5.3
   skeletonizer: ^2.1.0+1
-  equatable: ^2.0.7
-  intl: ^0.20.2
   in_app_idle_detector: ^0.0.1
   flutter_widget_from_html: ^0.17.0
   fwfh_cached_network_image: ^0.16.1
   cached_network_image: ^3.4.1
   photo_view: ^0.15.0
+  cupertino_icons: ^1.0.8
+
+  #data
+  equatable: ^2.0.7
+  intl: ^0.20.2
+  path_provider: ^2.1.5
+
 
 dev_dependencies:
   flutter_test:
