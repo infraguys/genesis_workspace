@@ -31,7 +31,10 @@ ci_stage:
 	flutter build web --release -t lib/stage.dart
 
 build-prod-apk:
-	flutter build apk --flavor prod -t lib/prod.dart
+	flutter build apk --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
+
+build-macos:
+	flutter build macos --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
 
 rename_prod_apk:
 	@if [ -f $(APK_PROD_PATH) ]; then \

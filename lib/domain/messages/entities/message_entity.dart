@@ -8,7 +8,7 @@ class MessageEntity {
   final int senderId;
   final dynamic displayRecipient;
   final String senderFullName;
-  final List<String>? flags;
+  List<String>? flags;
   final MessageType type;
   final int? streamId;
   final String subject;
