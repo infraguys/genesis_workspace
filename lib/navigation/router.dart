@@ -29,7 +29,6 @@ final _shellNavigatorMenuKey = GlobalKey<NavigatorState>(debugLabel: 'shellMenu'
 class Routes {
   static const String splashScreen = '/';
   static const String auth = '/auth';
-  static const String home = '/home';
   static const String directMessages = '/direct-messages';
   static const String channels = '/channels';
   static const String settings = '/settings';
@@ -139,7 +138,7 @@ final router = GoRouter(
       name: Routes.auth,
       redirect: (BuildContext context, GoRouterState state) {
         if (context.read<AuthCubit>().state.isAuthorized) {
-          return Routes.home;
+          return Routes.directMessages;
         }
         return null;
       },

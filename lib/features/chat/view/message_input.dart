@@ -141,7 +141,7 @@ class _MessageInputState extends State<MessageInput> {
                 textEditingController: widget.controller,
                 config: Config(
                   height: emojiState.keyboardHeight,
-                  bottomActionBarConfig: BottomActionBarConfig(enabled: false),
+                  bottomActionBarConfig: BottomActionBarConfig(enabled: true),
                 ),
               ),
             ),

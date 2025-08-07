@@ -113,13 +113,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
     gh.lazySingleton<_i592.MessagesCubit>(() => _i592.MessagesCubit());
     gh.lazySingleton<_i766.ProfileCubit>(() => _i766.ProfileCubit());
+    gh.lazySingleton<_i144.EmojiKeyboardCubit>(
+      () => _i144.EmojiKeyboardCubit(),
+    );
     gh.lazySingleton<_i862.AuthCubit>(() => _i862.AuthCubit());
     gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
     gh.lazySingleton<_i435.LocalizationService>(
       () => _i435.LocalizationService(),
-    );
-    gh.lazySingleton<_i144.EmojiKeyboardCubit>(
-      () => _i144.EmojiKeyboardCubit(),
     );
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
