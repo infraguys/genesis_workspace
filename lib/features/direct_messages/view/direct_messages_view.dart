@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
+import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/direct_messages/view/dm_search_field.dart';
 import 'package:genesis_workspace/features/direct_messages/view/user_tile.dart';
@@ -19,6 +20,8 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
   final TextEditingController _searchController = TextEditingController();
   late final Future _future;
   bool _isFutureInitialized = false;
+
+  static const double desktopDmsWidth = 400;
 
   @override
   void didChangeDependencies() {
@@ -83,18 +86,49 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                           return Center(child: Text("No users found"));
                         }
 
-                        return ListView.separated(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: currentSize(context) >= ScreenSize.desktop ? 24 : 12,
-                            vertical: 12,
-                          ),
-                          itemCount: state.filteredUsers.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final DmUserEntity user = state.filteredUsers[index];
+                        return Row(
+                          children: [
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth: currentSize(context) > ScreenSize.lTablet
+                                    ? desktopDmsWidth
+                                    : (MediaQuery.sizeOf(context).width -
+                                          (currentSize(context) > ScreenSize.tablet ? 114 : 0)),
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  left: BorderSide(
+                                    color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
+                                  right: BorderSide(
+                                    color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: ListView.separated(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: currentSize(context) >= ScreenSize.lTablet ? 0 : 12,
+                                  vertical: 12,
+                                ),
+                                itemCount: state.filteredUsers.length,
+                                separatorBuilder: (_, __) => const Divider(height: 1),
+                                itemBuilder: (context, index) {
+                                  final DmUserEntity user = state.filteredUsers[index];
 
-                            return UserTile(user: user);
-                          },
+                                  return UserTile(user: user);
+                                },
+                              ),
+                            ),
+                            (currentSize(context) > ScreenSize.lTablet &&
+                                    state.selectedUser != null)
+                                ? Expanded(
+                                    key: UniqueKey(),
+                                    child: Chat(user: state.selectedUser),
+                                  )
+                                : Expanded(child: Center(child: Text(context.t.selectAnyChannel))),
+                          ],
                         );
                       },
                     );

@@ -36,6 +36,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           typingUsers: [],
           selfUser: null,
           unreadMessages: [],
+          selectedUser: null,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -58,6 +59,11 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       state.selfUser = user;
       emit(state.copyWith(selfUser: state.selfUser));
     }
+  }
+
+  selectUserChat(DmUserEntity user) {
+    state.selectedUser = user;
+    emit(state.copyWith(selectedUser: state.selectedUser));
   }
 
   Future<void> getUsers() async {

@@ -46,6 +46,12 @@ final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   routes: [
     StatefulShellRoute.indexedStack(
+      redirect: (BuildContext context, GoRouterState state) {
+        if (!context.read<AuthCubit>().state.isAuthorized) {
+          return Routes.auth;
+        }
+        return null;
+      },
       builder: (context, state, navigationShell) {
         return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
       },

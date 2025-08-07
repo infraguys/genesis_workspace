@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
@@ -42,7 +43,13 @@ class UserTile extends StatelessWidget {
           );
         }
         return ListTile(
-          onTap: () => context.pushNamed(Routes.chat, extra: user),
+          onTap: () {
+            if (currentSize(context) >= ScreenSize.lTablet) {
+              context.read<DirectMessagesCubit>().selectUserChat(user);
+            } else {
+              context.pushNamed(Routes.chat, extra: user);
+            }
+          },
           title: Text(user.fullName, overflow: TextOverflow.ellipsis),
           subtitle: subtitle,
           leading: UserAvatar(avatarUrl: user.avatarUrl),
