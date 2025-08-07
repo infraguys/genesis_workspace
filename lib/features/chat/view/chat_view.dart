@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
@@ -11,6 +12,7 @@ import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -72,7 +74,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Row(
           spacing: 8,
@@ -134,7 +136,13 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                         : Expanded(
                             child: GestureDetector(
                               onTap: () {
-                                FocusScope.of(context).unfocus();
+                                if (currentSize(context) < ScreenSize.lTablet) {
+                                  FocusScope.of(context).unfocus();
+                                  context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                    false,
+                                    closeKeyboard: true,
+                                  );
+                                }
                               },
                               child: snapshot.connectionState == ConnectionState.waiting
                                   ? Skeletonizer(

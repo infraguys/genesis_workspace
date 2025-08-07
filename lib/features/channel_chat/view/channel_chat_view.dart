@@ -10,6 +10,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -35,22 +36,6 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     if (_controller.offset >= _controller.position.maxScrollExtent &&
         !context.read<ChannelChatCubit>().state.isLoadingMore) {
       context.read<ChannelChatCubit>().loadMoreMessages(widget.extra.channel.name);
-    }
-  }
-
-  Future<void> _scrollToBottom({bool animated = true}) async {
-    if (!_controller.hasClients) return;
-
-    final position = _controller.position.maxScrollExtent;
-
-    if (animated) {
-      await _controller.animateTo(
-        position,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    } else {
-      _controller.jumpTo(position);
     }
   }
 
@@ -91,6 +76,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: parseColor(widget.extra.channel.color),
         centerTitle: currentSize(context) <= ScreenSize.lTablet,
@@ -118,71 +104,72 @@ class _ChannelChatViewState extends State<ChannelChatView> {
 
           return BlocBuilder<ChannelChatCubit, ChannelChatState>(
             builder: (context, state) {
-              return AnimatedPadding(
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeOut,
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: Column(
-                  children: [
-                    if (state.messages.isEmpty && snapshot.connectionState == ConnectionState.done)
-                      Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
-                    else
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
+              return Column(
+                children: [
+                  if (state.messages.isEmpty && snapshot.connectionState == ConnectionState.done)
+                    Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
+                  else
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (currentSize(context) < ScreenSize.lTablet) {
                             FocusScope.of(context).unfocus();
-                          },
-                          child:
-                              (snapshot.connectionState == ConnectionState.waiting ||
-                                  state.isMessagesPending)
-                              ? Skeletonizer(
-                                  enabled: true,
-                                  child: ListView.separated(
-                                    itemCount: 20,
-                                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ).copyWith(bottom: 12),
-                                    itemBuilder: (context, index) {
-                                      return MessageItem(
-                                        isMyMessage: index % 5 == 0,
-                                        message: MessageEntity.fake(),
-                                        isSkeleton: true,
-                                        messageOrder: MessageUIOrder.single,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : MessagesList(
-                                  messages: state.messages,
-                                  controller: _controller,
-                                  showTopic: widget.extra.topicEntity == null,
-                                  isLoadingMore: state.isLoadingMore || state.isMessagesPending,
-                                  onRead: (id) {
-                                    context.read<ChannelChatCubit>().scheduleMarkAsRead(id);
+                            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                              false,
+                              closeKeyboard: true,
+                            );
+                          }
+                        },
+                        child:
+                            (snapshot.connectionState == ConnectionState.waiting ||
+                                state.isMessagesPending)
+                            ? Skeletonizer(
+                                enabled: true,
+                                child: ListView.separated(
+                                  itemCount: 20,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ).copyWith(bottom: 12),
+                                  itemBuilder: (context, index) {
+                                    return MessageItem(
+                                      isMyMessage: index % 5 == 0,
+                                      message: MessageEntity.fake(),
+                                      isSkeleton: true,
+                                      messageOrder: MessageUIOrder.single,
+                                    );
                                   },
                                 ),
-                        ),
+                              )
+                            : MessagesList(
+                                messages: state.messages,
+                                controller: _controller,
+                                showTopic: widget.extra.topicEntity == null,
+                                isLoadingMore: state.isLoadingMore || state.isMessagesPending,
+                                onRead: (id) {
+                                  context.read<ChannelChatCubit>().scheduleMarkAsRead(id);
+                                },
+                              ),
                       ),
-                    MessageInput(
-                      controller: _messageController,
-                      isMessagePending: state.isMessagePending,
-                      onSend: _currentText.isNotEmpty
-                          ? () async {
-                              final content = _messageController.text;
-                              _messageController.clear();
-                              try {
-                                await context.read<ChannelChatCubit>().sendMessage(
-                                  streamId: widget.extra.channel.streamId,
-                                  content: content,
-                                  topic: widget.extra.topicEntity?.name,
-                                );
-                              } catch (e) {}
-                            }
-                          : null,
                     ),
-                  ],
-                ),
+                  MessageInput(
+                    controller: _messageController,
+                    isMessagePending: state.isMessagePending,
+                    onSend: _currentText.isNotEmpty
+                        ? () async {
+                            final content = _messageController.text;
+                            _messageController.clear();
+                            try {
+                              await context.read<ChannelChatCubit>().sendMessage(
+                                streamId: widget.extra.channel.streamId,
+                                content: content,
+                                topic: widget.extra.topicEntity?.name,
+                              );
+                            } catch (e) {}
+                          }
+                        : null,
+                  ),
+                ],
               );
             },
           );

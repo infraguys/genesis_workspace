@@ -4,9 +4,11 @@ import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -18,6 +20,8 @@ class AuthView extends StatefulWidget {
 class _AuthViewState extends State<AuthView> {
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
+
+  final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -33,6 +37,11 @@ class _AuthViewState extends State<AuthView> {
   void initState() {
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
+    _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
+      if (height != 0) {
+        context.read<EmojiKeyboardCubit>().setHeight(height);
+      }
+    });
     super.initState();
   }
 
@@ -40,6 +49,7 @@ class _AuthViewState extends State<AuthView> {
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _keyboardHeightPlugin.dispose();
     super.dispose();
   }
 
