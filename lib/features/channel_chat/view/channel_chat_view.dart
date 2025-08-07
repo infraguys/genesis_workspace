@@ -112,8 +112,13 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          FocusScope.of(context).unfocus();
-                          context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
+                          if (currentSize(context) < ScreenSize.lTablet) {
+                            FocusScope.of(context).unfocus();
+                            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                              false,
+                              closeKeyboard: true,
+                            );
+                          }
                         },
                         child:
                             (snapshot.connectionState == ConnectionState.waiting ||

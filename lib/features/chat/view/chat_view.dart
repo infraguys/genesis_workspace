@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
@@ -135,8 +136,13 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                         : Expanded(
                             child: GestureDetector(
                               onTap: () {
-                                FocusScope.of(context).unfocus();
-                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
+                                if (currentSize(context) < ScreenSize.lTablet) {
+                                  FocusScope.of(context).unfocus();
+                                  context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                    false,
+                                    closeKeyboard: true,
+                                  );
+                                }
                               },
                               child: snapshot.connectionState == ConnectionState.waiting
                                   ? Skeletonizer(
