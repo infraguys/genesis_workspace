@@ -67,7 +67,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     _controller.dispose();
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
-    context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false, closeKeyboard: true);
     super.dispose();
   }
 

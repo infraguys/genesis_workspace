@@ -79,7 +79,6 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     _scrollController.dispose();
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
-    context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false, closeKeyboard: true);
     super.dispose();
   }
 
