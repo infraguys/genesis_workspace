@@ -49,6 +49,12 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   @override
+  void dispose() {
+    _keyboardHeightPlugin.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
