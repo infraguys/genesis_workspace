@@ -49,6 +49,7 @@ class _AuthViewState extends State<AuthView> {
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _keyboardHeightPlugin.dispose();
     super.dispose();
   }
 
