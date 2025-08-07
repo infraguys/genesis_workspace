@@ -2,6 +2,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 
@@ -22,7 +23,7 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-  bool _keyboardOpen = false;
+  // bool _keyboardOpen = false;
 
   final FocusNode _textFieldFocusNode = FocusNode();
 
@@ -31,11 +32,20 @@ class _MessageInputState extends State<MessageInput> {
   @override
   void initState() {
     super.initState();
-    _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
-      if (height != 0) {
-        context.read<EmojiKeyboardCubit>().setHeight(height);
-      }
-    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (currentSize(context) >= ScreenSize.lTablet) {
+      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
+    } else {
+      _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
+        if (height != 0) {
+          context.read<EmojiKeyboardCubit>().setHeight(height);
+        }
+      });
+    }
+    super.didChangeDependencies();
   }
 
   @override
@@ -47,9 +57,7 @@ class _MessageInputState extends State<MessageInput> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4).copyWith(
-                bottom: (_textFieldFocusNode.hasFocus || emojiState.showEmojiKeyboard) ? 20 : 30,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4).copyWith(bottom: 20),
               decoration: BoxDecoration(color: theme.colorScheme.surface),
               child: Row(
                 spacing: 8,
@@ -66,10 +74,9 @@ class _MessageInputState extends State<MessageInput> {
                         minLines: 1,
                         maxLines: 4,
                         onTap: () {
-                          context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
-                          setState(() {
-                            _keyboardOpen = true;
-                          });
+                          if (currentSize(context) < ScreenSize.lTablet) {
+                            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
+                          }
                         },
                         decoration: InputDecoration(
                           border: InputBorder.none,
@@ -77,15 +84,25 @@ class _MessageInputState extends State<MessageInput> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           suffixIcon: IconButton(
                             onPressed: () {
-                              setState(() {
-                                if (_keyboardOpen) {
-                                  _keyboardOpen = false;
-                                  FocusScope.of(context).unfocus();
+                              if (currentSize(context) >= ScreenSize.lTablet) {
+                                if (emojiState.showEmojiKeyboard) {
+                                  context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                    false,
+                                    closeKeyboard: true,
+                                  );
                                 } else {
-                                  _keyboardOpen = true;
-                                  FocusScope.of(context).requestFocus(_textFieldFocusNode);
+                                  context.read<EmojiKeyboardCubit>().setHeight(300);
+                                  context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
                                 }
-                              });
+                              } else {
+                                if (emojiState.showEmojiKeyboard) {
+                                  FocusScope.of(context).requestFocus(_textFieldFocusNode);
+                                  context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
+                                } else {
+                                  FocusScope.of(context).unfocus();
+                                  context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
+                                }
+                              }
                             },
                             icon: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 200),
@@ -95,9 +112,9 @@ class _MessageInputState extends State<MessageInput> {
                                     : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
                                 child: FadeTransition(opacity: animation, child: child),
                               ),
-                              child: _keyboardOpen
-                                  ? const Icon(Icons.emoji_emotions, key: ValueKey('emoji'))
-                                  : const Icon(Icons.keyboard, key: ValueKey('keyboard')),
+                              child: emojiState.showEmojiKeyboard
+                                  ? const Icon(Icons.keyboard, key: ValueKey('keyboard'))
+                                  : const Icon(Icons.emoji_emotions, key: ValueKey('emoji')),
                             ),
                           ),
                         ),
