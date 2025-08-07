@@ -39,6 +39,7 @@ class _MessageInputState extends State<MessageInput> {
     if (currentSize(context) >= ScreenSize.lTablet) {
       context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
     } else {
+      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false, closeKeyboard: true);
       _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
         if (height != 0) {
           context.read<EmojiKeyboardCubit>().setHeight(height);
