@@ -11,6 +11,7 @@ import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/message_input.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -72,7 +73,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Row(
           spacing: 8,
@@ -135,6 +136,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                             child: GestureDetector(
                               onTap: () {
                                 FocusScope.of(context).unfocus();
+                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
                               },
                               child: snapshot.connectionState == ConnectionState.waiting
                                   ? Skeletonizer(
