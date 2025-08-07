@@ -106,6 +106,9 @@ class _MessageInputState extends State<MessageInput> {
                                   context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
                                 } else {
                                   FocusScope.of(context).unfocus();
+                                  if (emojiState.keyboardHeight == 0) {
+                                    context.read<EmojiKeyboardCubit>().setHeight(300);
+                                  }
                                   context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
                                 }
                               }

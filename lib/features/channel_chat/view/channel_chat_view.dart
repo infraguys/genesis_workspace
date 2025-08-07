@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
+import 'package:genesis_workspace/core/widgets/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message_item.dart';
 import 'package:genesis_workspace/core/widgets/messages_list.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
-import 'package:genesis_workspace/features/chat/view/message_input.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -27,13 +27,13 @@ class ChannelChatView extends StatefulWidget {
 class _ChannelChatViewState extends State<ChannelChatView> {
   late final Future _future;
   late final UserEntity _myUser;
-  late final ScrollController _controller;
+  late final ScrollController _scrollController;
   late final TextEditingController _messageController;
 
   String _currentText = '';
 
   void _onScroll() {
-    if (_controller.offset >= _controller.position.maxScrollExtent &&
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
         !context.read<ChannelChatCubit>().state.isLoadingMore) {
       context.read<ChannelChatCubit>().loadMoreMessages(widget.extra.channel.name);
     }
@@ -54,7 +54,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     context.read<ChannelChatCubit>().setChannel(widget.extra.channel);
     context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
     _future = context.read<ChannelChatCubit>().getChannelMessages(widget.extra.channel.name);
-    _controller = ScrollController()..addListener(_onScroll);
+    _scrollController = ScrollController()..addListener(_onScroll);
     _messageController = TextEditingController();
     _messageController.addListener(_onTextChanged);
     super.didChangeDependencies();
@@ -71,6 +71,16 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     );
     _messageController.clear();
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _messageController.removeListener(_onTextChanged);
+    _messageController.dispose();
+    context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false, closeKeyboard: true);
+    super.dispose();
   }
 
   @override
@@ -143,7 +153,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                               )
                             : MessagesList(
                                 messages: state.messages,
-                                controller: _controller,
+                                controller: _scrollController,
                                 showTopic: widget.extra.topicEntity == null,
                                 isLoadingMore: state.isLoadingMore || state.isMessagesPending,
                                 onRead: (id) {
