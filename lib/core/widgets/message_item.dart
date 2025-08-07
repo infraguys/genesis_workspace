@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -38,7 +37,6 @@ class MessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isRead = message.flags?.contains('read') ?? false;
-    final parser = EmojiParser();
 
     final avatar = isSkeleton
         ? const CircleAvatar(radius: 20)
@@ -78,10 +76,7 @@ class MessageItem extends StatelessWidget {
 
                 return InlineCustomWidget(
                   child: UnicodeEmojiWidget(
-                    emojiDisplay: UnicodeEmojiDisplay(
-                      emojiName: emoji,
-                      emojiUnicode: emojiStr, // ← вот сюда передаём символ
-                    ),
+                    emojiDisplay: UnicodeEmojiDisplay(emojiName: emoji, emojiUnicode: emojiStr),
                     size: 14,
                   ),
                 );
