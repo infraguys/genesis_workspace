@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
+import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +38,7 @@ class MessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isRead = message.flags?.contains('read') ?? false;
+    final parser = EmojiParser();
 
     final avatar = isSkeleton
         ? const CircleAvatar(radius: 20)
@@ -60,7 +64,27 @@ class MessageItem extends StatelessWidget {
                 return AuthorizedImage(url: '${AppConstants.baseUrl}${element.attributes['src']}');
               }
               if (element.classes.contains('emoji')) {
-                // inspect(element);
+                final emojiUnicode = element.classes
+                    .firstWhere((className) => className.contains('emoji-'))
+                    .replaceAll('emoji-', '');
+
+                final codePoint = int.parse(emojiUnicode, radix: 16);
+
+                final emojiChar = String.fromCharCode(codePoint);
+
+                final emojiStr = String.fromCharCodes([codePoint]);
+
+                final emoji = ":${element.attributes['title']!.replaceAll(' ', '_')}:";
+
+                return InlineCustomWidget(
+                  child: UnicodeEmojiWidget(
+                    emojiDisplay: UnicodeEmojiDisplay(
+                      emojiName: emoji,
+                      emojiUnicode: emojiStr, // ← вот сюда передаём символ
+                    ),
+                    size: 14,
+                  ),
+                );
               }
               return null;
             },

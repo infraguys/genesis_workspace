@@ -52,6 +52,7 @@ dependencies:
   path_provider: ^2.1.5
   emoji_picker_flutter: ^4.3.0
   keyboard_height_plugin: ^0.1.5
+  flutter_emoji: ^2.5.1
 
 
 dev_dependencies:
@@ -92,7 +93,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/Noto_Color_Emoji/Noto-COLRv1.ttf
+    - family: AppleEmoji
+      fonts:
+        - asset: assets/fonts/Apple_Emoji/AppleColorEmoji.ttf
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf
