@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+part 'emoji_keyboard_state.dart';
+
 @LazySingleton()
 class EmojiKeyboardCubit extends Cubit<EmojiKeyboardState> {
   EmojiKeyboardCubit() : super(EmojiKeyboardState(showEmojiKeyboard: false, keyboardHeight: 0));
@@ -19,19 +21,6 @@ class EmojiKeyboardCubit extends Cubit<EmojiKeyboardState> {
         showEmojiKeyboard: state.showEmojiKeyboard,
         keyboardHeight: state.keyboardHeight,
       ),
-    );
-  }
-}
-
-class EmojiKeyboardState {
-  bool showEmojiKeyboard;
-  double keyboardHeight;
-  EmojiKeyboardState({required this.showEmojiKeyboard, required this.keyboardHeight});
-
-  EmojiKeyboardState copyWith({bool? showEmojiKeyboard, double? keyboardHeight}) {
-    return EmojiKeyboardState(
-      showEmojiKeyboard: showEmojiKeyboard ?? this.showEmojiKeyboard,
-      keyboardHeight: keyboardHeight ?? this.keyboardHeight,
     );
   }
 }
