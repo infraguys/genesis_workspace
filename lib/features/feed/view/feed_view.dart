@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/feed/bloc/feed_cubit.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class FeedView extends StatefulWidget {
@@ -13,6 +15,7 @@ class FeedView extends StatefulWidget {
 }
 
 class _MixedFeedViewState extends State<FeedView> {
+  late final UserEntity _myUser;
   late final Future _future;
   late final ScrollController _scrollController;
 
@@ -25,6 +28,7 @@ class _MixedFeedViewState extends State<FeedView> {
 
   @override
   void didChangeDependencies() {
+    _myUser = context.read<ProfileCubit>().state.user!;
     _scrollController = ScrollController()..addListener(_onScroll);
     _future = context.read<FeedCubit>().getMessages();
     super.didChangeDependencies();
@@ -59,6 +63,7 @@ class _MixedFeedViewState extends State<FeedView> {
                 messages: state.messages,
                 isLoadingMore: state.isLoadingMore,
                 showTopic: true,
+                myUserId: _myUser.userId,
               );
             },
           ),

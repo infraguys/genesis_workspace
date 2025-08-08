@@ -1,4 +1,5 @@
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 
 class MessageEntity {
   final int id;
@@ -13,7 +14,7 @@ class MessageEntity {
   final int? streamId;
   final String subject;
   final int timestamp;
-
+  final List<ReactionEntity> reactions;
   MessageEntity({
     required this.id,
     required this.isMeMessage,
@@ -27,9 +28,29 @@ class MessageEntity {
     this.streamId,
     required this.subject,
     required this.timestamp,
+    required this.reactions,
   });
 
   bool get hasUnreadMessages => flags == null || (flags != null && !flags!.contains('read'));
+
+  Map<String, ReactionDetails> get aggregatedReactions {
+    final Map<String, ReactionDetails> reactionMap = {};
+
+    for (final reaction in reactions) {
+      if (reactionMap.containsKey(reaction.emojiName)) {
+        reactionMap[reaction.emojiName]!.count++;
+        reactionMap[reaction.emojiName]!.userIds.add(reaction.userId);
+      } else {
+        reactionMap[reaction.emojiName] = ReactionDetails(
+          count: 1,
+          userIds: [reaction.userId],
+          emojiName: reaction.emojiName,
+          emojiCode: reaction.emojiCode,
+        );
+      }
+    }
+    return reactionMap;
+  }
 
   MessageEntity copyWith({
     int? id,
@@ -44,6 +65,7 @@ class MessageEntity {
     int? streamId,
     String? subject,
     int? timestamp,
+    List<ReactionEntity>? reactions,
   }) {
     return MessageEntity(
       id: id ?? this.id,
@@ -58,6 +80,7 @@ class MessageEntity {
       streamId: streamId ?? this.streamId,
       subject: subject ?? this.subject,
       timestamp: timestamp ?? this.timestamp,
+      reactions: reactions ?? this.reactions,
     );
   }
 
@@ -76,6 +99,7 @@ class MessageEntity {
       streamId: null,
       subject: 'Loading...',
       timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).toInt(),
+      reactions: [],
     );
   }
 }

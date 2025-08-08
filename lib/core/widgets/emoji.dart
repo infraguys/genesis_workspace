@@ -25,6 +25,12 @@ class UnicodeEmojiWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final codePoint = int.parse(emojiDisplay.emojiUnicode, radix: 16);
+
+    final emojiChar = String.fromCharCode(codePoint);
+
+    final emojiStr = String.fromCharCodes([codePoint]);
+    final unicode = emojiStr;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -48,7 +54,7 @@ class UnicodeEmojiWidget extends StatelessWidget {
             // with ambient DefaultTextStyle.
             forceStrutHeight: true,
           ),
-          emojiDisplay.emojiUnicode,
+          unicode,
         );
 
       case TargetPlatform.iOS:
@@ -86,7 +92,7 @@ class UnicodeEmojiWidget extends StatelessWidget {
                   // with ambient DefaultTextStyle.
                   forceStrutHeight: true,
                 ),
-                emojiDisplay.emojiUnicode,
+                unicode,
               ),
             ),
           ],

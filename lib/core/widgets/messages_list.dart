@@ -17,6 +17,7 @@ class MessagesList extends StatefulWidget {
   final void Function()? loadMore;
   final bool showTopic;
   final bool isLoadingMore;
+  final int myUserId;
 
   const MessagesList({
     super.key,
@@ -26,6 +27,7 @@ class MessagesList extends StatefulWidget {
     this.loadMore,
     this.showTopic = false,
     required this.isLoadingMore,
+    required this.myUserId,
   });
 
   @override
@@ -184,6 +186,7 @@ class _MessagesListState extends State<MessagesList> {
                       message: message,
                       messageOrder: messageOrder,
                       showTopic: widget.showTopic,
+                      myUserId: widget.myUserId,
                     ),
                   );
                 },

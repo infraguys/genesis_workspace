@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
@@ -7,6 +9,7 @@ import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -18,6 +21,7 @@ class MessageItem extends StatelessWidget {
   final bool isSkeleton;
   final bool showTopic;
   final MessageUIOrder messageOrder;
+  final int myUserId;
 
   const MessageItem({
     super.key,
@@ -26,6 +30,7 @@ class MessageItem extends StatelessWidget {
     this.isSkeleton = false,
     this.showTopic = false,
     this.messageOrder = MessageUIOrder.middle,
+    required this.myUserId,
   });
 
   String _formatTime(int timestamp) {
@@ -45,6 +50,10 @@ class MessageItem extends StatelessWidget {
     final senderName = isSkeleton
         ? Container(height: 10, width: 80, color: theme.colorScheme.surfaceContainerHighest)
         : Text(message.senderFullName, style: theme.textTheme.titleSmall);
+
+    if (!isSkeleton) {
+      inspect(message);
+    }
 
     final messageContent = isSkeleton
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceContainerHighest)
@@ -66,17 +75,11 @@ class MessageItem extends StatelessWidget {
                     .firstWhere((className) => className.contains('emoji-'))
                     .replaceAll('emoji-', '');
 
-                final codePoint = int.parse(emojiUnicode, radix: 16);
-
-                final emojiChar = String.fromCharCode(codePoint);
-
-                final emojiStr = String.fromCharCodes([codePoint]);
-
                 final emoji = ":${element.attributes['title']!.replaceAll(' ', '_')}:";
 
                 return InlineCustomWidget(
                   child: UnicodeEmojiWidget(
-                    emojiDisplay: UnicodeEmojiDisplay(emojiName: emoji, emojiUnicode: emojiStr),
+                    emojiDisplay: UnicodeEmojiDisplay(emojiName: emoji, emojiUnicode: emojiUnicode),
                     size: 14,
                   ),
                 );
@@ -193,47 +196,102 @@ class MessageItem extends StatelessWidget {
                         : theme.colorScheme.secondaryContainer,
                     borderRadius: messageRadius,
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 8,
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (showSenderName)
-                              Row(
-                                children: [
-                                  senderName,
-                                  if (showTopic && message.subject.isNotEmpty)
-                                    Skeleton.ignore(
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.arrow_right, size: 16),
-                                          Text(message.subject, style: theme.textTheme.labelSmall),
-                                        ],
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            const SizedBox(height: 2),
-                            messageContent,
-                          ],
-                        ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 8,
                         children: [
-                          messageTime,
-                          const SizedBox(height: 2),
-                          (isRead || isMyMessage || isSkeleton)
-                              ? const SizedBox()
-                              : Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (showSenderName)
+                                  Row(
+                                    children: [
+                                      senderName,
+                                      if (showTopic && message.subject.isNotEmpty)
+                                        Skeleton.ignore(
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.arrow_right, size: 16),
+                                              Text(
+                                                message.subject,
+                                                style: theme.textTheme.labelSmall,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                const SizedBox(height: 2),
+                                messageContent,
+                              ],
+                            ),
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              messageTime,
+                              const SizedBox(height: 2),
+                              (isRead || isMyMessage || isSkeleton)
+                                  ? const SizedBox()
+                                  : Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
+                            ],
+                          ),
                         ],
                       ),
+                      if (message.aggregatedReactions.isNotEmpty)
+                        SizedBox(
+                          height: 28,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.zero,
+                            itemCount: message.aggregatedReactions.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final ReactionDetails reaction = message.aggregatedReactions.values
+                                  .elementAt(index);
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  border: Border.all(
+                                    color: reaction.userIds.contains(myUserId)
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.outlineVariant,
+                                    width: reaction.userIds.contains(myUserId) ? 2 : 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    UnicodeEmojiWidget(
+                                      emojiDisplay: UnicodeEmojiDisplay(
+                                        emojiName: reaction.emojiName,
+                                        emojiUnicode: reaction.emojiCode,
+                                      ),
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4.0),
+                                    Text(
+                                      reaction.count.toString(),
+                                      style: TextStyle(
+                                        fontSize: 12.0,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            separatorBuilder: (_, _) => SizedBox(width: 4),
+                          ),
+                        ),
                     ],
                   ),
                 ),

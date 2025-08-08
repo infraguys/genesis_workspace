@@ -146,6 +146,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                       message: MessageEntity.fake(),
                                       isSkeleton: true,
                                       messageOrder: MessageUIOrder.single,
+                                      myUserId: _myUser.userId,
                                     );
                                   },
                                 ),
@@ -158,6 +159,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                 onRead: (id) {
                                   context.read<ChannelChatCubit>().scheduleMarkAsRead(id);
                                 },
+                                myUserId: _myUser.userId,
                               ),
                       ),
                     ),
