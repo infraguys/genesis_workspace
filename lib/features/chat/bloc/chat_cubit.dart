@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
+import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
@@ -11,12 +12,14 @@ import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
@@ -45,6 +48,7 @@ class ChatCubit extends Cubit<ChatState> {
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
       _onMessageFlagsEvents,
     );
+    _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(_onReactionEvents);
   }
 
   final RealTimeService _realTimeService = getIt<RealTimeService>();
@@ -57,6 +61,7 @@ class ChatCubit extends Cubit<ChatState> {
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  late final StreamSubscription<ReactionEventEntity> _reactionsSubscription;
 
   Timer? _readMessageDebounceTimer;
 
@@ -206,11 +211,35 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
+  void _onReactionEvents(ReactionEventEntity event) {
+    MessageEntity message = state.messages.firstWhere((message) => message.id == event.messageId);
+    final int index = state.messages.indexOf(message);
+    List<ReactionEntity> reactions = message.reactions;
+    if (event.op == ReactionOp.add) {
+      reactions.add(
+        ReactionEntity(
+          emojiName: event.emojiName,
+          emojiCode: event.emojiCode,
+          reactionType: event.reactionType,
+          userId: event.userId,
+        ),
+      );
+    } else if (event.op == ReactionOp.remove) {
+      reactions.removeWhere(
+        (reaction) => (reaction.userId == event.userId) && (reaction.emojiName == event.emojiName),
+      );
+    }
+    MessageEntity changedMessage = message.copyWith(reactions: reactions);
+    state.messages[index] = changedMessage;
+    emit(state.copyWith(messages: state.messages));
+  }
+
   @override
   Future<void> close() {
     _typingEventsSubscription.cancel();
     _messagesEventsSubscription.cancel();
     _messageFlagsSubscription.cancel();
+    _reactionsSubscription.cancel();
     _readMessageDebounceTimer?.cancel();
     return super.close();
   }
