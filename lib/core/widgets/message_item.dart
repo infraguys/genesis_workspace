@@ -6,6 +6,7 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/core/widgets/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
@@ -87,23 +88,6 @@ class MessageItem extends StatelessWidget {
               return true;
             },
           );
-    // : SelectableText(
-    //     message.content,
-    //     contextMenuBuilder: (context, editableTextState) {
-    //       return AdaptiveTextSelectionToolbar.buttonItems(
-    //         anchors: editableTextState.contextMenuAnchors,
-    //         buttonItems: [
-    //           ContextMenuButtonItem(
-    //             onPressed: () {
-    //               Clipboard.setData(ClipboardData(text: message.content));
-    //               ContextMenuController.removeAny();
-    //             },
-    //             label: context.t.copy,
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
 
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
@@ -126,15 +110,20 @@ class MessageItem extends StatelessWidget {
             bottomLeft: Radius.circular(12),
             bottomRight: Radius.zero,
           );
+          break;
         case MessageUIOrder.first:
           messageRadius = BorderRadius.only(
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
           );
-        case MessageUIOrder.single || MessageUIOrder.lastSingle:
+          break;
+        case MessageUIOrder.single:
+        case MessageUIOrder.lastSingle:
           messageRadius = BorderRadius.circular(12).copyWith(bottomRight: Radius.zero);
+          break;
         case MessageUIOrder.middle:
           messageRadius = BorderRadius.zero;
+          break;
       }
     } else {
       switch (messageOrder) {
@@ -145,15 +134,20 @@ class MessageItem extends StatelessWidget {
             bottomLeft: Radius.zero,
             bottomRight: Radius.circular(12),
           );
+          break;
         case MessageUIOrder.first:
           messageRadius = BorderRadius.only(
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
           );
-        case MessageUIOrder.single || MessageUIOrder.lastSingle:
+          break;
+        case MessageUIOrder.single:
+        case MessageUIOrder.lastSingle:
           messageRadius = BorderRadius.circular(12).copyWith(bottomLeft: Radius.zero);
+          break;
         case MessageUIOrder.middle:
           messageRadius = BorderRadius.zero;
+          break;
       }
     }
 
@@ -181,133 +175,164 @@ class MessageItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (showAvatar) ...[avatar, const SizedBox(width: 4)],
-              if (!showAvatar) SizedBox(width: 44),
+              if (!showAvatar && !isMyMessage) const SizedBox(width: 44),
               Flexible(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  constraints: (showAvatar) ? BoxConstraints(minHeight: 40) : null,
-                  decoration: BoxDecoration(
-                    color: isMyMessage
-                        ? theme.colorScheme.secondaryContainer.withAlpha(128)
-                        : theme.colorScheme.secondaryContainer,
-                    borderRadius: messageRadius,
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 8,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (showSenderName)
-                                  Row(
-                                    children: [
-                                      senderName,
-                                      if (showTopic && message.subject.isNotEmpty)
-                                        Skeleton.ignore(
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.arrow_right, size: 16),
-                                              Text(
-                                                message.subject,
-                                                style: theme.textTheme.labelSmall,
-                                              ),
-                                            ],
+                flex: 1,
+                child: GestureDetector(
+                  onLongPress: () {
+                    final renderBox = context.findRenderObject() as RenderBox;
+                    final position = renderBox.localToGlobal(Offset.zero);
+
+                    late OverlayEntry overlay;
+                    overlay = OverlayEntry(
+                      builder: (_) => MessageActionsOverlay(
+                        position: position,
+                        onClose: () => overlay.remove(),
+                        onEmojiSelected: (emojiName) {
+                          context.read<MessagesCubit>().addEmojiReaction(
+                            message.id,
+                            emojiName: emojiName,
+                          );
+                        },
+                        messageId: message.id,
+                        messageContent: messageContent,
+                        isOwnMessage: isMyMessage,
+                      ),
+                    );
+
+                    Overlay.of(context).insert(overlay);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    constraints: (showAvatar) ? BoxConstraints(minHeight: 40) : null,
+                    decoration: BoxDecoration(
+                      color: isMyMessage
+                          ? theme.colorScheme.secondaryContainer.withAlpha(128)
+                          : theme.colorScheme.secondaryContainer,
+                      borderRadius: messageRadius,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (showSenderName)
+                                    Row(
+                                      children: [
+                                        senderName,
+                                        if (showTopic && message.subject.isNotEmpty)
+                                          Skeleton.ignore(
+                                            child: Row(
+                                              children: [
+                                                const SizedBox(width: 2), // Spacing
+                                                const Icon(Icons.arrow_right, size: 16),
+                                                Text(
+                                                  message.subject,
+                                                  style: theme.textTheme.labelSmall,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 2),
+                                  messageContent,
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (message.aggregatedReactions.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Wrap(
+                              spacing: 6.0,
+                              runSpacing: 4.0,
+                              children: message.aggregatedReactions.entries.map((entry) {
+                                final ReactionDetails reaction = entry.value;
+                                final bool isMyReaction = reaction.userIds.contains(myUserId);
+
+                                return GestureDetector(
+                                  onTap: () async {
+                                    final String emojiIdentifier = entry.key;
+                                    if (isMyReaction) {
+                                      await context.read<MessagesCubit>().removeEmojiReaction(
+                                        message.id,
+                                        emojiName: emojiIdentifier,
+                                      );
+                                    } else {
+                                      await context.read<MessagesCubit>().addEmojiReaction(
+                                        message.id,
+                                        emojiName: emojiIdentifier,
+                                      );
+                                    }
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: isMyReaction
+                                          ? theme.colorScheme.primaryFixedDim
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      border: Border.all(
+                                        color: isMyReaction
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.outlineVariant,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        UnicodeEmojiWidget(
+                                          emojiDisplay: UnicodeEmojiDisplay(
+                                            emojiName: reaction.emojiName,
+                                            emojiUnicode: reaction.emojiCode,
+                                          ),
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4.0),
+                                        Text(
+                                          reaction.count.toString(),
+                                          style: TextStyle(
+                                            fontSize: 12.0,
+                                            color: theme.colorScheme.onSurfaceVariant,
+                                            fontWeight: isMyReaction
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                const SizedBox(height: 2),
-                                messageContent,
-                              ],
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              messageTime,
-                              const SizedBox(height: 2),
-                              (isRead || isMyMessage || isSkeleton)
-                                  ? const SizedBox()
-                                  : Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
-                            ],
-                          ),
-                        ],
-                      ),
-                      if (message.aggregatedReactions.isNotEmpty)
-                        SizedBox(
-                          height: 28,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            padding: EdgeInsets.zero,
-                            itemCount: message.aggregatedReactions.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final ReactionDetails reaction = message.aggregatedReactions.values
-                                  .elementAt(index);
-                              return GestureDetector(
-                                onTap: () async {
-                                  if (reaction.userIds.contains(myUserId)) {
-                                    await context.read<MessagesCubit>().removeEmojiReaction(
-                                      message.id,
-                                      emojiName: reaction.emojiName,
-                                    );
-                                  } else {
-                                    await context.read<MessagesCubit>().addEmojiReaction(
-                                      message.id,
-                                      emojiName: reaction.emojiName,
-                                    );
-                                  }
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 300),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                    vertical: 4.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceContainerHighest,
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    border: Border.all(
-                                      color: reaction.userIds.contains(myUserId)
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.outlineVariant,
-                                      width: reaction.userIds.contains(myUserId) ? 2 : 1,
+                                      ],
                                     ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      UnicodeEmojiWidget(
-                                        emojiDisplay: UnicodeEmojiDisplay(
-                                          emojiName: reaction.emojiName,
-                                          emojiUnicode: reaction.emojiCode,
-                                        ),
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: 4.0),
-                                      Text(
-                                        reaction.count.toString(),
-                                        style: TextStyle(
-                                          fontSize: 12.0,
-                                          color: theme.colorScheme.onSurfaceVariant,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            separatorBuilder: (_, _) => SizedBox(width: 4),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              messageTime,
+                              if (!isMyMessage && !isRead && !isSkeleton) ...[
+                                const SizedBox(width: 4),
+                                Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
+                              ],
+                            ],
                           ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
