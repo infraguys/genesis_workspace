@@ -127,7 +127,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                                     key: UniqueKey(),
                                     child: Chat(user: state.selectedUser),
                                   )
-                                : Expanded(child: Center(child: Text(context.t.selectAnyChannel))),
+                                : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
                           ],
                         );
                       },

@@ -158,6 +158,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                             isMyMessage: index % 2 == 0, // alternate sender
                                             message: MessageEntity.fake(),
                                             isSkeleton: true, // enable skeleton mode
+                                            myUserId: _myUser.userId,
                                           );
                                         },
                                       ),
@@ -171,6 +172,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       },
                                       loadMore: context.read<ChatCubit>().loadMoreMessages,
                                       showTopic: true,
+                                      myUserId: _myUser.userId,
                                     ),
                               // : Column(
                               //     children: [

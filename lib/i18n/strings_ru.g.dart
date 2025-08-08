@@ -55,6 +55,7 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsDateLabelsRu date_labels = _TranslationsDateLabelsRu._(_root);
 	@override late final _TranslationsInboxRu inbox = _TranslationsInboxRu._(_root);
 	@override late final _TranslationsMentionsRu mentions = _TranslationsMentionsRu._(_root);
+	@override String get select_any_chat => 'Выберите любой чат';
 }
 
 // Path: nav_bar
@@ -195,6 +196,7 @@ extension on TranslationsRu {
 			case 'inbox.channels_tab': return 'Каналы';
 			case 'mentions.title': return 'Упоминания';
 			case 'mentions.no_mentions': return 'Нет упоминаний';
+			case 'select_any_chat': return 'Выберите любой чат';
 			default: return null;
 		}
 	}

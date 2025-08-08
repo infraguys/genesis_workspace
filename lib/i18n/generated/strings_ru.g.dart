@@ -51,6 +51,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsDateLabelsRu dateLabels = TranslationsDateLabelsRu._(_root);
 	@override late final TranslationsInboxRu inbox = TranslationsInboxRu._(_root);
 	@override late final TranslationsMentionsRu mentions = TranslationsMentionsRu._(_root);
+	@override String get selectAnyChat => 'Выберите любой чат';
 }
 
 // Path: navBar

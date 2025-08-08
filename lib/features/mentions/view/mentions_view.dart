@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MentionsView extends StatefulWidget {
@@ -13,12 +15,14 @@ class MentionsView extends StatefulWidget {
 }
 
 class _MentionsViewState extends State<MentionsView> {
+  late final UserEntity _myUser;
   late final Future _future;
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     _future = context.read<MentionsCubit>().getMessages();
+    _myUser = context.read<ProfileCubit>().state.user!;
     _scrollController = ScrollController();
     super.initState();
   }
@@ -48,6 +52,7 @@ class _MentionsViewState extends State<MentionsView> {
                 controller: _scrollController,
                 messages: state.messages,
                 isLoadingMore: state.isLoadingMore,
+                myUserId: _myUser.userId,
                 loadMore: () {
                   print("loadmore");
                 },

@@ -1,4 +1,5 @@
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/data/messages/dto/reaction_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/recipient_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -29,6 +30,7 @@ class MessageDto {
   final int? streamId;
   final String subject;
   final int timestamp;
+  final List<ReactionDto> reactions;
 
   MessageDto({
     required this.id,
@@ -43,6 +45,7 @@ class MessageDto {
     this.streamId,
     required this.subject,
     required this.timestamp,
+    required this.reactions,
   });
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);
@@ -64,6 +67,7 @@ class MessageDto {
     streamId: streamId,
     subject: subject,
     timestamp: timestamp,
+    reactions: reactions.map((e) => e.toEntity()).toList(),
   );
 
   static dynamic _displayRecipientFromJson(dynamic json) {

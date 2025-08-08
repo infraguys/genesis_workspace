@@ -58,6 +58,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsDateLabelsEn date_labels = TranslationsDateLabelsEn._(_root);
 	late final TranslationsInboxEn inbox = TranslationsInboxEn._(_root);
 	late final TranslationsMentionsEn mentions = TranslationsMentionsEn._(_root);
+	String get select_any_chat => 'Select any chat';
 }
 
 // Path: nav_bar
@@ -186,6 +187,7 @@ extension on Translations {
 			case 'inbox.channels_tab': return 'Channels';
 			case 'mentions.title': return 'Mentions';
 			case 'mentions.no_mentions': return 'No mentions';
+			case 'select_any_chat': return 'Select any chat';
 			default: return null;
 		}
 	}

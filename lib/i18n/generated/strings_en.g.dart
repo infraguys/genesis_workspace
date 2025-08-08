@@ -53,6 +53,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsDateLabelsEn dateLabels = TranslationsDateLabelsEn.internal(_root);
 	late final TranslationsInboxEn inbox = TranslationsInboxEn.internal(_root);
 	late final TranslationsMentionsEn mentions = TranslationsMentionsEn.internal(_root);
+	String get selectAnyChat => 'Select any chat';
 }
 
 // Path: navBar

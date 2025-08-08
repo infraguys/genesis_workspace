@@ -50,5 +50,6 @@
   "mentions": {
    "title": "Mentions",
     "no_mentions": "No mentions"
-  }
+  },
+  "select_any_chat": "Select any chat"
 }
