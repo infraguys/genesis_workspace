@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -188,11 +189,18 @@ class MessageItem extends StatelessWidget {
                       builder: (_) => MessageActionsOverlay(
                         position: position,
                         onClose: () => overlay.remove(),
-                        onEmojiSelected: (emojiName) {
-                          context.read<MessagesCubit>().addEmojiReaction(
-                            message.id,
-                            emojiName: emojiName,
-                          );
+                        onEmojiSelected: (emojiName) async {
+                          try {
+                            await context.read<MessagesCubit>().addEmojiReaction(
+                              message.id,
+                              emojiName: emojiName,
+                            );
+                          } on DioException catch (e) {
+                            final msg = e.response!.data['msg'];
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(msg), backgroundColor: Colors.red),
+                            );
+                          }
                         },
                         messageId: message.id,
                         messageContent: messageContent,

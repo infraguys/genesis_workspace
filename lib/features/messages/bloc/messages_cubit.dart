@@ -51,7 +51,7 @@ class MessagesCubit extends Cubit<MessagesState> {
         EmojiReactionRequestEntity(messageId: messageId, emojiName: emojiName),
       );
     } catch (e) {
-      inspect(e);
+      rethrow;
     }
   }
 
