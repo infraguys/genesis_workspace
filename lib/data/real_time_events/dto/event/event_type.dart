@@ -17,6 +17,9 @@ enum EventType {
   @JsonValue('update_message_flags')
   updateMessageFlags,
 
+  @JsonValue('reaction')
+  reaction,
+
   unsupported,
 }
 
@@ -31,6 +34,8 @@ extension EventTypeX on EventType {
         return 'heartbeat';
       case EventType.updateMessageFlags:
         return 'update_message_flags';
+      case EventType.reaction:
+        return 'reaction';
       default:
         return 'unsupported';
     }
@@ -48,6 +53,8 @@ extension EventTypeX on EventType {
         return EventType.presence;
       case 'update_message_flags':
         return EventType.updateMessageFlags;
+      case 'reaction':
+        return EventType.reaction;
       default:
         return EventType.unsupported;
     }

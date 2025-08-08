@@ -6,6 +6,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
@@ -40,6 +41,10 @@ class RealTimeService {
       StreamController<UpdateMessageFlagsEntity>.broadcast();
   Stream<UpdateMessageFlagsEntity> get messagesFlagsEventsStream =>
       _messageFlagsEventsController.stream;
+
+  StreamController<ReactionEventEntity> _reactionsEventsController =
+      StreamController<ReactionEventEntity>.broadcast();
+  Stream<ReactionEventEntity> get reactionsEventsStream => _reactionsEventsController.stream;
 
   Future<RegisterQueueEntity> registerQueue() async {
     try {
@@ -76,6 +81,10 @@ class RealTimeService {
           if (response.events.last is UpdateMessageFlagsEntity) {
             _messageFlagsEventsController.add(response.events.last as UpdateMessageFlagsEntity);
           }
+        case EventType.reaction:
+          if (response.events.last is ReactionEventEntity) {
+            _reactionsEventsController.add(response.events.last as ReactionEventEntity);
+          }
         default:
           break;
       }
@@ -101,6 +110,9 @@ class RealTimeService {
     if (_typingEventsController.isClosed) {
       _typingEventsController = StreamController<TypingEventEntity>.broadcast();
     }
+    if (_reactionsEventsController.isClosed) {
+      _reactionsEventsController = StreamController<ReactionEventEntity>.broadcast();
+    }
     await registerQueue();
     if (_isPolling) return;
     _isPolling = true;
@@ -123,5 +135,6 @@ class RealTimeService {
     _typingEventsController.close();
     _messagesEventsController.close();
     _messageFlagsEventsController.close();
+    _reactionsEventsController.close();
   }
 }

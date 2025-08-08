@@ -29,8 +29,12 @@ import 'package:genesis_workspace/data/users/repositories_impl/users_repository_
     as _i675;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
     as _i857;
+import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
+    as _i276;
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart'
     as _i207;
+import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart'
+    as _i513;
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart'
     as _i116;
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart'
@@ -101,7 +105,6 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
     gh.factory<_i75.GetTokenUseCase>(() => _i75.GetTokenUseCase());
-    gh.factory<_i207.GetMessagesUseCase>(() => _i207.GetMessagesUseCase());
     gh.factory<_i1039.GetEventsByQueueIdUseCase>(
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
@@ -141,11 +144,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i435.DeleteQueueUseCase>(
       () => _i435.DeleteQueueUseCase(gh<_i703.RealTimeEventsRepository>()),
     );
+    gh.factory<_i207.GetMessagesUseCase>(
+      () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
+    );
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i116.SendMessageUseCase>(
       () => _i116.SendMessageUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i276.AddEmojiReactionUseCase>(
+      () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i513.RemoveEmojiReactionUseCase>(
+      () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),

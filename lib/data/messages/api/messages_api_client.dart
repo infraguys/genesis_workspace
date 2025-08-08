@@ -2,6 +2,7 @@ import 'package:dio/dio.dart' hide Headers;
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -35,5 +36,17 @@ abstract class MessagesApiClient {
     @Query("messages") String messages,
     @Query("op") UpdateMessageFlagsOp op,
     @Query("flag") MessageFlag flag,
+  );
+
+  @POST('/messages/{message_id}/reactions')
+  Future<EmojiReactionResponseDto> addEmojiReaction(
+    @Path('message_id') int messageId,
+    @Query('emoji_name') String emojiName,
+  );
+
+  @DELETE('/messages/{message_id}/reactions')
+  Future<EmojiReactionResponseDto> removeEmojiReaction(
+    @Path('message_id') int messageId,
+    @Query('emoji_name') String emojiName,
   );
 }
