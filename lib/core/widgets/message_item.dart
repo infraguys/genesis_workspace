@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -10,6 +9,7 @@ import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -50,10 +50,6 @@ class MessageItem extends StatelessWidget {
     final senderName = isSkeleton
         ? Container(height: 10, width: 80, color: theme.colorScheme.surfaceContainerHighest)
         : Text(message.senderFullName, style: theme.textTheme.titleSmall);
-
-    if (!isSkeleton) {
-      inspect(message);
-    }
 
     final messageContent = isSkeleton
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceContainerHighest)
@@ -254,38 +250,57 @@ class MessageItem extends StatelessWidget {
                             itemBuilder: (BuildContext context, int index) {
                               final ReactionDetails reaction = message.aggregatedReactions.values
                                   .elementAt(index);
-                              return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  border: Border.all(
-                                    color: reaction.userIds.contains(myUserId)
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.outlineVariant,
-                                    width: reaction.userIds.contains(myUserId) ? 2 : 1,
+                              return GestureDetector(
+                                onTap: () async {
+                                  if (reaction.userIds.contains(myUserId)) {
+                                    await context.read<MessagesCubit>().removeEmojiReaction(
+                                      message.id,
+                                      emojiName: reaction.emojiName,
+                                    );
+                                  } else {
+                                    await context.read<MessagesCubit>().addEmojiReaction(
+                                      message.id,
+                                      emojiName: reaction.emojiName,
+                                    );
+                                  }
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                    vertical: 4.0,
                                   ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    UnicodeEmojiWidget(
-                                      emojiDisplay: UnicodeEmojiDisplay(
-                                        emojiName: reaction.emojiName,
-                                        emojiUnicode: reaction.emojiCode,
-                                      ),
-                                      size: 16,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    border: Border.all(
+                                      color: reaction.userIds.contains(myUserId)
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.outlineVariant,
+                                      width: reaction.userIds.contains(myUserId) ? 2 : 1,
                                     ),
-                                    const SizedBox(width: 4.0),
-                                    Text(
-                                      reaction.count.toString(),
-                                      style: TextStyle(
-                                        fontSize: 12.0,
-                                        color: theme.colorScheme.onSurfaceVariant,
-                                        fontWeight: FontWeight.w500,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      UnicodeEmojiWidget(
+                                        emojiDisplay: UnicodeEmojiDisplay(
+                                          emojiName: reaction.emojiName,
+                                          emojiUnicode: reaction.emojiCode,
+                                        ),
+                                        size: 16,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 4.0),
+                                      Text(
+                                        reaction.count.toString(),
+                                        style: TextStyle(
+                                          fontSize: 12.0,
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },

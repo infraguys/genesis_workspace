@@ -1,5 +1,6 @@
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/message_event_dto.dart';
+import 'package:genesis_workspace/data/real_time_events/dto/event/reaction_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/typing_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/unsupported_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/update_message_flags_event_dto.dart';
@@ -29,6 +30,8 @@ EventDto parseEventDto(Map<String, dynamic> json) {
       return MessageEventDto.fromJson(json);
     case EventType.updateMessageFlags:
       return UpdateMessageFlagsEventDto.fromJson(json);
+    case EventType.reaction:
+      return ReactionEventDto.fromJson(json);
     default:
       return UnsupportedEventDto.fromJson(json);
   }
