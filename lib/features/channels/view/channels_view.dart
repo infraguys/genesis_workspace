@@ -157,7 +157,7 @@ class ChannelsViewState extends State<ChannelsView> {
                               state.selectedChannel != null &&
                               state.selectedChannelId != null)
                           ? Expanded(
-                              key: UniqueKey(),
+                              key: Key('channelChatViewKey'),
                               child: ChannelChat(
                                 extra: ChannelChatExtra(
                                   channel: state.selectedChannel!,
