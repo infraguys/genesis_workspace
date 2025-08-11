@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
@@ -65,8 +66,16 @@ class MessageItem extends StatelessWidget {
               return null;
             },
             customWidgetBuilder: (element) {
-              if (element.attributes.containsValue('image/png')) {
-                return AuthorizedImage(url: '${AppConstants.baseUrl}${element.attributes['src']}');
+              if (element.attributes.containsValue('image/png') ||
+                  element.attributes.containsValue('image/jpeg')) {
+                final src = element.attributes['src'];
+                final size = extractDimensionsFromUrl(src ?? '');
+                return AuthorizedImage(
+                  url: '${AppConstants.baseUrl}${src}',
+                  width: size?.width,
+                  height: size?.height,
+                  fit: BoxFit.contain,
+                );
               }
               if (element.classes.contains('emoji')) {
                 final emojiUnicode = element.classes

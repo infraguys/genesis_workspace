@@ -10,15 +10,23 @@ import 'package:go_router/go_router.dart';
 class AuthorizedImage extends StatefulWidget {
   final String url;
   final BoxFit fit;
+  final double? width;
+  final double? height;
 
-  const AuthorizedImage({super.key, required this.url, this.fit = BoxFit.contain});
+  const AuthorizedImage({
+    super.key,
+    required this.url,
+    this.fit = BoxFit.contain,
+    this.width,
+    this.height,
+  });
 
   @override
   State<AuthorizedImage> createState() => _AuthorizedImageState();
 }
 
 class _AuthorizedImageState extends State<AuthorizedImage> {
-  static final Map<String, Uint8List> _cache = {}; // 🗂️ Кэш изображений
+  static final Map<String, Uint8List> _cache = {};
   Uint8List? _imageBytes;
   bool _loading = true;
   bool _error = false;
@@ -28,14 +36,12 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   @override
   void initState() {
     super.initState();
-
     _dio = Dio()..interceptors.add(TokenInterceptor(TokenStorageFactory.create()));
     _loadImage();
   }
 
   Future<void> _loadImage() async {
     if (_cache.containsKey(widget.url)) {
-      // ✅ Берем из кэша
       setState(() {
         _imageBytes = _cache[widget.url];
         _loading = false;
@@ -48,39 +54,51 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
         widget.url,
         options: Options(responseType: ResponseType.bytes),
       );
-
-      if (mounted) {
-        final bytes = Uint8List.fromList(response.data!);
-        _cache[widget.url] = bytes; // 🗂️ Сохраняем в кэш
-        setState(() {
-          _imageBytes = bytes;
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = true;
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      final bytes = Uint8List.fromList(response.data!);
+      _cache[widget.url] = bytes;
+      setState(() {
+        _imageBytes = bytes;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _error = true;
+        _loading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
-    if (_error || _imageBytes == null) {
-      return const Icon(Icons.error, color: Colors.red);
-    }
+    // Оборачиваем в SizedBox, чтобы размер был стабильным в любых состояниях.
+    final box = SizedBox(width: widget.width, height: widget.height, child: _buildContent(context));
+
+    // Hero оставим, но тег лучше сделать стабильным (например, по URL).
     return GestureDetector(
-      child: Hero(
-        tag: _imageBytes.toString(),
-        child: Image.memory(_imageBytes!, fit: widget.fit, filterQuality: FilterQuality.high),
-      ),
       onTap: () {
-        context.pushNamed(Routes.imageFullScreen, extra: _imageBytes);
+        if (_imageBytes != null) {
+          context.pushNamed(Routes.imageFullScreen, extra: _imageBytes);
+        }
       },
+      child: Hero(tag: _imageBytes.toString(), child: box),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error || _imageBytes == null) {
+      return const Center(child: Icon(Icons.error, color: Colors.red));
+    }
+    return Image.memory(
+      _imageBytes!,
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      filterQuality: FilterQuality.high,
     );
   }
 }
