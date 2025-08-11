@@ -1,4 +1,11 @@
 {
+  "auth": {
+    "emailHint": "email@genesis.team",
+    "emailLabel": "Почта",
+    "passwordHint": "cucumber123",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль"
+  },
   "password_cant_be_empty": "Пароль не может быть пустым",
   "password": "Пароль",
   "login": "Войти",
