@@ -118,7 +118,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
     );
-    gh.lazySingleton<_i862.AuthCubit>(() => _i862.AuthCubit());
     gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
     gh.lazySingleton<_i435.LocalizationService>(
       () => _i435.LocalizationService(),
@@ -202,6 +201,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i513.RemoveEmojiReactionUseCase>(),
       ),
       dispose: _i592.disposeMessagesCubit,
+    );
+    gh.lazySingleton<_i862.AuthCubit>(
+      () => _i862.AuthCubit(
+        gh<_i799.FetchApiKeyUseCase>(),
+        gh<_i643.SaveTokenUseCase>(),
+        gh<_i75.GetTokenUseCase>(),
+        gh<_i435.DeleteQueueUseCase>(),
+        gh<_i433.DeleteTokenUseCase>(),
+        gh<_i82.RealTimeService>(),
+        gh<_i832.UpdatePresenceUseCase>(),
+      ),
+      dispose: _i862.disposeAuthCubit,
     );
     return this;
   }

@@ -34,6 +34,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	Translations $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => Translations(meta: meta ?? this.$meta);
 
 	// Translations
+	late final TranslationsAuthEn auth = TranslationsAuthEn.internal(_root);
 	String get passwordCantBeEmpty => 'Password can not be empty';
 	String get password => 'Password';
 	String get login => 'Login';
@@ -54,6 +55,20 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsInboxEn inbox = TranslationsInboxEn.internal(_root);
 	late final TranslationsMentionsEn mentions = TranslationsMentionsEn.internal(_root);
 	String get selectAnyChat => 'Select any chat';
+}
+
+// Path: auth
+class TranslationsAuthEn {
+	TranslationsAuthEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get emailHint => 'email@tokens.team';
+	String get emailLabel => 'Email';
+	String get passwordHint => 'cucumber123';
+	String get showPassword => 'Show password';
+	String get hidePassword => 'Hide password';
 }
 
 // Path: navBar

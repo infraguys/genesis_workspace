@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -20,106 +21,188 @@ class AuthView extends StatefulWidget {
 class _AuthViewState extends State<AuthView> {
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
+  final _formKey = GlobalKey<FormState>();
+  final _passwordFocus = FocusNode();
 
   final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
-
-  final _formKey = GlobalKey<FormState>();
-
   bool _obscureText = true;
 
-  void _toggleVisibility() {
-    setState(() {
-      _obscureText = !_obscureText;
-    });
-  }
+  void _toggleVisibility() => setState(() => _obscureText = !_obscureText);
+
+  static const double _maxFormWidth = 420;
+  static const double _cardPadding = 24;
 
   @override
   void initState() {
+    super.initState();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
+
     _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
       if (height != 0) {
         context.read<EmojiKeyboardCubit>().setHeight(height);
       }
     });
-    super.initState();
   }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _passwordFocus.dispose();
     _keyboardHeightPlugin.dispose();
     super.dispose();
   }
 
+  void _submit() async {
+    if (_formKey.currentState!.validate()) {
+      await context.read<AuthCubit>().login(
+        _usernameController.text.trim(),
+        _passwordController.text,
+      );
+      FocusScope.of(context).unfocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
+
     return BlocConsumer<AuthCubit, AuthState>(
-      listener: (BuildContext context, state) {
-        if (state.isAuthorized) {
-          context.go(Routes.directMessages);
-        }
+      listener: (context, state) {
+        if (state.isAuthorized) context.go(Routes.directMessages);
       },
       builder: (context, state) {
-        return Scaffold(
-          body: Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 12,
-                children: [
-                  GenesisLogo(size: 90),
-                  TextFormField(
-                    controller: _usernameController,
-                    autofillHints: [AutofillHints.email],
-                    onTapOutside: (_) {
-                      FocusScope.of(context).unfocus();
-                    },
-                    decoration: InputDecoration(hintText: "user@tokens.team", label: Text("Email")),
-                    validator: validateEmail,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  TextFormField(
-                    autofillHints: [AutofillHints.password],
+        final theme = Theme.of(context);
+        final isWide = currentSize(context) >= ScreenSize.lTablet;
 
-                    controller: _passwordController,
-                    obscureText: _obscureText,
-                    onTapOutside: (_) {
-                      FocusScope.of(context).unfocus();
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return context.t.passwordCantBeEmpty;
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      labelText: context.t.password,
-                      hintText: 'cucumber123',
-                      suffixIcon: IconButton(
+        final form = AutofillGroup(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 12,
+              children: [
+                const GenesisLogo(size: 90),
+                Text(
+                  t.login,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                TextFormField(
+                  controller: _usernameController,
+                  autofillHints: const [AutofillHints.email],
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: t.auth.emailHint,
+                    labelText: t.auth.emailLabel,
+                  ),
+                  validator: validateEmail,
+                ),
+                TextFormField(
+                  controller: _passwordController,
+                  autofillHints: const [AutofillHints.password],
+                  obscureText: _obscureText,
+                  obscuringCharacter: '•',
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _submit(),
+                  decoration: InputDecoration(
+                    labelText: t.password,
+                    hintText: t.auth.passwordHint,
+                    suffixIcon: Semantics(
+                      label: _obscureText ? t.auth.showPassword : t.auth.hidePassword,
+                      button: true,
+                      child: IconButton(
                         icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
                         onPressed: _toggleVisibility,
+                        tooltip: _obscureText ? t.auth.showPassword : t.auth.hidePassword,
                       ),
                     ),
                   ),
-                  if (state.errorMessage != null)
-                    Text(state.errorMessage!, style: TextStyle(color: Colors.red)),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        await context.read<AuthCubit>().login(
-                          _usernameController.text,
-                          _passwordController.text,
-                        );
-                      }
-                    },
-                    child: Text(context.t.login),
+                  validator: (v) => (v == null || v.isEmpty) ? t.passwordCantBeEmpty : null,
+                ),
+                if (state.errorMessage != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state.errorMessage!,
+                            style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: state.isPending ? null : _submit,
+                    child: Text(t.login),
                   ).pending(state.isPending),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        return Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  theme.colorScheme.surface,
+                  theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 ],
+              ),
+            ),
+            child: SafeArea(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: _maxFormWidth),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        curve: Curves.easeOut,
+                        padding: EdgeInsets.all(isWide ? _cardPadding : 16),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: isWide
+                              ? [
+                                  BoxShadow(
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 8),
+                                    color: Colors.black.withOpacity(0.08),
+                                  ),
+                                ]
+                              : null,
+                          border: Border.all(
+                            color: theme.colorScheme.outlineVariant.withOpacity(0.6),
+                          ),
+                        ),
+                        child: form,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

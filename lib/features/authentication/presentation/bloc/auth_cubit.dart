@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
@@ -13,74 +13,115 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
 
-@lazySingleton
+@LazySingleton(dispose: disposeAuthCubit)
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit() : super(AuthState(isPending: false, isAuthorized: false));
+  final FetchApiKeyUseCase _fetchApiKeyUseCase;
+  final SaveTokenUseCase _saveTokenUseCase;
+  final GetTokenUseCase _getTokenUseCase;
+  final DeleteQueueUseCase _deleteQueueUseCase;
+  final DeleteTokenUseCase _deleteTokenUseCase;
+  final RealTimeService _realTimeService;
+  final UpdatePresenceUseCase _updatePresenceUseCase;
 
-  final FetchApiKeyUseCase _fetchApiKeyUseCase = getIt<FetchApiKeyUseCase>();
-  final SaveTokenUseCase _saveTokenUseCase = getIt<SaveTokenUseCase>();
-  final GetTokenUseCase _getTokenUseCase = getIt<GetTokenUseCase>();
-  final DeleteQueueUseCase _deleteQueueUseCase = getIt<DeleteQueueUseCase>();
-  final DeleteTokenUseCase _deleteTokenUseCase = getIt<DeleteTokenUseCase>();
-  final RealTimeService _realTimeService = getIt<RealTimeService>();
-  final UpdatePresenceUseCase _updatePresenceUseCase = getIt<UpdatePresenceUseCase>();
+  AuthCubit(
+    this._fetchApiKeyUseCase,
+    this._saveTokenUseCase,
+    this._getTokenUseCase,
+    this._deleteQueueUseCase,
+    this._deleteTokenUseCase,
+    this._realTimeService,
+    this._updatePresenceUseCase,
+  ) : super(const AuthState(isPending: false, isAuthorized: false));
 
+  /// Login with basic auth -> save token -> set authorized
   Future<void> login(String username, String password) async {
-    state.isPending = true;
-    emit(state.copyWith(isPending: state.isPending));
+    emit(state.copyWith(isPending: true, errorMessage: null));
     try {
-      final ApiKeyEntity response = await _fetchApiKeyUseCase.call(username, password);
-      await _saveTokenUseCase.call(email: response.email, token: response.apiKey);
-      state.isAuthorized = true;
-      state.errorMessage = null;
-      emit(state.copyWith(isAuthorized: state.isAuthorized, errorMessage: state.errorMessage));
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        state.errorMessage = e.response!.data['msg'];
-        emit(state.copyWith(errorMessage: state.errorMessage));
-      }
+      final ApiKeyEntity response = await _fetchApiKeyUseCase(username, password);
+      await _saveTokenUseCase(email: response.email, token: response.apiKey);
+
+      emit(state.copyWith(isPending: false, isAuthorized: true, errorMessage: null));
+    } on DioException catch (e, st) {
+      final bool unauthorized = e.response?.statusCode == 401;
+      final String? backendMsg = e.response?.data is Map
+          ? e.response?.data['msg'] as String?
+          : null;
+      final String message = unauthorized
+          ? (backendMsg ?? 'Invalid credentials')
+          : (backendMsg ?? 'Network error. Please try again.');
+
+      addError(e, st);
+      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: message));
+    } catch (e, st) {
+      addError(e, st);
+      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: 'Unexpected error'));
     }
-    state.isPending = false;
-    emit(state.copyWith(isPending: state.isPending));
   }
 
+  /// Graceful logout: set idle presence, drop queue, delete token
   Future<void> logout() async {
-    final queueId = _realTimeService.queueId;
-    final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
-      status: PresenceStatus.idle,
-      newUserInput: true,
-      pingOnly: true,
-    );
-    await Future.wait([_updatePresenceUseCase.call(body), _deleteQueueUseCase.call(queueId)]);
-    await _deleteTokenUseCase.call();
-    state.isAuthorized = false;
-    emit(state.copyWith(isAuthorized: state.isAuthorized));
+    emit(state.copyWith(isPending: true));
+    try {
+      final String? queueId = _realTimeService.queueId;
+
+      final presence = UpdatePresenceRequestEntity(
+        status: PresenceStatus.idle,
+        newUserInput: true,
+        pingOnly: true,
+      );
+
+      final futures = <Future<dynamic>>[
+        _updatePresenceUseCase(presence),
+        if (queueId != null) _deleteQueueUseCase(queueId),
+      ];
+
+      await Future.wait(futures);
+      await _deleteTokenUseCase();
+
+      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
+    } catch (e, st) {
+      addError(e, st);
+      // даже если что-то упало — токен лучше удалить, чтобы не зависнуть в полулогине
+      await _deleteTokenUseCase();
+      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
+    }
   }
 
+  /// Dev-only logout without network calls
   Future<void> devLogout() async {
-    await _deleteTokenUseCase.call();
-    state.isAuthorized = false;
-    emit(state.copyWith(isAuthorized: state.isAuthorized));
+    emit(state.copyWith(isPending: true));
+    try {
+      await _deleteTokenUseCase();
+      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
+    } catch (e, st) {
+      addError(e, st);
+      emit(state.copyWith(isPending: false, isAuthorized: false));
+    }
   }
 
+  /// Check persisted token to restore session on app start
   Future<void> checkToken() async {
-    final String? token = await _getTokenUseCase.call();
-    if (token != null) {
-      state.isAuthorized = true;
-      emit(state.copyWith(isAuthorized: state.isAuthorized));
-    } else {
-      state.isAuthorized = false;
-      emit(state.copyWith(isAuthorized: state.isAuthorized));
+    emit(state.copyWith(isPending: true, errorMessage: null));
+    try {
+      final String? token = await _getTokenUseCase();
+      emit(state.copyWith(isPending: false, isAuthorized: token != null, errorMessage: null));
+    } catch (e, st) {
+      addError(e, st);
+      emit(
+        state.copyWith(isPending: false, isAuthorized: false, errorMessage: 'Token check failed'),
+      );
     }
   }
 }
 
-class AuthState {
-  bool isPending;
-  bool isAuthorized;
-  String? errorMessage;
+void disposeAuthCubit(AuthCubit cubit) => cubit.close();
 
-  AuthState({required this.isPending, required this.isAuthorized, this.errorMessage});
+class AuthState extends Equatable {
+  final bool isPending;
+  final bool isAuthorized;
+  final String? errorMessage;
+
+  const AuthState({required this.isPending, required this.isAuthorized, this.errorMessage});
 
   AuthState copyWith({bool? isPending, bool? isAuthorized, String? errorMessage}) {
     return AuthState(
@@ -89,4 +130,7 @@ class AuthState {
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
+
+  @override
+  List<Object?> get props => [isPending, isAuthorized, errorMessage];
 }

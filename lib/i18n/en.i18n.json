@@ -1,4 +1,11 @@
 {
+  "auth": {
+    "emailHint": "email@tokens.team",
+    "emailLabel": "Email",
+    "passwordHint": "cucumber123",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
   "password_cant_be_empty": "Password can not be empty",
   "password": "Password",
   "login": "Login",

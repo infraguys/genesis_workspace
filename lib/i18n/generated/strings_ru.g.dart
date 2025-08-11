@@ -32,6 +32,7 @@ class TranslationsRu extends Translations {
 	TranslationsRu $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsRu(meta: meta ?? this.$meta);
 
 	// Translations
+	@override late final TranslationsAuthRu auth = TranslationsAuthRu._(_root);
 	@override String get passwordCantBeEmpty => 'Пароль не может быть пустым';
 	@override String get password => 'Пароль';
 	@override String get login => 'Войти';
@@ -52,6 +53,20 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsInboxRu inbox = TranslationsInboxRu._(_root);
 	@override late final TranslationsMentionsRu mentions = TranslationsMentionsRu._(_root);
 	@override String get selectAnyChat => 'Выберите любой чат';
+}
+
+// Path: auth
+class TranslationsAuthRu extends TranslationsAuthEn {
+	TranslationsAuthRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get emailHint => 'email@tokens.team';
+	@override String get emailLabel => 'Почта';
+	@override String get passwordHint => 'cucumber123';
+	@override String get showPassword => 'Показать пароль';
+	@override String get hidePassword => 'Скрыть пароль';
 }
 
 // Path: navBar
