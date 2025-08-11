@@ -1,6 +1,6 @@
 part of 'messages_cubit.dart';
 
-class MessagesState extends Equatable {
+class MessagesState {
   final List<MessageEntity> messages;
   const MessagesState({required this.messages});
 
@@ -9,7 +9,4 @@ class MessagesState extends Equatable {
 
   MessagesState copyWith({List<MessageEntity>? messages}) =>
       MessagesState(messages: messages ?? this.messages);
-
-  @override
-  List<Object?> get props => [messages];
 }

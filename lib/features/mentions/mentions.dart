@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart';
 import 'package:genesis_workspace/features/mentions/view/mentions_view.dart';
 
@@ -8,6 +9,6 @@ class Mentions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => MentionsCubit(), child: MentionsView());
+    return BlocProvider(create: (context) => getIt<MentionsCubit>(), child: MentionsView());
   }
 }

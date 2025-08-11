@@ -14,6 +14,7 @@ import 'package:genesis_workspace/features/feed/feed.dart';
 import 'package:genesis_workspace/features/inbox/inbox.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/menu/menu.dart';
+import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +38,7 @@ class Routes {
   static const String channelChat = '/channel-chat';
   static const String inbox = '/inbox';
   static const String mentions = '/mentions';
+  static const String reactions = '/reactions';
   static const String imageFullScreen = '/image-full-screen';
 }
 
@@ -96,6 +98,11 @@ final router = GoRouter(
                   path: Routes.mentions,
                   name: Routes.mentions,
                   builder: (context, state) => Mentions(),
+                ),
+                GoRoute(
+                  path: Routes.reactions,
+                  name: Routes.reactions,
+                  builder: (context, state) => Reactions(),
                 ),
               ],
             ),

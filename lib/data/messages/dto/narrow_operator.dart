@@ -10,6 +10,8 @@ enum NarrowOperator {
   isFilter,
   @JsonValue('topic')
   topic,
+  @JsonValue('has')
+  has,
 }
 
 extension NarrowOperatorToJson on NarrowOperator {
@@ -23,6 +25,8 @@ extension NarrowOperatorToJson on NarrowOperator {
         return 'is';
       case NarrowOperator.topic:
         return 'topic';
+      case NarrowOperator.has:
+        return 'has';
     }
   }
 }

@@ -64,5 +64,9 @@
     "title": "Упоминания",
     "no_mentions": "Нет упоминаний"
   },
+  "reactions": {
+    "title": "Реакции",
+    "no_reactions": "Нет реакций"
+  },
   "select_any_chat": "Выберите любой чат"
 }

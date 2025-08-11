@@ -58,5 +58,9 @@
    "title": "Mentions",
     "no_mentions": "No mentions"
   },
+  "reactions": {
+   "title": "Reactions",
+    "no_reactions": "No reactions"
+  },
   "select_any_chat": "Select any chat"
 }
