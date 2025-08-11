@@ -237,7 +237,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
     for (var messageId in event.messages) {
       if (event.flag == MessageFlag.read) {
-        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        MessageEntity? message = state.messages.firstWhere((message) => message.id == messageId);
         final int index = state.messages.indexOf(message);
         MessageEntity changedMessage = message.copyWith(
           flags: [...message.flags ?? [], MessageFlag.read.name],

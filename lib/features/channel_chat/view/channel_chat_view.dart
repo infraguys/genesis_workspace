@@ -49,7 +49,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
   }
 
   @override
-  void didChangeDependencies() {
+  void initState() {
     _myUser = context.read<ProfileCubit>().state.user!;
     context.read<ChannelChatCubit>().setChannel(widget.extra.channel);
     context.read<ChannelChatCubit>().setTopic(widget.extra.topicEntity);
@@ -57,7 +57,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     _scrollController = ScrollController()..addListener(_onScroll);
     _messageController = TextEditingController();
     _messageController.addListener(_onTextChanged);
-    super.didChangeDependencies();
+    super.initState();
   }
 
   @override
