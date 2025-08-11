@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -189,6 +191,10 @@ class MessageItem extends StatelessWidget {
               Flexible(
                 flex: 1,
                 child: GestureDetector(
+                  onTap: () {
+                    inspect(message.content);
+                    inspect(messageContent);
+                  },
                   onLongPress: () {
                     final renderBox = context.findRenderObject() as RenderBox;
                     final position = renderBox.localToGlobal(Offset.zero);
