@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
@@ -20,92 +19,116 @@ import 'package:injectable/injectable.dart';
 
 part 'messages_state.dart';
 
-@LazySingleton()
+@LazySingleton(dispose: disposeMessagesCubit)
 class MessagesCubit extends Cubit<MessagesState> {
-  final _realTimeService = getIt<RealTimeService>();
+  final RealTimeService _realTimeService;
+  final GetMessagesUseCase _getMessagesUseCase;
+  final AddEmojiReactionUseCase _addEmojiReactionUseCase;
+  final RemoveEmojiReactionUseCase _removeEmojiReactionUseCase;
 
-  MessagesCubit() : super(MessagesState(messages: [], unreadMessages: [])) {
-    _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
+  StreamSubscription<MessageEventEntity>? _messagesEventsSubscription;
+  StreamSubscription<UpdateMessageFlagsEntity>? _messageFlagsSubscription;
+
+  MessagesCubit(
+    this._realTimeService,
+    this._getMessagesUseCase,
+    this._addEmojiReactionUseCase,
+    this._removeEmojiReactionUseCase,
+  ) : super(const MessagesState(messages: [])) {
+    _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(
+      _onMessageEvent,
+      onError: addError,
+    );
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
-      _onMessageFlagsEvents,
+      _onFlagsEvent,
+      onError: addError,
     );
   }
 
   @override
-  Future<void> close() {
-    _messagesEventsSubscription.cancel();
-    _messageFlagsSubscription.cancel();
+  Future<void> close() async {
+    await _messagesEventsSubscription?.cancel();
+    await _messageFlagsSubscription?.cancel();
     return super.close();
   }
 
-  final _getMessagesUseCase = getIt<GetMessagesUseCase>();
-  final _addEmojiReactionUseCase = getIt<AddEmojiReactionUseCase>();
-  final _removeEmojiReactionUseCase = getIt<RemoveEmojiReactionUseCase>();
+  void _onMessageEvent(MessageEventEntity event) {
+    final updatedMessages = List<MessageEntity>.of(state.messages);
+    if (!updatedMessages.any((message) => message.id == event.message.id)) {
+      updatedMessages.add(event.message);
+      emit(state.copyWith(messages: updatedMessages));
+    }
+  }
 
-  late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  void _onFlagsEvent(UpdateMessageFlagsEntity event) {
+    if (event.flag != MessageFlag.read) return;
+
+    final indexByMessageId = {
+      for (var i = 0; i < state.messages.length; i++) state.messages[i].id: i,
+    };
+    final updatedMessages = List<MessageEntity>.of(state.messages);
+
+    for (final messageId in event.messages) {
+      final index = indexByMessageId[messageId];
+      if (index == null) continue;
+
+      final message = updatedMessages[index];
+      final newFlags = {...?message.flags};
+
+      if (event.op == UpdateMessageFlagsOp.add) {
+        newFlags.add('read');
+      } else if (event.op == UpdateMessageFlagsOp.remove) {
+        newFlags.remove('read');
+      }
+
+      updatedMessages[index] = message.copyWith(flags: newFlags.toList(growable: false));
+    }
+
+    emit(state.copyWith(messages: updatedMessages));
+  }
+
+  Future<void> getLastMessages() async {
+    try {
+      final request = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
+        numBefore: 200,
+        numAfter: 0,
+      );
+
+      final response = await _getMessagesUseCase(request);
+
+      final mergedMessages = {
+        for (final message in state.messages) message.id: message,
+        for (final message in response.messages) message.id: message,
+      }.values.toList(growable: false);
+
+      emit(state.copyWith(messages: mergedMessages));
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
+    }
+  }
 
   Future<void> addEmojiReaction(int messageId, {required String emojiName}) async {
     try {
-      await _addEmojiReactionUseCase.call(
+      await _addEmojiReactionUseCase(
         EmojiReactionRequestEntity(messageId: messageId, emojiName: emojiName),
       );
-    } catch (e) {
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
       rethrow;
     }
   }
 
   Future<void> removeEmojiReaction(int messageId, {required String emojiName}) async {
     try {
-      await _removeEmojiReactionUseCase.call(
+      await _removeEmojiReactionUseCase(
         EmojiReactionRequestEntity(messageId: messageId, emojiName: emojiName),
       );
-    } catch (e) {
-      inspect(e);
-    }
-  }
-
-  _onMessageEvents(MessageEventEntity event) {
-    final messages = [...state.messages];
-    messages.add(event.message);
-    state.unreadMessages = messages.where((message) => message.hasUnreadMessages).toList();
-    emit(state.copyWith(messages: messages, unreadMessages: state.unreadMessages));
-  }
-
-  _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
-    final newUnreadMessages = [...state.unreadMessages];
-    final newMessages = [...state.messages];
-    if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
-      for (var messageId in event.messages) {
-        newUnreadMessages.removeWhere((unreadMessage) => unreadMessage.id == messageId);
-        for (var message in state.messages) {
-          final indexOf = state.messages.indexOf(message);
-          if (message.id == messageId) {
-            if (newMessages[indexOf].flags != null) {
-              newMessages[indexOf].flags!.add('read');
-            } else {
-              newMessages[indexOf].flags = ['read'];
-            }
-          }
-        }
-      }
-    }
-    emit(state.copyWith(unreadMessages: newUnreadMessages, messages: newMessages));
-  }
-
-  Future<void> getLastMessages() async {
-    try {
-      final messagesBody = MessagesRequestEntity(
-        anchor: MessageAnchor.newest(),
-        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
-        numBefore: 5000,
-        numAfter: 0,
-      );
-      final response = await _getMessagesUseCase.call(messagesBody);
-      state.unreadMessages = response.messages;
-      emit(state.copyWith(messages: state.messages, unreadMessages: state.unreadMessages));
-    } catch (e) {
-      inspect(e);
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
     }
   }
 }
+
+void disposeMessagesCubit(MessagesCubit cubit) => cubit.close();

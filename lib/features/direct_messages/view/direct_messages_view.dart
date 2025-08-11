@@ -124,7 +124,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                             (currentSize(context) > ScreenSize.lTablet &&
                                     state.selectedUser != null)
                                 ? Expanded(
-                                    key: Key('directMessagesKey'),
+                                    key: Key('directMessagesKey_${state.selectedUser?.userId}'),
                                     child: Chat(user: state.selectedUser),
                                   )
                                 : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
