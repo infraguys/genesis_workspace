@@ -81,12 +81,17 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
+import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart' as _i277;
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart'
     as _i144;
+import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
+    as _i758;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
     as _i766;
+import 'package:genesis_workspace/features/reactions/bloc/reactions_cubit.dart'
+    as _i656;
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
     as _i573;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
@@ -157,6 +162,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i656.ReactionsCubit>(
+      () => _i656.ReactionsCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+      ),
+    );
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
     );
@@ -193,6 +204,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.factory<_i758.MentionsCubit>(
+      () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
+    );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(
         gh<_i82.RealTimeService>(),
@@ -201,6 +215,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i513.RemoveEmojiReactionUseCase>(),
       ),
       dispose: _i592.disposeMessagesCubit,
+    );
+    gh.factory<_i277.ChatCubit>(
+      () => _i277.ChatCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+      ),
     );
     gh.lazySingleton<_i862.AuthCubit>(
       () => _i862.AuthCubit(

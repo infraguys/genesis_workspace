@@ -1,32 +1,29 @@
-part of 'mentions_cubit.dart';
+part of 'reactions_cubit.dart';
 
-class MentionsState extends Equatable {
+class ReactionsState {
   final List<MessageEntity> messages;
   final int? lastMessageId;
   final bool isLoadingMore;
   final bool isAllLoaded;
 
-  const MentionsState({
+  const ReactionsState({
     required this.messages,
     required this.isLoadingMore,
     required this.isAllLoaded,
     this.lastMessageId,
   });
 
-  MentionsState copyWith({
+  ReactionsState copyWith({
     List<MessageEntity>? messages,
     bool? isLoadingMore,
     bool? isAllLoaded,
     int? lastMessageId,
   }) {
-    return MentionsState(
+    return ReactionsState(
       messages: messages ?? this.messages,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       isAllLoaded: isAllLoaded ?? this.isAllLoaded,
       lastMessageId: lastMessageId ?? this.lastMessageId,
     );
   }
-
-  @override
-  List<Object?> get props => [messages, lastMessageId, isLoadingMore, isAllLoaded];
 }

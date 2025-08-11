@@ -52,6 +52,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsDateLabelsRu dateLabels = TranslationsDateLabelsRu._(_root);
 	@override late final TranslationsInboxRu inbox = TranslationsInboxRu._(_root);
 	@override late final TranslationsMentionsRu mentions = TranslationsMentionsRu._(_root);
+	@override late final TranslationsReactionsRu reactions = TranslationsReactionsRu._(_root);
 	@override String get selectAnyChat => 'Выберите любой чат';
 }
 
@@ -154,4 +155,15 @@ class TranslationsMentionsRu extends TranslationsMentionsEn {
 	// Translations
 	@override String get title => 'Упоминания';
 	@override String get noMentions => 'Нет упоминаний';
+}
+
+// Path: reactions
+class TranslationsReactionsRu extends TranslationsReactionsEn {
+	TranslationsReactionsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Реакции';
+	@override String get noReactions => 'Нет реакций';
 }

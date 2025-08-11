@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
@@ -25,12 +24,19 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/update_
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:injectable/injectable.dart';
 
 part 'chat_state.dart';
 
+@injectable
 class ChatCubit extends Cubit<ChatState> {
-  ChatCubit()
-    : super(
+  ChatCubit(
+    this._realTimeService,
+    this._getMessagesUseCase,
+    this._sendMessageUseCase,
+    this._setTypingUseCase,
+    this._updateMessagesFlagsUseCase,
+  ) : super(
         ChatState(
           messages: [],
           chatId: null,
@@ -51,12 +57,12 @@ class ChatCubit extends Cubit<ChatState> {
     _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(_onReactionEvents);
   }
 
-  final RealTimeService _realTimeService = getIt<RealTimeService>();
+  final RealTimeService _realTimeService;
 
-  final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
-  final SendMessageUseCase _sendMessageUseCase = getIt<SendMessageUseCase>();
-  final SetTypingUseCase _setTypingUseCase = getIt<SetTypingUseCase>();
-  final _updateMessagesFlagsUseCase = getIt<UpdateMessagesFlagsUseCase>();
+  final GetMessagesUseCase _getMessagesUseCase;
+  final SendMessageUseCase _sendMessageUseCase;
+  final SetTypingUseCase _setTypingUseCase;
+  final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
