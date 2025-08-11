@@ -1,15 +1,15 @@
 part of 'messages_cubit.dart';
 
-class MessagesState {
-  List<MessageEntity> messages;
-  List<MessageEntity> unreadMessages;
+class MessagesState extends Equatable {
+  final List<MessageEntity> messages;
+  const MessagesState({required this.messages});
 
-  MessagesState({required this.messages, required this.unreadMessages});
+  List<MessageEntity> get unreadMessages =>
+      messages.where((m) => m.hasUnreadMessages).toList(growable: false);
 
-  MessagesState copyWith({List<MessageEntity>? messages, List<MessageEntity>? unreadMessages}) {
-    return MessagesState(
-      messages: messages ?? this.messages,
-      unreadMessages: unreadMessages ?? this.unreadMessages,
-    );
-  }
+  MessagesState copyWith({List<MessageEntity>? messages}) =>
+      MessagesState(messages: messages ?? this.messages);
+
+  @override
+  List<Object?> get props => [messages];
 }

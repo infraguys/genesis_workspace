@@ -114,7 +114,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => coreModule.secureStorage(),
     );
     gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
-    gh.lazySingleton<_i592.MessagesCubit>(() => _i592.MessagesCubit());
     gh.lazySingleton<_i766.ProfileCubit>(() => _i766.ProfileCubit());
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
@@ -147,6 +146,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i207.GetMessagesUseCase>(
       () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i513.RemoveEmojiReactionUseCase>(
+      () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
+    );
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
     );
@@ -155,9 +157,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
-    );
-    gh.factory<_i513.RemoveEmojiReactionUseCase>(
-      () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
@@ -194,6 +193,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.lazySingleton<_i592.MessagesCubit>(
+      () => _i592.MessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i276.AddEmojiReactionUseCase>(),
+        gh<_i513.RemoveEmojiReactionUseCase>(),
+      ),
+      dispose: _i592.disposeMessagesCubit,
     );
     return this;
   }

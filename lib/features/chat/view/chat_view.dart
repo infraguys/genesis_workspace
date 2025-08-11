@@ -48,7 +48,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
     _myUser = context.read<ProfileCubit>().state.user!;
 
     _future = context.read<ChatCubit>().getMessages(
