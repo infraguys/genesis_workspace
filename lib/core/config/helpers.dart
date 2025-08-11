@@ -56,3 +56,26 @@ bool isJustNow(DateTime lastSeen) {
   final diff = DateTime.now().difference(lastSeen);
   return diff.inMinutes < 1;
 }
+
+Size? parseDimensions(String? raw) {
+  if (raw == null || raw.isEmpty) return null;
+  final parts = raw.split('x');
+  if (parts.length != 2) return null;
+  final w = double.tryParse(parts[0]);
+  final h = double.tryParse(parts[1]);
+  if (w == null || h == null || w <= 0 || h <= 0) return null;
+  return Size(w, h);
+}
+
+Size? extractDimensionsFromUrl(String url) {
+  final regex = RegExp(r'/(\d+)x(\d+)\.(?:webp|png|jpg|jpeg)$', caseSensitive: false);
+  final match = regex.firstMatch(url);
+  if (match != null) {
+    final width = double.tryParse(match.group(1)!);
+    final height = double.tryParse(match.group(2)!);
+    if (width != null && height != null) {
+      return Size(width, height);
+    }
+  }
+  return null;
+}
