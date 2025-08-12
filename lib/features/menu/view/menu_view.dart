@@ -45,6 +45,14 @@ class MenuView extends StatelessWidget {
               await context.pushNamed(Routes.reactions);
             },
           ),
+          ListTile(
+            title: Text(context.t.starred.title),
+            leading: Icon(Icons.star),
+            trailing: Icon(Icons.arrow_right),
+            onTap: () async {
+              await context.pushNamed(Routes.starred);
+            },
+          ),
         ],
       ),
     );

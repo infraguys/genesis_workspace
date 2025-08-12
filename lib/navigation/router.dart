@@ -17,6 +17,7 @@ import 'package:genesis_workspace/features/menu/menu.dart';
 import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
+import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/authentication/presentation/auth.dart';
@@ -39,6 +40,7 @@ class Routes {
   static const String inbox = '/inbox';
   static const String mentions = '/mentions';
   static const String reactions = '/reactions';
+  static const String starred = '/starred';
   static const String imageFullScreen = '/image-full-screen';
 }
 
@@ -103,6 +105,11 @@ final router = GoRouter(
                   path: Routes.reactions,
                   name: Routes.reactions,
                   builder: (context, state) => Reactions(),
+                ),
+                GoRoute(
+                  path: Routes.starred,
+                  name: Routes.starred,
+                  builder: (context, state) => Starred(),
                 ),
               ],
             ),

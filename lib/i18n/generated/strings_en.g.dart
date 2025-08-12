@@ -55,6 +55,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsInboxEn inbox = TranslationsInboxEn.internal(_root);
 	late final TranslationsMentionsEn mentions = TranslationsMentionsEn.internal(_root);
 	late final TranslationsReactionsEn reactions = TranslationsReactionsEn.internal(_root);
+	late final TranslationsStarredEn starred = TranslationsStarredEn.internal(_root);
 	String get selectAnyChat => 'Select any chat';
 }
 
@@ -162,4 +163,15 @@ class TranslationsReactionsEn {
 	// Translations
 	String get title => 'Reactions';
 	String get noReactions => 'No reactions';
+}
+
+// Path: starred
+class TranslationsStarredEn {
+	TranslationsStarredEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Starred Messages';
+	String get noStarred => 'No starred messages';
 }
