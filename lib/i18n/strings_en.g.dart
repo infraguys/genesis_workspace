@@ -39,6 +39,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	Translations $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => Translations(meta: meta ?? this.$meta);
 
 	// Translations
+	late final TranslationsAuthEn auth = TranslationsAuthEn._(_root);
 	String get password_cant_be_empty => 'Password can not be empty';
 	String get password => 'Password';
 	String get login => 'Login';
@@ -58,7 +59,22 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsDateLabelsEn date_labels = TranslationsDateLabelsEn._(_root);
 	late final TranslationsInboxEn inbox = TranslationsInboxEn._(_root);
 	late final TranslationsMentionsEn mentions = TranslationsMentionsEn._(_root);
+	late final TranslationsReactionsEn reactions = TranslationsReactionsEn._(_root);
 	String get select_any_chat => 'Select any chat';
+}
+
+// Path: auth
+class TranslationsAuthEn {
+	TranslationsAuthEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get emailHint => 'email@genesis.team';
+	String get emailLabel => 'Email';
+	String get passwordHint => 'cucumber123';
+	String get showPassword => 'Show password';
+	String get hidePassword => 'Hide password';
 }
 
 // Path: nav_bar
@@ -142,11 +158,27 @@ class TranslationsMentionsEn {
 	String get no_mentions => 'No mentions';
 }
 
+// Path: reactions
+class TranslationsReactionsEn {
+	TranslationsReactionsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	String get title => 'Reactions';
+	String get no_reactions => 'No reactions';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
+			case 'auth.emailHint': return 'email@genesis.team';
+			case 'auth.emailLabel': return 'Email';
+			case 'auth.passwordHint': return 'cucumber123';
+			case 'auth.showPassword': return 'Show password';
+			case 'auth.hidePassword': return 'Hide password';
 			case 'password_cant_be_empty': return 'Password can not be empty';
 			case 'password': return 'Password';
 			case 'login': return 'Login';
@@ -187,6 +219,8 @@ extension on Translations {
 			case 'inbox.channels_tab': return 'Channels';
 			case 'mentions.title': return 'Mentions';
 			case 'mentions.no_mentions': return 'No mentions';
+			case 'reactions.title': return 'Reactions';
+			case 'reactions.no_reactions': return 'No reactions';
 			case 'select_any_chat': return 'Select any chat';
 			default: return null;
 		}
