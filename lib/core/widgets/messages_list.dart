@@ -164,6 +164,19 @@ class _MessagesListState extends State<MessagesList> {
                     messageOrder = MessageUIOrder.middle;
                   }
 
+                  bool isNewDay = false;
+
+                  if (prevMessage != null) {
+                    final prevMessageDate = DateTime.fromMillisecondsSinceEpoch(
+                      prevMessage.timestamp * 1000,
+                    );
+
+                    isNewDay =
+                        messageDate.day != prevMessageDate.day ||
+                        messageDate.month != prevMessageDate.month ||
+                        messageDate.year != prevMessageDate.year;
+                  }
+
                   return VisibilityDetector(
                     key: Key('message-${message.id}'),
                     onVisibilityChanged: (info) {
@@ -187,6 +200,7 @@ class _MessagesListState extends State<MessagesList> {
                       messageOrder: messageOrder,
                       showTopic: widget.showTopic,
                       myUserId: widget.myUserId,
+                      isNewDay: isNewDay,
                     ),
                   );
                 },

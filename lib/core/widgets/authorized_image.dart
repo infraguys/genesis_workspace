@@ -72,17 +72,16 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
 
   @override
   Widget build(BuildContext context) {
-    // Оборачиваем в SizedBox, чтобы размер был стабильным в любых состояниях.
-    final box = SizedBox(width: widget.width, height: widget.height, child: _buildContent(context));
-
-    // Hero оставим, но тег лучше сделать стабильным (например, по URL).
     return GestureDetector(
       onTap: () {
         if (_imageBytes != null) {
           context.pushNamed(Routes.imageFullScreen, extra: _imageBytes);
         }
       },
-      child: Hero(tag: _imageBytes.toString(), child: box),
+      child: Hero(
+        tag: _imageBytes.toString(),
+        child: SizedBox(width: widget.width, height: widget.height, child: _buildContent(context)),
+      ),
     );
   }
 
@@ -98,7 +97,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
       width: widget.width,
       height: widget.height,
       fit: widget.fit,
-      filterQuality: FilterQuality.high,
+      filterQuality: FilterQuality.none,
     );
   }
 }
