@@ -176,6 +176,19 @@ class MessageItem extends StatelessWidget {
         messageOrder == MessageUIOrder.single ||
         messageOrder == MessageUIOrder.lastSingle;
 
+    double maxMessageWidth;
+
+    switch (currentSize(context)) {
+      case ScreenSize.desktop:
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.6;
+        break;
+      case ScreenSize.laptop:
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.4;
+        break;
+      default:
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.8;
+    }
+
     return Skeletonizer(
       enabled: isSkeleton,
       child: Align(
@@ -279,11 +292,7 @@ class MessageItem extends StatelessWidget {
                               const SizedBox(height: 2),
                               IntrinsicWidth(
                                 child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: currentSize(context) >= ScreenSize.tablet
-                                        ? MediaQuery.sizeOf(context).width * 0.6
-                                        : MediaQuery.sizeOf(context).width * 0.7,
-                                  ),
+                                  constraints: BoxConstraints(maxWidth: maxMessageWidth),
                                   child: messageContent,
                                 ),
                               ),
