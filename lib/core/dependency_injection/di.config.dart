@@ -94,6 +94,8 @@ import 'package:genesis_workspace/features/reactions/bloc/reactions_cubit.dart'
     as _i656;
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
     as _i573;
+import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart'
+    as _i1068;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
 import 'package:genesis_workspace/services/real_time/real_time_service.dart'
@@ -206,6 +208,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
+    );
+    gh.factory<_i1068.StarredCubit>(
+      () => _i1068.StarredCubit(gh<_i207.GetMessagesUseCase>()),
     );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(

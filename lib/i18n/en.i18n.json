@@ -62,5 +62,9 @@
    "title": "Reactions",
     "no_reactions": "No reactions"
   },
+  "starred": {
+   "title": "Starred Messages",
+    "no_starred": "No starred messages"
+  },
   "select_any_chat": "Select any chat"
 }

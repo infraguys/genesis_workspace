@@ -167,10 +167,10 @@ class MessageItem extends StatelessWidget {
 
     final bool showAvatar =
         !isMyMessage &&
-            (messageOrder == MessageUIOrder.last ||
-                messageOrder == MessageUIOrder.single ||
-                messageOrder == MessageUIOrder.lastSingle) ||
-        isNewDay;
+        (messageOrder == MessageUIOrder.last ||
+            messageOrder == MessageUIOrder.single ||
+            messageOrder == MessageUIOrder.lastSingle ||
+            isNewDay);
     final bool showSenderName =
         messageOrder == MessageUIOrder.first ||
         messageOrder == MessageUIOrder.single ||
@@ -186,7 +186,7 @@ class MessageItem extends StatelessWidget {
         maxMessageWidth = MediaQuery.of(context).size.width * 0.4;
         break;
       default:
-        maxMessageWidth = MediaQuery.of(context).size.width * 0.75;
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.7;
     }
 
     return Skeletonizer(

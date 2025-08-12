@@ -29,11 +29,16 @@ class ReactionsCubit extends Cubit<ReactionsState> {
 
   late final StreamSubscription<ReactionEventEntity> _reactionsSubscription;
 
+  final List<MessageNarrowEntity> narrow = [
+    MessageNarrowEntity(operator: NarrowOperator.has, operand: 'reaction'),
+    MessageNarrowEntity(operator: NarrowOperator.sender, operand: 'me'),
+  ];
+
   Future<void> getMessages() async {
     try {
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
-        narrow: [MessageNarrowEntity(operator: NarrowOperator.has, operand: 'reaction')],
+        narrow: narrow,
         numBefore: 100,
         numAfter: 0,
       );
@@ -50,7 +55,7 @@ class ReactionsCubit extends Cubit<ReactionsState> {
       try {
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
-          narrow: [MessageNarrowEntity(operator: NarrowOperator.has, operand: 'reaction')],
+          narrow: narrow,
           numBefore: 100,
           numAfter: 0,
         );

@@ -12,6 +12,8 @@ enum NarrowOperator {
   topic,
   @JsonValue('has')
   has,
+  @JsonValue('sender')
+  sender,
 }
 
 extension NarrowOperatorToJson on NarrowOperator {
@@ -27,6 +29,8 @@ extension NarrowOperatorToJson on NarrowOperator {
         return 'topic';
       case NarrowOperator.has:
         return 'has';
+      case NarrowOperator.sender:
+        return 'sender';
     }
   }
 }
