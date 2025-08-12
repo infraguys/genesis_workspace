@@ -14,19 +14,20 @@ class ReactionsView extends StatefulWidget {
 }
 
 class _ReactionsViewState extends State<ReactionsView> {
+  late final int _myUserId;
   late final Future _future;
   late final ScrollController _scrollController;
 
   @override
   void initState() {
-    _future = context.read<ReactionsCubit>().getMessages();
+    _myUserId = context.read<ProfileCubit>().state.user?.userId ?? 0;
+    _future = context.read<ReactionsCubit>().getMessages(_myUserId);
     _scrollController = ScrollController();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final myUserId = context.select<ProfileCubit, int?>((cubit) => cubit.state.user?.userId);
     return BlocBuilder<ReactionsCubit, ReactionsState>(
       builder: (context, state) {
         return Scaffold(
@@ -44,8 +45,10 @@ class _ReactionsViewState extends State<ReactionsView> {
                 controller: _scrollController,
                 messages: state.messages,
                 isLoadingMore: state.isLoadingMore,
-                myUserId: myUserId ?? 0,
-                loadMore: context.read<ReactionsCubit>().loadMoreMessages,
+                myUserId: _myUserId,
+                loadMore: () {
+                  context.read<ReactionsCubit>().loadMoreMessages(_myUserId);
+                },
               );
             },
           ),
