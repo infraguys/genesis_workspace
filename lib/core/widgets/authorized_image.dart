@@ -97,7 +97,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
       width: widget.width,
       height: widget.height,
       fit: widget.fit,
-      filterQuality: FilterQuality.none,
+      filterQuality: FilterQuality.high,
     );
   }
 }
