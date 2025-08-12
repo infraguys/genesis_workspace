@@ -186,7 +186,7 @@ class MessageItem extends StatelessWidget {
         maxMessageWidth = MediaQuery.of(context).size.width * 0.4;
         break;
       default:
-        maxMessageWidth = MediaQuery.of(context).size.width * 0.8;
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.75;
     }
 
     return Skeletonizer(
@@ -259,115 +259,123 @@ class MessageItem extends StatelessWidget {
                     ),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (showSenderName)
-                                Row(
-                                  children: [
-                                    senderName,
-                                    if (showTopic && message.subject.isNotEmpty)
-                                      Skeleton.ignore(
-                                        child: Row(
-                                          children: [
-                                            const SizedBox(width: 2), // Spacing
-                                            const Icon(Icons.arrow_right, size: 16),
-                                            Text(
-                                              message.subject,
-                                              style: theme.textTheme.labelSmall,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (showSenderName)
+                                    Row(
+                                      children: [
+                                        senderName,
+                                        if (showTopic && message.subject.isNotEmpty)
+                                          Skeleton.ignore(
+                                            child: Row(
+                                              children: [
+                                                const SizedBox(width: 2), // Spacing
+                                                const Icon(Icons.arrow_right, size: 16),
+                                                Text(
+                                                  message.subject,
+                                                  style: theme.textTheme.labelSmall,
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              const SizedBox(height: 2),
-                              IntrinsicWidth(
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: maxMessageWidth),
-                                  child: messageContent,
-                                ),
+                                          ),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 2),
+                                  IntrinsicWidth(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(maxWidth: maxMessageWidth),
+                                      child: messageContent,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                          if (message.aggregatedReactions.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Wrap(
+                                spacing: 6.0,
+                                runSpacing: 4.0,
+                                children: message.aggregatedReactions.entries.map((entry) {
+                                  final ReactionDetails reaction = entry.value;
+                                  final bool isMyReaction = reaction.userIds.contains(myUserId);
+
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      final String emojiIdentifier = entry.key;
+                                      if (isMyReaction) {
+                                        await context.read<MessagesCubit>().removeEmojiReaction(
+                                          message.id,
+                                          emojiName: emojiIdentifier,
+                                        );
+                                      } else {
+                                        await context.read<MessagesCubit>().addEmojiReaction(
+                                          message.id,
+                                          emojiName: emojiIdentifier,
+                                        );
+                                      }
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 300),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isMyReaction
+                                            ? theme.colorScheme.primaryFixedDim
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(16.0),
+                                        border: Border.all(
+                                          color: isMyReaction
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.outlineVariant,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          UnicodeEmojiWidget(
+                                            emojiDisplay: UnicodeEmojiDisplay(
+                                              emojiName: reaction.emojiName,
+                                              emojiUnicode: reaction.emojiCode,
+                                            ),
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4.0),
+                                          Text(
+                                            reaction.count.toString(),
+                                            style: TextStyle(
+                                              fontSize: 12.0,
+                                              color: theme.colorScheme.onSurfaceVariant,
+                                              fontWeight: isMyReaction
+                                                  ? FontWeight.w600
+                                                  : FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
                         ],
                       ),
-                      if (message.aggregatedReactions.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Wrap(
-                            spacing: 6.0,
-                            runSpacing: 4.0,
-                            children: message.aggregatedReactions.entries.map((entry) {
-                              final ReactionDetails reaction = entry.value;
-                              final bool isMyReaction = reaction.userIds.contains(myUserId);
-
-                              return GestureDetector(
-                                onTap: () async {
-                                  final String emojiIdentifier = entry.key;
-                                  if (isMyReaction) {
-                                    await context.read<MessagesCubit>().removeEmojiReaction(
-                                      message.id,
-                                      emojiName: emojiIdentifier,
-                                    );
-                                  } else {
-                                    await context.read<MessagesCubit>().addEmojiReaction(
-                                      message.id,
-                                      emojiName: emojiIdentifier,
-                                    );
-                                  }
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 300),
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: isMyReaction
-                                        ? theme.colorScheme.primaryFixedDim
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    border: Border.all(
-                                      color: isMyReaction
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.outlineVariant,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      UnicodeEmojiWidget(
-                                        emojiDisplay: UnicodeEmojiDisplay(
-                                          emojiName: reaction.emojiName,
-                                          emojiUnicode: reaction.emojiCode,
-                                        ),
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: 4.0),
-                                      Text(
-                                        reaction.count.toString(),
-                                        style: TextStyle(
-                                          fontSize: 12.0,
-                                          color: theme.colorScheme.onSurfaceVariant,
-                                          fontWeight: isMyReaction
-                                              ? FontWeight.w600
-                                              : FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -389,5 +397,3 @@ class MessageItem extends StatelessWidget {
     );
   }
 }
-
-// class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}

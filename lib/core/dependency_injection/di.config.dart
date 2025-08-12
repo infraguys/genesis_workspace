@@ -150,9 +150,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i207.GetMessagesUseCase>(
       () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
     );
-    gh.factory<_i513.RemoveEmojiReactionUseCase>(
-      () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
-    );
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
     );
@@ -161,6 +158,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i513.RemoveEmojiReactionUseCase>(
+      () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(
