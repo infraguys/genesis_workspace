@@ -31,14 +31,16 @@ class ReactionsCubit extends Cubit<ReactionsState> {
 
   final List<MessageNarrowEntity> narrow = [
     MessageNarrowEntity(operator: NarrowOperator.has, operand: 'reaction'),
-    MessageNarrowEntity(operator: NarrowOperator.sender, operand: 'me'),
   ];
 
-  Future<void> getMessages() async {
+  Future<void> getMessages(int userId) async {
     try {
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
-        narrow: narrow,
+        narrow: [
+          ...narrow,
+          MessageNarrowEntity(operator: NarrowOperator.sender, operand: userId),
+        ],
         numBefore: 100,
         numAfter: 0,
       );
@@ -49,13 +51,16 @@ class ReactionsCubit extends Cubit<ReactionsState> {
     }
   }
 
-  Future<void> loadMoreMessages() async {
+  Future<void> loadMoreMessages(int userId) async {
     if (!state.isAllLoaded) {
       emit(state.copyWith(isLoadingMore: true));
       try {
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
-          narrow: narrow,
+          narrow: [
+            ...narrow,
+            MessageNarrowEntity(operator: NarrowOperator.sender, operand: userId),
+          ],
           numBefore: 100,
           numAfter: 0,
         );
