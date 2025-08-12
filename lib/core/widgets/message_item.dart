@@ -72,7 +72,8 @@ class MessageItem extends StatelessWidget {
             customWidgetBuilder: (element) {
               if (element.attributes.containsValue('image/png') ||
                   element.attributes.containsValue('image/jpeg')) {
-                final src = element.attributes['src'];
+                inspect(element);
+                final src = element.parentNode?.attributes['href'];
                 final size = extractDimensionsFromUrl(src ?? '');
                 return AuthorizedImage(
                   url: '${AppConstants.baseUrl}$src',
@@ -89,9 +90,15 @@ class MessageItem extends StatelessWidget {
                 final emoji = ":${element.attributes['title']!.replaceAll(' ', '_')}:";
 
                 return InlineCustomWidget(
-                  child: UnicodeEmojiWidget(
-                    emojiDisplay: UnicodeEmojiDisplay(emojiName: emoji, emojiUnicode: emojiUnicode),
-                    size: 14,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: UnicodeEmojiWidget(
+                      emojiDisplay: UnicodeEmojiDisplay(
+                        emojiName: emoji,
+                        emojiUnicode: emojiUnicode,
+                      ),
+                      size: 14,
+                    ),
                   ),
                 );
               }
