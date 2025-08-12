@@ -29,7 +29,6 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   shared_preferences: ^2.5.3
 
-
   #router
   go_router: ^16.0.0
 
