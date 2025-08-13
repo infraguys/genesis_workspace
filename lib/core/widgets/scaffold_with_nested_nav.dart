@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -89,6 +91,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               if (currentSize(context) > ScreenSize.tablet) ...[
                 BlocBuilder<MessagesCubit, MessagesState>(
                   builder: (context, state) {
+                    inspect(state);
                     return NavigationRail(
                       selectedIndex: widget.navigationShell.currentIndex,
                       onDestinationSelected: _goBranch,
@@ -97,7 +100,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                         NavigationRailDestination(
                           label: Text(context.t.navBar.directMessages),
                           icon: Badge(
-                            isLabelVisible: state.unreadMessages.any(
+                            isLabelVisible: state.messages.any(
                               (message) => message.type == MessageType.private,
                             ),
                             child: Icon(Icons.people),
@@ -106,7 +109,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                         NavigationRailDestination(
                           label: Text(context.t.navBar.channels),
                           icon: Badge(
-                            isLabelVisible: state.unreadMessages.any(
+                            isLabelVisible: state.messages.any(
                               (message) => message.type == MessageType.stream,
                             ),
                             child: Icon(Icons.chat),
@@ -143,7 +146,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             BottomNavigationBarItem(
                               label: context.t.navBar.directMessages,
                               icon: Badge(
-                                isLabelVisible: state.unreadMessages.any(
+                                isLabelVisible: state.messages.any(
                                   (message) =>
                                       (message.type == MessageType.private &&
                                       message.senderId != profileState.user?.userId),
@@ -154,7 +157,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             BottomNavigationBarItem(
                               label: context.t.navBar.channels,
                               icon: Badge(
-                                isLabelVisible: state.unreadMessages.any(
+                                isLabelVisible: state.messages.any(
                                   (message) =>
                                       (message.type == MessageType.stream &&
                                       message.senderId != profileState.user?.userId),

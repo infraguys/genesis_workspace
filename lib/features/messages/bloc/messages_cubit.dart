@@ -28,7 +28,7 @@ class MessagesCubit extends Cubit<MessagesState> {
     this._getMessagesUseCase,
     this._addEmojiReactionUseCase,
     this._removeEmojiReactionUseCase,
-  ) : super(MessagesState(messages: [], unreadMessages: [])) {
+  ) : super(MessagesState(messages: [])) {
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
       _onMessageFlagsEvents,
@@ -72,29 +72,17 @@ class MessagesCubit extends Cubit<MessagesState> {
   _onMessageEvents(MessageEventEntity event) {
     final messages = [...state.messages];
     messages.add(event.message);
-    state.unreadMessages = messages.where((message) => message.hasUnreadMessages).toList();
-    emit(state.copyWith(messages: messages, unreadMessages: state.unreadMessages));
+    emit(state.copyWith(messages: messages));
   }
 
   _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
-    final newUnreadMessages = [...state.unreadMessages];
     final newMessages = [...state.messages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       for (var messageId in event.messages) {
-        newUnreadMessages.removeWhere((unreadMessage) => unreadMessage.id == messageId);
-        for (var message in state.messages) {
-          final indexOf = state.messages.indexOf(message);
-          if (message.id == messageId) {
-            if (newMessages[indexOf].flags != null) {
-              newMessages[indexOf].flags!.add('read');
-            } else {
-              newMessages[indexOf].flags = ['read'];
-            }
-          }
-        }
+        newMessages.removeWhere((message) => message.id == messageId);
       }
     }
-    emit(state.copyWith(unreadMessages: newUnreadMessages, messages: newMessages));
+    emit(state.copyWith(messages: newMessages));
   }
 
   Future<void> getLastMessages() async {
@@ -102,12 +90,11 @@ class MessagesCubit extends Cubit<MessagesState> {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
         narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
-        numBefore: 5000,
+        numBefore: 1000,
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      state.unreadMessages = response.messages;
-      emit(state.copyWith(messages: state.messages, unreadMessages: state.unreadMessages));
+      emit(state.copyWith(messages: response.messages));
     } catch (e) {
       inspect(e);
     }

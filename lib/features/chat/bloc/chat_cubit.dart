@@ -84,6 +84,7 @@ class ChatCubit extends Cubit<ChatState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(body);
+      inspect(response);
       state.isAllMessagesLoaded = response.foundOldest;
       state.lastMessageId = response.messages.first.id;
       state.messages = response.messages;
