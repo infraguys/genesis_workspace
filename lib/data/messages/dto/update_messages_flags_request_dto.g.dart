@@ -29,4 +29,7 @@ const _$UpdateMessageFlagsOpEnumMap = {
   UpdateMessageFlagsOp.remove: 'remove',
 };
 
-const _$MessageFlagEnumMap = {MessageFlag.read: 'read'};
+const _$MessageFlagEnumMap = {
+  MessageFlag.read: 'read',
+  MessageFlag.starred: 'starred',
+};

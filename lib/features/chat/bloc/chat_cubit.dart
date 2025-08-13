@@ -84,7 +84,6 @@ class ChatCubit extends Cubit<ChatState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(body);
-      inspect(response);
       state.isAllMessagesLoaded = response.foundOldest;
       state.lastMessageId = response.messages.first.id;
       state.messages = response.messages;
@@ -185,6 +184,20 @@ class ChatCubit extends Cubit<ChatState> {
           flags: [...message.flags ?? [], MessageFlag.read.name],
         );
         state.messages[index] = changedMessage;
+      }
+      if (event.flag == MessageFlag.starred) {
+        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        final int index = state.messages.indexOf(message);
+        if (event.op == UpdateMessageFlagsOp.add) {
+          MessageEntity changedMessage = message.copyWith(
+            flags: [...message.flags ?? [], MessageFlag.starred.name],
+          );
+          state.messages[index] = changedMessage;
+        } else if (event.op == UpdateMessageFlagsOp.remove) {
+          MessageEntity changedMessage = message;
+          changedMessage.flags?.remove(MessageFlag.starred.name);
+          state.messages[index] = changedMessage;
+        }
       }
     }
     emit(state.copyWith(messages: state.messages));

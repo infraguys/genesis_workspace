@@ -9,9 +9,11 @@ import 'package:genesis_workspace/domain/messages/entities/emoji_reaction_entity
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
@@ -28,6 +30,7 @@ class MessagesCubit extends Cubit<MessagesState> {
     this._getMessagesUseCase,
     this._addEmojiReactionUseCase,
     this._removeEmojiReactionUseCase,
+    this._updateMessagesFlagsUseCase,
   ) : super(MessagesState(messages: [])) {
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
@@ -45,6 +48,7 @@ class MessagesCubit extends Cubit<MessagesState> {
   final GetMessagesUseCase _getMessagesUseCase;
   final AddEmojiReactionUseCase _addEmojiReactionUseCase;
   final RemoveEmojiReactionUseCase _removeEmojiReactionUseCase;
+  final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
@@ -95,6 +99,32 @@ class MessagesCubit extends Cubit<MessagesState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       emit(state.copyWith(messages: response.messages));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> addStarredFlag(int messageId) async {
+    try {
+      final body = UpdateMessagesFlagsRequestEntity(
+        messages: [messageId],
+        op: UpdateMessageFlagsOp.add,
+        flag: MessageFlag.starred,
+      );
+      await _updateMessagesFlagsUseCase.call(body);
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> removeStarredFlag(int messageId) async {
+    try {
+      final body = UpdateMessagesFlagsRequestEntity(
+        messages: [messageId],
+        op: UpdateMessageFlagsOp.remove,
+        flag: MessageFlag.starred,
+      );
+      await _updateMessagesFlagsUseCase.call(body);
     } catch (e) {
       inspect(e);
     }

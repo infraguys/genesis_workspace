@@ -2,13 +2,17 @@ import 'dart:ui';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 
 class MessageActionsOverlay extends StatefulWidget {
   final Offset position;
-  final int messageId;
+  final MessageEntity message;
   final Widget messageContent;
   final bool isOwnMessage;
   final VoidCallback onClose;
@@ -17,7 +21,7 @@ class MessageActionsOverlay extends StatefulWidget {
   const MessageActionsOverlay({
     super.key,
     required this.position,
-    required this.messageId,
+    required this.message,
     required this.messageContent,
     required this.isOwnMessage,
     required this.onClose,
@@ -30,6 +34,7 @@ class MessageActionsOverlay extends StatefulWidget {
 
 class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
   bool showEmojiPicker = false;
+  bool isStarred = false;
 
   final parser = EmojiParser();
 
@@ -41,6 +46,12 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
     UnicodeEmojiDisplay(emojiName: ":cry:", emojiUnicode: "1F622"),
     UnicodeEmojiDisplay(emojiName: ":clap:", emojiUnicode: "1F44F"),
   ];
+
+  @override
+  void initState() {
+    isStarred = widget.message.flags?.contains(MessageFlag.starred.name) ?? false;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,6 +193,27 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        IconButton(
+                          onPressed: () async {
+                            if (isStarred) {
+                              setState(() {
+                                isStarred = false;
+                              });
+                              await context.read<MessagesCubit>().removeStarredFlag(
+                                widget.message.id,
+                              );
+                            } else {
+                              setState(() {
+                                isStarred = true;
+                              });
+                              await context.read<MessagesCubit>().addStarredFlag(widget.message.id);
+                            }
+                          },
+                          icon: Icon(
+                            isStarred ? Icons.star : Icons.star_border,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
                         IconButton(
                           onPressed: () {},
                           icon: Icon(Icons.edit, color: theme.colorScheme.primary),
