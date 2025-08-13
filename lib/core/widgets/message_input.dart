@@ -85,6 +85,13 @@ class _MessageInputState extends State<MessageInput> {
                             context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
                           }
                         },
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (value) {
+                          print(value);
+                          if (widget.onSend != null) {
+                            widget.onSend!();
+                          }
+                        },
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: "Message",

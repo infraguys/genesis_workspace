@@ -58,7 +58,6 @@ class MessageItem extends StatelessWidget {
     final messageContent = isSkeleton
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceContainerHighest)
         : MessageHtml(content: message.content);
-    // : Text(message.content);
 
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
