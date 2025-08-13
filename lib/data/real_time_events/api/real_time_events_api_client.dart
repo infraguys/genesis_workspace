@@ -11,7 +11,10 @@ abstract class RealTimeEventsApiClient {
   factory RealTimeEventsApiClient(Dio dio, {String? baseUrl}) = _RealTimeEventsApiClient;
 
   @POST('/register')
-  Future<RegisterQueueResponseDto> registerQueue(@Body() RegisterQueueRequestBodyDto requestDto);
+  Future<RegisterQueueResponseDto> registerQueue(
+    @Body() RegisterQueueRequestBodyDto requestDto,
+    @Query('apply_markdown') bool applyMarkdown,
+  );
 
   @GET('/events')
   Future<EventByQueueIdResponseDto> getEventsByQueueId(
