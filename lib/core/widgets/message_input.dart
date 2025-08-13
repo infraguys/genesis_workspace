@@ -87,7 +87,6 @@ class _MessageInputState extends State<MessageInput> {
                         },
                         textInputAction: TextInputAction.send,
                         onSubmitted: (value) {
-                          print(value);
                           if (widget.onSend != null) {
                             widget.onSend!();
                           }
@@ -150,6 +149,9 @@ class _MessageInputState extends State<MessageInput> {
               duration: Duration(milliseconds: 250),
               child: EmojiPicker(
                 textEditingController: widget.controller,
+                onEmojiSelected: (_, _) {
+                  _textFieldFocusNode.requestFocus();
+                },
                 config: Config(
                   height: emojiState.keyboardHeight,
                   bottomActionBarConfig: BottomActionBarConfig(enabled: true),
