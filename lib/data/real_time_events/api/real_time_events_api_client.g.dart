@@ -20,9 +20,10 @@ class _RealTimeEventsApiClient implements RealTimeEventsApiClient {
   @override
   Future<RegisterQueueResponseDto> registerQueue(
     RegisterQueueRequestBodyDto requestDto,
+    bool applyMarkdown,
   ) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'apply_markdown': applyMarkdown};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(requestDto.toJson());

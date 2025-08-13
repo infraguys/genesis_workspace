@@ -3,13 +3,10 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:genesis_workspace/core/config/constants.dart';
-import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
-import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -60,55 +57,8 @@ class MessageItem extends StatelessWidget {
 
     final messageContent = isSkeleton
         ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceContainerHighest)
-        : HtmlWidget(
-            message.content,
-            // factoryBuilder: () => MyWidgetFactory(),
-            customStylesBuilder: (element) {
-              if (element.classes.contains('user-mention')) {
-                return {'font-weight': '600'};
-              }
-              return null;
-            },
-            customWidgetBuilder: (element) {
-              if (element.attributes.containsValue('image/png') ||
-                  element.attributes.containsValue('image/jpeg')) {
-                inspect(element);
-                final src = element.parentNode?.attributes['href'];
-                final size = extractDimensionsFromUrl(src ?? '');
-                return AuthorizedImage(
-                  url: '${AppConstants.baseUrl}$src',
-                  width: size?.width,
-                  height: size?.height,
-                  fit: BoxFit.contain,
-                );
-              }
-              if (element.classes.contains('emoji')) {
-                final emojiUnicode = element.classes
-                    .firstWhere((className) => className.contains('emoji-'))
-                    .replaceAll('emoji-', '');
-
-                final emoji = ":${element.attributes['title']!.replaceAll(' ', '_')}:";
-
-                return InlineCustomWidget(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: UnicodeEmojiWidget(
-                      emojiDisplay: UnicodeEmojiDisplay(
-                        emojiName: emoji,
-                        emojiUnicode: emojiUnicode,
-                      ),
-                      size: 14,
-                    ),
-                  ),
-                );
-              }
-              return null;
-            },
-            onTapUrl: (String? url) async {
-              print(url);
-              return true;
-            },
-          );
+        : MessageHtml(content: message.content);
+    // : Text(message.content);
 
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
@@ -253,6 +203,7 @@ class MessageItem extends StatelessWidget {
                           minHeight: 40,
                           maxWidth:
                               (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
+                          // minWidth: 50,
                         )
                       : null,
                   decoration: BoxDecoration(
@@ -266,7 +217,8 @@ class MessageItem extends StatelessWidget {
                     ),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // alignment: Alignment.topLeft,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,7 +255,13 @@ class MessageItem extends StatelessWidget {
                                   IntrinsicWidth(
                                     child: ConstrainedBox(
                                       constraints: BoxConstraints(maxWidth: maxMessageWidth),
-                                      child: messageContent,
+                                      child: isSkeleton
+                                          ? Container(
+                                              height: 14,
+                                              width: 150,
+                                              color: theme.colorScheme.surfaceContainerHighest,
+                                            )
+                                          : messageContent,
                                     ),
                                   ),
                                 ],

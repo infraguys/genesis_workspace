@@ -31,6 +31,7 @@ dependencies:
 
   #router
   go_router: ^16.0.0
+  url_launcher: ^6.3.2
 
   #ui
   flutter_svg: ^2.2.0
@@ -52,6 +53,7 @@ dependencies:
   emoji_picker_flutter: ^4.3.0
   keyboard_height_plugin: ^0.1.5
   flutter_emoji: ^2.5.1
+
 
 
 dev_dependencies:
