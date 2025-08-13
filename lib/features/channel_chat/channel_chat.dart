@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
@@ -19,7 +20,7 @@ class ChannelChat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ChannelChatCubit(),
+      create: (context) => getIt<ChannelChatCubit>(),
       child: ChannelChatView(extra: extra),
     );
   }

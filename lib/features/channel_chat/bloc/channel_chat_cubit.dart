@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
@@ -27,12 +26,19 @@ import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:injectable/injectable.dart';
 
 part 'channel_chat_state.dart';
 
+@injectable
 class ChannelChatCubit extends Cubit<ChannelChatState> {
-  ChannelChatCubit()
-    : super(
+  ChannelChatCubit(
+    this._realTimeService,
+    this._getMessagesUseCase,
+    this._setTypingUseCase,
+    this._updateMessagesFlagsUseCase,
+    this._sendMessageUseCase,
+  ) : super(
         ChannelChatState(
           messages: [],
           isLoadingMore: false,
@@ -55,12 +61,12 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(_onReactionEvents);
   }
 
-  final RealTimeService _realTimeService = getIt<RealTimeService>();
+  final RealTimeService _realTimeService;
 
-  final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
-  final SetTypingUseCase _setTypingUseCase = getIt<SetTypingUseCase>();
-  final _updateMessagesFlagsUseCase = getIt<UpdateMessagesFlagsUseCase>();
-  final SendMessageUseCase _sendMessageUseCase = getIt<SendMessageUseCase>();
+  final GetMessagesUseCase _getMessagesUseCase;
+  final SetTypingUseCase _setTypingUseCase;
+  final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
+  final SendMessageUseCase _sendMessageUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -244,12 +250,26 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
     for (var messageId in event.messages) {
       if (event.flag == MessageFlag.read) {
-        MessageEntity? message = state.messages.firstWhere((message) => message.id == messageId);
+        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
         final int index = state.messages.indexOf(message);
         MessageEntity changedMessage = message.copyWith(
           flags: [...message.flags ?? [], MessageFlag.read.name],
         );
         state.messages[index] = changedMessage;
+      }
+      if (event.flag == MessageFlag.starred) {
+        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        final int index = state.messages.indexOf(message);
+        if (event.op == UpdateMessageFlagsOp.add) {
+          MessageEntity changedMessage = message.copyWith(
+            flags: [...message.flags ?? [], MessageFlag.starred.name],
+          );
+          state.messages[index] = changedMessage;
+        } else if (event.op == UpdateMessageFlagsOp.remove) {
+          MessageEntity changedMessage = message;
+          changedMessage.flags?.remove(MessageFlag.starred.name);
+          state.messages[index] = changedMessage;
+        }
       }
     }
     emit(state.copyWith(messages: state.messages));

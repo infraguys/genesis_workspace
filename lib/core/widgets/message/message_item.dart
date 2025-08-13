@@ -172,6 +172,7 @@ class MessageItem extends StatelessWidget {
                   late OverlayEntry overlay;
                   overlay = OverlayEntry(
                     builder: (_) => MessageActionsOverlay(
+                      message: message,
                       position: position,
                       onClose: () => overlay.remove(),
                       onEmojiSelected: (emojiName) async {
@@ -187,7 +188,6 @@ class MessageItem extends StatelessWidget {
                           ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
                         }
                       },
-                      messageId: message.id,
                       messageContent: messageContent,
                       isOwnMessage: isMyMessage,
                     ),
@@ -217,7 +217,6 @@ class MessageItem extends StatelessWidget {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    // alignment: Alignment.topLeft,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +238,7 @@ class MessageItem extends StatelessWidget {
                                           Skeleton.ignore(
                                             child: Row(
                                               children: [
-                                                const SizedBox(width: 2), // Spacing
+                                                const SizedBox(width: 2),
                                                 const Icon(Icons.arrow_right, size: 16),
                                                 Text(
                                                   message.subject,
@@ -253,7 +252,10 @@ class MessageItem extends StatelessWidget {
                                   const SizedBox(height: 2),
                                   IntrinsicWidth(
                                     child: ConstrainedBox(
-                                      constraints: BoxConstraints(maxWidth: maxMessageWidth),
+                                      constraints: BoxConstraints(
+                                        maxWidth: maxMessageWidth,
+                                        minWidth: 70,
+                                      ),
                                       child: isSkeleton
                                           ? Container(
                                               height: 14,

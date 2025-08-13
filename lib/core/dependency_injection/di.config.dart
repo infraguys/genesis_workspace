@@ -81,6 +81,8 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
+import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart'
+    as _i739;
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart' as _i277;
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart'
     as _i144;
@@ -164,8 +166,24 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i513.RemoveEmojiReactionUseCase>(
       () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.lazySingleton<_i592.MessagesCubit>(
+      () => _i592.MessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i276.AddEmojiReactionUseCase>(),
+        gh<_i513.RemoveEmojiReactionUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+      ),
+      dispose: _i592.disposeMessagesCubit,
+    );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+      ),
+    );
+    gh.factory<_i1068.StarredCubit>(
+      () => _i1068.StarredCubit(
         gh<_i82.RealTimeService>(),
         gh<_i207.GetMessagesUseCase>(),
       ),
@@ -209,17 +227,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
     );
-    gh.factory<_i1068.StarredCubit>(
-      () => _i1068.StarredCubit(gh<_i207.GetMessagesUseCase>()),
-    );
-    gh.lazySingleton<_i592.MessagesCubit>(
-      () => _i592.MessagesCubit(
+    gh.factory<_i739.ChannelChatCubit>(
+      () => _i739.ChannelChatCubit(
         gh<_i82.RealTimeService>(),
         gh<_i207.GetMessagesUseCase>(),
-        gh<_i276.AddEmojiReactionUseCase>(),
-        gh<_i513.RemoveEmojiReactionUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
       ),
-      dispose: _i592.disposeMessagesCubit,
     );
     gh.factory<_i277.ChatCubit>(
       () => _i277.ChatCubit(

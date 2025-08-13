@@ -126,7 +126,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
-                // padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                 padding: EdgeInsetsGeometry.zero,
                 child: Column(
                   children: [
@@ -173,50 +172,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       showTopic: true,
                                       myUserId: _myUser.userId,
                                     ),
-                              // : Column(
-                              //     children: [
-                              //       if (state.isLoadingMore) const LinearProgressIndicator(),
-                              //       Expanded(
-                              //         child: ListView.separated(
-                              //           controller: _controller,
-                              //           reverse: true,
-                              //           itemCount: state.messages.length,
-                              //           padding: EdgeInsets.symmetric(
-                              //             horizontal: 12,
-                              //           ).copyWith(bottom: 12),
-                              //           separatorBuilder: (BuildContext context, int index) {
-                              //             return SizedBox(height: 12);
-                              //           },
-                              //           itemBuilder: (BuildContext context, int index) {
-                              //             final message = state.messages.reversed
-                              //                 .toList()[index];
-                              //             final isMyMessage =
-                              //                 message.senderId == _myUser.userId;
-                              //
-                              //             return VisibilityDetector(
-                              //               key: Key('message-${message.id}'),
-                              //               onVisibilityChanged: (info) {
-                              //                 final visiblePercentage =
-                              //                     info.visibleFraction * 100;
-                              //
-                              //                 if (visiblePercentage > 50 &&
-                              //                     (message.flags == null ||
-                              //                         message.flags!.isEmpty)) {
-                              //                   context.read<ChatCubit>().scheduleMarkAsRead(
-                              //                     message.id,
-                              //                   );
-                              //                 }
-                              //               },
-                              //               child: MessageItem(
-                              //                 isMyMessage: isMyMessage,
-                              //                 message: message,
-                              //               ),
-                              //             );
-                              //           },
-                              //         ),
-                              //       ),
-                              //     ],
-                              //   ),
                             ),
                           ),
                     MessageInput(
