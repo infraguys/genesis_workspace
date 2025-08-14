@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -9,6 +11,8 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
+typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
 
 class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
@@ -43,9 +47,14 @@ class _MessagesListState extends State<MessagesList> {
   late final ScrollController _scrollController;
   late final UserEntity? _myUser;
 
+  bool showEmojiPicker = false;
+
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
     _scrollController = widget.controller;
     _scrollController.addListener(_onScroll);
     _myUser = context.read<ProfileCubit>().state.user;
@@ -53,6 +62,9 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   void dispose() {
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
     _scrollController.removeListener(_onScroll);
     _dayLabelTimer?.cancel();
     super.dispose();
@@ -96,6 +108,7 @@ class _MessagesListState extends State<MessagesList> {
   @override
   Widget build(BuildContext context) {
     final reversedMessages = widget.messages.reversed.toList();
+    final theme = Theme.of(context);
 
     return Column(
       children: [
@@ -177,8 +190,10 @@ class _MessagesListState extends State<MessagesList> {
                         messageDate.year != prevMessageDate.year;
                   }
 
+                  final GlobalObjectKey messageKey = GlobalObjectKey('message-${message.id}');
+
                   return VisibilityDetector(
-                    key: Key('message-${message.id}'),
+                    key: messageKey,
                     onVisibilityChanged: (info) {
                       final visiblePercentage = info.visibleFraction * 100;
                       if (visiblePercentage > 50) {
@@ -205,7 +220,6 @@ class _MessagesListState extends State<MessagesList> {
                   );
                 },
               ),
-
               // Лейбл даты при скролле
               Positioned(
                 top: 8,
@@ -232,7 +246,6 @@ class _MessagesListState extends State<MessagesList> {
                   ),
                 ),
               ),
-
               // Кнопка "Scroll to Bottom"
               Positioned(
                 bottom: 16,

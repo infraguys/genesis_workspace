@@ -127,7 +127,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
     );
-    gh.lazySingleton<_i82.RealTimeService>(() => _i82.RealTimeService());
     gh.lazySingleton<_i435.LocalizationService>(
       () => _i435.LocalizationService(),
     );
@@ -144,6 +143,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i735.RealTimeEventsDataSource>(
       () => _i735.RealTimeEventsDataSourceImpl(),
+    );
+    gh.lazySingleton<_i82.RealTimeService>(
+      () => _i82.RealTimeService(
+        gh<_i477.RegisterQueueUseCase>(),
+        gh<_i1039.GetEventsByQueueIdUseCase>(),
+      ),
     );
     gh.factory<_i125.UsersRepository>(
       () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
