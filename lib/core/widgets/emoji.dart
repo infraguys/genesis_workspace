@@ -50,15 +50,33 @@ class UnicodeEmojiWidget extends StatelessWidget {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
+        final double notoColorEmojiTextSize = size * (14.5 / 17);
+        return Text(
+          textScaler: textScaler,
+          style: TextStyle(
+            fontFamily: FontFamily.notoColorEmoji,
+            fontSize: notoColorEmojiTextSize,
+          ),
+          strutStyle: StrutStyle(
+            fontSize: notoColorEmojiTextSize,
+            forceStrutHeight: true,
+          ),
+          unicode,
+        );
       case TargetPlatform.windows:
         final double notoColorEmojiTextSize = size * (14.5 / 17);
         return Text(
           textScaler: textScaler,
-          style: TextStyle(fontFamily: FontFamily.notoColorEmoji, fontSize: notoColorEmojiTextSize),
-          strutStyle: StrutStyle(fontSize: notoColorEmojiTextSize, forceStrutHeight: true),
+          style: TextStyle(
+            // fontFamily: FontFamily.notoColorEmoji,
+            fontSize: notoColorEmojiTextSize,
+          ),
+          strutStyle: StrutStyle(
+            fontSize: notoColorEmojiTextSize,
+            forceStrutHeight: true,
+          ),
           unicode,
         );
-
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         final boxSize = textScaler.scale(size);
@@ -71,7 +89,10 @@ class UnicodeEmojiWidget extends StatelessWidget {
               start: 0,
               child: Text(
                 textScaler: textScaler,
-                style: TextStyle(fontFamily: FontFamily.appleEmoji, fontSize: size),
+                style: TextStyle(
+                  fontFamily: FontFamily.appleEmoji,
+                  fontSize: size,
+                ),
                 strutStyle: StrutStyle(fontSize: size, forceStrutHeight: true),
                 unicode,
               ),
