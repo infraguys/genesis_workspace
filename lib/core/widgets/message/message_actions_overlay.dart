@@ -4,8 +4,8 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
-import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
@@ -37,15 +37,6 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
   bool isStarred = false;
 
   final parser = EmojiParser();
-
-  final popularEmojis = [
-    UnicodeEmojiDisplay(emojiName: ":thumbs_up:", emojiUnicode: "1F44D"),
-    UnicodeEmojiDisplay(emojiName: ":heart:", emojiUnicode: "2764"),
-    UnicodeEmojiDisplay(emojiName: ":joy:", emojiUnicode: "1F602"),
-    UnicodeEmojiDisplay(emojiName: ":open_mouth:", emojiUnicode: "1F62E"),
-    UnicodeEmojiDisplay(emojiName: ":cry:", emojiUnicode: "1F622"),
-    UnicodeEmojiDisplay(emojiName: ":clap:", emojiUnicode: "1F44F"),
-  ];
 
   @override
   void initState() {
@@ -102,7 +93,7 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const SizedBox(width: 8),
-                              for (final emoji in popularEmojis)
+                              for (final emoji in AppConstants.popularEmojis)
                                 GestureDetector(
                                   onTap: () {
                                     widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
