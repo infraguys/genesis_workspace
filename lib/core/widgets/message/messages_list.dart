@@ -108,7 +108,6 @@ class _MessagesListState extends State<MessagesList> {
   @override
   Widget build(BuildContext context) {
     final reversedMessages = widget.messages.reversed.toList();
-    final theme = Theme.of(context);
 
     return Column(
       children: [
@@ -190,10 +189,8 @@ class _MessagesListState extends State<MessagesList> {
                         messageDate.year != prevMessageDate.year;
                   }
 
-                  final GlobalObjectKey messageKey = GlobalObjectKey('message-${message.id}');
-
                   return VisibilityDetector(
-                    key: messageKey,
+                    key: UniqueKey(),
                     onVisibilityChanged: (info) {
                       final visiblePercentage = info.visibleFraction * 100;
                       if (visiblePercentage > 50) {
