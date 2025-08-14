@@ -4,14 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/models/emoji.dart';
-import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
+import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
+import 'package:genesis_workspace/core/widgets/message/reactions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -26,8 +26,6 @@ class MessageItem extends StatelessWidget {
   final MessageUIOrder messageOrder;
   final int myUserId;
   final bool isNewDay;
-  // final bool showEmojiPicker;
-  // final void Function(GlobalObjectKey messageKey)? openEmojiPicker;
 
   MessageItem({
     super.key,
@@ -38,9 +36,9 @@ class MessageItem extends StatelessWidget {
     this.messageOrder = MessageUIOrder.middle,
     required this.myUserId,
     this.isNewDay = false,
-    // this.showEmojiPicker = false,
-    // this.openEmojiPicker,
   });
+
+  final reactionsPopupKey = GlobalKey<CustomPopupState>();
 
   String _formatTime(int timestamp) {
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
@@ -48,6 +46,17 @@ class MessageItem extends StatelessWidget {
   }
 
   final parser = EmojiParser();
+
+  Future<void> onEmojiSelected(BuildContext context, {required String emojiName}) async {
+    try {
+      await context.read<MessagesCubit>().addEmojiReaction(message.id, emojiName: emojiName);
+    } on DioException catch (e) {
+      final msg = e.response!.data['msg'];
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +68,6 @@ class MessageItem extends StatelessWidget {
         ? const CircleAvatar(radius: 20)
         : UserAvatar(avatarUrl: message.avatarUrl);
 
-    final senderName = isSkeleton
-        ? Container(height: 10, width: 80, color: theme.colorScheme.surfaceContainerHighest)
-        : Text(message.senderFullName, style: theme.textTheme.titleSmall);
-
-    final messageContent = isSkeleton
-        ? Container(height: 14, width: 150, color: theme.colorScheme.surfaceContainerHighest)
-        : MessageHtml(content: message.content);
-
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
         : Text(
@@ -76,58 +77,6 @@ class MessageItem extends StatelessWidget {
               fontSize: 10,
             ),
           );
-
-    BorderRadius? messageRadius;
-
-    if (isMyMessage) {
-      switch (messageOrder) {
-        case MessageUIOrder.last:
-          messageRadius = BorderRadius.only(
-            topLeft: Radius.zero,
-            topRight: Radius.zero,
-            bottomLeft: Radius.circular(12),
-            bottomRight: Radius.zero,
-          );
-          break;
-        case MessageUIOrder.first:
-          messageRadius = BorderRadius.only(
-            topLeft: Radius.circular(12),
-            topRight: Radius.circular(12),
-          );
-          break;
-        case MessageUIOrder.single:
-        case MessageUIOrder.lastSingle:
-          messageRadius = BorderRadius.circular(12).copyWith(bottomRight: Radius.zero);
-          break;
-        case MessageUIOrder.middle:
-          messageRadius = BorderRadius.zero;
-          break;
-      }
-    } else {
-      switch (messageOrder) {
-        case MessageUIOrder.last:
-          messageRadius = BorderRadius.only(
-            topLeft: Radius.zero,
-            topRight: Radius.zero,
-            bottomLeft: Radius.zero,
-            bottomRight: Radius.circular(12),
-          );
-          break;
-        case MessageUIOrder.first:
-          messageRadius = BorderRadius.only(
-            topLeft: Radius.circular(12),
-            topRight: Radius.circular(12),
-          );
-          break;
-        case MessageUIOrder.single:
-        case MessageUIOrder.lastSingle:
-          messageRadius = BorderRadius.circular(12).copyWith(bottomLeft: Radius.zero);
-          break;
-        case MessageUIOrder.middle:
-          messageRadius = BorderRadius.zero;
-          break;
-      }
-    }
 
     final bool showAvatar =
         !isMyMessage &&
@@ -144,7 +93,7 @@ class MessageItem extends StatelessWidget {
 
     switch (currentSize(context)) {
       case ScreenSize.desktop:
-        maxMessageWidth = MediaQuery.of(context).size.width * 0.6;
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.55;
         break;
       case ScreenSize.laptop:
         maxMessageWidth = MediaQuery.of(context).size.width * 0.4;
@@ -155,264 +104,260 @@ class MessageItem extends StatelessWidget {
 
     final bool isStarred = message.flags?.contains('starred') ?? false;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Skeletonizer(
-          enabled: isSkeleton,
-          child: Align(
-            alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-            child: ConstrainedBox(
-              key: messageKey,
-              constraints: BoxConstraints(
-                maxWidth: (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (showAvatar) ...[avatar, const SizedBox(width: 4)],
-                  if (!showAvatar && !isMyMessage) const SizedBox(width: 44),
-                  GestureDetector(
-                    onTap: () {
-                      inspect(message.content);
-                      inspect(messageContent);
-                    },
-                    onLongPress: () {
-                      if (currentSize(context) <= ScreenSize.tablet) {
-                        final renderBox = context.findRenderObject() as RenderBox;
-                        final position = renderBox.localToGlobal(Offset.zero);
+    return Skeletonizer(
+      enabled: isSkeleton,
+      child: Align(
+        alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
+        child: CustomPopup(
+          key: reactionsPopupKey,
+          position: PopupPosition.auto,
+          animationCurve: Curves.bounceInOut,
+          contentPadding: EdgeInsets.zero,
+          contentDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+          content: ReactionsContextMenu(
+            onEmojiSelected: (emojiName) {
+              onEmojiSelected(context, emojiName: emojiName);
+            },
+            onClose: () {
+              Navigator.of(context).pop();
+            },
+            popupKey: reactionsPopupKey,
+          ),
+          child: ConstrainedBox(
+            key: messageKey,
+            constraints: BoxConstraints(
+              maxWidth: (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (showAvatar) ...[avatar, const SizedBox(width: 4)],
+                if (!showAvatar && !isMyMessage) const SizedBox(width: 44),
+                GestureDetector(
+                  onTap: () {
+                    inspect(message.content);
+                    // inspect(messageContent);
+                  },
+                  onSecondaryTap: () {
+                    reactionsPopupKey.currentState?.show();
+                  },
+                  onLongPress: () {
+                    if (currentSize(context) <= ScreenSize.tablet) {
+                      final renderBox = context.findRenderObject() as RenderBox;
+                      final position = renderBox.localToGlobal(Offset.zero);
 
-                        late OverlayEntry overlay;
-                        overlay = OverlayEntry(
-                          builder: (_) => MessageActionsOverlay(
-                            message: message,
-                            position: position,
-                            onClose: () => overlay.remove(),
-                            onEmojiSelected: (emojiName) async {
-                              try {
-                                await context.read<MessagesCubit>().addEmojiReaction(
-                                  message.id,
-                                  emojiName: emojiName,
-                                );
-                              } on DioException catch (e) {
-                                final msg = e.response!.data['msg'];
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(msg), backgroundColor: Colors.red),
-                                );
-                              }
-                            },
-                            messageContent: messageContent,
-                            isOwnMessage: isMyMessage,
-                          ),
-                        );
-
-                        Overlay.of(context).insert(overlay);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      constraints: (showAvatar)
-                          ? BoxConstraints(
-                              minHeight: 40,
-                              maxWidth:
-                                  (MediaQuery.of(context).size.width * 0.9) -
-                                  (isMyMessage ? 30 : 0),
-                            )
-                          : null,
-                      decoration: BoxDecoration(
-                        color: isMyMessage
-                            ? theme.colorScheme.secondaryContainer.withAlpha(128)
-                            : theme.colorScheme.secondaryContainer,
-                        // borderRadius: messageRadius,
-                        borderRadius: BorderRadius.circular(14).copyWith(
-                          bottomRight: isMyMessage ? Radius.zero : null,
-                          bottomLeft: !isMyMessage ? Radius.zero : null,
+                      late OverlayEntry overlay;
+                      overlay = OverlayEntry(
+                        builder: (_) => MessageActionsOverlay(
+                          message: message,
+                          position: position,
+                          onClose: () => overlay.remove(),
+                          onEmojiSelected: (emojiName) {
+                            onEmojiSelected(context, emojiName: emojiName);
+                          },
+                          messageContent: MessageHtml(content: message.content),
+                          isOwnMessage: isMyMessage,
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (showSenderName)
-                                        Row(
-                                          children: [
-                                            senderName,
-                                            if (showTopic && message.subject.isNotEmpty)
-                                              Skeleton.ignore(
-                                                child: Row(
-                                                  children: [
-                                                    const SizedBox(width: 2),
-                                                    const Icon(Icons.arrow_right, size: 16),
-                                                    Text(
-                                                      message.subject,
-                                                      style: theme.textTheme.labelSmall,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      const SizedBox(height: 2),
-                                      IntrinsicWidth(
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: maxMessageWidth,
-                                            minWidth: 70,
-                                          ),
-                                          child: isSkeleton
-                                              ? Container(
-                                                  height: 14,
-                                                  width: 150,
-                                                  color: theme.colorScheme.surfaceContainerHighest,
-                                                )
-                                              : messageContent,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              if (message.aggregatedReactions.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4.0),
-                                  child: Wrap(
-                                    spacing: 6.0,
-                                    runSpacing: 4.0,
-                                    children: message.aggregatedReactions.entries.map((entry) {
-                                      final ReactionDetails reaction = entry.value;
-                                      final bool isMyReaction = reaction.userIds.contains(myUserId);
+                      );
 
-                                      return GestureDetector(
-                                        onTap: () async {
-                                          final String emojiIdentifier = entry.key;
-                                          if (isMyReaction) {
-                                            await context.read<MessagesCubit>().removeEmojiReaction(
-                                              message.id,
-                                              emojiName: emojiIdentifier,
-                                            );
-                                          } else {
-                                            await context.read<MessagesCubit>().addEmojiReaction(
-                                              message.id,
-                                              emojiName: emojiIdentifier,
-                                            );
-                                          }
-                                        },
-                                        child: AnimatedContainer(
-                                          duration: const Duration(milliseconds: 300),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isMyReaction
-                                                ? theme.colorScheme.primaryFixedDim
-                                                : Colors.transparent,
-                                            borderRadius: BorderRadius.circular(16.0),
-                                            border: Border.all(
-                                              color: isMyReaction
-                                                  ? theme.colorScheme.primary
-                                                  : theme.colorScheme.outlineVariant,
-                                              width: 2,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              UnicodeEmojiWidget(
-                                                emojiDisplay: UnicodeEmojiDisplay(
-                                                  emojiName: reaction.emojiName,
-                                                  emojiUnicode: reaction.emojiCode,
-                                                ),
-                                                size: 16,
-                                              ),
-                                              const SizedBox(width: 4.0),
-                                              Text(
-                                                reaction.count.toString(),
-                                                style: TextStyle(
-                                                  fontSize: 12.0,
-                                                  color: theme.colorScheme.onSurfaceVariant,
-                                                  fontWeight: isMyReaction
-                                                      ? FontWeight.w600
-                                                      : FontWeight.w400,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              messageTime,
-                              if (!isMyMessage && !isRead && !isSkeleton) ...[
-                                const SizedBox(width: 4),
-                                Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
-                              ],
-                              ...[
-                                InkWell(
-                                  onTap: () async {
-                                    if (isStarred) {
-                                      await context.read<MessagesCubit>().removeStarredFlag(
-                                        message.id,
-                                      );
-                                    } else {
-                                      await context.read<MessagesCubit>().addStarredFlag(
-                                        message.id,
-                                      );
-                                    }
-                                  },
-                                  child: Icon(
-                                    isStarred ? Icons.star : Icons.star_border,
-                                    color: isStarred
-                                        ? theme.colorScheme.primary
-                                        : theme.unselectedWidgetColor,
-                                    size: 16,
-                                  ),
-                                ),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  transitionBuilder: (child, animation) =>
-                                      RotationTransition(turns: animation, child: child),
-                                  child: InkWell(
-                                    child: Icon(
-                                      Icons.menu,
-                                      color: theme.unselectedWidgetColor,
-                                      size: 16,
-                                    ),
-                                    onTap: () {
-                                      // TOGGLE OPEN/CLOSE EMOJI PICKER HERE
-                                    },
-                                  ),
+                      Overlay.of(context).insert(overlay);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    constraints: (showAvatar)
+                        ? BoxConstraints(
+                            minHeight: 40,
+                            maxWidth:
+                                (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
+                          )
+                        : null,
+                    decoration: BoxDecoration(
+                      color: isMyMessage
+                          ? theme.colorScheme.secondaryContainer.withAlpha(128)
+                          : theme.colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(14).copyWith(
+                        bottomRight: isMyMessage ? Radius.zero : null,
+                        bottomLeft: !isMyMessage ? Radius.zero : null,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                MessageBody(
+                                  showSenderName: showSenderName,
+                                  isSkeleton: isSkeleton,
+                                  message: message,
+                                  showTopic: showTopic,
+                                  isStarred: isStarred,
+                                  reactionsPopupKey: reactionsPopupKey,
+                                  maxMessageWidth: maxMessageWidth,
                                 ),
                               ],
+                            ),
+                            if (message.aggregatedReactions.isNotEmpty)
+                              MessageReactionsList(message: message, myUserId: myUserId),
+                          ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            messageTime,
+                            if (!isMyMessage && !isRead && !isSkeleton) ...[
+                              const SizedBox(width: 4),
+                              Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
                             ],
-                          ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MessageBody extends StatelessWidget {
+  final bool showSenderName;
+  final bool isSkeleton;
+  final MessageEntity message;
+  final bool showTopic;
+  final bool isStarred;
+  final GlobalKey<CustomPopupState> reactionsPopupKey;
+  final double maxMessageWidth;
+  const MessageBody({
+    super.key,
+    required this.showSenderName,
+    required this.isSkeleton,
+    required this.message,
+    required this.showTopic,
+    required this.isStarred,
+    required this.reactionsPopupKey,
+    required this.maxMessageWidth,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showSenderName)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  isSkeleton
+                      ? Container(
+                          height: 10,
+                          width: 80,
+                          color: theme.colorScheme.surfaceContainerHighest,
+                        )
+                      : Text(message.senderFullName, style: theme.textTheme.titleSmall),
+                  if (showTopic && message.subject.isNotEmpty)
+                    Skeleton.ignore(
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 2),
+                          const Icon(Icons.arrow_right, size: 16),
+                          Text(message.subject, style: theme.textTheme.labelSmall),
                         ],
                       ),
                     ),
-                  ),
                 ],
               ),
-            ),
+              if (currentSize(context) > ScreenSize.tablet)
+                _MessageActions(
+                  isStarred: isStarred,
+                  messageId: message.id,
+                  reactionsPopupKey: reactionsPopupKey,
+                ),
+            ],
           ),
+        const SizedBox(height: 2),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            IntrinsicWidth(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxMessageWidth, minWidth: 30),
+                child: isSkeleton
+                    ? Container(
+                        height: 14,
+                        width: 150,
+                        color: theme.colorScheme.surfaceContainerHighest,
+                      )
+                    : MessageHtml(content: message.content),
+              ),
+            ),
+            if (currentSize(context) > ScreenSize.tablet && !showSenderName)
+              _MessageActions(
+                isStarred: isStarred,
+                messageId: message.id,
+                reactionsPopupKey: reactionsPopupKey,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MessageActions extends StatelessWidget {
+  final bool isStarred;
+  final int messageId;
+  final GlobalKey<CustomPopupState> reactionsPopupKey;
+  const _MessageActions({
+    super.key,
+    required this.isStarred,
+    required this.messageId,
+    required this.reactionsPopupKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      spacing: 4,
+      children: [
+        InkWell(
+          onTap: () async {
+            if (isStarred) {
+              await context.read<MessagesCubit>().removeStarredFlag(messageId);
+            } else {
+              await context.read<MessagesCubit>().addStarredFlag(messageId);
+            }
+          },
+          child: Icon(
+            isStarred ? Icons.star : Icons.star_border,
+            color: isStarred ? theme.colorScheme.primary : theme.unselectedWidgetColor,
+            size: 16,
+          ),
+        ),
+        InkWell(
+          child: Icon(Icons.add_reaction_outlined, color: theme.unselectedWidgetColor, size: 16),
+          onTap: () {
+            reactionsPopupKey.currentState?.show();
+          },
         ),
       ],
     );

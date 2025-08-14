@@ -7,6 +7,7 @@ import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/core/widgets/message/message_actions.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 
@@ -181,43 +182,21 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                         BoxShadow(color: Colors.black26, blurRadius: 6, offset: const Offset(0, 3)),
                       ],
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed: () async {
-                            if (isStarred) {
-                              setState(() {
-                                isStarred = false;
-                              });
-                              await context.read<MessagesCubit>().removeStarredFlag(
-                                widget.message.id,
-                              );
-                            } else {
-                              setState(() {
-                                isStarred = true;
-                              });
-                              await context.read<MessagesCubit>().addStarredFlag(widget.message.id);
-                            }
-                          },
-                          icon: Icon(
-                            isStarred ? Icons.star : Icons.star_border,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(Icons.edit, color: theme.colorScheme.primary),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(Icons.delete, color: theme.colorScheme.error),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(Icons.copy, color: theme.colorScheme.onSurface),
-                        ),
-                      ],
+                    child: MessageActions(
+                      isStarred: isStarred,
+                      onTapStarred: () async {
+                        if (isStarred) {
+                          setState(() {
+                            isStarred = false;
+                          });
+                          await context.read<MessagesCubit>().removeStarredFlag(widget.message.id);
+                        } else {
+                          setState(() {
+                            isStarred = true;
+                          });
+                          await context.read<MessagesCubit>().addStarredFlag(widget.message.id);
+                        }
+                      },
                     ),
                   ),
                 ],
