@@ -17,7 +17,6 @@ class MessageActionsOverlay extends StatefulWidget {
   final Widget messageContent;
   final bool isOwnMessage;
   final VoidCallback onClose;
-  final Function(String emojiName) onEmojiSelected;
 
   const MessageActionsOverlay({
     super.key,
@@ -26,7 +25,6 @@ class MessageActionsOverlay extends StatefulWidget {
     required this.messageContent,
     required this.isOwnMessage,
     required this.onClose,
-    required this.onEmojiSelected,
   });
 
   @override
@@ -96,8 +94,13 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                               const SizedBox(width: 8),
                               for (final emoji in AppConstants.popularEmojis)
                                 GestureDetector(
-                                  onTap: () {
-                                    widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
+                                  onTap: () async {
+                                    await context.read<MessagesCubit>().addEmojiReaction(
+                                      widget.message.id,
+                                      emojiName: emoji.emojiName.replaceAll(":", ""),
+                                    );
+
+                                    // widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
                                     widget.onClose();
                                   },
                                   child: Padding(
@@ -130,9 +133,12 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                           SizedBox(
                             height: 300,
                             child: EmojiPicker(
-                              onEmojiSelected: (category, emoji) {
+                              onEmojiSelected: (category, emoji) async {
                                 final fullEmoji = parser.getEmoji(emoji.emoji);
-                                widget.onEmojiSelected(fullEmoji.name);
+                                await context.read<MessagesCubit>().addEmojiReaction(
+                                  widget.message.id,
+                                  emojiName: fullEmoji.name,
+                                );
                                 widget.onClose();
                               },
                               config: Config(
