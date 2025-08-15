@@ -15,7 +15,6 @@ class ReactionsContextMenu extends StatefulWidget {
     this.onDelete,
     this.onReply,
     this.onForward,
-    this.onClose,
     this.title,
   });
 
@@ -28,9 +27,6 @@ class ReactionsContextMenu extends StatefulWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onReply;
   final VoidCallback? onForward;
-
-  /// Optional close handler (e.g., to dismiss overlay/sheet).
-  final VoidCallback? onClose;
 
   /// Optional header (e.g., “Message actions”).
   final String? title;
@@ -108,9 +104,7 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
                 InkWell(
                   onTap: () {
                     widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
-                    if (widget.onClose != null) {
-                      widget.onClose!();
-                    }
+                    Navigator.of(context).pop();
                   },
                   child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 24),
                 ),
@@ -138,9 +132,7 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
                     onEmojiSelected: (category, emoji) {
                       final fullEmoji = parser.getEmoji(emoji.emoji);
                       widget.onEmojiSelected(fullEmoji.name);
-                      if (widget.onClose != null) {
-                        widget.onClose!();
-                      }
+                      Navigator.of(context).pop();
                     },
                     config: Config(
                       height: 300,
