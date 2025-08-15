@@ -1,11 +1,14 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 
 class ReactionsContextMenu extends StatefulWidget {
   final GlobalKey popupKey;
+  final int messageId;
   const ReactionsContextMenu({
     super.key,
     required this.popupKey,
@@ -16,10 +19,11 @@ class ReactionsContextMenu extends StatefulWidget {
     this.onReply,
     this.onForward,
     this.title,
+    required this.messageId,
   });
 
   /// Fired with emoji name **without colons**, e.g. "thumbs_up".
-  final ValueChanged<String> onEmojiSelected;
+  final Function(String) onEmojiSelected;
 
   // Actions (any null ones are hidden from the layout).
   final VoidCallback? onCopy;
@@ -65,19 +69,6 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final actions = <_ActionItem>[
-      if (widget.onCopy != null)
-        _ActionItem(label: 'Copy', icon: Icons.copy_rounded, onTap: widget.onCopy!),
-      if (widget.onEdit != null)
-        _ActionItem(label: 'Edit', icon: Icons.edit_rounded, onTap: widget.onEdit!),
-      if (widget.onDelete != null)
-        _ActionItem(label: 'Delete', icon: Icons.delete_rounded, onTap: widget.onDelete!),
-      if (widget.onReply != null)
-        _ActionItem(label: 'Reply', icon: Icons.reply_rounded, onTap: widget.onReply!),
-      if (widget.onForward != null)
-        _ActionItem(label: 'Forward', icon: Icons.forward_rounded, onTap: widget.onForward!),
-    ];
-
     final emojis = AppConstants.popularEmojis;
 
     return AnimatedContainer(
@@ -102,8 +93,12 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
             children: [
               for (final emoji in emojis)
                 InkWell(
-                  onTap: () {
-                    widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
+                  onTap: () async {
+                    // await widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
+                    await context.read<MessagesCubit>().addEmojiReaction(
+                      widget.messageId,
+                      emojiName: emoji.emojiName.replaceAll(":", ""),
+                    );
                     Navigator.of(context).pop();
                   },
                   child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 24),
@@ -127,7 +122,7 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
           AnimatedContainer(
             duration: animationsEnabled ? const Duration(milliseconds: 300) : Duration.zero,
             height: showEmojiPicker ? 300 : 0,
-            child: showEmojiPicker || animationsEnabled
+            child: showEmojiPicker
                 ? EmojiPicker(
                     onEmojiSelected: (category, emoji) {
                       final fullEmoji = parser.getEmoji(emoji.emoji);

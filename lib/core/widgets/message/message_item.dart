@@ -115,8 +115,9 @@ class MessageItem extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           contentDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           content: ReactionsContextMenu(
-            onEmojiSelected: (emojiName) {
-              onEmojiSelected(context, emojiName: emojiName);
+            messageId: message.id,
+            onEmojiSelected: (emojiName) async {
+              await onEmojiSelected(context, emojiName: emojiName);
             },
             popupKey: reactionsPopupKey,
           ),
@@ -151,9 +152,6 @@ class MessageItem extends StatelessWidget {
                           message: message,
                           position: position,
                           onClose: () => overlay.remove(),
-                          onEmojiSelected: (emojiName) {
-                            onEmojiSelected(context, emojiName: emojiName);
-                          },
                           messageContent: MessageHtml(content: message.content),
                           isOwnMessage: isMyMessage,
                         ),
