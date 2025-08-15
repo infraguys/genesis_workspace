@@ -118,9 +118,6 @@ class MessageItem extends StatelessWidget {
             onEmojiSelected: (emojiName) {
               onEmojiSelected(context, emojiName: emojiName);
             },
-            onClose: () {
-              Navigator.of(context).pop();
-            },
             popupKey: reactionsPopupKey,
           ),
           child: ConstrainedBox(
