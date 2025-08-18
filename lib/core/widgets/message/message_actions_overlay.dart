@@ -142,7 +142,7 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                                 widget.onClose();
                               },
                               config: Config(
-                                height: 250,
+                                height: showEmojiPicker ? 250 : 0,
                                 emojiViewConfig: const EmojiViewConfig(
                                   emojiSizeMax: 28,
                                   backgroundColor: Colors.transparent,

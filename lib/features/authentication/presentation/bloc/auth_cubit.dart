@@ -102,9 +102,6 @@ class AuthCubit extends Cubit<AuthState> {
     final uri = Uri.parse(
       realmBase.resolve(loginPath).toString(),
     ).replace(queryParameters: {'next': next, 'desktop_flow_otp': otp});
-    final dio = Dio();
-    final response = await dio.get("${realmBaseUrl}${loginPath}");
-    inspect(response);
     await launchUrl(uri, mode: LaunchMode.platformDefault, webOnlyWindowName: '_blank');
   }
 
@@ -113,7 +110,7 @@ class AuthCubit extends Cubit<AuthState> {
     final dio = getIt<Dio>();
     // final res = await dio.get('${AppConstants.baseUrl}/accounts/login/subdomain/$pastedText');
     // final res = await dio.get('zulip://$pastedText');
-    await launchUrl(Uri.parse('zulip://$pastedText'));
+    await launchUrl(Uri.parse('genesis_workspace://$pastedText'));
 
     // final email = res.data['email'] as String;
     // final apiKey = res.data['api_key'] as String;
