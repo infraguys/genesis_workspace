@@ -130,7 +130,7 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
                       Navigator.of(context).pop();
                     },
                     config: Config(
-                      height: 300,
+                      height: showEmojiPicker ? 300 : 0,
                       emojiViewConfig: const EmojiViewConfig(
                         emojiSizeMax: 22,
                         backgroundColor: Colors.transparent,
