@@ -6,7 +6,7 @@ part of 'messages_api_client.dart';
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter
 
 class _MessagesApiClient implements MessagesApiClient {
   _MessagesApiClient(this._dio, {this.baseUrl, this.errorLogger});
@@ -69,7 +69,7 @@ class _MessagesApiClient implements MessagesApiClient {
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'type': type.name,
+      r'type': type,
       r'to': to,
       r'content': content,
       r'stream_id': streamId,
@@ -100,8 +100,8 @@ class _MessagesApiClient implements MessagesApiClient {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'messages': messages,
-      r'op': op.name,
-      r'flag': flag.name,
+      r'op': op,
+      r'flag': flag,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;

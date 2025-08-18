@@ -40,26 +40,58 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	// Translations
 	late final TranslationsAuthEn auth = TranslationsAuthEn._(_root);
+
+	/// en: 'Password can not be empty'
 	String get password_cant_be_empty => 'Password can not be empty';
+
+	/// en: 'Password'
 	String get password => 'Password';
+
+	/// en: 'Login'
 	String get login => 'Login';
+
+	/// en: 'Typing'
 	String get typing => 'Typing';
+
+	/// en: 'Online'
 	String get online => 'Online';
+
 	late final TranslationsNavBarEn nav_bar = TranslationsNavBarEn._(_root);
+
+	/// en: 'Feed'
 	String get feed => 'Feed';
+
+	/// en: 'Select any channel'
 	String get select_any_channel => 'Select any channel';
+
+	/// en: 'All messages'
 	String get all_messages => 'All messages';
+
+	/// en: 'No messages here yet...'
 	String get no_messages_here_yet => 'No messages here yet...';
+
+	/// en: 'Copy'
 	String get copy => 'Copy';
+
+	/// en: 'was online {time} ago'
 	String get was_online => 'was online {time} ago';
+
+	/// en: 'was online just now'
 	String get was_online_just_now => 'was online just now';
+
 	late final TranslationsTimeAgoEn time_ago = TranslationsTimeAgoEn._(_root);
+
+	/// en: 'Search'
 	String get search => 'Search';
+
 	late final TranslationsSettingsEn settings = TranslationsSettingsEn._(_root);
 	late final TranslationsDateLabelsEn date_labels = TranslationsDateLabelsEn._(_root);
 	late final TranslationsInboxEn inbox = TranslationsInboxEn._(_root);
 	late final TranslationsMentionsEn mentions = TranslationsMentionsEn._(_root);
 	late final TranslationsReactionsEn reactions = TranslationsReactionsEn._(_root);
+	late final TranslationsStarredEn starred = TranslationsStarredEn._(_root);
+
+	/// en: 'Select any chat'
 	String get select_any_chat => 'Select any chat';
 }
 
@@ -70,11 +102,24 @@ class TranslationsAuthEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'email@tokens.team'
 	String get emailHint => 'email@tokens.team';
+
+	/// en: 'Email'
 	String get emailLabel => 'Email';
+
+	/// en: 'cucumber123'
 	String get passwordHint => 'cucumber123';
+
+	/// en: 'Show password'
 	String get showPassword => 'Show password';
+
+	/// en: 'Hide password'
 	String get hidePassword => 'Hide password';
+
+	/// en: 'Login with Tokens Team'
+	String get login_with_tokens_team => 'Login with Tokens Team';
 }
 
 // Path: nav_bar
@@ -84,9 +129,17 @@ class TranslationsNavBarEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Direct Messages'
 	String get direct_messages => 'Direct Messages';
+
+	/// en: 'Settings'
 	String get settings => 'Settings';
+
+	/// en: 'Menu'
 	String get menu => 'Menu';
+
+	/// en: 'Channels'
 	String get channels => 'Channels';
 }
 
@@ -97,15 +150,23 @@ class TranslationsTimeAgoEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'just now'
 	String get just_now => 'just now';
+
+	/// en: '(one) {{n} minute} (other) {{n} minutes}'
 	String minutes({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 		one: '{n} minute',
 		other: '{n} minutes',
 	);
+
+	/// en: '(one) {{n} hour} (other) {{n} hours}'
 	String hours({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 		one: '{n} hour',
 		other: '{n} hours',
 	);
+
+	/// en: '(one) {{n} day} (other) {{n} days}'
 	String days({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 		one: '{n} day',
 		other: '{n} days',
@@ -119,7 +180,11 @@ class TranslationsSettingsEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Language'
 	String get language => 'Language';
+
+	/// en: 'Logout'
 	String get logout => 'Logout';
 }
 
@@ -130,7 +195,11 @@ class TranslationsDateLabelsEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Today'
 	String get today => 'Today';
+
+	/// en: 'Yesterday'
 	String get yesterday => 'Yesterday';
 }
 
@@ -141,9 +210,17 @@ class TranslationsInboxEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Inbox'
 	String get title => 'Inbox';
+
+	/// en: 'No unread messages'
 	String get no_messages => 'No unread messages';
+
+	/// en: 'Direct messages'
 	String get dm_tab => 'Direct messages';
+
+	/// en: 'Channels'
 	String get channels_tab => 'Channels';
 }
 
@@ -154,7 +231,11 @@ class TranslationsMentionsEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Mentions'
 	String get title => 'Mentions';
+
+	/// en: 'No mentions'
 	String get no_mentions => 'No mentions';
 }
 
@@ -165,8 +246,27 @@ class TranslationsReactionsEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Reactions'
 	String get title => 'Reactions';
+
+	/// en: 'No reactions'
 	String get no_reactions => 'No reactions';
+}
+
+// Path: starred
+class TranslationsStarredEn {
+	TranslationsStarredEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Starred Messages'
+	String get title => 'Starred Messages';
+
+	/// en: 'No starred messages'
+	String get no_starred => 'No starred messages';
 }
 
 /// Flat map(s) containing all translations.
@@ -179,6 +279,7 @@ extension on Translations {
 			case 'auth.passwordHint': return 'cucumber123';
 			case 'auth.showPassword': return 'Show password';
 			case 'auth.hidePassword': return 'Hide password';
+			case 'auth.login_with_tokens_team': return 'Login with Tokens Team';
 			case 'password_cant_be_empty': return 'Password can not be empty';
 			case 'password': return 'Password';
 			case 'login': return 'Login';
@@ -221,6 +322,8 @@ extension on Translations {
 			case 'mentions.no_mentions': return 'No mentions';
 			case 'reactions.title': return 'Reactions';
 			case 'reactions.no_reactions': return 'No reactions';
+			case 'starred.title': return 'Starred Messages';
+			case 'starred.no_starred': return 'No starred messages';
 			case 'select_any_chat': return 'Select any chat';
 			default: return null;
 		}

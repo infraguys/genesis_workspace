@@ -65,10 +65,18 @@ class TranslationsAuthRu extends TranslationsAuthEn {
 
 	// Translations
 	@override String get emailHint => 'email@tokens.team';
-	@override String get emailLabel => 'Почта';
+	@override String get emailLabel => 'Эл. почта';
 	@override String get passwordHint => 'cucumber123';
 	@override String get showPassword => 'Показать пароль';
 	@override String get hidePassword => 'Скрыть пароль';
+	@override String loginWith({required Object realmName}) => 'Войти через ${realmName}';
+	@override String get pasteYourCodeHere => 'Вставьте код здесь';
+	@override String get enterOrPasteCodeTitle => 'Введите или вставьте код для входа';
+	@override String get codeUsageHint => 'Мы используем его, чтобы завершить вход в систему.';
+	@override String get tokenLabel => 'Токен';
+	@override String get tokenHint => 'Ваш код здесь…';
+	@override String get paste => 'Вставить';
+	@override String get clear => 'Очистить';
 }
 
 // Path: navBar

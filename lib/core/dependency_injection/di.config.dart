@@ -75,6 +75,8 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/delete
     as _i433;
 import 'package:genesis_workspace/features/authentication/domain/usecases/fetch_api_key_use_case.dart'
     as _i799;
+import 'package:genesis_workspace/features/authentication/domain/usecases/get_server_settings_use_case.dart'
+    as _i848;
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart'
     as _i75;
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart'
@@ -159,6 +161,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i207.GetMessagesUseCase>(
       () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i513.RemoveEmojiReactionUseCase>(
+      () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
+    );
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
     );
@@ -167,9 +172,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
-    );
-    gh.factory<_i513.RemoveEmojiReactionUseCase>(
-      () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(
@@ -229,8 +231,24 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.factory<_i848.GetServerSettingsUseCase>(
+      () => _i848.GetServerSettingsUseCase(gh<_i1022.AuthRepository>()),
+    );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
+    );
+    gh.lazySingleton<_i862.AuthCubit>(
+      () => _i862.AuthCubit(
+        gh<_i799.FetchApiKeyUseCase>(),
+        gh<_i643.SaveTokenUseCase>(),
+        gh<_i75.GetTokenUseCase>(),
+        gh<_i435.DeleteQueueUseCase>(),
+        gh<_i433.DeleteTokenUseCase>(),
+        gh<_i82.RealTimeService>(),
+        gh<_i832.UpdatePresenceUseCase>(),
+        gh<_i848.GetServerSettingsUseCase>(),
+      ),
+      dispose: _i862.disposeAuthCubit,
     );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
@@ -249,18 +267,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i487.SetTypingUseCase>(),
         gh<_i664.UpdateMessagesFlagsUseCase>(),
       ),
-    );
-    gh.lazySingleton<_i862.AuthCubit>(
-      () => _i862.AuthCubit(
-        gh<_i799.FetchApiKeyUseCase>(),
-        gh<_i643.SaveTokenUseCase>(),
-        gh<_i75.GetTokenUseCase>(),
-        gh<_i435.DeleteQueueUseCase>(),
-        gh<_i433.DeleteTokenUseCase>(),
-        gh<_i82.RealTimeService>(),
-        gh<_i832.UpdatePresenceUseCase>(),
-      ),
-      dispose: _i862.disposeAuthCubit,
     );
     return this;
   }

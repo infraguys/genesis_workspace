@@ -57,6 +57,7 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsInboxRu inbox = _TranslationsInboxRu._(_root);
 	@override late final _TranslationsMentionsRu mentions = _TranslationsMentionsRu._(_root);
 	@override late final _TranslationsReactionsRu reactions = _TranslationsReactionsRu._(_root);
+	@override late final _TranslationsStarredRu starred = _TranslationsStarredRu._(_root);
 	@override String get select_any_chat => 'Выберите любой чат';
 }
 
@@ -72,6 +73,7 @@ class _TranslationsAuthRu implements TranslationsAuthEn {
 	@override String get passwordHint => 'cucumber123';
 	@override String get showPassword => 'Показать пароль';
 	@override String get hidePassword => 'Скрыть пароль';
+	@override String get login_with_tokens_team => 'Войти через Tokens Team';
 }
 
 // Path: nav_bar
@@ -172,6 +174,17 @@ class _TranslationsReactionsRu implements TranslationsReactionsEn {
 	@override String get no_reactions => 'Нет реакций';
 }
 
+// Path: starred
+class _TranslationsStarredRu implements TranslationsStarredEn {
+	_TranslationsStarredRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Отмеченные сообщения';
+	@override String get no_starred => 'Нет отмеченных сообщений';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsRu {
@@ -182,6 +195,7 @@ extension on TranslationsRu {
 			case 'auth.passwordHint': return 'cucumber123';
 			case 'auth.showPassword': return 'Показать пароль';
 			case 'auth.hidePassword': return 'Скрыть пароль';
+			case 'auth.login_with_tokens_team': return 'Войти через Tokens Team';
 			case 'password_cant_be_empty': return 'Пароль не может быть пустым';
 			case 'password': return 'Пароль';
 			case 'login': return 'Войти';
@@ -230,6 +244,8 @@ extension on TranslationsRu {
 			case 'mentions.no_mentions': return 'Нет упоминаний';
 			case 'reactions.title': return 'Реакции';
 			case 'reactions.no_reactions': return 'Нет реакций';
+			case 'starred.title': return 'Отмеченные сообщения';
+			case 'starred.no_starred': return 'Нет отмеченных сообщений';
 			case 'select_any_chat': return 'Выберите любой чат';
 			default: return null;
 		}
