@@ -31,10 +31,12 @@ class _AuthViewState extends State<AuthView> {
 
   static const double _maxFormWidth = 420;
   static const double _cardPadding = 24;
+  late final Future _future;
 
   @override
   void initState() {
     super.initState();
+    _future = context.read<AuthCubit>().getServerSettings();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
 
@@ -151,6 +153,24 @@ class _AuthViewState extends State<AuthView> {
                     child: Text(t.login),
                   ).pending(state.isPending),
                 ),
+                if (state.serverSettings != null)
+                  ...state.serverSettings!.externalAuthenticationMethods.map(
+                    (realm) => SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final url = realm.loginUrl;
+                          await context.read<AuthCubit>().startOidcMobileFlow(
+                            realmBaseUrl: state.serverSettings!.realmUri,
+                            loginPath: url,
+                          );
+                          // await context.read<AuthCubit>().loginWithTokensTeam(url);
+                          await context.pushNamed(Routes.pasteToken);
+                        },
+                        child: Text(t.auth.loginWith(realmName: realm.displayName)),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -158,53 +178,63 @@ class _AuthViewState extends State<AuthView> {
 
         return Scaffold(
           resizeToAvoidBottomInset: true,
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  theme.colorScheme.surface,
-                  theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                ],
-              ),
-            ),
-            child: SafeArea(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => FocusScope.of(context).unfocus(),
-                child: Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: _maxFormWidth),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeOut,
-                        padding: EdgeInsets.all(isWide ? _cardPadding : 16),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: isWide
-                              ? [
-                                  BoxShadow(
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 8),
-                                    color: Colors.black.withOpacity(0.08),
-                                  ),
-                                ]
-                              : null,
-                          border: Border.all(
-                            color: theme.colorScheme.outlineVariant.withOpacity(0.6),
+          body: FutureBuilder(
+            future: _future,
+            builder: (BuildContext context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.connectionState == ConnectionState.done) {
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        theme.colorScheme.surface,
+                        theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      ],
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => FocusScope.of(context).unfocus(),
+                      child: Center(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: _maxFormWidth),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              curve: Curves.easeOut,
+                              padding: EdgeInsets.all(isWide ? _cardPadding : 16),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: isWide
+                                    ? [
+                                        BoxShadow(
+                                          blurRadius: 24,
+                                          offset: const Offset(0, 8),
+                                          color: Colors.black.withOpacity(0.08),
+                                        ),
+                                      ]
+                                    : null,
+                                border: Border.all(
+                                  color: theme.colorScheme.outlineVariant.withOpacity(0.6),
+                                ),
+                              ),
+                              child: form,
+                            ),
                           ),
                         ),
-                        child: form,
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
+                );
+              }
+              return SizedBox();
+            },
           ),
         );
       },

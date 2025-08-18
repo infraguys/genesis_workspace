@@ -71,6 +71,14 @@ class TranslationsAuthEn {
 	String get passwordHint => 'cucumber123';
 	String get showPassword => 'Show password';
 	String get hidePassword => 'Hide password';
+	String loginWith({required Object realmName}) => 'Login with ${realmName}';
+	String get pasteYourCodeHere => 'Paste code here';
+	String get enterOrPasteCodeTitle => 'Enter or paste your login code';
+	String get codeUsageHint => 'We\'ll use it to finish signing you in.';
+	String get tokenLabel => 'Token';
+	String get tokenHint => 'Your code here…';
+	String get paste => 'Paste';
+	String get clear => 'Clear';
 }
 
 // Path: navBar

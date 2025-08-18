@@ -4,6 +4,7 @@ import 'package:genesis_workspace/features/authentication/data/datasources/auth_
 import 'package:genesis_workspace/features/authentication/data/dto/fetch_api_key_response_dto.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/api_key_entity.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/api_key_request_entity.dart';
+import 'package:genesis_workspace/features/authentication/domain/entities/server_settings_entity.dart';
 import 'package:genesis_workspace/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
@@ -37,6 +38,16 @@ class AuthRepositoryImpl implements AuthRepository {
       await tokenStorage.deleteToken();
     } catch (e) {
       inspect(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ServerSettingsEntity> getServerSettings() async {
+    try {
+      final dto = await remoteDataSource.getServerSettings();
+      return dto.toEntity();
+    } catch (e) {
       rethrow;
     }
   }

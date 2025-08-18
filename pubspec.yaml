@@ -32,6 +32,7 @@ dependencies:
   #router
   go_router: ^16.0.0
   url_launcher: ^6.3.2
+  url_launcher_web: ^2.4.1
 
   #ui
   flutter_svg: ^2.2.0

@@ -6,7 +6,7 @@ part of 'users_api_client.dart';
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter
 
 class _UsersApiClient implements UsersApiClient {
   _UsersApiClient(this._dio, {this.baseUrl, this.errorLogger});
@@ -141,8 +141,8 @@ class _UsersApiClient implements UsersApiClient {
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'type': type.name,
-      r'op': op.name,
+      r'type': type,
+      r'op': op,
       r'to': to,
       r'stream_id': streamId,
       r'topic': topic,
@@ -259,7 +259,7 @@ class _UsersApiClient implements UsersApiClient {
     final queryParameters = <String, dynamic>{
       r'last_update_id': lastUpdateId,
       r'new_user_input': newUserInput,
-      r'status': status.name,
+      r'status': status,
       r'ping_only': pingOnly,
     };
     queryParameters.removeWhere((k, v) => v == null);

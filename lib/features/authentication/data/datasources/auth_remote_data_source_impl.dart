@@ -10,4 +10,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<FetchApiKeyResponseDto> fetchApiKey(ApiKeyRequestDto body) async {
     return await apiClient.fetchApiKey(body);
   }
+
+  @override
+  Future<ServerSettingsResponseDto> getServerSettings() async {
+    try {
+      final response = await apiClient.getServerSettings();
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

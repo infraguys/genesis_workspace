@@ -4,7 +4,16 @@
     "emailLabel": "Email",
     "passwordHint": "cucumber123",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "login_with": "Login with {realm_name}",
+
+    "paste_your_code_here": "Paste code here",
+    "enter_or_paste_code_title": "Enter or paste your login code",
+    "code_usage_hint": "We'll use it to finish signing you in.",
+    "token_label": "Token",
+    "token_hint": "Your code here…",
+    "paste": "Paste",
+    "clear": "Clear"
   },
   "password_cant_be_empty": "Password can not be empty",
   "password": "Password",

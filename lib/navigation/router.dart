@@ -6,6 +6,7 @@ import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/authentication/presentation/view/paste_code_view.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
@@ -31,6 +32,7 @@ final _shellNavigatorMenuKey = GlobalKey<NavigatorState>(debugLabel: 'shellMenu'
 class Routes {
   static const String splashScreen = '/';
   static const String auth = '/auth';
+  static const String pasteToken = '/paste-token';
   static const String directMessages = '/direct-messages';
   static const String channels = '/channels';
   static const String settings = '/settings';
@@ -156,6 +158,13 @@ final router = GoRouter(
         }
         return null;
       },
+      routes: [
+        GoRoute(
+          path: Routes.pasteToken,
+          name: Routes.pasteToken,
+          builder: (context, state) => const PasteCodeView(),
+        ),
+      ],
       pageBuilder: (context, state) {
         return CustomTransitionPage(
           key: state.pageKey,

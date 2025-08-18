@@ -1,11 +1,21 @@
 {
   "auth": {
     "emailHint": "email@genesis.team",
-    "emailLabel": "Почта",
+    "emailLabel": "Эл. почта",
     "passwordHint": "cucumber123",
     "showPassword": "Показать пароль",
-    "hidePassword": "Скрыть пароль"
-  },
+    "hidePassword": "Скрыть пароль",
+    "login_with": "Войти через {realm_name}",
+
+    "paste_your_code_here": "Вставьте код здесь",
+    "enter_or_paste_code_title": "Введите или вставьте код для входа",
+    "code_usage_hint": "Мы используем его, чтобы завершить вход в систему.",
+    "token_label": "Токен",
+    "token_hint": "Ваш код здесь…",
+    "paste": "Вставить",
+    "clear": "Очистить"
+  }
+,
   "password_cant_be_empty": "Пароль не может быть пустым",
   "password": "Пароль",
   "login": "Войти",
