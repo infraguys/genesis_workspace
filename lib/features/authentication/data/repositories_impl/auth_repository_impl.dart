@@ -53,6 +53,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> deleteCsrfToken() async {
+    try {
+      await tokenStorage.deleteCsrfToken();
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  @override
   Future<ServerSettingsEntity> getServerSettings() async {
     try {
       final dto = await remoteDataSource.getServerSettings();

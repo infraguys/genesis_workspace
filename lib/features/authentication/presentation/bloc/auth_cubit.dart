@@ -16,11 +16,13 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_request_
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/api_key_entity.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/server_settings_entity.dart';
+import 'package:genesis_workspace/features/authentication/domain/usecases/delete_csrftoken_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/delete_session_id_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/delete_token_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/fetch_api_key_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_csrftoken_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_server_settings_use_case.dart';
+import 'package:genesis_workspace/features/authentication/domain/usecases/get_session_id_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_csrftoken_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_session_id_use_case.dart';
@@ -42,6 +44,8 @@ class AuthCubit extends Cubit<AuthState> {
   final DeleteSessionIdUseCase _deleteSessionIdUseCase;
   final SaveCsrftokenUseCase _saveCsrftokenUseCase;
   final GetCsrftokenUseCase _getCsrftokenUseCase;
+  final GetSessionIdUseCase _getSessionIdUseCase;
+  final DeleteCsrftokenUseCase _deleteCsrftokenUseCase;
 
   AuthCubit(
     this._fetchApiKeyUseCase,
@@ -56,6 +60,8 @@ class AuthCubit extends Cubit<AuthState> {
     this._deleteSessionIdUseCase,
     this._saveCsrftokenUseCase,
     this._getCsrftokenUseCase,
+    this._getSessionIdUseCase,
+    this._deleteCsrftokenUseCase,
   ) : super(
         const AuthState(
           isPending: false,
@@ -64,11 +70,12 @@ class AuthCubit extends Cubit<AuthState> {
           otp: null,
           serverSettings: null,
           errorMessage: null,
+          isParseTokenPending: false,
+          parseTokenError: null,
         ),
       );
 
   final CookieManager _cookieManager = CookieManager.instance();
-  // final _dio = getIt<Dio>();
   final _dio = Dio();
   String? _csrfToken;
 
@@ -104,22 +111,19 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> getServerSettings() async {
     try {
       await _deleteSessionIdUseCase.call();
-      // await _cookieManager.deleteAllCookies();
       final response = await _getServerSettingsUseCase.call();
 
       final cookieResponse = await _dio.get('${AppConstants.baseUrl}/accounts/login/');
 
-      final csrf = getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
+      final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
       _csrfToken = csrf;
-      print(_csrfToken);
-      // await _saveCsrftokenUseCase.call(csrftoken: csrf ?? '');
       emit(state.copyWith(serverSettings: response));
     } catch (e) {
       inspect(e);
     }
   }
 
-  Future<String> generateOtp() async {
+  Future<String> _generateOtp() async {
     final algorithm = AesGcm.with256bits();
     final secretKey = await algorithm.newSecretKey();
     final keyBytes = await secretKey.extractBytes();
@@ -134,7 +138,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String loginPath,
     String next = '/',
   }) async {
-    final otp = await generateOtp();
+    final otp = await _generateOtp();
     emit(state.copyWith(otp: otp));
     final realmBase = Uri.parse(realmBaseUrl);
     final uri = Uri.parse(
@@ -153,7 +157,7 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  String? getCookieFromDio(List<String>? rawCookies, String name) {
+  String? _getCookieFromDio(List<String>? rawCookies, String name) {
     if (rawCookies == null) return null;
 
     for (final raw in rawCookies) {
@@ -167,55 +171,51 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> parsePastedZulipCode({required String pastedText}) async {
-    // 1) Декодируем токен
-    final String token = await decryptManual(pastedText, rawKey: state.rawKey!);
-    final String loginUrl = '${AppConstants.baseUrl}/accounts/login/subdomain/$token';
+    emit(state.copyWith(isParseTokenPending: true));
+    try {
+      // 1) Декодируем токен
+      final String token = await _decryptManual(pastedText, rawKey: state.rawKey!);
+      final String loginUrl = '${AppConstants.baseUrl}/accounts/login/subdomain/$token';
 
-    final dio = Dio(
-      BaseOptions(
-        followRedirects: false, // важно, иначе потеряешь заголовки 302
-        validateStatus: (status) => status != null && status < 400,
-      ),
-    );
-
-    final response = await dio.get(loginUrl);
-
-    final cookies = response.headers['set-cookie'];
-    if (cookies != null) {
-      String? csrfToken;
-      String? sessionId;
-
-      for (final cookie in cookies) {
-        if (cookie.startsWith('__Host-csrftoken')) {
-          csrfToken = RegExp(r'__Host-csrftoken=([^;]+)').firstMatch(cookie)?.group(1);
-        } else if (cookie.startsWith('__Host-sessionid')) {
-          sessionId = RegExp(r'__Host-sessionid=([^;]+)').firstMatch(cookie)?.group(1);
-        }
-      }
-
-      print('csrfToken $csrfToken, sessionId $sessionId');
-
-      await _saveCsrftokenUseCase.call(csrftoken: csrfToken ?? '');
-      await _saveSessionIdUseCase.call(sessionId: sessionId ?? '');
-
-      // сохрани куда надо (например, в state или storage)
-      emit(state.copyWith(isPending: false, isAuthorized: true, errorMessage: null));
-    } else {
-      emit(
-        state.copyWith(
-          isPending: false,
-          isAuthorized: false,
-          errorMessage: 'Не удалось получить куки',
+      final dio = Dio(
+        BaseOptions(
+          followRedirects: false, // важно, иначе потеряешь заголовки 302
+          validateStatus: (status) => status != null && status < 400,
         ),
       );
+
+      final response = await dio.get(loginUrl);
+
+      final cookies = response.headers['set-cookie'];
+      if (cookies != null) {
+        String? csrfToken;
+        String? sessionId;
+
+        for (final cookie in cookies) {
+          if (cookie.startsWith('__Host-csrftoken')) {
+            csrfToken = RegExp(r'__Host-csrftoken=([^;]+)').firstMatch(cookie)?.group(1);
+          } else if (cookie.startsWith('__Host-sessionid')) {
+            sessionId = RegExp(r'__Host-sessionid=([^;]+)').firstMatch(cookie)?.group(1);
+          }
+        }
+
+        await _saveCsrftokenUseCase.call(csrftoken: csrfToken ?? '');
+        await _saveSessionIdUseCase.call(sessionId: sessionId ?? '');
+
+        emit(state.copyWith(isAuthorized: true, errorMessage: null));
+      }
+    } on FormatException catch (e) {
+      inspect(e);
+      emit(state.copyWith(parseTokenError: e.message));
+    } on DioException catch (e) {
+      inspect(e);
+      emit(state.copyWith(parseTokenError: 'Invalid or expired login session. Try again.'));
+    } finally {
+      emit(state.copyWith(isParseTokenPending: false));
     }
   }
 
-  setLogin() {
-    emit(state.copyWith(isPending: false, isAuthorized: true, errorMessage: null));
-  }
-
-  Future<String> decryptManual(String pastedText, {required Uint8List rawKey}) async {
+  Future<String> _decryptManual(String pastedText, {required Uint8List rawKey}) async {
     final algorithm = AesGcm.with256bits();
 
     // hex -> bytes
@@ -260,13 +260,21 @@ class AuthCubit extends Cubit<AuthState> {
       ];
 
       await Future.wait(futures);
-      await _deleteTokenUseCase.call();
+      await Future.wait([
+        _deleteTokenUseCase.call(),
+        _deleteSessionIdUseCase.call(),
+        _deleteCsrftokenUseCase.call(),
+      ]);
 
       emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
     } catch (e, st) {
       addError(e, st);
       // даже если что-то упало — токен лучше удалить, чтобы не зависнуть в полулогине
-      await _deleteTokenUseCase.call();
+      await Future.wait([
+        _deleteTokenUseCase.call(),
+        _deleteSessionIdUseCase.call(),
+        _deleteCsrftokenUseCase.call(),
+      ]);
       emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
     }
   }
@@ -275,7 +283,11 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> devLogout() async {
     emit(state.copyWith(isPending: true));
     try {
-      await _deleteTokenUseCase();
+      await Future.wait([
+        _deleteTokenUseCase.call(),
+        _deleteSessionIdUseCase.call(),
+        _deleteCsrftokenUseCase.call(),
+      ]);
       emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
     } catch (e, st) {
       addError(e, st);
@@ -288,7 +300,17 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(isPending: true, errorMessage: null));
     try {
       final String? token = await _getTokenUseCase.call();
-      emit(state.copyWith(isPending: false, isAuthorized: token != null, errorMessage: null));
+      final String? csrf = await _getCsrftokenUseCase.call();
+      final String? sessionId = await _getSessionIdUseCase.call();
+      bool isAuthorized = false;
+
+      if (token != null) {
+        isAuthorized = true;
+      } else if (csrf != null && sessionId != null) {
+        isAuthorized = true;
+      }
+
+      emit(state.copyWith(isPending: false, isAuthorized: isAuthorized, errorMessage: null));
     } catch (e, st) {
       addError(e, st);
       emit(
@@ -307,6 +329,8 @@ class AuthState {
   final ServerSettingsEntity? serverSettings;
   final String? otp;
   final Uint8List? rawKey;
+  final bool isParseTokenPending;
+  final String? parseTokenError;
 
   const AuthState({
     required this.isPending,
@@ -315,6 +339,8 @@ class AuthState {
     this.serverSettings,
     this.otp,
     this.rawKey,
+    required this.isParseTokenPending,
+    this.parseTokenError,
   });
 
   AuthState copyWith({
@@ -324,6 +350,8 @@ class AuthState {
     ServerSettingsEntity? serverSettings,
     String? otp,
     Uint8List? rawKey,
+    bool? isParseTokenPending,
+    String? parseTokenError,
   }) {
     return AuthState(
       isPending: isPending ?? this.isPending,
@@ -332,6 +360,8 @@ class AuthState {
       serverSettings: serverSettings ?? this.serverSettings,
       otp: otp ?? this.otp,
       rawKey: rawKey ?? this.rawKey,
+      isParseTokenPending: isParseTokenPending ?? this.isParseTokenPending,
+      parseTokenError: parseTokenError ?? this.parseTokenError,
     );
   }
 }

@@ -71,6 +71,8 @@ import 'package:genesis_workspace/features/authentication/data/repositories_impl
     as _i44;
 import 'package:genesis_workspace/features/authentication/domain/repositories/auth_repository.dart'
     as _i1022;
+import 'package:genesis_workspace/features/authentication/domain/usecases/delete_csrftoken_use_case.dart'
+    as _i819;
 import 'package:genesis_workspace/features/authentication/domain/usecases/delete_session_id_use_case.dart'
     as _i361;
 import 'package:genesis_workspace/features/authentication/domain/usecases/delete_token_use_case.dart'
@@ -81,6 +83,8 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/get_cs
     as _i862;
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_server_settings_use_case.dart'
     as _i848;
+import 'package:genesis_workspace/features/authentication/domain/usecases/get_session_id_use_case.dart'
+    as _i350;
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart'
     as _i75;
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_csrftoken_use_case.dart'
@@ -129,6 +133,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
+    gh.factory<_i350.GetSessionIdUseCase>(() => _i350.GetSessionIdUseCase());
     gh.lazySingleton<_i361.Dio>(() => coreModule.dio());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
@@ -252,6 +257,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i352.SaveCsrftokenUseCase>(
       () => _i352.SaveCsrftokenUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.factory<_i819.DeleteCsrftokenUseCase>(
+      () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
+    );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
     );
@@ -287,6 +295,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i361.DeleteSessionIdUseCase>(),
         gh<_i352.SaveCsrftokenUseCase>(),
         gh<_i862.GetCsrftokenUseCase>(),
+        gh<_i350.GetSessionIdUseCase>(),
+        gh<_i819.DeleteCsrftokenUseCase>(),
       ),
       dispose: _i862.disposeAuthCubit,
     );

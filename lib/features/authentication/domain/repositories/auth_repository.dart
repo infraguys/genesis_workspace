@@ -9,5 +9,6 @@ abstract class AuthRepository {
   Future<void> saveCsrfToken({required String csrftoken});
   Future<void> deleteToken();
   Future<void> deleteSessionId();
+  Future<void> deleteCsrfToken();
   Future<ServerSettingsEntity> getServerSettings();
 }

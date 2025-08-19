@@ -51,10 +51,8 @@ class SecureTokenStorage implements TokenStorage {
   Future<void> deleteToken() => _storage.delete(key: TokenStorageKeys.token);
 
   @override
-  Future<void> deleteSessionId() async {
-    await Future.wait([
-      _storage.delete(key: TokenStorageKeys.sessionId),
-      _storage.delete(key: TokenStorageKeys.csrftoken),
-    ]);
-  }
+  Future<void> deleteSessionId() => _storage.delete(key: TokenStorageKeys.sessionId);
+
+  @override
+  Future<void> deleteCsrfToken() => _storage.delete(key: TokenStorageKeys.csrftoken);
 }

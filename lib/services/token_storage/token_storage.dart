@@ -12,6 +12,7 @@ abstract class TokenStorage {
   Future<String?> getCsrftoken();
   Future<void> deleteToken();
   Future<void> deleteSessionId();
+  Future<void> deleteCsrfToken();
 }
 
 class TokenStorageFactory {
