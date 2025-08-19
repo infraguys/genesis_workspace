@@ -75,10 +75,14 @@ class FileTokenStorage implements TokenStorage {
   @override
   Future<void> deleteSessionId() async {
     final sessionId = await _getSessionId();
-    final csrftoken = await _getCsrftoken();
     if (await sessionId.exists()) {
       await sessionId.delete();
     }
+  }
+
+  @override
+  Future<void> deleteCsrfToken() async {
+    final csrftoken = await _getCsrftoken();
     if (await csrftoken.exists()) {
       await csrftoken.delete();
     }
