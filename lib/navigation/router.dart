@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
@@ -176,6 +176,20 @@ final router = GoRouter(
             );
           },
         );
+      },
+    ),
+    GoRoute(
+      // важна точная сигнатура пути, которую вы указали в deep link
+      path: '/auth/callback',
+      name: 'auth_callback',
+      builder: (context, state) {
+        // Разбор query через state.uri
+        final uri = state.uri;
+        final code = uri.queryParameters['code'];
+        final error = uri.queryParameters['error'];
+        final stateParam = uri.queryParameters['state']; // если используете PKCE/state
+
+        return Scaffold(body: Center(child: Text('$code, $error, $stateParam')));
       },
     ),
     GoRoute(

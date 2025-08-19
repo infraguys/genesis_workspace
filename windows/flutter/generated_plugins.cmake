@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
+  flutter_inappwebview_windows
   flutter_secure_storage_windows
   in_app_idle_detector
   url_launcher_windows

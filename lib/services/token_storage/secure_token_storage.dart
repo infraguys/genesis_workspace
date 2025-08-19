@@ -19,8 +19,42 @@ class SecureTokenStorage implements TokenStorage {
   }
 
   @override
+  Future<void> saveSessionIdCookie({required String sessionId}) async {
+    try {
+      await _storage.write(key: TokenStorageKeys.sessionId, value: sessionId);
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> saveCsrfTokenCookie({required String csrftoken}) async {
+    try {
+      await _storage.write(key: TokenStorageKeys.csrftoken, value: csrftoken);
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  @override
   Future<String?> getToken() => _storage.read(key: TokenStorageKeys.token);
 
   @override
+  Future<String?> getCsrftoken() => _storage.read(key: TokenStorageKeys.csrftoken);
+
+  @override
+  Future<String?> getSessionId() => _storage.read(key: TokenStorageKeys.sessionId);
+
+  @override
   Future<void> deleteToken() => _storage.delete(key: TokenStorageKeys.token);
+
+  @override
+  Future<void> deleteSessionId() async {
+    await Future.wait([
+      _storage.delete(key: TokenStorageKeys.sessionId),
+      _storage.delete(key: TokenStorageKeys.csrftoken),
+    ]);
+  }
 }

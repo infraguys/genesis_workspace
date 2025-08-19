@@ -5,6 +5,9 @@ import 'package:genesis_workspace/features/authentication/domain/entities/server
 abstract class AuthRepository {
   Future<ApiKeyEntity> fetchApiKey(ApiKeyRequestEntity body);
   Future<void> saveToken({required String token, required String email});
+  Future<void> saveSessionId({required String sessionId});
+  Future<void> saveCsrfToken({required String csrftoken});
   Future<void> deleteToken();
+  Future<void> deleteSessionId();
   Future<ServerSettingsEntity> getServerSettings();
 }
