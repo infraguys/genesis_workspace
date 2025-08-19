@@ -171,8 +171,6 @@ class _AuthViewState extends State<AuthView> {
                             realmBaseUrl: state.serverSettings!.realmUri,
                             loginPath: url,
                           );
-                          // await context.read<AuthCubit>().loginWithCookies();
-                          // await context.read<AuthCubit>().loginWithTokensTeam(url);
                           await context.pushNamed(Routes.pasteToken);
                         },
                         child: Text(t.auth.loginWith(realmName: realm.displayName)),

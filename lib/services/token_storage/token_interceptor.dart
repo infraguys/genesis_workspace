@@ -10,15 +10,12 @@ class TokenInterceptor extends Interceptor {
   final TokenStorage tokenStorage;
   TokenInterceptor(this.tokenStorage);
 
-  static const _referer = 'https://zulip.genesis.team/';
-  static const _origin = 'https://zulip.genesis.team';
-
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
       final token = await tokenStorage.getToken(); // "email:api_key" (Basic)
       final sessionId = await tokenStorage.getSessionId(); // __Host-sessionid
-      // final sessionId = '5tcnj2itvcjb1lr8nusf1t0jc88iynuz'; // __Host-sessionid
+      // final sessionId = '1q70y5fkp4ym8iffann3pmwzn8rc508m'; // __Host-sessionid
 
       // --- 1) Basic auth, если доступно — короткий путь, CSRF не нужен ---
       if (token != null && token.contains(':')) {
@@ -52,30 +49,6 @@ class TokenInterceptor extends Interceptor {
     }
 
     handler.next(options);
-  }
-
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    // Автосохранение Set-Cookie
-    // try {
-    //   final setCookies = response.headers.map['set-cookie'];
-    //   if (setCookies != null) {
-    //     for (final raw in setCookies) {
-    //       final first = raw.split(';').first; // name=value
-    //       final eq = first.indexOf('=');
-    //       if (eq <= 0) continue;
-    //       final name = first.substring(0, eq).trim();
-    //       final value = first.substring(eq + 1).trim();
-    //
-    //       if (name == '__Host-csrftoken') {
-    //         await tokenStorage.saveCsrfTokenCookie(csrftoken: value);
-    //       } else if (name == '__Host-sessionid') {
-    //         await tokenStorage.saveSessionIdCookie(sessionId: value);
-    //       }
-    //     }
-    //   }
-    // } catch (_) {}
-    handler.next(response);
   }
 
   // Убирает дубликаты и двойные разделители в Cookie

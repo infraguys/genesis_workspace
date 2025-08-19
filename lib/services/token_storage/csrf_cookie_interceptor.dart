@@ -14,7 +14,7 @@ class CsrfCookieInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
       final csrfToken = await tokenStorage.getCsrftoken(); // __Host-csrftoken
-      // final csrfToken = 'KI4WN2GNSMJWsZlCvKhrNJt5sGWWn6xH'; // __Host-csrftoken
+      // final csrfToken = 'EuJE9eaxkAyKfW2A56sxNrJ7uHHWT6c4'; // __Host-csrftoken
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
       final existingCookie = (options.headers['Cookie'] as String?)?.trim();
@@ -38,30 +38,6 @@ class CsrfCookieInterceptor extends Interceptor {
     }
 
     handler.next(options);
-  }
-
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    // Автосохранение Set-Cookie
-    // try {
-    //   final setCookies = response.headers.map['set-cookie'];
-    //   if (setCookies != null) {
-    //     for (final raw in setCookies) {
-    //       final first = raw.split(';').first; // name=value
-    //       final eq = first.indexOf('=');
-    //       if (eq <= 0) continue;
-    //       final name = first.substring(0, eq).trim();
-    //       final value = first.substring(eq + 1).trim();
-    //
-    //       if (name == '__Host-csrftoken') {
-    //         await tokenStorage.saveCsrfTokenCookie(csrftoken: value);
-    //       } else if (name == '__Host-sessionid') {
-    //         await tokenStorage.saveSessionIdCookie(sessionId: value);
-    //       }
-    //     }
-    //   }
-    // } catch (_) {}
-    handler.next(response);
   }
 
   // Убирает дубликаты и двойные разделители в Cookie
