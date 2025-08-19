@@ -29,6 +29,7 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_s
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 @LazySingleton(dispose: disposeAuthCubit)
 class AuthCubit extends Cubit<AuthState> {
@@ -79,7 +80,7 @@ class AuthCubit extends Cubit<AuthState> {
   final _dio = Dio();
   String? _csrfToken;
 
-  final _browser = InAppBrowser();
+  final InAppBrowser? _browser = kIsWeb ? null : InAppBrowser();
   final _settings = InAppBrowserClassSettings(
     webViewSettings: InAppWebViewSettings(sharedCookiesEnabled: true),
   );
@@ -112,9 +113,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await _deleteSessionIdUseCase.call();
       final response = await _getServerSettingsUseCase.call();
-
       final cookieResponse = await _dio.get('${AppConstants.baseUrl}/accounts/login/');
-
       final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
       _csrfToken = csrf;
       emit(state.copyWith(serverSettings: response));
@@ -144,17 +143,21 @@ class AuthCubit extends Cubit<AuthState> {
     final uri = Uri.parse(
       realmBase.resolve(loginPath).toString(),
     ).replace(queryParameters: {'next': next, 'desktop_flow_otp': otp});
-    _cookieManager.setCookie(
-      url: WebUri.uri(uri),
-      name: '__Host-csrftoken',
-      value: _csrfToken ?? '',
-      isSecure: true,
-      path: '/',
-    );
-    await _browser.openUrlRequest(
-      urlRequest: URLRequest(url: WebUri.uri(uri)),
-      settings: _settings,
-    );
+    if (kIsWeb) {
+      await launchUrl(uri, webOnlyWindowName: '_blank');
+    } else {
+      _cookieManager.setCookie(
+        url: WebUri.uri(uri),
+        name: '__Host-csrftoken',
+        value: _csrfToken ?? '',
+        isSecure: true,
+        path: '/',
+      );
+      await _browser!.openUrlRequest(
+        urlRequest: URLRequest(url: WebUri.uri(uri)),
+        settings: _settings,
+      );
+    }
   }
 
   String? _getCookieFromDio(List<String>? rawCookies, String name) {
@@ -170,6 +173,10 @@ class AuthCubit extends Cubit<AuthState> {
     return null;
   }
 
+  setLogin() {
+    emit(state.copyWith(isAuthorized: true));
+  }
+
   Future<void> parsePastedZulipCode({required String pastedText}) async {
     emit(state.copyWith(isParseTokenPending: true));
     try {
@@ -183,7 +190,6 @@ class AuthCubit extends Cubit<AuthState> {
           validateStatus: (status) => status != null && status < 400,
         ),
       );
-
       final response = await dio.get(loginUrl);
 
       final cookies = response.headers['set-cookie'];

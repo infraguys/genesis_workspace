@@ -22,7 +22,6 @@ class _PasteCodeViewState extends State<PasteCodeView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tryAutoPaste());
   }
 
   @override
@@ -30,19 +29,6 @@ class _PasteCodeViewState extends State<PasteCodeView> {
     _focusNode.dispose();
     _controller.dispose();
     super.dispose();
-  }
-
-  Future<void> _tryAutoPaste() async {
-    try {
-      final data = await Clipboard.getData(Clipboard.kTextPlain);
-      final text = data?.text?.trim();
-      if (text != null && text.isNotEmpty) {
-        _controller.text = text;
-        _controller.selection = TextSelection.collapsed(offset: text.length);
-      }
-    } catch (_) {
-      // Тихо игнорируем ограничения браузера/платформы.
-    }
   }
 
   Future<void> _pasteFromClipboard() async {
