@@ -1,32 +1,20 @@
 // auth_interceptor.dart
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 
 import 'token_storage.dart';
 
-class TokenInterceptor extends Interceptor {
+class CsrfCookieInterceptor extends Interceptor {
   final TokenStorage tokenStorage;
-  TokenInterceptor(this.tokenStorage);
+  CsrfCookieInterceptor(this.tokenStorage);
 
-  static const _referer = 'https://zulip.genesis.team/';
-  static const _origin = 'https://zulip.genesis.team';
+  final _referer = AppConstants.baseUrl;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final token = await tokenStorage.getToken(); // "email:api_key" (Basic)
-      final sessionId = await tokenStorage.getSessionId(); // __Host-sessionid
-      // final sessionId = '5tcnj2itvcjb1lr8nusf1t0jc88iynuz'; // __Host-sessionid
-
-      // --- 1) Basic auth, если доступно — короткий путь, CSRF не нужен ---
-      if (token != null && token.contains(':')) {
-        final auth = base64Encode(utf8.encode(token));
-        options.headers['Authorization'] = 'Basic $auth';
-        options.headers['Accept'] = 'application/json, text/javascript, */*; q=0.01';
-        return handler.next(options);
-      }
+      final csrfToken = await tokenStorage.getCsrftoken(); // __Host-csrftoken
+      // final csrfToken = 'KI4WN2GNSMJWsZlCvKhrNJt5sGWWn6xH'; // __Host-csrftoken
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
       final existingCookie = (options.headers['Cookie'] as String?)?.trim();
@@ -36,18 +24,16 @@ class TokenInterceptor extends Interceptor {
       }
       cookieParts.add('django_language=ru');
 
-      // --- 2) sessionid: добавляем только его (независимо от CSRF) ---
-      if (sessionId != null && sessionId.isNotEmpty) {
-        cookieParts.add('__Host-sessionid=$sessionId');
-        // Referer полезен и для GET сессии
-        options.baseUrl = '${AppConstants.baseUrl}/json';
+      if (csrfToken != null && csrfToken.isNotEmpty) {
+        cookieParts.add('__Host-csrftoken=$csrfToken');
+        options.headers['X-CSRFToken'] = csrfToken;
+        options.headers['Referer'] = _referer;
       }
+
       if (cookieParts.isNotEmpty) {
-        // Склеиваем без дубликатов и лишних ; ;
         options.headers['Cookie'] = _normalizeCookie(cookieParts.join('; '));
       }
     } catch (e) {
-      // ignore: avoid_print
       print('TokenInterceptor error: $e');
     }
 

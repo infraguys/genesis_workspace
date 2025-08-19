@@ -71,14 +71,22 @@ import 'package:genesis_workspace/features/authentication/data/repositories_impl
     as _i44;
 import 'package:genesis_workspace/features/authentication/domain/repositories/auth_repository.dart'
     as _i1022;
+import 'package:genesis_workspace/features/authentication/domain/usecases/delete_session_id_use_case.dart'
+    as _i361;
 import 'package:genesis_workspace/features/authentication/domain/usecases/delete_token_use_case.dart'
     as _i433;
 import 'package:genesis_workspace/features/authentication/domain/usecases/fetch_api_key_use_case.dart'
     as _i799;
+import 'package:genesis_workspace/features/authentication/domain/usecases/get_csrftoken_use_case.dart'
+    as _i862;
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_server_settings_use_case.dart'
     as _i848;
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart'
     as _i75;
+import 'package:genesis_workspace/features/authentication/domain/usecases/save_csrftoken_use_case.dart'
+    as _i352;
+import 'package:genesis_workspace/features/authentication/domain/usecases/save_session_id_use_case.dart'
+    as _i721;
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart'
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
@@ -115,6 +123,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
+    gh.factory<_i862.GetCsrftokenUseCase>(() => _i862.GetCsrftokenUseCase());
     gh.factory<_i75.GetTokenUseCase>(() => _i75.GetTokenUseCase());
     gh.factory<_i1039.GetEventsByQueueIdUseCase>(
       () => _i1039.GetEventsByQueueIdUseCase(),
@@ -231,24 +240,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.factory<_i721.SaveSessionIdUseCase>(
+      () => _i721.SaveSessionIdUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i361.DeleteSessionIdUseCase>(
+      () => _i361.DeleteSessionIdUseCase(gh<_i1022.AuthRepository>()),
+    );
     gh.factory<_i848.GetServerSettingsUseCase>(
       () => _i848.GetServerSettingsUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.factory<_i352.SaveCsrftokenUseCase>(
+      () => _i352.SaveCsrftokenUseCase(gh<_i1022.AuthRepository>()),
+    );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
-    );
-    gh.lazySingleton<_i862.AuthCubit>(
-      () => _i862.AuthCubit(
-        gh<_i799.FetchApiKeyUseCase>(),
-        gh<_i643.SaveTokenUseCase>(),
-        gh<_i75.GetTokenUseCase>(),
-        gh<_i435.DeleteQueueUseCase>(),
-        gh<_i433.DeleteTokenUseCase>(),
-        gh<_i82.RealTimeService>(),
-        gh<_i832.UpdatePresenceUseCase>(),
-        gh<_i848.GetServerSettingsUseCase>(),
-      ),
-      dispose: _i862.disposeAuthCubit,
     );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
@@ -267,6 +272,23 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i487.SetTypingUseCase>(),
         gh<_i664.UpdateMessagesFlagsUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i862.AuthCubit>(
+      () => _i862.AuthCubit(
+        gh<_i799.FetchApiKeyUseCase>(),
+        gh<_i643.SaveTokenUseCase>(),
+        gh<_i75.GetTokenUseCase>(),
+        gh<_i435.DeleteQueueUseCase>(),
+        gh<_i433.DeleteTokenUseCase>(),
+        gh<_i82.RealTimeService>(),
+        gh<_i832.UpdatePresenceUseCase>(),
+        gh<_i848.GetServerSettingsUseCase>(),
+        gh<_i721.SaveSessionIdUseCase>(),
+        gh<_i361.DeleteSessionIdUseCase>(),
+        gh<_i352.SaveCsrftokenUseCase>(),
+        gh<_i862.GetCsrftokenUseCase>(),
+      ),
+      dispose: _i862.disposeAuthCubit,
     );
     return this;
   }

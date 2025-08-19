@@ -118,8 +118,29 @@ class TranslationsAuthEn {
 	/// en: 'Hide password'
 	String get hidePassword => 'Hide password';
 
-	/// en: 'Login with Tokens Team'
-	String get login_with_genesis_team => 'Login with Tokens Team';
+	/// en: 'Login with {realm_name}'
+	String get login_with => 'Login with {realm_name}';
+
+	/// en: 'Paste code here'
+	String get paste_your_code_here => 'Paste code here';
+
+	/// en: 'Enter or paste your login code'
+	String get enter_or_paste_code_title => 'Enter or paste your login code';
+
+	/// en: 'We'll use it to finish signing you in.'
+	String get code_usage_hint => 'We\'ll use it to finish signing you in.';
+
+	/// en: 'Token'
+	String get token_label => 'Token';
+
+	/// en: 'Your code here…'
+	String get token_hint => 'Your code here…';
+
+	/// en: 'Paste'
+	String get paste => 'Paste';
+
+	/// en: 'Clear'
+	String get clear => 'Clear';
 }
 
 // Path: nav_bar
@@ -279,7 +300,14 @@ extension on Translations {
 			case 'auth.passwordHint': return 'cucumber123';
 			case 'auth.showPassword': return 'Show password';
 			case 'auth.hidePassword': return 'Hide password';
-			case 'auth.login_with_genesis_team': return 'Login with Tokens Team';
+			case 'auth.login_with': return 'Login with {realm_name}';
+			case 'auth.paste_your_code_here': return 'Paste code here';
+			case 'auth.enter_or_paste_code_title': return 'Enter or paste your login code';
+			case 'auth.code_usage_hint': return 'We\'ll use it to finish signing you in.';
+			case 'auth.token_label': return 'Token';
+			case 'auth.token_hint': return 'Your code here…';
+			case 'auth.paste': return 'Paste';
+			case 'auth.clear': return 'Clear';
 			case 'password_cant_be_empty': return 'Password can not be empty';
 			case 'password': return 'Password';
 			case 'login': return 'Login';

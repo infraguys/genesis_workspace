@@ -5,8 +5,13 @@ import 'secure_token_storage.dart';
 
 abstract class TokenStorage {
   Future<void> saveToken({required String token, required String email});
+  Future<void> saveSessionIdCookie({required String sessionId});
+  Future<void> saveCsrfTokenCookie({required String csrftoken});
   Future<String?> getToken();
+  Future<String?> getSessionId();
+  Future<String?> getCsrftoken();
   Future<void> deleteToken();
+  Future<void> deleteSessionId();
 }
 
 class TokenStorageFactory {
@@ -27,4 +32,6 @@ class TokenStorageFactory {
 
 class TokenStorageKeys {
   static const String token = 'auth_token';
+  static const String sessionId = 'session_id';
+  static const String csrftoken = 'csrftoken';
 }

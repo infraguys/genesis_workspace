@@ -153,6 +153,13 @@ class _AuthViewState extends State<AuthView> {
                     child: Text(t.login),
                   ).pending(state.isPending),
                 ),
+                // SizedBox(
+                //   height: 48,
+                //   child: ElevatedButton(
+                //     onPressed: context.read<AuthCubit>().setLogin,
+                //     child: Text('set login'),
+                //   ),
+                // ),
                 if (state.serverSettings != null)
                   ...state.serverSettings!.externalAuthenticationMethods.map(
                     (realm) => SizedBox(
@@ -164,6 +171,7 @@ class _AuthViewState extends State<AuthView> {
                             realmBaseUrl: state.serverSettings!.realmUri,
                             loginPath: url,
                           );
+                          // await context.read<AuthCubit>().loginWithCookies();
                           // await context.read<AuthCubit>().loginWithTokensTeam(url);
                           await context.pushNamed(Routes.pasteToken);
                         },

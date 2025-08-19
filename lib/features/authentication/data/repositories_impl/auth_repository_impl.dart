@@ -43,11 +43,41 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> deleteSessionId() async {
+    try {
+      await tokenStorage.deleteSessionId();
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  @override
   Future<ServerSettingsEntity> getServerSettings() async {
     try {
       final dto = await remoteDataSource.getServerSettings();
       return dto.toEntity();
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> saveSessionId({required String sessionId}) async {
+    try {
+      await tokenStorage.saveSessionIdCookie(sessionId: sessionId);
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> saveCsrfToken({required String csrftoken}) async {
+    try {
+      await tokenStorage.saveCsrfTokenCookie(csrftoken: csrftoken);
+    } catch (e) {
+      inspect(e);
       rethrow;
     }
   }

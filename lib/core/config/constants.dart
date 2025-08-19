@@ -13,6 +13,7 @@ class AppConstants {
     UnicodeEmojiDisplay(emojiName: ":cry:", emojiUnicode: "1F622"),
     UnicodeEmojiDisplay(emojiName: ":clap:", emojiUnicode: "1F44F"),
   ];
+  static const appName = 'genesis_workspace';
 }
 
 class SharedPrefsKeys {

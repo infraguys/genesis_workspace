@@ -50,5 +50,14 @@
 		<string>en</string>
 		<string>ru</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>genesis_workspace</string>
+        </array>
+      </dict>
+    </array>
 </dict>
 </plist>

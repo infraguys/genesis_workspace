@@ -69,11 +69,18 @@ class _TranslationsAuthRu implements TranslationsAuthEn {
 
 	// Translations
 	@override String get emailHint => 'email@genesis.team';
-	@override String get emailLabel => 'Почта';
+	@override String get emailLabel => 'Эл. почта';
 	@override String get passwordHint => 'cucumber123';
 	@override String get showPassword => 'Показать пароль';
 	@override String get hidePassword => 'Скрыть пароль';
-	@override String get login_with_genesis_team => 'Войти через Tokens Team';
+	@override String get login_with => 'Войти через {realm_name}';
+	@override String get paste_your_code_here => 'Вставьте код здесь';
+	@override String get enter_or_paste_code_title => 'Введите или вставьте код для входа';
+	@override String get code_usage_hint => 'Мы используем его, чтобы завершить вход в систему.';
+	@override String get token_label => 'Токен';
+	@override String get token_hint => 'Ваш код здесь…';
+	@override String get paste => 'Вставить';
+	@override String get clear => 'Очистить';
 }
 
 // Path: nav_bar
@@ -191,11 +198,18 @@ extension on TranslationsRu {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
 			case 'auth.emailHint': return 'email@genesis.team';
-			case 'auth.emailLabel': return 'Почта';
+			case 'auth.emailLabel': return 'Эл. почта';
 			case 'auth.passwordHint': return 'cucumber123';
 			case 'auth.showPassword': return 'Показать пароль';
 			case 'auth.hidePassword': return 'Скрыть пароль';
-			case 'auth.login_with_genesis_team': return 'Войти через Tokens Team';
+			case 'auth.login_with': return 'Войти через {realm_name}';
+			case 'auth.paste_your_code_here': return 'Вставьте код здесь';
+			case 'auth.enter_or_paste_code_title': return 'Введите или вставьте код для входа';
+			case 'auth.code_usage_hint': return 'Мы используем его, чтобы завершить вход в систему.';
+			case 'auth.token_label': return 'Токен';
+			case 'auth.token_hint': return 'Ваш код здесь…';
+			case 'auth.paste': return 'Вставить';
+			case 'auth.clear': return 'Очистить';
 			case 'password_cant_be_empty': return 'Пароль не может быть пустым';
 			case 'password': return 'Пароль';
 			case 'login': return 'Войти';
