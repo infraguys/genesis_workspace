@@ -18,4 +18,5 @@ class AppConstants {
 
 class SharedPrefsKeys {
   static const String locale = 'locale';
+  static const String isWebAuth = 'isWebAuth';
 }

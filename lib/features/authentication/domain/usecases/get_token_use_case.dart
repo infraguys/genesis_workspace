@@ -3,9 +3,9 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class GetTokenUseCase {
-  final tokenStorage = TokenStorageFactory.create();
+  final TokenStorage tokenStorage;
 
-  GetTokenUseCase();
+  GetTokenUseCase(this.tokenStorage);
 
   Future<String?> call() async {
     return tokenStorage.getToken();

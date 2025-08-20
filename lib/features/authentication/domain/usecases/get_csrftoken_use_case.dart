@@ -3,9 +3,9 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class GetCsrftokenUseCase {
-  final _tokenStorage = TokenStorageFactory.create();
+  final TokenStorage _tokenStorage;
 
-  GetCsrftokenUseCase();
+  GetCsrftokenUseCase(this._tokenStorage);
 
   Future<String?> call() async {
     return _tokenStorage.getCsrftoken();

@@ -12,9 +12,9 @@ import 'package:injectable/injectable.dart';
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
-  final TokenStorage tokenStorage = TokenStorageFactory.create();
+  final TokenStorage tokenStorage;
 
-  AuthRepositoryImpl(this.remoteDataSource);
+  AuthRepositoryImpl(this.remoteDataSource, this.tokenStorage);
 
   @override
   Future<ApiKeyEntity> fetchApiKey(ApiKeyRequestEntity body) async {

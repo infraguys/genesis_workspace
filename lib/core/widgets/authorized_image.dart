@@ -2,8 +2,9 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/dio_interceptors/token_interceptor.dart';
 import 'package:genesis_workspace/navigation/router.dart';
-import 'package:genesis_workspace/services/token_storage/token_interceptor.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,7 +37,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   @override
   void initState() {
     super.initState();
-    _dio = Dio()..interceptors.add(TokenInterceptor(TokenStorageFactory.create()));
+    _dio = Dio()..interceptors.add(TokenInterceptor(getIt<TokenStorage>()));
     _loadImage();
   }
 
