@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:convert/convert.dart' as conv;
 import 'package:convert/convert.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:dio/dio.dart';
@@ -29,6 +28,7 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_s
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @LazySingleton(dispose: disposeAuthCubit)
@@ -76,8 +76,9 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
 
+  late final SharedPreferences _prefs;
   final CookieManager _cookieManager = CookieManager.instance();
-  final _dio = Dio();
+  final Dio _dio = Dio();
   String? _csrfToken;
 
   final InAppBrowser? _browser = kIsWeb ? null : InAppBrowser();
@@ -116,6 +117,7 @@ class AuthCubit extends Cubit<AuthState> {
       final cookieResponse = await _dio.get('${AppConstants.baseUrl}/accounts/login/');
       final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
       _csrfToken = csrf;
+
       emit(state.copyWith(serverSettings: response));
     } catch (e) {
       inspect(e);
@@ -192,22 +194,26 @@ class AuthCubit extends Cubit<AuthState> {
       );
       final response = await dio.get(loginUrl);
 
-      final cookies = response.headers['set-cookie'];
-      if (cookies != null) {
-        String? csrfToken;
-        String? sessionId;
+      if (kIsWeb) {
+        _prefs.setBool(SharedPrefsKeys.isWebAuth, true);
+        emit(state.copyWith(isAuthorized: true, errorMessage: null));
+      } else {
+        final cookies = response.headers['set-cookie'];
+        if (cookies != null) {
+          String? csrfToken;
+          String? sessionId;
 
-        for (final cookie in cookies) {
-          if (cookie.startsWith('__Host-csrftoken')) {
-            csrfToken = RegExp(r'__Host-csrftoken=([^;]+)').firstMatch(cookie)?.group(1);
-          } else if (cookie.startsWith('__Host-sessionid')) {
-            sessionId = RegExp(r'__Host-sessionid=([^;]+)').firstMatch(cookie)?.group(1);
+          for (final cookie in cookies) {
+            if (cookie.startsWith('__Host-csrftoken')) {
+              csrfToken = RegExp(r'__Host-csrftoken=([^;]+)').firstMatch(cookie)?.group(1);
+            } else if (cookie.startsWith('__Host-sessionid')) {
+              sessionId = RegExp(r'__Host-sessionid=([^;]+)').firstMatch(cookie)?.group(1);
+            }
           }
+
+          await _saveCsrftokenUseCase.call(csrftoken: csrfToken ?? '');
+          await _saveSessionIdUseCase.call(sessionId: sessionId ?? '');
         }
-
-        await _saveCsrftokenUseCase.call(csrftoken: csrfToken ?? '');
-        await _saveSessionIdUseCase.call(sessionId: sessionId ?? '');
-
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       }
     } on FormatException catch (e) {
@@ -225,7 +231,7 @@ class AuthCubit extends Cubit<AuthState> {
     final algorithm = AesGcm.with256bits();
 
     // hex -> bytes
-    final data = Uint8List.fromList(conv.hex.decode(pastedText.trim()));
+    final data = Uint8List.fromList(hex.decode(pastedText.trim()));
     if (data.length < 12 + 16) {
       throw FormatException('Token too short for AES-GCM (need IV(12)+TAG(16)).');
     }
@@ -251,6 +257,9 @@ class AuthCubit extends Cubit<AuthState> {
   /// Graceful logout: set idle presence, drop queue, delete token
   Future<void> logout() async {
     emit(state.copyWith(isPending: true));
+    if (kIsWeb) {
+      _prefs.remove(SharedPrefsKeys.isWebAuth);
+    }
     try {
       final String? queueId = _realTimeService.queueId;
 
@@ -271,7 +280,6 @@ class AuthCubit extends Cubit<AuthState> {
         _deleteSessionIdUseCase.call(),
         _deleteCsrftokenUseCase.call(),
       ]);
-
       emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
     } catch (e, st) {
       addError(e, st);
@@ -303,7 +311,13 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Check persisted token to restore session on app start
   Future<void> checkToken() async {
+    _prefs = await SharedPreferences.getInstance();
     emit(state.copyWith(isPending: true, errorMessage: null));
+    if (kIsWeb) {
+      final isAuth = _prefs.getBool(SharedPrefsKeys.isWebAuth) ?? false;
+      emit(state.copyWith(isAuthorized: isAuth, errorMessage: null, isPending: false));
+      return;
+    }
     try {
       final String? token = await _getTokenUseCase.call();
       final String? csrf = await _getCsrftokenUseCase.call();

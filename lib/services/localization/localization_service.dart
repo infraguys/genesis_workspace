@@ -6,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 @lazySingleton
 class LocalizationService {
-  late SharedPreferences _prefs;
+  late final SharedPreferences _prefs;
+
+  LocalizationService();
 
   init() async {
     _prefs = await SharedPreferences.getInstance();

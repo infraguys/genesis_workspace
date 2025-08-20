@@ -9,7 +9,7 @@ import 'core/dependency_injection/di.dart';
 class Main {
   static Future<void> startApp() async {
     WidgetsFlutterBinding.ensureInitialized();
-    configureDependencies();
+    await configureDependencies();
     usePathUrlStrategy();
     final LocalizationService localizationService = getIt<LocalizationService>();
     await localizationService.init();

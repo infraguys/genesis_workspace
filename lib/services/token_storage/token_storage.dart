@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 
 import 'file_token_storage.dart';
 import 'secure_token_storage.dart';
@@ -20,7 +22,7 @@ class TokenStorageFactory {
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS ||
         kIsWeb) {
-      return SecureTokenStorage();
+      return SecureTokenStorage(getIt<FlutterSecureStorage>());
     } else if (defaultTargetPlatform == TargetPlatform.windows ||
         defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS) {
