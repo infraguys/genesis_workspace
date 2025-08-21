@@ -45,7 +45,7 @@ class UserTile extends StatelessWidget {
         }
         return ListTile(
           onTap: () {
-            if (currentSize(context) >= ScreenSize.lTablet) {
+            if (currentSize(context) > ScreenSize.lTablet) {
               context.read<DirectMessagesCubit>().selectUserChat(user.userId);
 
               // 2) Синхронизируем URL через query-параметр
