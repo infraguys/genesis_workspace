@@ -254,15 +254,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i958.TokenStorage>(),
       ),
     );
-    gh.factory<_i739.ChannelChatCubit>(
-      () => _i739.ChannelChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-      ),
-    );
     gh.factory<_i277.ChatCubit>(
       () => _i277.ChatCubit(
         gh<_i82.RealTimeService>(),
@@ -270,6 +261,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i116.SendMessageUseCase>(),
         gh<_i487.SetTypingUseCase>(),
         gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i773.GetUserByIdUseCase>(),
+      ),
+    );
+    gh.factory<_i739.ChannelChatCubit>(
+      () => _i739.ChannelChatCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
       ),
     );
     gh.factory<_i433.DeleteTokenUseCase>(

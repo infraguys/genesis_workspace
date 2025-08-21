@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
-import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/authentication/presentation/view/paste_code_view.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -124,9 +123,24 @@ final router = GoRouter(
       ],
     ),
     GoRoute(
-      path: Routes.chat,
-      name: Routes.chat,
-      builder: (context, state) => Chat(user: state.extra as DmUserEntity),
+      path: Routes.directMessages,
+      name: Routes.directMessages,
+      builder: (context, state) {
+        final userId = int.tryParse(state.uri.queryParameters['userId'] ?? '');
+        return DirectMessages(initialUserId: userId);
+      },
+      routes: [
+        GoRoute(
+          path: ':userId',
+          name: Routes.chat,
+          builder: (context, state) {
+            final idStr = state.pathParameters['userId'];
+            final id = int.tryParse(idStr ?? '');
+            assert(id != null, 'userId must be int');
+            return Chat(userId: id!);
+          },
+        ),
+      ],
     ),
     GoRoute(
       path: Routes.channelChat,

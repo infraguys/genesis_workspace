@@ -11,6 +11,7 @@ class ChatState {
   bool isAllMessagesLoaded;
   TypingEventOp selfTypingOp;
   Set<int> pendingToMarkAsRead;
+  DmUserEntity? userEntity;
 
   ChatState({
     required this.messages,
@@ -23,6 +24,7 @@ class ChatState {
     required this.isAllMessagesLoaded,
     required this.selfTypingOp,
     required this.pendingToMarkAsRead,
+    this.userEntity,
   });
 
   ChatState copyWith({
@@ -36,6 +38,7 @@ class ChatState {
     bool? isAllMessagesLoaded,
     TypingEventOp? selfTypingOp,
     Set<int>? pendingToMarkAsRead,
+    DmUserEntity? userEntity,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -48,6 +51,7 @@ class ChatState {
       isAllMessagesLoaded: isAllMessagesLoaded ?? this.isAllMessagesLoaded,
       selfTypingOp: selfTypingOp ?? this.selfTypingOp,
       pendingToMarkAsRead: pendingToMarkAsRead ?? this.pendingToMarkAsRead,
+      userEntity: userEntity ?? this.userEntity,
     );
   }
 }
