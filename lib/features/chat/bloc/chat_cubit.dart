@@ -21,7 +21,10 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/message
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -36,6 +39,7 @@ class ChatCubit extends Cubit<ChatState> {
     this._sendMessageUseCase,
     this._setTypingUseCase,
     this._updateMessagesFlagsUseCase,
+    this._getUserByIdUseCase,
   ) : super(
         ChatState(
           messages: [],
@@ -47,6 +51,7 @@ class ChatCubit extends Cubit<ChatState> {
           isAllMessagesLoaded: false,
           selfTypingOp: TypingEventOp.stop,
           pendingToMarkAsRead: {},
+          userEntity: null,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -63,6 +68,7 @@ class ChatCubit extends Cubit<ChatState> {
   final SendMessageUseCase _sendMessageUseCase;
   final SetTypingUseCase _setTypingUseCase;
   final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
+  final GetUserByIdUseCase _getUserByIdUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -71,14 +77,24 @@ class ChatCubit extends Cubit<ChatState> {
 
   Timer? _readMessageDebounceTimer;
 
-  Future<void> getMessages({required int chatId, required int myUserId}) async {
-    state.chatId = chatId;
+  Future<void> getUserById({required int userId, required int myUserId}) async {
+    state.chatId = userId;
+    try {
+      final UserEntity user = await _getUserByIdUseCase.call(userId);
+      emit(state.copyWith(userEntity: user.toDmUser()));
+      await getMessages(myUserId: myUserId);
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> getMessages({required int myUserId}) async {
     state.myUserId = myUserId;
     try {
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
         narrow: [
-          MessageNarrowEntity(operator: NarrowOperator.dm, operand: [chatId]),
+          MessageNarrowEntity(operator: NarrowOperator.dm, operand: [state.userEntity!.userId]),
         ],
         numBefore: 25,
         numAfter: 0,
@@ -126,12 +142,12 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  Future<void> changeTyping({required int chatId, required TypingEventOp op}) async {
+  Future<void> changeTyping({required TypingEventOp op}) async {
     if (state.selfTypingOp != op) {
       state.selfTypingOp = op;
       try {
         await _setTypingUseCase.call(
-          TypingRequestEntity(type: SendMessageType.direct, op: op, to: [chatId]),
+          TypingRequestEntity(type: SendMessageType.direct, op: op, to: [state.userEntity!.userId]),
         );
       } catch (e) {
         inspect(e);

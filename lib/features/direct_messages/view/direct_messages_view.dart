@@ -121,13 +121,13 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                                 },
                               ),
                             ),
-                            (currentSize(context) > ScreenSize.lTablet &&
-                                    state.selectedUser != null)
-                                ? Expanded(
-                                    key: ObjectKey(state.selectedUser),
-                                    child: Chat(user: state.selectedUser),
-                                  )
-                                : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
+                            if (currentSize(context) > ScreenSize.lTablet)
+                              state.selectedUserId != null
+                                  ? Expanded(
+                                      key: ObjectKey(state.selectedUserId),
+                                      child: Chat(userId: state.selectedUserId),
+                                    )
+                                  : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
                           ],
                         );
                       },

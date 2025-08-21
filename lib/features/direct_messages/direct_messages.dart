@@ -4,10 +4,14 @@ import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_
 import 'package:genesis_workspace/features/direct_messages/view/direct_messages_view.dart';
 
 class DirectMessages extends StatelessWidget {
-  const DirectMessages({super.key});
+  final int? initialUserId;
+  const DirectMessages({super.key, this.initialUserId});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => DirectMessagesCubit(), child: DirectMessagesView());
+    return BlocProvider(
+      create: (context) => DirectMessagesCubit()..selectUserChat(initialUserId),
+      child: DirectMessagesView(),
+    );
   }
 }

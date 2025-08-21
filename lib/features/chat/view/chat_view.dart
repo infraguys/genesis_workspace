@@ -9,7 +9,6 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -18,9 +17,9 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatView extends StatefulWidget {
-  final DmUserEntity userEntity;
+  final int userId;
 
-  const ChatView({super.key, required this.userEntity});
+  const ChatView({super.key, required this.userId});
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -39,7 +38,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       _currentText = _messageController.text;
     });
     await context.read<ChatCubit>().changeTyping(
-      chatId: widget.userEntity.userId,
       op: _currentText.isEmpty ? TypingEventOp.stop : TypingEventOp.start,
     );
   }
@@ -50,8 +48,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _myUser = context.read<ProfileCubit>().state.user!;
 
-    _future = context.read<ChatCubit>().getMessages(
-      chatId: widget.userEntity.userId,
+    _future = context.read<ChatCubit>().getUserById(
+      userId: widget.userId,
       myUserId: _myUser.userId,
     );
     _controller = ScrollController();
@@ -75,42 +73,65 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Row(
-          spacing: 8,
-          children: [
-            UserAvatar(avatarUrl: widget.userEntity.avatarUrl),
-            BlocBuilder<ChatCubit, ChatState>(
-              builder: (context, state) {
-                final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-                  (widget.userEntity.presenceTimestamp * 1000).toInt(),
-                );
+        title: BlocBuilder<ChatCubit, ChatState>(
+          builder: (context, state) {
+            final theme = Theme.of(context);
+            final isLoading = state.userEntity == null;
 
-                final timeAgo = timeAgoText(context, lastSeen);
+            if (isLoading) {
+              return Skeletonizer(
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    UserAvatar(),
+                    BlocBuilder<ChatCubit, ChatState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [Text("User Userov"), Text(context.t.online)],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }
 
-                Widget? userStatus;
+            final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+              (state.userEntity!.presenceTimestamp * 1000).toInt(),
+            );
+            final timeAgo = timeAgoText(context, lastSeen);
 
-                if (widget.userEntity.presenceStatus == PresenceStatus.active) {
-                  userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
-                } else {
-                  userStatus = Text(
-                    isJustNow(lastSeen)
-                        ? context.t.wasOnlineJustNow
-                        : context.t.wasOnline(time: timeAgo),
-                    style: theme.textTheme.labelSmall,
-                  );
-                }
+            Widget userStatus;
+            if (state.userEntity!.presenceStatus == PresenceStatus.active) {
+              userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
+            } else {
+              userStatus = Text(
+                isJustNow(lastSeen)
+                    ? context.t.wasOnlineJustNow
+                    : context.t.wasOnline(time: timeAgo),
+                style: theme.textTheme.labelSmall,
+              );
+            }
+            if (state.typingId == state.userEntity!.userId) {
+              userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
+            }
 
-                if (state.typingId == widget.userEntity.userId) {
-                  userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Text(widget.userEntity.fullName), userStatus],
-                );
-              },
-            ),
-          ],
+            return Row(
+              spacing: 8,
+              children: [
+                UserAvatar(avatarUrl: state.userEntity!.avatarUrl),
+                BlocBuilder<ChatCubit, ChatState>(
+                  builder: (context, state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [Text(state.userEntity!.fullName), userStatus],
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         ),
       ),
       body: FutureBuilder(
@@ -183,7 +204,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                               _messageController.clear();
                               try {
                                 await context.read<ChatCubit>().sendMessage(
-                                  chatId: widget.userEntity.userId,
+                                  chatId: state.userEntity!.userId,
                                   content: content,
                                 );
                               } catch (e) {}

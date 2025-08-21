@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 extension PendingExtension on Widget {
   Widget pending(bool isPending) {
@@ -23,5 +25,15 @@ extension PendingExtension on Widget {
             )
           : button.child ?? const SizedBox(),
     );
+  }
+}
+
+extension DmUrl on BuildContext {
+  void setDmUserIdInUrl(int? userId) {
+    final queryParams = <String, String>{};
+    if (userId != null) queryParams['userId'] = '$userId';
+
+    // Меняем только query — остаёмся на той же странице
+    goNamed(Routes.directMessages, queryParameters: queryParams);
   }
 }
