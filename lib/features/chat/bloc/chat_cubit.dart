@@ -78,6 +78,7 @@ class ChatCubit extends Cubit<ChatState> {
   Timer? _readMessageDebounceTimer;
 
   Future<void> getUserById({required int userId, required int myUserId}) async {
+    state.chatId = userId;
     try {
       final UserEntity user = await _getUserByIdUseCase.call(userId);
       emit(state.copyWith(userEntity: user.toDmUser()));

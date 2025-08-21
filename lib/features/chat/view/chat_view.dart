@@ -75,46 +75,62 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       appBar: AppBar(
         title: BlocBuilder<ChatCubit, ChatState>(
           builder: (context, state) {
-            if (state.userEntity == null) {
-              return CircularProgressIndicator();
-            } else {
-              final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-                (state.userEntity!.presenceTimestamp * 1000).toInt(),
-              );
+            final theme = Theme.of(context);
+            final isLoading = state.userEntity == null;
 
-              final timeAgo = timeAgoText(context, lastSeen);
-
-              Widget? userStatus;
-
-              if (state.userEntity!.presenceStatus == PresenceStatus.active) {
-                userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
-              } else {
-                userStatus = Text(
-                  isJustNow(lastSeen)
-                      ? context.t.wasOnlineJustNow
-                      : context.t.wasOnline(time: timeAgo),
-                  style: theme.textTheme.labelSmall,
-                );
-              }
-
-              if (state.typingId == state.userEntity!.userId) {
-                userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
-              }
-              return Row(
-                spacing: 8,
-                children: [
-                  UserAvatar(avatarUrl: state.userEntity!.avatarUrl),
-                  BlocBuilder<ChatCubit, ChatState>(
-                    builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [Text(state.userEntity!.fullName), userStatus!],
-                      );
-                    },
-                  ),
-                ],
+            if (isLoading) {
+              return Skeletonizer(
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    UserAvatar(),
+                    BlocBuilder<ChatCubit, ChatState>(
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [Text("User Userov"), Text(context.t.online)],
+                        );
+                      },
+                    ),
+                  ],
+                ),
               );
             }
+
+            final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+              (state.userEntity!.presenceTimestamp * 1000).toInt(),
+            );
+            final timeAgo = timeAgoText(context, lastSeen);
+
+            Widget userStatus;
+            if (state.userEntity!.presenceStatus == PresenceStatus.active) {
+              userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
+            } else {
+              userStatus = Text(
+                isJustNow(lastSeen)
+                    ? context.t.wasOnlineJustNow
+                    : context.t.wasOnline(time: timeAgo),
+                style: theme.textTheme.labelSmall,
+              );
+            }
+            if (state.typingId == state.userEntity!.userId) {
+              userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
+            }
+
+            return Row(
+              spacing: 8,
+              children: [
+                UserAvatar(avatarUrl: state.userEntity!.avatarUrl),
+                BlocBuilder<ChatCubit, ChatState>(
+                  builder: (context, state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [Text(state.userEntity!.fullName), userStatus],
+                    );
+                  },
+                ),
+              ],
+            );
           },
         ),
       ),

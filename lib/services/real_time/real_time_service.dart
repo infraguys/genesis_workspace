@@ -23,7 +23,7 @@ class RealTimeService {
   final GetEventsByQueueIdUseCase _getEventsByQueueIdUseCase;
 
   int lastEventId = -1;
-  String? queueId;
+  late final String? queueId;
 
   bool _isPolling = false;
 
@@ -66,26 +66,23 @@ class RealTimeService {
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueId!, lastEventId: lastEventId),
       );
-      switch (response.events.last.type) {
-        case EventType.typing:
-          if (response.events.last is TypingEventEntity) {
-            _typingEventsController.add(response.events.last as TypingEventEntity);
-          }
-        case EventType.message:
-          if (response.events.last is MessageEventEntity) {
-            _messagesEventsController.add(response.events.last as MessageEventEntity);
-          }
-        case EventType.updateMessageFlags:
-          if (response.events.last is UpdateMessageFlagsEntity) {
+      for (var event in response.events) {
+        switch (event.type) {
+          case EventType.typing:
+            _typingEventsController.add(event as TypingEventEntity);
+          case EventType.message:
+            _messagesEventsController.add(event as MessageEventEntity);
+          case EventType.updateMessageFlags:
             _messageFlagsEventsController.add(response.events.last as UpdateMessageFlagsEntity);
-          }
-        case EventType.reaction:
-          if (response.events.last is ReactionEventEntity) {
+
+          case EventType.reaction:
             _reactionsEventsController.add(response.events.last as ReactionEventEntity);
-          }
-        default:
-          break;
+
+          default:
+            break;
+        }
       }
+      lastEventId = response.events.last.id;
       return response;
     } on DioException catch (e) {
       inspect(e);
@@ -117,8 +114,7 @@ class RealTimeService {
 
     while (_isPolling) {
       try {
-        final lastEvent = await getLastEvent();
-        lastEventId = lastEvent.events.last.id;
+        await getLastEvent();
       } catch (e) {
         inspect(e);
         await Future.delayed(Duration(seconds: 2));
