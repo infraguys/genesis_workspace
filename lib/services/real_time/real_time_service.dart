@@ -73,11 +73,9 @@ class RealTimeService {
           case EventType.message:
             _messagesEventsController.add(event as MessageEventEntity);
           case EventType.updateMessageFlags:
-            _messageFlagsEventsController.add(response.events.last as UpdateMessageFlagsEntity);
-
+            _messageFlagsEventsController.add(event as UpdateMessageFlagsEntity);
           case EventType.reaction:
-            _reactionsEventsController.add(response.events.last as ReactionEventEntity);
-
+            _reactionsEventsController.add(event as ReactionEventEntity);
           default:
             break;
         }
