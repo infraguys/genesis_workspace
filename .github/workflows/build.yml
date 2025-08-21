@@ -26,6 +26,7 @@ env:
   # {
   #   "api_url": "https://console.genesis-core.tech/api"
   # }
+  UI_BUILD_ENV_legacy_ui: "/legacy"
 
 jobs:
   build:
