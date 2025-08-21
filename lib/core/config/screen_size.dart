@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 ScreenSize currentSize(BuildContext context) {
   final width = MediaQuery.sizeOf(context).width;
+  print(width);
   switch (width) {
     case (> 1440):
       return ScreenSize.desktop;
