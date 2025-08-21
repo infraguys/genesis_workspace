@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
@@ -45,9 +46,13 @@ class UserTile extends StatelessWidget {
         return ListTile(
           onTap: () {
             if (currentSize(context) >= ScreenSize.lTablet) {
-              context.read<DirectMessagesCubit>().selectUserChat(user);
+              context.read<DirectMessagesCubit>().selectUserChat(user.userId);
+
+              // 2) Синхронизируем URL через query-параметр
+              context.setDmUserIdInUrl(user.userId);
             } else {
-              context.pushNamed(Routes.chat, extra: user);
+              // Мобильная навигация на подроут /direct-messages/:userId
+              context.pushNamed(Routes.chat, pathParameters: {'userId': user.userId.toString()});
             }
           },
           title: Text(user.fullName, overflow: TextOverflow.ellipsis),
