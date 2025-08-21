@@ -326,29 +326,32 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> checkToken() async {
     _prefs = await SharedPreferences.getInstance();
     emit(state.copyWith(isPending: true, errorMessage: null));
-    if (kIsWeb) {
-      final isAuth = _prefs.getBool(SharedPrefsKeys.isWebAuth) ?? false;
-      emit(state.copyWith(isAuthorized: isAuth, errorMessage: null, isPending: false));
-      return;
-    }
-    try {
-      final String? token = await _getTokenUseCase.call();
-      final String? csrf = await _getCsrftokenUseCase.call();
-      final String? sessionId = await _getSessionIdUseCase.call();
-      bool isAuthorized = false;
+    bool isAuthorized = false;
+    final String? token = await _getTokenUseCase.call();
 
-      if (token != null) {
-        isAuthorized = true;
-      } else if (csrf != null && sessionId != null) {
-        isAuthorized = true;
-      }
-
+    if (token != null) {
+      isAuthorized = true;
       emit(state.copyWith(isPending: false, isAuthorized: isAuthorized, errorMessage: null));
-    } catch (e, st) {
-      addError(e, st);
-      emit(
-        state.copyWith(isPending: false, isAuthorized: false, errorMessage: 'Token check failed'),
-      );
+    } else {
+      if (kIsWeb) {
+        final isAuth = _prefs.getBool(SharedPrefsKeys.isWebAuth) ?? false;
+        emit(state.copyWith(isAuthorized: isAuth, errorMessage: null, isPending: false));
+        return;
+      }
+      try {
+        final String? csrf = await _getCsrftokenUseCase.call();
+        final String? sessionId = await _getSessionIdUseCase.call();
+
+        if (csrf != null && sessionId != null) {
+          isAuthorized = true;
+        }
+        emit(state.copyWith(errorMessage: null));
+      } catch (e, st) {
+        addError(e, st);
+        emit(state.copyWith(isAuthorized: false, errorMessage: 'Token check failed'));
+      } finally {
+        emit(state.copyWith(isPending: false, isAuthorized: isAuthorized));
+      }
     }
   }
 }

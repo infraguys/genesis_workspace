@@ -205,7 +205,16 @@ class ChatCubit extends Cubit<ChatState> {
 
   void scheduleMarkAsRead(int messageId) {
     state.pendingToMarkAsRead.add(messageId);
-
+    final MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+    final indexOf = state.messages.indexOf(message);
+    if (message.flags != null) {
+      message.flags!.add(MessageFlag.read.name);
+    } else {
+      message.flags = [MessageFlag.read.name];
+    }
+    final newMessages = [...state.messages];
+    newMessages[indexOf] = message;
+    emit(state.copyWith(messages: newMessages));
     _readMessageDebounceTimer?.cancel();
     _readMessageDebounceTimer = Timer(const Duration(milliseconds: 500), () {
       _sendMarkAsRead();
