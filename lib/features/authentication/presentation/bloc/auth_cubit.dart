@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
@@ -78,7 +79,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   late final SharedPreferences _prefs;
   final CookieManager _cookieManager = CookieManager.instance();
-  final Dio _dio = Dio();
+  final Dio _dio = getIt<Dio>();
   String? _csrfToken;
 
   final InAppBrowser? _browser = kIsWeb ? null : InAppBrowser();
