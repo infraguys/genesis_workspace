@@ -4,6 +4,7 @@ import 'package:genesis_workspace/flavor.dart';
 class AppConstants {
   static const String _baseProdUrl = String.fromEnvironment('prod_url');
   static const String _baseStageUrl = String.fromEnvironment('dev_url');
+  static const String legacyPath = String.fromEnvironment('legacy_ui');
   static String baseUrl = Flavor.current == Flavor.prod ? _baseProdUrl : _baseStageUrl;
   static final popularEmojis = [
     UnicodeEmojiDisplay(emojiName: ":thumbs_up:", emojiUnicode: "1F44D"),

@@ -194,6 +194,18 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
       final response = await dio.get(loginUrl);
+      final zulipResponse = await dio.get('${AppConstants.baseUrl}/legacy');
+      final html = zulipResponse.data as String;
+
+      final regex = RegExp(r'name="csrfmiddlewaretoken"\s+value="([^"]+)"');
+      final match = regex.firstMatch(html);
+
+      if (match != null) {
+        final csrfToken0 = match.group(1);
+        await _saveCsrftokenUseCase.call(csrftoken: csrfToken0 ?? '');
+      } else {
+        print('CSRF token not found');
+      }
 
       if (kIsWeb) {
         _prefs.setBool(SharedPrefsKeys.isWebAuth, true);
