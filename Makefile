@@ -30,8 +30,17 @@ ci_stage:
 	make slang
 	flutter build web --release -t lib/stage.dart --dart-define-from-file=env.json
 
-build-prod-apk:
+ci_prod_apk:
+	make clean
+	make generate
+	make slang
 	flutter build apk --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
+
+ci_stage_apk:
+	make clean
+	make generate
+	make slang
+	flutter build apk --flavor stage -t lib/stage.dart --dart-define-from-file=env.json
 
 build-macos:
 	flutter build macos --flavor prod -t lib/prod.dart --dart-define-from-file=env.json

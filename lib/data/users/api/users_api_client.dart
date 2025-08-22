@@ -9,6 +9,7 @@ import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart
 import 'package:genesis_workspace/data/users/dto/topics_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/update_presence_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/user_presence_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -29,6 +30,9 @@ abstract class UsersApiClient {
 
   @GET('/realm/presence')
   Future<PresencesResponseDto> getAllPresences();
+
+  @GET('/users/{user_id}/presence')
+  Future<UserPresenceResponseDto> getUserPresence(@Path('user_id') int userId);
 
   @GET('/users/me')
   Future<OwnUserResponseDto> getOwnUser();
