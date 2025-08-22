@@ -18,13 +18,13 @@ clean:
 	yes | flutter pub cache clean
 	flutter pub get
 
-ci_prod:
+ci_prod_web:
 	make clean
 	make generate
 	make slang
 	flutter build web --release -t lib/prod.dart --dart-define-from-file=env.json
 
-ci_stage:
+ci_stage_web:
 	make clean
 	make generate
 	make slang
