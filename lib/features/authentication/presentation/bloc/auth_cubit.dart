@@ -93,7 +93,7 @@ class AuthCubit extends Cubit<AuthState> {
       final ApiKeyEntity response = await _fetchApiKeyUseCase.call(username, password);
       await _saveTokenUseCase.call(email: response.email, token: response.apiKey);
 
-      emit(state.copyWith(isPending: false, isAuthorized: true, errorMessage: null));
+      emit(state.copyWith(isAuthorized: true, errorMessage: null));
     } on DioException catch (e, st) {
       final bool unauthorized = e.response?.statusCode == 401;
       final String? backendMsg = e.response?.data is Map
@@ -104,10 +104,12 @@ class AuthCubit extends Cubit<AuthState> {
           : (backendMsg ?? 'Network error. Please try again.');
 
       addError(e, st);
-      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: message));
+      emit(state.copyWith(isAuthorized: false, errorMessage: message));
     } catch (e, st) {
       addError(e, st);
-      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: 'Unexpected error'));
+      emit(state.copyWith(isAuthorized: false, errorMessage: 'Unexpected error'));
+    } finally {
+      emit(state.copyWith(isPending: false));
     }
   }
 
@@ -288,6 +290,7 @@ class AuthCubit extends Cubit<AuthState> {
       ];
 
       await Future.wait(futures);
+      _realTimeService.stopPolling();
       await Future.wait([
         _deleteTokenUseCase.call(),
         _deleteSessionIdUseCase.call(),
