@@ -51,6 +51,34 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
+  Future<void> getUnreadMessages() async {
+    try {
+      final messagesBody = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
+        numBefore: 5000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase.call(messagesBody);
+      final unreadMessages = response.messages;
+      final channels = [...state.channels];
+      for (var channel in channels) {
+        channel.unreadMessages = unreadMessages
+            .where((message) {
+              return (message.streamId == channel.streamId) &&
+                  (message.type == MessageType.stream) &&
+                  (message.senderId != state.selfUser?.userId);
+            })
+            .map((message) => message.id)
+            .toSet();
+      }
+      state.channels = channels;
+      emit(state.copyWith(unreadMessages: unreadMessages, channels: channels));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
   void selectChannelId(int? id) {
     state.selectedChannelId = id;
     emit(state.copyWith(selectedChannelId: state.selectedChannelId));
@@ -93,34 +121,6 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     await getUnreadMessages();
   }
 
-  Future<void> getUnreadMessages() async {
-    try {
-      final messagesBody = MessagesRequestEntity(
-        anchor: MessageAnchor.newest(),
-        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
-        numBefore: 5000,
-        numAfter: 0,
-      );
-      final response = await _getMessagesUseCase.call(messagesBody);
-      state.unreadMessages = response.messages;
-      final channels = [...state.channels];
-      for (var channel in channels) {
-        channel.unreadMessages = state.unreadMessages
-            .where((message) {
-              return (message.streamId == channel.streamId) &&
-                  (message.type == MessageType.stream) &&
-                  (message.senderId != state.selfUser?.userId);
-            })
-            .map((message) => message.id)
-            .toSet();
-      }
-      state.channels = channels;
-      emit(state.copyWith(unreadMessages: state.unreadMessages, channels: state.channels));
-    } catch (e) {
-      inspect(e);
-    }
-  }
-
   Future<void> getChannelTopics({required int streamId}) async {
     state.pendingTopicsId = streamId;
     emit(state.copyWith(pendingTopicsId: state.pendingTopicsId));
@@ -160,8 +160,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
     final channels = [...state.channels];
+    final unreadMessages = [...state.unreadMessages];
     if (message.type == MessageType.stream && message.hasUnreadMessages) {
-      state.unreadMessages.add(message);
+      unreadMessages.add(message);
       final channel = channels.firstWhere((channel) => channel.streamId == message.streamId);
       final indexOfChannel = channels.indexOf(channel);
       channel.unreadMessages.add(message.id);
@@ -175,13 +176,13 @@ class ChannelsCubit extends Cubit<ChannelsState> {
         }
       }
     }
-    state.channels = channels;
-    emit(state.copyWith(channels: state.channels, unreadMessages: state.unreadMessages));
+    emit(state.copyWith(channels: channels, unreadMessages: unreadMessages));
   }
 
   void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+    final unreadMessages = [...state.unreadMessages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
-      state.unreadMessages.removeWhere((message) => event.messages.contains(message.id));
+      unreadMessages.removeWhere((message) => event.messages.contains(message.id));
       final channels = state.channels.map((channel) {
         channel.unreadMessages.removeAll(event.messages);
         for (var topic in channel.topics) {
@@ -189,8 +190,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
         }
         return channel;
       }).toList();
-      state.channels = channels;
-      emit(state.copyWith(channels: state.channels, unreadMessages: state.unreadMessages));
+      emit(state.copyWith(channels: channels, unreadMessages: unreadMessages));
     }
   }
 }
