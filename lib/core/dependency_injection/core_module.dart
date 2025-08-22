@@ -25,7 +25,12 @@ abstract class CoreModule {
     final isWebAuth = prefs.getBool(SharedPrefsKeys.isWebAuth) ?? false;
 
     final basePath = (isWebAuth && kIsWeb) ? "/json" : "/api/v1";
-    final dio = Dio(BaseOptions(baseUrl: "${AppConstants.baseUrl}$basePath"));
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: "${AppConstants.baseUrl}$basePath",
+        receiveTimeout: Duration(seconds: 90),
+      ),
+    );
 
     final adapter = createPlatformAdapter();
     if (adapter != null) {

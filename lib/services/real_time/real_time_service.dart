@@ -12,24 +12,18 @@ import 'package:genesis_workspace/domain/real_time_events/entities/events_by_que
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_request_body_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
 class RealTimeService {
-  RealTimeService(
-    this._registerQueueUseCase,
-    this._getEventsByQueueIdUseCase,
-    this._deleteQueueUseCase,
-  );
+  RealTimeService(this._registerQueueUseCase, this._getEventsByQueueIdUseCase);
   final RegisterQueueUseCase _registerQueueUseCase;
   final GetEventsByQueueIdUseCase _getEventsByQueueIdUseCase;
-  final DeleteQueueUseCase _deleteQueueUseCase;
 
   int lastEventId = -1;
-  late final String? queueId;
+  String? queueId;
 
   bool _isPolling = false;
 
@@ -112,18 +106,22 @@ class RealTimeService {
     if (_reactionsEventsController.isClosed) {
       _reactionsEventsController = StreamController<ReactionEventEntity>.broadcast();
     }
-    await registerQueue();
     if (_isPolling) return;
-    _isPolling = true;
+    try {
+      await registerQueue();
+      _isPolling = true;
 
-    while (_isPolling) {
-      try {
-        await getLastEvent();
-      } catch (e) {
-        inspect(e);
-        await Future.delayed(Duration(seconds: 2));
-        // _isPolling = false;
+      while (_isPolling) {
+        try {
+          await getLastEvent();
+        } catch (e) {
+          inspect(e);
+          await Future.delayed(Duration(seconds: 2));
+          // _isPolling = false;
+        }
       }
+    } catch (e) {
+      inspect(e);
     }
   }
 

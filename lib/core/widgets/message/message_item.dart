@@ -201,7 +201,11 @@ class MessageItem extends StatelessWidget {
                               ],
                             ),
                             if (message.aggregatedReactions.isNotEmpty)
-                              MessageReactionsList(message: message, myUserId: myUserId),
+                              MessageReactionsList(
+                                message: message,
+                                myUserId: myUserId,
+                                maxWidth: maxMessageWidth,
+                              ),
                           ],
                         ),
                         Row(

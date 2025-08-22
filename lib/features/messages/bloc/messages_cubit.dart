@@ -53,6 +53,21 @@ class MessagesCubit extends Cubit<MessagesState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
 
+  Future<void> getLastMessages() async {
+    try {
+      final messagesBody = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
+        numBefore: 1000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase.call(messagesBody);
+      emit(state.copyWith(messages: response.messages));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
   Future<void> addEmojiReaction(int messageId, {required String emojiName}) async {
     try {
       await _addEmojiReactionUseCase.call(
@@ -87,21 +102,6 @@ class MessagesCubit extends Cubit<MessagesState> {
       }
     }
     emit(state.copyWith(messages: newMessages));
-  }
-
-  Future<void> getLastMessages() async {
-    try {
-      final messagesBody = MessagesRequestEntity(
-        anchor: MessageAnchor.newest(),
-        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
-        numBefore: 1000,
-        numAfter: 0,
-      );
-      final response = await _getMessagesUseCase.call(messagesBody);
-      emit(state.copyWith(messages: response.messages));
-    } catch (e) {
-      inspect(e);
-    }
   }
 
   Future<void> addStarredFlag(int messageId) async {

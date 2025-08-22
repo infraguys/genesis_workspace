@@ -159,6 +159,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i735.RealTimeEventsDataSource>(
       () => _i735.RealTimeEventsDataSourceImpl(),
     );
+    gh.lazySingleton<_i82.RealTimeService>(
+      () => _i82.RealTimeService(
+        gh<_i477.RegisterQueueUseCase>(),
+        gh<_i1039.GetEventsByQueueIdUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i958.TokenStorage>(
       () => coreModule.tokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
@@ -192,13 +198,6 @@ extension GetItInjectableX on _i174.GetIt {
     await gh.lazySingletonAsync<_i361.Dio>(
       () => coreModule.dio(gh<_i958.TokenStorage>()),
       preResolve: true,
-    );
-    gh.lazySingleton<_i82.RealTimeService>(
-      () => _i82.RealTimeService(
-        gh<_i477.RegisterQueueUseCase>(),
-        gh<_i1039.GetEventsByQueueIdUseCase>(),
-        gh<_i435.DeleteQueueUseCase>(),
-      ),
     );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(

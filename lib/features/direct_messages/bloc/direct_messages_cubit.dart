@@ -145,10 +145,10 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      state.unreadMessages = response.messages;
-      final users = state.users;
+      final unreadMessages = response.messages;
+      final users = [...state.users];
       for (var user in users) {
-        user.unreadMessages = state.unreadMessages
+        user.unreadMessages = unreadMessages
             .where(
               (message) =>
                   (message.senderId == user.userId) &&
@@ -158,7 +158,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
             .map((message) => message.id)
             .toSet();
       }
-      emit(state.copyWith(unreadMessages: state.unreadMessages));
+      emit(state.copyWith(unreadMessages: unreadMessages, users: users));
     } catch (e) {
       inspect(e);
     }
