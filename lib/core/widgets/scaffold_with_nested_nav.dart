@@ -91,8 +91,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     switch (state) {
       case AppLifecycleState.inactive:
         await setIdleStatus();
-      case AppLifecycleState.resumed:
-        await setActiveStatus();
       default:
         break;
     }
