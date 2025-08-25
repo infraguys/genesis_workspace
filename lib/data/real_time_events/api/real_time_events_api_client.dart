@@ -14,6 +14,7 @@ abstract class RealTimeEventsApiClient {
   Future<RegisterQueueResponseDto> registerQueue(
     @Body() RegisterQueueRequestBodyDto requestDto,
     @Query('apply_markdown') bool applyMarkdown,
+    @Query('simplified_presence_events') bool simplifiedPresenceEvents,
   );
 
   @GET('/events')
