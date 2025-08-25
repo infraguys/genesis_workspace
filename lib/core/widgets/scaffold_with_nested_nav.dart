@@ -20,7 +20,8 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
   State<ScaffoldWithNestedNavigation> createState() => _ScaffoldWithNestedNavigationState();
 }
 
-class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
+class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation>
+    with WidgetsBindingObserver {
   late final Future _future;
   late final RealTimeCubit _realTimeCubit;
 
@@ -31,26 +32,33 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     );
   }
 
+  Future<void> setIdleStatus() async {
+    final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
+      status: PresenceStatus.idle,
+      newUserInput: false,
+      pingOnly: false,
+    );
+    await context.read<ProfileCubit>().updatePresence(body);
+  }
+
+  Future<void> setActiveStatus() async {
+    final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
+      lastUpdateId: -1,
+      status: PresenceStatus.active,
+      newUserInput: true,
+      pingOnly: false,
+    );
+    await context.read<ProfileCubit>().updatePresence(body);
+  }
+
   void _initIdleDetector() {
     InAppIdleDetector.initialize(
       timeout: Duration(minutes: 2),
       onIdle: () async {
-        final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
-          lastUpdateId: -1,
-          status: PresenceStatus.idle,
-          newUserInput: false,
-          pingOnly: false,
-        );
-        await context.read<ProfileCubit>().updatePresence(body);
+        await setIdleStatus();
       },
       onActive: () async {
-        final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
-          lastUpdateId: -1,
-          status: PresenceStatus.active,
-          newUserInput: true,
-          pingOnly: false,
-        );
-        await context.read<ProfileCubit>().updatePresence(body);
+        await setActiveStatus();
       },
     );
   }
@@ -76,6 +84,18 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     _pauseIdleDetector();
     _realTimeCubit.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.inactive:
+        await setIdleStatus();
+      case AppLifecycleState.resumed:
+        await setActiveStatus();
+      default:
+        break;
+    }
   }
 
   @override
