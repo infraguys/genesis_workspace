@@ -15,7 +15,7 @@ import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case
 import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
 
@@ -51,7 +51,7 @@ class MessagesCubit extends Cubit<MessagesState> {
   final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
 
   Future<void> getLastMessages() async {
     try {
@@ -94,13 +94,15 @@ class MessagesCubit extends Cubit<MessagesState> {
     emit(state.copyWith(messages: messages));
   }
 
-  _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+  _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     final newMessages = [...state.messages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       for (var messageId in event.messages) {
         newMessages.removeWhere((message) => message.id == messageId);
       }
     }
+    inspect(event);
+    inspect(newMessages);
     emit(state.copyWith(messages: newMessages));
   }
 

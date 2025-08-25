@@ -36,6 +36,8 @@ extension EventTypeX on EventType {
         return 'update_message_flags';
       case EventType.reaction:
         return 'reaction';
+      case EventType.presence:
+        return 'presence';
       default:
         return 'unsupported';
     }

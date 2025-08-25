@@ -20,11 +20,12 @@ import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -40,6 +41,7 @@ class ChatCubit extends Cubit<ChatState> {
     this._setTypingUseCase,
     this._updateMessagesFlagsUseCase,
     this._getUserByIdUseCase,
+    this._getUserPresenceUseCase,
   ) : super(
         ChatState(
           messages: [],
@@ -69,10 +71,11 @@ class ChatCubit extends Cubit<ChatState> {
   final SetTypingUseCase _setTypingUseCase;
   final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
   final GetUserByIdUseCase _getUserByIdUseCase;
+  final GetUserPresenceUseCase _getUserPresenceUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
   late final StreamSubscription<ReactionEventEntity> _reactionsSubscription;
 
   Timer? _readMessageDebounceTimer;
@@ -81,7 +84,11 @@ class ChatCubit extends Cubit<ChatState> {
     state.chatId = userId;
     try {
       final UserEntity user = await _getUserByIdUseCase.call(userId);
-      emit(state.copyWith(userEntity: user.toDmUser()));
+      final presence = await _getUserPresenceUseCase.call(userId);
+      final DmUserEntity dmUser = user.toDmUser();
+      dmUser.presenceStatus = presence.userPresence.aggregated!.status;
+      dmUser.presenceTimestamp = presence.userPresence.aggregated!.timestamp;
+      emit(state.copyWith(userEntity: dmUser));
       await getMessages(myUserId: myUserId);
     } catch (e) {
       inspect(e);
@@ -191,7 +198,7 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     for (var messageId in event.messages) {
       if (event.flag == MessageFlag.read) {
         MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);

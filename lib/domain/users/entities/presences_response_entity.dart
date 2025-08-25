@@ -14,22 +14,16 @@ class PresencesResponseEntity extends ResponseEntity {
 }
 
 class PresenceEntity {
-  final PresenceDetailEntity aggregated;
+  final PresenceDetailEntity? aggregated;
   final PresenceDetailEntity? website;
 
   PresenceEntity({required this.aggregated, this.website});
 }
 
 class PresenceDetailEntity {
-  final String client;
   final PresenceStatus status;
   final int timestamp;
   final bool? pushable;
 
-  PresenceDetailEntity({
-    required this.client,
-    required this.status,
-    required this.timestamp,
-    this.pushable,
-  });
+  PresenceDetailEntity({required this.status, required this.timestamp, this.pushable});
 }

@@ -59,6 +59,8 @@ import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart
     as _i699;
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart'
     as _i773;
+import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart'
+    as _i394;
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
     as _i194;
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart'
@@ -98,6 +100,8 @@ import 'package:genesis_workspace/features/authentication/presentation/bloc/auth
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart'
     as _i739;
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart' as _i277;
+import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart'
+    as _i852;
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart'
     as _i144;
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
@@ -221,6 +225,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
       ),
     );
+    gh.factory<_i394.GetUserPresenceUseCase>(
+      () => _i394.GetUserPresenceUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
     );
@@ -262,6 +269,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i487.SetTypingUseCase>(),
         gh<_i664.UpdateMessagesFlagsUseCase>(),
         gh<_i773.GetUserByIdUseCase>(),
+        gh<_i394.GetUserPresenceUseCase>(),
       ),
     );
     gh.factory<_i739.ChannelChatCubit>(
@@ -271,6 +279,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i487.SetTypingUseCase>(),
         gh<_i664.UpdateMessagesFlagsUseCase>(),
         gh<_i116.SendMessageUseCase>(),
+      ),
+    );
+    gh.factory<_i852.DirectMessagesCubit>(
+      () => _i852.DirectMessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i837.GetAllPresencesUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
       ),
     );
     gh.factory<_i433.DeleteTokenUseCase>(

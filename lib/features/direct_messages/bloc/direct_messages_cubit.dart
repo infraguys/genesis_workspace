@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
@@ -14,21 +13,28 @@ import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:injectable/injectable.dart';
 
 part 'direct_messages_state.dart';
 
+@injectable
 class DirectMessagesCubit extends Cubit<DirectMessagesState> {
-  final _realTimeService = getIt<RealTimeService>();
+  final RealTimeService _realTimeService;
 
-  DirectMessagesCubit()
-    : super(
+  DirectMessagesCubit(
+    this._realTimeService,
+    this._getAllPresencesUseCase,
+    this._getUsersUseCase,
+    this._getMessagesUseCase,
+  ) : super(
         DirectMessagesState(
           users: [],
           filteredUsers: [],
@@ -44,15 +50,17 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
       _onMessageFlagsEvents,
     );
+    _presenceSubscription = _realTimeService.presenceEventsStream.listen(_onPresenceEvents);
   }
 
-  final _getMessagesUseCase = getIt<GetMessagesUseCase>();
-  final GetUsersUseCase _getUsersUseCase = getIt<GetUsersUseCase>();
-  final GetAllPresencesUseCase _getAllPresencesUseCase = getIt<GetAllPresencesUseCase>();
+  final GetMessagesUseCase _getMessagesUseCase;
+  final GetUsersUseCase _getUsersUseCase;
+  final GetAllPresencesUseCase _getAllPresencesUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
+  late final StreamSubscription<PresenceEventEntity> _presenceSubscription;
 
   setSelfUser(UserEntity? user) {
     if (state.selfUser == null) {
@@ -75,6 +83,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       state.filteredUsers = mappedUsers;
 
       await Future.wait([getUnreadMessages(), getAllPresences()]);
+      inspect(state.users);
       _sortUsers();
     } catch (e) {
       inspect(e);
@@ -87,8 +96,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       response.presences.forEach((user, presence) {
         final indexOfUser = state.users.indexWhere((u) => u.email == user);
         if (indexOfUser != -1) {
-          state.users[indexOfUser].presenceStatus = presence.aggregated.status;
-          state.users[indexOfUser].presenceTimestamp = presence.aggregated.timestamp;
+          state.users[indexOfUser].presenceStatus = presence.aggregated!.status;
+          state.users[indexOfUser].presenceTimestamp = presence.aggregated!.timestamp;
         }
       });
     } catch (e) {
@@ -194,7 +203,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     }
   }
 
-  void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       final users = state.users.map((user) {
         user.unreadMessages.removeAll(event.messages);
@@ -203,6 +212,23 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       state.users = users;
       _sortUsers();
     }
+  }
+
+  void _onPresenceEvents(PresenceEventEntity event) {
+    inspect(event);
+    final user = state.users.firstWhere((user) => user.userId == event.userId);
+    final indexOf = state.users.indexOf(user);
+    if (event.presenceEntity.website != null) {
+      user.presenceStatus = event.presenceEntity.website!.status;
+      user.presenceTimestamp = event.presenceEntity.website!.timestamp;
+    } else if (event.presenceEntity.aggregated != null) {
+      user.presenceStatus = event.presenceEntity.aggregated!.status;
+      user.presenceTimestamp = event.presenceEntity.aggregated!.timestamp;
+    }
+    final updatedUsers = [...state.users];
+    updatedUsers[indexOf] = user;
+    emit(state.copyWith(users: updatedUsers));
+    _sortUsers();
   }
 
   @override

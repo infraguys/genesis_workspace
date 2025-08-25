@@ -9,7 +9,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
 
@@ -26,7 +26,7 @@ class StarredCubit extends Cubit<StarredState> {
     );
   }
 
-  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
 
   final RealTimeService _realTimeService;
   final GetMessagesUseCase _getMessagesUseCase;
@@ -75,7 +75,7 @@ class StarredCubit extends Cubit<StarredState> {
     }
   }
 
-  void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     for (var messageId in event.messages) {
       if (event.flag == MessageFlag.starred) {
         MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
