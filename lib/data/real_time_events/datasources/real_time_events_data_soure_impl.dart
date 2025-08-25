@@ -23,7 +23,8 @@ class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
   Future<RegisterQueueResponseDto> registerQueue(RegisterQueueRequestBodyDto requestDto) async {
     try {
       final bool applyMarkdown = true;
-      return await apiClient.registerQueue(requestDto, applyMarkdown);
+      final bool simplifiedPresenceEvents = true;
+      return await apiClient.registerQueue(requestDto, applyMarkdown, simplifiedPresenceEvents);
     } catch (e) {
       rethrow;
     }

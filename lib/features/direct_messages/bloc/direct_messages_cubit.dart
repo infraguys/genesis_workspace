@@ -100,6 +100,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           state.users[indexOfUser].presenceTimestamp = presence.aggregated!.timestamp;
         }
       });
+      inspect(response);
     } catch (e) {
       inspect(e);
     }

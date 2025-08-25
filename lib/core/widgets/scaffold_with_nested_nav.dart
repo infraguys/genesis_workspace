@@ -33,12 +33,12 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   void _initIdleDetector() {
     InAppIdleDetector.initialize(
-      timeout: Duration(seconds: 5),
+      timeout: Duration(minutes: 2),
       onIdle: () async {
         final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
           lastUpdateId: -1,
           status: PresenceStatus.idle,
-          newUserInput: true,
+          newUserInput: false,
           pingOnly: false,
         );
         await context.read<ProfileCubit>().updatePresence(body);
