@@ -23,40 +23,19 @@ set -o pipefail
 INSTALL_PATH="/opt/"
 WORK_DIR="/opt/genesis_workspace"
 WEB_DIR="/var/www/html"
-FLUTTER_SDK_PATH="/opt/flutter"
-BUILD_TARGET="${UI_BUILD_ENV_BUILD_TARGET:-ci_stage}"
-
-apt update
-apt install -y nginx jq
+UI_BUILD_ENV_WEB_ARCHIVE="${UI_BUILD_ENV_WEB_ARCHIVE:-http://repository.genesis-core.tech:8081/genesis_workspace/latest/workspace-web.tar.gz}"
 
 cd "$WORK_DIR"
-
-# Detect the Flutter SDK version
-FLUTTER_SDK_VERSION=$(cat .fvmrc | jq -r .flutter | awk NF)
 
 [[ "$EUID" == 0 ]] || exec sudo -s "$0" "$@"
 
-# Install FVM
-export FVM_ALLOW_ROOT=true
-curl -fsSL https://fvm.app/install.sh | bash
+apt update
+apt install -y nginx
 
-cd "/tmp"
-wget -q "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_$FLUTTER_SDK_VERSION-stable.tar.xz"
-tar -xf "flutter_linux_$FLUTTER_SDK_VERSION-stable.tar.xz" -C "$INSTALL_PATH"
-
-ln -sv "$FLUTTER_SDK_PATH/bin/flutter" "/usr/local/bin/flutter"
-
-cd "$WORK_DIR"
-
-# Prepare the environment
-python3 genesis/images/make_ui_build_env.py
-
-# Build the application
-make "$BUILD_TARGET"
-
-rm -fv "$WEB_DIR/index.nginx-debian.html"
-find "build/web/" -maxdepth 1 -type f -exec mv -t "$WEB_DIR/" {} +
-cp -r "build/web/assets" "$WEB_DIR/"
+# Install web archive    
+wget -q "$UI_BUILD_ENV_WEB_ARCHIVE" -O /tmp/web.tar.gz
+tar -xzf /tmp/web.tar.gz -C "$WEB_DIR"
+chown -R www-data:www-data "$WEB_DIR"
 
 # Configure Nginx for single page application
 cp genesis/images/nginx.conf /etc/nginx/sites-available/default
