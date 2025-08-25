@@ -1,5 +1,6 @@
 import 'package:genesis_workspace/data/common/dto/response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/presence_dto.dart';
+import 'package:genesis_workspace/domain/users/entities/user_presence_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user_presence_dto.g.dart';
@@ -11,6 +12,9 @@ class UserPresenceResponseDto extends ResponseDto {
 
   factory UserPresenceResponseDto.fromJson(Map<String, dynamic> json) =>
       _$UserPresenceResponseDtoFromJson(json);
+
+  UserPresenceResponseEntity toEntity() =>
+      UserPresenceResponseEntity(userPresence: presence.toEntity(), msg: msg, result: result);
 }
 
 class UserPresenceRequestDto {

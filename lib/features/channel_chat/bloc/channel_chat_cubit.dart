@@ -20,7 +20,7 @@ import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
@@ -70,7 +70,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
   late final StreamSubscription<ReactionEventEntity> _reactionsSubscription;
 
   Timer? _readMessageDebounceTimer;
@@ -256,7 +256,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     }
   }
 
-  void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     for (var messageId in event.messages) {
       if (event.flag == MessageFlag.read) {
         MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);

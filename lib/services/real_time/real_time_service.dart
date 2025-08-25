@@ -5,9 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
@@ -35,19 +36,23 @@ class RealTimeService {
       StreamController<MessageEventEntity>.broadcast();
   Stream<MessageEventEntity> get messagesEventsStream => _messagesEventsController.stream;
 
-  StreamController<UpdateMessageFlagsEntity> _messageFlagsEventsController =
-      StreamController<UpdateMessageFlagsEntity>.broadcast();
-  Stream<UpdateMessageFlagsEntity> get messagesFlagsEventsStream =>
+  StreamController<UpdateMessageFlagsEventEntity> _messageFlagsEventsController =
+      StreamController<UpdateMessageFlagsEventEntity>.broadcast();
+  Stream<UpdateMessageFlagsEventEntity> get messagesFlagsEventsStream =>
       _messageFlagsEventsController.stream;
 
   StreamController<ReactionEventEntity> _reactionsEventsController =
       StreamController<ReactionEventEntity>.broadcast();
   Stream<ReactionEventEntity> get reactionsEventsStream => _reactionsEventsController.stream;
 
+  StreamController<PresenceEventEntity> _presenceEventsController =
+      StreamController<PresenceEventEntity>.broadcast();
+  Stream<PresenceEventEntity> get presenceEventsStream => _presenceEventsController.stream;
+
   Future<RegisterQueueEntity> registerQueue() async {
     try {
       final RegisterQueueEntity response = await _registerQueueUseCase.call(
-        RegisterQueueRequestBodyEntity(eventTypes: [EventTypes.message]),
+        RegisterQueueRequestBodyEntity(eventTypes: [EventTypes.message, EventTypes.realm_user]),
       );
       lastEventId = response.lastEventId;
       queueId = response.queueId;
@@ -73,9 +78,11 @@ class RealTimeService {
           case EventType.message:
             _messagesEventsController.add(event as MessageEventEntity);
           case EventType.updateMessageFlags:
-            _messageFlagsEventsController.add(event as UpdateMessageFlagsEntity);
+            _messageFlagsEventsController.add(event as UpdateMessageFlagsEventEntity);
           case EventType.reaction:
             _reactionsEventsController.add(event as ReactionEventEntity);
+          case EventType.presence:
+            _presenceEventsController.add(event as PresenceEventEntity);
           default:
             break;
         }
@@ -95,7 +102,7 @@ class RealTimeService {
 
   Future<void> startPolling() async {
     if (_messageFlagsEventsController.isClosed) {
-      _messageFlagsEventsController = StreamController<UpdateMessageFlagsEntity>.broadcast();
+      _messageFlagsEventsController = StreamController<UpdateMessageFlagsEventEntity>.broadcast();
     }
     if (_messagesEventsController.isClosed) {
       _messagesEventsController = StreamController<MessageEventEntity>.broadcast();
@@ -105,6 +112,9 @@ class RealTimeService {
     }
     if (_reactionsEventsController.isClosed) {
       _reactionsEventsController = StreamController<ReactionEventEntity>.broadcast();
+    }
+    if (_presenceEventsController.isClosed) {
+      _presenceEventsController = StreamController<PresenceEventEntity>.broadcast();
     }
     if (_isPolling) return;
     try {
@@ -132,5 +142,6 @@ class RealTimeService {
     _messagesEventsController.close();
     _messageFlagsEventsController.close();
     _reactionsEventsController.close();
+    _presenceEventsController.close();
   }
 }

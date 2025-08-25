@@ -12,7 +12,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
@@ -32,7 +32,7 @@ class InboxCubit extends Cubit<InboxState> {
   }
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-  late final StreamSubscription<UpdateMessageFlagsEntity> _messageFlagsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
 
   final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
   final GetUserByIdUseCase _getUserByIdUseCase = getIt<GetUserByIdUseCase>();
@@ -121,7 +121,7 @@ class InboxCubit extends Cubit<InboxState> {
     emit(state.copyWith(dmMessages: state.dmMessages, channelMessages: state.channelMessages));
   }
 
-  void _onMessageFlagsEvents(UpdateMessageFlagsEntity event) {
+  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       for (var eventMessage in event.messages) {
         for (var user in state.dmMessages.keys) {

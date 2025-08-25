@@ -6,4 +6,6 @@ enum PresenceStatus {
   idle,
   @JsonValue("active")
   active,
+  @JsonValue('offline')
+  offline,
 }

@@ -27,4 +27,5 @@ Map<String, dynamic> _$UpdatePresenceRequestDtoToJson(
 const _$PresenceStatusEnumMap = {
   PresenceStatus.idle: 'idle',
   PresenceStatus.active: 'active',
+  PresenceStatus.offline: 'offline',
 };

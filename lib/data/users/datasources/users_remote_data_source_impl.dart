@@ -97,4 +97,13 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<UserPresenceResponseDto> getUserPresence(UserPresenceRequestDto body) async {
+    try {
+      return await apiClient.getUserPresence(body.userId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

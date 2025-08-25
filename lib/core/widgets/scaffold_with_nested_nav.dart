@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -35,13 +33,13 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   void _initIdleDetector() {
     InAppIdleDetector.initialize(
-      timeout: Duration(minutes: 1),
+      timeout: Duration(seconds: 5),
       onIdle: () async {
         final UpdatePresenceRequestEntity body = UpdatePresenceRequestEntity(
           lastUpdateId: -1,
           status: PresenceStatus.idle,
-          newUserInput: false,
-          pingOnly: true,
+          newUserInput: true,
+          pingOnly: false,
         );
         await context.read<ProfileCubit>().updatePresence(body);
       },
@@ -50,7 +48,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           lastUpdateId: -1,
           status: PresenceStatus.active,
           newUserInput: true,
-          pingOnly: true,
+          pingOnly: false,
         );
         await context.read<ProfileCubit>().updatePresence(body);
       },
@@ -91,7 +89,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               if (currentSize(context) > ScreenSize.tablet) ...[
                 BlocBuilder<MessagesCubit, MessagesState>(
                   builder: (context, state) {
-                    inspect(state);
                     return NavigationRail(
                       selectedIndex: widget.navigationShell.currentIndex,
                       onDestinationSelected: _goBranch,

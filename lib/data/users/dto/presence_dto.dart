@@ -6,7 +6,7 @@ part 'presence_dto.g.dart';
 
 @JsonSerializable()
 class PresenceDto {
-  final PresenceDetailDto aggregated;
+  final PresenceDetailDto? aggregated;
   final PresenceDetailDto? website;
 
   PresenceDto({required this.aggregated, this.website});
@@ -15,31 +15,21 @@ class PresenceDto {
   Map<String, dynamic> toJson() => _$PresenceDtoToJson(this);
 
   PresenceEntity toEntity() =>
-      PresenceEntity(aggregated: aggregated.toEntity(), website: website?.toEntity());
+      PresenceEntity(aggregated: aggregated?.toEntity(), website: website?.toEntity());
 }
 
 @JsonSerializable()
 class PresenceDetailDto {
-  final String client;
   final PresenceStatus status;
   final int timestamp;
   final bool? pushable;
 
-  PresenceDetailDto({
-    required this.client,
-    required this.status,
-    required this.timestamp,
-    this.pushable,
-  });
+  PresenceDetailDto({required this.status, required this.timestamp, this.pushable});
 
   factory PresenceDetailDto.fromJson(Map<String, dynamic> json) =>
       _$PresenceDetailDtoFromJson(json);
   Map<String, dynamic> toJson() => _$PresenceDetailDtoToJson(this);
 
-  PresenceDetailEntity toEntity() => PresenceDetailEntity(
-    client: client,
-    status: status,
-    timestamp: timestamp,
-    pushable: pushable,
-  );
+  PresenceDetailEntity toEntity() =>
+      PresenceDetailEntity(status: status, timestamp: timestamp, pushable: pushable);
 }
