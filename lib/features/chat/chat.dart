@@ -6,15 +6,16 @@ import 'package:genesis_workspace/features/chat/view/chat_view.dart';
 
 class Chat extends StatelessWidget {
   final int? userId;
+  final int? unreadMessagesCount;
 
-  const Chat({super.key, required this.userId});
+  const Chat({super.key, required this.userId, this.unreadMessagesCount});
 
   @override
   Widget build(BuildContext context) {
     assert(userId != null, 'userId cannot be null');
     return BlocProvider(
       create: (context) => getIt<ChatCubit>(),
-      child: ChatView(userId: userId!),
+      child: ChatView(userId: userId!, unreadMessagesCount: unreadMessagesCount),
     );
   }
 }

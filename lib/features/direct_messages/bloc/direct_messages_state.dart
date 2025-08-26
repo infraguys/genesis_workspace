@@ -8,6 +8,7 @@ class DirectMessagesState {
   List<int> typingUsers;
   UserEntity? selfUser;
   int? selectedUserId;
+  int? selectedUnreadMessagesCount;
 
   DirectMessagesState({
     required this.users,
@@ -17,6 +18,7 @@ class DirectMessagesState {
     this.selfUser,
     required this.unreadMessages,
     this.selectedUserId,
+    this.selectedUnreadMessagesCount,
   });
 
   DirectMessagesState copyWith({
@@ -27,6 +29,7 @@ class DirectMessagesState {
     UserEntity? selfUser,
     List<MessageEntity>? unreadMessages,
     int? selectedUserId,
+    int? selectedUnreadMessagesCount,
   }) {
     return DirectMessagesState(
       users: users ?? this.users,
@@ -36,6 +39,7 @@ class DirectMessagesState {
       selfUser: selfUser ?? this.selfUser,
       unreadMessages: unreadMessages ?? this.unreadMessages,
       selectedUserId: selectedUserId ?? this.selectedUserId,
+      selectedUnreadMessagesCount: selectedUnreadMessagesCount ?? this.selectedUnreadMessagesCount,
     );
   }
 }

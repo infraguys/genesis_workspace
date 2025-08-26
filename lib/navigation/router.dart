@@ -134,10 +134,12 @@ final router = GoRouter(
           path: ':userId',
           name: Routes.chat,
           builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
             final idStr = state.pathParameters['userId'];
             final id = int.tryParse(idStr ?? '');
+            final unreadMessagesCount = extra['unreadMessagesCount'];
             assert(id != null, 'userId must be int');
-            return Chat(userId: id!);
+            return Chat(userId: id!, unreadMessagesCount: unreadMessagesCount);
           },
         ),
       ],
@@ -145,7 +147,14 @@ final router = GoRouter(
     GoRoute(
       path: Routes.channelChat,
       name: Routes.channelChat,
-      builder: (context, state) => ChannelChat(extra: state.extra as ChannelChatExtra),
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        final idStr = state.pathParameters['channelId'];
+        final id = int.tryParse(idStr ?? '');
+        final unreadMessagesCount = extra['unreadMessagesCount'];
+        assert(id != null, 'channelId must be int');
+        return ChannelChat(extra: state.extra as ChannelChatExtra);
+      },
     ),
     GoRoute(
       path: Routes.splashScreen,
