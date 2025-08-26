@@ -80,7 +80,11 @@ class ChatCubit extends Cubit<ChatState> {
 
   Timer? _readMessageDebounceTimer;
 
-  Future<void> getUserById({required int userId, required int myUserId}) async {
+  Future<void> getInitialData({
+    required int userId,
+    required int myUserId,
+    int? unreadMessagesCount,
+  }) async {
     state.chatId = userId;
     try {
       final UserEntity user = await _getUserByIdUseCase.call(userId);
@@ -89,21 +93,26 @@ class ChatCubit extends Cubit<ChatState> {
       dmUser.presenceStatus = presence.userPresence.aggregated!.status;
       dmUser.presenceTimestamp = presence.userPresence.aggregated!.timestamp;
       emit(state.copyWith(userEntity: dmUser));
-      await getMessages(myUserId: myUserId);
+      await getMessages(myUserId: myUserId, unreadMessagesCount: unreadMessagesCount);
     } catch (e) {
       inspect(e);
     }
   }
 
-  Future<void> getMessages({required int myUserId}) async {
+  Future<void> getMessages({required int myUserId, int? unreadMessagesCount}) async {
     state.myUserId = myUserId;
+    int numBefore = 25;
+    if (unreadMessagesCount != null && unreadMessagesCount > numBefore) {
+      numBefore = unreadMessagesCount + 5;
+    }
+
     try {
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
         narrow: [
           MessageNarrowEntity(operator: NarrowOperator.dm, operand: [state.userEntity!.userId]),
         ],
-        numBefore: 25,
+        numBefore: numBefore,
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(body);

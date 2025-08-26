@@ -11,7 +11,7 @@ class DirectMessages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<DirectMessagesCubit>()..selectUserChat(initialUserId),
+      create: (context) => getIt<DirectMessagesCubit>()..selectUserChat(userId: initialUserId),
       child: DirectMessagesView(),
     );
   }

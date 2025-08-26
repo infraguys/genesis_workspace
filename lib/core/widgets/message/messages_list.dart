@@ -10,6 +10,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
@@ -43,35 +44,82 @@ class _MessagesListState extends State<MessagesList> {
   bool _showDayLabel = false;
   bool _showScrollToBottom = false;
   Timer? _dayLabelTimer;
+  int? _firstUnreadIndexInReversed;
 
-  late final ScrollController _scrollController;
+  // late final ScrollController _autoScrollController;
   late final UserEntity? _myUser;
+  late final AutoScrollController _autoScrollController;
 
   bool showEmojiPicker = false;
 
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) {
-      BrowserContextMenu.disableContextMenu();
-    }
-    _scrollController = widget.controller;
-    _scrollController.addListener(_onScroll);
+    if (kIsWeb) BrowserContextMenu.disableContextMenu();
+
+    _autoScrollController = AutoScrollController(axis: Axis.vertical);
+
+    _autoScrollController.addListener(_onScroll);
+
     _myUser = context.read<ProfileCubit>().state.user;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToFirstUnreadIfNeeded();
+    });
   }
 
   @override
   void dispose() {
-    if (kIsWeb) {
-      BrowserContextMenu.enableContextMenu();
-    }
-    _scrollController.removeListener(_onScroll);
+    if (kIsWeb) BrowserContextMenu.enableContextMenu();
+    _autoScrollController.removeListener(_onScroll);
     _dayLabelTimer?.cancel();
     super.dispose();
   }
 
+  void _scrollToFirstUnreadIfNeeded() {
+    final List<MessageEntity> reversedMessages = widget.messages.reversed.toList();
+
+    // Находим границу "последнее прочитанное -> первое непрочитанное"
+    _firstUnreadIndexInReversed = _findFirstUnreadBoundaryIndex(reversedMessages);
+
+    if (_firstUnreadIndexInReversed != null) {
+      _autoScrollController.scrollToIndex(
+        _firstUnreadIndexInReversed!,
+        preferPosition: AutoScrollPosition.end, // начало экрана
+        duration: const Duration(milliseconds: 300),
+      );
+    } else {
+      // Если все прочитано — логично показать самый низ (последние сообщения).
+      // В вашей конфигурации (reverse: true + reversed list)
+      // индекс 0 — это самый новый элемент (визуально внизу).
+      _autoScrollController.jumpTo(0);
+    }
+  }
+
+  int? _findFirstUnreadBoundaryIndex(List<MessageEntity> reversedMessages) {
+    // Идем СНИЗУ (самые старые) вверх.
+    for (int index = reversedMessages.length - 1; index >= 0; index--) {
+      final MessageEntity message = reversedMessages[index];
+      final bool isRead = message.flags?.contains('read') ?? false;
+
+      if (!isRead) {
+        final MessageEntity? previous = (index + 1 < reversedMessages.length)
+            ? reversedMessages[index + 1]
+            : null;
+        final bool previousIsRead = previous == null
+            ? true
+            : (previous.flags?.contains('read') ?? false);
+
+        if (previousIsRead) {
+          return index; // граница: первое непрочитанное
+        }
+      }
+    }
+    return null;
+  }
+
   void _onScroll() {
-    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+    if (_autoScrollController.offset >= _autoScrollController.position.maxScrollExtent &&
         !widget.isLoadingMore) {
       if (widget.loadMore != null) {
         widget.loadMore!();
@@ -87,8 +135,8 @@ class _MessagesListState extends State<MessagesList> {
 
     final showScrollToBottomOffset = 200.0;
     final isNearBottom =
-        _scrollController.offset <=
-        _scrollController.position.minScrollExtent + showScrollToBottomOffset;
+        _autoScrollController.offset <=
+        _autoScrollController.position.minScrollExtent + showScrollToBottomOffset;
 
     if (_showScrollToBottom == isNearBottom) {
       setState(() {
@@ -98,8 +146,8 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void _scrollToBottom() {
-    _scrollController.animateTo(
-      _scrollController.position.minScrollExtent,
+    _autoScrollController.animateTo(
+      _autoScrollController.position.minScrollExtent,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
@@ -116,7 +164,7 @@ class _MessagesListState extends State<MessagesList> {
           child: Stack(
             children: [
               ListView.separated(
-                controller: _scrollController,
+                controller: _autoScrollController,
                 reverse: true,
                 itemCount: reversedMessages.length,
                 padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
@@ -189,30 +237,35 @@ class _MessagesListState extends State<MessagesList> {
                         messageDate.year != prevMessageDate.year;
                   }
 
-                  return VisibilityDetector(
-                    key: UniqueKey(),
-                    onVisibilityChanged: (info) {
-                      final visiblePercentage = info.visibleFraction * 100;
-                      if (visiblePercentage > 50) {
-                        final label = _getDayLabel(context, messageDate);
-                        if (_currentDayLabel != label) {
-                          setState(() => _currentDayLabel = label);
+                  return AutoScrollTag(
+                    index: index,
+                    key: ValueKey(index),
+                    controller: _autoScrollController,
+                    child: VisibilityDetector(
+                      key: UniqueKey(),
+                      onVisibilityChanged: (info) {
+                        final visiblePercentage = info.visibleFraction * 100;
+                        if (visiblePercentage > 50) {
+                          final label = _getDayLabel(context, messageDate);
+                          if (_currentDayLabel != label) {
+                            setState(() => _currentDayLabel = label);
+                          }
                         }
-                      }
-                      if (visiblePercentage > 50 &&
-                          (message.flags == null ||
-                              message.flags!.isEmpty ||
-                              (message.flags != null && !message.flags!.contains('read')))) {
-                        widget.onRead?.call(message.id);
-                      }
-                    },
-                    child: MessageItem(
-                      isMyMessage: isMyMessage,
-                      message: message,
-                      messageOrder: messageOrder,
-                      showTopic: widget.showTopic,
-                      myUserId: widget.myUserId,
-                      isNewDay: isNewDay,
+                        if (visiblePercentage > 50 &&
+                            (message.flags == null ||
+                                message.flags!.isEmpty ||
+                                (message.flags != null && !message.flags!.contains('read')))) {
+                          widget.onRead?.call(message.id);
+                        }
+                      },
+                      child: MessageItem(
+                        isMyMessage: isMyMessage,
+                        message: message,
+                        messageOrder: messageOrder,
+                        showTopic: widget.showTopic,
+                        myUserId: widget.myUserId,
+                        isNewDay: isNewDay,
+                      ),
                     ),
                   );
                 },
