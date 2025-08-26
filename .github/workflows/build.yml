@@ -15,7 +15,9 @@ on:
 
 env:
   ARTIFACTS_PATH: artifacts
+  PROJECT_NAME: genesis_workspace
   REPO_ENDPOINT: http://10.20.0.1:8081
+  REPO_ENDPOINT_PUT: http://10.20.0.1:8082
   CORE_ENDPOINT: http://10.20.0.2:11010
   NODE_NS_UUID: 3ea35d89-fc3c-43d1-82fe-40980edbf617
   PROJECT_ID: d4ef38ee-2667-4931-90fd-c858d4bc5f1c
@@ -30,12 +32,56 @@ env:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: [self-hosted, flutter]
     strategy:
       fail-fast: true
     steps:
       - uses: actions/checkout@v3
-      - name: Build Genesis Workspace
+      - name: Build Genesis Workspace Android & Web
+        env:
+            DEV_KEYS: ${{ secrets.DEV_KEYS }}
+            UI_BUILD_ENV_BUILD_TARGET: ${{ github.event.inputs.build_target }}
+            PROD_URL: ${{ secrets.PROD_URL }}
+            DEV_URL: ${{ secrets.DEV_URL }}
+        run: |
+          set -eux
+          mkdir -p ${ARTIFACTS_PATH}
+          BUILD_TARGET="${UI_BUILD_ENV_BUILD_TARGET:-ci_stage}"
+          WEB_DIR="$(pwd)/__html"
+          mkdir -p "${WEB_DIR}"
+
+          # Install DevTools
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install genesis-devtools
+          VERSION="$(genesis get-version .)"
+          
+          if [[ "${UI_BUILD_ENV_BUILD_TARGET}" == "ci_prod" ]]; then
+            export UI_BUILD_ENV_prod_url="${PROD_URL}"
+            python3 /usr/local/bin/make_ui_build_env
+            make ci_prod_apk
+            curl -X PUT --upload-file build/app/outputs/flutter-apk/app-prod-release.apk \
+              $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-app.apk
+            make ci_prod_web
+          else
+            export UI_BUILD_ENV_dev_url="${DEV_URL}"
+            python3 /usr/local/bin/make_ui_build_env
+            make ci_stage_apk
+            curl -X PUT --upload-file build/app/outputs/flutter-apk/app-stage-release.apk \
+              $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-app.apk
+            make ci_stage_web
+          fi
+
+          find "build/web/" -maxdepth 1 -type f -exec mv -t "$WEB_DIR/" {} +
+          cp -r "build/web/assets" "$WEB_DIR/"
+          cd "$WEB_DIR"
+          tar -czf /tmp/web.tar.gz . 
+          curl -X PUT --upload-file /tmp/web.tar.gz \
+            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-web.tar.gz
+          cd
+          rm -rf "$WEB_DIR" /tmp/web.tar.gz
+
+      - name: Build Genesis Workspace VM image
         env:
             DEV_KEYS: ${{ secrets.DEV_KEYS }}
             UI_BUILD_ENV_BUILD_TARGET: ${{ github.event.inputs.build_target }}
@@ -49,32 +95,24 @@ jobs:
           # Node UUID based on the build target
           python3 -c "import uuid; print(uuid.uuid5(uuid.UUID(\"${NODE_NS_UUID}\"),\"${BUILD_TARGET}\"))" > "${ARTIFACTS_PATH}/node_uuid.txt"
 
-          if [[ "${UI_BUILD_ENV_BUILD_TARGET}" == "ci_prod" ]]; then
-            export UI_BUILD_ENV_prod_url="${PROD_URL}"
-          else
-            export UI_BUILD_ENV_dev_url="${DEV_URL}"
-          fi
-
           # Install DevTools
-          rm -fr venv
           python3 -m venv venv
           source venv/bin/activate
           pip install genesis-devtools
-
+          
+          VERSION="$(genesis get-version .)"
           echo "${DEV_KEYS}" > dev-keys.txt
+          export UI_BUILD_ENV_WEB_ARCHIVE="$REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-web.tar.gz"
 
           genesis build $(pwd) -i dev-keys.txt
 
-          # Temporary upload step is done in the build script
-          VERSION="$(genesis get-version .)"
-          echo "${VERSION}" > "${ARTIFACTS_PATH}/version.txt"
-          ELEMENT_PATH="/var/lib/repository/genesis_workspace"
+          # Upload the VM image
+          curl -X PUT --upload-file output/genesis-workspace.raw \
+            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/genesis-workspace.raw
 
-          rm -fr "${ELEMENT_PATH}/${VERSION}"
-          mkdir -p "${ELEMENT_PATH}/${VERSION}"
-          mv output/genesis-workspace.raw "${ELEMENT_PATH}/${VERSION}/"
-          cd ${ELEMENT_PATH}/${VERSION}/ && \
-            sha256sum genesis-workspace.raw >> ${ELEMENT_PATH}/${VERSION}/SHA256SUMS
+          # Temporary upload step is done in the build script
+          echo "${VERSION}" > "${ARTIFACTS_PATH}/version.txt"
+
       - name: Upload the build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -82,7 +120,7 @@ jobs:
           path: artifacts/
       
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, flutter]
     needs: [build]
     steps:
       - name: Download the build artifacts
@@ -106,6 +144,7 @@ jobs:
           pip install genesis-ci-tools
 
           genesis-ci -e $CORE_ENDPOINT -u $CORE_USER -p $CORE_PASSWORD nodes add-or-update \
+            --wait \
             -u $NODE_UUID \
             -p $PROJECT_ID \
-            -i "${REPO_ENDPOINT}/genesis_workspace/${VERSION}/genesis-workspace.raw"
+            -i "${REPO_ENDPOINT}/${PROJECT_NAME}/${VERSION}/genesis-workspace.raw"
