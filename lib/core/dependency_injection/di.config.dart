@@ -51,6 +51,8 @@ import 'package:genesis_workspace/domain/users/repositories/users_repository.dar
     as _i125;
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart'
     as _i837;
+import 'package:genesis_workspace/domain/users/usecases/get_channel_by_id_use_case.dart'
+    as _i720;
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart'
     as _i547;
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart'
@@ -252,6 +254,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i720.GetChannelByIdUseCase>(
+      () => _i720.GetChannelByIdUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i739.ChannelChatCubit>(
+      () => _i739.ChannelChatCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i720.GetChannelByIdUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
+      ),
+    );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
     );
@@ -270,15 +286,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i664.UpdateMessagesFlagsUseCase>(),
         gh<_i773.GetUserByIdUseCase>(),
         gh<_i394.GetUserPresenceUseCase>(),
-      ),
-    );
-    gh.factory<_i739.ChannelChatCubit>(
-      () => _i739.ChannelChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
       ),
     );
     gh.factory<_i852.DirectMessagesCubit>(

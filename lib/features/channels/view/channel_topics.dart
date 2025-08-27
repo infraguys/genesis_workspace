@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
-import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/features/channels/view/topic_item.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -65,7 +64,12 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                               } else {
                                 context.pushNamed(
                                   Routes.channelChat,
-                                  extra: ChannelChatExtra(channel: widget.channel!),
+                                  pathParameters: {
+                                    'channelId': widget.channel!.streamId.toString(),
+                                  },
+                                  extra: {
+                                    'unreadMessagesCount': widget.channel!.unreadMessages.length,
+                                  },
                                 );
                               }
                             }
@@ -99,11 +103,14 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                               );
                             } else {
                               context.pushNamed(
-                                Routes.channelChat,
-                                extra: ChannelChatExtra(
-                                  channel: widget.channel!,
-                                  topicEntity: topic!,
-                                ),
+                                Routes.channelChatTopic,
+                                pathParameters: {
+                                  'channelId': widget.channel!.streamId.toString(),
+                                  'topicName': topic!.name,
+                                },
+                                extra: {
+                                  'unreadMessagesCount': widget.channel!.unreadMessages.length,
+                                },
                               );
                             }
                           }

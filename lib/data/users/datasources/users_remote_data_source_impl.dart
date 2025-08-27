@@ -90,9 +90,9 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   }
 
   @override
-  Future<ChannelByIdResponseDto> getChannelById(int streamId) async {
+  Future<ChannelByIdResponseDto> getChannelById(ChannelByIdRequestDto body) async {
     try {
-      return await apiClient.getChannelById(streamId);
+      return await apiClient.getChannelById(body.streamId);
     } catch (e) {
       rethrow;
     }

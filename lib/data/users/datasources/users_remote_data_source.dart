@@ -28,5 +28,5 @@ abstract class UsersRemoteDataSource {
   Future<UserPresenceResponseDto> getUserPresence(UserPresenceRequestDto body);
   Future<UserByIdResponseDto> getUserById(int userId);
   Future<UpdatePresenceResponseDto> updatePresence(UpdatePresenceRequestDto body);
-  Future<ChannelByIdResponseDto> getChannelById(int streamId);
+  Future<ChannelByIdResponseDto> getChannelById(ChannelByIdRequestDto body);
 }
