@@ -69,8 +69,6 @@ class _ChannelChatViewState extends State<ChannelChatView> {
 
   @override
   void didUpdateWidget(ChannelChatView oldWidget) {
-    print('current: ${widget.topicName} prev: ${oldWidget.topicName}');
-    print('current: ${widget.channelId} prev: ${oldWidget.channelId}');
     if (widget.channelId != oldWidget.channelId) {
       context.read<ChannelChatCubit>().getInitialData(
         streamId: widget.channelId,
@@ -83,7 +81,9 @@ class _ChannelChatViewState extends State<ChannelChatView> {
           .read<ChannelChatCubit>()
           .getChannelTopics(streamId: widget.channelId, topicName: widget.topicName)
           .then((_) {
-            context.read<ChannelChatCubit>().getChannelMessages();
+            context.read<ChannelChatCubit>().getChannelMessages(
+              unreadMessagesCount: widget.unreadMessagesCount,
+            );
           });
     }
 
