@@ -16,8 +16,14 @@ import 'package:skeletonizer/skeletonizer.dart';
 class ChannelChatView extends StatefulWidget {
   final int channelId;
   final String? topicName;
+  final int? unreadMessagesCount;
 
-  const ChannelChatView({super.key, required this.channelId, this.topicName});
+  const ChannelChatView({
+    super.key,
+    required this.channelId,
+    this.topicName,
+    this.unreadMessagesCount = 0,
+  });
 
   @override
   State<ChannelChatView> createState() => _ChannelChatViewState();
@@ -53,6 +59,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
     _future = context.read<ChannelChatCubit>().getInitialData(
       streamId: widget.channelId,
       topicName: widget.topicName,
+      unreadMessagesCount: widget.unreadMessagesCount,
     );
     _scrollController = ScrollController()..addListener(_onScroll);
     _messageController = TextEditingController();
@@ -172,6 +179,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                 onRead: (id) {
                                   context.read<ChannelChatCubit>().scheduleMarkAsRead(id);
                                 },
+                                loadMore: context.read<ChannelChatCubit>().loadMoreMessages,
                                 myUserId: _myUser.userId,
                               ),
                       ),

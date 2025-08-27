@@ -20,7 +20,7 @@ class ChatView extends StatefulWidget {
   final int userId;
   final int? unreadMessagesCount;
 
-  const ChatView({super.key, required this.userId, this.unreadMessagesCount});
+  const ChatView({super.key, required this.userId, this.unreadMessagesCount = 0});
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -45,7 +45,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    super.initState();
     WidgetsBinding.instance.addObserver(this);
     _myUser = context.read<ProfileCubit>().state.user!;
 
@@ -58,6 +57,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     _messageController = TextEditingController();
 
     _messageController.addListener(_onTextChanged);
+    super.initState();
   }
 
   @override

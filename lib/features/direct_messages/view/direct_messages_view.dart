@@ -133,7 +133,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                                   ? Expanded(
                                       key: ObjectKey(state.selectedUserId),
                                       child: Chat(
-                                        userId: state.selectedUserId,
+                                        userId: state.selectedUserId!,
                                         unreadMessagesCount: state.selectedUnreadMessagesCount,
                                       ),
                                     )
