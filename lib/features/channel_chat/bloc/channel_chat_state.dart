@@ -6,7 +6,7 @@ class ChannelChatState {
   bool isLoadingMore;
   bool isAllMessagesLoaded;
   int? lastMessageId;
-  ChannelEntity? channel;
+  StreamEntity? channel;
   TopicEntity? topic;
   int? typingUserId;
   TypingEventOp selfTypingOp;
@@ -33,7 +33,7 @@ class ChannelChatState {
     bool? isLoadingMore,
     bool? isMessagePending,
     int? lastMessageId,
-    ChannelEntity? channel,
+    StreamEntity? channel,
     int? typingUserId,
     TypingEventOp? selfTypingOp,
     TopicEntity? topic,

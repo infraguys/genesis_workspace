@@ -116,12 +116,11 @@ class ChatCubit extends Cubit<ChatState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(body);
-      state.isAllMessagesLoaded = response.foundOldest;
-      state.lastMessageId = response.messages.first.id;
-      state.messages = response.messages;
-      emit(
-        state.copyWith(messages: state.messages, isAllMessagesLoaded: state.isAllMessagesLoaded),
-      );
+      if (response.messages.isNotEmpty) {
+        state.lastMessageId = response.messages.first.id;
+        state.messages = response.messages;
+      }
+      emit(state.copyWith(messages: state.messages, isAllMessagesLoaded: response.foundOldest));
     } catch (e) {
       inspect(e);
     }

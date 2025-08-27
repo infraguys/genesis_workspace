@@ -21,3 +21,11 @@ Map<String, dynamic> _$ChannelByIdResponseDtoToJson(
   'result': instance.result,
   'stream': instance.stream,
 };
+
+ChannelByIdRequestDto _$ChannelByIdRequestDtoFromJson(
+  Map<String, dynamic> json,
+) => ChannelByIdRequestDto(streamId: (json['streamId'] as num).toInt());
+
+Map<String, dynamic> _$ChannelByIdRequestDtoToJson(
+  ChannelByIdRequestDto instance,
+) => <String, dynamic>{'streamId': instance.streamId};
