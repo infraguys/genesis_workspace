@@ -108,9 +108,7 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                                   'channelId': widget.channel!.streamId.toString(),
                                   'topicName': topic!.name,
                                 },
-                                extra: {
-                                  'unreadMessagesCount': widget.channel!.unreadMessages.length,
-                                },
+                                extra: {'unreadMessagesCount': topic.unreadMessages.length},
                               );
                             }
                           }

@@ -86,11 +86,18 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     required int streamId,
     String? topicName,
     bool? didUpdateWidget,
+    int? unreadMessagesCount,
   }) async {
     emit(state.copyWith(channel: null, topic: null, messages: []));
     try {
-      await Future.wait([getChannel(streamId: streamId), getChannelTopics(streamId: streamId)]);
-      await getChannelMessages(didUpdateWidget: didUpdateWidget);
+      await Future.wait([
+        getChannel(streamId: streamId),
+        getChannelTopics(streamId: streamId, topicName: topicName),
+      ]);
+      await getChannelMessages(
+        didUpdateWidget: didUpdateWidget,
+        unreadMessagesCount: unreadMessagesCount,
+      );
     } catch (e) {
       inspect(e);
     }
@@ -118,13 +125,17 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     }
   }
 
-  Future<void> getChannelMessages({bool? didUpdateWidget}) async {
+  Future<void> getChannelMessages({bool? didUpdateWidget, int? unreadMessagesCount}) async {
     emit(state.copyWith(isMessagesPending: true));
     if (didUpdateWidget == true) {
       state.isMessagesPending = true;
       emit(state.copyWith(isMessagesPending: state.isMessagesPending));
     }
     try {
+      int numBefore = 25;
+      if (unreadMessagesCount != null && unreadMessagesCount > 25) {
+        numBefore = unreadMessagesCount + 10;
+      }
       final response = await _getMessagesUseCase.call(
         MessagesRequestEntity(
           anchor: MessageAnchor.newest(),
@@ -133,7 +144,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
             if (state.topic != null)
               MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
           ],
-          numBefore: 25,
+          numBefore: numBefore,
           numAfter: 0,
         ),
       );

@@ -51,6 +51,9 @@ class UserTile extends StatelessWidget {
                 unreadMessagesCount: user.unreadMessages.length,
               );
               // context.setDmUserIdInUrl(user.userId);
+              // SystemNavigator.routeInformationUpdated(
+              //   uri: Uri(path: "${}"),
+              // );
             } else {
               // Мобильная навигация на подроут /direct-messages/:userId
               context.pushNamed(

@@ -48,6 +48,7 @@ class Routes {
 
 final router = GoRouter(
   initialLocation: Routes.splashScreen,
+  debugLogDiagnostics: true,
   navigatorKey: _rootNavigatorKey,
   routes: [
     StatefulShellRoute.indexedStack(
@@ -160,7 +161,7 @@ final router = GoRouter(
             final channelId = int.tryParse(channelIdStr ?? '');
             final unreadMessagesCount = extra['unreadMessagesCount'];
             assert(channelId != null, 'channelId must be int');
-            return ChannelChat(channelId: channelId!);
+            return ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount);
           },
         ),
         GoRoute(
@@ -173,7 +174,11 @@ final router = GoRouter(
             final topicName = state.pathParameters['topicName'];
             final unreadMessagesCount = extra['unreadMessagesCount'];
             assert(channelId != null, 'channelId must be int');
-            return ChannelChat(channelId: channelId!, topicName: topicName);
+            return ChannelChat(
+              channelId: channelId!,
+              topicName: topicName,
+              unreadMessagesCount: unreadMessagesCount,
+            );
           },
         ),
       ],
