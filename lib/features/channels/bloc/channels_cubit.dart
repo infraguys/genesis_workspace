@@ -79,9 +79,8 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     }
   }
 
-  void selectChannelId(int? id) {
-    state.selectedChannelId = id;
-    emit(state.copyWith(selectedChannelId: state.selectedChannelId));
+  void selectChannelId(ChannelEntity channel) {
+    emit(state.copyWith(selectedChannelId: channel.streamId, selectedChannel: channel));
   }
 
   void closeChannel() {

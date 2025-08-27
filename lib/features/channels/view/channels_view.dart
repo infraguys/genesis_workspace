@@ -161,6 +161,9 @@ class ChannelsViewState extends State<ChannelsView> {
                               child: ChannelChat(
                                 channelId: state.selectedChannelId!,
                                 topicName: state.selectedTopic?.name,
+                                unreadMessagesCount: state.selectedTopic != null
+                                    ? state.selectedTopic!.unreadMessages.length
+                                    : state.selectedChannel?.unreadMessages.length,
                               ),
                             )
                           : Expanded(child: Center(child: Text(context.t.selectAnyChannel))),
