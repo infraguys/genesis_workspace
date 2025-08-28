@@ -55,6 +55,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsReactionsRu reactions = TranslationsReactionsRu._(_root);
 	@override late final TranslationsStarredRu starred = TranslationsStarredRu._(_root);
 	@override String get selectAnyChat => 'Выберите любой чат';
+	@override late final TranslationsUnreadMarkerRu unreadMarker = TranslationsUnreadMarkerRu._(_root);
 }
 
 // Path: auth
@@ -186,4 +187,16 @@ class TranslationsStarredRu extends TranslationsStarredEn {
 	// Translations
 	@override String get title => 'Отмеченные сообщения';
 	@override String get noStarred => 'Нет отмеченных сообщений';
+}
+
+// Path: unreadMarker
+class TranslationsUnreadMarkerRu extends TranslationsUnreadMarkerEn {
+	TranslationsUnreadMarkerRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get label => 'Непрочитанные сообщения';
+	@override String labelWithCount({required Object count}) => 'Непрочитанные сообщения • ${count}';
+	@override String get a11yLabel => 'Маркер непрочитанных сообщений';
 }
