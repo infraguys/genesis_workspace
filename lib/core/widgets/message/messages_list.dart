@@ -5,13 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
+import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
+import '../../../i18n/generated/strings.g.dart';
 
 typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
 
@@ -150,6 +152,7 @@ class _MessagesListState extends State<MessagesList> {
   @override
   Widget build(BuildContext context) {
     final reversedMessages = widget.messages.reversed.toList();
+    final theme = Theme.of(context);
 
     return Column(
       children: [
@@ -175,6 +178,15 @@ class _MessagesListState extends State<MessagesList> {
                       messageDate.day != nextMessageDate.day ||
                       messageDate.month != nextMessageDate.month ||
                       messageDate.year != nextMessageDate.year;
+
+                  if (_firstUnreadIndexInReversed != null &&
+                      index == _firstUnreadIndexInReversed!) {
+                    return UnreadMessagesMarker(
+                      unreadCount: reversedMessages
+                          .where((message) => message.hasUnreadMessages)
+                          .length,
+                    );
+                  }
 
                   if (isNewDay) {
                     return MessageDayLabel(label: _getDayLabel(context, messageDate));
@@ -229,7 +241,6 @@ class _MessagesListState extends State<MessagesList> {
                         messageDate.month != prevMessageDate.month ||
                         messageDate.year != prevMessageDate.year;
                   }
-
                   return AutoScrollTag(
                     index: index,
                     key: ValueKey(index),

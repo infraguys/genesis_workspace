@@ -88,6 +88,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Select any chat'
 	String get selectAnyChat => 'Select any chat';
+
+	late final TranslationsUnreadMarkerEn unreadMarker = TranslationsUnreadMarkerEn.internal(_root);
 }
 
 // Path: auth
@@ -283,4 +285,22 @@ class TranslationsStarredEn {
 
 	/// en: 'No starred messages'
 	String get noStarred => 'No starred messages';
+}
+
+// Path: unreadMarker
+class TranslationsUnreadMarkerEn {
+	TranslationsUnreadMarkerEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Unread messages'
+	String get label => 'Unread messages';
+
+	/// en: 'Unread messages • {count}'
+	String labelWithCount({required Object count}) => 'Unread messages • ${count}';
+
+	/// en: 'Unread messages marker'
+	String get a11yLabel => 'Unread messages marker';
 }

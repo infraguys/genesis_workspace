@@ -75,5 +75,10 @@
    "title": "Starred Messages",
     "no_starred": "No starred messages"
   },
-  "select_any_chat": "Select any chat"
+  "select_any_chat": "Select any chat",
+  "unread_marker": {
+    "label": "Unread messages",
+    "label_with_count": "Unread messages • {count}",
+    "a11y_label": "Unread messages marker"
+  }
 }
