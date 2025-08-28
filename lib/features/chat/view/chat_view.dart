@@ -169,7 +169,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                   ? Skeletonizer(
                                       enabled: true,
                                       child: ListView.separated(
-                                        itemCount: 15,
+                                        itemCount: 20,
                                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12,

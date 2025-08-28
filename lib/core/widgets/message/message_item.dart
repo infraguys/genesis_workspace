@@ -113,6 +113,8 @@ class MessageItem extends StatelessWidget {
           position: PopupPosition.auto,
           animationCurve: Curves.bounceInOut,
           contentPadding: EdgeInsets.zero,
+          rootNavigator: true,
+          isLongPress: true,
           contentDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           content: ReactionsContextMenu(
             messageId: message.id,
