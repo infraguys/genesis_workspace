@@ -242,6 +242,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i773.GetUserByIdUseCase>(
       () => _i773.GetUserByIdUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i720.GetChannelByIdUseCase>(
+      () => _i720.GetChannelByIdUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i194.GetUsersUseCase>(
       () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
     );
@@ -253,9 +256,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i720.GetChannelByIdUseCase>(
-      () => _i720.GetChannelByIdUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
