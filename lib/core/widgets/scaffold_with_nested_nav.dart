@@ -23,7 +23,6 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation>
     with WidgetsBindingObserver {
   late final Future _future;
-  // late final RealTimeCubit _realTimeCubit;
 
   void _goBranch(int index) {
     widget.navigationShell.goBranch(

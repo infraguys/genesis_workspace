@@ -113,7 +113,6 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     try {
       final response = await _getSubscribedChannelsUseCase.call(true);
       state.channels = response.map((e) => e.toChannelEntity()).toList();
-      inspect(response);
       emit(state.copyWith(channels: state.channels));
     } catch (e) {
       inspect(e);

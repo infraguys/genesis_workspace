@@ -46,7 +46,6 @@ class _MessagesListState extends State<MessagesList> {
   Timer? _dayLabelTimer;
   int? _firstUnreadIndexInReversed;
 
-  // late final ScrollController _autoScrollController;
   late final UserEntity? _myUser;
   late final AutoScrollController _autoScrollController;
 
@@ -79,7 +78,6 @@ class _MessagesListState extends State<MessagesList> {
   void _scrollToFirstUnreadIfNeeded() {
     final List<MessageEntity> reversedMessages = widget.messages.reversed.toList();
 
-    // Находим границу "последнее прочитанное -> первое непрочитанное"
     _firstUnreadIndexInReversed = _findFirstUnreadBoundaryIndex(reversedMessages);
 
     if (_firstUnreadIndexInReversed != null) {
@@ -89,15 +87,11 @@ class _MessagesListState extends State<MessagesList> {
         duration: const Duration(milliseconds: 300),
       );
     } else {
-      // Если все прочитано — логично показать самый низ (последние сообщения).
-      // В вашей конфигурации (reverse: true + reversed list)
-      // индекс 0 — это самый новый элемент (визуально внизу).
       _autoScrollController.jumpTo(0);
     }
   }
 
   int? _findFirstUnreadBoundaryIndex(List<MessageEntity> reversedMessages) {
-    // Идем СНИЗУ (самые старые) вверх.
     for (int index = reversedMessages.length - 1; index >= 0; index--) {
       final MessageEntity message = reversedMessages[index];
       final bool isRead = message.flags?.contains('read') ?? false;
@@ -111,7 +105,7 @@ class _MessagesListState extends State<MessagesList> {
             : (previous.flags?.contains('read') ?? false);
 
         if (previousIsRead) {
-          return index; // граница: первое непрочитанное
+          return index;
         }
       }
     }
@@ -201,7 +195,6 @@ class _MessagesListState extends State<MessagesList> {
                   final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
                   final isMyMessage = message.senderId == _myUser?.userId;
 
-                  // Определяем порядок отображения пузырей сообщений
                   final isNewUser = message.senderId != nextMessage?.senderId;
                   final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
                   final isMessageMiddle =
