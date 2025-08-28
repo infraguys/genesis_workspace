@@ -69,8 +69,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     }
   }
 
-  selectUserChat(int? userId) {
-    emit(state.copyWith(selectedUserId: userId));
+  selectUserChat({int? userId, int? unreadMessagesCount}) {
+    emit(state.copyWith(selectedUserId: userId, selectedUnreadMessagesCount: unreadMessagesCount));
   }
 
   Future<void> getUsers() async {
@@ -83,7 +83,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       state.filteredUsers = mappedUsers;
 
       await Future.wait([getUnreadMessages(), getAllPresences()]);
-      inspect(state.users);
       _sortUsers();
     } catch (e) {
       inspect(e);
@@ -100,7 +99,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           state.users[indexOfUser].presenceTimestamp = presence.aggregated!.timestamp;
         }
       });
-      inspect(response);
     } catch (e) {
       inspect(e);
     }
@@ -216,7 +214,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   }
 
   void _onPresenceEvents(PresenceEventEntity event) {
-    inspect(event);
     final user = state.users.firstWhere((user) => user.userId == event.userId);
     final indexOf = state.users.indexOf(user);
     if (event.presenceEntity.website != null) {

@@ -38,6 +38,7 @@ class Routes {
   static const String feed = '/feed';
   static const String chat = '/chat';
   static const String channelChat = '/channel-chat';
+  static const String channelChatTopic = '/channel-chat/topic';
   static const String inbox = '/inbox';
   static const String mentions = '/mentions';
   static const String reactions = '/reactions';
@@ -126,26 +127,60 @@ final router = GoRouter(
       path: Routes.directMessages,
       name: Routes.directMessages,
       builder: (context, state) {
-        final userId = int.tryParse(state.uri.queryParameters['userId'] ?? '');
-        return DirectMessages(initialUserId: userId);
+        return DirectMessages();
       },
       routes: [
         GoRoute(
           path: ':userId',
           name: Routes.chat,
           builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
             final idStr = state.pathParameters['userId'];
             final id = int.tryParse(idStr ?? '');
+            final unreadMessagesCount = extra['unreadMessagesCount'];
             assert(id != null, 'userId must be int');
-            return Chat(userId: id!);
+            return Chat(userId: id!, unreadMessagesCount: unreadMessagesCount);
           },
         ),
       ],
     ),
     GoRoute(
-      path: Routes.channelChat,
-      name: Routes.channelChat,
-      builder: (context, state) => ChannelChat(extra: state.extra as ChannelChatExtra),
+      path: Routes.channels,
+      name: Routes.channels,
+      builder: (context, state) {
+        return Channels();
+      },
+      routes: [
+        GoRoute(
+          path: ':channelId',
+          name: Routes.channelChat,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            final channelIdStr = state.pathParameters['channelId'];
+            final channelId = int.tryParse(channelIdStr ?? '');
+            final unreadMessagesCount = extra['unreadMessagesCount'];
+            assert(channelId != null, 'channelId must be int');
+            return ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount);
+          },
+        ),
+        GoRoute(
+          path: ':channelId/:topicName',
+          name: Routes.channelChatTopic,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            final channelIdStr = state.pathParameters['channelId'];
+            final channelId = int.tryParse(channelIdStr ?? '');
+            final topicName = state.pathParameters['topicName'];
+            final unreadMessagesCount = extra['unreadMessagesCount'];
+            assert(channelId != null, 'channelId must be int');
+            return ChannelChat(
+              channelId: channelId!,
+              topicName: topicName,
+              unreadMessagesCount: unreadMessagesCount,
+            );
+          },
+        ),
+      ],
     ),
     GoRoute(
       path: Routes.splashScreen,
@@ -190,20 +225,6 @@ final router = GoRouter(
             );
           },
         );
-      },
-    ),
-    GoRoute(
-      // важна точная сигнатура пути, которую вы указали в deep link
-      path: '/auth/callback',
-      name: 'auth_callback',
-      builder: (context, state) {
-        // Разбор query через state.uri
-        final uri = state.uri;
-        final code = uri.queryParameters['code'];
-        final error = uri.queryParameters['error'];
-        final stateParam = uri.queryParameters['state']; // если используете PKCE/state
-
-        return Scaffold(body: Center(child: Text('$code, $error, $stateParam')));
       },
     ),
     GoRoute(

@@ -24,7 +24,7 @@ class ChannelItem extends StatelessWidget {
     return InkWell(
       highlightColor: theme.colorScheme.primaryContainer,
       onTap: () async {
-        context.read<ChannelsCubit>().selectChannelId(channel.streamId);
+        context.read<ChannelsCubit>().selectChannelId(channel);
         if (currentSize(context) > ScreenSize.tablet) {
           context.read<ChannelsCubit>().openTopic(channel: channel);
         }

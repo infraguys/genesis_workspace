@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
@@ -17,4 +18,5 @@ abstract class UsersRepository {
   Future<UserPresenceResponseEntity> getUserPresence(UserPresenceRequestEntity body);
   Future<UserEntity> getUserById(int userId);
   Future<UpdatePresenceResponseEntity> updatePresence(UpdatePresenceRequestEntity body);
+  Future<ChannelByIdResponseEntity> getChannelById(ChannelByIdRequestEntity body);
 }

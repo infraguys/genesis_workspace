@@ -101,8 +101,6 @@ class MessagesCubit extends Cubit<MessagesState> {
         newMessages.removeWhere((message) => message.id == messageId);
       }
     }
-    inspect(event);
-    inspect(newMessages);
     emit(state.copyWith(messages: newMessages));
   }
 

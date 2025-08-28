@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
@@ -45,14 +44,23 @@ class UserTile extends StatelessWidget {
         }
         return ListTile(
           onTap: () {
+            // context.go('/direct-messages/${user.userId}');
             if (currentSize(context) > ScreenSize.lTablet) {
-              context.read<DirectMessagesCubit>().selectUserChat(user.userId);
-
-              // 2) Синхронизируем URL через query-параметр
-              context.setDmUserIdInUrl(user.userId);
+              context.read<DirectMessagesCubit>().selectUserChat(
+                userId: user.userId,
+                unreadMessagesCount: user.unreadMessages.length,
+              );
+              // context.setDmUserIdInUrl(user.userId);
+              // SystemNavigator.routeInformationUpdated(
+              //   uri: Uri(path: "${}"),
+              // );
             } else {
               // Мобильная навигация на подроут /direct-messages/:userId
-              context.pushNamed(Routes.chat, pathParameters: {'userId': user.userId.toString()});
+              context.pushNamed(
+                Routes.chat,
+                pathParameters: {'userId': user.userId.toString()},
+                extra: {'unreadMessagesCount': user.unreadMessages.length},
+              );
             }
           },
           title: Text(user.fullName, overflow: TextOverflow.ellipsis),

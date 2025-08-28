@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
-import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/inbox/bloc/inbox_cubit.dart';
 import 'package:genesis_workspace/features/inbox/view/section_header.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -126,15 +124,21 @@ class _InboxViewState extends State<InboxView> {
                                   final channel = await context.read<InboxCubit>().getChannelById(
                                     streamId!,
                                   );
-                                  final ChannelChatExtra extra = ChannelChatExtra(
-                                    channel: channel.toChannelEntity(),
-                                    topicEntity: TopicEntity(
-                                      name: topicName,
-                                      maxId: maxId,
-                                      unreadMessages: {},
-                                    ),
+                                  // final ChannelChatExtra extra = ChannelChatExtra(
+                                  //   channel: channel.toChannelEntity(),
+                                  //   topicEntity: TopicEntity(
+                                  //     name: topicName,
+                                  //     maxId: maxId,
+                                  //     unreadMessages: {},
+                                  //   ),
+                                  // );
+                                  context.pushNamed(
+                                    Routes.channelChatTopic,
+                                    pathParameters: {
+                                      'channelId': channel.streamId.toString(),
+                                      'topicName': topicName,
+                                    },
                                   );
-                                  context.pushNamed(Routes.channelChat, extra: extra);
                                 },
                         );
                       }).toList(),

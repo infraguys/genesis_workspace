@@ -18,8 +18,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatView extends StatefulWidget {
   final int userId;
+  final int? unreadMessagesCount;
 
-  const ChatView({super.key, required this.userId});
+  const ChatView({super.key, required this.userId, this.unreadMessagesCount = 0});
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -44,18 +45,19 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    super.initState();
     WidgetsBinding.instance.addObserver(this);
     _myUser = context.read<ProfileCubit>().state.user!;
 
-    _future = context.read<ChatCubit>().getUserById(
+    _future = context.read<ChatCubit>().getInitialData(
       userId: widget.userId,
       myUserId: _myUser.userId,
+      unreadMessagesCount: widget.unreadMessagesCount,
     );
     _controller = ScrollController();
     _messageController = TextEditingController();
 
     _messageController.addListener(_onTextChanged);
+    super.initState();
   }
 
   @override

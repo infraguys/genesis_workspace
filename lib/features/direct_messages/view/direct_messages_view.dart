@@ -10,7 +10,8 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class DirectMessagesView extends StatefulWidget {
-  const DirectMessagesView({super.key});
+  final int? initialUserId;
+  const DirectMessagesView({super.key, this.initialUserId});
 
   @override
   State<DirectMessagesView> createState() => _DirectMessagesViewState();
@@ -22,6 +23,12 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
   bool _isFutureInitialized = false;
 
   static const double desktopDmsWidth = 400;
+
+  @override
+  void initState() {
+    context.read<DirectMessagesCubit>().selectUserChat(userId: widget.initialUserId);
+    super.initState();
+  }
 
   @override
   void didChangeDependencies() {
@@ -125,7 +132,10 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                               state.selectedUserId != null
                                   ? Expanded(
                                       key: ObjectKey(state.selectedUserId),
-                                      child: Chat(userId: state.selectedUserId),
+                                      child: Chat(
+                                        userId: state.selectedUserId!,
+                                        unreadMessagesCount: state.selectedUnreadMessagesCount,
+                                      ),
                                     )
                                   : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
                           ],

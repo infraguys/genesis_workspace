@@ -21,9 +21,12 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/message
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/stream_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_channel_by_id_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -38,6 +41,8 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     this._setTypingUseCase,
     this._updateMessagesFlagsUseCase,
     this._sendMessageUseCase,
+    this._getChannelByIdUseCase,
+    this._getTopicsUseCase,
   ) : super(
         ChannelChatState(
           messages: [],
@@ -67,6 +72,8 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   final SetTypingUseCase _setTypingUseCase;
   final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
   final SendMessageUseCase _sendMessageUseCase;
+  final GetChannelByIdUseCase _getChannelByIdUseCase;
+  final GetTopicsUseCase _getTopicsUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -75,53 +82,87 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
 
   Timer? _readMessageDebounceTimer;
 
-  void setChannel(ChannelEntity? channel) {
-    state.channel = channel;
-    emit(state.copyWith(channel: state.channel));
+  Future<void> getInitialData({
+    required int streamId,
+    String? topicName,
+    bool? didUpdateWidget,
+    int? unreadMessagesCount,
+  }) async {
+    emit(state.copyWith(channel: null, topic: null, messages: []));
+    try {
+      await Future.wait([
+        getChannel(streamId: streamId),
+        getChannelTopics(streamId: streamId, topicName: topicName),
+      ]);
+      await getChannelMessages(
+        didUpdateWidget: didUpdateWidget,
+        unreadMessagesCount: unreadMessagesCount,
+      );
+    } catch (e) {
+      inspect(e);
+    }
   }
 
-  void setTopic(TopicEntity? topic) {
-    state.topic = topic;
-    emit(state.copyWith(topic: state.topic));
+  Future<void> getChannel({required int streamId, String? topicName}) async {
+    try {
+      final response = await _getChannelByIdUseCase.call(
+        ChannelByIdRequestEntity(streamId: streamId),
+      );
+      final channel = response.stream;
+      emit(state.copyWith(channel: channel));
+    } catch (e) {
+      inspect(e);
+    }
   }
 
-  Future<void> getChannelMessages(String streamName, {bool? didUpdateWidget}) async {
+  Future<void> getChannelTopics({required int streamId, String? topicName}) async {
+    try {
+      final response = await _getTopicsUseCase.call(streamId);
+      final topic = response.where((topic) => topicName == topic.name).firstOrNull;
+      emit(state.copyWith(topic: topic));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> getChannelMessages({bool? didUpdateWidget, int? unreadMessagesCount}) async {
+    emit(state.copyWith(isMessagesPending: true));
     if (didUpdateWidget == true) {
       state.isMessagesPending = true;
       emit(state.copyWith(isMessagesPending: state.isMessagesPending));
     }
     try {
+      int numBefore = 25;
+      if (unreadMessagesCount != null && unreadMessagesCount > 25) {
+        numBefore = unreadMessagesCount + 10;
+      }
       final response = await _getMessagesUseCase.call(
         MessagesRequestEntity(
           anchor: MessageAnchor.newest(),
           narrow: [
-            MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamName),
+            MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
             if (state.topic != null)
               MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
           ],
-          numBefore: 25,
+          numBefore: numBefore,
           numAfter: 0,
         ),
       );
-      state.messages = response.messages;
-      state.isAllMessagesLoaded = response.foundOldest;
-      state.lastMessageId = response.messages.first.id;
-      state.isMessagesPending = false;
       emit(
         state.copyWith(
-          messages: state.messages,
-          isAllMessagesLoaded: state.isAllMessagesLoaded,
-          isMessagesPending: state.isMessagesPending,
+          messages: response.messages,
+          isAllMessagesLoaded: response.foundOldest,
+          lastMessageId: response.messages.first.id,
         ),
       );
     } catch (e) {
-      state.isMessagePending = false;
-      emit(state.copyWith(isMessagesPending: state.isMessagesPending));
       inspect(e);
+    } finally {
+      emit(state.copyWith(isMessagesPending: false));
     }
   }
 
-  Future<void> loadMoreMessages(String streamName) async {
+  Future<void> loadMoreMessages() async {
     if (!state.isAllMessagesLoaded) {
       state.isLoadingMore = true;
       emit(state.copyWith(isLoadingMore: state.isLoadingMore));
@@ -129,7 +170,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
           narrow: [
-            MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamName),
+            MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
             if (state.topic != null)
               MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
           ],
@@ -242,7 +283,6 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    inspect(event);
     bool isThisChatMessage = event.message.displayRecipient == state.channel!.name;
     String messageSubject = event.message.subject;
     if (isThisChatMessage) {
