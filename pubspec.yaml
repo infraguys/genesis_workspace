@@ -81,9 +81,9 @@ flutter_gen:
   integrations:
     image: true
     flutter_svg: true
-    assets:
-      exclude:
-        - assets/audio/pop.wav
+  assets:
+    exclude:
+      - assets/audio/pop.wav
 
 flutter:
   uses-material-design: true
