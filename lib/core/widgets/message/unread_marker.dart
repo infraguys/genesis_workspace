@@ -27,7 +27,6 @@ class UnreadMessagesMarker extends StatelessWidget {
     final Color pillBorder = colors.outlineVariant.withOpacity(0.7);
     final Color textColor = colors.onSurfaceVariant;
 
-    // i18n: берём строку из slang
     final String label = unreadCount == 0
         ? context.t.unreadMarker.label
         : context.t.unreadMarker.labelWithCount(count: unreadCount!);
