@@ -21,3 +21,7 @@ class SharedPrefsKeys {
   static const String locale = 'locale';
   static const String isWebAuth = 'isWebAuth';
 }
+
+class AssetsConstants {
+  static const String audioPop = 'audio/pop.wav';
+}

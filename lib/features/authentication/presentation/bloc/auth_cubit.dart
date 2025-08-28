@@ -117,13 +117,14 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await _deleteSessionIdUseCase.call();
       final response = await _getServerSettingsUseCase.call();
-      final cookieResponse = await _dio.get('${AppConstants.baseUrl}/accounts/login/');
-      final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
-      _csrfToken = csrf;
 
       emit(state.copyWith(serverSettings: response));
     } catch (e) {
       inspect(e);
+    } finally {
+      final cookieResponse = await _dio.get('${AppConstants.baseUrl}/accounts/login/');
+      final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
+      _csrfToken = csrf;
     }
   }
 

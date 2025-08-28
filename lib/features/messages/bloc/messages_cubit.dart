@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
@@ -52,6 +54,7 @@ class MessagesCubit extends Cubit<MessagesState> {
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
+  final player = AudioPlayer();
 
   Future<void> getLastMessages() async {
     try {
@@ -89,6 +92,7 @@ class MessagesCubit extends Cubit<MessagesState> {
   }
 
   _onMessageEvents(MessageEventEntity event) {
+    player.play(AssetSource(AssetsConstants.audioPop));
     final messages = [...state.messages];
     messages.add(event.message);
     emit(state.copyWith(messages: messages));

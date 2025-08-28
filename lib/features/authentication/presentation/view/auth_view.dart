@@ -187,9 +187,10 @@ class _AuthViewState extends State<AuthView> {
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (state.serverSettings == null) {
                 return Center(child: CircularProgressIndicator());
-              } else if (snapshot.connectionState == ConnectionState.done) {
+              } else if (snapshot.connectionState == ConnectionState.done ||
+                  state.serverSettings != null) {
                 return Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
