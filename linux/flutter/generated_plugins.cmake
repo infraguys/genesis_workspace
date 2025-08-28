@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_linux
   emoji_picker_flutter
   flutter_secure_storage_linux
   in_app_idle_detector

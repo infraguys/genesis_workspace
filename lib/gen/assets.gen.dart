@@ -14,6 +14,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart' as _svg;
 import 'package:vector_graphics/vector_graphics.dart' as _vg;
 
+class $AssetsAudioGen {
+  const $AssetsAudioGen();
+
+  /// File path: assets/audio/pop.wav
+  String get pop => 'assets/audio/pop.wav';
+
+  /// List of all assets
+  List<String> get values => [pop];
+}
+
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
@@ -28,6 +38,7 @@ class $AssetsImagesGen {
 class Assets {
   const Assets._();
 
+  static const $AssetsAudioGen audio = $AssetsAudioGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
 }
 
