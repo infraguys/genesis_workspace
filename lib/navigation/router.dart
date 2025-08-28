@@ -48,7 +48,6 @@ class Routes {
 
 final router = GoRouter(
   initialLocation: Routes.splashScreen,
-  debugLogDiagnostics: true,
   navigatorKey: _rootNavigatorKey,
   routes: [
     StatefulShellRoute.indexedStack(

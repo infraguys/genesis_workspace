@@ -132,7 +132,13 @@ class _InboxViewState extends State<InboxView> {
                                   //     unreadMessages: {},
                                   //   ),
                                   // );
-                                  context.pushNamed(Routes.channelChat);
+                                  context.pushNamed(
+                                    Routes.channelChatTopic,
+                                    pathParameters: {
+                                      'channelId': channel.streamId.toString(),
+                                      'topicName': topicName,
+                                    },
+                                  );
                                 },
                         );
                       }).toList(),
