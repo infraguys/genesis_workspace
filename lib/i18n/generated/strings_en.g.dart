@@ -100,8 +100,8 @@ class TranslationsAuthEn {
 
 	// Translations
 
-	/// en: 'email@genesis.team'
-	String get emailHint => 'email@genesis.team';
+	/// en: 'email@example.com'
+	String get emailHint => 'email@example.com';
 
 	/// en: 'Email'
 	String get emailLabel => 'Email';

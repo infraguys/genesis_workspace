@@ -105,8 +105,8 @@ class TranslationsAuthEn {
 
 	// Translations
 
-	/// en: 'email@genesis.team'
-	String get emailHint => 'email@genesis.team';
+	/// en: 'email@example.com'
+	String get emailHint => 'email@example.com';
 
 	/// en: 'Email'
 	String get emailLabel => 'Email';
@@ -315,7 +315,7 @@ class TranslationsUnreadMarkerEn {
 extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
-			case 'auth.emailHint': return 'email@genesis.team';
+			case 'auth.emailHint': return 'email@example.com';
 			case 'auth.emailLabel': return 'Email';
 			case 'auth.passwordHint': return 'cucumber123';
 			case 'auth.showPassword': return 'Show password';

@@ -1,6 +1,6 @@
-import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'typing_request_dto.g.dart';

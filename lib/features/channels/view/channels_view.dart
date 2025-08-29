@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
@@ -8,9 +9,13 @@ import 'package:genesis_workspace/features/channels/view/channel_item.dart';
 import 'package:genesis_workspace/features/channels/view/channel_topics.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class ChannelsView extends StatefulWidget {
-  const ChannelsView({super.key});
+  final int? initialChannelId;
+  final String? initialTopicName;
+  const ChannelsView({super.key, this.initialChannelId, this.initialTopicName});
 
   @override
   State<ChannelsView> createState() => ChannelsViewState();
@@ -25,8 +30,11 @@ class ChannelsViewState extends State<ChannelsView> {
 
   @override
   void initState() {
+    _future = context.read<ChannelsCubit>().getChannels(
+      initialChannelId: widget.initialChannelId,
+      initialTopicName: widget.initialTopicName,
+    );
     super.initState();
-    _future = context.read<ChannelsCubit>().getChannels();
   }
 
   void _measureAvatarWidth() {
@@ -45,44 +53,64 @@ class ChannelsViewState extends State<ChannelsView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: WorkspaceAppBar(
-        title: context.t.navBar.channels,
-        leading: BlocBuilder<ChannelsCubit, ChannelsState>(
-          builder: (context, state) {
-            if (state.selectedChannelId != null) {
-              return IconButton(
-                onPressed: () {
-                  context.read<ChannelsCubit>().closeChannel();
-                },
-                icon: Icon(Icons.arrow_back_ios),
-              );
-            }
-            return SizedBox();
-          },
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-        ),
-      ),
-      body: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, state) {
-          if (state.user != null) {
-            context.read<ChannelsCubit>().setSelfUser(state.user);
-          }
-          return FutureBuilder(
-            future: _future,
-            builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return Center(child: Text("Some error..."));
-              }
+    return BlocConsumer<ChannelsCubit, ChannelsState>(
+      listenWhen: (prev, next) =>
+          prev.selectedChannelId != next.selectedChannelId ||
+          prev.selectedTopic?.name != next.selectedTopic?.name, // сравниваем по имени
 
-              return BlocBuilder<ChannelsCubit, ChannelsState>(
-                builder: (context, state) {
+      listener: (context, state) {
+        final router = GoRouter.of(shellNavigatorChannelsKey.currentContext!);
+        final currentLocation = router.routeInformationProvider.value.location;
+
+        String target;
+        if (state.selectedChannelId == null) {
+          target = Routes.channels;
+        } else if (state.selectedTopic == null) {
+          target = '${Routes.channels}/${state.selectedChannelId}';
+        } else {
+          target = '${Routes.channels}/${state.selectedChannelId}/${state.selectedTopic!.name}';
+        }
+
+        if (currentLocation != target) {
+          updateBrowserUrlPath(target);
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: WorkspaceAppBar(
+            title: context.t.navBar.channels,
+            leading: state.selectedChannelId != null
+                ? IconButton(
+                    onPressed: () {
+                      context.read<ChannelsCubit>().closeChannel();
+                      // сразу обновим URL (для больших экранов это просто /channels)
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        updateBrowserUrlPath(Routes.channels);
+                      });
+                    },
+                    icon: Icon(Icons.arrow_back_ios),
+                  )
+                : SizedBox(),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(1),
+              child: Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+            ),
+          ),
+          body: BlocBuilder<ProfileCubit, ProfileState>(
+            builder: (context, profileState) {
+              if (profileState.user != null) {
+                context.read<ChannelsCubit>().setSelfUser(profileState.user);
+              }
+              return FutureBuilder(
+                future: _future,
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text("Some error..."));
+                  }
+
                   if (state.channels.isNotEmpty) {
                     _measureAvatarWidth();
                   }
@@ -95,6 +123,7 @@ class ChannelsViewState extends State<ChannelsView> {
                   final double topicsWidth = state.selectedChannelId != null
                       ? channelsWidth - _measuredWidth
                       : 0;
+
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -172,9 +201,9 @@ class ChannelsViewState extends State<ChannelsView> {
                 },
               );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

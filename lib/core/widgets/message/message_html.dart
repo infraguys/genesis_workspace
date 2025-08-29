@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
-import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:url_launcher/url_launcher.dart';

@@ -65,7 +65,7 @@ class TranslationsAuthRu extends TranslationsAuthEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
-	@override String get emailHint => 'email@genesis.team';
+	@override String get emailHint => 'email@example.com';
 	@override String get emailLabel => 'Эл. почта';
 	@override String get passwordHint => 'cucumber123';
 	@override String get showPassword => 'Показать пароль';

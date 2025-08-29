@@ -1,7 +1,7 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
@@ -24,7 +24,7 @@ import '../features/authentication/presentation/auth.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorDMKey = GlobalKey<NavigatorState>(debugLabel: 'shellDM');
-final _shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');
+final shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
 final _shellNavigatorMenuKey = GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
@@ -51,12 +51,6 @@ final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   routes: [
     StatefulShellRoute.indexedStack(
-      redirect: (BuildContext context, GoRouterState state) {
-        if (!context.read<AuthCubit>().state.isAuthorized) {
-          return Routes.auth;
-        }
-        return null;
-      },
       builder: (context, state, navigationShell) {
         return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
       },
@@ -66,24 +60,99 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: Routes.directMessages,
-              pageBuilder: (context, state) {
-                return CustomTransitionPage(
-                  key: state.pageKey,
-                  child: const DirectMessages(),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(
-                      opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
-                      child: child,
-                    );
-                  },
-                );
+              name: Routes.directMessages,
+              redirect: (BuildContext context, GoRouterState state) {
+                if (!context.read<AuthCubit>().state.isAuthorized) {
+                  return Routes.auth;
+                }
+                return null;
+              },
+              builder: (context, state) {
+                return DirectMessages();
               },
             ),
+            if (kIsWeb) ...[
+              GoRoute(
+                path: '${Routes.directMessages}/:userId',
+                name: Routes.chat,
+                builder: (context, state) {
+                  final userId = int.parse(state.pathParameters['userId']!);
+                  final extra = state.extra as Map<String, dynamic>?;
+                  final unread = extra?['unreadMessagesCount'] ?? 0;
+
+                  if (currentSize(context) > ScreenSize.lTablet) {
+                    return DirectMessages(initialUserId: userId);
+                  } else {
+                    return Chat(userId: userId, unreadMessagesCount: unread);
+                  }
+                },
+              ),
+            ],
           ],
         ),
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorChannelsKey,
-          routes: [GoRoute(path: Routes.channels, builder: (context, state) => const Channels())],
+          navigatorKey: shellNavigatorChannelsKey,
+          routes: [
+            GoRoute(
+              path: Routes.channels,
+              name: Routes.channels,
+              pageBuilder: (context, state) => const NoTransitionPage(child: Channels()),
+            ),
+            if (kIsWeb) ...[
+              GoRoute(
+                path: '${Routes.channels}/:channelId',
+                name: Routes.channelChat,
+                pageBuilder: (context, state) {
+                  final channelIdString = state.pathParameters['channelId'];
+                  final channelId = int.tryParse(channelIdString ?? '');
+                  assert(channelId != null, 'channelId must be int');
+
+                  final extra = state.extra as Map<String, dynamic>?;
+                  final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+
+                  if (currentSize(context) > ScreenSize.lTablet) {
+                    return NoTransitionPage(
+                      child: Channels(initialChannelId: channelId, initialTopicName: null),
+                    );
+                  } else {
+                    return NoTransitionPage(
+                      child: ChannelChat(
+                        channelId: channelId!,
+                        unreadMessagesCount: unreadMessagesCount,
+                      ),
+                    );
+                  }
+                },
+              ),
+              GoRoute(
+                path: '${Routes.channels}/:channelId/:topicName',
+                name: Routes.channelChatTopic,
+                pageBuilder: (context, state) {
+                  final channelIdString = state.pathParameters['channelId'];
+                  final topicName = state.pathParameters['topicName'];
+                  final channelId = int.tryParse(channelIdString ?? '');
+                  assert(channelId != null, 'channelId must be int');
+
+                  final extra = state.extra as Map<String, dynamic>?;
+                  final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+
+                  if (currentSize(context) > ScreenSize.lTablet) {
+                    return NoTransitionPage(
+                      child: Channels(initialChannelId: channelId, initialTopicName: topicName),
+                    );
+                  } else {
+                    return NoTransitionPage(
+                      child: ChannelChat(
+                        channelId: channelId!,
+                        topicName: topicName,
+                        unreadMessagesCount: unreadMessagesCount,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ],
         ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorMenuKey,
@@ -123,65 +192,70 @@ final router = GoRouter(
         ),
       ],
     ),
-    GoRoute(
-      path: Routes.directMessages,
-      name: Routes.directMessages,
-      builder: (context, state) {
-        return DirectMessages();
-      },
-      routes: [
-        GoRoute(
-          path: ':userId',
-          name: Routes.chat,
-          builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>;
-            final idStr = state.pathParameters['userId'];
-            final id = int.tryParse(idStr ?? '');
-            final unreadMessagesCount = extra['unreadMessagesCount'];
-            assert(id != null, 'userId must be int');
-            return Chat(userId: id!, unreadMessagesCount: unreadMessagesCount);
-          },
-        ),
-      ],
-    ),
-    GoRoute(
-      path: Routes.channels,
-      name: Routes.channels,
-      builder: (context, state) {
-        return Channels();
-      },
-      routes: [
-        GoRoute(
-          path: ':channelId',
-          name: Routes.channelChat,
-          builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>;
-            final channelIdStr = state.pathParameters['channelId'];
-            final channelId = int.tryParse(channelIdStr ?? '');
-            final unreadMessagesCount = extra['unreadMessagesCount'];
-            assert(channelId != null, 'channelId must be int');
-            return ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount);
-          },
-        ),
-        GoRoute(
-          path: ':channelId/:topicName',
-          name: Routes.channelChatTopic,
-          builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>;
-            final channelIdStr = state.pathParameters['channelId'];
-            final channelId = int.tryParse(channelIdStr ?? '');
-            final topicName = state.pathParameters['topicName'];
-            final unreadMessagesCount = extra['unreadMessagesCount'];
-            assert(channelId != null, 'channelId must be int');
+    if (!kIsWeb) ...[
+      GoRoute(
+        path: '${Routes.directMessages}/:userId',
+        name: Routes.chat,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final userId = int.parse(state.pathParameters['userId']!);
+          final extra = state.extra as Map<String, dynamic>?;
+          final unread = extra?['unreadMessagesCount'] ?? 0;
+
+          if (currentSize(context) > ScreenSize.lTablet) {
+            // На десктопе в идеале сюда не приходим, но на всякий случай
+            return SizedBox.shrink();
+          } else {
+            return Chat(userId: userId, unreadMessagesCount: unread);
+          }
+        },
+      ),
+      GoRoute(
+        path: '${Routes.channels}/:channelId',
+        name: Routes.channelChat,
+        pageBuilder: (context, state) {
+          final channelIdString = state.pathParameters['channelId'];
+          final channelId = int.tryParse(channelIdString ?? '');
+          assert(channelId != null, 'channelId must be int');
+
+          final extra = state.extra as Map<String, dynamic>?;
+          final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+
+          if (currentSize(context) > ScreenSize.lTablet) {
+            return NoTransitionPage(
+              child: Channels(initialChannelId: channelId, initialTopicName: null),
+            );
+          } else {
+            return NoTransitionPage(
+              child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
+            );
+          }
+        },
+      ),
+      GoRoute(
+        path: '${Routes.channels}/:channelId/:topicName',
+        name: Routes.channelChatTopic,
+        builder: (context, state) {
+          final channelIdString = state.pathParameters['channelId'];
+          final topicName = state.pathParameters['topicName'];
+          final channelId = int.tryParse(channelIdString ?? '');
+          assert(channelId != null, 'channelId must be int');
+
+          final extra = state.extra as Map<String, dynamic>?;
+          final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+
+          if (currentSize(context) > ScreenSize.lTablet) {
+            return Channels(initialChannelId: channelId, initialTopicName: topicName);
+          } else {
             return ChannelChat(
               channelId: channelId!,
               topicName: topicName,
               unreadMessagesCount: unreadMessagesCount,
             );
-          },
-        ),
-      ],
-    ),
+          }
+        },
+      ),
+    ],
     GoRoute(
       path: Routes.splashScreen,
       name: Routes.splashScreen,
