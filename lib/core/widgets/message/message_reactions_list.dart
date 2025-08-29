@@ -22,8 +22,8 @@ class MessageReactionsList extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 4.0),
-      child: SizedBox(
-        width: maxWidth,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
         child: Wrap(
           spacing: 6.0,
           runSpacing: 4.0,

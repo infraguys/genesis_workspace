@@ -1,6 +1,6 @@
 {
   "auth": {
-    "emailHint": "email@tokens.team",
+    "emailHint": "email@example.com",
     "emailLabel": "Email",
     "passwordHint": "cucumber123",
     "showPassword": "Show password",

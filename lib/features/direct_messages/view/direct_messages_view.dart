@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
@@ -8,6 +9,8 @@ import 'package:genesis_workspace/features/direct_messages/view/dm_search_field.
 import 'package:genesis_workspace/features/direct_messages/view/user_tile.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class DirectMessagesView extends StatefulWidget {
   final int? initialUserId;
@@ -43,42 +46,58 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: theme.colorScheme.inversePrimary,
-        title: Row(
-          children: [
-            Expanded(child: Text(context.t.navBar.directMessages)),
-            if (currentSize(context) > ScreenSize.tablet)
-              SizedBox(
-                width: 250,
-                child: DmSearchField(
-                  searchController: _searchController,
-                  searchUsers: context.read<DirectMessagesCubit>().searchUsers,
-                ),
-              ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          if (currentSize(context) <= ScreenSize.tablet)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: DmSearchField(
-                searchController: _searchController,
-                searchUsers: context.read<DirectMessagesCubit>().searchUsers,
-              ),
-            ),
-          Expanded(
-            child: BlocBuilder<ProfileCubit, ProfileState>(
-              builder: (context, profileState) {
-                if (profileState.user != null) {
-                  context.read<DirectMessagesCubit>().setSelfUser(profileState.user);
-                }
+    return BlocConsumer<DirectMessagesCubit, DirectMessagesState>(
+      listenWhen: (prev, next) => prev.selectedUserId != next.selectedUserId,
+      listener: (context, state) {
+        if (currentSize(context) > ScreenSize.lTablet) {
+          final String target = (state.selectedUserId == null)
+              ? Routes.directMessages
+              : '${Routes.directMessages}/${state.selectedUserId}';
 
-                return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
-                  builder: (context, state) {
+          final String currentLocation = GoRouterState.of(context).uri.toString();
+
+          if (currentLocation != target) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              updateBrowserUrlPath(target);
+            });
+          }
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: theme.colorScheme.inversePrimary,
+            title: Row(
+              children: [
+                Expanded(child: Text(context.t.navBar.directMessages)),
+                if (currentSize(context) > ScreenSize.tablet)
+                  SizedBox(
+                    width: 250,
+                    child: DmSearchField(
+                      searchController: _searchController,
+                      searchUsers: context.read<DirectMessagesCubit>().searchUsers,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          body: Column(
+            children: [
+              if (currentSize(context) <= ScreenSize.tablet)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DmSearchField(
+                    searchController: _searchController,
+                    searchUsers: context.read<DirectMessagesCubit>().searchUsers,
+                  ),
+                ),
+              Expanded(
+                child: BlocBuilder<ProfileCubit, ProfileState>(
+                  builder: (context, profileState) {
+                    if (profileState.user != null) {
+                      context.read<DirectMessagesCubit>().setSelfUser(profileState.user);
+                    }
+
                     return FutureBuilder(
                       future: _future,
                       builder: (BuildContext context, snapshot) {
@@ -143,12 +162,12 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                       },
                     );
                   },
-                );
-              },
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
@@ -19,14 +18,20 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:injectable/injectable.dart';
 
 part 'channels_state.dart';
 
+@injectable
 class ChannelsCubit extends Cubit<ChannelsState> {
-  final _realTimeService = getIt<RealTimeService>();
+  final RealTimeService _realTimeService;
 
-  ChannelsCubit()
-    : super(
+  ChannelsCubit(
+    this._realTimeService,
+    this._getTopicsUseCase,
+    this._getMessagesUseCase,
+    this._getSubscribedChannelsUseCase,
+  ) : super(
         ChannelsState(
           channels: [],
           pendingTopicsId: null,
@@ -43,10 +48,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     );
   }
 
-  final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase =
-      getIt<GetSubscribedChannelsUseCase>();
-  final GetTopicsUseCase _getTopicsUseCase = getIt<GetTopicsUseCase>();
-  final GetMessagesUseCase _getMessagesUseCase = getIt<GetMessagesUseCase>();
+  final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
+  final GetTopicsUseCase _getTopicsUseCase;
+  final GetMessagesUseCase _getMessagesUseCase;
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
@@ -84,22 +88,20 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   }
 
   void closeChannel() {
-    state.selectedChannelId = null;
     state.selectedChannel = null;
+    state.selectedChannelId = null;
+    state.selectedTopic = null;
     emit(
       state.copyWith(
         selectedChannel: state.selectedChannel,
         selectedChannelId: state.selectedChannelId,
+        selectedTopic: state.selectedTopic,
       ),
     );
   }
 
   void openTopic({required ChannelEntity channel, TopicEntity? topic}) {
-    state.selectedChannel = channel;
-    state.selectedTopic = topic;
-    emit(
-      state.copyWith(selectedChannel: state.selectedChannel, selectedTopic: state.selectedTopic),
-    );
+    emit(state.copyWith(selectedChannel: channel, selectedTopic: topic));
   }
 
   setSelfUser(UserEntity? user) {
@@ -109,11 +111,27 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     }
   }
 
-  Future<void> getChannels() async {
+  Future<void> getChannels({int? initialChannelId, String? initialTopicName}) async {
     try {
       final response = await _getSubscribedChannelsUseCase.call(true);
-      state.channels = response.map((e) => e.toChannelEntity()).toList();
-      emit(state.copyWith(channels: state.channels));
+      emit(state.copyWith(channels: response.map((e) => e.toChannelEntity()).toList()));
+      if (initialChannelId != null) {
+        emit(state.copyWith(selectedChannelId: initialChannelId));
+        final indexOfChannel = state.channels.indexWhere(
+          (element) => element.streamId == initialChannelId,
+        );
+        final selectedChannel = state.channels[indexOfChannel];
+        await getChannelTopics(streamId: initialChannelId);
+        if (initialTopicName != null) {
+          final topicName = initialTopicName.replaceAll('-', ' ');
+          final indexOfTopic = state.channels[indexOfChannel].topics.indexWhere(
+            (element) => element.name.toLowerCase() == topicName.toLowerCase(),
+          );
+          final selectedTopic = selectedChannel.topics[indexOfTopic];
+          emit(state.copyWith(selectedTopic: selectedTopic));
+        }
+        emit(state.copyWith(selectedChannel: selectedChannel));
+      }
     } catch (e) {
       inspect(e);
     }
@@ -191,5 +209,12 @@ class ChannelsCubit extends Cubit<ChannelsState> {
       }).toList();
       emit(state.copyWith(channels: channels, unreadMessages: unreadMessages));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _messagesEventsSubscription.cancel();
+    _messageFlagsSubscription.cancel();
+    return super.close();
   }
 }

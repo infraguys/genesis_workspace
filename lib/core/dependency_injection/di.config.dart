@@ -101,6 +101,8 @@ import 'package:genesis_workspace/features/authentication/presentation/bloc/auth
     as _i862;
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart'
     as _i739;
+import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart'
+    as _i201;
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart' as _i277;
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart'
     as _i852;
@@ -300,6 +302,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i837.GetAllPresencesUseCase>(),
         gh<_i194.GetUsersUseCase>(),
         gh<_i207.GetMessagesUseCase>(),
+      ),
+    );
+    gh.factory<_i201.ChannelsCubit>(
+      () => _i201.ChannelsCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i699.GetTopicsUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i988.GetSubscribedChannelsUseCase>(),
       ),
     );
     gh.factory<_i433.DeleteTokenUseCase>(

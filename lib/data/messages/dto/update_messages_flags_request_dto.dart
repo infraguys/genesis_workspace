@@ -1,6 +1,6 @@
-import 'package:genesis_workspace/core/config/helpers.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'update_messages_flags_request_dto.g.dart';

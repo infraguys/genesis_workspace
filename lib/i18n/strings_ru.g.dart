@@ -69,7 +69,7 @@ class _TranslationsAuthRu implements TranslationsAuthEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
-	@override String get emailHint => 'email@tokens.team';
+	@override String get emailHint => 'email@example.com';
 	@override String get emailLabel => 'Эл. почта';
 	@override String get passwordHint => 'cucumber123';
 	@override String get showPassword => 'Показать пароль';
@@ -210,7 +210,7 @@ class _TranslationsUnreadMarkerRu implements TranslationsUnreadMarkerEn {
 extension on TranslationsRu {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
-			case 'auth.emailHint': return 'email@tokens.team';
+			case 'auth.emailHint': return 'email@example.com';
 			case 'auth.emailLabel': return 'Эл. почта';
 			case 'auth.passwordHint': return 'cucumber123';
 			case 'auth.showPassword': return 'Показать пароль';
