@@ -33,8 +33,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> getOwnUser() async {
     try {
       final response = await _getOwnUserUseCase.call();
-      state.user = response;
-      emit(state.copyWith(user: state.user));
+      emit(state.copyWith(user: response));
     } catch (e) {
       inspect(e);
     }
@@ -59,5 +58,11 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (event.message.senderId != state.user?.userId) {
       player.play(AssetSource(AssetsConstants.audioPop));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _messagesEventsSubscription.cancel();
+    return super.close();
   }
 }
