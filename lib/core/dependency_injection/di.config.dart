@@ -144,7 +144,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => coreModule.secureStorage(),
     );
     gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
-    gh.lazySingleton<_i766.ProfileCubit>(() => _i766.ProfileCubit());
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
     );
@@ -275,6 +274,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i44.AuthRepositoryImpl(
         gh<_i672.AuthRemoteDataSource>(),
         gh<_i958.TokenStorage>(),
+      ),
+    );
+    gh.lazySingleton<_i766.ProfileCubit>(
+      () => _i766.ProfileCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i547.GetOwnUserUseCase>(),
+        gh<_i832.UpdatePresenceUseCase>(),
       ),
     );
     gh.factory<_i277.ChatCubit>(
