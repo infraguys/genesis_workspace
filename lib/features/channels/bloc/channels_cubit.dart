@@ -101,7 +101,11 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   }
 
   void openTopic({required ChannelEntity channel, TopicEntity? topic}) {
-    emit(state.copyWith(selectedChannel: channel, selectedTopic: topic));
+    state.selectedChannel = channel;
+    state.selectedTopic = topic;
+    emit(
+      state.copyWith(selectedChannel: state.selectedChannel, selectedTopic: state.selectedTopic),
+    );
   }
 
   setSelfUser(UserEntity? user) {
