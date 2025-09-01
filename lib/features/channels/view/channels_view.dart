@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -54,11 +56,11 @@ class ChannelsViewState extends State<ChannelsView> {
     final theme = Theme.of(context);
 
     return BlocConsumer<ChannelsCubit, ChannelsState>(
-      listenWhen: (prev, next) =>
-          prev.selectedChannelId != next.selectedChannelId ||
-          prev.selectedTopic?.name != next.selectedTopic?.name, // сравниваем по имени
-
+      // listenWhen: (prev, next) =>
+      //     prev.selectedChannelId != next.selectedChannelId ||
+      //     prev.selectedTopic?.name != next.selectedTopic?.name,
       listener: (context, state) {
+        inspect(state.selectedTopic == null);
         final router = GoRouter.of(shellNavigatorChannelsKey.currentContext!);
         final currentLocation = router.routeInformationProvider.value.location;
 
@@ -83,7 +85,6 @@ class ChannelsViewState extends State<ChannelsView> {
                 ? IconButton(
                     onPressed: () {
                       context.read<ChannelsCubit>().closeChannel();
-                      // сразу обновим URL (для больших экранов это просто /channels)
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         updateBrowserUrlPath(Routes.channels);
                       });
