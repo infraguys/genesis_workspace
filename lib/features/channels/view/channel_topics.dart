@@ -48,7 +48,9 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                       firstTrailing = Text("${widget.channel!.unreadMessages.length}");
                     }
 
-                    if (state.selectedTopic == null && state.selectedChannel != null) {
+                    if (state.selectedTopic == null &&
+                        state.selectedChannel != null &&
+                        currentSize(context) > ScreenSize.lTablet) {
                       firstTrailing = selectedTopic(theme);
                     }
                     return TopicItem(
