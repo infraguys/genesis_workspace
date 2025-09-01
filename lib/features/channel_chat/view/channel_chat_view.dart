@@ -108,7 +108,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             // backgroundColor: parseColor(state.channel.color),
-            centerTitle: currentSize(context) <= ScreenSize.lTablet,
+            centerTitle: false,
             title: Skeletonizer(
               enabled: state.channel == null,
               child: Column(

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -60,7 +58,6 @@ class ChannelsViewState extends State<ChannelsView> {
       //     prev.selectedChannelId != next.selectedChannelId ||
       //     prev.selectedTopic?.name != next.selectedTopic?.name,
       listener: (context, state) {
-        inspect(state.selectedTopic == null);
         final router = GoRouter.of(shellNavigatorChannelsKey.currentContext!);
         final currentLocation = router.routeInformationProvider.value.location;
 
