@@ -14,6 +14,7 @@ class Main {
     final LocalizationService localizationService = getIt<LocalizationService>();
     await localizationService.init();
     // LocaleSettings.useDeviceLocale();
+
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }
 }

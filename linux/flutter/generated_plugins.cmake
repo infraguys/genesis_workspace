@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   flutter_secure_storage_linux
   in_app_idle_detector
+  sqlite3_flutter_libs
   url_launcher_linux
 )
 
