@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_inappwebview_windows
   flutter_secure_storage_windows
   in_app_idle_detector
+  sqlite3_flutter_libs
   url_launcher_windows
 )
 

@@ -16,3 +16,7 @@ targets:
           - lib/data/**/api/**.dart
           - lib/data/**/dto/**.dart
           - lib/data/**/dto/**/**.dart
+#      drift_dev:
+#        generate_for:
+#          - lib/data/database/app_database.dart
+#          - lib/data/**/tables/**.dart
