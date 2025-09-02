@@ -308,7 +308,7 @@ class AuthCubit extends Cubit<AuthState> {
     } finally {
       await getIt.reset(dispose: true);
       await configureDependencies();
-      emit(state.copyWith(isAuthorized: false, errorMessage: null));
+      emit(state.copyWith(isAuthorized: false, errorMessage: null, isPending: false));
     }
   }
 
