@@ -13,6 +13,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
+import 'package:genesis_workspace/data/database/app_database.dart' as _i606;
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart'
     as _i253;
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source_impl.dart'
@@ -23,8 +24,13 @@ import 'package:genesis_workspace/data/real_time_events/datasources/real_time_ev
     as _i735;
 import 'package:genesis_workspace/data/real_time_events/repositories_impl/real_time_events_repository_impl.dart'
     as _i506;
+import 'package:genesis_workspace/data/users/dao/recent_dm_dao.dart' as _i571;
+import 'package:genesis_workspace/data/users/datasources/recent_dm_data_source.dart'
+    as _i38;
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart'
     as _i451;
+import 'package:genesis_workspace/data/users/repositories_impl/recent_dm_repository_impl.dart'
+    as _i265;
 import 'package:genesis_workspace/data/users/repositories_impl/users_repository_impl.dart'
     as _i675;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
@@ -47,14 +53,20 @@ import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by
     as _i1039;
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart'
     as _i477;
+import 'package:genesis_workspace/domain/users/repositories/recent_dm_repository.dart'
+    as _i911;
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart'
     as _i125;
+import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart'
+    as _i812;
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart'
     as _i837;
 import 'package:genesis_workspace/domain/users/usecases/get_channel_by_id_use_case.dart'
     as _i720;
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart'
     as _i547;
+import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart'
+    as _i445;
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart'
     as _i988;
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart'
@@ -118,6 +130,8 @@ import 'package:genesis_workspace/features/reactions/bloc/reactions_cubit.dart'
     as _i656;
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart'
     as _i573;
+import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart'
+    as _i155;
 import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart'
     as _i1068;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
@@ -142,6 +156,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
+    gh.lazySingleton<_i606.AppDatabase>(
+      () => coreModule.appDatabase(),
+      dispose: (i) => i.dispose(),
+    );
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
     );
@@ -162,6 +180,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i672.AuthRemoteDataSource>(
       () => _i672.AuthRemoteDataSourceImpl(),
+    );
+    gh.factory<_i571.RecentDmDao>(
+      () => _i571.RecentDmDao(gh<_i606.AppDatabase>()),
     );
     gh.factory<_i735.RealTimeEventsDataSource>(
       () => _i735.RealTimeEventsDataSourceImpl(),
@@ -258,6 +279,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i38.RecentDmLocalDataSource>(
+      () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
+    );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
         gh<_i82.RealTimeService>(),
@@ -304,6 +328,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
       ),
     );
+    gh.factory<_i911.RecentDmRepository>(
+      () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
+    );
+    gh.factory<_i812.AddRecentDmUseCase>(
+      () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
+    );
+    gh.factory<_i445.GetRecentDmsUseCase>(
+      () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
+    );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
         gh<_i82.RealTimeService>(),
@@ -335,6 +368,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i819.DeleteCsrftokenUseCase>(
       () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i155.SettingsCubit>(
+      () => _i155.SettingsCubit(
+        gh<_i812.AddRecentDmUseCase>(),
+        gh<_i445.GetRecentDmsUseCase>(),
+      ),
     );
     gh.lazySingleton<_i862.AuthCubit>(
       () => _i862.AuthCubit(

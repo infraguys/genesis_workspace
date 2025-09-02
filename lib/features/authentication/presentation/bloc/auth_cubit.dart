@@ -297,7 +297,6 @@ class AuthCubit extends Cubit<AuthState> {
         _deleteSessionIdUseCase.call(),
         _deleteCsrftokenUseCase.call(),
       ]);
-      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
     } catch (e, st) {
       addError(e, st);
       // даже если что-то упало — токен лучше удалить, чтобы не зависнуть в полулогине
@@ -306,7 +305,10 @@ class AuthCubit extends Cubit<AuthState> {
         _deleteSessionIdUseCase.call(),
         _deleteCsrftokenUseCase.call(),
       ]);
-      emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
+    } finally {
+      await getIt.reset(dispose: true);
+      await configureDependencies();
+      emit(state.copyWith(isAuthorized: false, errorMessage: null));
     }
   }
 

@@ -10,6 +10,7 @@ import 'package:genesis_workspace/core/dio_interceptors/csrf_cookie_interceptor.
 import 'package:genesis_workspace/core/dio_interceptors/enum_interceptor.dart';
 import 'package:genesis_workspace/core/dio_interceptors/sessionid_interceptor.dart';
 import 'package:genesis_workspace/core/dio_interceptors/token_interceptor.dart';
+import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/services/token_storage/file_token_storage.dart';
 import 'package:genesis_workspace/services/token_storage/secure_token_storage.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
@@ -18,6 +19,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 @module
 abstract class CoreModule {
+  @lazySingleton
+  AppDatabase appDatabase() => AppDatabase();
+
   @preResolve
   @lazySingleton
   Future<Dio> dio(TokenStorage tokenStorage) async {
