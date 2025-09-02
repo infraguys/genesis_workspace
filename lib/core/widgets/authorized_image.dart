@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/dio_interceptors/csrf_cookie_interceptor.dart';
+import 'package:genesis_workspace/core/dio_interceptors/sessionid_interceptor.dart';
 import 'package:genesis_workspace/core/dio_interceptors/token_interceptor.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
@@ -37,7 +39,11 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   @override
   void initState() {
     super.initState();
-    _dio = Dio()..interceptors.add(TokenInterceptor(getIt<TokenStorage>()));
+    _dio = Dio();
+    _dio.interceptors
+      ..add(SessionidInterceptor(getIt<TokenStorage>()))
+      ..add(CsrfCookieInterceptor(getIt<TokenStorage>()))
+      ..add(TokenInterceptor(getIt<TokenStorage>()));
     _loadImage();
   }
 
