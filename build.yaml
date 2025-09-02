@@ -9,6 +9,7 @@ targets:
           - lib/data/**/datasources/**.dart
           - lib/data/**/repositories_impl/**.dart
           - lib/services/real_time/**.dart
+          - lib/data/**/dao/**.dart
       json_serializable:
         generate_for:
           - lib/features/**/data/dto/**.dart
@@ -16,7 +17,8 @@ targets:
           - lib/data/**/api/**.dart
           - lib/data/**/dto/**.dart
           - lib/data/**/dto/**/**.dart
-#      drift_dev:
-#        generate_for:
-#          - lib/data/database/app_database.dart
-#          - lib/data/**/tables/**.dart
+      drift_dev:
+        generate_for:
+          - lib/data/database/app_database.dart
+          - lib/data/**/tables/**.dart
+          - lib/data/**/dao/**.dart
