@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/data/users/datasources/recent_dm_data_source.dart';
 import 'package:genesis_workspace/domain/users/repositories/recent_dm_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -18,9 +19,9 @@ class RecentDmRepositoryImpl implements RecentDmRepository {
   }
 
   @override
-  getRecentDms() async {
+  Future<List<RecentDm>> getRecentDms() async {
     try {
-      await _recentDmLocalDataSource.getAll();
+      return await _recentDmLocalDataSource.getAll();
     } catch (e) {
       rethrow;
     }

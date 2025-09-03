@@ -1,6 +1,4 @@
 // lib/data/users/dao/recent_dm_dao.dart
-import 'dart:developer';
-
 import 'package:drift/drift.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/data/users/tables/recent_dm_table.dart';
@@ -35,9 +33,9 @@ class RecentDmDao extends DatabaseAccessor<AppDatabase> with _$RecentDmDaoMixin 
     });
   }
 
-  Future<void> getAll() async {
+  Future<List<RecentDm>> getAll() async {
     final recentDm = await select(recentDms).get();
-    inspect(recentDm);
+    return recentDm;
   }
 
   // Живой поток: обновится при любом изменении таблицы

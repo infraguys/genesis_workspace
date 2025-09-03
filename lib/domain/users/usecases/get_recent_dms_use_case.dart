@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/users/repositories/recent_dm_repository.dart';
 import 'package:injectable/injectable.dart';
 
@@ -7,9 +8,9 @@ class GetRecentDmsUseCase {
 
   GetRecentDmsUseCase(this._repository);
 
-  Future<void> call() async {
+  Future<List<RecentDm>> call() async {
     try {
-      await _repository.getRecentDms();
+      return await _repository.getRecentDms();
     } catch (e) {
       rethrow;
     }

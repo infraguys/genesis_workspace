@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/data/users/dao/recent_dm_dao.dart';
 import 'package:injectable/injectable.dart';
 
@@ -14,9 +15,9 @@ class RecentDmLocalDataSource {
     }
   }
 
-  Future<void> getAll() async {
+  Future<List<RecentDm>> getAll() async {
     try {
-      await _dao.getAll();
+      return await _dao.getAll();
     } catch (e) {
       rethrow;
     }

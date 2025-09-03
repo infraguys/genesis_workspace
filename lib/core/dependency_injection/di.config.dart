@@ -320,22 +320,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i394.GetUserPresenceUseCase>(),
       ),
     );
-    gh.factory<_i852.DirectMessagesCubit>(
-      () => _i852.DirectMessagesCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i837.GetAllPresencesUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-        gh<_i207.GetMessagesUseCase>(),
-      ),
-    );
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
     );
-    gh.factory<_i812.AddRecentDmUseCase>(
-      () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
-    );
     gh.factory<_i445.GetRecentDmsUseCase>(
       () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
+    );
+    gh.factory<_i812.AddRecentDmUseCase>(
+      () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
     );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
@@ -368,6 +360,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i819.DeleteCsrftokenUseCase>(
       () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i852.DirectMessagesCubit>(
+      () => _i852.DirectMessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i837.GetAllPresencesUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i812.AddRecentDmUseCase>(),
+        gh<_i445.GetRecentDmsUseCase>(),
+      ),
     );
     gh.factory<_i155.SettingsCubit>(
       () => _i155.SettingsCubit(

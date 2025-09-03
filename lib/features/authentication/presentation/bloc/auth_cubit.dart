@@ -291,14 +291,14 @@ class AuthCubit extends Cubit<AuthState> {
       ];
 
       await Future.wait(futures);
-      _realTimeService.stopPolling();
+      await _realTimeService.stopPolling();
       await Future.wait([
         _deleteTokenUseCase.call(),
         _deleteSessionIdUseCase.call(),
         _deleteCsrftokenUseCase.call(),
       ]);
     } catch (e, st) {
-      addError(e, st);
+      inspect(e);
       // даже если что-то упало — токен лучше удалить, чтобы не зависнуть в полулогине
       await Future.wait([
         _deleteTokenUseCase.call(),
@@ -306,8 +306,6 @@ class AuthCubit extends Cubit<AuthState> {
         _deleteCsrftokenUseCase.call(),
       ]);
     } finally {
-      await getIt.reset(dispose: true);
-      await configureDependencies();
       emit(state.copyWith(isAuthorized: false, errorMessage: null, isPending: false));
     }
   }

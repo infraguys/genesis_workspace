@@ -7,9 +7,8 @@ import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
-import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -18,7 +17,9 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -34,14 +35,18 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     this._getAllPresencesUseCase,
     this._getUsersUseCase,
     this._getMessagesUseCase,
+    this._addRecentDmUseCase,
+    this._getRecentDmsUseCase,
   ) : super(
         DirectMessagesState(
           users: [],
+          recentDmsUsers: [],
           filteredUsers: [],
           isUsersPending: false,
           typingUsers: [],
           selfUser: null,
           unreadMessages: [],
+          allMessages: [],
           selectedUserId: null,
         ),
       ) {
@@ -56,6 +61,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   final GetMessagesUseCase _getMessagesUseCase;
   final GetUsersUseCase _getUsersUseCase;
   final GetAllPresencesUseCase _getAllPresencesUseCase;
+  final AddRecentDmUseCase _addRecentDmUseCase;
+  final GetRecentDmsUseCase _getRecentDmsUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -82,7 +89,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       state.users = mappedUsers;
       state.filteredUsers = mappedUsers;
 
-      await Future.wait([getUnreadMessages(), getAllPresences()]);
+      await Future.wait([getInitialMessages(), getAllPresences()]);
+      await getRecentDms();
       _sortUsers();
     } catch (e) {
       inspect(e);
@@ -144,16 +152,53 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     emit(state.copyWith(users: sortedUsers, filteredUsers: sortedUsers));
   }
 
-  Future<void> getUnreadMessages() async {
+  Future<void> getRecentDms() async {
+    try {
+      List<RecentDm> recentDms = await _getRecentDmsUseCase.call();
+      inspect(recentDms);
+      final users = state.users;
+
+      if (recentDms.isEmpty) {
+        final allMessages = state.allMessages;
+        inspect(
+          allMessages
+              .where(
+                (message) =>
+                    (message.type == MessageType.private) &&
+                    message.senderId != state.selfUser?.userId,
+              )
+              .toList(),
+        );
+        final Set<int> senderIds = allMessages
+            .where(
+              (message) =>
+                  (message.type == MessageType.private) &&
+                  message.senderId != state.selfUser?.userId,
+            )
+            .map((message) => message.senderId)
+            .toSet();
+        recentDms = senderIds.map((senderId) => RecentDm(dmId: senderId)).toList();
+        final recentDmsUsers = users.where((user) => senderIds.contains(user.userId)).toList();
+        inspect(recentDmsUsers);
+        emit(state.copyWith(recentDmsUsers: recentDmsUsers));
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> getInitialMessages() async {
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
-        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
-        numBefore: 5000,
+        // narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
+        numBefore: 2000,
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      final unreadMessages = response.messages;
+      final unreadMessages = response.messages
+          .where((message) => message.hasUnreadMessages)
+          .toList();
       final users = [...state.users];
       for (var user in users) {
         user.unreadMessages = unreadMessages
@@ -166,7 +211,13 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
             .map((message) => message.id)
             .toSet();
       }
-      emit(state.copyWith(unreadMessages: unreadMessages, users: users));
+      emit(
+        state.copyWith(
+          unreadMessages: unreadMessages,
+          users: users,
+          allMessages: response.messages,
+        ),
+      );
     } catch (e) {
       inspect(e);
     }
@@ -234,6 +285,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     _typingEventsSubscription.cancel();
     _messagesEventsSubscription.cancel();
     _messageFlagsSubscription.cancel();
+    _presenceSubscription.cancel();
     return super.close();
   }
 }
