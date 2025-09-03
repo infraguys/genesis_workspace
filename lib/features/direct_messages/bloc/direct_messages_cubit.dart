@@ -15,6 +15,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/message
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart';
@@ -42,6 +43,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           users: [],
           recentDmsUsers: [],
           filteredUsers: [],
+          filteredRecentDmsUsers: [],
           isUsersPending: false,
           typingUsers: [],
           selfUser: null,
@@ -115,7 +117,12 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   void searchUsers(String query) {
     if (query.isEmpty) {
-      emit(state.copyWith(filteredUsers: [...state.users]));
+      emit(
+        state.copyWith(
+          filteredUsers: [...state.users],
+          filteredRecentDmsUsers: [...state.recentDmsUsers],
+        ),
+      );
       return;
     }
 
@@ -125,7 +132,12 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           user.email.toLowerCase().contains(lowerQuery);
     }).toList();
 
-    emit(state.copyWith(filteredUsers: filtered));
+    final filteredDms = state.recentDmsUsers.where((user) {
+      return user.fullName.toLowerCase().contains(lowerQuery) ||
+          user.email.toLowerCase().contains(lowerQuery);
+    }).toList();
+
+    emit(state.copyWith(filteredUsers: filtered, filteredRecentDmsUsers: filteredDms));
   }
 
   void _sortUsers() {
@@ -153,6 +165,10 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     emit(state.copyWith(users: sortedUsers, filteredUsers: sortedUsers));
   }
 
+  void toggleShowAllUsers() {
+    emit(state.copyWith(showAllUsers: !state.showAllUsers));
+  }
+
   Future<void> getRecentDms() async {
     try {
       List<RecentDm> recentDms = await _getRecentDmsUseCase.call();
@@ -163,17 +179,24 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final List<MessageEntity> allMessages = state.allMessages;
       final int? selfUserId = state.selfUser?.userId;
 
-      final candidateMessages = allMessages.where(
-        (m) => m.type == MessageType.private && m.senderId != selfUserId,
-      );
+      final candidateMessages = allMessages.where((message) => message.type == MessageType.private);
 
       final Map<int, int> lastTimestampBySenderId = {};
-      for (final m in candidateMessages) {
-        final senderId = m.senderId;
-        final int ts = m.timestamp;
+
+      for (final message in candidateMessages) {
+        final recipients = message.displayRecipient;
+        final senderId = message.senderId == selfUserId
+            ? recipients
+                  .firstWhere(
+                    (recipient) => recipient.userId != selfUserId,
+                    orElse: () => RecipientEntity(userId: -1, email: ''),
+                  )
+                  .userId
+            : message.senderId;
+        final int timestamp = message.timestamp;
         final int? current = lastTimestampBySenderId[senderId];
-        if (current == null || ts > current) {
-          lastTimestampBySenderId[senderId] = ts;
+        if (current == null || timestamp > current) {
+          lastTimestampBySenderId[senderId] = timestamp;
         }
       }
 
@@ -193,7 +216,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
         recentDms = orderedSenderIds.map((id) => RecentDm(dmId: id)).toList();
       }
 
-      emit(state.copyWith(recentDmsUsers: recentDmsUsers));
+      emit(state.copyWith(recentDmsUsers: recentDmsUsers, filteredRecentDmsUsers: recentDmsUsers));
     } catch (error, stackTrace) {
       addError(error, stackTrace);
       rethrow;

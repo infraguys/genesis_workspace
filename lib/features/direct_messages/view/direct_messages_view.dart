@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -22,152 +24,291 @@ class DirectMessagesView extends StatefulWidget {
 
 class _DirectMessagesViewState extends State<DirectMessagesView> {
   final TextEditingController _searchController = TextEditingController();
-  late final Future _future;
-  bool _isFutureInitialized = false;
+  late final Future _initialLoadFuture;
+  bool _isInitialLoadScheduled = false;
 
-  static const double desktopDmsWidth = 400;
+  static const double desktopListPaneWidth = 400;
 
   @override
   void initState() {
-    context.read<DirectMessagesCubit>().selectUserChat(userId: widget.initialUserId);
     super.initState();
+    context.read<DirectMessagesCubit>().selectUserChat(userId: widget.initialUserId);
   }
 
   @override
   void didChangeDependencies() {
-    if (!_isFutureInitialized) {
-      _future = context.read<DirectMessagesCubit>().getUsers();
-      _isFutureInitialized = true;
-    }
     super.didChangeDependencies();
+    if (!_isInitialLoadScheduled) {
+      _initialLoadFuture = context.read<DirectMessagesCubit>().getUsers();
+      _isInitialLoadScheduled = true;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
 
     return BlocConsumer<DirectMessagesCubit, DirectMessagesState>(
-      listenWhen: (prev, next) => prev.selectedUserId != next.selectedUserId,
+      listenWhen: (previous, next) => previous.selectedUserId != next.selectedUserId,
       listener: (context, state) {
         if (currentSize(context) > ScreenSize.lTablet) {
-          final String target = (state.selectedUserId == null)
+          final String targetPath = (state.selectedUserId == null)
               ? Routes.directMessages
               : '${Routes.directMessages}/${state.selectedUserId}';
 
           final String currentLocation = GoRouterState.of(context).uri.toString();
 
-          if (currentLocation != target) {
+          if (currentLocation != targetPath) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              updateBrowserUrlPath(target);
+              updateBrowserUrlPath(targetPath);
             });
           }
         }
       },
-      builder: (context, state) {
+      builder: (context, directMessagesState) {
         return Scaffold(
-          appBar: AppBar(
-            backgroundColor: theme.colorScheme.inversePrimary,
-            title: Row(
-              children: [
-                Expanded(child: Text(context.t.navBar.directMessages)),
-                if (currentSize(context) > ScreenSize.tablet)
-                  SizedBox(
-                    width: 250,
-                    child: DmSearchField(
-                      searchController: _searchController,
-                      searchUsers: context.read<DirectMessagesCubit>().searchUsers,
+          body: BlocBuilder<ProfileCubit, ProfileState>(
+            builder: (context, profileState) {
+              if (profileState.user != null) {
+                context.read<DirectMessagesCubit>().setSelfUser(profileState.user);
+              }
+
+              return FutureBuilder(
+                future: _initialLoadFuture,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Some error...'));
+                  }
+
+                  if (directMessagesState.users.isEmpty) {
+                    return Center(child: Text('No users found'));
+                  }
+
+                  final bool isDesktopLayout = currentSize(context) > ScreenSize.lTablet;
+
+                  final Widget directMessagesListPane = Container(
+                    constraints: BoxConstraints(
+                      maxWidth: isDesktopLayout
+                          ? desktopListPaneWidth
+                          : (MediaQuery.sizeOf(context).width -
+                                (currentSize(context) > ScreenSize.tablet ? 114 : 0)),
                     ),
-                  ),
-              ],
-            ),
-          ),
-          body: Column(
-            children: [
-              if (currentSize(context) <= ScreenSize.tablet)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DmSearchField(
-                    searchController: _searchController,
-                    searchUsers: context.read<DirectMessagesCubit>().searchUsers,
-                  ),
-                ),
-              Expanded(
-                child: BlocBuilder<ProfileCubit, ProfileState>(
-                  builder: (context, profileState) {
-                    if (profileState.user != null) {
-                      context.read<DirectMessagesCubit>().setSelfUser(profileState.user);
-                    }
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                        right: BorderSide(
+                          color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: _SliverDirectMessagesList(
+                      theme: theme,
+                      searchController: _searchController,
+                      showAllUsers: directMessagesState.showAllUsers,
+                      onToggleShowAllUsers: context.read<DirectMessagesCubit>().toggleShowAllUsers,
+                    ),
+                  );
 
-                    return FutureBuilder(
-                      future: _future,
-                      builder: (BuildContext context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return Center(child: Text("Some error..."));
-                        }
+                  if (!isDesktopLayout) {
+                    // Мобильный / планшетный layout: показываем только список
+                    return directMessagesListPane;
+                  }
 
-                        if (state.users.isEmpty) {
-                          return Center(child: Text("No users found"));
-                        }
-
-                        return Row(
-                          children: [
-                            Container(
-                              constraints: BoxConstraints(
-                                maxWidth: currentSize(context) > ScreenSize.lTablet
-                                    ? desktopDmsWidth
-                                    : (MediaQuery.sizeOf(context).width -
-                                          (currentSize(context) > ScreenSize.tablet ? 114 : 0)),
+                  // Desktop layout: слева список (Slivers), справа — чат
+                  return Row(
+                    children: [
+                      directMessagesListPane,
+                      directMessagesState.selectedUserId != null
+                          ? Expanded(
+                              key: ObjectKey(directMessagesState.selectedUserId),
+                              child: Chat(
+                                userId: directMessagesState.selectedUserId!,
+                                unreadMessagesCount:
+                                    directMessagesState.selectedUnreadMessagesCount,
                               ),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  left: BorderSide(
-                                    color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                                    width: 1,
-                                  ),
-                                  right: BorderSide(
-                                    color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                              child: ListView.separated(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: currentSize(context) >= ScreenSize.lTablet ? 0 : 12,
-                                  vertical: 12,
-                                ),
-                                itemCount: state.filteredUsers.length,
-                                separatorBuilder: (_, __) => const Divider(height: 1),
-                                itemBuilder: (context, index) {
-                                  final DmUserEntity user = state.filteredUsers[index];
-
-                                  return UserTile(user: user);
-                                },
-                              ),
-                            ),
-                            if (currentSize(context) > ScreenSize.lTablet)
-                              state.selectedUserId != null
-                                  ? Expanded(
-                                      key: ObjectKey(state.selectedUserId),
-                                      child: Chat(
-                                        userId: state.selectedUserId!,
-                                        unreadMessagesCount: state.selectedUnreadMessagesCount,
-                                      ),
-                                    )
-                                  : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+                            )
+                          : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
+                    ],
+                  );
+                },
+              );
+            },
           ),
         );
       },
     );
+  }
+}
+
+/// Отдельный виджет с CustomScrollView и всеми Slivers.
+/// Внутри:
+/// - SliverAppBar (заголовок + переключатель "все пользователи / недавние").
+/// - SliverPersistentHeader (строка поиска; исчезает при скролле вниз).
+/// - SliverPadding + SliverList (данные: recentDmsUsers или filteredUsers).
+class _SliverDirectMessagesList extends StatelessWidget {
+  final ThemeData theme;
+  final TextEditingController searchController;
+  final bool showAllUsers;
+  final VoidCallback onToggleShowAllUsers;
+
+  const _SliverDirectMessagesList({
+    required this.theme,
+    required this.searchController,
+    required this.showAllUsers,
+    required this.onToggleShowAllUsers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      // Поведение: строка поиска будет скрываться при прокрутке вниз (floating + snap).
+      slivers: [
+        SliverAppBar(
+          backgroundColor: theme.colorScheme.inversePrimary,
+          pinned: true,
+          title: Row(
+            children: [
+              Expanded(child: Text(context.t.navBar.directMessages)),
+              // Переключатель источника: недавние / все
+              _ShowAllUsersToggleButton(showAllUsers: showAllUsers, onToggle: onToggleShowAllUsers),
+            ],
+          ),
+        ),
+
+        // Строка поиска, исчезает при скролле вниз (floating + snap)
+        SliverPersistentHeader(
+          floating: true,
+          pinned: false,
+          delegate: _SearchBarHeaderDelegate(
+            minExtentHeight: 0, // полностью схлопывается
+            maxExtentHeight: 56,
+            child: Container(
+              color: theme.colorScheme.inversePrimary, // чтобы не мигало под AppBar
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: DmSearchField(
+                searchController: searchController,
+                searchUsers: context.read<DirectMessagesCubit>().searchUsers,
+              ),
+            ),
+          ),
+        ),
+
+        // Список пользователей
+        SliverPadding(
+          padding: EdgeInsets.symmetric(
+            horizontal: currentSize(context) >= ScreenSize.lTablet ? 0 : 12,
+            vertical: 12,
+          ),
+          sliver: BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
+            buildWhen: (previous, next) =>
+                previous.filteredUsers != next.filteredUsers ||
+                previous.filteredRecentDmsUsers != next.filteredRecentDmsUsers ||
+                previous.showAllUsers != next.showAllUsers,
+            builder: (context, state) {
+              final List<DmUserEntity> displayedUsers = state.showAllUsers
+                  ? state.filteredUsers
+                  : state.filteredRecentDmsUsers;
+
+              if (displayedUsers.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text(context.t.selectAnyChat)),
+                  ),
+                );
+              }
+
+              // Разделители между элементами, аналог ListView.separated
+              final int sliverChildCount = displayedUsers.length * 2 - 1;
+
+              return SliverList.builder(
+                itemCount: sliverChildCount,
+                itemBuilder: (BuildContext context, int sliverIndex) {
+                  if (sliverIndex.isOdd) {
+                    return const Divider(height: 1);
+                  }
+                  final int userIndex = sliverIndex ~/ 2;
+                  final DmUserEntity userEntity = displayedUsers[userIndex];
+                  return UserTile(user: userEntity);
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Кнопка-переключатель "Показывать всех / Показывать недавние".
+class _ShowAllUsersToggleButton extends StatelessWidget {
+  final bool showAllUsers;
+  final VoidCallback onToggle;
+
+  const _ShowAllUsersToggleButton({required this.showAllUsers, required this.onToggle});
+
+  @override
+  Widget build(BuildContext context) {
+    final String tooltipText = showAllUsers
+        ? 'Показать недавние диалоги'
+        : 'Показать всех пользователей';
+
+    return Tooltip(
+      message: tooltipText,
+      child: IconButton(
+        onPressed: onToggle,
+        icon: Icon(showAllUsers ? Icons.history : Icons.groups),
+      ),
+    );
+  }
+}
+
+/// Делегат для SliverPersistentHeader, который позволяет схлопывать/показывать строку поиска.
+class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double minExtentHeight;
+  final double maxExtentHeight;
+  final Widget child;
+
+  _SearchBarHeaderDelegate({
+    required this.minExtentHeight,
+    required this.maxExtentHeight,
+    required this.child,
+  });
+
+  @override
+  double get minExtent => minExtentHeight;
+
+  @override
+  double get maxExtent => math.max(maxExtentHeight, minExtentHeight);
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    // Простая реализация: просто обрезаем по высоте.
+    final double availableHeight = math.max(minExtentHeight, maxExtentHeight - shrinkOffset);
+
+    return SizedBox(
+      height: availableHeight,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          height: availableHeight, // чтобы не дёргалось при схлопывании
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _SearchBarHeaderDelegate oldDelegate) {
+    return minExtentHeight != oldDelegate.minExtentHeight ||
+        maxExtentHeight != oldDelegate.maxExtentHeight ||
+        child != oldDelegate.child;
   }
 }

@@ -3,8 +3,9 @@ part of 'direct_messages_cubit.dart';
 class DirectMessagesState {
   bool isUsersPending;
   List<DmUserEntity> users;
-  List<DmUserEntity> recentDmsUsers;
   List<DmUserEntity> filteredUsers;
+  List<DmUserEntity> recentDmsUsers;
+  List<DmUserEntity> filteredRecentDmsUsers;
   List<MessageEntity> unreadMessages;
   List<MessageEntity> allMessages;
   List<int> typingUsers;
@@ -16,6 +17,7 @@ class DirectMessagesState {
   DirectMessagesState({
     required this.users,
     required this.recentDmsUsers,
+    required this.filteredRecentDmsUsers,
     required this.filteredUsers,
     required this.isUsersPending,
     required this.typingUsers,
@@ -30,6 +32,7 @@ class DirectMessagesState {
   DirectMessagesState copyWith({
     List<DmUserEntity>? users,
     List<DmUserEntity>? recentDmsUsers,
+    List<DmUserEntity>? filteredRecentDmsUsers,
     List<DmUserEntity>? filteredUsers,
     bool? isUsersPending,
     List<int>? typingUsers,
@@ -44,6 +47,7 @@ class DirectMessagesState {
       users: users ?? this.users,
       recentDmsUsers: recentDmsUsers ?? this.recentDmsUsers,
       filteredUsers: filteredUsers ?? this.filteredUsers,
+      filteredRecentDmsUsers: filteredRecentDmsUsers ?? this.filteredRecentDmsUsers,
       isUsersPending: isUsersPending ?? this.isUsersPending,
       typingUsers: typingUsers ?? this.typingUsers,
       selfUser: selfUser ?? this.selfUser,
