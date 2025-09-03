@@ -80,6 +80,14 @@ dev_dependencies:
   slang_build_runner: ^4.7.0
   drift_dev: ^2.28.0
 
+dependency_overrides:
+  flutter_secure_storage_linux:
+    git:
+      url: https://github.com/m-berto/flutter_secure_storage.git
+      ref: patch-2
+      path: flutter_secure_storage_linux
+  flutter_secure_storage_platform_interface: 2.0.0
+
 flutter_gen:
   integrations:
     image: true
