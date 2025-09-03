@@ -83,5 +83,6 @@
   },
   "recent_dialogs": "Recent dialogs",
   "show_all_users": "Show all users",
-  "show_recent_dialogs": "Show recent dialogs"
+  "show_recent_dialogs": "Show recent dialogs",
+  "no_recent_dialogs": "No recent dialogs"
 }

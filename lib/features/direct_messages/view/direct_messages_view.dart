@@ -220,7 +220,7 @@ class _SliverDirectMessagesList extends StatelessWidget {
                 return SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: Center(child: Text(context.t.selectAnyChat)),
+                    child: Center(child: Text(context.t.noRecentDialogs)),
                   ),
                 );
               }

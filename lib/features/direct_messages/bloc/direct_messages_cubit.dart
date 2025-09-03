@@ -7,7 +7,6 @@ import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
-import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
@@ -161,7 +160,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       // 3️⃣ Если все равны — сортируем по имени
       return user1.fullName.compareTo(user2.fullName);
     });
-
     emit(state.copyWith(users: sortedUsers, filteredUsers: sortedUsers));
   }
 
@@ -171,7 +169,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   Future<void> getRecentDms() async {
     try {
-      List<RecentDm> recentDms = await _getRecentDmsUseCase.call();
+      // List<RecentDm> recentDms = await _getRecentDmsUseCase.call();
+      // List<RecentDm> recentDms = [];
 
       final List<DmUserEntity> users = state.users;
       final Map<int, DmUserEntity> usersById = {for (final user in users) user.userId: user};
@@ -180,6 +179,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final int? selfUserId = state.selfUser?.userId;
 
       final candidateMessages = allMessages.where((message) => message.type == MessageType.private);
+
+      inspect(candidateMessages.toList());
 
       final Map<int, int> lastTimestampBySenderId = {};
 
@@ -212,9 +213,9 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           if (usersById[id] != null) usersById[id]!,
       ];
 
-      if (recentDms.isEmpty) {
-        recentDms = orderedSenderIds.map((id) => RecentDm(dmId: id)).toList();
-      }
+      // recentDms = orderedSenderIds.map((id) => RecentDm(dmId: id)).toList();
+
+      inspect(recentDmsUsers);
 
       emit(state.copyWith(recentDmsUsers: recentDmsUsers, filteredRecentDmsUsers: recentDmsUsers));
     } catch (error, stackTrace) {
@@ -277,6 +278,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
+    state.allMessages.add(event.message);
 
     if (message.senderId != state.selfUser!.userId) {
       final sender = state.users.firstWhere((user) => user.userId == message.senderId);
@@ -287,6 +289,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       state.users[indexOfSender] = sender;
       _sortUsers();
     }
+    final _recentDmsUsers = state.recentDmsUsers;
+    getRecentDms();
   }
 
   void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {

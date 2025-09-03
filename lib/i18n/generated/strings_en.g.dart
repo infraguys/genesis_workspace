@@ -99,6 +99,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Show recent dialogs'
 	String get showRecentDialogs => 'Show recent dialogs';
+
+	/// en: 'No recent dialogs'
+	String get noRecentDialogs => 'No recent dialogs';
 }
 
 // Path: auth
