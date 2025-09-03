@@ -90,6 +90,15 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get selectAnyChat => 'Select any chat';
 
 	late final TranslationsUnreadMarkerEn unreadMarker = TranslationsUnreadMarkerEn.internal(_root);
+
+	/// en: 'Recent dialogs'
+	String get recentDialogs => 'Recent dialogs';
+
+	/// en: 'Show all users'
+	String get showAllUsers => 'Show all users';
+
+	/// en: 'Show recent dialogs'
+	String get showRecentDialogs => 'Show recent dialogs';
 }
 
 // Path: auth

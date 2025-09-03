@@ -48,6 +48,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           unreadMessages: [],
           allMessages: [],
           selectedUserId: null,
+          showAllUsers: false,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -155,34 +156,46 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   Future<void> getRecentDms() async {
     try {
       List<RecentDm> recentDms = await _getRecentDmsUseCase.call();
-      inspect(recentDms);
-      final users = state.users;
+
+      final List<DmUserEntity> users = state.users;
+      final Map<int, DmUserEntity> usersById = {for (final user in users) user.userId: user};
+
+      final List<MessageEntity> allMessages = state.allMessages;
+      final int? selfUserId = state.selfUser?.userId;
+
+      final candidateMessages = allMessages.where(
+        (m) => m.type == MessageType.private && m.senderId != selfUserId,
+      );
+
+      final Map<int, int> lastTimestampBySenderId = {};
+      for (final m in candidateMessages) {
+        final senderId = m.senderId;
+        final int ts = m.timestamp;
+        final int? current = lastTimestampBySenderId[senderId];
+        if (current == null || ts > current) {
+          lastTimestampBySenderId[senderId] = ts;
+        }
+      }
+
+      final orderedSenderIds = lastTimestampBySenderId.keys.toList()
+        ..sort((a, b) {
+          final tb = lastTimestampBySenderId[b]!;
+          final ta = lastTimestampBySenderId[a]!;
+          return tb.compareTo(ta);
+        });
+
+      final recentDmsUsers = <DmUserEntity>[
+        for (final id in orderedSenderIds)
+          if (usersById[id] != null) usersById[id]!,
+      ];
 
       if (recentDms.isEmpty) {
-        final allMessages = state.allMessages;
-        inspect(
-          allMessages
-              .where(
-                (message) =>
-                    (message.type == MessageType.private) &&
-                    message.senderId != state.selfUser?.userId,
-              )
-              .toList(),
-        );
-        final Set<int> senderIds = allMessages
-            .where(
-              (message) =>
-                  (message.type == MessageType.private) &&
-                  message.senderId != state.selfUser?.userId,
-            )
-            .map((message) => message.senderId)
-            .toSet();
-        recentDms = senderIds.map((senderId) => RecentDm(dmId: senderId)).toList();
-        final recentDmsUsers = users.where((user) => senderIds.contains(user.userId)).toList();
-        inspect(recentDmsUsers);
-        emit(state.copyWith(recentDmsUsers: recentDmsUsers));
+        recentDms = orderedSenderIds.map((id) => RecentDm(dmId: id)).toList();
       }
-    } catch (e) {
+
+      emit(state.copyWith(recentDmsUsers: recentDmsUsers));
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
       rethrow;
     }
   }
@@ -192,7 +205,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
         // narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
-        numBefore: 2000,
+        numBefore: 1000,
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);

@@ -56,6 +56,9 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsStarredRu starred = TranslationsStarredRu._(_root);
 	@override String get selectAnyChat => 'Выберите любой чат';
 	@override late final TranslationsUnreadMarkerRu unreadMarker = TranslationsUnreadMarkerRu._(_root);
+	@override String get recentDialogs => 'Недавние чаты';
+	@override String get showAllUsers => 'Показать всех пользователей';
+	@override String get showRecentDialogs => 'Показать недавние чаты';
 }
 
 // Path: auth

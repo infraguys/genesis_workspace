@@ -80,5 +80,8 @@
     "label": "Unread messages",
     "label_with_count": "Unread messages • {count}",
     "a11y_label": "Unread messages marker"
-  }
+  },
+  "recent_dialogs": "Recent dialogs",
+  "show_all_users": "Show all users",
+  "show_recent_dialogs": "Show recent dialogs"
 }
