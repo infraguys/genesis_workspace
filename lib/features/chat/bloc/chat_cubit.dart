@@ -17,6 +17,7 @@ import 'package:genesis_workspace/domain/messages/entities/update_messages_flags
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
@@ -62,6 +63,9 @@ class ChatCubit extends Cubit<ChatState> {
       _onMessageFlagsEvents,
     );
     _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(_onReactionEvents);
+    _deleteMessageSubscription = _realTimeService.deleteMessageEventsStream.listen(
+      _onDeleteMessageEvents,
+    );
   }
 
   final RealTimeService _realTimeService;
@@ -77,6 +81,7 @@ class ChatCubit extends Cubit<ChatState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
   late final StreamSubscription<ReactionEventEntity> _reactionsSubscription;
+  late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageSubscription;
 
   Timer? _readMessageDebounceTimer;
 
@@ -294,12 +299,19 @@ class ChatCubit extends Cubit<ChatState> {
     emit(state.copyWith(messages: state.messages));
   }
 
+  void _onDeleteMessageEvents(DeleteMessageEventEntity event) {
+    final updatedMessages = [...state.messages];
+    updatedMessages.removeWhere((message) => message.id == event.messageId);
+    emit(state.copyWith(messages: updatedMessages));
+  }
+
   @override
   Future<void> close() {
     _typingEventsSubscription.cancel();
     _messagesEventsSubscription.cancel();
     _messageFlagsSubscription.cancel();
     _reactionsSubscription.cancel();
+    _deleteMessageSubscription.cancel();
     _readMessageDebounceTimer?.cancel();
     return super.close();
   }

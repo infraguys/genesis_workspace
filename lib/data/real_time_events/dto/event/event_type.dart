@@ -20,6 +20,9 @@ enum EventType {
   @JsonValue('reaction')
   reaction,
 
+  @JsonValue('delete_message')
+  deleteMessage,
+
   unsupported,
 }
 
@@ -38,6 +41,8 @@ extension EventTypeX on EventType {
         return 'reaction';
       case EventType.presence:
         return 'presence';
+      case EventType.deleteMessage:
+        return 'delete_message';
       default:
         return 'unsupported';
     }
@@ -57,6 +62,8 @@ extension EventTypeX on EventType {
         return EventType.updateMessageFlags;
       case 'reaction':
         return EventType.reaction;
+      case 'delete_message':
+        return EventType.deleteMessage;
       default:
         return EventType.unsupported;
     }

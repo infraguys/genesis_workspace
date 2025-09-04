@@ -12,6 +12,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
@@ -60,6 +61,9 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       _onMessageFlagsEvents,
     );
     _presenceSubscription = _realTimeService.presenceEventsStream.listen(_onPresenceEvents);
+    _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(
+      _onDeleteMessageEvents,
+    );
   }
 
   final GetMessagesUseCase _getMessagesUseCase;
@@ -72,6 +76,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
   late final StreamSubscription<PresenceEventEntity> _presenceSubscription;
+  late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
 
   setSelfUser(UserEntity? user) {
     if (state.selfUser == null) {
@@ -311,12 +316,27 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     _sortUsers();
   }
 
+  void _onDeleteMessageEvents(DeleteMessageEventEntity event) {
+    final updatedMessages = [...state.allMessages];
+    updatedMessages.removeWhere((message) => message.id == event.messageId);
+    final updatedUnreadMessages = [...state.unreadMessages];
+    updatedUnreadMessages.removeWhere((message) => message.id == event.messageId);
+    emit(state.copyWith(allMessages: updatedMessages, unreadMessages: updatedUnreadMessages));
+    final users = state.users.map((user) {
+      user.unreadMessages.remove(event.messageId);
+      return user;
+    }).toList();
+    state.users = users;
+    _sortUsers();
+  }
+
   @override
   Future<void> close() {
     _typingEventsSubscription.cancel();
     _messagesEventsSubscription.cancel();
     _messageFlagsSubscription.cancel();
     _presenceSubscription.cancel();
+    _deleteMessageEventsSubscription.cancel();
     return super.close();
   }
 }

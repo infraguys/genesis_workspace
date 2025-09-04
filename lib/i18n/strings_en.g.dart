@@ -95,6 +95,18 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get select_any_chat => 'Select any chat';
 
 	late final TranslationsUnreadMarkerEn unread_marker = TranslationsUnreadMarkerEn._(_root);
+
+	/// en: 'Recent dialogs'
+	String get recent_dialogs => 'Recent dialogs';
+
+	/// en: 'Show all users'
+	String get show_all_users => 'Show all users';
+
+	/// en: 'Show recent dialogs'
+	String get show_recent_dialogs => 'Show recent dialogs';
+
+	/// en: 'No recent dialogs'
+	String get no_recent_dialogs => 'No recent dialogs';
 }
 
 // Path: auth
@@ -376,6 +388,10 @@ extension on Translations {
 			case 'unread_marker.label': return 'Unread messages';
 			case 'unread_marker.label_with_count': return 'Unread messages • {count}';
 			case 'unread_marker.a11y_label': return 'Unread messages marker';
+			case 'recent_dialogs': return 'Recent dialogs';
+			case 'show_all_users': return 'Show all users';
+			case 'show_recent_dialogs': return 'Show recent dialogs';
+			case 'no_recent_dialogs': return 'No recent dialogs';
 			default: return null;
 		}
 	}

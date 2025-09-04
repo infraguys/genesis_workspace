@@ -14,6 +14,7 @@ import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_us
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
@@ -36,13 +37,9 @@ class MessagesCubit extends Cubit<MessagesState> {
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
       _onMessageFlagsEvents,
     );
-  }
-
-  @override
-  Future<void> close() {
-    _messagesEventsSubscription.cancel();
-    _messageFlagsSubscription.cancel();
-    return super.close();
+    _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(
+      _onDeleteMessageEvents,
+    );
   }
 
   final GetMessagesUseCase _getMessagesUseCase;
@@ -52,6 +49,7 @@ class MessagesCubit extends Cubit<MessagesState> {
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
+  late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
 
   Future<void> getLastMessages() async {
     try {
@@ -88,22 +86,6 @@ class MessagesCubit extends Cubit<MessagesState> {
     }
   }
 
-  _onMessageEvents(MessageEventEntity event) {
-    final messages = [...state.messages];
-    messages.add(event.message);
-    emit(state.copyWith(messages: messages));
-  }
-
-  _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
-    final newMessages = [...state.messages];
-    if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
-      for (var messageId in event.messages) {
-        newMessages.removeWhere((message) => message.id == messageId);
-      }
-    }
-    emit(state.copyWith(messages: newMessages));
-  }
-
   Future<void> addStarredFlag(int messageId) async {
     try {
       final body = UpdateMessagesFlagsRequestEntity(
@@ -128,6 +110,36 @@ class MessagesCubit extends Cubit<MessagesState> {
     } catch (e) {
       inspect(e);
     }
+  }
+
+  _onMessageEvents(MessageEventEntity event) {
+    final messages = [...state.messages];
+    messages.add(event.message);
+    emit(state.copyWith(messages: messages));
+  }
+
+  _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
+    final newMessages = [...state.messages];
+    if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
+      for (var messageId in event.messages) {
+        newMessages.removeWhere((message) => message.id == messageId);
+      }
+    }
+    emit(state.copyWith(messages: newMessages));
+  }
+
+  _onDeleteMessageEvents(DeleteMessageEventEntity event) {
+    final newMessages = [...state.messages];
+    newMessages.removeWhere((message) => message.id == event.messageId);
+    emit(state.copyWith(messages: newMessages));
+  }
+
+  @override
+  Future<void> close() {
+    _messagesEventsSubscription.cancel();
+    _messageFlagsSubscription.cancel();
+    _deleteMessageEventsSubscription.cancel();
+    return super.close();
   }
 }
 

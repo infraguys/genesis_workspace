@@ -10,6 +10,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
@@ -46,6 +47,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
       _onMessageFlagsEvents,
     );
+    _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(
+      _onDeleteMessageEvents,
+    );
   }
 
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
@@ -54,6 +58,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
+  late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
 
   Future<void> getUnreadMessages() async {
     try {
@@ -215,10 +220,24 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     }
   }
 
+  void _onDeleteMessageEvents(DeleteMessageEventEntity event) {
+    final updatedChannels = [...state.channels];
+    final channel = updatedChannels.firstWhere((channel) => channel.streamId == event.streamId);
+    final indexOfChannel = updatedChannels.indexOf(channel);
+    channel.unreadMessages.remove(event.messageId);
+    updatedChannels[indexOfChannel] = channel;
+    final topic = updatedChannels[indexOfChannel].topics.firstWhere(
+      (topic) => topic.name == event.topic,
+    );
+    topic.unreadMessages.remove(event.messageId);
+    emit(state.copyWith(channels: updatedChannels));
+  }
+
   @override
   Future<void> close() {
     _messagesEventsSubscription.cancel();
     _messageFlagsSubscription.cancel();
+    _deleteMessageEventsSubscription.cancel();
     return super.close();
   }
 }

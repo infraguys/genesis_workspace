@@ -17,6 +17,7 @@ import 'package:genesis_workspace/domain/messages/entities/update_messages_flags
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
@@ -64,6 +65,9 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
       _onMessageFlagsEvents,
     );
     _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(_onReactionEvents);
+    _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(
+      _onDeleteMessageEvents,
+    );
   }
 
   final RealTimeService _realTimeService;
@@ -79,6 +83,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
   late final StreamSubscription<ReactionEventEntity> _reactionsSubscription;
+  late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
 
   Timer? _readMessageDebounceTimer;
 
@@ -347,6 +352,12 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     emit(state.copyWith(messages: state.messages));
   }
 
+  void _onDeleteMessageEvents(DeleteMessageEventEntity event) {
+    final updatedMessages = [...state.messages];
+    updatedMessages.removeWhere((message) => message.id == event.messageId);
+    emit(state.copyWith(messages: updatedMessages));
+  }
+
   @override
   Future<void> close() {
     _typingEventsSubscription.cancel();
@@ -354,6 +365,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     _messageFlagsSubscription.cancel();
     _readMessageDebounceTimer?.cancel();
     _reactionsSubscription.cancel();
+    _deleteMessageEventsSubscription.cancel();
     return super.close();
   }
 }

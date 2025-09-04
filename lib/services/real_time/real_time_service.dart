@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
@@ -49,6 +50,11 @@ class RealTimeService {
       StreamController<PresenceEventEntity>.broadcast();
   Stream<PresenceEventEntity> get presenceEventsStream => _presenceEventsController.stream;
 
+  StreamController<DeleteMessageEventEntity> _deleteMessageEventsController =
+      StreamController<DeleteMessageEventEntity>.broadcast();
+  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream =>
+      _deleteMessageEventsController.stream;
+
   Future<RegisterQueueEntity> registerQueue() async {
     try {
       final RegisterQueueEntity response = await _registerQueueUseCase.call(
@@ -71,6 +77,7 @@ class RealTimeService {
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueId!, lastEventId: lastEventId),
       );
+      inspect(response.events);
       for (var event in response.events) {
         switch (event.type) {
           case EventType.typing:
@@ -83,6 +90,8 @@ class RealTimeService {
             _reactionsEventsController.add(event as ReactionEventEntity);
           case EventType.presence:
             _presenceEventsController.add(event as PresenceEventEntity);
+          case EventType.deleteMessage:
+            _deleteMessageEventsController.add(event as DeleteMessageEventEntity);
           default:
             break;
         }
@@ -116,6 +125,9 @@ class RealTimeService {
     if (_presenceEventsController.isClosed) {
       _presenceEventsController = StreamController<PresenceEventEntity>.broadcast();
     }
+    if (_deleteMessageEventsController.isClosed) {
+      _deleteMessageEventsController = StreamController<DeleteMessageEventEntity>.broadcast();
+    }
     if (_isPolling) return;
     try {
       await registerQueue();
@@ -143,5 +155,6 @@ class RealTimeService {
     _messageFlagsEventsController.close();
     _reactionsEventsController.close();
     _presenceEventsController.close();
+    _deleteMessageEventsController.close();
   }
 }

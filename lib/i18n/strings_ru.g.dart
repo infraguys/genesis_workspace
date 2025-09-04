@@ -60,6 +60,10 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsStarredRu starred = _TranslationsStarredRu._(_root);
 	@override String get select_any_chat => 'Выберите любой чат';
 	@override late final _TranslationsUnreadMarkerRu unread_marker = _TranslationsUnreadMarkerRu._(_root);
+	@override String get recent_dialogs => 'Недавние чаты';
+	@override String get show_all_users => 'Показать всех пользователей';
+	@override String get show_recent_dialogs => 'Показать недавние чаты';
+	@override String get no_recent_dialogs => 'Нет недавних чатов';
 }
 
 // Path: auth
@@ -277,6 +281,10 @@ extension on TranslationsRu {
 			case 'unread_marker.label': return 'Непрочитанные сообщения';
 			case 'unread_marker.label_with_count': return 'Непрочитанные сообщения • {count}';
 			case 'unread_marker.a11y_label': return 'Маркер непрочитанных сообщений';
+			case 'recent_dialogs': return 'Недавние чаты';
+			case 'show_all_users': return 'Показать всех пользователей';
+			case 'show_recent_dialogs': return 'Показать недавние чаты';
+			case 'no_recent_dialogs': return 'Нет недавних чатов';
 			default: return null;
 		}
 	}
