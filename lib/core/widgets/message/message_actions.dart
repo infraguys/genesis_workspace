@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageActions extends StatelessWidget {
   final VoidCallback? onTapStarred;
   final VoidCallback? onTapDelete;
+  final Function()? onTapQuote;
   final bool isStarred;
   final bool isMyMessage;
   const MessageActions({
     super.key,
     required this.onTapStarred,
+    required this.onTapQuote,
     required this.isStarred,
     required this.isMyMessage,
     required this.onTapDelete,
@@ -19,18 +22,30 @@ class MessageActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          onPressed: onTapStarred,
-          icon: Icon(isStarred ? Icons.star : Icons.star_border, color: theme.colorScheme.primary),
+        Tooltip(
+          message: context.t.messageActions.star,
+          child: IconButton(
+            onPressed: onTapStarred,
+            icon: Icon(
+              isStarred ? Icons.star : Icons.star_border,
+              color: theme.colorScheme.primary,
+            ),
+          ),
         ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.edit, color: theme.colorScheme.primary),
+        Tooltip(
+          message: context.t.messageActions.quote,
+          child: IconButton(
+            onPressed: onTapQuote,
+            icon: Icon(Icons.format_quote, color: theme.colorScheme.primary),
+          ),
         ),
         if (isMyMessage)
-          IconButton(
-            onPressed: onTapDelete,
-            icon: Icon(Icons.delete, color: theme.colorScheme.error),
+          Tooltip(
+            message: context.t.messageActions.delete,
+            child: IconButton(
+              onPressed: onTapDelete,
+              icon: Icon(Icons.delete, color: theme.colorScheme.error),
+            ),
           ),
         IconButton(
           onPressed: () {},

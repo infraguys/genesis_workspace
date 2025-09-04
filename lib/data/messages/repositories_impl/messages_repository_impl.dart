@@ -5,6 +5,7 @@ import 'package:genesis_workspace/domain/messages/entities/emoji_reaction_entity
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_response_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -18,6 +19,16 @@ class MessagesRepositoryImpl implements MessagesRepository {
     try {
       final dto = await dataSource.getMessages(body.toDto());
       return dto.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<SingleMessageResponseEntity> getMessageById(SingleMessageRequestEntity body) async {
+    try {
+      final response = await dataSource.getMessageById(body.toDto());
+      return response.toEntity();
     } catch (e) {
       rethrow;
     }

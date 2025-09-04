@@ -10,12 +10,14 @@ class MessageInput extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onSend;
   final bool isMessagePending;
+  final FocusNode focusNode;
 
   const MessageInput({
     super.key,
     required this.controller,
     this.onSend,
     required this.isMessagePending,
+    required this.focusNode,
   });
 
   @override
@@ -24,8 +26,6 @@ class MessageInput extends StatefulWidget {
 
 class _MessageInputState extends State<MessageInput> {
   // bool _keyboardOpen = false;
-
-  final FocusNode _textFieldFocusNode = FocusNode();
 
   final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
 
@@ -77,7 +77,7 @@ class _MessageInputState extends State<MessageInput> {
                       ),
                       child: TextField(
                         controller: widget.controller,
-                        focusNode: _textFieldFocusNode,
+                        focusNode: widget.focusNode,
                         minLines: 1,
                         maxLines: 4,
                         onTap: () {
@@ -109,7 +109,7 @@ class _MessageInputState extends State<MessageInput> {
                                 }
                               } else {
                                 if (emojiState.showEmojiKeyboard) {
-                                  FocusScope.of(context).requestFocus(_textFieldFocusNode);
+                                  FocusScope.of(context).requestFocus(widget.focusNode);
                                   context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
                                 } else {
                                   FocusScope.of(context).unfocus();
@@ -150,7 +150,7 @@ class _MessageInputState extends State<MessageInput> {
               child: EmojiPicker(
                 textEditingController: widget.controller,
                 onEmojiSelected: (_, _) {
-                  _textFieldFocusNode.requestFocus();
+                  widget.focusNode.requestFocus();
                 },
                 config: Config(
                   height: emojiState.keyboardHeight,

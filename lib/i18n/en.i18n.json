@@ -85,5 +85,10 @@
   "show_all_users": "Show all users",
   "show_recent_dialogs": "Show recent dialogs",
   "no_recent_dialogs": "No recent dialogs",
-  "error": "Error"
+  "error": "Error",
+  "message_actions": {
+    "quote": "Quote this message",
+    "delete": "Delete this message",
+    "star": "Star this message"
+  }
 }

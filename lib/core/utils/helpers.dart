@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/utils/url_updater_stub.dart'
     if (dart.library.html) 'package:genesis_workspace/core/utils/url_updater_web.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -85,4 +86,14 @@ Size? extractDimensionsFromUrl(String url) {
 void updateBrowserUrlPath(String path, {bool addToHistory = true}) {
   final normalizedPath = path.startsWith('/') ? path : '/$path';
   platformUpdateBrowserUrlPath(normalizedPath, addToHistory: addToHistory);
+}
+
+String generateMessageQuote(MessageEntity message) {
+  final quoteText =
+      '''@_**${message.senderFullName}|${message.senderId}** [писал/а]:
+```quote
+${message.content}
+```
+''';
+  return quoteText;
 }

@@ -61,6 +61,7 @@ class TranslationsRu extends Translations {
 	@override String get showRecentDialogs => 'Показать недавние чаты';
 	@override String get noRecentDialogs => 'Нет недавних чатов';
 	@override String get error => 'Ошибка';
+	@override late final TranslationsMessageActionsRu messageActions = TranslationsMessageActionsRu._(_root);
 }
 
 // Path: auth
@@ -204,4 +205,16 @@ class TranslationsUnreadMarkerRu extends TranslationsUnreadMarkerEn {
 	@override String get label => 'Непрочитанные сообщения';
 	@override String labelWithCount({required Object count}) => 'Непрочитанные сообщения • ${count}';
 	@override String get a11yLabel => 'Маркер непрочитанных сообщений';
+}
+
+// Path: messageActions
+class TranslationsMessageActionsRu extends TranslationsMessageActionsEn {
+	TranslationsMessageActionsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get quote => 'Цитировать это сообщение';
+	@override String get delete => 'Удалить это сообщение';
+	@override String get star => 'Отметить это сообщение';
 }

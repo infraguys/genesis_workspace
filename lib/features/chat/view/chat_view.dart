@@ -12,6 +12,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -32,6 +33,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   late final UserEntity _myUser;
   late final TextEditingController _messageController;
 
+  final FocusNode _messageInputFocusNode = FocusNode();
+
   String _currentText = '';
 
   Future<void> _onTextChanged() async {
@@ -41,6 +44,35 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     await context.read<ChatCubit>().changeTyping(
       op: _currentText.isEmpty ? TypingEventOp.stop : TypingEventOp.start,
     );
+  }
+
+  void insertQuoteAndFocus({required String textToInsert, bool append = false}) {
+    final String current = _messageController.text;
+    final String nextText = append && current.isNotEmpty ? '$current\n$textToInsert' : textToInsert;
+
+    _messageController.text = nextText;
+    _messageController.selection = TextSelection.collapsed(offset: nextText.length);
+    _messageInputFocusNode.requestFocus();
+  }
+
+  Future<void> onTapQuote(int messageId) async {
+    try {
+      context.read<ChatCubit>().setIsMessagePending(true);
+
+      final singleMessage = await context.read<MessagesCubit>().getMessageById(
+        messageId: messageId,
+        applyMarkdown: false,
+      );
+
+      final String quote = generateMessageQuote(singleMessage);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        insertQuoteAndFocus(textToInsert: quote);
+      });
+    } catch (e) {
+    } finally {
+      context.read<ChatCubit>().setIsMessagePending(false);
+    }
   }
 
   @override
@@ -66,6 +98,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     _controller.dispose();
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
+    _messageInputFocusNode.dispose();
     super.dispose();
   }
 
@@ -180,6 +213,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                             message: MessageEntity.fake(),
                                             isSkeleton: true, // enable skeleton mode
                                             myUserId: _myUser.userId,
+                                            onTapQuote: (_) {},
                                           );
                                         },
                                       ),
@@ -194,12 +228,14 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       loadMore: context.read<ChatCubit>().loadMoreMessages,
                                       showTopic: true,
                                       myUserId: _myUser.userId,
+                                      onTapQuote: onTapQuote,
                                     ),
                             ),
                           ),
                     MessageInput(
                       controller: _messageController,
                       isMessagePending: state.isMessagePending,
+                      focusNode: _messageInputFocusNode,
                       onSend: _currentText.isNotEmpty
                           ? () async {
                               final content = _messageController.text;

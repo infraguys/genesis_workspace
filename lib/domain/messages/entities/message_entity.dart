@@ -66,6 +66,7 @@ class MessageEntity {
     String? subject,
     int? timestamp,
     List<ReactionEntity>? reactions,
+    String? rawContent,
   }) {
     return MessageEntity(
       id: id ?? this.id,

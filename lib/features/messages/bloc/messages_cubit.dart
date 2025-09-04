@@ -10,9 +10,11 @@ import 'package:genesis_workspace/domain/messages/entities/emoji_reaction_entity
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/delete_message_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/get_message_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
@@ -35,6 +37,7 @@ class MessagesCubit extends Cubit<MessagesState> {
     this._removeEmojiReactionUseCase,
     this._updateMessagesFlagsUseCase,
     this._deleteMessageUseCase,
+      this._getMessageByIdUseCase,
   ) : super(MessagesState(messages: [])) {
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
@@ -50,6 +53,7 @@ class MessagesCubit extends Cubit<MessagesState> {
   final RemoveEmojiReactionUseCase _removeEmojiReactionUseCase;
   final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
   final DeleteMessageUseCase _deleteMessageUseCase;
+  final GetMessageByIdUseCase _getMessageByIdUseCase;
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
@@ -120,6 +124,17 @@ class MessagesCubit extends Cubit<MessagesState> {
     try {
       final body = DeleteMessageRequestEntity(messageId: messageId);
       await _deleteMessageUseCase.call(body);
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  Future<MessageEntity> getMessageById({required int messageId, bool? applyMarkdown = true}) async {
+    try {
+      final body = SingleMessageRequestEntity(messageId: messageId, applyMarkdown: applyMarkdown!);
+      final response = await _getMessageByIdUseCase.call(body);
+      return response.message;
     } catch (e) {
       inspect(e);
       rethrow;

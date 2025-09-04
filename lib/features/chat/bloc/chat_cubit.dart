@@ -175,6 +175,10 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
+  void setIsMessagePending(bool value) {
+    emit(state.copyWith(isMessagePending: value));
+  }
+
   Future<void> sendMessage({required int chatId, required String content}) async {
     state.isMessagePending = true;
     emit(state.copyWith(isMessagePending: state.isMessagePending));

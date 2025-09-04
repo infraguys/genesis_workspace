@@ -238,6 +238,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     }
   }
 
+  void setIsMessagePending(bool value) {
+    emit(state.copyWith(isMessagePending: value));
+  }
+
   void scheduleMarkAsRead(int messageId) {
     state.pendingToMarkAsRead.add(messageId);
     final MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);

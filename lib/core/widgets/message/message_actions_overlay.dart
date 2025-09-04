@@ -19,6 +19,7 @@ class MessageActionsOverlay extends StatefulWidget {
   final Widget messageContent;
   final bool isOwnMessage;
   final VoidCallback onClose;
+  final Function() onTapQuote;
 
   const MessageActionsOverlay({
     super.key,
@@ -27,6 +28,7 @@ class MessageActionsOverlay extends StatefulWidget {
     required this.messageContent,
     required this.isOwnMessage,
     required this.onClose,
+    required this.onTapQuote,
   });
 
   @override
@@ -194,6 +196,10 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                     child: MessageActions(
                       isStarred: isStarred,
                       isMyMessage: widget.isOwnMessage,
+                      onTapQuote: () {
+                        widget.onTapQuote();
+                        widget.onClose();
+                      },
                       onTapDelete: () async {
                         try {
                           await context.read<MessagesCubit>().deleteMessage(widget.message.id);

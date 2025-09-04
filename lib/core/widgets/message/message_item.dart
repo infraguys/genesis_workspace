@@ -8,6 +8,7 @@ import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
+import 'package:genesis_workspace/core/widgets/message/message_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -27,6 +28,7 @@ class MessageItem extends StatelessWidget {
   final MessageUIOrder messageOrder;
   final int myUserId;
   final bool isNewDay;
+  final Function(int messageId) onTapQuote;
 
   MessageItem({
     super.key,
@@ -37,6 +39,7 @@ class MessageItem extends StatelessWidget {
     this.messageOrder = MessageUIOrder.middle,
     required this.myUserId,
     this.isNewDay = false,
+    required this.onTapQuote,
   });
 
   final actionsPopupKey = GlobalKey<CustomPopupState>();
@@ -73,7 +76,7 @@ class MessageItem extends StatelessWidget {
       }
     }
 
-    Future<void> toggleIsStarred(bool isStarred) async {
+    Future<void> handleToggleIsStarred(bool isStarred) async {
       try {
         if (isStarred) {
           await messagesCubit.removeStarredFlag(message.id);
@@ -89,7 +92,7 @@ class MessageItem extends StatelessWidget {
       }
     }
 
-    Future<void> deleteMessage() async {
+    Future<void> handleDeleteMessage() async {
       try {
         await messagesCubit.deleteMessage(message.id);
       } on DioException catch (e) {
@@ -158,10 +161,13 @@ class MessageItem extends StatelessWidget {
             isStarred: isStarred,
             popupKey: actionsPopupKey,
             onTapStarred: () async {
-              await toggleIsStarred(isStarred);
+              await handleToggleIsStarred(isStarred);
             },
             onTapDelete: () async {
-              await deleteMessage();
+              await handleDeleteMessage();
+            },
+            onTapQuote: () {
+              onTapQuote(message.id);
             },
           ),
           child: ConstrainedBox(
@@ -194,6 +200,9 @@ class MessageItem extends StatelessWidget {
                         builder: (_) => MessageActionsOverlay(
                           message: message,
                           position: position,
+                          onTapQuote: () {
+                            onTapQuote(message.id);
+                          },
                           onClose: () => overlay.remove(),
                           messageContent: MessageHtml(content: message.content),
                           isOwnMessage: isMyMessage,
@@ -270,134 +279,6 @@ class MessageItem extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class MessageBody extends StatelessWidget {
-  final bool showSenderName;
-  final bool isSkeleton;
-  final MessageEntity message;
-  final bool showTopic;
-  final bool isStarred;
-  final GlobalKey<CustomPopupState> actionsPopupKey;
-  final double maxMessageWidth;
-  const MessageBody({
-    super.key,
-    required this.showSenderName,
-    required this.isSkeleton,
-    required this.message,
-    required this.showTopic,
-    required this.isStarred,
-    required this.actionsPopupKey,
-    required this.maxMessageWidth,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (showSenderName)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  isSkeleton
-                      ? Container(
-                          height: 10,
-                          width: 80,
-                          color: theme.colorScheme.surfaceContainerHighest,
-                        )
-                      : Text(message.senderFullName, style: theme.textTheme.titleSmall),
-                  if (showTopic && message.subject.isNotEmpty)
-                    Skeleton.ignore(
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 2),
-                          const Icon(Icons.arrow_right, size: 16),
-                          Text(message.subject, style: theme.textTheme.labelSmall),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-              if (currentSize(context) > ScreenSize.tablet) ...[
-                SizedBox(width: 4),
-                _MessageActions(
-                  isStarred: isStarred,
-                  messageId: message.id,
-                  actionsPopupKey: actionsPopupKey,
-                ),
-              ],
-            ],
-          ),
-        const SizedBox(height: 2),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            IntrinsicWidth(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxMessageWidth, minWidth: 30),
-                child: isSkeleton
-                    ? Container(
-                        height: 14,
-                        width: 150,
-                        color: theme.colorScheme.surfaceContainerHighest,
-                      )
-                    : MessageHtml(content: message.content),
-              ),
-            ),
-            if (currentSize(context) > ScreenSize.tablet && !showSenderName)
-              _MessageActions(
-                isStarred: isStarred,
-                messageId: message.id,
-                actionsPopupKey: actionsPopupKey,
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _MessageActions extends StatelessWidget {
-  final bool isStarred;
-  final int messageId;
-  final GlobalKey<CustomPopupState> actionsPopupKey;
-  const _MessageActions({
-    super.key,
-    required this.isStarred,
-    required this.messageId,
-    required this.actionsPopupKey,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(6),
-            onTap: () async {
-              actionsPopupKey.currentState?.show();
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: Icon(Icons.menu, color: theme.unselectedWidgetColor, size: 16),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -25,6 +25,7 @@ class MessagesList extends StatefulWidget {
   final bool showTopic;
   final bool isLoadingMore;
   final int myUserId;
+  final void Function(int messageId)? onTapQuote;
 
   const MessagesList({
     super.key,
@@ -35,6 +36,7 @@ class MessagesList extends StatefulWidget {
     this.showTopic = false,
     required this.isLoadingMore,
     required this.myUserId,
+    this.onTapQuote,
   });
 
   @override
@@ -269,6 +271,7 @@ class _MessagesListState extends State<MessagesList> {
                         showTopic: widget.showTopic,
                         myUserId: widget.myUserId,
                         isNewDay: isNewDay,
+                        onTapQuote: widget.onTapQuote ?? (_) {},
                       ),
                     ),
                   );

@@ -105,6 +105,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Error'
 	String get error => 'Error';
+
+	late final TranslationsMessageActionsEn messageActions = TranslationsMessageActionsEn.internal(_root);
 }
 
 // Path: auth
@@ -318,4 +320,22 @@ class TranslationsUnreadMarkerEn {
 
 	/// en: 'Unread messages marker'
 	String get a11yLabel => 'Unread messages marker';
+}
+
+// Path: messageActions
+class TranslationsMessageActionsEn {
+	TranslationsMessageActionsEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Quote this message'
+	String get quote => 'Quote this message';
+
+	/// en: 'Delete this message'
+	String get delete => 'Delete this message';
+
+	/// en: 'Star this message'
+	String get star => 'Star this message';
 }

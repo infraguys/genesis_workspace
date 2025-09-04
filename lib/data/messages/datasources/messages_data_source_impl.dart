@@ -9,6 +9,7 @@ import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/send_message_request_dto.dart';
+import 'package:genesis_workspace/data/messages/dto/single_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_messages_flags_request_dto.dart';
 import 'package:injectable/injectable.dart';
 
@@ -32,6 +33,17 @@ class MessagesDataSourceImpl implements MessagesDataSource {
         applyMarkdown,
         clientGravatar,
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<SingleMessageResponseDto> getMessageById(SingleMessageRequestDto body) async {
+    try {
+      final messageId = body.messageId;
+      final applyMarkdown = body.applyMarkdown;
+      return await apiClient.getMessageById(messageId, applyMarkdown);
     } catch (e) {
       rethrow;
     }

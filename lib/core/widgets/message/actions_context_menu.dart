@@ -20,12 +20,14 @@ class ActionsContextMenu extends StatefulWidget {
     required this.isStarred,
     required this.isMyMessage,
     required this.messageId,
+    required this.onTapQuote,
   });
 
   /// Fired with emoji name **without colons**, e.g. "thumbs_up".
-  final Function(String) onEmojiSelected;
+  final Function(String emojiValue) onEmojiSelected;
   final Function() onTapStarred;
   final Function() onTapDelete;
+  final Function() onTapQuote;
 
   @override
   State<ActionsContextMenu> createState() => _ActionsContextMenuState();
@@ -148,6 +150,12 @@ class _ActionsContextMenuState extends State<ActionsContextMenu> {
           ),
           MessageActions(
             isMyMessage: widget.isMyMessage,
+            onTapQuote: () {
+              widget.onTapQuote();
+              if (mounted) {
+                navigator.pop();
+              }
+            },
             onTapStarred: () async {
               setState(() {
                 isStarred = !isStarred;
