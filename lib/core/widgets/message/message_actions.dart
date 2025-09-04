@@ -4,10 +4,12 @@ class MessageActions extends StatelessWidget {
   final VoidCallback? onTapStarred;
   final VoidCallback? onTapDelete;
   final bool isStarred;
+  final bool isMyMessage;
   const MessageActions({
     super.key,
     required this.onTapStarred,
     required this.isStarred,
+    required this.isMyMessage,
     required this.onTapDelete,
   });
 
@@ -25,10 +27,11 @@ class MessageActions extends StatelessWidget {
           onPressed: () {},
           icon: Icon(Icons.edit, color: theme.colorScheme.primary),
         ),
-        IconButton(
-          onPressed: onTapDelete,
-          icon: Icon(Icons.delete, color: theme.colorScheme.error),
-        ),
+        if (isMyMessage)
+          IconButton(
+            onPressed: onTapDelete,
+            icon: Icon(Icons.delete, color: theme.colorScheme.error),
+          ),
         IconButton(
           onPressed: () {},
           icon: Icon(Icons.copy, color: theme.colorScheme.onSurface),

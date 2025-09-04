@@ -9,6 +9,7 @@ class ActionsContextMenu extends StatefulWidget {
   final GlobalKey popupKey;
   final int messageId;
   final bool isStarred;
+  final bool isMyMessage;
 
   const ActionsContextMenu({
     super.key,
@@ -17,6 +18,7 @@ class ActionsContextMenu extends StatefulWidget {
     required this.onTapStarred,
     required this.onTapDelete,
     required this.isStarred,
+    required this.isMyMessage,
     required this.messageId,
   });
 
@@ -145,6 +147,7 @@ class _ActionsContextMenuState extends State<ActionsContextMenu> {
                 : const SizedBox.shrink(),
           ),
           MessageActions(
+            isMyMessage: widget.isMyMessage,
             onTapStarred: () async {
               setState(() {
                 isStarred = !isStarred;

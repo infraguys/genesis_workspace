@@ -193,6 +193,7 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                     ),
                     child: MessageActions(
                       isStarred: isStarred,
+                      isMyMessage: widget.isOwnMessage,
                       onTapDelete: () async {
                         try {
                           await context.read<MessagesCubit>().deleteMessage(widget.message.id);

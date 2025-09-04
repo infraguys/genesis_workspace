@@ -151,6 +151,7 @@ class MessageItem extends StatelessWidget {
           contentDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           content: ActionsContextMenu(
             messageId: message.id,
+            isMyMessage: isMyMessage,
             onEmojiSelected: (emojiName) async {
               await handleEmojiSelected(emojiName);
             },
