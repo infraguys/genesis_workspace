@@ -7,7 +7,9 @@ import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -169,9 +171,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   Future<void> getRecentDms() async {
     try {
-      // List<RecentDm> recentDms = await _getRecentDmsUseCase.call();
-      // List<RecentDm> recentDms = [];
-
       final List<DmUserEntity> users = state.users;
       final Map<int, DmUserEntity> usersById = {for (final user in users) user.userId: user};
 
@@ -179,8 +178,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final int? selfUserId = state.selfUser?.userId;
 
       final candidateMessages = allMessages.where((message) => message.type == MessageType.private);
-
-      inspect(candidateMessages.toList());
 
       final Map<int, int> lastTimestampBySenderId = {};
 
@@ -212,11 +209,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
         for (final id in orderedSenderIds)
           if (usersById[id] != null) usersById[id]!,
       ];
-
-      // recentDms = orderedSenderIds.map((id) => RecentDm(dmId: id)).toList();
-
-      inspect(recentDmsUsers);
-
       emit(state.copyWith(recentDmsUsers: recentDmsUsers, filteredRecentDmsUsers: recentDmsUsers));
     } catch (error, stackTrace) {
       addError(error, stackTrace);
@@ -228,8 +220,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
-        // narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
-        numBefore: 1000,
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'dm')],
+        numBefore: 1500,
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
@@ -289,7 +281,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       state.users[indexOfSender] = sender;
       _sortUsers();
     }
-    final _recentDmsUsers = state.recentDmsUsers;
     getRecentDms();
   }
 
