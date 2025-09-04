@@ -1,5 +1,6 @@
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
+import 'package:genesis_workspace/domain/messages/entities/delete_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/emoji_reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_response_entity.dart';
@@ -54,6 +55,16 @@ class MessagesRepositoryImpl implements MessagesRepository {
   Future<EmojiReactionResponseEntity> removeEmojiReaction(EmojiReactionRequestEntity body) async {
     try {
       final response = await dataSource.removeEmojiReaction(body.toDto());
+      return response.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DeleteMessageResponseEntity> deleteMessage(DeleteMessageRequestEntity body) async {
+    try {
+      final response = await dataSource.deleteMessage(body.toDto());
       return response.toEntity();
     } catch (e) {
       rethrow;

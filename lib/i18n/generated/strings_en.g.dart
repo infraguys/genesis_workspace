@@ -102,6 +102,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'No recent dialogs'
 	String get noRecentDialogs => 'No recent dialogs';
+
+	/// en: 'Error'
+	String get error => 'Error';
 }
 
 // Path: auth

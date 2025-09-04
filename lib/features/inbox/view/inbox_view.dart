@@ -124,14 +124,6 @@ class _InboxViewState extends State<InboxView> {
                                   final channel = await context.read<InboxCubit>().getChannelById(
                                     streamId!,
                                   );
-                                  // final ChannelChatExtra extra = ChannelChatExtra(
-                                  //   channel: channel.toChannelEntity(),
-                                  //   topicEntity: TopicEntity(
-                                  //     name: topicName,
-                                  //     maxId: maxId,
-                                  //     unreadMessages: {},
-                                  //   ),
-                                  // );
                                   context.pushNamed(
                                     Routes.channelChatTopic,
                                     pathParameters: {

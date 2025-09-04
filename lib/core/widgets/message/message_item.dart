@@ -6,13 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
-import 'package:genesis_workspace/core/widgets/message/reactions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -38,7 +39,7 @@ class MessageItem extends StatelessWidget {
     this.isNewDay = false,
   });
 
-  final reactionsPopupKey = GlobalKey<CustomPopupState>();
+  final actionsPopupKey = GlobalKey<CustomPopupState>();
 
   String _formatTime(int timestamp) {
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
@@ -46,17 +47,6 @@ class MessageItem extends StatelessWidget {
   }
 
   final parser = EmojiParser();
-
-  Future<void> onEmojiSelected(BuildContext context, {required String emojiName}) async {
-    try {
-      await context.read<MessagesCubit>().addEmojiReaction(message.id, emojiName: emojiName);
-    } on DioException catch (e) {
-      final msg = e.response!.data['msg'];
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +57,49 @@ class MessageItem extends StatelessWidget {
     final avatar = isSkeleton
         ? const CircleAvatar(radius: 20)
         : UserAvatar(avatarUrl: message.avatarUrl);
+
+    final MessagesCubit messagesCubit = context.read<MessagesCubit>();
+    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(context);
+
+    Future<void> handleEmojiSelected(String emojiName) async {
+      try {
+        await messagesCubit.addEmojiReaction(message.id, emojiName: emojiName);
+      } on DioException catch (e) {
+        final dynamic data = e.response?.data;
+        final String errorMessage = (data is Map && data['msg'] is String)
+            ? data['msg'] as String
+            : context.t.error;
+        messenger?.showSnackBar(SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+      }
+    }
+
+    Future<void> toggleIsStarred(bool isStarred) async {
+      try {
+        if (isStarred) {
+          await messagesCubit.removeStarredFlag(message.id);
+        } else {
+          await messagesCubit.addStarredFlag(message.id);
+        }
+      } on DioException catch (e) {
+        final dynamic data = e.response?.data;
+        final String errorMessage = (data is Map && data['msg'] is String)
+            ? data['msg'] as String
+            : context.t.error;
+        messenger?.showSnackBar(SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+      }
+    }
+
+    Future<void> deleteMessage() async {
+      try {
+        await messagesCubit.deleteMessage(message.id);
+      } on DioException catch (e) {
+        final dynamic data = e.response?.data;
+        final String errorMessage = (data is Map && data['msg'] is String)
+            ? data['msg'] as String
+            : 'Failed to delete message';
+        messenger?.showSnackBar(SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+      }
+    }
 
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
@@ -109,19 +142,26 @@ class MessageItem extends StatelessWidget {
       child: Align(
         alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
         child: CustomPopup(
-          key: reactionsPopupKey,
+          key: actionsPopupKey,
           position: PopupPosition.auto,
           animationCurve: Curves.bounceInOut,
           contentPadding: EdgeInsets.zero,
           rootNavigator: true,
           isLongPress: true,
           contentDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
-          content: ReactionsContextMenu(
+          content: ActionsContextMenu(
             messageId: message.id,
             onEmojiSelected: (emojiName) async {
-              await onEmojiSelected(context, emojiName: emojiName);
+              await handleEmojiSelected(emojiName);
             },
-            popupKey: reactionsPopupKey,
+            isStarred: isStarred,
+            popupKey: actionsPopupKey,
+            onTapStarred: () async {
+              await toggleIsStarred(isStarred);
+            },
+            onTapDelete: () async {
+              await deleteMessage();
+            },
           ),
           child: ConstrainedBox(
             key: messageKey,
@@ -141,7 +181,7 @@ class MessageItem extends StatelessWidget {
                     // inspect(messageContent);
                   },
                   onSecondaryTap: () {
-                    reactionsPopupKey.currentState?.show();
+                    actionsPopupKey.currentState?.show();
                   },
                   onLongPress: () {
                     if (currentSize(context) <= ScreenSize.tablet) {
@@ -197,7 +237,7 @@ class MessageItem extends StatelessWidget {
                                   message: message,
                                   showTopic: showTopic,
                                   isStarred: isStarred,
-                                  reactionsPopupKey: reactionsPopupKey,
+                                  actionsPopupKey: actionsPopupKey,
                                   maxMessageWidth: maxMessageWidth,
                                 ),
                               ],
@@ -239,7 +279,7 @@ class MessageBody extends StatelessWidget {
   final MessageEntity message;
   final bool showTopic;
   final bool isStarred;
-  final GlobalKey<CustomPopupState> reactionsPopupKey;
+  final GlobalKey<CustomPopupState> actionsPopupKey;
   final double maxMessageWidth;
   const MessageBody({
     super.key,
@@ -248,7 +288,7 @@ class MessageBody extends StatelessWidget {
     required this.message,
     required this.showTopic,
     required this.isStarred,
-    required this.reactionsPopupKey,
+    required this.actionsPopupKey,
     required this.maxMessageWidth,
   });
 
@@ -285,12 +325,14 @@ class MessageBody extends StatelessWidget {
                     ),
                 ],
               ),
-              if (currentSize(context) > ScreenSize.tablet)
+              if (currentSize(context) > ScreenSize.tablet) ...[
+                SizedBox(width: 4),
                 _MessageActions(
                   isStarred: isStarred,
                   messageId: message.id,
-                  reactionsPopupKey: reactionsPopupKey,
+                  actionsPopupKey: actionsPopupKey,
                 ),
+              ],
             ],
           ),
         const SizedBox(height: 2),
@@ -314,7 +356,7 @@ class MessageBody extends StatelessWidget {
               _MessageActions(
                 isStarred: isStarred,
                 messageId: message.id,
-                reactionsPopupKey: reactionsPopupKey,
+                actionsPopupKey: actionsPopupKey,
               ),
           ],
         ),
@@ -326,39 +368,33 @@ class MessageBody extends StatelessWidget {
 class _MessageActions extends StatelessWidget {
   final bool isStarred;
   final int messageId;
-  final GlobalKey<CustomPopupState> reactionsPopupKey;
+  final GlobalKey<CustomPopupState> actionsPopupKey;
   const _MessageActions({
     super.key,
     required this.isStarred,
     required this.messageId,
-    required this.reactionsPopupKey,
+    required this.actionsPopupKey,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Row(
-      spacing: 4,
       children: [
-        InkWell(
-          onTap: () async {
-            if (isStarred) {
-              await context.read<MessagesCubit>().removeStarredFlag(messageId);
-            } else {
-              await context.read<MessagesCubit>().addStarredFlag(messageId);
-            }
-          },
-          child: Icon(
-            isStarred ? Icons.star : Icons.star_border,
-            color: isStarred ? theme.colorScheme.primary : theme.unselectedWidgetColor,
-            size: 16,
+        Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(6),
+            onTap: () async {
+              actionsPopupKey.currentState?.show();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Icon(Icons.menu, color: theme.unselectedWidgetColor, size: 16),
+            ),
           ),
-        ),
-        InkWell(
-          child: Icon(Icons.add_reaction_outlined, color: theme.unselectedWidgetColor, size: 16),
-          onTap: () {
-            reactionsPopupKey.currentState?.show();
-          },
         ),
       ],
     );

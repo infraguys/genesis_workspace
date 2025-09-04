@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
@@ -10,4 +11,5 @@ abstract class MessagesDataSource {
   Future<void> updateMessagesFlags(UpdateMessagesFlagsRequestDto body);
   Future<EmojiReactionResponseDto> addEmojiReaction(EmojiReactionRequestDto body);
   Future<EmojiReactionResponseDto> removeEmojiReaction(EmojiReactionRequestDto body);
+  Future<DeleteMessageResponseDto> deleteMessage(DeleteMessageRequestDto body);
 }

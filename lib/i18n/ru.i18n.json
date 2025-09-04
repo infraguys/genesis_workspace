@@ -91,5 +91,6 @@
   "recent_dialogs": "Недавние чаты",
   "show_all_users": "Показать всех пользователей",
   "show_recent_dialogs": "Показать недавние чаты",
-  "no_recent_dialogs": "Нет недавних чатов"
+  "no_recent_dialogs": "Нет недавних чатов",
+  "error": "Ошибка"
 }

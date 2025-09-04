@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +11,7 @@ import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageActionsOverlay extends StatefulWidget {
   final Offset position;
@@ -46,6 +48,7 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -190,6 +193,21 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                     ),
                     child: MessageActions(
                       isStarred: isStarred,
+                      onTapDelete: () async {
+                        try {
+                          await context.read<MessagesCubit>().deleteMessage(widget.message.id);
+                        } on DioException catch (e) {
+                          final dynamic data = e.response?.data;
+                          final String errorMessage = (data is Map && data['msg'] is String)
+                              ? data['msg'] as String
+                              : context.t.error;
+                          messenger?.showSnackBar(
+                            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+                          );
+                        } finally {
+                          widget.onClose();
+                        }
+                      },
                       onTapStarred: () async {
                         if (isStarred) {
                           setState(() {

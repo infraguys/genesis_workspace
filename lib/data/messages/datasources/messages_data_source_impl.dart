@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
+import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
@@ -73,6 +74,15 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   Future<EmojiReactionResponseDto> removeEmojiReaction(EmojiReactionRequestDto body) async {
     try {
       return await apiClient.removeEmojiReaction(body.messageId, body.emojiName);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DeleteMessageResponseDto> deleteMessage(DeleteMessageRequestDto body) async {
+    try {
+      return await apiClient.deleteMessage(body.messageId);
     } catch (e) {
       rethrow;
     }

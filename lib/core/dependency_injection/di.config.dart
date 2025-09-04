@@ -37,6 +37,8 @@ import 'package:genesis_workspace/domain/messages/repositories/messages_reposito
     as _i857;
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
     as _i276;
+import 'package:genesis_workspace/domain/messages/usecases/delete_message_use_case.dart'
+    as _i455;
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart'
     as _i207;
 import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart'
@@ -217,6 +219,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i455.DeleteMessageUseCase>(
+      () => _i455.DeleteMessageUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.lazySingleton<_i592.MessagesCubit>(
+      () => _i592.MessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i276.AddEmojiReactionUseCase>(),
+        gh<_i513.RemoveEmojiReactionUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i455.DeleteMessageUseCase>(),
+      ),
+      dispose: _i592.disposeMessagesCubit,
+    );
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
     );
@@ -226,16 +242,6 @@ extension GetItInjectableX on _i174.GetIt {
     await gh.lazySingletonAsync<_i361.Dio>(
       () => coreModule.dio(gh<_i958.TokenStorage>()),
       preResolve: true,
-    );
-    gh.lazySingleton<_i592.MessagesCubit>(
-      () => _i592.MessagesCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i276.AddEmojiReactionUseCase>(),
-        gh<_i513.RemoveEmojiReactionUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-      ),
-      dispose: _i592.disposeMessagesCubit,
     );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(

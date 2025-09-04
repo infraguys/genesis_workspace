@@ -60,6 +60,7 @@ class TranslationsRu extends Translations {
 	@override String get showAllUsers => 'Показать всех пользователей';
 	@override String get showRecentDialogs => 'Показать недавние чаты';
 	@override String get noRecentDialogs => 'Нет недавних чатов';
+	@override String get error => 'Ошибка';
 }
 
 // Path: auth

@@ -1,48 +1,40 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/core/widgets/message/message_actions.dart';
 
-class ReactionsContextMenu extends StatefulWidget {
+class ActionsContextMenu extends StatefulWidget {
   final GlobalKey popupKey;
   final int messageId;
-  const ReactionsContextMenu({
+  final bool isStarred;
+
+  const ActionsContextMenu({
     super.key,
     required this.popupKey,
     required this.onEmojiSelected,
-    this.onCopy,
-    this.onEdit,
-    this.onDelete,
-    this.onReply,
-    this.onForward,
-    this.title,
+    required this.onTapStarred,
+    required this.onTapDelete,
+    required this.isStarred,
     required this.messageId,
   });
 
   /// Fired with emoji name **without colons**, e.g. "thumbs_up".
   final Function(String) onEmojiSelected;
-
-  // Actions (any null ones are hidden from the layout).
-  final VoidCallback? onCopy;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-  final VoidCallback? onReply;
-  final VoidCallback? onForward;
-
-  /// Optional header (e.g., “Message actions”).
-  final String? title;
+  final Function() onTapStarred;
+  final Function() onTapDelete;
 
   @override
-  State<ReactionsContextMenu> createState() => _ReactionsContextMenuState();
+  State<ActionsContextMenu> createState() => _ActionsContextMenuState();
 }
 
-class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
+class _ActionsContextMenuState extends State<ActionsContextMenu> {
   bool showEmojiPicker = true;
   bool animationsEnabled = false;
   final parser = EmojiParser();
+  late bool isStarred;
+  late NavigatorState navigator;
 
   @override
   void initState() {
@@ -52,7 +44,6 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
       if (!mounted) return;
       setState(() {
         showEmojiPicker = false;
-        // animationsEnabled остаётся false => duration = Duration.zero
       });
 
       // 2) На СЛЕДУЮЩЕМ кадре включаем анимации для будущих изменений.
@@ -63,6 +54,14 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
         });
       });
     });
+
+    isStarred = widget.isStarred;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    navigator = Navigator.of(context);
   }
 
   @override
@@ -75,8 +74,8 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
       duration: animationsEnabled ? const Duration(milliseconds: 300) : Duration.zero,
       curve: Curves.bounceInOut,
       width: 290,
-      height: showEmojiPicker ? 365 : 65,
-      constraints: BoxConstraints(maxHeight: 365, minHeight: 65),
+      height: showEmojiPicker ? 405 : 105,
+      constraints: BoxConstraints(maxHeight: 405, minHeight: 105),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -94,12 +93,10 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
               for (final emoji in emojis)
                 InkWell(
                   onTap: () async {
-                    // await widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
-                    await context.read<MessagesCubit>().addEmojiReaction(
-                      widget.messageId,
-                      emojiName: emoji.emojiName.replaceAll(":", ""),
-                    );
-                    Navigator.of(context).pop();
+                    widget.onEmojiSelected(emoji.emojiName.replaceAll(":", ""));
+                    if (mounted) {
+                      navigator.pop();
+                    }
                   },
                   child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 24),
                 ),
@@ -124,10 +121,12 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
             height: showEmojiPicker ? 300 : 0,
             child: showEmojiPicker
                 ? EmojiPicker(
-                    onEmojiSelected: (category, emoji) {
+                    onEmojiSelected: (category, emoji) async {
                       final fullEmoji = parser.getEmoji(emoji.emoji);
                       widget.onEmojiSelected(fullEmoji.name);
-                      Navigator.of(context).pop();
+                      if (mounted) {
+                        navigator.pop();
+                      }
                     },
                     config: Config(
                       height: showEmojiPicker ? 300 : 0,
@@ -144,6 +143,21 @@ class _ReactionsContextMenuState extends State<ReactionsContextMenu> {
                     ),
                   )
                 : const SizedBox.shrink(),
+          ),
+          MessageActions(
+            onTapStarred: () async {
+              setState(() {
+                isStarred = !isStarred;
+              });
+              await widget.onTapStarred();
+            },
+            onTapDelete: () async {
+              await widget.onTapDelete();
+              if (mounted) {
+                navigator.pop();
+              }
+            },
+            isStarred: isStarred,
           ),
         ],
       ),

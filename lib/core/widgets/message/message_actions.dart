@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 
 class MessageActions extends StatelessWidget {
   final VoidCallback? onTapStarred;
+  final VoidCallback? onTapDelete;
   final bool isStarred;
-  const MessageActions({super.key, required this.onTapStarred, required this.isStarred});
+  const MessageActions({
+    super.key,
+    required this.onTapStarred,
+    required this.isStarred,
+    required this.onTapDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +26,7 @@ class MessageActions extends StatelessWidget {
           icon: Icon(Icons.edit, color: theme.colorScheme.primary),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: onTapDelete,
           icon: Icon(Icons.delete, color: theme.colorScheme.error),
         ),
         IconButton(

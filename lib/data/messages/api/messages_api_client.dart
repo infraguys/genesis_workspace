@@ -2,6 +2,7 @@ import 'package:dio/dio.dart' hide Headers;
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
@@ -49,4 +50,7 @@ abstract class MessagesApiClient {
     @Path('message_id') int messageId,
     @Query('emoji_name') String emojiName,
   );
+
+  @DELETE('/messages/{message_id}')
+  Future<DeleteMessageResponseDto> deleteMessage(@Path('message_id') int messageId);
 }
