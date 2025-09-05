@@ -77,7 +77,6 @@ class RealTimeService {
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueId!, lastEventId: lastEventId),
       );
-      inspect(response.events);
       for (var event in response.events) {
         switch (event.type) {
           case EventType.typing:

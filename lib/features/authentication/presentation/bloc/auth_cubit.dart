@@ -7,7 +7,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+// import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
@@ -78,14 +78,14 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
   late final SharedPreferences _prefs;
-  final CookieManager _cookieManager = CookieManager.instance();
+  // final CookieManager _cookieManager = CookieManager.instance();
   final Dio _dio = getIt<Dio>();
   String? _csrfToken;
 
-  final InAppBrowser? _browser = kIsWeb ? null : InAppBrowser();
-  final _settings = InAppBrowserClassSettings(
-    webViewSettings: InAppWebViewSettings(sharedCookiesEnabled: true),
-  );
+  // final InAppBrowser? _browser = kIsWeb ? null : InAppBrowser();
+  // final _settings = InAppBrowserClassSettings(
+  //   webViewSettings: InAppWebViewSettings(sharedCookiesEnabled: true),
+  // );
 
   Future<void> login(String username, String password) async {
     emit(state.copyWith(isPending: true, errorMessage: null));
@@ -149,21 +149,22 @@ class AuthCubit extends Cubit<AuthState> {
     final uri = Uri.parse(
       realmBase.resolve(loginPath).toString(),
     ).replace(queryParameters: {'next': next, 'desktop_flow_otp': otp});
-    if (kIsWeb) {
+    if (true) {
       await launchUrl(uri, webOnlyWindowName: '_blank');
-    } else {
-      _cookieManager.setCookie(
-        url: WebUri.uri(uri),
-        name: '__Host-csrftoken',
-        value: _csrfToken ?? '',
-        isSecure: true,
-        path: '/',
-      );
-      await _browser!.openUrlRequest(
-        urlRequest: URLRequest(url: WebUri.uri(uri)),
-        settings: _settings,
-      );
     }
+    // } else {
+    //   _cookieManager.setCookie(
+    //     url: WebUri.uri(uri),
+    //     name: '__Host-csrftoken',
+    //     value: _csrfToken ?? '',
+    //     isSecure: true,
+    //     path: '/',
+    //   );
+    //   await _browser!.openUrlRequest(
+    //     urlRequest: URLRequest(url: WebUri.uri(uri)),
+    //     settings: _settings,
+    //   );
+    // }
   }
 
   String? _getCookieFromDio(List<String>? rawCookies, String name) {

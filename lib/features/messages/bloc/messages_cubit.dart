@@ -37,7 +37,7 @@ class MessagesCubit extends Cubit<MessagesState> {
     this._removeEmojiReactionUseCase,
     this._updateMessagesFlagsUseCase,
     this._deleteMessageUseCase,
-      this._getMessageByIdUseCase,
+    this._getMessageByIdUseCase,
   ) : super(MessagesState(messages: [])) {
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
@@ -153,6 +153,7 @@ class MessagesCubit extends Cubit<MessagesState> {
       for (var messageId in event.messages) {
         newMessages.removeWhere((message) => message.id == messageId);
       }
+      newMessages.removeWhere((message) => message.hasUnreadMessages);
     }
     emit(state.copyWith(messages: newMessages));
   }

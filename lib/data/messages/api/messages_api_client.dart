@@ -37,6 +37,7 @@ abstract class MessagesApiClient {
     @Query("content") String content,
     @Query("stream_id") int? streamId,
     @Query("topic") String? topic,
+    @Query("read_by_sender") bool? readBySender,
   );
 
   @POST('/messages/flags')

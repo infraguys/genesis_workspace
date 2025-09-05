@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -115,6 +117,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                 if (currentSize(context) > ScreenSize.tablet) ...[
                   BlocBuilder<MessagesCubit, MessagesState>(
                     builder: (context, state) {
+                      inspect(state);
                       return NavigationRail(
                         selectedIndex: widget.navigationShell.currentIndex,
                         onDestinationSelected: _goBranch,
@@ -124,7 +127,9 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             label: Text(context.t.navBar.directMessages),
                             icon: Badge(
                               isLabelVisible: state.messages.any(
-                                (message) => message.type == MessageType.private,
+                                (message) =>
+                                    (message.type == MessageType.private &&
+                                    message.hasUnreadMessages),
                               ),
                               child: Icon(Icons.people),
                             ),
@@ -133,7 +138,9 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             label: Text(context.t.navBar.channels),
                             icon: Badge(
                               isLabelVisible: state.messages.any(
-                                (message) => message.type == MessageType.stream,
+                                (message) =>
+                                    (message.type == MessageType.stream &&
+                                    message.hasUnreadMessages),
                               ),
                               child: Icon(Icons.chat),
                             ),

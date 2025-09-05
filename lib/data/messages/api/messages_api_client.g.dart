@@ -96,6 +96,7 @@ class _MessagesApiClient implements MessagesApiClient {
     String content,
     int? streamId,
     String? topic,
+    bool? readBySender,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
@@ -104,6 +105,7 @@ class _MessagesApiClient implements MessagesApiClient {
       r'content': content,
       r'stream_id': streamId,
       r'topic': topic,
+      r'read_by_sender': readBySender,
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};

@@ -52,12 +52,14 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   @override
   Future<void> sendMessage(SendMessageRequestDto body) async {
     try {
+      final readBySender = true;
       await apiClient.sendMessage(
         body.type,
         jsonEncode(body.to),
         body.content,
         body.streamId,
         body.topic,
+        readBySender,
       );
     } catch (e) {
       rethrow;

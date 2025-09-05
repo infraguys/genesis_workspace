@@ -107,6 +107,11 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'No recent dialogs'
 	String get no_recent_dialogs => 'No recent dialogs';
+
+	/// en: 'Error'
+	String get error => 'Error';
+
+	late final TranslationsMessageActionsEn message_actions = TranslationsMessageActionsEn._(_root);
 }
 
 // Path: auth
@@ -322,6 +327,24 @@ class TranslationsUnreadMarkerEn {
 	String get a11y_label => 'Unread messages marker';
 }
 
+// Path: message_actions
+class TranslationsMessageActionsEn {
+	TranslationsMessageActionsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Quote this message'
+	String get quote => 'Quote this message';
+
+	/// en: 'Delete this message'
+	String get delete => 'Delete this message';
+
+	/// en: 'Star this message'
+	String get star => 'Star this message';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -392,6 +415,10 @@ extension on Translations {
 			case 'show_all_users': return 'Show all users';
 			case 'show_recent_dialogs': return 'Show recent dialogs';
 			case 'no_recent_dialogs': return 'No recent dialogs';
+			case 'error': return 'Error';
+			case 'message_actions.quote': return 'Quote this message';
+			case 'message_actions.delete': return 'Delete this message';
+			case 'message_actions.star': return 'Star this message';
 			default: return null;
 		}
 	}

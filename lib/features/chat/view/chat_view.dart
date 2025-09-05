@@ -209,9 +209,9 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                         ).copyWith(bottom: 12),
                                         itemBuilder: (context, index) {
                                           return MessageItem(
-                                            isMyMessage: index % 2 == 0, // alternate sender
+                                            isMyMessage: index % 2 == 0,
                                             message: MessageEntity.fake(),
-                                            isSkeleton: true, // enable skeleton mode
+                                            isSkeleton: true,
                                             myUserId: _myUser.userId,
                                             onTapQuote: (_) {},
                                           );

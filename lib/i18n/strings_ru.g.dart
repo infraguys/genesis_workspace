@@ -64,6 +64,8 @@ class TranslationsRu implements Translations {
 	@override String get show_all_users => 'Показать всех пользователей';
 	@override String get show_recent_dialogs => 'Показать недавние чаты';
 	@override String get no_recent_dialogs => 'Нет недавних чатов';
+	@override String get error => 'Ошибка';
+	@override late final _TranslationsMessageActionsRu message_actions = _TranslationsMessageActionsRu._(_root);
 }
 
 // Path: auth
@@ -209,6 +211,18 @@ class _TranslationsUnreadMarkerRu implements TranslationsUnreadMarkerEn {
 	@override String get a11y_label => 'Маркер непрочитанных сообщений';
 }
 
+// Path: message_actions
+class _TranslationsMessageActionsRu implements TranslationsMessageActionsEn {
+	_TranslationsMessageActionsRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get quote => 'Цитировать это сообщение';
+	@override String get delete => 'Удалить это сообщение';
+	@override String get star => 'Отметить это сообщение';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsRu {
@@ -285,6 +299,10 @@ extension on TranslationsRu {
 			case 'show_all_users': return 'Показать всех пользователей';
 			case 'show_recent_dialogs': return 'Показать недавние чаты';
 			case 'no_recent_dialogs': return 'Нет недавних чатов';
+			case 'error': return 'Ошибка';
+			case 'message_actions.quote': return 'Цитировать это сообщение';
+			case 'message_actions.delete': return 'Удалить это сообщение';
+			case 'message_actions.star': return 'Отметить это сообщение';
 			default: return null;
 		}
 	}

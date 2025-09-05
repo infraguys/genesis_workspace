@@ -7,13 +7,6 @@ PODS:
   - emoji_picker_flutter (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - flutter_inappwebview_ios (0.0.1):
-    - Flutter
-    - flutter_inappwebview_ios/Core (= 0.0.1)
-    - OrderedSet (~> 6.0.3)
-  - flutter_inappwebview_ios/Core (0.0.1):
-    - Flutter
-    - OrderedSet (~> 6.0.3)
   - flutter_secure_storage (6.0.0):
     - Flutter
   - in_app_idle_detector (0.0.1):
@@ -23,7 +16,6 @@ PODS:
     - FlutterMacOS
   - keyboard_height_plugin (0.0.1):
     - Flutter
-  - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -76,7 +68,6 @@ DEPENDENCIES:
   - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/darwin`)
   - emoji_picker_flutter (from `.symlinks/plugins/emoji_picker_flutter/ios`)
   - Flutter (from `Flutter`)
-  - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - in_app_idle_detector (from `.symlinks/plugins/in_app_idle_detector/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
@@ -93,7 +84,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - OrderedSet
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -105,8 +95,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/emoji_picker_flutter/ios"
   Flutter:
     :path: Flutter
-  flutter_inappwebview_ios:
-    :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   in_app_idle_detector:
@@ -139,12 +127,10 @@ SPEC CHECKSUMS:
   audioplayers_darwin: 4f9ca89d92d3d21cec7ec580e78ca888e5fb68bd
   emoji_picker_flutter: ece213fc274bdddefb77d502d33080dc54e616cc
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   in_app_idle_detector: 675286f53111e6516e5f176baa12b2442844439e
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   keyboard_height_plugin: ef70a8181b29f27670e9e2450814ca6b6dc05b05
-  OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
