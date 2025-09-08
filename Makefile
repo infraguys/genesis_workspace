@@ -45,6 +45,9 @@ ci_stage_apk:
 build-macos:
 	flutter build macos --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
 
+build-linux:
+	flutter build linux --release -t lib/prod.dart --dart-define-from-file=env.json
+
 rename_prod_apk:
 	@if [ -f $(APK_PROD_PATH) ]; then \
 		mv $(APK_PROD_PATH) $(APK_DIR)$(NAME)_$(VERSION)b$(BUILD_NUMBER)_prod.apk; \
