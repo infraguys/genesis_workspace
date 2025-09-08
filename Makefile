@@ -45,7 +45,10 @@ ci_stage_apk:
 build-macos:
 	flutter build macos --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
 
-build-linux:
+ci_prod_linux:
+	make clean
+	make generate
+	make slang
 	flutter build linux --release -t lib/prod.dart --dart-define-from-file=env.json
 
 rename_prod_apk:
