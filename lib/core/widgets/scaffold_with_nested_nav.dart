@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -117,7 +115,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                 if (currentSize(context) > ScreenSize.tablet) ...[
                   BlocBuilder<MessagesCubit, MessagesState>(
                     builder: (context, state) {
-                      inspect(state);
                       return NavigationRail(
                         selectedIndex: widget.navigationShell.currentIndex,
                         onDestinationSelected: _goBranch,

@@ -265,12 +265,14 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       return;
     }
 
+    final updatedTypingUsers = [...state.typingUsers];
+
     if (isWriting) {
-      state.typingUsers.add(senderId);
+      updatedTypingUsers.add(senderId);
     } else {
-      state.typingUsers.remove(senderId);
+      updatedTypingUsers.remove(senderId);
     }
-    emit(state.copyWith(typingUsers: state.typingUsers));
+    emit(state.copyWith(typingUsers: updatedTypingUsers));
   }
 
   void _onMessageEvents(MessageEventEntity event) {
