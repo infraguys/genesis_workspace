@@ -155,6 +155,30 @@ class TranslationsAuthEn {
 
 	/// en: 'Clear'
 	String get clear => 'Clear';
+
+	/// en: 'Paste Base URL'
+	String get pasteBaseUrlHere => 'Paste Base URL';
+
+	/// en: 'Enter or paste the server address'
+	String get enterOrPasteBaseUrlTitle => 'Enter or paste the server address';
+
+	/// en: 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.'
+	String get baseUrlUsageHint => 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.';
+
+	/// en: 'Base URL'
+	String get baseUrlLabel => 'Base URL';
+
+	/// en: 'https://your-domain.com'
+	String get baseUrlHint => 'https://your-domain.com';
+
+	/// en: 'Invalid address. Use http or https.'
+	String get baseUrlInvalid => 'Invalid address. Use http or https.';
+
+	/// en: 'Save and continue'
+	String get saveAndContinue => 'Save and continue';
+
+	/// en: 'Logout from organization'
+	String get logoutFromOrganization => 'Logout from organization';
 }
 
 // Path: navBar

@@ -88,6 +88,14 @@ class _TranslationsAuthRu implements TranslationsAuthEn {
 	@override String get token_hint => 'Ваш код здесь…';
 	@override String get paste => 'Вставить';
 	@override String get clear => 'Очистить';
+	@override String get pasteBaseUrlHere => 'Вставьте Base URL';
+	@override String get enterOrPasteBaseUrlTitle => 'Введите или вставьте адрес сервера';
+	@override String get baseUrlUsageHint => 'Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.';
+	@override String get baseUrlLabel => 'Base URL';
+	@override String get baseUrlHint => 'https://your-domain.com';
+	@override String get baseUrlInvalid => 'Некорректный адрес. Используйте http или https.';
+	@override String get saveAndContinue => 'Сохранить и продолжить';
+	@override String get logoutFromOrganization => 'Выйти из организации';
 }
 
 // Path: nav_bar
@@ -241,6 +249,14 @@ extension on TranslationsRu {
 			case 'auth.token_hint': return 'Ваш код здесь…';
 			case 'auth.paste': return 'Вставить';
 			case 'auth.clear': return 'Очистить';
+			case 'auth.pasteBaseUrlHere': return 'Вставьте Base URL';
+			case 'auth.enterOrPasteBaseUrlTitle': return 'Введите или вставьте адрес сервера';
+			case 'auth.baseUrlUsageHint': return 'Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.';
+			case 'auth.baseUrlLabel': return 'Base URL';
+			case 'auth.baseUrlHint': return 'https://your-domain.com';
+			case 'auth.baseUrlInvalid': return 'Некорректный адрес. Используйте http или https.';
+			case 'auth.saveAndContinue': return 'Сохранить и продолжить';
+			case 'auth.logoutFromOrganization': return 'Выйти из организации';
 			case 'password_cant_be_empty': return 'Пароль не может быть пустым';
 			case 'password': return 'Пароль';
 			case 'login': return 'Войти';

@@ -1,19 +1,27 @@
 {
-  "auth": {
-    "emailHint": "email@example.com",
-    "emailLabel": "Email",
-    "passwordHint": "cucumber123",
-    "showPassword": "Show password",
-    "hidePassword": "Hide password",
-    "login_with": "Login with {realm_name}",
 
+  "auth": {
+    "email_hint": "email@example.com",
+    "email_label": "Email",
+    "password_hint": "cucumber123",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "login_with": "Login with {realm_name}",
     "paste_your_code_here": "Paste code here",
     "enter_or_paste_code_title": "Enter or paste your login code",
     "code_usage_hint": "We'll use it to finish signing you in.",
     "token_label": "Token",
     "token_hint": "Your code here…",
     "paste": "Paste",
-    "clear": "Clear"
+    "clear": "Clear",
+    "paste_base_url_here": "Paste Base URL",
+    "enter_or_paste_base_url_title": "Enter or paste the server address",
+    "base_url_usage_hint": "Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.",
+    "base_url_label": "Base URL",
+    "base_url_hint": "https://your-domain.com",
+    "base_url_invalid": "Invalid address. Use http or https.",
+    "save_and_continue": "Save and continue",
+    "logout_from_organization": "Logout from organization"
   },
   "password_cant_be_empty": "Password can not be empty",
   "password": "Password",

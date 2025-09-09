@@ -24,30 +24,19 @@ abstract class CoreModule {
 
   @preResolve
   @lazySingleton
-  Future<Dio> dio(TokenStorage tokenStorage) async {
-    final prefs = await SharedPreferences.getInstance();
-    final isWebAuth = prefs.getBool(SharedPrefsKeys.isWebAuth) ?? false;
+  Future<SharedPreferences> sharedPreferences() => SharedPreferences.getInstance();
 
-    final basePath = (isWebAuth && kIsWeb) ? "/json" : "/api/v1";
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: "${AppConstants.baseUrl}$basePath",
-        receiveTimeout: Duration(seconds: 90),
-      ),
+  @lazySingleton
+  Dio dio(SharedPreferences sharedPreferences, TokenStorage tokenStorage, DioFactory dioFactory) {
+    final String? saved = sharedPreferences.getString(SharedPrefsKeys.baseUrl);
+    // НЕ бросаем: если нет — создаём Dio с плейсхолдером.
+    final String baseUrl = (saved != null && saved.trim().isNotEmpty) ? saved.trim() : '';
+
+    return dioFactory.build(
+      baseUrl: baseUrl, // может быть пустым — это ок, интерсептор поправит
+      sharedPreferences: sharedPreferences,
+      tokenStorage: tokenStorage,
     );
-
-    final adapter = createPlatformAdapter();
-    if (adapter != null) {
-      dio.httpClientAdapter = adapter;
-    }
-
-    dio.interceptors
-      ..add(BaseUrlInterceptor(prefs))
-      ..add(TokenInterceptor(tokenStorage))
-      ..add(SessionidInterceptor(tokenStorage))
-      ..add(CsrfCookieInterceptor(tokenStorage))
-      ..add(EnumInterceptor());
-    return dio;
   }
 
   @lazySingleton
@@ -62,5 +51,39 @@ abstract class CoreModule {
     } else {
       return FileTokenStorage();
     }
+  }
+}
+
+@injectable
+class DioFactory {
+  Dio build({
+    required String baseUrl, // может быть пустым
+    required SharedPreferences sharedPreferences,
+    required TokenStorage tokenStorage,
+  }) {
+    final bool isWebAuth = sharedPreferences.getBool(SharedPrefsKeys.isWebAuth) ?? false;
+    final String basePath = (isWebAuth && kIsWeb) ? "/json" : "/api/v1";
+
+    final Dio dio = Dio(
+      BaseOptions(
+        // если baseUrl пуст — используем безопасный плейсхолдер (не будет вызовов до ввода URL)
+        baseUrl: baseUrl.isEmpty ? 'http://placeholder.local' : '$baseUrl$basePath',
+        receiveTimeout: const Duration(seconds: 90),
+      ),
+    );
+
+    final adapter = createPlatformAdapter();
+    if (adapter != null) {
+      dio.httpClientAdapter = adapter;
+    }
+
+    dio.interceptors
+      ..add(BaseUrlInterceptor(sharedPreferences)) // см. обновлённый код ниже
+      ..add(TokenInterceptor(tokenStorage))
+      ..add(SessionidInterceptor(tokenStorage))
+      ..add(CsrfCookieInterceptor(tokenStorage))
+      ..add(EnumInterceptor());
+
+    return dio;
   }
 }

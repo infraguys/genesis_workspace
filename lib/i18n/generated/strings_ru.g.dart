@@ -72,18 +72,26 @@ class TranslationsAuthRu extends TranslationsAuthEn {
 
 	// Translations
 	@override String get emailHint => 'email@example.com';
-	@override String get emailLabel => 'Эл. почта';
+	@override String get emailLabel => 'Email';
 	@override String get passwordHint => 'cucumber123';
 	@override String get showPassword => 'Показать пароль';
 	@override String get hidePassword => 'Скрыть пароль';
 	@override String loginWith({required Object realmName}) => 'Войти через ${realmName}';
-	@override String get pasteYourCodeHere => 'Вставьте код здесь';
-	@override String get enterOrPasteCodeTitle => 'Введите или вставьте код для входа';
-	@override String get codeUsageHint => 'Мы используем его, чтобы завершить вход в систему.';
+	@override String get pasteYourCodeHere => 'Вставьте код';
+	@override String get enterOrPasteCodeTitle => 'Введите или вставьте ваш код входа';
+	@override String get codeUsageHint => 'Мы используем его, чтобы завершить вход.';
 	@override String get tokenLabel => 'Токен';
-	@override String get tokenHint => 'Ваш код здесь…';
+	@override String get tokenHint => 'Ваш код…';
 	@override String get paste => 'Вставить';
 	@override String get clear => 'Очистить';
+	@override String get pasteBaseUrlHere => 'Вставьте Base URL';
+	@override String get enterOrPasteBaseUrlTitle => 'Введите или вставьте адрес сервера';
+	@override String get baseUrlUsageHint => 'Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.';
+	@override String get baseUrlLabel => 'Base URL';
+	@override String get baseUrlHint => 'https://your-domain.com';
+	@override String get baseUrlInvalid => 'Некорректный адрес. Используйте http или https.';
+	@override String get saveAndContinue => 'Сохранить и продолжить';
+	@override String get logoutFromOrganization => 'Выйти из организации';
 }
 
 // Path: navBar
