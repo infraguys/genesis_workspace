@@ -146,6 +146,7 @@ import 'package:genesis_workspace/services/token_storage/token_storage.dart'
     as _i958;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -155,6 +156,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
+    gh.factory<_i440.DioFactory>(() => _i440.DioFactory());
     gh.factory<_i350.GetSessionIdUseCase>(() => _i350.GetSessionIdUseCase());
     gh.factory<_i1039.GetEventsByQueueIdUseCase>(
       () => _i1039.GetEventsByQueueIdUseCase(),
@@ -163,6 +165,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i606.AppDatabase>(
       () => coreModule.appDatabase(),
       dispose: (i) => i.dispose(),
+    );
+    await gh.lazySingletonAsync<_i460.SharedPreferences>(
+      () => coreModule.sharedPreferences(),
+      preResolve: true,
     );
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
@@ -233,10 +239,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i75.GetTokenUseCase>(
       () => _i75.GetTokenUseCase(gh<_i958.TokenStorage>()),
     );
-    await gh.lazySingletonAsync<_i361.Dio>(
-      () => coreModule.dio(gh<_i958.TokenStorage>()),
-      preResolve: true,
-    );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(
         gh<_i82.RealTimeService>(),
@@ -290,6 +292,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.lazySingleton<_i361.Dio>(
+      () => coreModule.dio(
+        gh<_i460.SharedPreferences>(),
+        gh<_i958.TokenStorage>(),
+        gh<_i440.DioFactory>(),
+      ),
     );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
@@ -391,6 +400,8 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i862.AuthCubit>(
       () => _i862.AuthCubit(
+        gh<_i460.SharedPreferences>(),
+        gh<_i440.DioFactory>(),
         gh<_i799.FetchApiKeyUseCase>(),
         gh<_i643.SaveTokenUseCase>(),
         gh<_i75.GetTokenUseCase>(),

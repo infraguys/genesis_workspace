@@ -14,6 +14,7 @@ import 'package:genesis_workspace/features/feed/feed.dart';
 import 'package:genesis_workspace/features/inbox/inbox.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/menu/menu.dart';
+import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
@@ -44,6 +45,7 @@ class Routes {
   static const String reactions = '/reactions';
   static const String starred = '/starred';
   static const String imageFullScreen = '/image-full-screen';
+  static const String pasteBaseUrl = '/paste-base-url';
 }
 
 final router = GoRouter(
@@ -270,6 +272,13 @@ final router = GoRouter(
             );
           },
         );
+      },
+    ),
+    GoRoute(
+      path: Routes.pasteBaseUrl,
+      name: Routes.pasteBaseUrl,
+      builder: (context, state) {
+        return PasteBaseUrl();
       },
     ),
     GoRoute(

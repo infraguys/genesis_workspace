@@ -73,174 +73,226 @@ class _AuthViewState extends State<AuthView> {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state.isAuthorized) context.go(Routes.directMessages);
+        if (!state.hasBaseUrl) context.go(Routes.pasteBaseUrl);
       },
       builder: (context, state) {
         final theme = Theme.of(context);
         final isWide = currentSize(context) >= ScreenSize.lTablet;
-
-        final form = AutofillGroup(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 12,
-              children: [
-                const GenesisLogo(size: 90),
-                Text(
-                  t.login,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                TextFormField(
-                  controller: _usernameController,
-                  autofillHints: const [AutofillHints.email],
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    hintText: t.auth.emailHint,
-                    labelText: t.auth.emailLabel,
-                  ),
-                  validator: validateEmail,
-                ),
-                TextFormField(
-                  controller: _passwordController,
-                  autofillHints: const [AutofillHints.password],
-                  obscureText: _obscureText,
-                  obscuringCharacter: '•',
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
-                  decoration: InputDecoration(
-                    labelText: t.password,
-                    hintText: t.auth.passwordHint,
-                    suffixIcon: Semantics(
-                      label: _obscureText ? t.auth.showPassword : t.auth.hidePassword,
-                      button: true,
-                      child: IconButton(
-                        icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
-                        onPressed: _toggleVisibility,
-                        tooltip: _obscureText ? t.auth.showPassword : t.auth.hidePassword,
-                      ),
-                    ),
-                  ),
-                  validator: (v) => (v == null || v.isEmpty) ? t.passwordCantBeEmpty : null,
-                ),
-                if (state.errorMessage != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.error_outline),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            state.errorMessage!,
-                            style: TextStyle(color: theme.colorScheme.onErrorContainer),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: state.isPending ? null : _submit,
-                    child: Text(t.login),
-                  ).pending(state.isPending),
-                ),
-                // SizedBox(
-                //   height: 48,
-                //   child: ElevatedButton(
-                //     onPressed: context.read<AuthCubit>().setLogin,
-                //     child: Text('set login'),
-                //   ),
-                // ),
-                if (state.serverSettings != null)
-                  ...state.serverSettings!.externalAuthenticationMethods.map(
-                    (realm) => SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final url = realm.loginUrl;
-                          await context.read<AuthCubit>().startOidcMobileFlow(
-                            realmBaseUrl: state.serverSettings!.realmUri,
-                            loginPath: url,
-                          );
-                          await context.pushNamed(Routes.pasteToken);
-                        },
-                        child: Text(t.auth.loginWith(realmName: realm.displayName)),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
 
         return Scaffold(
           resizeToAvoidBottomInset: true,
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
-              if (state.serverSettings == null) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.connectionState == ConnectionState.done ||
-                  state.serverSettings != null) {
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        theme.colorScheme.surface,
-                        theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                      ],
-                    ),
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.surface,
+                      theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                    ],
                   ),
-                  child: SafeArea(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => FocusScope.of(context).unfocus(),
-                      child: Center(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: _maxFormWidth),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              curve: Curves.easeOut,
-                              padding: EdgeInsets.all(isWide ? _cardPadding : 16),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surface,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: isWide
-                                    ? [
-                                        BoxShadow(
-                                          blurRadius: 24,
-                                          offset: const Offset(0, 8),
-                                          color: Colors.black.withOpacity(0.08),
+                ),
+                child: SafeArea(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: _maxFormWidth),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            curve: Curves.easeOut,
+                            padding: EdgeInsets.all(isWide ? _cardPadding : 16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: isWide
+                                  ? [
+                                      BoxShadow(
+                                        blurRadius: 24,
+                                        offset: const Offset(0, 8),
+                                        color: Colors.black.withOpacity(0.08),
+                                      ),
+                                    ]
+                                  : null,
+                              border: Border.all(
+                                color: theme.colorScheme.outlineVariant.withOpacity(0.6),
+                              ),
+                            ),
+                            child: AutofillGroup(
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  spacing: 12,
+                                  children: [
+                                    const GenesisLogo(size: 90),
+                                    if (state.currentBaseUrl != null) ...[
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            t.auth.currentBaseUrl,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          Text(
+                                            state.currentBaseUrl!,
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant, // secondary цвет
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+                                    ],
+                                    Text(
+                                      t.login,
+                                      // textAlign: TextAlign.center,
+                                      style: theme.textTheme.headlineSmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    TextFormField(
+                                      controller: _usernameController,
+                                      autofillHints: const [AutofillHints.email],
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.emailAddress,
+                                      decoration: InputDecoration(
+                                        hintText: t.auth.emailHint,
+                                        labelText: t.auth.emailLabel,
+                                      ),
+                                      validator: validateEmail,
+                                    ),
+                                    TextFormField(
+                                      controller: _passwordController,
+                                      autofillHints: const [AutofillHints.password],
+                                      obscureText: _obscureText,
+                                      obscuringCharacter: '•',
+                                      enableSuggestions: false,
+                                      autocorrect: false,
+                                      textInputAction: TextInputAction.done,
+                                      onFieldSubmitted: (_) => _submit(),
+                                      decoration: InputDecoration(
+                                        labelText: t.password,
+                                        hintText: t.auth.passwordHint,
+                                        suffixIcon: Semantics(
+                                          label: _obscureText
+                                              ? t.auth.showPassword
+                                              : t.auth.hidePassword,
+                                          button: true,
+                                          child: IconButton(
+                                            icon: Icon(
+                                              _obscureText
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                            ),
+                                            onPressed: _toggleVisibility,
+                                            tooltip: _obscureText
+                                                ? t.auth.showPassword
+                                                : t.auth.hidePassword,
+                                          ),
                                         ),
-                                      ]
-                                    : null,
-                                border: Border.all(
-                                  color: theme.colorScheme.outlineVariant.withOpacity(0.6),
+                                      ),
+                                      validator: (v) =>
+                                          (v == null || v.isEmpty) ? t.passwordCantBeEmpty : null,
+                                    ),
+                                    if (state.errorMessage != null)
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.errorContainer,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.error_outline),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                state.errorMessage!,
+                                                style: TextStyle(
+                                                  color: theme.colorScheme.onErrorContainer,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    SizedBox(
+                                      height: 48,
+                                      child: ElevatedButton(
+                                        onPressed: state.isPending ? null : _submit,
+                                        child: Text(t.login),
+                                      ).pending(state.isPending),
+                                    ),
+                                    // SizedBox(
+                                    //   height: 48,
+                                    //   child: ElevatedButton(
+                                    //     onPressed: context.read<AuthCubit>().setLogin,
+                                    //     child: Text('set login'),
+                                    //   ),
+                                    // ),
+                                    if (state.serverSettings != null)
+                                      ...state.serverSettings!.externalAuthenticationMethods.map(
+                                        (realm) => SizedBox(
+                                          height: 48,
+                                          child: ElevatedButton(
+                                            onPressed: () async {
+                                              final url = realm.loginUrl;
+                                              await context.read<AuthCubit>().startOidcMobileFlow(
+                                                realmBaseUrl: state.serverSettings!.realmUri,
+                                                loginPath: url,
+                                              );
+                                              await context.pushNamed(Routes.pasteToken);
+                                            },
+                                            child: Text(
+                                              t.auth.loginWith(realmName: realm.displayName),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    if (state.serverSettingsPending)
+                                      Center(child: CircularProgressIndicator()),
+                                    SizedBox(
+                                      height: 44,
+                                      child: OutlinedButton.icon(
+                                        icon: const Icon(Icons.logout_rounded),
+                                        label: Text(t.auth.logoutFromOrganization),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: theme.colorScheme.error,
+                                          side: BorderSide(color: theme.colorScheme.error),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () async {
+                                          await context.read<AuthCubit>().clearBaseUrl();
+                                          if (context.mounted) {
+                                            context.go(Routes.pasteBaseUrl);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: form,
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                );
-              }
-              return SizedBox();
+                ),
+              );
             },
           ),
         );

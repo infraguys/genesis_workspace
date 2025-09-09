@@ -160,6 +160,27 @@ class TranslationsAuthEn {
 
 	/// en: 'Clear'
 	String get clear => 'Clear';
+
+	/// en: 'Paste Base URL'
+	String get pasteBaseUrlHere => 'Paste Base URL';
+
+	/// en: 'Enter or paste the server address'
+	String get enterOrPasteBaseUrlTitle => 'Enter or paste the server address';
+
+	/// en: 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.'
+	String get baseUrlUsageHint => 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.';
+
+	/// en: 'Base URL'
+	String get baseUrlLabel => 'Base URL';
+
+	/// en: 'https://your-domain.com'
+	String get baseUrlHint => 'https://your-domain.com';
+
+	/// en: 'Invalid address. Use http or https.'
+	String get baseUrlInvalid => 'Invalid address. Use http or https.';
+
+	/// en: 'Save and continue'
+	String get saveAndContinue => 'Save and continue';
 }
 
 // Path: nav_bar
@@ -363,6 +384,13 @@ extension on Translations {
 			case 'auth.token_hint': return 'Your code here…';
 			case 'auth.paste': return 'Paste';
 			case 'auth.clear': return 'Clear';
+			case 'auth.pasteBaseUrlHere': return 'Paste Base URL';
+			case 'auth.enterOrPasteBaseUrlTitle': return 'Enter or paste the server address';
+			case 'auth.baseUrlUsageHint': return 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.';
+			case 'auth.baseUrlLabel': return 'Base URL';
+			case 'auth.baseUrlHint': return 'https://your-domain.com';
+			case 'auth.baseUrlInvalid': return 'Invalid address. Use http or https.';
+			case 'auth.saveAndContinue': return 'Save and continue';
 			case 'password_cant_be_empty': return 'Password can not be empty';
 			case 'password': return 'Password';
 			case 'login': return 'Login';
