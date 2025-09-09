@@ -155,19 +155,6 @@ class AuthCubit extends Cubit<AuthState> {
     if (true) {
       await launchUrl(uri, webOnlyWindowName: '_blank');
     }
-    // } else {
-    //   _cookieManager.setCookie(
-    //     url: WebUri.uri(uri),
-    //     name: '__Host-csrftoken',
-    //     value: _csrfToken ?? '',
-    //     isSecure: true,
-    //     path: '/',
-    //   );
-    //   await _browser!.openUrlRequest(
-    //     urlRequest: URLRequest(url: WebUri.uri(uri)),
-    //     settings: _settings,
-    //   );
-    // }
   }
 
   String? _getCookieFromDio(List<String>? rawCookies, String name) {
@@ -196,7 +183,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       final dio = Dio(
         BaseOptions(
-          followRedirects: false, // важно, иначе потеряешь заголовки 302
+          followRedirects: false,
           validateStatus: (status) => status != null && status < 400,
         ),
       );
@@ -250,13 +237,11 @@ class AuthCubit extends Cubit<AuthState> {
   Future<String> _decryptManual(String pastedText, {required Uint8List rawKey}) async {
     final algorithm = AesGcm.with256bits();
 
-    // hex -> bytes
     final data = Uint8List.fromList(hex.decode(pastedText.trim()));
     if (data.length < 12 + 16) {
       throw FormatException('Token too short for AES-GCM (need IV(12)+TAG(16)).');
     }
 
-    // разбор: IV | ciphertext || tag
     final iv = data.sublist(0, 12);
     final body = data.sublist(12);
     if (body.length < 16) {
@@ -274,7 +259,6 @@ class AuthCubit extends Cubit<AuthState> {
     return utf8.decode(clearBytes);
   }
 
-  /// Graceful logout: set idle presence, drop queue, delete token
   Future<void> logout() async {
     emit(state.copyWith(isPending: true));
     if (kIsWeb) {
@@ -303,7 +287,6 @@ class AuthCubit extends Cubit<AuthState> {
       ]);
     } catch (e, st) {
       inspect(e);
-      // даже если что-то упало — токен лучше удалить, чтобы не зависнуть в полулогине
       await Future.wait([
         _deleteTokenUseCase.call(),
         _deleteSessionIdUseCase.call(),
@@ -314,7 +297,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Dev-only logout without network calls
   Future<void> devLogout() async {
     emit(state.copyWith(isPending: true));
     try {
@@ -330,7 +312,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Check persisted token to restore session on app start
   Future<void> checkToken() async {
     emit(state.copyWith(isPending: true, errorMessage: null));
     bool isAuthorized = false;
@@ -376,7 +357,6 @@ class AuthCubit extends Cubit<AuthState> {
       AppConstants().setBaseUrl(normalized);
       emit(state.copyWith(currentBaseUrl: normalized));
 
-      // Пересоберём Dio и подменим его в DI-контейнере
       final TokenStorage tokenStorage = getIt<TokenStorage>();
 
       final Dio newDio = _dioFactory.build(
@@ -385,7 +365,6 @@ class AuthCubit extends Cubit<AuthState> {
         tokenStorage: tokenStorage,
       );
 
-      // Если уже зарегистрирован — удалим/закроем и заменим
       if (getIt.isRegistered<Dio>()) {
         await getIt.resetLazySingleton<Dio>(instance: newDio);
       } else {

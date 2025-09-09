@@ -29,11 +29,10 @@ abstract class CoreModule {
   @lazySingleton
   Dio dio(SharedPreferences sharedPreferences, TokenStorage tokenStorage, DioFactory dioFactory) {
     final String? saved = sharedPreferences.getString(SharedPrefsKeys.baseUrl);
-    // НЕ бросаем: если нет — создаём Dio с плейсхолдером.
     final String baseUrl = (saved != null && saved.trim().isNotEmpty) ? saved.trim() : '';
 
     return dioFactory.build(
-      baseUrl: baseUrl, // может быть пустым — это ок, интерсептор поправит
+      baseUrl: baseUrl,
       sharedPreferences: sharedPreferences,
       tokenStorage: tokenStorage,
     );
@@ -57,7 +56,7 @@ abstract class CoreModule {
 @injectable
 class DioFactory {
   Dio build({
-    required String baseUrl, // может быть пустым
+    required String baseUrl,
     required SharedPreferences sharedPreferences,
     required TokenStorage tokenStorage,
   }) {
@@ -66,7 +65,6 @@ class DioFactory {
 
     final Dio dio = Dio(
       BaseOptions(
-        // если baseUrl пуст — используем безопасный плейсхолдер (не будет вызовов до ввода URL)
         baseUrl: baseUrl.isEmpty ? 'http://placeholder.local' : '$baseUrl$basePath',
         receiveTimeout: const Duration(seconds: 90),
       ),
@@ -78,7 +76,7 @@ class DioFactory {
     }
 
     dio.interceptors
-      ..add(BaseUrlInterceptor(sharedPreferences)) // см. обновлённый код ниже
+      ..add(BaseUrlInterceptor(sharedPreferences))
       ..add(TokenInterceptor(tokenStorage))
       ..add(SessionidInterceptor(tokenStorage))
       ..add(CsrfCookieInterceptor(tokenStorage))

@@ -63,7 +63,7 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
     }
 
     if (uri == null || !uri.hasAuthority || !(uri.isScheme('http') || uri.isScheme('https'))) {
-      _validationError = context.t.auth.baseUrlInvalid; // добавьте ключ в slang
+      _validationError = context.t.auth.baseUrlInvalid;
     } else {
       _validationError = null;
     }
@@ -79,7 +79,6 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
 
     setState(() => _submitting = true);
     try {
-      // реализуйте метод в вашем AuthCubit
       await context.read<AuthCubit>().saveBaseUrl(baseUrl: baseUrl);
     } finally {
       if (mounted) {
@@ -96,11 +95,10 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
 
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        final bool isPending = state.pasteBaseUrlPending; // добавьте поле в стейт
-        // final String? serverError = state.setBaseUrlError; // и это тоже
+        final bool isPending = state.pasteBaseUrlPending;
 
         return Scaffold(
-          appBar: AppBar(title: Text(t.auth.pasteBaseUrlHere)), // добавьте ключ
+          appBar: AppBar(title: Text(t.auth.pasteBaseUrlHere)),
           body: SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -115,15 +113,10 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            t.auth.enterOrPasteBaseUrlTitle, // добавьте ключ
-                            style: theme.textTheme.titleLarge,
-                          ),
+                          Text(t.auth.enterOrPasteBaseUrlTitle, style: theme.textTheme.titleLarge),
                           const SizedBox(height: 8),
                           Text(
-                            t
-                                .auth
-                                .baseUrlUsageHint, // добавьте ключ (пример: "Введите адрес сервера, например https://zulip.example.com")
+                            t.auth.baseUrlUsageHint,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                             ),
@@ -144,9 +137,7 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                                 onChanged: _validate,
                                 decoration: InputDecoration(
                                   labelText: t.auth.baseUrlLabel, // добавьте ключ
-                                  hintText: t
-                                      .auth
-                                      .baseUrlHint, // добавьте ключ (пример: "https://your-domain.com")
+                                  hintText: t.auth.baseUrlHint,
                                   errorText: _validationError,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -207,7 +198,7 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                                           width: 22,
                                           child: CircularProgressIndicator(strokeWidth: 2),
                                         )
-                                      : Text(t.auth.saveAndContinue), // добавьте ключ
+                                      : Text(t.auth.saveAndContinue),
                                 ).pending(isPending),
                               );
                             },

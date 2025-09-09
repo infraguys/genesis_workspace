@@ -1,4 +1,3 @@
-// auth_interceptor.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -13,7 +12,6 @@ class BaseUrlInterceptor extends Interceptor {
     final String? saved = _prefs.getString(SharedPrefsKeys.baseUrl);
 
     if (saved == null || saved.trim().isEmpty) {
-      // Запросы до ввода baseUrl — это логическая ошибка навигации, аккуратно подсветим.
       handler.reject(
         DioException(
           requestOptions: options,
@@ -28,7 +26,6 @@ class BaseUrlInterceptor extends Interceptor {
     final String basePath = (kIsWeb && isWebAuth) ? '/json' : '/api/v1';
     final String normalized = saved.trim();
 
-    // Если кто-то уже поменял baseUrl через saveBaseUrl — просто синхронизируем.
     final String desired = '$normalized$basePath';
     if (options.baseUrl != desired) {
       options.baseUrl = desired;
