@@ -92,6 +92,7 @@ class TranslationsAuthRu extends TranslationsAuthEn {
 	@override String get baseUrlInvalid => 'Некорректный адрес. Используйте http или https.';
 	@override String get saveAndContinue => 'Сохранить и продолжить';
 	@override String get logoutFromOrganization => 'Выйти из организации';
+	@override String get currentBaseUrl => 'Текущий сервер';
 }
 
 // Path: navBar

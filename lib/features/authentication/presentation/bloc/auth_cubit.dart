@@ -80,6 +80,7 @@ class AuthCubit extends Cubit<AuthState> {
           hasBaseUrl: false,
           pasteBaseUrlPending: false,
           serverSettingsPending: false,
+          currentBaseUrl: null,
         ),
       );
 
@@ -335,7 +336,7 @@ class AuthCubit extends Cubit<AuthState> {
     bool isAuthorized = false;
     final String? baseUrl = _sharedPreferences.getString(SharedPrefsKeys.baseUrl);
     if (baseUrl != null) {
-      emit(state.copyWith(hasBaseUrl: true));
+      emit(state.copyWith(hasBaseUrl: true, currentBaseUrl: baseUrl));
       final String? token = await _getTokenUseCase.call();
 
       if (token != null) {
@@ -373,6 +374,7 @@ class AuthCubit extends Cubit<AuthState> {
       final String normalized = baseUrl.trim();
       await _sharedPreferences.setString(SharedPrefsKeys.baseUrl, normalized);
       AppConstants().setBaseUrl(normalized);
+      emit(state.copyWith(currentBaseUrl: normalized));
 
       // Пересоберём Dio и подменим его в DI-контейнере
       final TokenStorage tokenStorage = getIt<TokenStorage>();
@@ -403,7 +405,14 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       inspect(e);
     } finally {
-      emit(state.copyWith(pasteBaseUrlPending: false, hasBaseUrl: false, serverSettings: null));
+      emit(
+        state.copyWith(
+          pasteBaseUrlPending: false,
+          hasBaseUrl: false,
+          serverSettings: null,
+          currentBaseUrl: null,
+        ),
+      );
     }
   }
 }
@@ -422,6 +431,7 @@ class AuthState {
   final bool hasBaseUrl;
   final bool pasteBaseUrlPending;
   final bool serverSettingsPending;
+  final String? currentBaseUrl;
 
   const AuthState({
     required this.isPending,
@@ -435,6 +445,7 @@ class AuthState {
     required this.hasBaseUrl,
     required this.pasteBaseUrlPending,
     required this.serverSettingsPending,
+    this.currentBaseUrl,
   });
 
   AuthState copyWith({
@@ -449,6 +460,7 @@ class AuthState {
     bool? hasBaseUrl,
     bool? pasteBaseUrlPending,
     bool? serverSettingsPending,
+    String? currentBaseUrl,
   }) {
     return AuthState(
       isPending: isPending ?? this.isPending,
@@ -462,6 +474,7 @@ class AuthState {
       hasBaseUrl: hasBaseUrl ?? this.hasBaseUrl,
       pasteBaseUrlPending: pasteBaseUrlPending ?? this.pasteBaseUrlPending,
       serverSettingsPending: serverSettingsPending ?? this.serverSettingsPending,
+      currentBaseUrl: currentBaseUrl ?? this.currentBaseUrl,
     );
   }
 }

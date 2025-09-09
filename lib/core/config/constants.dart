@@ -2,8 +2,8 @@ import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppConstants {
-  static const String _baseProdUrl = String.fromEnvironment('prod_url');
-  static const String _baseStageUrl = String.fromEnvironment('dev_url');
+  // static const String _baseProdUrl = String.fromEnvironment('prod_url');
+  // static const String _baseStageUrl = String.fromEnvironment('dev_url');
   static const String legacyPath = String.fromEnvironment('legacy_ui');
 
   static const String appName = 'genesis_workspace';

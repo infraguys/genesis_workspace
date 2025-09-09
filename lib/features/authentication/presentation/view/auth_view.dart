@@ -132,9 +132,31 @@ class _AuthViewState extends State<AuthView> {
                                   spacing: 12,
                                   children: [
                                     const GenesisLogo(size: 90),
+                                    if (state.currentBaseUrl != null) ...[
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            t.auth.currentBaseUrl,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          Text(
+                                            state.currentBaseUrl!,
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant, // secondary цвет
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+                                    ],
                                     Text(
                                       t.login,
-                                      textAlign: TextAlign.center,
+                                      // textAlign: TextAlign.center,
                                       style: theme.textTheme.headlineSmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -240,24 +262,19 @@ class _AuthViewState extends State<AuthView> {
                                       ),
                                     if (state.serverSettingsPending)
                                       Center(child: CircularProgressIndicator()),
-                                    const SizedBox(height: 8),
-
                                     SizedBox(
                                       height: 44,
                                       child: OutlinedButton.icon(
                                         icon: const Icon(Icons.logout_rounded),
                                         label: Text(t.auth.logoutFromOrganization),
                                         style: OutlinedButton.styleFrom(
-                                          foregroundColor: Theme.of(context).colorScheme.error,
-                                          side: BorderSide(
-                                            color: Theme.of(context).colorScheme.error,
-                                          ),
+                                          foregroundColor: theme.colorScheme.error,
+                                          side: BorderSide(color: theme.colorScheme.error),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                         ),
                                         onPressed: () async {
-                                          // Очищаем baseUrl и уходим на экран вставки URL
                                           await context.read<AuthCubit>().clearBaseUrl();
                                           if (context.mounted) {
                                             context.go(Routes.pasteBaseUrl);

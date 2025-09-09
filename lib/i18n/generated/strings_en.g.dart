@@ -179,6 +179,9 @@ class TranslationsAuthEn {
 
 	/// en: 'Logout from organization'
 	String get logoutFromOrganization => 'Logout from organization';
+
+	/// en: 'Current server'
+	String get currentBaseUrl => 'Current server';
 }
 
 // Path: navBar

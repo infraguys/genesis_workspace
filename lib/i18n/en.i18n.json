@@ -21,7 +21,8 @@
     "base_url_hint": "https://your-domain.com",
     "base_url_invalid": "Invalid address. Use http or https.",
     "save_and_continue": "Save and continue",
-    "logout_from_organization": "Logout from organization"
+    "logout_from_organization": "Logout from organization",
+    "current_base_url": "Current server"
   },
   "password_cant_be_empty": "Password can not be empty",
   "password": "Password",

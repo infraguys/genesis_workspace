@@ -20,7 +20,8 @@
     "base_url_hint": "https://your-domain.com",
     "base_url_invalid": "Некорректный адрес. Используйте http или https.",
     "save_and_continue": "Сохранить и продолжить",
-    "logout_from_organization": "Выйти из организации"
+    "logout_from_organization": "Выйти из организации",
+    "current_base_url": "Текущий сервер"
   },
   "password_cant_be_empty": "Пароль не может быть пустым",
   "password": "Пароль",
