@@ -2,8 +2,6 @@ import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppConstants {
-  // static const String _baseProdUrl = String.fromEnvironment('prod_url');
-  // static const String _baseStageUrl = String.fromEnvironment('dev_url');
   static const String legacyPath = String.fromEnvironment('legacy_ui');
 
   static const String appName = 'genesis_workspace';
@@ -19,7 +17,6 @@ class AppConstants {
     UnicodeEmojiDisplay(emojiName: ":clap:", emojiUnicode: "1F44F"),
   ];
 
-  /// Инициализация. Нужно вызвать при старте приложения (например в main)
   static Future<void> init() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -28,7 +25,6 @@ class AppConstants {
     if (savedBaseUrl != null && savedBaseUrl.trim().isNotEmpty) {
       baseUrl = savedBaseUrl.trim();
     } else {
-      // fallback: если нет сохранённого baseUrl, берём из env по Flavor
       baseUrl = '';
     }
   }
