@@ -126,7 +126,9 @@ class AuthCubit extends Cubit<AuthState> {
     } finally {
       emit(state.copyWith(serverSettingsPending: false));
     }
-    final cookieResponse = await getIt<Dio>().get('${AppConstants.baseUrl}/accounts/login/');
+    final dio = getIt<Dio>();
+    dio.options.followRedirects = false;
+    final cookieResponse = await dio.get('${AppConstants.baseUrl}/accounts/login/');
     final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
     _csrfToken = csrf;
   }
