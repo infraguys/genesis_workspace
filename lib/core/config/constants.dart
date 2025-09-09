@@ -29,7 +29,7 @@ class AppConstants {
     }
   }
 
-  setBaseUrl(String url) {
+  static setBaseUrl(String url) {
     baseUrl = url;
   }
 }

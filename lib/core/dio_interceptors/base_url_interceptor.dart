@@ -4,8 +4,9 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BaseUrlInterceptor extends Interceptor {
-  BaseUrlInterceptor(this._prefs);
   final SharedPreferences _prefs;
+
+  BaseUrlInterceptor(this._prefs);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {

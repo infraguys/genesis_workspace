@@ -354,8 +354,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final String normalized = baseUrl.trim();
       await _sharedPreferences.setString(SharedPrefsKeys.baseUrl, normalized);
-      AppConstants().setBaseUrl(normalized);
-      emit(state.copyWith(currentBaseUrl: normalized));
+      AppConstants.setBaseUrl(normalized);
 
       final TokenStorage tokenStorage = getIt<TokenStorage>();
 
@@ -370,17 +369,19 @@ class AuthCubit extends Cubit<AuthState> {
       } else {
         getIt.registerLazySingleton<Dio>(() => newDio);
       }
+      emit(state.copyWith(hasBaseUrl: true, currentBaseUrl: normalized));
     } catch (e) {
       inspect(e);
+      emit(state.copyWith(hasBaseUrl: false, currentBaseUrl: null));
     } finally {
-      emit(state.copyWith(pasteBaseUrlPending: false, hasBaseUrl: true));
+      emit(state.copyWith(pasteBaseUrlPending: false));
     }
   }
 
   Future<void> clearBaseUrl() async {
     try {
       await _sharedPreferences.remove(SharedPrefsKeys.baseUrl);
-      AppConstants().setBaseUrl("");
+      AppConstants.setBaseUrl("");
     } catch (e) {
       inspect(e);
     } finally {
