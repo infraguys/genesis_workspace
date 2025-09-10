@@ -28,7 +28,6 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_c
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_session_id_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
-import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -126,12 +125,6 @@ class AuthCubit extends Cubit<AuthState> {
     } finally {
       emit(state.copyWith(serverSettingsPending: false));
     }
-    // final dio = Dio(
-    //   BaseOptions(
-    //     // followRedirects: false,
-    //     validateStatus: (status) => status != null && status < 400,
-    //   ),
-    // );
     final dio = getIt<Dio>();
     final cookieResponse = await dio.get('${AppConstants.baseUrl}/accounts/login/');
     final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
@@ -363,27 +356,8 @@ class AuthCubit extends Cubit<AuthState> {
       await _sharedPreferences.setString(SharedPrefsKeys.baseUrl, normalized);
       AppConstants.setBaseUrl(normalized);
 
-      final TokenStorage tokenStorage = getIt<TokenStorage>();
-
-      final Dio newDio = _dioFactory.build(
-        baseUrl: normalized,
-        sharedPreferences: _sharedPreferences,
-        tokenStorage: tokenStorage,
-      );
-
-      if (getIt.isRegistered<Dio>()) {
-        final Dio oldDio = getIt<Dio>();
-        oldDio.close(force: true); // корректно закрываем
-        await getIt.unregister<Dio>();
-      }
-
-      final Dio replacedDio = _dioFactory.build(
-        baseUrl: normalized,
-        sharedPreferences: _sharedPreferences,
-        tokenStorage: getIt<TokenStorage>(),
-      );
-
-      getIt.registerSingleton<Dio>(replacedDio, dispose: (d) => d.close(force: true));
+      final dio = getIt<Dio>();
+      dio.options.baseUrl = normalized;
       emit(state.copyWith(hasBaseUrl: true, currentBaseUrl: normalized));
     } catch (e) {
       inspect(e);
@@ -397,6 +371,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await _sharedPreferences.remove(SharedPrefsKeys.baseUrl);
       AppConstants.setBaseUrl("");
+      await _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
     } catch (e) {
       inspect(e);
     } finally {
