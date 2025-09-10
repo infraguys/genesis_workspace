@@ -190,6 +190,7 @@ class AuthCubit extends Cubit<AuthState> {
       final response = await dio.get(loginUrl);
       final zulipResponse = await dio.get('${AppConstants.baseUrl}${AppConstants.legacyPath}');
       final html = zulipResponse.data as String;
+      print(html);
 
       final regex = RegExp(r'name="csrfmiddlewaretoken"\s+value="([^"]+)"');
       final match = regex.firstMatch(html);
@@ -371,6 +372,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await _sharedPreferences.remove(SharedPrefsKeys.baseUrl);
       AppConstants.setBaseUrl("");
+      await _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
     } catch (e) {
       inspect(e);
     } finally {
