@@ -190,7 +190,6 @@ class AuthCubit extends Cubit<AuthState> {
       final response = await dio.get(loginUrl);
       final zulipResponse = await dio.get('${AppConstants.baseUrl}${AppConstants.legacyPath}');
       final html = zulipResponse.data as String;
-      print(html);
 
       final regex = RegExp(r'name="csrfmiddlewaretoken"\s+value="([^"]+)"');
       final match = regex.firstMatch(html);
