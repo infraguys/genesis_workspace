@@ -126,8 +126,13 @@ class AuthCubit extends Cubit<AuthState> {
     } finally {
       emit(state.copyWith(serverSettingsPending: false));
     }
+    // final dio = Dio(
+    //   BaseOptions(
+    //     // followRedirects: false,
+    //     validateStatus: (status) => status != null && status < 400,
+    //   ),
+    // );
     final dio = getIt<Dio>();
-    dio.options.followRedirects = false;
     final cookieResponse = await dio.get('${AppConstants.baseUrl}/accounts/login/');
     final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
     _csrfToken = csrf;
@@ -367,10 +372,18 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       if (getIt.isRegistered<Dio>()) {
-        await getIt.resetLazySingleton<Dio>(instance: newDio);
-      } else {
-        getIt.registerLazySingleton<Dio>(() => newDio);
+        final Dio oldDio = getIt<Dio>();
+        oldDio.close(force: true); // корректно закрываем
+        await getIt.unregister<Dio>();
       }
+
+      final Dio replacedDio = _dioFactory.build(
+        baseUrl: normalized,
+        sharedPreferences: _sharedPreferences,
+        tokenStorage: getIt<TokenStorage>(),
+      );
+
+      getIt.registerSingleton<Dio>(replacedDio, dispose: (d) => d.close(force: true));
       emit(state.copyWith(hasBaseUrl: true, currentBaseUrl: normalized));
     } catch (e) {
       inspect(e);
