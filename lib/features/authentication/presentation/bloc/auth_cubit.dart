@@ -261,9 +261,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     emit(state.copyWith(isPending: true));
-    if (kIsWeb) {
-      _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
-    }
     try {
       final String? queueId = _realTimeService.queueId;
 
@@ -293,15 +290,15 @@ class AuthCubit extends Cubit<AuthState> {
         _deleteCsrftokenUseCase.call(),
       ]);
     } finally {
+      if (kIsWeb) {
+        _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
+      }
       emit(state.copyWith(isAuthorized: false, errorMessage: null, isPending: false));
     }
   }
 
   Future<void> devLogout() async {
     emit(state.copyWith(isPending: true));
-    if (kIsWeb) {
-      _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
-    }
     try {
       await Future.wait([
         _deleteTokenUseCase.call(),
@@ -312,6 +309,10 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e, st) {
       addError(e, st);
       emit(state.copyWith(isPending: false, isAuthorized: false));
+    } finally {
+      if (kIsWeb) {
+        _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
+      }
     }
   }
 
@@ -373,8 +374,8 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> clearBaseUrl() async {
     try {
       await _sharedPreferences.remove(SharedPrefsKeys.baseUrl);
-      AppConstants.setBaseUrl("");
       await _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
+      AppConstants.setBaseUrl("");
     } catch (e) {
       inspect(e);
     } finally {
