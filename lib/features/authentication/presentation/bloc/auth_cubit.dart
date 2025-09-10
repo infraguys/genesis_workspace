@@ -299,6 +299,9 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> devLogout() async {
     emit(state.copyWith(isPending: true));
+    if (kIsWeb) {
+      _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
+    }
     try {
       await Future.wait([
         _deleteTokenUseCase.call(),
