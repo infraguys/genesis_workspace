@@ -112,8 +112,8 @@ jobs:
           genesis build $(pwd) -i dev-keys.txt
 
           # Upload the VM image
-          curl -X PUT --upload-file output/genesis-workspace.raw \
-            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/genesis-workspace.raw
+          curl -X PUT --upload-file output/genesis-workspace.raw.gz \
+            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/genesis-workspace.raw.gz
 
           # Temporary upload step is done in the build script
           echo "${VERSION}" > "${ARTIFACTS_PATH}/version.txt"
@@ -152,4 +152,4 @@ jobs:
             --wait \
             -u $NODE_UUID \
             -p $PROJECT_ID \
-            -i "${REPO_ENDPOINT}/${PROJECT_NAME}/${VERSION}/genesis-workspace.raw"
+            -i "${REPO_ENDPOINT}/${PROJECT_NAME}/${VERSION}/genesis-workspace.raw.gz"
