@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
@@ -11,6 +12,7 @@ import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/send_message_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/single_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_messages_flags_request_dto.dart';
+import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
 import 'package:injectable/injectable.dart';
 
 @Injectable(as: MessagesDataSource)
@@ -97,6 +99,23 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   Future<DeleteMessageResponseDto> deleteMessage(DeleteMessageRequestDto body) async {
     try {
       return await apiClient.deleteMessage(body.messageId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UploadFileResponseDto> uploadFile(
+    UploadFileRequestDto body, {
+    Function(int sent, int total)? onProgress,
+  }) async {
+    try {
+      final formData = FormData();
+      final MultipartFile part = kIsWeb
+          ? MultipartFile.fromBytes(body.file.bytes!, filename: body.file.name)
+          : await MultipartFile.fromFile(body.file.path!, filename: body.file.name);
+      formData.files.add(MapEntry('file', part));
+      return await apiClient.uploadFile(formData, onProgress);
     } catch (e) {
       rethrow;
     }

@@ -112,6 +112,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get error => 'Error';
 
 	late final TranslationsMessageActionsEn message_actions = TranslationsMessageActionsEn._(_root);
+	late final TranslationsAttachmentButtonEn attachment_button = TranslationsAttachmentButtonEn._(_root);
 }
 
 // Path: auth
@@ -123,19 +124,19 @@ class TranslationsAuthEn {
 	// Translations
 
 	/// en: 'email@example.com'
-	String get emailHint => 'email@example.com';
+	String get email_hint => 'email@example.com';
 
 	/// en: 'Email'
-	String get emailLabel => 'Email';
+	String get email_label => 'Email';
 
 	/// en: 'cucumber123'
-	String get passwordHint => 'cucumber123';
+	String get password_hint => 'cucumber123';
 
 	/// en: 'Show password'
-	String get showPassword => 'Show password';
+	String get show_password => 'Show password';
 
 	/// en: 'Hide password'
-	String get hidePassword => 'Hide password';
+	String get hide_password => 'Hide password';
 
 	/// en: 'Login with {realm_name}'
 	String get login_with => 'Login with {realm_name}';
@@ -162,25 +163,31 @@ class TranslationsAuthEn {
 	String get clear => 'Clear';
 
 	/// en: 'Paste Base URL'
-	String get pasteBaseUrlHere => 'Paste Base URL';
+	String get paste_base_url_here => 'Paste Base URL';
 
 	/// en: 'Enter or paste the server address'
-	String get enterOrPasteBaseUrlTitle => 'Enter or paste the server address';
+	String get enter_or_paste_base_url_title => 'Enter or paste the server address';
 
 	/// en: 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.'
-	String get baseUrlUsageHint => 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.';
+	String get base_url_usage_hint => 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.';
 
 	/// en: 'Base URL'
-	String get baseUrlLabel => 'Base URL';
+	String get base_url_label => 'Base URL';
 
 	/// en: 'https://your-domain.com'
-	String get baseUrlHint => 'https://your-domain.com';
+	String get base_url_hint => 'https://your-domain.com';
 
 	/// en: 'Invalid address. Use http or https.'
-	String get baseUrlInvalid => 'Invalid address. Use http or https.';
+	String get base_url_invalid => 'Invalid address. Use http or https.';
 
 	/// en: 'Save and continue'
-	String get saveAndContinue => 'Save and continue';
+	String get save_and_continue => 'Save and continue';
+
+	/// en: 'Logout from organization'
+	String get logout_from_organization => 'Logout from organization';
+
+	/// en: 'Current server'
+	String get current_base_url => 'Current server';
 }
 
 // Path: nav_bar
@@ -366,16 +373,31 @@ class TranslationsMessageActionsEn {
 	String get star => 'Star this message';
 }
 
+// Path: attachment_button
+class TranslationsAttachmentButtonEn {
+	TranslationsAttachmentButtonEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Pick a file'
+	String get file => 'Pick a file';
+
+	/// en: 'Pick an image'
+	String get image => 'Pick an image';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
-			case 'auth.emailHint': return 'email@example.com';
-			case 'auth.emailLabel': return 'Email';
-			case 'auth.passwordHint': return 'cucumber123';
-			case 'auth.showPassword': return 'Show password';
-			case 'auth.hidePassword': return 'Hide password';
+			case 'auth.email_hint': return 'email@example.com';
+			case 'auth.email_label': return 'Email';
+			case 'auth.password_hint': return 'cucumber123';
+			case 'auth.show_password': return 'Show password';
+			case 'auth.hide_password': return 'Hide password';
 			case 'auth.login_with': return 'Login with {realm_name}';
 			case 'auth.paste_your_code_here': return 'Paste code here';
 			case 'auth.enter_or_paste_code_title': return 'Enter or paste your login code';
@@ -384,13 +406,15 @@ extension on Translations {
 			case 'auth.token_hint': return 'Your code here…';
 			case 'auth.paste': return 'Paste';
 			case 'auth.clear': return 'Clear';
-			case 'auth.pasteBaseUrlHere': return 'Paste Base URL';
-			case 'auth.enterOrPasteBaseUrlTitle': return 'Enter or paste the server address';
-			case 'auth.baseUrlUsageHint': return 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.';
-			case 'auth.baseUrlLabel': return 'Base URL';
-			case 'auth.baseUrlHint': return 'https://your-domain.com';
-			case 'auth.baseUrlInvalid': return 'Invalid address. Use http or https.';
-			case 'auth.saveAndContinue': return 'Save and continue';
+			case 'auth.paste_base_url_here': return 'Paste Base URL';
+			case 'auth.enter_or_paste_base_url_title': return 'Enter or paste the server address';
+			case 'auth.base_url_usage_hint': return 'Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.';
+			case 'auth.base_url_label': return 'Base URL';
+			case 'auth.base_url_hint': return 'https://your-domain.com';
+			case 'auth.base_url_invalid': return 'Invalid address. Use http or https.';
+			case 'auth.save_and_continue': return 'Save and continue';
+			case 'auth.logout_from_organization': return 'Logout from organization';
+			case 'auth.current_base_url': return 'Current server';
 			case 'password_cant_be_empty': return 'Password can not be empty';
 			case 'password': return 'Password';
 			case 'login': return 'Login';
@@ -447,6 +471,8 @@ extension on Translations {
 			case 'message_actions.quote': return 'Quote this message';
 			case 'message_actions.delete': return 'Delete this message';
 			case 'message_actions.star': return 'Star this message';
+			case 'attachment_button.file': return 'Pick a file';
+			case 'attachment_button.image': return 'Pick an image';
 			default: return null;
 		}
 	}

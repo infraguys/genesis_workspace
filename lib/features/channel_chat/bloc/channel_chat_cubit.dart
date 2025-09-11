@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/reaction_op.dart';
@@ -14,9 +15,11 @@ import 'package:genesis_workspace/domain/messages/entities/messages_request_enti
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
@@ -44,6 +47,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     this._sendMessageUseCase,
     this._getChannelByIdUseCase,
     this._getTopicsUseCase,
+    this._uploadFileUseCase,
   ) : super(
         ChannelChatState(
           messages: [],
@@ -78,6 +82,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
   final SendMessageUseCase _sendMessageUseCase;
   final GetChannelByIdUseCase _getChannelByIdUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
+  final UploadFileUseCase _uploadFileUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -240,6 +245,26 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
 
   void setIsMessagePending(bool value) {
     emit(state.copyWith(isMessagePending: value));
+  }
+
+  Future<UploadFileResponseEntity> uploadFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+      withData: true,
+    );
+    if (result != null) {
+      try {
+        final body = UploadFileRequestEntity(file: result.files.single);
+        final response = await _uploadFileUseCase.call(body);
+        inspect(response);
+        return response;
+      } catch (e) {
+        inspect(e);
+        rethrow;
+      }
+    } else {
+      throw Exception('No file selected');
+    }
   }
 
   void scheduleMarkAsRead(int messageId) {

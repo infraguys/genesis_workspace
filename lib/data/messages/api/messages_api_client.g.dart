@@ -237,6 +237,43 @@ class _MessagesApiClient implements MessagesApiClient {
     return _value;
   }
 
+  @override
+  Future<UploadFileResponseDto> uploadFile(
+    FormData formData,
+    void Function(int, int)? onSendProgress,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = formData;
+    final _options = _setStreamType<UploadFileResponseDto>(
+      Options(
+            method: 'POST',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'multipart/form-data',
+          )
+          .compose(
+            _dio.options,
+            '/user_uploads',
+            queryParameters: queryParameters,
+            data: _data,
+            onSendProgress: onSendProgress,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UploadFileResponseDto _value;
+    try {
+      _value = UploadFileResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

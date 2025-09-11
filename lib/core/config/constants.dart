@@ -32,6 +32,34 @@ class AppConstants {
   static setBaseUrl(String url) {
     baseUrl = url;
   }
+
+  static const Set<String> kImageExtensions = {
+    'png',
+    'jpg',
+    'jpeg',
+    'gif',
+    'webp',
+    'bmp',
+    'heic',
+    'heif',
+    'svg',
+  };
+
+  static const List<String> kNonImageAllowedExtensions = [
+    'pdf',
+    'txt',
+    'md',
+    'doc',
+    'docx',
+    'xls',
+    'xlsx',
+    'csv',
+    'zip',
+    'rar',
+    '7z',
+    'json',
+    'xml',
+  ];
 }
 
 class SharedPrefsKeys {

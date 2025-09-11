@@ -236,7 +236,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                       controller: _messageController,
                       isMessagePending: state.isMessagePending,
                       focusNode: _messageInputFocusNode,
-                      onSend: _currentText.isNotEmpty
+                      onSend: (_currentText.isNotEmpty || state.uploadedFiles.isNotEmpty)
                           ? () async {
                               final content = _messageController.text;
                               _messageController.clear();
@@ -248,6 +248,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                               } catch (e) {}
                             }
                           : null,
+                      onUploadFile: context.read<ChatCubit>().uploadFile,
+                      files: state.uploadedFiles,
                     ),
                   ],
                 ),
