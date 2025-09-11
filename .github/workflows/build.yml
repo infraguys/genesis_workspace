@@ -56,21 +56,17 @@ jobs:
           pip install genesis-devtools
           VERSION="$(genesis get-version .)"
 
-          if [[ "${UI_BUILD_ENV_BUILD_TARGET}" == "ci_prod" ]]; then
-            export UI_BUILD_ENV_prod_url="${PROD_URL}"
-            python3 /usr/local/bin/make_ui_build_env
-            make ci_prod_apk
-            curl -X PUT --upload-file build/app/outputs/flutter-apk/app-prod-release.apk \
-              $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-app.apk
-            make ci_prod_web
-          else
-            export UI_BUILD_ENV_dev_url="${DEV_URL}"
-            python3 /usr/local/bin/make_ui_build_env
-            make ci_stage_apk
-            curl -X PUT --upload-file build/app/outputs/flutter-apk/app-stage-release.apk \
-              $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-app.apk
-            make ci_stage_web
-          fi
+          python3 /usr/local/bin/make_ui_build_env
+          make ci_prod_linux
+          cd build/linux/x64/release/
+          tar -czf bundle_linux.tar.gz bundle
+          curl -X PUT --upload-file bundle_linux.tar.gz \
+            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/bundle_linux.tar.gz
+          cd -
+          make ci_prod_apk
+          curl -X PUT --upload-file build/app/outputs/flutter-apk/app-prod-release.apk \
+            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-app.apk
+          make ci_prod_web
 
           find "build/web/" -maxdepth 1 -type f -exec mv -t "$WEB_DIR/" {} +
           cp -r "build/web/assets" "$WEB_DIR/"
@@ -80,11 +76,6 @@ jobs:
             $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-web.tar.gz
           cd -
           rm -rf "$WEB_DIR" /tmp/web.tar.gz
-
-          # Common target for all environments
-          make ci_prod_linux
-          curl -X PUT --upload-file build/linux/x64/release/bundle/genesis_workspace \
-            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/genesis_workspace
 
       - name: Build Genesis Workspace VM image
         env:
