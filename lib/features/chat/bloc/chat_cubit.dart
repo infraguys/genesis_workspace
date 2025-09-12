@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
@@ -14,9 +18,11 @@ import 'package:genesis_workspace/domain/messages/entities/messages_request_enti
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
@@ -43,6 +49,7 @@ class ChatCubit extends Cubit<ChatState> {
     this._updateMessagesFlagsUseCase,
     this._getUserByIdUseCase,
     this._getUserPresenceUseCase,
+    this._uploadFileUseCase,
   ) : super(
         ChatState(
           messages: [],
@@ -55,6 +62,8 @@ class ChatCubit extends Cubit<ChatState> {
           selfTypingOp: TypingEventOp.stop,
           pendingToMarkAsRead: {},
           userEntity: null,
+          uploadedFiles: [],
+          uploadedFilesString: '',
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -76,6 +85,7 @@ class ChatCubit extends Cubit<ChatState> {
   final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
   final GetUserByIdUseCase _getUserByIdUseCase;
   final GetUserPresenceUseCase _getUserPresenceUseCase;
+  final UploadFileUseCase _uploadFileUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -84,6 +94,8 @@ class ChatCubit extends Cubit<ChatState> {
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageSubscription;
 
   Timer? _readMessageDebounceTimer;
+
+  final Map<String, CancelToken> _uploadCancelTokens = <String, CancelToken>{};
 
   Future<void> getInitialData({
     required int userId,
@@ -180,17 +192,32 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendMessage({required int chatId, required String content}) async {
-    state.isMessagePending = true;
-    emit(state.copyWith(isMessagePending: state.isMessagePending));
+    emit(state.copyWith(isMessagePending: true));
     final SendMessageType type = SendMessageType.direct;
-    final body = SendMessageRequestEntity(type: type, to: [chatId], content: content);
+    for (var file in state.uploadedFiles) {
+      if (file is UploadedFileEntity) {
+        final uploaded = file;
+        final String fileLink = '[${uploaded.filename}](${uploaded.url})';
+        final String newUploadedFilesString = appendFileLink(state.uploadedFilesString, fileLink);
+
+        emit(state.copyWith(uploadedFilesString: newUploadedFilesString));
+      }
+    }
+    final messageParts = [state.uploadedFilesString, content].where((part) => part.isNotEmpty);
+    final body = SendMessageRequestEntity(
+      type: type,
+      to: [chatId],
+      content: messageParts.join('\n'),
+    );
+
     try {
       await _sendMessageUseCase.call(body);
+      emit(state.copyWith(uploadedFilesString: '', uploadedFiles: []));
     } catch (e) {
       inspect(e);
+    } finally {
+      emit(state.copyWith(isMessagePending: false));
     }
-    state.isMessagePending = false;
-    emit(state.copyWith(isMessagePending: state.isMessagePending));
   }
 
   void _onTypingEvents(TypingEventEntity event) {
@@ -241,6 +268,112 @@ class ChatCubit extends Cubit<ChatState> {
       }
     }
     emit(state.copyWith(messages: state.messages));
+  }
+
+  Future<void> uploadFiles() async {
+    final List<PlatformFile>? platformFiles = await pickNonImageFiles();
+    if (platformFiles == null || platformFiles.isEmpty) return;
+
+    final List<Future<void>> uploadTasks = <Future<void>>[];
+
+    for (final PlatformFile platformFile in platformFiles) {
+      final String extension = extensionOf(platformFile.name).toLowerCase();
+      if (AppConstants.kImageExtensions.contains(extension)) continue;
+
+      final String localId = generateFileLocalId(platformFile.name);
+
+      final UploadingFileEntity placeholder = UploadingFileEntity(
+        localId: localId,
+        filename: platformFile.name,
+        size: platformFile.size,
+        bytesSent: 0,
+        bytesTotal: platformFile.size == 0 ? null : platformFile.size,
+      );
+      _addUploadingFile(placeholder);
+
+      uploadTasks.add(_uploadSingleFile(platformFile: platformFile, localId: localId));
+    }
+
+    if (uploadTasks.isEmpty) return;
+
+    await Future.wait(uploadTasks, eagerError: false);
+  }
+
+  Future<void> _uploadSingleFile({
+    required PlatformFile platformFile,
+    required String localId,
+  }) async {
+    final CancelToken cancelToken = CancelToken();
+    _uploadCancelTokens[localId] = cancelToken;
+
+    try {
+      final UploadFileRequestEntity request = UploadFileRequestEntity(file: platformFile);
+
+      final response = await _uploadFileUseCase.call(
+        request,
+        cancelToken: cancelToken,
+        onProgress: (int bytesSent, int bytesTotal) {
+          if (!_uploadCancelTokens.containsKey(localId)) return;
+          _updateProgress(localId, bytesSent, bytesTotal);
+        },
+      );
+
+      if (!_uploadCancelTokens.containsKey(localId)) return; // отменили в процессе
+
+      final UploadedFileEntity uploaded = response.toUploadedFileEntity(
+        localId: localId,
+        size: platformFile.size,
+      );
+      _replaceWithUploaded(localId, uploaded);
+    } on DioException catch (e) {
+      if (CancelToken.isCancel(e)) {
+        removeUploadedFile(localId); // отмена пользователем
+        return;
+      }
+      removeUploadedFile(localId);
+      inspect(e);
+    } catch (e, stackTrace) {
+      removeUploadedFile(localId);
+      inspect(e);
+      inspect(stackTrace);
+    } finally {
+      _uploadCancelTokens.remove(localId);
+    }
+  }
+
+  void cancelUpload(String localId) {
+    final CancelToken? token = _uploadCancelTokens.remove(localId);
+    token?.cancel('canceled_by_user:$localId');
+    removeUploadedFile(localId);
+  }
+
+  void _addUploadingFile(UploadingFileEntity newItem) {
+    final List<UploadFileEntity> next = List.of(state.uploadedFiles)..add(newItem);
+    emit(state.copyWith(uploadedFiles: next));
+  }
+
+  void _updateProgress(String localId, int bytesSent, int bytesTotal) {
+    final List<UploadFileEntity> next = state.uploadedFiles.map((UploadFileEntity item) {
+      if (item is UploadingFileEntity && item.localId == localId) {
+        return item.copyWith(bytesSent: bytesSent, bytesTotal: bytesTotal);
+      }
+      return item;
+    }).toList();
+    emit(state.copyWith(uploadedFiles: next));
+  }
+
+  void _replaceWithUploaded(String localId, UploadedFileEntity uploaded) {
+    final List<UploadFileEntity> next = state.uploadedFiles.map((UploadFileEntity item) {
+      return item.localId == localId ? uploaded : item;
+    }).toList();
+    emit(state.copyWith(uploadedFiles: next));
+  }
+
+  void removeUploadedFile(String localId) {
+    final List<UploadFileEntity> next = state.uploadedFiles
+        .where((item) => item.localId != localId)
+        .toList();
+    emit(state.copyWith(uploadedFiles: next));
   }
 
   void scheduleMarkAsRead(int messageId) {

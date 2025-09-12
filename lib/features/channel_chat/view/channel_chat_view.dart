@@ -237,6 +237,9 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                             } catch (e) {}
                           }
                         : null,
+                    onUploadFile: context.read<ChannelChatCubit>().uploadFile,
+                    onRemoveFile: (_) {},
+                    onCancelUpload: (_) {},
                   ),
                 ],
               );

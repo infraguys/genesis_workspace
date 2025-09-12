@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,7 +73,6 @@ class _AuthViewState extends State<AuthView> {
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        inspect(state);
         if (state.isAuthorized) context.go(Routes.directMessages);
         if (!state.hasBaseUrl) context.go(Routes.pasteBaseUrl);
       },

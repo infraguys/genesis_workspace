@@ -1,15 +1,21 @@
 targets:
   $default:
     builders:
-      injectable:
+      injectable_generator:injectable_builder:
         generate_for:
           - lib/core/dependency_injection/di.dart
+          - lib/core/dependency_injection/core_module.dart
           - lib/features/**/data/repositories_impl/**.dart
+          - lib/features/**/data/datasources/**.dart
           - lib/features/**/domain/usecases/**.dart
+          - lib/features/**/presentation/bloc/**.dart
+          - lib/features/**/bloc/**.dart
+          - lib/services/real_time/**.dart
+          - lib/services/localization/localization_service.dart
           - lib/data/**/datasources/**.dart
           - lib/data/**/repositories_impl/**.dart
-          - lib/services/real_time/**.dart
           - lib/data/**/dao/**.dart
+          - lib/domain/**/usecases/**.dart
       json_serializable:
         generate_for:
           - lib/features/**/data/dto/**.dart
@@ -22,3 +28,7 @@ targets:
           - lib/data/database/app_database.dart
           - lib/data/**/tables/**.dart
           - lib/data/**/dao/**.dart
+      retrofit_generator:
+        generate_for:
+          - lib/data/**/api/**.dart
+          - lib/features/**/data/api/**.dart

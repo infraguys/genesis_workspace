@@ -49,6 +49,8 @@ import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case
     as _i116;
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart'
     as _i664;
+import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart'
+    as _i42;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
     as _i703;
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart'
@@ -233,6 +235,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i699.GetMessageByIdUseCase>(
       () => _i699.GetMessageByIdUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i42.UploadFileUseCase>(
+      () => _i42.UploadFileUseCase(gh<_i857.MessagesRepository>()),
+    );
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
     );
@@ -300,6 +305,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i440.DioFactory>(),
       ),
     );
+    gh.factory<_i277.ChatCubit>(
+      () => _i277.ChatCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i773.GetUserByIdUseCase>(),
+        gh<_i394.GetUserPresenceUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+      ),
+    );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
     );
@@ -312,6 +329,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i116.SendMessageUseCase>(),
         gh<_i720.GetChannelByIdUseCase>(),
         gh<_i699.GetTopicsUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
       ),
     );
     gh.factory<_i758.MentionsCubit>(
@@ -328,17 +346,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i82.RealTimeService>(),
         gh<_i547.GetOwnUserUseCase>(),
         gh<_i832.UpdatePresenceUseCase>(),
-      ),
-    );
-    gh.factory<_i277.ChatCubit>(
-      () => _i277.ChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i773.GetUserByIdUseCase>(),
-        gh<_i394.GetUserPresenceUseCase>(),
       ),
     );
     gh.factory<_i911.RecentDmRepository>(
