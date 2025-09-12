@@ -16,6 +16,8 @@ class MessageInput extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onSend;
   final VoidCallback onUploadFile;
+  final Function(String localId) onRemoveFile;
+  final Function(String localId) onCancelUpload;
   final bool isMessagePending;
   final FocusNode focusNode;
   final List<UploadFileEntity>? files;
@@ -25,6 +27,8 @@ class MessageInput extends StatefulWidget {
     required this.controller,
     this.onSend,
     required this.onUploadFile,
+    required this.onRemoveFile,
+    required this.onCancelUpload,
     required this.isMessagePending,
     required this.focusNode,
     this.files,
@@ -72,8 +76,8 @@ class _MessageInputState extends State<MessageInput> {
 
     Widget buildAttachmentTile(
       UploadFileEntity entity, {
-      VoidCallback? onRemoveUploaded,
-      VoidCallback? onCancelUploading,
+      Function(String localId)? onRemoveUploaded,
+      Function(String localId)? onCancelUploading,
     }) {
       final String fileExtension = extensionOf(entity.filename);
 
@@ -86,14 +90,22 @@ class _MessageInputState extends State<MessageInput> {
             isUploading: true,
             bytesSent: bytesSent,
             bytesTotal: bytesTotal,
-            onRemove: onCancelUploading,
+            onCancelUploading: () {
+              if (onCancelUploading != null) {
+                onCancelUploading(entity.localId);
+              }
+            },
           ),
         UploadedFileEntity(:final filename, :final size) => AttachmentTile(
           filename: filename,
           extension: fileExtension,
           fileSize: size,
           isUploading: false,
-          onRemove: onRemoveUploaded,
+          onRemove: () {
+            if (onRemoveUploaded != null) {
+              onRemoveUploaded(entity.localId);
+            }
+          },
         ),
       };
     }
@@ -115,8 +127,8 @@ class _MessageInputState extends State<MessageInput> {
                     final UploadFileEntity entity = widget.files![index];
                     return buildAttachmentTile(
                       entity,
-                      onRemoveUploaded: null,
-                      onCancelUploading: null,
+                      onRemoveUploaded: widget.onRemoveFile,
+                      onCancelUploading: widget.onCancelUpload,
                     );
                   },
                 ),

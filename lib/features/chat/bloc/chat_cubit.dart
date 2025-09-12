@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -93,6 +94,8 @@ class ChatCubit extends Cubit<ChatState> {
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageSubscription;
 
   Timer? _readMessageDebounceTimer;
+
+  final Map<String, CancelToken> _uploadCancelTokens = <String, CancelToken>{};
 
   Future<void> getInitialData({
     required int userId,
@@ -191,11 +194,22 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> sendMessage({required int chatId, required String content}) async {
     emit(state.copyWith(isMessagePending: true));
     final SendMessageType type = SendMessageType.direct;
+    for (var file in state.uploadedFiles) {
+      if (file is UploadedFileEntity) {
+        final uploaded = file;
+        final String fileLink = '[${uploaded.filename}](${uploaded.url})';
+        final String newUploadedFilesString = appendFileLink(state.uploadedFilesString, fileLink);
+
+        emit(state.copyWith(uploadedFilesString: newUploadedFilesString));
+      }
+    }
+    final messageParts = [state.uploadedFilesString, content].where((part) => part.isNotEmpty);
     final body = SendMessageRequestEntity(
       type: type,
       to: [chatId],
-      content: '${state.uploadedFilesString}\n$content',
+      content: messageParts.join('\n'),
     );
+
     try {
       await _sendMessageUseCase.call(body);
       emit(state.copyWith(uploadedFilesString: '', uploadedFiles: []));
@@ -256,16 +270,18 @@ class ChatCubit extends Cubit<ChatState> {
     emit(state.copyWith(messages: state.messages));
   }
 
-  Future<void> uploadFile() async {
-    final PlatformFile? platformFile = await pickNonImageFile();
-    if (platformFile == null) return;
-    final String extension = extensionOf(platformFile.name);
-    if (AppConstants.kImageExtensions.contains(extension)) {
-      return;
-    }
-    final String localId = generateFileLocalId(platformFile.name);
+  Future<void> uploadFiles() async {
+    final List<PlatformFile>? platformFiles = await pickNonImageFiles();
+    if (platformFiles == null || platformFiles.isEmpty) return;
 
-    try {
+    final List<Future<void>> uploadTasks = <Future<void>>[];
+
+    for (final PlatformFile platformFile in platformFiles) {
+      final String extension = extensionOf(platformFile.name).toLowerCase();
+      if (AppConstants.kImageExtensions.contains(extension)) continue;
+
+      final String localId = generateFileLocalId(platformFile.name);
+
       final UploadingFileEntity placeholder = UploadingFileEntity(
         localId: localId,
         filename: platformFile.name,
@@ -275,29 +291,60 @@ class ChatCubit extends Cubit<ChatState> {
       );
       _addUploadingFile(placeholder);
 
+      uploadTasks.add(_uploadSingleFile(platformFile: platformFile, localId: localId));
+    }
+
+    if (uploadTasks.isEmpty) return;
+
+    await Future.wait(uploadTasks, eagerError: false);
+  }
+
+  Future<void> _uploadSingleFile({
+    required PlatformFile platformFile,
+    required String localId,
+  }) async {
+    final CancelToken cancelToken = CancelToken();
+    _uploadCancelTokens[localId] = cancelToken;
+
+    try {
       final UploadFileRequestEntity request = UploadFileRequestEntity(file: platformFile);
+
       final response = await _uploadFileUseCase.call(
         request,
+        cancelToken: cancelToken,
         onProgress: (int bytesSent, int bytesTotal) {
+          if (!_uploadCancelTokens.containsKey(localId)) return;
           _updateProgress(localId, bytesSent, bytesTotal);
         },
       );
+
+      if (!_uploadCancelTokens.containsKey(localId)) return; // отменили в процессе
 
       final UploadedFileEntity uploaded = response.toUploadedFileEntity(
         localId: localId,
         size: platformFile.size,
       );
       _replaceWithUploaded(localId, uploaded);
-      final String fileString = '[${uploaded.filename}](${uploaded.url})';
-
-      String updatedUploadedFilesString = state.uploadedFilesString;
-      updatedUploadedFilesString = appendFileLink(updatedUploadedFilesString, fileString);
-      emit(state.copyWith(uploadedFilesString: updatedUploadedFilesString));
+    } on DioException catch (e) {
+      if (CancelToken.isCancel(e)) {
+        removeUploadedFile(localId); // отмена пользователем
+        return;
+      }
+      removeUploadedFile(localId);
+      inspect(e);
     } catch (e, stackTrace) {
-      _removeByLocalId(localId);
+      removeUploadedFile(localId);
       inspect(e);
       inspect(stackTrace);
+    } finally {
+      _uploadCancelTokens.remove(localId);
     }
+  }
+
+  void cancelUpload(String localId) {
+    final CancelToken? token = _uploadCancelTokens.remove(localId);
+    token?.cancel('canceled_by_user:$localId');
+    removeUploadedFile(localId);
   }
 
   void _addUploadingFile(UploadingFileEntity newItem) {
@@ -322,7 +369,7 @@ class ChatCubit extends Cubit<ChatState> {
     emit(state.copyWith(uploadedFiles: next));
   }
 
-  void _removeByLocalId(String localId) {
+  void removeUploadedFile(String localId) {
     final List<UploadFileEntity> next = state.uploadedFiles
         .where((item) => item.localId != localId)
         .toList();

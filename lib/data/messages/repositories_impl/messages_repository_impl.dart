@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
 import 'package:genesis_workspace/domain/messages/entities/delete_message_entity.dart';
@@ -87,9 +88,14 @@ class MessagesRepositoryImpl implements MessagesRepository {
   Future<UploadFileResponseEntity> uploadFile(
     UploadFileRequestEntity body, {
     Function(int sent, int total)? onProgress,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final response = await dataSource.uploadFile(body.toDto(), onProgress: onProgress);
+      final response = await dataSource.uploadFile(
+        body.toDto(),
+        onProgress: onProgress,
+        cancelToken: cancelToken,
+      );
       return response.toEntity();
     } catch (e) {
       rethrow;

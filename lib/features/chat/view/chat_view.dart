@@ -9,6 +9,7 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -179,6 +180,10 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           }
           return BlocBuilder<ChatCubit, ChatState>(
             builder: (context, state) {
+              final bool isSendEnabled =
+                  _currentText.isNotEmpty ||
+                  (state.uploadedFiles.isNotEmpty &&
+                      !state.uploadedFiles.any((file) => file is UploadingFileEntity));
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
@@ -236,7 +241,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                       controller: _messageController,
                       isMessagePending: state.isMessagePending,
                       focusNode: _messageInputFocusNode,
-                      onSend: (_currentText.isNotEmpty || state.uploadedFiles.isNotEmpty)
+                      onSend: isSendEnabled
                           ? () async {
                               final content = _messageController.text;
                               _messageController.clear();
@@ -248,7 +253,9 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                               } catch (e) {}
                             }
                           : null,
-                      onUploadFile: context.read<ChatCubit>().uploadFile,
+                      onUploadFile: context.read<ChatCubit>().uploadFiles,
+                      onRemoveFile: context.read<ChatCubit>().removeUploadedFile,
+                      onCancelUpload: context.read<ChatCubit>().cancelUpload,
                       files: state.uploadedFiles,
                     ),
                   ],

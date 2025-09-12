@@ -160,9 +160,9 @@ String appendFileLink(String existing, String fileLink) {
   return normalized.isEmpty ? fileLink : '$normalized\n$fileLink';
 }
 
-Future<PlatformFile?> pickNonImageFile() async {
+Future<List<PlatformFile>?> pickNonImageFiles() async {
   final FilePickerResult? result = await FilePicker.platform.pickFiles(
-    allowMultiple: false,
+    allowMultiple: true,
     withData: kIsWeb,
     type: FileType.custom,
     allowedExtensions: AppConstants.kNonImageAllowedExtensions,
@@ -170,12 +170,17 @@ Future<PlatformFile?> pickNonImageFile() async {
 
   if (result == null) return null;
 
-  final PlatformFile platformFile = result.files.single;
+  final List<PlatformFile> platformFiles = result.files;
 
-  final String extension = extensionOf(platformFile.name);
-  if (AppConstants.kImageExtensions.contains(extension)) {
-    // здесь можно показать SnackBar/Toast и вернуть null
-    return null;
-  }
-  return platformFile;
+  platformFiles.removeWhere((platformFile) {
+    final String extension = extensionOf(platformFile.name);
+    if (AppConstants.kImageExtensions.contains(extension)) {
+      return true;
+    }
+    return false;
+  });
+
+  return platformFiles;
 }
+
+String b64(String value) => base64Encode(utf8.encode(value));

@@ -241,6 +241,7 @@ class _MessagesApiClient implements MessagesApiClient {
   Future<UploadFileResponseDto> uploadFile(
     FormData formData,
     void Function(int, int)? onSendProgress,
+    CancelToken? cancelToken,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -259,6 +260,7 @@ class _MessagesApiClient implements MessagesApiClient {
             '/user_uploads',
             queryParameters: queryParameters,
             data: _data,
+            cancelToken: cancelToken,
             onSendProgress: onSendProgress,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
@@ -272,6 +274,35 @@ class _MessagesApiClient implements MessagesApiClient {
       rethrow;
     }
     return _value;
+  }
+
+  @override
+  Future<HttpResponse<void>> createUpload(
+    String uploadLength,
+    String uploadMetadata,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      r'Tus-Resumable': '1.0.0',
+      r'Upload-Length': uploadLength,
+      r'Upload-Metadata': uploadMetadata,
+    };
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<void>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/tus',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<void>(_options);
+    final httpResponse = HttpResponse(null, _result);
+    return httpResponse;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

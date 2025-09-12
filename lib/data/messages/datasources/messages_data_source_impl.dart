@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
@@ -13,11 +15,16 @@ import 'package:genesis_workspace/data/messages/dto/send_message_request_dto.dar
 import 'package:genesis_workspace/data/messages/dto/single_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_messages_flags_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
+import 'package:genesis_workspace/data/messages/tus/platform_chunk_reader_stub.dart'
+    if (dart.library.html) 'package:genesis_workspace/data/messages/tus/platform_chunk_reader_web.dart'
+    if (dart.library.io) 'package:genesis_workspace/data/messages/tus/platform_chunk_reader_io.dart';
 import 'package:injectable/injectable.dart';
+import 'package:mime/mime.dart';
 
 @Injectable(as: MessagesDataSource)
 class MessagesDataSourceImpl implements MessagesDataSource {
   final MessagesApiClient apiClient = MessagesApiClient(getIt<Dio>());
+  final Dio dio = getIt<Dio>();
 
   @override
   Future<MessagesResponseDto> getMessages(MessagesRequestDto body) async {
@@ -108,16 +115,182 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   Future<UploadFileResponseDto> uploadFile(
     UploadFileRequestDto body, {
     Function(int sent, int total)? onProgress,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final formData = FormData();
+      final FormData formData = FormData();
       final MultipartFile part = kIsWeb
           ? MultipartFile.fromBytes(body.file.bytes!, filename: body.file.name)
-          : await MultipartFile.fromFile(body.file.path!, filename: body.file.name);
+          : await MultipartFile.fromFile(body.file.path ?? '', filename: body.file.name);
       formData.files.add(MapEntry('file', part));
-      return await apiClient.uploadFile(formData, onProgress);
+
+      const int fifteenMB = 15 * 1024 * 1024;
+      final bool isLargeFile = formData.files.any((e) => e.value.length > fifteenMB);
+
+      if (isLargeFile) {
+        final PlatformChunkReader reader = createPlatformChunkReader(body);
+        await reader.open();
+        try {
+          final int fileSize = await reader.length();
+          final UploadFileResponseDto result = await _uploadViaTus(
+            fileName: body.file.name,
+            fileSize: fileSize,
+            reader: reader,
+            onProgress: onProgress,
+            cancelToken: cancelToken,
+          );
+          return result;
+        } finally {
+          await reader.close();
+        }
+      } else {
+        return await apiClient.uploadFile(formData, onProgress, cancelToken);
+      }
     } catch (e) {
       rethrow;
     }
   }
+
+  String _resolveLocation(String locationHeader) {
+    final String base = dio.options.baseUrl;
+    if (locationHeader.startsWith('http://') || locationHeader.startsWith('https://')) {
+      return locationHeader;
+    }
+    if (base.isEmpty) return locationHeader;
+    return Uri.parse(base).resolve(locationHeader).toString();
+  }
+
+  Future<_AttachmentMatch> _findInAttachments({
+    required String expectedName,
+    required int expectedSize,
+    CancelToken? cancelToken,
+  }) async {
+    final Response<Map<String, dynamic>> res = await dio.get<Map<String, dynamic>>(
+      '/attachments',
+      cancelToken: cancelToken,
+    );
+
+    final List<dynamic> items = (res.data?['attachments'] as List<dynamic>? ?? <dynamic>[]);
+    _AttachmentMatch? best;
+    for (final dynamic raw in items) {
+      final map = raw as Map<String, dynamic>;
+      final String name = map['name'] as String? ?? '';
+      final int size = map['size'] as int? ?? -1;
+      final String pathId = map['path_id'] as String? ?? '';
+      final int ts = map['create_time'] as int? ?? 0;
+      if (name == expectedName && size == expectedSize) {
+        if (best == null || ts > best!.createTime) {
+          best = _AttachmentMatch(filename: name, pathId: pathId, createTime: ts);
+        }
+      }
+    }
+    if (best == null) {
+      throw StateError('TUS: uploaded file not found in attachments');
+    }
+    return best!;
+  }
+
+  Future<UploadFileResponseDto> _uploadViaTus({
+    required String fileName,
+    required int fileSize,
+    required PlatformChunkReader reader,
+    Function(int sent, int total)? onProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final String metadata = _buildTusMetadata(
+      filename: fileName,
+      mimeType: lookupMimeType(fileName),
+    );
+
+    final create = await apiClient.createUpload(fileSize.toString(), metadata);
+
+    final String? location =
+        create.response.headers.value('location') ?? create.response.headers.value('Location');
+    if (location == null) {
+      throw StateError('TUS: Location header is missing');
+    }
+    final String uploadUrl = _resolveLocation(location);
+
+    int offset = await _tusHead(uploadUrl, cancelToken);
+
+    const int chunkSize = 5 * 1024 * 1024;
+    while (offset < fileSize) {
+      final int toRead = min(chunkSize, fileSize - offset);
+      final List<int> chunk = await reader.read(offset, toRead); // было: Uint8List
+      await _tusPatch(
+        uploadUrl,
+        chunk,
+        offset,
+        cancelToken,
+        (sent, total) => onProgress?.call(offset + sent, fileSize),
+      );
+      offset += chunk.length;
+      onProgress?.call(offset, fileSize);
+    }
+
+    final _AttachmentMatch match = await _findInAttachments(
+      expectedName: fileName,
+      expectedSize: fileSize,
+      cancelToken: cancelToken,
+    );
+
+    return UploadFileResponseDto(
+      filename: match.filename,
+      url: '/user_uploads/${match.pathId}',
+      uri: '/user_uploads/${match.pathId}',
+      result: 'success',
+      msg: '',
+    );
+  }
+
+  Future<int> _tusHead(String uploadUrl, CancelToken? cancelToken) async {
+    final Response res = await dio.head(
+      uploadUrl,
+      options: Options(headers: {'Tus-Resumable': AppConstants.tusVersion}),
+      cancelToken: cancelToken,
+    );
+    final String value =
+        res.headers.value('Upload-Offset') ?? res.headers.value('upload-offset') ?? '0';
+    return int.parse(value);
+  }
+
+  Future<void> _tusPatch(
+    String uploadUrl,
+    List<int> chunk,
+    int offset,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+  ) async {
+    await dio.patch(
+      uploadUrl,
+      data: chunk,
+      options: Options(
+        headers: {
+          'Tus-Resumable': AppConstants.tusVersion,
+          'Upload-Offset': offset.toString(),
+          'Content-Type': 'application/offset+octet-stream',
+          'Content-Length': chunk.length.toString(),
+        },
+        responseType: ResponseType.plain,
+      ),
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+    );
+  }
+
+  String _buildTusMetadata({required String filename, String? mimeType}) {
+    String b64(String v) => base64Encode(utf8.encode(v));
+    final parts = <String>[
+      'filename ${b64(filename)}',
+      if (mimeType != null) 'type ${b64(mimeType)}',
+    ];
+    return parts.join(',');
+  }
+}
+
+class _AttachmentMatch {
+  final String filename;
+  final String pathId;
+  final int createTime;
+  _AttachmentMatch({required this.filename, required this.pathId, required this.createTime});
 }

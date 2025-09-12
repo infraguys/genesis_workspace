@@ -6,8 +6,8 @@ class AttachmentTile extends StatelessWidget {
   final String extension;
   final int fileSize;
   final VoidCallback? onRemove;
+  final VoidCallback? onCancelUploading;
 
-  // добавлено:
   final bool isUploading;
   final int? bytesSent;
   final int? bytesTotal;
@@ -18,6 +18,7 @@ class AttachmentTile extends StatelessWidget {
     required this.extension,
     required this.fileSize,
     this.onRemove,
+    this.onCancelUploading,
     this.isUploading = false,
     this.bytesSent,
     this.bytesTotal,
@@ -91,12 +92,48 @@ class AttachmentTile extends StatelessWidget {
             ),
           ),
 
-          // Кнопка закрытия — справа сверху
+          // Оверлей прогресса (не перехватывает тапы)
+          if (isUploading)
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: true,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    color: theme.colorScheme.surface.withOpacity(0.65),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 28,
+                            width: 28,
+                            child: CircularProgressIndicator(strokeWidth: 3, value: progressValue),
+                          ),
+                          if (percentText != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              percentText,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Кнопка удаления / отмены
           Positioned(
             top: 4,
             right: 4,
             child: InkWell(
-              onTap: onRemove,
+              onTap: isUploading ? onCancelUploading : onRemove,
               borderRadius: BorderRadius.circular(10),
               child: Container(
                 padding: const EdgeInsets.all(4),
@@ -112,49 +149,13 @@ class AttachmentTile extends StatelessWidget {
                   ],
                 ),
                 child: Icon(
-                  Icons.close_rounded,
+                  isUploading ? Icons.stop_rounded : Icons.close_rounded,
                   size: 14,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: isUploading ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
           ),
-
-          // Оверлей прогресса загрузки
-          if (isUploading)
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  color: theme.colorScheme.surface.withOpacity(0.65),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 28,
-                          width: 28,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            value: progressValue, // null => indeterminate
-                          ),
-                        ),
-                        if (percentText != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            percentText,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: theme.colorScheme.onSurface,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );

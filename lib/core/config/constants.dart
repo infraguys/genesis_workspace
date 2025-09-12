@@ -6,6 +6,8 @@ class AppConstants {
 
   static const String appName = 'genesis_workspace';
 
+  static const String tusVersion = '1.0.0';
+
   static late String baseUrl;
 
   static final popularEmojis = [

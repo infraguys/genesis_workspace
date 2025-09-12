@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart' hide Headers;
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
@@ -68,5 +69,13 @@ abstract class MessagesApiClient {
   Future<UploadFileResponseDto> uploadFile(
     @Body() FormData formData,
     @SendProgress() ProgressCallback? onSendProgress,
+    @CancelRequest() CancelToken? cancelToken,
+  );
+
+  @POST('/tus')
+  @Headers({'Tus-Resumable': AppConstants.tusVersion})
+  Future<HttpResponse<void>> createUpload(
+    @Header('Upload-Length') String uploadLength,
+    @Header('Upload-Metadata') String uploadMetadata,
   );
 }
