@@ -108,114 +108,116 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: BlocBuilder<ChatCubit, ChatState>(
-          builder: (context, state) {
-            final theme = Theme.of(context);
-            final isLoading = state.userEntity == null;
+    return BlocConsumer<ChatCubit, ChatState>(
+      listenWhen: (prev, current) =>
+          prev.uploadFileError != current.uploadFileError ||
+          prev.uploadFileErrorName != current.uploadFileErrorName,
+      listener: (context, state) {
+        if (state.uploadFileError != null && state.uploadFileErrorName != null) {
+          ScaffoldMessenger.maybeOf(context)
+              ?.showSnackBar(
+                SnackBar(
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8,
+                    children: [
+                      Text(
+                        state.uploadFileErrorName!,
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                      ),
+                      Text(state.uploadFileError!),
+                    ],
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              )
+              .closed
+              .then((_) {
+                if (context.mounted) {
+                  context.read<ChatCubit>().clearUploadFileErrorCommon();
+                }
+              });
+        }
+      },
+      buildWhen: (prev, current) {
+        if (prev.uploadedFiles != current.uploadedFiles) {
+          return false;
+        } else {
+          return true;
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state.userEntity == null;
 
-            if (isLoading) {
-              return Skeletonizer(
-                child: Row(
+        return Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            title: Builder(
+              builder: (context) {
+                if (isLoading) {
+                  return Skeletonizer(
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        UserAvatar(),
+                        BlocBuilder<ChatCubit, ChatState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [Text("User Userov"), Text(context.t.online)],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+                  (state.userEntity!.presenceTimestamp * 1000).toInt(),
+                );
+                final timeAgo = timeAgoText(context, lastSeen);
+
+                Widget userStatus;
+                if (state.userEntity!.presenceStatus == PresenceStatus.active) {
+                  userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
+                } else {
+                  userStatus = Text(
+                    isJustNow(lastSeen)
+                        ? context.t.wasOnlineJustNow
+                        : context.t.wasOnline(time: timeAgo),
+                    style: theme.textTheme.labelSmall,
+                  );
+                }
+                if (state.typingId == state.userEntity!.userId) {
+                  userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
+                }
+
+                return Row(
                   spacing: 8,
                   children: [
-                    UserAvatar(),
+                    UserAvatar(avatarUrl: state.userEntity!.avatarUrl),
                     BlocBuilder<ChatCubit, ChatState>(
                       builder: (context, state) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [Text("User Userov"), Text(context.t.online)],
+                          children: [Text(state.userEntity!.fullName), userStatus],
                         );
                       },
                     ),
                   ],
-                ),
-              );
-            }
-
-            final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-              (state.userEntity!.presenceTimestamp * 1000).toInt(),
-            );
-            final timeAgo = timeAgoText(context, lastSeen);
-
-            Widget userStatus;
-            if (state.userEntity!.presenceStatus == PresenceStatus.active) {
-              userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
-            } else {
-              userStatus = Text(
-                isJustNow(lastSeen)
-                    ? context.t.wasOnlineJustNow
-                    : context.t.wasOnline(time: timeAgo),
-                style: theme.textTheme.labelSmall,
-              );
-            }
-            if (state.typingId == state.userEntity!.userId) {
-              userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
-            }
-
-            return Row(
-              spacing: 8,
-              children: [
-                UserAvatar(avatarUrl: state.userEntity!.avatarUrl),
-                BlocBuilder<ChatCubit, ChatState>(
-                  builder: (context, state) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [Text(state.userEntity!.fullName), userStatus],
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-      body: FutureBuilder(
-        future: _future,
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return Center(child: Text("Error"));
-            }
-          }
-          return BlocConsumer<ChatCubit, ChatState>(
-            listener: (context, state) {
-              if (state.uploadFileError != null && state.uploadFileErrorName != null) {
-                ScaffoldMessenger.maybeOf(context)
-                    ?.showSnackBar(
-                      SnackBar(
-                        content: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 8,
-                          children: [
-                            Text(
-                              state.uploadFileErrorName!,
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                            ),
-                            Text(state.uploadFileError!),
-                          ],
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    )
-                    .closed
-                    .then((_) {
-                      if (context.mounted) {
-                        context.read<ChatCubit>().clearUploadFileError();
-                      }
-                    });
+                );
+              },
+            ),
+          ),
+          body: FutureBuilder(
+            future: _future,
+            builder: (BuildContext context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error"));
+                }
               }
-            },
-            listenWhen: (prev, current) =>
-                prev.uploadFileError != current.uploadFileError ||
-                prev.uploadFileErrorName != current.uploadFileErrorName,
-            builder: (context, state) {
-              final bool isSendEnabled =
-                  _currentText.isNotEmpty ||
-                  (state.uploadedFiles.isNotEmpty &&
-                      !state.uploadedFiles.any((file) => file is UploadingFileEntity));
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
@@ -260,7 +262,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       isLoadingMore: state.isLoadingMore,
                                       controller: _controller,
                                       onRead: (id) {
-                                        context.read<ChatCubit>().scheduleMarkAsRead(id);
+                                        context.read<ChatCubit>().scheduleMarkAsReadCommon(id);
                                       },
                                       loadMore: context.read<ChatCubit>().loadMoreMessages,
                                       showTopic: true,
@@ -269,39 +271,54 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                     ),
                             ),
                           ),
-                    MessageInput(
-                      controller: _messageController,
-                      isMessagePending: state.isMessagePending,
-                      focusNode: _messageInputFocusNode,
-                      onSend: isSendEnabled
-                          ? () async {
-                              final content = _messageController.text;
-                              _messageController.clear();
-                              try {
-                                await context.read<ChatCubit>().sendMessage(
-                                  chatId: state.userEntity!.userId,
-                                  content: content,
-                                );
-                              } catch (e) {}
-                            }
-                          : null,
-                      onUploadFile: () async {
-                        await context.read<ChatCubit>().uploadFiles();
-                      },
-                      onRemoveFile: context.read<ChatCubit>().removeUploadedFile,
-                      onCancelUpload: context.read<ChatCubit>().cancelUpload,
-                      files: state.uploadedFiles,
-                      onUploadImage: () async {
-                        await context.read<ChatCubit>().uploadImage();
+                    BlocBuilder<ChatCubit, ChatState>(
+                      buildWhen: (prev, current) => (prev.uploadedFiles != current.uploadedFiles),
+                      builder: (context, inputState) {
+                        final bool hasText = _currentText.trim().isNotEmpty;
+                        final bool hasUploadingFiles = inputState.uploadedFiles.any(
+                          (file) => file is UploadingFileEntity,
+                        );
+                        final bool allFilesReady =
+                            inputState.uploadedFiles.every((file) => file is UploadedFileEntity) &&
+                            inputState.uploadedFiles.isNotEmpty;
+
+                        final bool isSendEnabled = hasText || (!hasUploadingFiles && allFilesReady);
+                        final bool isSendDisabled = !isSendEnabled;
+                        return MessageInput(
+                          controller: _messageController,
+                          isMessagePending: state.isMessagePending,
+                          focusNode: _messageInputFocusNode,
+                          onSend: isSendDisabled
+                              ? null
+                              : () async {
+                                  final content = _messageController.text;
+                                  _messageController.clear();
+                                  try {
+                                    await context.read<ChatCubit>().sendMessage(
+                                      chatId: inputState.userEntity!.userId,
+                                      content: content,
+                                    );
+                                  } catch (e) {}
+                                },
+                          onUploadFile: () async {
+                            await context.read<ChatCubit>().uploadFilesCommon();
+                          },
+                          onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
+                          onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
+                          files: inputState.uploadedFiles,
+                          onUploadImage: () async {
+                            await context.read<ChatCubit>().uploadImagesCommon();
+                          },
+                        );
                       },
                     ),
                   ],
                 ),
               );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
