@@ -151,45 +151,6 @@ class MessagesDataSourceImpl implements MessagesDataSource {
     }
   }
 
-  String _resolveLocation(String locationHeader) {
-    final String base = dio.options.baseUrl;
-    if (locationHeader.startsWith('http://') || locationHeader.startsWith('https://')) {
-      return locationHeader;
-    }
-    if (base.isEmpty) return locationHeader;
-    return Uri.parse(base).resolve(locationHeader).toString();
-  }
-
-  Future<_AttachmentMatch> _findInAttachments({
-    required String expectedName,
-    required int expectedSize,
-    CancelToken? cancelToken,
-  }) async {
-    final Response<Map<String, dynamic>> res = await dio.get<Map<String, dynamic>>(
-      '/attachments',
-      cancelToken: cancelToken,
-    );
-
-    final List<dynamic> items = (res.data?['attachments'] as List<dynamic>? ?? <dynamic>[]);
-    _AttachmentMatch? best;
-    for (final dynamic raw in items) {
-      final map = raw as Map<String, dynamic>;
-      final String name = map['name'] as String? ?? '';
-      final int size = map['size'] as int? ?? -1;
-      final String pathId = map['path_id'] as String? ?? '';
-      final int ts = map['create_time'] as int? ?? 0;
-      if (name == expectedName && size == expectedSize) {
-        if (best == null || ts > best!.createTime) {
-          best = _AttachmentMatch(filename: name, pathId: pathId, createTime: ts);
-        }
-      }
-    }
-    if (best == null) {
-      throw StateError('TUS: uploaded file not found in attachments');
-    }
-    return best!;
-  }
-
   Future<UploadFileResponseDto> _uploadViaTus({
     required String fileName,
     required int fileSize,
@@ -241,6 +202,45 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       result: 'success',
       msg: '',
     );
+  }
+
+  String _resolveLocation(String locationHeader) {
+    final String base = dio.options.baseUrl;
+    if (locationHeader.startsWith('http://') || locationHeader.startsWith('https://')) {
+      return locationHeader;
+    }
+    if (base.isEmpty) return locationHeader;
+    return Uri.parse(base).resolve(locationHeader).toString();
+  }
+
+  Future<_AttachmentMatch> _findInAttachments({
+    required String expectedName,
+    required int expectedSize,
+    CancelToken? cancelToken,
+  }) async {
+    final Response<Map<String, dynamic>> res = await dio.get<Map<String, dynamic>>(
+      '/attachments',
+      cancelToken: cancelToken,
+    );
+
+    final List<dynamic> items = (res.data?['attachments'] as List<dynamic>? ?? <dynamic>[]);
+    _AttachmentMatch? best;
+    for (final dynamic raw in items) {
+      final map = raw as Map<String, dynamic>;
+      final String name = map['name'] as String? ?? '';
+      final int size = map['size'] as int? ?? -1;
+      final String pathId = map['path_id'] as String? ?? '';
+      final int ts = map['create_time'] as int? ?? 0;
+      if (name == expectedName && size == expectedSize) {
+        if (best == null || ts > best!.createTime) {
+          best = _AttachmentMatch(filename: name, pathId: pathId, createTime: ts);
+        }
+      }
+    }
+    if (best == null) {
+      throw StateError('TUS: uploaded file not found in attachments');
+    }
+    return best!;
   }
 
   Future<int> _tusHead(String uploadUrl, CancelToken? cancelToken) async {

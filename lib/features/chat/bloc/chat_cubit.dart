@@ -296,7 +296,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     if (uploadTasks.isEmpty) return;
 
-    await Future.wait(uploadTasks, eagerError: false);
+    await Future.wait(uploadTasks, eagerError: true);
   }
 
   Future<void> _uploadSingleFile({
@@ -327,11 +327,13 @@ class ChatCubit extends Cubit<ChatState> {
       _replaceWithUploaded(localId, uploaded);
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) {
-        removeUploadedFile(localId); // отмена пользователем
+        removeUploadedFile(localId);
         return;
       }
       removeUploadedFile(localId);
-      inspect(e);
+      final errorMessage = e.response?.data['message'];
+      emit(state.copyWith(uploadFileError: errorMessage, uploadFileErrorName: platformFile.name));
+      rethrow;
     } catch (e, stackTrace) {
       removeUploadedFile(localId);
       inspect(e);
@@ -339,6 +341,17 @@ class ChatCubit extends Cubit<ChatState> {
     } finally {
       _uploadCancelTokens.remove(localId);
     }
+  }
+
+  void clearUploadFileError() {
+    state.uploadFileError = null;
+    state.uploadFileErrorName = null;
+    emit(
+      state.copyWith(
+        uploadFileError: state.uploadFileError,
+        uploadFileErrorName: state.uploadFileErrorName,
+      ),
+    );
   }
 
   void cancelUpload(String localId) {

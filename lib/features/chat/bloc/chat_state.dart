@@ -14,6 +14,8 @@ class ChatState {
   DmUserEntity? userEntity;
   List<UploadFileEntity> uploadedFiles;
   String uploadedFilesString;
+  String? uploadFileError;
+  String? uploadFileErrorName;
 
   ChatState({
     required this.messages,
@@ -29,6 +31,8 @@ class ChatState {
     this.userEntity,
     required this.uploadedFiles,
     required this.uploadedFilesString,
+    this.uploadFileError,
+    this.uploadFileErrorName,
   });
 
   ChatState copyWith({
@@ -45,6 +49,8 @@ class ChatState {
     DmUserEntity? userEntity,
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,
+    String? uploadFileError,
+    String? uploadFileErrorName,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -60,6 +66,8 @@ class ChatState {
       userEntity: userEntity ?? this.userEntity,
       uploadedFiles: uploadedFiles ?? this.uploadedFiles,
       uploadedFilesString: uploadedFilesString ?? this.uploadedFilesString,
+      uploadFileError: uploadFileError ?? this.uploadFileError,
+      uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
     );
   }
 }

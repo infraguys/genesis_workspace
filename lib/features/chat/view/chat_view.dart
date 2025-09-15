@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -178,7 +180,37 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
               return Center(child: Text("Error"));
             }
           }
-          return BlocBuilder<ChatCubit, ChatState>(
+          return BlocConsumer<ChatCubit, ChatState>(
+            listener: (context, state) {
+              if (state.uploadFileError != null && state.uploadFileErrorName != null) {
+                ScaffoldMessenger.maybeOf(context)
+                    ?.showSnackBar(
+                      SnackBar(
+                        content: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 8,
+                          children: [
+                            Text(
+                              state.uploadFileErrorName!,
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                            ),
+                            Text(state.uploadFileError!),
+                          ],
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    )
+                    .closed
+                    .then((_) {
+                      if (context.mounted) {
+                        context.read<ChatCubit>().clearUploadFileError();
+                      }
+                    });
+              }
+            },
+            listenWhen: (prev, current) =>
+                prev.uploadFileError != current.uploadFileError ||
+                prev.uploadFileErrorName != current.uploadFileErrorName,
             builder: (context, state) {
               final bool isSendEnabled =
                   _currentText.isNotEmpty ||
@@ -253,7 +285,9 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                               } catch (e) {}
                             }
                           : null,
-                      onUploadFile: context.read<ChatCubit>().uploadFiles,
+                      onUploadFile: () async {
+                        await context.read<ChatCubit>().uploadFiles();
+                      },
                       onRemoveFile: context.read<ChatCubit>().removeUploadedFile,
                       onCancelUpload: context.read<ChatCubit>().cancelUpload,
                       files: state.uploadedFiles,
