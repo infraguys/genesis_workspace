@@ -291,6 +291,9 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                       onRemoveFile: context.read<ChatCubit>().removeUploadedFile,
                       onCancelUpload: context.read<ChatCubit>().cancelUpload,
                       files: state.uploadedFiles,
+                      onUploadImage: () async {
+                        await context.read<ChatCubit>().uploadImage();
+                      },
                     ),
                   ],
                 ),

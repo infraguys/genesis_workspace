@@ -16,6 +16,7 @@ class MessageInput extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onSend;
   final VoidCallback onUploadFile;
+  final VoidCallback onUploadImage;
   final Function(String localId) onRemoveFile;
   final Function(String localId) onCancelUpload;
   final bool isMessagePending;
@@ -27,6 +28,7 @@ class MessageInput extends StatefulWidget {
     required this.controller,
     this.onSend,
     required this.onUploadFile,
+    required this.onUploadImage,
     required this.onRemoveFile,
     required this.onCancelUpload,
     required this.isMessagePending,
@@ -82,22 +84,21 @@ class _MessageInputState extends State<MessageInput> {
       final String fileExtension = extensionOf(entity.filename);
 
       return switch (entity) {
-        UploadingFileEntity(:final filename, :final size, :final bytesSent, :final bytesTotal) =>
-          AttachmentTile(
-            filename: filename,
-            extension: fileExtension,
-            fileSize: size,
-            isUploading: true,
-            bytesSent: bytesSent,
-            bytesTotal: bytesTotal,
-            onCancelUploading: () {
-              if (onCancelUploading != null) {
-                onCancelUploading(entity.localId);
-              }
-            },
-          ),
-        UploadedFileEntity(:final filename, :final size) => AttachmentTile(
-          filename: filename,
+        UploadingFileEntity(:final size, :final bytesSent, :final bytesTotal) => AttachmentTile(
+          file: entity,
+          extension: fileExtension,
+          fileSize: size,
+          isUploading: true,
+          bytesSent: bytesSent,
+          bytesTotal: bytesTotal,
+          onCancelUploading: () {
+            if (onCancelUploading != null) {
+              onCancelUploading(entity.localId);
+            }
+          },
+        ),
+        UploadedFileEntity(:final size) => AttachmentTile(
+          file: entity,
           extension: fileExtension,
           fileSize: size,
           isUploading: false,
@@ -163,7 +164,8 @@ class _MessageInputState extends State<MessageInput> {
                               iconData: Icons.image_outlined,
                               label: context.t.attachmentButton.image,
                               onTap: () {
-                                // context.read<MessagesCubit>().pickImage();
+                                Navigator.of(context).pop();
+                                widget.onUploadImage();
                               },
                             ),
                           ],

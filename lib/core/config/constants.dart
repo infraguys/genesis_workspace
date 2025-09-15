@@ -35,7 +35,7 @@ class AppConstants {
     baseUrl = url;
   }
 
-  static const Set<String> kImageExtensions = {
+  static const List<String> kImageExtensions = [
     'png',
     'jpg',
     'jpeg',
@@ -45,7 +45,7 @@ class AppConstants {
     'heic',
     'heif',
     'svg',
-  };
+  ];
 
   static const List<String> kNonImageAllowedExtensions = [
     'pdf',

@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/utils/url_updater_stub.dart'
     if (dart.library.html) 'package:genesis_workspace/core/utils/url_updater_web.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 String? validateEmail(String? value) {
@@ -181,6 +182,32 @@ Future<List<PlatformFile>?> pickNonImageFiles() async {
   });
 
   return platformFiles;
+}
+
+Future<List<XFile>> pickImages() async {
+  final bool useImagePicker =
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.macOS;
+
+  if (useImagePicker) {
+    final List<XFile> files = (await ImagePicker().pickMultiImage()) ?? const <XFile>[];
+    return files;
+  } else {
+    final FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: AppConstants.kImageExtensions,
+      withData: false,
+    );
+    if (result == null) return const <XFile>[];
+
+    return result.files
+        .where((file) => file.path != null)
+        .map((file) => XFile(file.path!, name: file.name))
+        .toList(growable: false);
+  }
 }
 
 String b64(String value) => base64Encode(utf8.encode(value));

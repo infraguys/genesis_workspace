@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
@@ -35,6 +36,7 @@ import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.
 import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 
 part 'chat_state.dart';
@@ -220,54 +222,55 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  void _onTypingEvents(TypingEventEntity event) {
-    final senderId = event.sender.userId;
-    final isWriting = event.op == TypingEventOp.start && senderId == state.chatId;
+  Future<void> uploadImage() async {
+    try {
+      final List<XFile> images = await pickImages();
+      if (images.isEmpty) return;
 
-    if (isWriting) {
-      state.typingId = senderId;
-    } else {
-      state.typingId = null;
-    }
-    emit(state.copyWith(typingId: state.typingId));
-  }
+      final List<Future<void>> uploadTasks = <Future<void>>[];
 
-  void _onMessageEvents(MessageEventEntity event) {
-    bool isThisChatMessage =
-        event.message.displayRecipient.any((recipient) => recipient.userId == state.myUserId) &&
-        event.message.displayRecipient.any((recipient) => recipient.userId == state.chatId);
-    if (isThisChatMessage) {
-      state.messages = [...state.messages, event.message];
-      emit(state.copyWith(messages: state.messages));
-    }
-  }
+      for (final XFile image in images) {
+        final int size = await image.length();
+        final String localId = generateFileLocalId(image.name);
 
-  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
-    for (var messageId in event.messages) {
-      if (event.flag == MessageFlag.read) {
-        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
-        final int index = state.messages.indexOf(message);
-        MessageEntity changedMessage = message.copyWith(
-          flags: [...message.flags ?? [], MessageFlag.read.name],
+        final bytes = await image.readAsBytes();
+
+        final UploadingFileEntity placeholder = UploadingFileEntity(
+          localId: localId,
+          filename: image.name,
+          size: size,
+          bytesSent: 0,
+          bytesTotal: size == 0 ? null : size,
+          type: UploadFileType.image,
+          path: image.path,
+          bytes: bytes,
         );
-        state.messages[index] = changedMessage;
+        _addUploadingFile(placeholder);
+
+        uploadTasks.add(_uploadSingleImage(imageFile: image, localId: localId));
       }
-      if (event.flag == MessageFlag.starred) {
-        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
-        final int index = state.messages.indexOf(message);
-        if (event.op == UpdateMessageFlagsOp.add) {
-          MessageEntity changedMessage = message.copyWith(
-            flags: [...message.flags ?? [], MessageFlag.starred.name],
-          );
-          state.messages[index] = changedMessage;
-        } else if (event.op == UpdateMessageFlagsOp.remove) {
-          MessageEntity changedMessage = message;
-          changedMessage.flags?.remove(MessageFlag.starred.name);
-          state.messages[index] = changedMessage;
-        }
-      }
+
+      await Future.wait(uploadTasks, eagerError: true);
+    } catch (e) {
+      inspect(e);
     }
-    emit(state.copyWith(messages: state.messages));
+  }
+
+  Future<void> _uploadSingleImage({required XFile imageFile, required String localId}) async {
+    final int fileSize = await imageFile.length();
+
+    final PlatformFile platformFile = PlatformFile(
+      name: imageFile.name,
+      size: fileSize,
+      path: imageFile.path,
+      bytes: await imageFile.readAsBytes(),
+    );
+
+    return _uploadSingleFile(
+      platformFile: platformFile,
+      localId: localId,
+      type: UploadFileType.image,
+    );
   }
 
   Future<void> uploadFiles() async {
@@ -278,7 +281,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     for (final PlatformFile platformFile in platformFiles) {
       final String extension = extensionOf(platformFile.name).toLowerCase();
-      if (AppConstants.kImageExtensions.contains(extension)) continue;
+      if (AppConstants.kImageExtensions.contains(extension)) return;
 
       final String localId = generateFileLocalId(platformFile.name);
 
@@ -288,10 +291,15 @@ class ChatCubit extends Cubit<ChatState> {
         size: platformFile.size,
         bytesSent: 0,
         bytesTotal: platformFile.size == 0 ? null : platformFile.size,
+        type: UploadFileType.file,
+        path: platformFile.path ?? '',
+        bytes: platformFile.bytes ?? Uint8List(0),
       );
       _addUploadingFile(placeholder);
 
-      uploadTasks.add(_uploadSingleFile(platformFile: platformFile, localId: localId));
+      uploadTasks.add(
+        _uploadSingleFile(platformFile: platformFile, localId: localId, type: UploadFileType.file),
+      );
     }
 
     if (uploadTasks.isEmpty) return;
@@ -302,6 +310,7 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> _uploadSingleFile({
     required PlatformFile platformFile,
     required String localId,
+    required UploadFileType type,
   }) async {
     final CancelToken cancelToken = CancelToken();
     _uploadCancelTokens[localId] = cancelToken;
@@ -323,6 +332,9 @@ class ChatCubit extends Cubit<ChatState> {
       final UploadedFileEntity uploaded = response.toUploadedFileEntity(
         localId: localId,
         size: platformFile.size,
+        type: type,
+        path: platformFile.path ?? '',
+        bytes: platformFile.bytes ?? Uint8List(0),
       );
       _replaceWithUploaded(localId, uploaded);
     } on DioException catch (e) {
@@ -424,6 +436,56 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (e) {
       // Optional: retry or log error
     }
+  }
+
+  void _onTypingEvents(TypingEventEntity event) {
+    final senderId = event.sender.userId;
+    final isWriting = event.op == TypingEventOp.start && senderId == state.chatId;
+
+    if (isWriting) {
+      state.typingId = senderId;
+    } else {
+      state.typingId = null;
+    }
+    emit(state.copyWith(typingId: state.typingId));
+  }
+
+  void _onMessageEvents(MessageEventEntity event) {
+    bool isThisChatMessage =
+        event.message.displayRecipient.any((recipient) => recipient.userId == state.myUserId) &&
+        event.message.displayRecipient.any((recipient) => recipient.userId == state.chatId);
+    if (isThisChatMessage) {
+      state.messages = [...state.messages, event.message];
+      emit(state.copyWith(messages: state.messages));
+    }
+  }
+
+  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
+    for (var messageId in event.messages) {
+      if (event.flag == MessageFlag.read) {
+        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        final int index = state.messages.indexOf(message);
+        MessageEntity changedMessage = message.copyWith(
+          flags: [...message.flags ?? [], MessageFlag.read.name],
+        );
+        state.messages[index] = changedMessage;
+      }
+      if (event.flag == MessageFlag.starred) {
+        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        final int index = state.messages.indexOf(message);
+        if (event.op == UpdateMessageFlagsOp.add) {
+          MessageEntity changedMessage = message.copyWith(
+            flags: [...message.flags ?? [], MessageFlag.starred.name],
+          );
+          state.messages[index] = changedMessage;
+        } else if (event.op == UpdateMessageFlagsOp.remove) {
+          MessageEntity changedMessage = message;
+          changedMessage.flags?.remove(MessageFlag.starred.name);
+          state.messages[index] = changedMessage;
+        }
+      }
+    }
+    emit(state.copyWith(messages: state.messages));
   }
 
   void _onReactionEvents(ReactionEventEntity event) {

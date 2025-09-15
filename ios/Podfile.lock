@@ -43,6 +43,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_secure_storage (6.0.0):
     - Flutter
+  - image_picker_ios (0.0.1):
+    - Flutter
   - in_app_idle_detector (0.0.1):
     - Flutter
   - just_audio (0.0.1):
@@ -108,6 +110,7 @@ DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - in_app_idle_detector (from `.symlinks/plugins/in_app_idle_detector/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - keyboard_height_plugin (from `.symlinks/plugins/keyboard_height_plugin/ios`)
@@ -142,6 +145,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
   in_app_idle_detector:
     :path: ".symlinks/plugins/in_app_idle_detector/ios"
   just_audio:
@@ -176,6 +181,7 @@ SPEC CHECKSUMS:
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   in_app_idle_detector: 675286f53111e6516e5f176baa12b2442844439e
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   keyboard_height_plugin: ef70a8181b29f27670e9e2450814ca6b6dc05b05

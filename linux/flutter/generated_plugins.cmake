@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_linux
   emoji_picker_flutter
+  file_selector_linux
   flutter_secure_storage_linux
   in_app_idle_detector
   sqlite3_flutter_libs
