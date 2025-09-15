@@ -66,6 +66,7 @@ class TranslationsRu implements Translations {
 	@override String get no_recent_dialogs => 'Нет недавних чатов';
 	@override String get error => 'Ошибка';
 	@override late final _TranslationsMessageActionsRu message_actions = _TranslationsMessageActionsRu._(_root);
+	@override late final _TranslationsAttachmentButtonRu attachment_button = _TranslationsAttachmentButtonRu._(_root);
 }
 
 // Path: auth
@@ -75,27 +76,28 @@ class _TranslationsAuthRu implements TranslationsAuthEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
-	@override String get emailHint => 'email@example.com';
-	@override String get emailLabel => 'Эл. почта';
-	@override String get passwordHint => 'cucumber123';
-	@override String get showPassword => 'Показать пароль';
-	@override String get hidePassword => 'Скрыть пароль';
+	@override String get email_hint => 'email@example.com';
+	@override String get email_label => 'Email';
+	@override String get password_hint => 'cucumber123';
+	@override String get show_password => 'Показать пароль';
+	@override String get hide_password => 'Скрыть пароль';
 	@override String get login_with => 'Войти через {realm_name}';
-	@override String get paste_your_code_here => 'Вставьте код здесь';
-	@override String get enter_or_paste_code_title => 'Введите или вставьте код для входа';
-	@override String get code_usage_hint => 'Мы используем его, чтобы завершить вход в систему.';
+	@override String get paste_your_code_here => 'Вставьте код';
+	@override String get enter_or_paste_code_title => 'Введите или вставьте ваш код входа';
+	@override String get code_usage_hint => 'Мы используем его, чтобы завершить вход.';
 	@override String get token_label => 'Токен';
-	@override String get token_hint => 'Ваш код здесь…';
+	@override String get token_hint => 'Ваш код…';
 	@override String get paste => 'Вставить';
 	@override String get clear => 'Очистить';
-	@override String get pasteBaseUrlHere => 'Вставьте Base URL';
-	@override String get enterOrPasteBaseUrlTitle => 'Введите или вставьте адрес сервера';
-	@override String get baseUrlUsageHint => 'Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.';
-	@override String get baseUrlLabel => 'Base URL';
-	@override String get baseUrlHint => 'https://your-domain.com';
-	@override String get baseUrlInvalid => 'Некорректный адрес. Используйте http или https.';
-	@override String get saveAndContinue => 'Сохранить и продолжить';
-	@override String get logoutFromOrganization => 'Выйти из организации';
+	@override String get paste_base_url_here => 'Вставьте Base URL';
+	@override String get enter_or_paste_base_url_title => 'Введите или вставьте адрес сервера';
+	@override String get base_url_usage_hint => 'Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.';
+	@override String get base_url_label => 'Base URL';
+	@override String get base_url_hint => 'https://your-domain.com';
+	@override String get base_url_invalid => 'Некорректный адрес. Используйте http или https.';
+	@override String get save_and_continue => 'Сохранить и продолжить';
+	@override String get logout_from_organization => 'Выйти из организации';
+	@override String get current_base_url => 'Текущий сервер';
 }
 
 // Path: nav_bar
@@ -231,32 +233,44 @@ class _TranslationsMessageActionsRu implements TranslationsMessageActionsEn {
 	@override String get star => 'Отметить это сообщение';
 }
 
+// Path: attachment_button
+class _TranslationsAttachmentButtonRu implements TranslationsAttachmentButtonEn {
+	_TranslationsAttachmentButtonRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get file => 'Выбрать файл';
+	@override String get image => 'Выбрать изображение';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsRu {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
-			case 'auth.emailHint': return 'email@example.com';
-			case 'auth.emailLabel': return 'Эл. почта';
-			case 'auth.passwordHint': return 'cucumber123';
-			case 'auth.showPassword': return 'Показать пароль';
-			case 'auth.hidePassword': return 'Скрыть пароль';
+			case 'auth.email_hint': return 'email@example.com';
+			case 'auth.email_label': return 'Email';
+			case 'auth.password_hint': return 'cucumber123';
+			case 'auth.show_password': return 'Показать пароль';
+			case 'auth.hide_password': return 'Скрыть пароль';
 			case 'auth.login_with': return 'Войти через {realm_name}';
-			case 'auth.paste_your_code_here': return 'Вставьте код здесь';
-			case 'auth.enter_or_paste_code_title': return 'Введите или вставьте код для входа';
-			case 'auth.code_usage_hint': return 'Мы используем его, чтобы завершить вход в систему.';
+			case 'auth.paste_your_code_here': return 'Вставьте код';
+			case 'auth.enter_or_paste_code_title': return 'Введите или вставьте ваш код входа';
+			case 'auth.code_usage_hint': return 'Мы используем его, чтобы завершить вход.';
 			case 'auth.token_label': return 'Токен';
-			case 'auth.token_hint': return 'Ваш код здесь…';
+			case 'auth.token_hint': return 'Ваш код…';
 			case 'auth.paste': return 'Вставить';
 			case 'auth.clear': return 'Очистить';
-			case 'auth.pasteBaseUrlHere': return 'Вставьте Base URL';
-			case 'auth.enterOrPasteBaseUrlTitle': return 'Введите или вставьте адрес сервера';
-			case 'auth.baseUrlUsageHint': return 'Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.';
-			case 'auth.baseUrlLabel': return 'Base URL';
-			case 'auth.baseUrlHint': return 'https://your-domain.com';
-			case 'auth.baseUrlInvalid': return 'Некорректный адрес. Используйте http или https.';
-			case 'auth.saveAndContinue': return 'Сохранить и продолжить';
-			case 'auth.logoutFromOrganization': return 'Выйти из организации';
+			case 'auth.paste_base_url_here': return 'Вставьте Base URL';
+			case 'auth.enter_or_paste_base_url_title': return 'Введите или вставьте адрес сервера';
+			case 'auth.base_url_usage_hint': return 'Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.';
+			case 'auth.base_url_label': return 'Base URL';
+			case 'auth.base_url_hint': return 'https://your-domain.com';
+			case 'auth.base_url_invalid': return 'Некорректный адрес. Используйте http или https.';
+			case 'auth.save_and_continue': return 'Сохранить и продолжить';
+			case 'auth.logout_from_organization': return 'Выйти из организации';
+			case 'auth.current_base_url': return 'Текущий сервер';
 			case 'password_cant_be_empty': return 'Пароль не может быть пустым';
 			case 'password': return 'Пароль';
 			case 'login': return 'Войти';
@@ -319,6 +333,8 @@ extension on TranslationsRu {
 			case 'message_actions.quote': return 'Цитировать это сообщение';
 			case 'message_actions.delete': return 'Удалить это сообщение';
 			case 'message_actions.star': return 'Отметить это сообщение';
+			case 'attachment_button.file': return 'Выбрать файл';
+			case 'attachment_button.image': return 'Выбрать изображение';
 			default: return null;
 		}
 	}
