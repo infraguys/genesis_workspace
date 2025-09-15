@@ -109,7 +109,7 @@ String extensionOf(String fileName) {
 }
 
 bool isImageExtension(String extension) {
-  const Set<String> imageExts = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'heic', 'bmp', 'svg'};
+  const imageExts = AppConstants.kImageExtensions;
   return imageExts.contains(extension);
 }
 

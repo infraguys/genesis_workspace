@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
@@ -279,7 +280,6 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   }
 
   String _buildTusMetadata({required String filename, String? mimeType}) {
-    String b64(String v) => base64Encode(utf8.encode(v));
     final parts = <String>[
       'filename ${b64(filename)}',
       if (mimeType != null) 'type ${b64(mimeType)}',

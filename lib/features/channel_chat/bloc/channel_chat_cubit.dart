@@ -447,26 +447,6 @@ class ChannelChatCubit extends Cubit<ChannelChatState> {
     emit(state.copyWith(isMessagePending: value));
   }
 
-  Future<UploadFileResponseEntity> uploadFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      withData: true,
-    );
-    if (result != null) {
-      try {
-        final body = UploadFileRequestEntity(file: result.files.single);
-        final response = await _uploadFileUseCase.call(body);
-        inspect(response);
-        return response;
-      } catch (e) {
-        inspect(e);
-        rethrow;
-      }
-    } else {
-      throw Exception('No file selected');
-    }
-  }
-
   void scheduleMarkAsRead(int messageId) {
     state.pendingToMarkAsRead.add(messageId);
     final MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);

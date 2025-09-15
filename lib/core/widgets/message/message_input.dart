@@ -46,6 +46,41 @@ class _MessageInputState extends State<MessageInput> {
   final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
   final GlobalKey<CustomPopupState> attachmentsKey = GlobalKey<CustomPopupState>();
 
+  Widget _buildAttachmentTile(
+    UploadFileEntity entity, {
+    Function(String localId)? onRemoveUploaded,
+    Function(String localId)? onCancelUploading,
+  }) {
+    final String fileExtension = extensionOf(entity.filename);
+
+    return switch (entity) {
+      UploadingFileEntity(:final size, :final bytesSent, :final bytesTotal) => AttachmentTile(
+        file: entity,
+        extension: fileExtension,
+        fileSize: size,
+        isUploading: true,
+        bytesSent: bytesSent,
+        bytesTotal: bytesTotal,
+        onCancelUploading: () {
+          if (onCancelUploading != null) {
+            onCancelUploading(entity.localId);
+          }
+        },
+      ),
+      UploadedFileEntity(:final size) => AttachmentTile(
+        file: entity,
+        extension: fileExtension,
+        fileSize: size,
+        isUploading: false,
+        onRemove: () {
+          if (onRemoveUploaded != null) {
+            onRemoveUploaded(entity.localId);
+          }
+        },
+      ),
+    };
+  }
+
   @override
   void initState() {
     super.initState();
@@ -75,42 +110,6 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    Widget buildAttachmentTile(
-      UploadFileEntity entity, {
-      Function(String localId)? onRemoveUploaded,
-      Function(String localId)? onCancelUploading,
-    }) {
-      final String fileExtension = extensionOf(entity.filename);
-
-      return switch (entity) {
-        UploadingFileEntity(:final size, :final bytesSent, :final bytesTotal) => AttachmentTile(
-          file: entity,
-          extension: fileExtension,
-          fileSize: size,
-          isUploading: true,
-          bytesSent: bytesSent,
-          bytesTotal: bytesTotal,
-          onCancelUploading: () {
-            if (onCancelUploading != null) {
-              onCancelUploading(entity.localId);
-            }
-          },
-        ),
-        UploadedFileEntity(:final size) => AttachmentTile(
-          file: entity,
-          extension: fileExtension,
-          fileSize: size,
-          isUploading: false,
-          onRemove: () {
-            if (onRemoveUploaded != null) {
-              onRemoveUploaded(entity.localId);
-            }
-          },
-        ),
-      };
-    }
-
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
       builder: (context, emojiState) {
         return Column(
@@ -126,7 +125,7 @@ class _MessageInputState extends State<MessageInput> {
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     final UploadFileEntity entity = widget.files![index];
-                    return buildAttachmentTile(
+                    return _buildAttachmentTile(
                       entity,
                       onRemoveUploaded: widget.onRemoveFile,
                       onCancelUploading: widget.onCancelUpload,
