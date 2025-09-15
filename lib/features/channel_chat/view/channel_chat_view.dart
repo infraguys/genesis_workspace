@@ -136,7 +136,37 @@ class _ChannelChatViewState extends State<ChannelChatView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChannelChatCubit, ChannelChatState>(
+    return BlocConsumer<ChannelChatCubit, ChannelChatState>(
+      listener: (context, state) {
+        if (state.uploadFileError != null && state.uploadFileErrorName != null) {
+          ScaffoldMessenger.maybeOf(context)
+              ?.showSnackBar(
+                SnackBar(
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8,
+                    children: [
+                      Text(
+                        state.uploadFileErrorName!,
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                      ),
+                      Text(state.uploadFileError!),
+                    ],
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              )
+              .closed
+              .then((_) {
+                if (context.mounted) {
+                  context.read<ChannelChatCubit>().clearUploadFileError();
+                }
+              });
+        }
+      },
+      listenWhen: (prev, current) =>
+          prev.uploadFileError != current.uploadFileError ||
+          prev.uploadFileErrorName != current.uploadFileErrorName,
       builder: (context, state) {
         return Scaffold(
           resizeToAvoidBottomInset: false,
@@ -237,10 +267,15 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                             } catch (e) {}
                           }
                         : null,
-                    onUploadFile: context.read<ChannelChatCubit>().uploadFile,
-                    onRemoveFile: (_) {},
-                    onCancelUpload: (_) {},
-                    onUploadImage: () {},
+                    onUploadFile: () async {
+                      await context.read<ChannelChatCubit>().uploadFiles();
+                    },
+                    onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFile,
+                    onCancelUpload: context.read<ChannelChatCubit>().cancelUpload,
+                    files: state.uploadedFiles,
+                    onUploadImage: () async {
+                      await context.read<ChannelChatCubit>().uploadImage();
+                    },
                   ),
                 ],
               );

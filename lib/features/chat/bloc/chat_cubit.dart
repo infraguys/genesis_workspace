@@ -66,6 +66,8 @@ class ChatCubit extends Cubit<ChatState> {
           userEntity: null,
           uploadedFiles: [],
           uploadedFilesString: '',
+          uploadFileErrorName: null,
+          uploadFileError: null,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
