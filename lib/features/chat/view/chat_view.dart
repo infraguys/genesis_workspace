@@ -289,8 +289,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                       onPerformDrop: (PerformDropEvent event) async {
                         setState(() => isDropOver = false);
                         final List<PlatformFile> droppedFiles = await toPlatformFiles(event);
-                        await context.read<ChatCubit>().uploadFilesCommon(
-                          droppedFiles: droppedFiles,
+                        unawaited(
+                          context.read<ChatCubit>().uploadFilesCommon(droppedFiles: droppedFiles),
                         );
                       },
                       child: BlocBuilder<ChatCubit, ChatState>(
