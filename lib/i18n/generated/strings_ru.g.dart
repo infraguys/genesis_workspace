@@ -63,6 +63,7 @@ class TranslationsRu extends Translations {
 	@override String get error => 'Ошибка';
 	@override late final TranslationsMessageActionsRu messageActions = TranslationsMessageActionsRu._(_root);
 	@override late final TranslationsAttachmentButtonRu attachmentButton = TranslationsAttachmentButtonRu._(_root);
+	@override String get dropFilesToUpload => 'Отпустите файлы, чтобы загрузить';
 }
 
 // Path: auth

@@ -268,7 +268,7 @@ class _MessageInputState extends State<MessageInput> {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    "Отпустите файлы, чтобы загрузить",
+                                    context.t.dropFilesToUpload,
                                     textAlign: TextAlign.center,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: theme.colorScheme.primary,
