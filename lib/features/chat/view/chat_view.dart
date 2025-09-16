@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -301,10 +302,12 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                   _messageController.clear();
                                   try {
                                     await context.read<ChatCubit>().sendMessage(
-                                      chatId: inputState.userEntity!.userId,
+                                      chatId: state.userEntity!.userId,
                                       content: content,
                                     );
-                                  } catch (e) {}
+                                  } catch (e) {
+                                    inspect(e);
+                                  }
                                 }
                               : null,
                           onUploadFile: () async {
