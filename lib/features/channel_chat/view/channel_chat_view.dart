@@ -287,9 +287,9 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                 _messageController.clear();
                                 try {
                                   await context.read<ChannelChatCubit>().sendMessage(
-                                    streamId: inputState.channel!.streamId,
+                                    streamId: state.channel!.streamId,
                                     content: content,
-                                    topic: inputState.topic?.name,
+                                    topic: state.topic?.name,
                                   );
                                 } catch (e) {}
                               }

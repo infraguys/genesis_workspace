@@ -20,7 +20,6 @@ import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChatView extends StatefulWidget {
   final int userId;
@@ -41,7 +40,6 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   final FocusNode _messageInputFocusNode = FocusNode();
 
   String _currentText = '';
-  bool isDropOver = false;
 
   Future<void> _onTextChanged() async {
     setState(() {
@@ -294,56 +292,33 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                         final bool isSendEnabled =
                             canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
 
-                        return DropRegion(
-                          formats: Formats.standardFormats,
-                          onDropOver: (DropOverEvent event) async {
-                            print('drop over');
-                            inspect(event);
-                            if (!isDropOver) {
-                              setState(() {
-                                isDropOver = true;
-                              });
-                            }
-                            return DropOperation.copy;
-                          },
-                          onPerformDrop: (PerformDropEvent event) async {
-                            print('drop perform');
-                            inspect(event);
-                          },
-                          onDropLeave: (_) {
-                            if (isDropOver) {
-                              setState(() {
-                                isDropOver = false;
-                              });
-                            }
-                          },
-                          child: MessageInput(
-                            controller: _messageController,
-                            isMessagePending: state.isMessagePending,
-                            focusNode: _messageInputFocusNode,
-                            isDropOver: isDropOver,
-                            onSend: isSendEnabled
-                                ? () async {
-                                    final content = _messageController.text;
-                                    _messageController.clear();
-                                    try {
-                                      await context.read<ChatCubit>().sendMessage(
-                                        chatId: inputState.userEntity!.userId,
-                                        content: content,
-                                      );
-                                    } catch (e) {}
+                        return MessageInput(
+                          controller: _messageController,
+                          isMessagePending: state.isMessagePending,
+                          focusNode: _messageInputFocusNode,
+                          onSend: isSendEnabled
+                              ? () async {
+                                  final content = _messageController.text;
+                                  _messageController.clear();
+                                  try {
+                                    await context.read<ChatCubit>().sendMessage(
+                                      chatId: state.userEntity!.userId,
+                                      content: content,
+                                    );
+                                  } catch (e) {
+                                    inspect(e);
                                   }
-                                : null,
-                            onUploadFile: () async {
-                              await context.read<ChatCubit>().uploadFilesCommon();
-                            },
-                            onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
-                            onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
-                            files: inputState.uploadedFiles,
-                            onUploadImage: () async {
-                              await context.read<ChatCubit>().uploadImagesCommon();
-                            },
-                          ),
+                                }
+                              : null,
+                          onUploadFile: () async {
+                            await context.read<ChatCubit>().uploadFilesCommon();
+                          },
+                          onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
+                          onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
+                          files: inputState.uploadedFiles,
+                          onUploadImage: () async {
+                            await context.read<ChatCubit>().uploadImagesCommon();
+                          },
                         );
                       },
                     ),
