@@ -22,6 +22,7 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatView extends StatefulWidget {
   final int userId;
@@ -289,9 +290,38 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                       onPerformDrop: (PerformDropEvent event) async {
                         setState(() => isDropOver = false);
                         final List<PlatformFile> droppedFiles = await toPlatformFiles(event);
-                        unawaited(
-                          context.read<ChatCubit>().uploadFilesCommon(droppedFiles: droppedFiles),
-                        );
+
+                        // Split into image files and other files
+                        final List<PlatformFile> nonImageFiles = <PlatformFile>[];
+                        final List<XFile> imageFiles = <XFile>[];
+
+                        for (final pf in droppedFiles) {
+                          final ext = extensionOf(pf.name);
+                          if (isImageExtension(ext)) {
+                            if (pf.path != null && pf.path!.isNotEmpty) {
+                              imageFiles.add(XFile(pf.path!, name: pf.name));
+                            } else if (pf.bytes != null) {
+                              imageFiles.add(XFile.fromData(pf.bytes!, name: pf.name));
+                            }
+                          } else {
+                            nonImageFiles.add(pf);
+                          }
+                        }
+
+                        if (nonImageFiles.isNotEmpty) {
+                          unawaited(
+                            context
+                                .read<ChatCubit>()
+                                .uploadFilesCommon(droppedFiles: nonImageFiles),
+                          );
+                        }
+                        if (imageFiles.isNotEmpty) {
+                          unawaited(
+                            context
+                                .read<ChatCubit>()
+                                .uploadImagesCommon(droppedImages: imageFiles),
+                          );
+                        }
                       },
                       child: BlocBuilder<ChatCubit, ChatState>(
                         buildWhen: (prev, current) => (prev.uploadedFiles != current.uploadedFiles),
