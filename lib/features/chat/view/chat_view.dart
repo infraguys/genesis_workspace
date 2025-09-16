@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +21,11 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:genesis_workspace/core/utils/web_drop.dart';
 
 class ChatView extends StatefulWidget {
   final int userId;
@@ -44,6 +47,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
   String _currentText = '';
   bool isDropOver = false;
+  final GlobalKey _dropAreaKey = GlobalKey();
+  RemoveDropHandlers? _removeWebDnD;
 
   Future<void> _onTextChanged() async {
     setState(() {
@@ -98,6 +103,37 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
     _messageController.addListener(_onTextChanged);
     super.initState();
+    if (kIsWeb) {
+      _removeWebDnD = attachWebDropHandlersForKey(
+        targetKey: _dropAreaKey,
+        onIsOverChange: (over) {
+          if (isDropOver != over) {
+            setState(() => isDropOver = over);
+          }
+        },
+        onDrop: (dropped) async {
+          setState(() => isDropOver = false);
+          final nonImageFiles = <PlatformFile>[];
+          final imageFiles = <XFile>[];
+          for (final item in dropped) {
+            final name = item.name;
+            final ext = extensionOf(name);
+            final bytes = Uint8List.fromList(item.bytes);
+            if (isImageExtension(ext)) {
+              imageFiles.add(XFile.fromData(bytes, name: name));
+            } else {
+              nonImageFiles.add(PlatformFile(name: name, size: item.size, bytes: bytes));
+            }
+          }
+          if (nonImageFiles.isNotEmpty) {
+            unawaited(context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles));
+          }
+          if (imageFiles.isNotEmpty) {
+            unawaited(context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles));
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -107,6 +143,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     _messageInputFocusNode.dispose();
+    _removeWebDnD?.call();
     super.dispose();
   }
 
@@ -310,16 +347,14 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
                         if (nonImageFiles.isNotEmpty) {
                           unawaited(
-                            context
-                                .read<ChatCubit>()
-                                .uploadFilesCommon(droppedFiles: nonImageFiles),
+                            context.read<ChatCubit>().uploadFilesCommon(
+                              droppedFiles: nonImageFiles,
+                            ),
                           );
                         }
                         if (imageFiles.isNotEmpty) {
                           unawaited(
-                            context
-                                .read<ChatCubit>()
-                                .uploadImagesCommon(droppedImages: imageFiles),
+                            context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
                           );
                         }
                       },
@@ -344,10 +379,12 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                           final bool isSendEnabled =
                               canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
 
-                          return MessageInput(
-                            controller: _messageController,
-                            isMessagePending: state.isMessagePending,
-                            focusNode: _messageInputFocusNode,
+                          return Container(
+                            key: _dropAreaKey,
+                            child: MessageInput(
+                              controller: _messageController,
+                              isMessagePending: state.isMessagePending,
+                              focusNode: _messageInputFocusNode,
                             onSend: isSendEnabled
                                 ? () async {
                                     final content = _messageController.text;
@@ -368,10 +405,11 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                             onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
                             onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
                             files: inputState.uploadedFiles,
-                            onUploadImage: () async {
-                              await context.read<ChatCubit>().uploadImagesCommon();
-                            },
-                            isDropOver: isDropOver,
+                              onUploadImage: () async {
+                                await context.read<ChatCubit>().uploadImagesCommon();
+                              },
+                              isDropOver: isDropOver,
+                            ),
                           );
                         },
                       ),
