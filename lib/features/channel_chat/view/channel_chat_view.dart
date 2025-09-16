@@ -260,23 +260,28 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                   BlocBuilder<ChannelChatCubit, ChannelChatState>(
                     buildWhen: (prev, current) => prev.uploadedFiles != current.uploadedFiles,
                     builder: (context, inputState) {
-                      final bool hasText = _currentText.trim().isNotEmpty;
-                      final bool hasUploadingFiles = inputState.uploadedFiles.any(
+                      final String currentText = _currentText.trim();
+                      final bool hasText = currentText.isNotEmpty;
+
+                      final files = inputState.uploadedFiles;
+                      final bool hasFiles = files.isNotEmpty;
+                      final bool hasUploadingFiles = files.any(
                         (file) => file is UploadingFileEntity,
                       );
-                      final bool allFilesReady =
-                          inputState.uploadedFiles.every((file) => file is UploadedFileEntity) &&
-                          inputState.uploadedFiles.isNotEmpty;
 
-                      final bool isSendEnabled = hasText || (!hasUploadingFiles && allFilesReady);
-                      final bool isSendDisabled = !isSendEnabled;
+                      final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
+                      final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
+                      final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
+
+                      final bool isSendEnabled =
+                          canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+
                       return MessageInput(
                         controller: _messageController,
                         isMessagePending: state.isMessagePending,
                         focusNode: _messageInputFocusNode,
-                        onSend: isSendDisabled
-                            ? null
-                            : () async {
+                        onSend: isSendEnabled
+                            ? () async {
                                 final content = _messageController.text;
                                 _messageController.clear();
                                 try {
@@ -286,7 +291,8 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                     topic: inputState.topic?.name,
                                   );
                                 } catch (e) {}
-                              },
+                              }
+                            : null,
                         onUploadFile: () async {
                           await context.read<ChannelChatCubit>().uploadFilesCommon();
                         },
