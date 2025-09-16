@@ -107,6 +107,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get error => 'Error';
 
 	late final TranslationsMessageActionsEn messageActions = TranslationsMessageActionsEn.internal(_root);
+	late final TranslationsAttachmentButtonEn attachmentButton = TranslationsAttachmentButtonEn.internal(_root);
 }
 
 // Path: auth
@@ -365,4 +366,19 @@ class TranslationsMessageActionsEn {
 
 	/// en: 'Star this message'
 	String get star => 'Star this message';
+}
+
+// Path: attachmentButton
+class TranslationsAttachmentButtonEn {
+	TranslationsAttachmentButtonEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Pick a file'
+	String get file => 'Pick a file';
+
+	/// en: 'Pick an image'
+	String get image => 'Pick an image';
 }

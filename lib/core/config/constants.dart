@@ -6,6 +6,8 @@ class AppConstants {
 
   static const String appName = 'genesis_workspace';
 
+  static const String tusVersion = '1.0.0';
+
   static late String baseUrl;
 
   static final popularEmojis = [
@@ -32,6 +34,34 @@ class AppConstants {
   static setBaseUrl(String url) {
     baseUrl = url;
   }
+
+  static const List<String> kImageExtensions = [
+    'png',
+    'jpg',
+    'jpeg',
+    'gif',
+    'webp',
+    'bmp',
+    'heic',
+    'heif',
+    'svg',
+  ];
+
+  static const List<String> kNonImageAllowedExtensions = [
+    'pdf',
+    'txt',
+    'md',
+    'doc',
+    'docx',
+    'xls',
+    'xlsx',
+    'csv',
+    'zip',
+    'rar',
+    '7z',
+    'json',
+    'xml',
+  ];
 }
 
 class SharedPrefsKeys {

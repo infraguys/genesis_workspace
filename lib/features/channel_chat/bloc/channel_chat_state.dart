@@ -12,6 +12,10 @@ class ChannelChatState {
   TypingEventOp selfTypingOp;
   Set<int> pendingToMarkAsRead;
   bool isMessagesPending;
+  List<UploadFileEntity> uploadedFiles;
+  String uploadedFilesString;
+  String? uploadFileError;
+  String? uploadFileErrorName;
 
   ChannelChatState({
     required this.messages,
@@ -25,6 +29,10 @@ class ChannelChatState {
     this.topic,
     required this.pendingToMarkAsRead,
     required this.isMessagesPending,
+    required this.uploadedFiles,
+    required this.uploadedFilesString,
+    this.uploadFileError,
+    this.uploadFileErrorName,
   });
 
   ChannelChatState copyWith({
@@ -39,6 +47,10 @@ class ChannelChatState {
     TopicEntity? topic,
     Set<int>? pendingToMarkAsRead,
     bool? isMessagesPending,
+    List<UploadFileEntity>? uploadedFiles,
+    String? uploadedFilesString,
+    String? uploadFileError,
+    String? uploadFileErrorName,
   }) {
     return ChannelChatState(
       messages: messages ?? this.messages,
@@ -52,6 +64,10 @@ class ChannelChatState {
       topic: topic ?? this.topic,
       pendingToMarkAsRead: pendingToMarkAsRead ?? this.pendingToMarkAsRead,
       isMessagesPending: isMessagesPending ?? this.isMessagesPending,
+      uploadedFiles: uploadedFiles ?? this.uploadedFiles,
+      uploadedFilesString: uploadedFilesString ?? this.uploadedFilesString,
+      uploadFileError: uploadFileError ?? this.uploadFileError,
+      uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
     );
   }
 }

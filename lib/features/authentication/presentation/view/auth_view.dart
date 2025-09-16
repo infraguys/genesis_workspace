@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
@@ -74,7 +73,6 @@ class _AuthViewState extends State<AuthView> {
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        inspect(state);
         if (state.isAuthorized) context.go(Routes.directMessages);
         if (!state.hasBaseUrl) context.go(Routes.pasteBaseUrl);
       },
@@ -134,6 +132,18 @@ class _AuthViewState extends State<AuthView> {
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   spacing: 12,
                                   children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        SizedBox(height: 20),
+                                        if (snapshot.connectionState == ConnectionState.waiting)
+                                          SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: Center(child: CupertinoActivityIndicator()),
+                                          ),
+                                      ],
+                                    ),
                                     const GenesisLogo(size: 90),
                                     if (state.currentBaseUrl != null) ...[
                                       Row(
@@ -244,7 +254,8 @@ class _AuthViewState extends State<AuthView> {
                                     //     child: Text('set login'),
                                     //   ),
                                     // ),
-                                    if (state.serverSettings != null)
+                                    if (state.serverSettings != null &&
+                                        snapshot.connectionState == ConnectionState.done)
                                       ...state.serverSettings!.externalAuthenticationMethods.map(
                                         (realm) => SizedBox(
                                           height: 48,
@@ -263,8 +274,6 @@ class _AuthViewState extends State<AuthView> {
                                           ),
                                         ),
                                       ),
-                                    if (state.serverSettingsPending)
-                                      Center(child: CircularProgressIndicator()),
                                     SizedBox(
                                       height: 44,
                                       child: OutlinedButton.icon(

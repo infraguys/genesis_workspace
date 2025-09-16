@@ -7,16 +7,18 @@ import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_common_mixin.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
@@ -34,7 +36,7 @@ import 'package:injectable/injectable.dart';
 part 'chat_state.dart';
 
 @injectable
-class ChatCubit extends Cubit<ChatState> {
+class ChatCubit extends Cubit<ChatState> with ChatCommonMixin<ChatState> {
   ChatCubit(
     this._realTimeService,
     this._getMessagesUseCase,
@@ -43,6 +45,7 @@ class ChatCubit extends Cubit<ChatState> {
     this._updateMessagesFlagsUseCase,
     this._getUserByIdUseCase,
     this._getUserPresenceUseCase,
+    this._uploadFileUseCase,
   ) : super(
         ChatState(
           messages: [],
@@ -55,6 +58,10 @@ class ChatCubit extends Cubit<ChatState> {
           selfTypingOp: TypingEventOp.stop,
           pendingToMarkAsRead: {},
           userEntity: null,
+          uploadedFiles: [],
+          uploadedFilesString: '',
+          uploadFileErrorName: null,
+          uploadFileError: null,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -76,6 +83,7 @@ class ChatCubit extends Cubit<ChatState> {
   final UpdateMessagesFlagsUseCase _updateMessagesFlagsUseCase;
   final GetUserByIdUseCase _getUserByIdUseCase;
   final GetUserPresenceUseCase _getUserPresenceUseCase;
+  final UploadFileUseCase _uploadFileUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -84,6 +92,47 @@ class ChatCubit extends Cubit<ChatState> {
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageSubscription;
 
   Timer? _readMessageDebounceTimer;
+
+  @override
+  UploadFileUseCase get uploadFileUseCase => _uploadFileUseCase;
+
+  @override
+  UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase => _updateMessagesFlagsUseCase;
+
+  @override
+  List<UploadFileEntity> getUploadedFiles(ChatState s) => s.uploadedFiles;
+
+  @override
+  String getUploadedFilesString(ChatState s) => s.uploadedFilesString;
+
+  @override
+  String? getUploadFileError(ChatState s) => s.uploadFileError;
+
+  @override
+  String? getUploadFileErrorName(ChatState s) => s.uploadFileErrorName;
+
+  @override
+  List<MessageEntity> getStateMessages(ChatState s) => s.messages;
+
+  @override
+  Set<int> getPendingToMarkAsRead(ChatState s) => s.pendingToMarkAsRead;
+
+  @override
+  ChatState copyWithCommon({
+    List<UploadFileEntity>? uploadedFiles,
+    String? uploadedFilesString,
+    String? uploadFileError,
+    String? uploadFileErrorName,
+    List<MessageEntity>? messages,
+  }) {
+    return state.copyWith(
+      uploadedFiles: uploadedFiles ?? state.uploadedFiles,
+      uploadedFilesString: uploadedFilesString ?? state.uploadedFilesString,
+      uploadFileError: uploadFileError,
+      uploadFileErrorName: uploadFileErrorName,
+      messages: messages ?? state.messages,
+    );
+  }
 
   Future<void> getInitialData({
     required int userId,
@@ -180,17 +229,23 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendMessage({required int chatId, required String content}) async {
-    state.isMessagePending = true;
-    emit(state.copyWith(isMessagePending: state.isMessagePending));
-    final SendMessageType type = SendMessageType.direct;
-    final body = SendMessageRequestEntity(type: type, to: [chatId], content: content);
+    emit(state.copyWith(isMessagePending: true));
+    final String composed = buildMessageWithUploadedFilesCommon(content: content);
+
+    final body = SendMessageRequestEntity(
+      type: SendMessageType.direct,
+      to: [chatId],
+      content: composed,
+    );
+
     try {
       await _sendMessageUseCase.call(body);
+      emit(state.copyWith(uploadedFilesString: '', uploadedFiles: []));
     } catch (e) {
       inspect(e);
+    } finally {
+      emit(state.copyWith(isMessagePending: false));
     }
-    state.isMessagePending = false;
-    emit(state.copyWith(isMessagePending: state.isMessagePending));
   }
 
   void _onTypingEvents(TypingEventEntity event) {
@@ -241,43 +296,6 @@ class ChatCubit extends Cubit<ChatState> {
       }
     }
     emit(state.copyWith(messages: state.messages));
-  }
-
-  void scheduleMarkAsRead(int messageId) {
-    state.pendingToMarkAsRead.add(messageId);
-    final MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
-    final indexOf = state.messages.indexOf(message);
-    if (message.flags != null) {
-      message.flags!.add(MessageFlag.read.name);
-    } else {
-      message.flags = [MessageFlag.read.name];
-    }
-    final newMessages = [...state.messages];
-    newMessages[indexOf] = message;
-    emit(state.copyWith(messages: newMessages));
-    _readMessageDebounceTimer?.cancel();
-    _readMessageDebounceTimer = Timer(const Duration(milliseconds: 500), () {
-      _sendMarkAsRead();
-    });
-  }
-
-  Future<void> _sendMarkAsRead() async {
-    if (state.pendingToMarkAsRead.isEmpty) return;
-
-    final idsToSend = state.pendingToMarkAsRead.toList();
-    state.pendingToMarkAsRead.clear();
-
-    try {
-      await _updateMessagesFlagsUseCase.call(
-        UpdateMessagesFlagsRequestEntity(
-          messages: idsToSend,
-          op: UpdateMessageFlagsOp.add,
-          flag: MessageFlag.read,
-        ),
-      );
-    } catch (e) {
-      // Optional: retry or log error
-    }
   }
 
   void _onReactionEvents(ReactionEventEntity event) {

@@ -12,6 +12,10 @@ class ChatState {
   TypingEventOp selfTypingOp;
   Set<int> pendingToMarkAsRead;
   DmUserEntity? userEntity;
+  List<UploadFileEntity> uploadedFiles;
+  String uploadedFilesString;
+  String? uploadFileError;
+  String? uploadFileErrorName;
 
   ChatState({
     required this.messages,
@@ -25,6 +29,10 @@ class ChatState {
     required this.selfTypingOp,
     required this.pendingToMarkAsRead,
     this.userEntity,
+    required this.uploadedFiles,
+    required this.uploadedFilesString,
+    this.uploadFileError,
+    this.uploadFileErrorName,
   });
 
   ChatState copyWith({
@@ -39,6 +47,10 @@ class ChatState {
     TypingEventOp? selfTypingOp,
     Set<int>? pendingToMarkAsRead,
     DmUserEntity? userEntity,
+    List<UploadFileEntity>? uploadedFiles,
+    String? uploadedFilesString,
+    String? uploadFileError,
+    String? uploadFileErrorName,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -52,6 +64,10 @@ class ChatState {
       selfTypingOp: selfTypingOp ?? this.selfTypingOp,
       pendingToMarkAsRead: pendingToMarkAsRead ?? this.pendingToMarkAsRead,
       userEntity: userEntity ?? this.userEntity,
+      uploadedFiles: uploadedFiles ?? this.uploadedFiles,
+      uploadedFilesString: uploadedFilesString ?? this.uploadedFilesString,
+      uploadFileError: uploadFileError ?? this.uploadFileError,
+      uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
     );
   }
 }

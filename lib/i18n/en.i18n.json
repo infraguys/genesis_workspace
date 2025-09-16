@@ -99,5 +99,9 @@
     "quote": "Quote this message",
     "delete": "Delete this message",
     "star": "Star this message"
+  },
+  "attachment_button": {
+    "file": "Pick a file",
+    "image": "Pick an image"
   }
 }

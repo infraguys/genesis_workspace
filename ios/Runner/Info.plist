@@ -59,5 +59,9 @@
         </array>
       </dict>
     </array>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>“$(APP_DISPLAY_NAME)” needs access to your Photos to choose and attach images and videos to messages and update your profile picture.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>“$(APP_DISPLAY_NAME)” needs access to the camera to take photos and videos to share.</string>
 </dict>
 </plist>

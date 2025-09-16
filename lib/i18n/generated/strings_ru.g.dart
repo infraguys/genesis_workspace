@@ -62,6 +62,7 @@ class TranslationsRu extends Translations {
 	@override String get noRecentDialogs => 'Нет недавних чатов';
 	@override String get error => 'Ошибка';
 	@override late final TranslationsMessageActionsRu messageActions = TranslationsMessageActionsRu._(_root);
+	@override late final TranslationsAttachmentButtonRu attachmentButton = TranslationsAttachmentButtonRu._(_root);
 }
 
 // Path: auth
@@ -226,4 +227,15 @@ class TranslationsMessageActionsRu extends TranslationsMessageActionsEn {
 	@override String get quote => 'Цитировать это сообщение';
 	@override String get delete => 'Удалить это сообщение';
 	@override String get star => 'Отметить это сообщение';
+}
+
+// Path: attachmentButton
+class TranslationsAttachmentButtonRu extends TranslationsAttachmentButtonEn {
+	TranslationsAttachmentButtonRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get file => 'Выбрать файл';
+	@override String get image => 'Выбрать изображение';
 }
