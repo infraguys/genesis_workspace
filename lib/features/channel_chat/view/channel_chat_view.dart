@@ -280,6 +280,7 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                         controller: _messageController,
                         isMessagePending: state.isMessagePending,
                         focusNode: _messageInputFocusNode,
+                        isDropOver: false,
                         onSend: isSendEnabled
                             ? () async {
                                 final content = _messageController.text;
