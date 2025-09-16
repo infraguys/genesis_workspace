@@ -14,7 +14,7 @@ build:
     # List of images in the element
     - images:
       - name: genesis-workspace
-        format: raw
+        format: gz
         envs:
           - UI_BUILD_ENV_*
         
