@@ -103,5 +103,6 @@
   "attachment_button": {
     "file": "Pick a file",
     "image": "Pick an image"
-  }
+  },
+  "drop_files_to_upload": "Drop files here to upload"
 }

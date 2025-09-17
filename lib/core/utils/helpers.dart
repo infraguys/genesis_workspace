@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
@@ -10,6 +11,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 String? validateEmail(String? value) {
   final emailRegex = RegExp(r'^[\w.+-]+@([\w-]+\.)+[\w-]{2,}$');
@@ -211,3 +213,46 @@ Future<List<XFile>> pickImages() async {
 }
 
 String b64(String value) => base64Encode(utf8.encode(value));
+
+Future<List<PlatformFile>> toPlatformFiles(PerformDropEvent event) async {
+  final List<PlatformFile> files = [];
+
+  for (final DropItem dropItem in event.session.items) {
+    final reader = dropItem.dataReader!;
+
+    Uri? fileUri;
+    if (reader.canProvide(Formats.fileUri)) {
+      reader.getValue<Uri>(Formats.fileUri, (uri) {
+        fileUri = uri;
+      });
+    }
+
+    Uint8List? bytes;
+    String? name;
+    int? size;
+
+    reader.getFile(null, (dataFile) async {
+      name = dataFile.fileName;
+      size = dataFile.fileSize;
+      bytes = await dataFile.readAll();
+    });
+
+    name ??= await reader.getSuggestedName() ?? fileUri?.pathSegments.last ?? 'dropped_file';
+    size ??= bytes?.lengthInBytes ?? 0;
+
+    final String? path = _tryToFilePath(fileUri);
+
+    files.add(PlatformFile(name: name!, size: size ?? 0, path: path, bytes: bytes));
+  }
+
+  return files;
+}
+
+String? _tryToFilePath(Uri? uri) {
+  if (uri == null || uri.scheme != 'file') return null;
+  try {
+    return uri.toFilePath();
+  } catch (_) {
+    return null;
+  }
+}

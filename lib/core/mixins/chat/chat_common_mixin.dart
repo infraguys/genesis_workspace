@@ -44,9 +44,9 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
   final Map<String, CancelToken> _uploadCancelTokens = <String, CancelToken>{};
   Timer? _readMessageDebounceTimer;
 
-  Future<void> uploadImagesCommon() async {
+  Future<void> uploadImagesCommon({List<XFile>? droppedImages}) async {
     try {
-      final List<XFile> images = await pickImages();
+      final List<XFile> images = droppedImages ?? await pickImages();
       if (images.isEmpty) return;
 
       final List<Future<void>> uploadTasks = <Future<void>>[];
@@ -91,8 +91,8 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     }
   }
 
-  Future<void> uploadFilesCommon() async {
-    final List<PlatformFile>? platformFiles = await pickNonImageFiles();
+  Future<void> uploadFilesCommon({List<PlatformFile>? droppedFiles}) async {
+    final List<PlatformFile>? platformFiles = droppedFiles ?? await pickNonImageFiles();
     if (platformFiles == null || platformFiles.isEmpty) return;
 
     final List<Future<void>> uploadTasks = <Future<void>>[];

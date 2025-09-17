@@ -55,10 +55,13 @@ class _MessagesListState extends State<MessagesList> {
 
   bool showEmojiPicker = false;
 
+  late List<MessageEntity> _reversed;
+
   @override
   void initState() {
     super.initState();
     if (kIsWeb) BrowserContextMenu.disableContextMenu();
+    _reversed = widget.messages.reversed.toList(growable: false);
 
     _autoScrollController = AutoScrollController(axis: Axis.vertical);
 
@@ -69,6 +72,15 @@ class _MessagesListState extends State<MessagesList> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToFirstUnreadIfNeeded();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant MessagesList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.messages, widget.messages)) {
+      _reversed = widget.messages.reversed.toList(growable: false);
+      // _scrollToFirstUnreadIfNeeded();
+    }
   }
 
   @override
@@ -151,9 +163,14 @@ class _MessagesListState extends State<MessagesList> {
     );
   }
 
+  int _dayInt(int tsSec) {
+    final dt = DateTime.fromMillisecondsSinceEpoch(tsSec * 1000);
+    return dt.year * 10000 + dt.month * 100 + dt.day;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final reversedMessages = widget.messages.reversed.toList();
+    // final reversedMessages = widget.messages.reversed.toList();
     final theme = Theme.of(context);
 
     return Column(
@@ -165,28 +182,23 @@ class _MessagesListState extends State<MessagesList> {
               ListView.separated(
                 controller: _autoScrollController,
                 reverse: true,
-                itemCount: reversedMessages.length,
+                itemCount: _reversed.length,
                 padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
                 separatorBuilder: (BuildContext context, int index) {
-                  final message = reversedMessages[index];
-                  final nextMessage = reversedMessages[index + 1];
+                  final message = _reversed[index];
+                  final nextMessage = _reversed[index + 1];
 
                   final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
                   final nextMessageDate = DateTime.fromMillisecondsSinceEpoch(
                     nextMessage.timestamp * 1000,
                   );
 
-                  final isNewDay =
-                      messageDate.day != nextMessageDate.day ||
-                      messageDate.month != nextMessageDate.month ||
-                      messageDate.year != nextMessageDate.year;
+                  final isNewDay = _dayInt(message.timestamp) != _dayInt(nextMessage.timestamp);
 
                   if (_firstUnreadIndexInReversed != null &&
                       index == _firstUnreadIndexInReversed!) {
                     return UnreadMessagesMarker(
-                      unreadCount: reversedMessages
-                          .where((message) => message.hasUnreadMessages)
-                          .length,
+                      unreadCount: _reversed.where((message) => message.hasUnreadMessages).length,
                     );
                   }
 
@@ -197,14 +209,12 @@ class _MessagesListState extends State<MessagesList> {
                   return SizedBox(height: isNewUser ? 12 : 2);
                 },
                 itemBuilder: (BuildContext context, int index) {
-                  final message = reversedMessages[index];
+                  final message = _reversed[index];
                   final MessageEntity? nextMessage =
-                      (reversedMessages.length > 1 && index != reversedMessages.length - 1)
-                      ? reversedMessages[index + 1]
+                      (_reversed.length > 1 && index != _reversed.length - 1)
+                      ? _reversed[index + 1]
                       : null;
-                  final MessageEntity? prevMessage = index != 0
-                      ? reversedMessages[index - 1]
-                      : null;
+                  final MessageEntity? prevMessage = index != 0 ? _reversed[index - 1] : null;
 
                   final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
                   final isMyMessage = message.senderId == _myUser?.userId;
@@ -248,7 +258,7 @@ class _MessagesListState extends State<MessagesList> {
                     key: ValueKey(index),
                     controller: _autoScrollController,
                     child: VisibilityDetector(
-                      key: UniqueKey(),
+                      key: ValueKey('msg-${message.id}'),
                       onVisibilityChanged: (info) {
                         final visiblePercentage = info.visibleFraction * 100;
                         if (visiblePercentage > 50) {
