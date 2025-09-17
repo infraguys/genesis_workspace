@@ -47,10 +47,11 @@ class MessageActions extends StatelessWidget {
               icon: Icon(Icons.delete, color: theme.colorScheme.error),
             ),
           ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.copy, color: theme.colorScheme.onSurface),
-        ),
+        if (isMyMessage)
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.edit, color: theme.colorScheme.onSurface),
+          ),
       ],
     );
   }
