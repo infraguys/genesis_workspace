@@ -314,6 +314,13 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                       }
                       return DropOperation.link;
                     },
+                    onDropLeave: (_) {
+                      if (isDropOver) {
+                        setState(() {
+                          isDropOver = false;
+                        });
+                      }
+                    },
                     onPerformDrop: (PerformDropEvent event) async {
                       setState(() => isDropOver = false);
                       final List<PlatformFile> droppedFiles = await toPlatformFiles(event);

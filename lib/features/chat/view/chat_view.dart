@@ -324,6 +324,13 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                         }
                         return DropOperation.link;
                       },
+                      onDropLeave: (_) {
+                        if (isDropOver) {
+                          setState(() {
+                            isDropOver = false;
+                          });
+                        }
+                      },
                       onPerformDrop: (PerformDropEvent event) async {
                         setState(() => isDropOver = false);
                         final List<PlatformFile> droppedFiles = await toPlatformFiles(event);
