@@ -7,6 +7,7 @@ import 'package:genesis_workspace/domain/messages/entities/messages_request_enti
 import 'package:genesis_workspace/domain/messages/entities/messages_response_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart';
@@ -96,6 +97,16 @@ class MessagesRepositoryImpl implements MessagesRepository {
         onProgress: onProgress,
         cancelToken: cancelToken,
       );
+      return response.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpdateMessageResponseEntity> updateMessage(UpdateMessageRequestEntity body) async {
+    try {
+      final response = await dataSource.updateMessage(body.toDto());
       return response.toEntity();
     } catch (e) {
       rethrow;

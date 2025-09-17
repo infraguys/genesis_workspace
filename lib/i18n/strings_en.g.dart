@@ -113,6 +113,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	late final TranslationsMessageActionsEn message_actions = TranslationsMessageActionsEn._(_root);
 	late final TranslationsAttachmentButtonEn attachment_button = TranslationsAttachmentButtonEn._(_root);
+
+	/// en: 'Drop files here to upload'
+	String get drop_files_to_upload => 'Drop files here to upload';
 }
 
 // Path: auth
@@ -371,6 +374,9 @@ class TranslationsMessageActionsEn {
 
 	/// en: 'Star this message'
 	String get star => 'Star this message';
+
+	/// en: 'Edit this message'
+	String get edit => 'Edit this message';
 }
 
 // Path: attachment_button
@@ -471,8 +477,10 @@ extension on Translations {
 			case 'message_actions.quote': return 'Quote this message';
 			case 'message_actions.delete': return 'Delete this message';
 			case 'message_actions.star': return 'Star this message';
+			case 'message_actions.edit': return 'Edit this message';
 			case 'attachment_button.file': return 'Pick a file';
 			case 'attachment_button.image': return 'Pick an image';
+			case 'drop_files_to_upload': return 'Drop files here to upload';
 			default: return null;
 		}
 	}

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +27,7 @@ class MessagesList extends StatefulWidget {
   final bool isLoadingMore;
   final int myUserId;
   final void Function(int messageId)? onTapQuote;
+  final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
 
   const MessagesList({
     super.key,
@@ -37,6 +39,7 @@ class MessagesList extends StatefulWidget {
     required this.isLoadingMore,
     required this.myUserId,
     this.onTapQuote,
+    this.onTapEditMessage,
   });
 
   @override
@@ -282,6 +285,7 @@ class _MessagesListState extends State<MessagesList> {
                         myUserId: widget.myUserId,
                         isNewDay: isNewDay,
                         onTapQuote: widget.onTapQuote ?? (_) {},
+                        onTapEditMessage: widget.onTapEditMessage ?? (_) {},
                       ),
                     ),
                   );

@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_action.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -15,6 +16,9 @@ import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onSend;
+  final VoidCallback? onEdit;
+  final VoidCallback? onCancelEdit;
+  final bool isEdit;
   final VoidCallback onUploadFile;
   final VoidCallback onUploadImage;
   final Function(String localId) onRemoveFile;
@@ -23,6 +27,7 @@ class MessageInput extends StatefulWidget {
   final FocusNode focusNode;
   final List<UploadFileEntity>? files;
   final bool isDropOver;
+  final MessageEntity? editingMessage;
 
   const MessageInput({
     super.key,
@@ -35,7 +40,11 @@ class MessageInput extends StatefulWidget {
     required this.isMessagePending,
     required this.focusNode,
     required this.isDropOver,
+    this.isEdit = false,
+    this.onEdit,
+    this.onCancelEdit,
     this.files,
+    this.editingMessage,
   });
 
   @override
@@ -115,6 +124,53 @@ class _MessageInputState extends State<MessageInput> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SizeTransition(sizeFactor: animation, child: child),
+                );
+              },
+              child: widget.isEdit
+                  ? Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        margin: const EdgeInsets.fromLTRB(6, 6, 6, 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: theme.colorScheme.primary, width: 2),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                widget.editingMessage?.content ?? '',
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              tooltip: 'Cancel editing',
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(Icons.close_rounded, size: 20),
+                              onPressed: widget.onCancelEdit,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             if (widget.files != null && widget.files!.isNotEmpty)
               SizedBox(
                 height: 92,
@@ -197,8 +253,14 @@ class _MessageInputState extends State<MessageInput> {
                             },
                             textInputAction: TextInputAction.send,
                             onSubmitted: (value) {
-                              if (widget.onSend != null) {
-                                widget.onSend!();
+                              if (widget.isEdit) {
+                                if (widget.onEdit != null) {
+                                  widget.onEdit!();
+                                }
+                              } else {
+                                if (widget.onSend != null) {
+                                  widget.onSend!();
+                                }
                               }
                             },
                             decoration: InputDecoration(
@@ -282,8 +344,10 @@ class _MessageInputState extends State<MessageInput> {
                   ),
 
                   ElevatedButton(
-                    onPressed: widget.onSend,
-                    child: const Icon(Icons.send),
+                    onPressed: widget.isEdit ? widget.onEdit : widget.onSend,
+                    child: widget.isEdit
+                        ? const Icon(Icons.check)
+                        : const Icon(Icons.send_outlined),
                   ).pending(widget.isMessagePending),
                 ],
               ),

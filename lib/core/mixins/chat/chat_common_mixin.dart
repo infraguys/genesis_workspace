@@ -19,6 +19,7 @@ import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -327,6 +328,17 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
 
     final Iterable<String> parts = <String>[filesBlock, content].where((p) => p.isNotEmpty);
     return parts.join('\n');
+  }
+
+  void onUpdateMessageEvents(UpdateMessageEventEntity event) {
+    final updatedMessages = [...getStateMessages(state)];
+    final updatedMessage = updatedMessages.firstWhere(
+      (message) => message.id == event.messageId,
+      orElse: () => MessageEntity.fake(),
+    );
+    final int index = updatedMessages.indexOf(updatedMessage);
+    updatedMessages[index] = updatedMessage.copyWith(content: event.renderedContent);
+    emit(copyWithCommon(messages: updatedMessages));
   }
 
   void disposeCommon() {

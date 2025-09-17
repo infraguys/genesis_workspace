@@ -67,6 +67,7 @@ class TranslationsRu implements Translations {
 	@override String get error => 'Ошибка';
 	@override late final _TranslationsMessageActionsRu message_actions = _TranslationsMessageActionsRu._(_root);
 	@override late final _TranslationsAttachmentButtonRu attachment_button = _TranslationsAttachmentButtonRu._(_root);
+	@override String get drop_files_to_upload => 'Отпустите файлы, чтобы загрузить';
 }
 
 // Path: auth
@@ -231,6 +232,7 @@ class _TranslationsMessageActionsRu implements TranslationsMessageActionsEn {
 	@override String get quote => 'Цитировать это сообщение';
 	@override String get delete => 'Удалить это сообщение';
 	@override String get star => 'Отметить это сообщение';
+	@override String get edit => 'Редактировать это сообщение';
 }
 
 // Path: attachment_button
@@ -333,8 +335,10 @@ extension on TranslationsRu {
 			case 'message_actions.quote': return 'Цитировать это сообщение';
 			case 'message_actions.delete': return 'Удалить это сообщение';
 			case 'message_actions.star': return 'Отметить это сообщение';
+			case 'message_actions.edit': return 'Редактировать это сообщение';
 			case 'attachment_button.file': return 'Выбрать файл';
 			case 'attachment_button.image': return 'Выбрать изображение';
+			case 'drop_files_to_upload': return 'Отпустите файлы, чтобы загрузить';
 			default: return null;
 		}
 	}

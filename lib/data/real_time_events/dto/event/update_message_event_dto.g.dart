@@ -1,22 +1,29 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'unsupported_event_dto.dart';
+part of 'update_message_event_dto.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-UnsupportedEventDto _$UnsupportedEventDtoFromJson(Map<String, dynamic> json) =>
-    UnsupportedEventDto(
-      id: (json['id'] as num).toInt(),
-      type: $enumDecode(_$EventTypeEnumMap, json['type']),
-    );
+UpdateMessageEventDto _$UpdateMessageEventDtoFromJson(
+  Map<String, dynamic> json,
+) => UpdateMessageEventDto(
+  id: (json['id'] as num).toInt(),
+  type: $enumDecode(_$EventTypeEnumMap, json['type']),
+  content: json['content'] as String,
+  renderedContent: json['rendered_content'] as String,
+  messageId: (json['message_id'] as num).toInt(),
+);
 
-Map<String, dynamic> _$UnsupportedEventDtoToJson(
-  UnsupportedEventDto instance,
+Map<String, dynamic> _$UpdateMessageEventDtoToJson(
+  UpdateMessageEventDto instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'type': _$EventTypeEnumMap[instance.type]!,
+  'content': instance.content,
+  'rendered_content': instance.renderedContent,
+  'message_id': instance.messageId,
 };
 
 const _$EventTypeEnumMap = {

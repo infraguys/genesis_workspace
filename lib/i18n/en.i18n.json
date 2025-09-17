@@ -98,7 +98,8 @@
   "message_actions": {
     "quote": "Quote this message",
     "delete": "Delete this message",
-    "star": "Star this message"
+    "star": "Star this message",
+    "edit": "Edit this message"
   },
   "attachment_button": {
     "file": "Pick a file",

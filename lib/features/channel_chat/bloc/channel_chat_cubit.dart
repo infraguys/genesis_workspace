@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_common_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_mixin.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
@@ -23,6 +24,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/stream_entity.dart';
@@ -37,7 +39,9 @@ import 'package:injectable/injectable.dart';
 part 'channel_chat_state.dart';
 
 @injectable
-class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<ChannelChatState> {
+class ChannelChatCubit extends Cubit<ChannelChatState>
+    with ChatCommonMixin<ChannelChatState>
+    implements TypingCapable {
   ChannelChatCubit(
     this._realTimeService,
     this._getMessagesUseCase,
@@ -75,6 +79,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
     _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(
       _onDeleteMessageEvents,
     );
+
+    _updateMessageSubscription = _realTimeService.updateMessageEventsStream.listen(
+      onUpdateMessageEvents,
+    );
   }
 
   final RealTimeService _realTimeService;
@@ -92,6 +100,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
   late final StreamSubscription<ReactionEventEntity> _reactionsSubscription;
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
+  late final StreamSubscription<UpdateMessageEventEntity> _updateMessageSubscription;
 
   Timer? _readMessageDebounceTimer;
 
@@ -271,6 +280,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
     }
   }
 
+  @override
   Future<void> changeTyping({required TypingEventOp op}) async {
     if (state.selfTypingOp != op) {
       state.selfTypingOp = op;
@@ -289,6 +299,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
     }
   }
 
+  @override
   void setIsMessagePending(bool value) {
     emit(state.copyWith(isMessagePending: value));
   }
@@ -322,7 +333,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
   void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     for (var messageId in event.messages) {
       if (event.flag == MessageFlag.read) {
-        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        MessageEntity message = state.messages.firstWhere(
+          (message) => message.id == messageId,
+          orElse: () => MessageEntity.fake(),
+        );
         final int index = state.messages.indexOf(message);
         MessageEntity changedMessage = message.copyWith(
           flags: [...message.flags ?? [], MessageFlag.read.name],
@@ -330,7 +344,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
         state.messages[index] = changedMessage;
       }
       if (event.flag == MessageFlag.starred) {
-        MessageEntity message = state.messages.firstWhere((message) => message.id == messageId);
+        MessageEntity message = state.messages.firstWhere(
+          (message) => message.id == messageId,
+          orElse: () => MessageEntity.fake(),
+        );
         final int index = state.messages.indexOf(message);
         if (event.op == UpdateMessageFlagsOp.add) {
           MessageEntity changedMessage = message.copyWith(
@@ -348,7 +365,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
   }
 
   void _onReactionEvents(ReactionEventEntity event) {
-    MessageEntity message = state.messages.firstWhere((message) => message.id == event.messageId);
+    MessageEntity message = state.messages.firstWhere(
+      (message) => message.id == event.messageId,
+      orElse: () => MessageEntity.fake(),
+    );
     final int index = state.messages.indexOf(message);
     List<ReactionEntity> reactions = message.reactions;
     if (event.op == ReactionOp.add) {
@@ -384,6 +404,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState> with ChatCommonMixin<Chan
     _readMessageDebounceTimer?.cancel();
     _reactionsSubscription.cancel();
     _deleteMessageEventsSubscription.cancel();
+    _updateMessageSubscription.cancel();
     return super.close();
   }
 }
