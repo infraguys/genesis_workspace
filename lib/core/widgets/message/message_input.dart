@@ -173,8 +173,6 @@ class _MessageInputState extends State<MessageInput> {
                       child: const Icon(Icons.attach_file),
                     ),
                   ),
-
-                  // ... внутри build(...) в Row -> вместо прежнего Expanded(Container(...TextField...)):
                   Expanded(
                     child: Stack(
                       children: [
