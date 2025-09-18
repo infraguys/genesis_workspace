@@ -20,6 +20,7 @@ class MessageActionsOverlay extends StatefulWidget {
   final bool isOwnMessage;
   final VoidCallback onClose;
   final Function() onTapQuote;
+  final VoidCallback onEdit;
 
   const MessageActionsOverlay({
     super.key,
@@ -29,6 +30,7 @@ class MessageActionsOverlay extends StatefulWidget {
     required this.isOwnMessage,
     required this.onClose,
     required this.onTapQuote,
+    required this.onEdit,
   });
 
   @override
@@ -201,6 +203,7 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                         widget.onClose();
                       },
                       onTapEdit: () async {
+                        widget.onEdit();
                         widget.onClose();
                       },
                       onTapDelete: () async {

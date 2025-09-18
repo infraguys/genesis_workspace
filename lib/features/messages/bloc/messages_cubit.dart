@@ -11,7 +11,6 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/delete_message_use_case.dart';
@@ -139,17 +138,6 @@ class MessagesCubit extends Cubit<MessagesState> {
       final body = SingleMessageRequestEntity(messageId: messageId, applyMarkdown: applyMarkdown!);
       final response = await _getMessageByIdUseCase.call(body);
       return response.message;
-    } catch (e) {
-      inspect(e);
-      rethrow;
-    }
-  }
-
-  Future<void> updateMessage({required int messageId, required String content}) async {
-    try {
-      await _updateMessageUseCase.call(
-        UpdateMessageRequestEntity(messageId: messageId, content: content),
-      );
     } catch (e) {
       inspect(e);
       rethrow;

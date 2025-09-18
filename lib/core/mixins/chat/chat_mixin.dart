@@ -10,6 +10,7 @@ import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 abstract class TypingCapable {
   Future<void> changeTyping({required TypingEventOp op});
   void setIsMessagePending(bool value);
+  Future<void> updateMessage({required int messageId, required String content});
 }
 
 mixin ChatMixin<TChatCubit extends TypingCapable, TWidget extends StatefulWidget>
@@ -144,7 +145,7 @@ mixin ChatMixin<TChatCubit extends TypingCapable, TWidget extends StatefulWidget
     context.read<TChatCubit>().setIsMessagePending(true);
     if (editingMessage == null) return;
     final String newContent = messageController.text;
-    await context.read<MessagesCubit>().updateMessage(
+    await context.read<TChatCubit>().updateMessage(
       messageId: editingMessage!.id,
       content: newContent,
     );

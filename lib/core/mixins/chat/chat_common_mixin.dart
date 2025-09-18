@@ -13,8 +13,10 @@ import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
+import 'package:genesis_workspace/domain/messages/usecases/update_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
@@ -26,6 +28,7 @@ import 'package:image_picker/image_picker.dart';
 mixin ChatCommonMixin<S extends Object> on Cubit<S> {
   UploadFileUseCase get uploadFileUseCase;
   UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase;
+  UpdateMessageUseCase get updateMessageUseCase;
 
   List<UploadFileEntity> getUploadedFiles(S state);
   String getUploadedFilesString(S state);
@@ -339,6 +342,19 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     final int index = updatedMessages.indexOf(updatedMessage);
     updatedMessages[index] = updatedMessage.copyWith(content: event.renderedContent);
     emit(copyWithCommon(messages: updatedMessages));
+  }
+
+  Future<void> updateMessage({required int messageId, required String content}) async {
+    try {
+      final String composed = buildMessageWithUploadedFilesCommon(content: content);
+      await updateMessageUseCase.call(
+        UpdateMessageRequestEntity(messageId: messageId, content: composed),
+      );
+      emit(copyWithCommon(uploadedFilesString: '', uploadedFiles: []));
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
   }
 
   void disposeCommon() {

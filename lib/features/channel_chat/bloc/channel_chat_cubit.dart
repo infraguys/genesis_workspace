@@ -18,6 +18,7 @@ import 'package:genesis_workspace/domain/messages/entities/send_message_request_
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/update_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
@@ -51,6 +52,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     this._getChannelByIdUseCase,
     this._getTopicsUseCase,
     this._uploadFileUseCase,
+    this._updateMessageUseCase,
   ) : super(
         ChannelChatState(
           messages: [],
@@ -94,6 +96,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   final GetChannelByIdUseCase _getChannelByIdUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
   final UploadFileUseCase _uploadFileUseCase;
+  final UpdateMessageUseCase _updateMessageUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -109,6 +112,9 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   @override
   UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase => _updateMessagesFlagsUseCase;
+
+  @override
+  UpdateMessageUseCase get updateMessageUseCase => _updateMessageUseCase;
 
   @override
   List<UploadFileEntity> getUploadedFiles(ChannelChatState s) => s.uploadedFiles;

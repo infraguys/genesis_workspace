@@ -95,40 +95,6 @@ class MessageItem extends StatelessWidget {
       }
     }
 
-    Future<void> handleEditMessage() async {
-      try {
-        final raw = await messagesCubit.getMessageById(messageId: message.id, applyMarkdown: false);
-        final controller = TextEditingController(text: raw.content);
-        final bool? save = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text('Edit message'),
-            content: TextField(
-              controller: controller,
-              minLines: 1,
-              maxLines: 8,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Save'),
-              ),
-            ],
-          ),
-        );
-        if (save == true) {
-          await messagesCubit.updateMessage(messageId: message.id, content: controller.text.trim());
-        }
-      } on DioException catch (e) {
-        showErrorSnackBar(context, exception: e);
-      }
-    }
-
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
         : Text(
@@ -237,6 +203,13 @@ class MessageItem extends StatelessWidget {
                             onTapQuote(message.id);
                           },
                           onClose: () => overlay.remove(),
+                          onEdit: () {
+                            final body = UpdateMessageRequestEntity(
+                              messageId: message.id,
+                              content: message.content,
+                            );
+                            onTapEditMessage(body);
+                          },
                           messageContent: MessageHtml(content: message.content),
                           isOwnMessage: isMyMessage,
                         ),
