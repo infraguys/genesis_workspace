@@ -44,6 +44,22 @@ class UploadFileRequestEntity {
 
 enum UploadFileType { file, image }
 
+class EditingAttachment {
+  final String filename;
+  final String extension;
+  final String url;
+  final UploadFileType type;
+  final String rawString;
+
+  EditingAttachment({
+    required this.filename,
+    required this.extension,
+    required this.url,
+    required this.type,
+    required this.rawString,
+  });
+}
+
 sealed class UploadFileEntity {
   final String localId;
   final String filename;

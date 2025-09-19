@@ -111,6 +111,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Drop files here to upload'
 	String get dropFilesToUpload => 'Drop files here to upload';
+
+	/// en: 'Cancel editing'
+	String get cancelEditing => 'Cancel editing';
 }
 
 // Path: auth
@@ -369,6 +372,9 @@ class TranslationsMessageActionsEn {
 
 	/// en: 'Star this message'
 	String get star => 'Star this message';
+
+	/// en: 'Edit this message'
+	String get edit => 'Edit this message';
 }
 
 // Path: attachmentButton

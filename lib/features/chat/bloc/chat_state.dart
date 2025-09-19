@@ -18,6 +18,8 @@ class ChatState {
   String? uploadFileErrorName;
   bool isEdit;
   MessageEntity? editingMessage;
+  List<EditingAttachment> editingAttachments;
+  bool isEdited;
 
   ChatState({
     required this.messages,
@@ -37,6 +39,8 @@ class ChatState {
     this.uploadFileErrorName,
     required this.isEdit,
     this.editingMessage,
+    required this.editingAttachments,
+    required this.isEdited,
   });
 
   ChatState copyWith({
@@ -57,6 +61,8 @@ class ChatState {
     String? uploadFileErrorName,
     bool? isEdit,
     MessageEntity? editingMessage,
+    List<EditingAttachment>? editingAttachments,
+    bool? isEdited,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -76,6 +82,8 @@ class ChatState {
       uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
       isEdit: isEdit ?? this.isEdit,
       editingMessage: editingMessage ?? this.editingMessage,
+      editingAttachments: editingAttachments ?? this.editingAttachments,
+      isEdited: isEdited ?? this.isEdited,
     );
   }
 }

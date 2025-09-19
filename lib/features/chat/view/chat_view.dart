@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
-import 'package:genesis_workspace/core/mixins/chat/chat_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -38,7 +38,7 @@ class ChatView extends StatefulWidget {
 }
 
 class _ChatViewState extends State<ChatView>
-    with ChatMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
+    with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
@@ -342,6 +342,7 @@ class _ChatViewState extends State<ChatView>
 
                           final bool isSendEnabled =
                               canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                          final bool isEditEnabled = isSendEnabled || state.isEdited;
 
                           return Container(
                             key: dropAreaKey,
@@ -363,13 +364,15 @@ class _ChatViewState extends State<ChatView>
                                       }
                                     }
                                   : null,
-                              onEdit: () async {
-                                try {
-                                  await submitEdit();
-                                } on DioException catch (e) {
-                                  showErrorSnackBar(context, exception: e);
-                                }
-                              },
+                              onEdit: isEditEnabled
+                                  ? () async {
+                                      try {
+                                        await submitEdit();
+                                      } on DioException catch (e) {
+                                        showErrorSnackBar(context, exception: e);
+                                      }
+                                    }
+                                  : null,
                               onUploadFile: () async {
                                 await context.read<ChatCubit>().uploadFilesCommon();
                               },
@@ -383,6 +386,10 @@ class _ChatViewState extends State<ChatView>
                               onCancelEdit: onCancelEdit,
                               isEdit: isEditMode,
                               editingMessage: editingMessage,
+                              editingFiles: state.editingAttachments,
+                              onRemoveEditingAttachment: (attachment) {
+                                context.read<ChatCubit>().removeEditingAttachment(attachment);
+                              },
                             ),
                           );
                         },

@@ -1,5 +1,6 @@
 // lib/features/chat/common/chat_common_mixin.dart
 import 'dart:async';
+import 'dart:collection';
 import 'dart:developer';
 import 'dart:typed_data';
 
@@ -25,7 +26,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/update_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:image_picker/image_picker.dart';
 
-mixin ChatCommonMixin<S extends Object> on Cubit<S> {
+mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   UploadFileUseCase get uploadFileUseCase;
   UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase;
   UpdateMessageUseCase get updateMessageUseCase;
@@ -36,6 +37,7 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
   String? getUploadFileErrorName(S state);
   List<MessageEntity> getStateMessages(S state);
   Set<int> getPendingToMarkAsRead(S state);
+  List<EditingAttachment> getEditingAttachments(S state);
 
   S copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
@@ -43,6 +45,8 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     String? uploadFileError,
     String? uploadFileErrorName,
     List<MessageEntity>? messages,
+    List<EditingAttachment>? editingAttachments,
+    bool? isEdited,
   });
 
   final Map<String, CancelToken> _uploadCancelTokens = <String, CancelToken>{};
@@ -219,6 +223,118 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     emit(copyWithCommon(uploadedFiles: next));
   }
 
+  Future<void> updateMessage({required int messageId, required String content}) async {
+    try {
+      final composed = buildMessageContent(content: content);
+      await updateMessageUseCase.call(
+        UpdateMessageRequestEntity(messageId: messageId, content: composed),
+      );
+      emit(copyWithCommon(uploadedFilesString: '', uploadedFiles: [], editingAttachments: []));
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  void cancelEdit() {
+    emit(
+      copyWithCommon(
+        isEdited: false,
+        editingAttachments: [],
+        uploadedFilesString: '',
+        uploadedFiles: [],
+      ),
+    );
+  }
+
+  void removeEditingAttachment(EditingAttachment attachment) {
+    final updatedAttachments = [...getEditingAttachments(state)];
+    updatedAttachments.remove(attachment);
+    emit(copyWithCommon(editingAttachments: updatedAttachments, isEdited: true));
+  }
+
+  String buildMessageContent({
+    required String content,
+    bool placeFilesOnTop = true,
+    bool stripExistingAttachmentsFromContent = true,
+  }) {
+    final editingAttachments = getEditingAttachments(state);
+    final uploadedFiles = getUploadedFiles(state);
+
+    final String trimmedContent = stripExistingAttachmentsFromContent
+        ? _removeAttachmentsFromContent(content)
+        : content.trim();
+
+    final List<String> editingLinks = editingAttachments
+        .map((attachment) {
+          final String raw = (attachment.rawString ?? '').trim();
+          if (raw.isNotEmpty) return raw;
+          return '[${attachment.filename}](${attachment.url})';
+        })
+        .where((link) => link.isNotEmpty)
+        .toList();
+
+    final List<String> uploadedLinks = uploadedFiles
+        .whereType<UploadedFileEntity>()
+        .map((file) => '[${file.filename}](${file.url})')
+        .where((link) => link.isNotEmpty)
+        .toList();
+
+    // Дедупликация с сохранением порядка
+    final LinkedHashSet<String> uniqueFileLinks = LinkedHashSet<String>()
+      ..addAll(editingLinks)
+      ..addAll(uploadedLinks);
+
+    final List<String> nonEmptyParts = [];
+
+    if (placeFilesOnTop) {
+      if (uniqueFileLinks.isNotEmpty) nonEmptyParts.addAll(uniqueFileLinks);
+      if (trimmedContent.isNotEmpty) nonEmptyParts.add(trimmedContent);
+    } else {
+      if (trimmedContent.isNotEmpty) nonEmptyParts.add(trimmedContent);
+      if (uniqueFileLinks.isNotEmpty) nonEmptyParts.addAll(uniqueFileLinks);
+    }
+
+    return nonEmptyParts.join('\n');
+  }
+
+  String _removeAttachmentsFromContent(String content) {
+    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+    final String withoutAttachments = content.replaceAll(pattern, '');
+    return withoutAttachments.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
+  }
+
+  List<EditingAttachment> parseAttachments(String content) {
+    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+    final Iterable<RegExpMatch> matches = pattern.allMatches(content);
+
+    final List<EditingAttachment> attachments = matches.map((match) {
+      final String rawString = match.group(0)!;
+      final String filename = match.group(1)!;
+      final String extension = filename.split('.').last;
+      final String url = match.group(2)!;
+
+      final UploadFileType type = AppConstants.kImageExtensions.contains(extension)
+          ? UploadFileType.image
+          : UploadFileType.file;
+
+      return EditingAttachment(
+        filename: filename,
+        extension: extension,
+        url: url,
+        type: type,
+        rawString: rawString,
+      );
+    }).toList();
+
+    return attachments;
+  }
+
+  void setUploadedFiles(String content) {
+    List<EditingAttachment> attachments = parseAttachments(content);
+    emit(copyWithCommon(editingAttachments: attachments));
+  }
+
   void onMessageFlagsEventsCommon(UpdateMessageFlagsEventEntity event) {
     final List<MessageEntity> current = List.of(getStateMessages(state));
     bool changed = false;
@@ -323,16 +439,6 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     }
   }
 
-  String buildMessageWithUploadedFilesCommon({required String content}) {
-    final String filesBlock = getUploadedFiles(state)
-        .whereType<UploadedFileEntity>()
-        .map((f) => '[${f.filename}](${f.url})')
-        .fold<String>('', (acc, link) => appendFileLink(acc, link));
-
-    final Iterable<String> parts = <String>[filesBlock, content].where((p) => p.isNotEmpty);
-    return parts.join('\n');
-  }
-
   void onUpdateMessageEvents(UpdateMessageEventEntity event) {
     final updatedMessages = [...getStateMessages(state)];
     final updatedMessage = updatedMessages.firstWhere(
@@ -342,19 +448,6 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     final int index = updatedMessages.indexOf(updatedMessage);
     updatedMessages[index] = updatedMessage.copyWith(content: event.renderedContent);
     emit(copyWithCommon(messages: updatedMessages));
-  }
-
-  Future<void> updateMessage({required int messageId, required String content}) async {
-    try {
-      final String composed = buildMessageWithUploadedFilesCommon(content: content);
-      await updateMessageUseCase.call(
-        UpdateMessageRequestEntity(messageId: messageId, content: composed),
-      );
-      emit(copyWithCommon(uploadedFilesString: '', uploadedFiles: []));
-    } catch (e) {
-      inspect(e);
-      rethrow;
-    }
   }
 
   void disposeCommon() {

@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/mixins/chat/chat_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -41,7 +41,7 @@ class ChannelChatView extends StatefulWidget {
 }
 
 class _ChannelChatViewState extends State<ChannelChatView>
-    with ChatMixin<ChannelChatCubit, ChannelChatView>, WidgetsBindingObserver {
+    with ChatWidgetMixin<ChannelChatCubit, ChannelChatView>, WidgetsBindingObserver {
   late final Future _future;
   late final UserEntity _myUser;
   late final ScrollController _scrollController;

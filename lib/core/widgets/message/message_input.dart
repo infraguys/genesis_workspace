@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_action.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
+import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -26,8 +27,10 @@ class MessageInput extends StatefulWidget {
   final bool isMessagePending;
   final FocusNode focusNode;
   final List<UploadFileEntity>? files;
+  final List<EditingAttachment>? editingFiles;
   final bool isDropOver;
   final MessageEntity? editingMessage;
+  final Function(EditingAttachment)? onRemoveEditingAttachment;
 
   const MessageInput({
     super.key,
@@ -45,6 +48,8 @@ class MessageInput extends StatefulWidget {
     this.onCancelEdit,
     this.files,
     this.editingMessage,
+    this.editingFiles,
+    this.onRemoveEditingAttachment,
   });
 
   @override
@@ -145,26 +150,54 @@ class _MessageInputState extends State<MessageInput> {
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: theme.colorScheme.primary, width: 2),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                widget.editingMessage?.content ?? '',
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodyMedium,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    widget.editingMessage?.content ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  tooltip: context.t.cancelEditing,
+                                  visualDensity: VisualDensity.compact,
+                                  icon: const Icon(Icons.close_rounded, size: 20),
+                                  onPressed: widget.onCancelEdit,
+                                ),
+                              ],
+                            ),
+                            if (widget.editingFiles != null && widget.editingFiles!.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                height: 96,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: widget.editingFiles!.length,
+                                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                                  itemBuilder: (context, index) {
+                                    final EditingAttachment attachment =
+                                        widget.editingFiles![index];
+                                    return EditingAttachmentTile(
+                                      attachment: attachment,
+                                      onRemove: widget.onRemoveEditingAttachment == null
+                                          ? null
+                                          : () {
+                                              widget.onRemoveEditingAttachment!(attachment);
+                                            },
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              tooltip: 'Cancel editing',
-                              visualDensity: VisualDensity.compact,
-                              icon: const Icon(Icons.close_rounded, size: 20),
-                              onPressed: widget.onCancelEdit,
-                            ),
+                            ],
                           ],
                         ),
                       ),
@@ -178,7 +211,7 @@ class _MessageInputState extends State<MessageInput> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   itemCount: widget.files!.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     final UploadFileEntity entity = widget.files![index];
                     return _buildAttachmentTile(

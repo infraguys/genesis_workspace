@@ -5,15 +5,19 @@ import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/web_drop_types.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 
-abstract class TypingCapable {
+abstract class ChatCubitCapable {
   Future<void> changeTyping({required TypingEventOp op});
   void setIsMessagePending(bool value);
   Future<void> updateMessage({required int messageId, required String content});
+  void setUploadedFiles(String content);
+  void removeEditingAttachment(EditingAttachment attachment);
+  void cancelEdit();
 }
 
-mixin ChatMixin<TChatCubit extends TypingCapable, TWidget extends StatefulWidget>
+mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends StatefulWidget>
     on State<TWidget> {
   late final TextEditingController messageController;
   final FocusNode messageInputFocusNode = FocusNode();
@@ -102,31 +106,9 @@ mixin ChatMixin<TChatCubit extends TypingCapable, TWidget extends StatefulWidget
     }
   }
 
-  Future<void> startEditByMessageId({
-    required int messageId,
-    required Future<void> Function(bool isPending) setPending,
-  }) async {
-    try {
-      await setPending(true);
-      final MessageEntity message = await context.read<MessagesCubit>().getMessageById(
-        messageId: messageId,
-        applyMarkdown: false,
-      );
-      setState(() {
-        isEditMode = true;
-        editingMessage = message;
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        messageController.text = message.content;
-        messageController.selection = TextSelection.collapsed(offset: message.content.length);
-        messageInputFocusNode.requestFocus();
-      });
-    } finally {
-      await setPending(false);
-    }
-  }
-
   void onCancelEdit() {
+    context.read<TChatCubit>().cancelEdit();
+    context.read<TChatCubit>().setIsMessagePending(false);
     setState(() {
       isEditMode = false;
       editingMessage = null;
@@ -134,34 +116,55 @@ mixin ChatMixin<TChatCubit extends TypingCapable, TWidget extends StatefulWidget
     });
   }
 
+  String extractMessageText(String content) {
+    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+    final String cleaned = content.replaceAll(pattern, '').trim();
+    return cleaned.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
+  }
+
   Future<void> onTapEditMessage(UpdateMessageRequestEntity body) async {
-    await startEditByMessageId(
-      messageId: body.messageId,
-      setPending: (pending) async => context.read<TChatCubit>().setIsMessagePending(pending),
-    );
+    try {
+      context.read<TChatCubit>().setIsMessagePending(true);
+      final MessageEntity message = await context.read<MessagesCubit>().getMessageById(
+        messageId: body.messageId,
+        applyMarkdown: false,
+      );
+      final messageBody = extractMessageText(message.content);
+      setState(() {
+        isEditMode = true;
+        editingMessage = message.copyWith(content: messageBody);
+      });
+      context.read<TChatCubit>().setUploadedFiles(message.content);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        messageController.text = messageBody;
+        messageController.selection = TextSelection.collapsed(offset: messageBody.length);
+        messageInputFocusNode.requestFocus();
+      });
+    } finally {
+      context.read<TChatCubit>().setIsMessagePending(false);
+    }
   }
 
   Future<void> submitEdit() async {
     context.read<TChatCubit>().setIsMessagePending(true);
     if (editingMessage == null) return;
-    final String newContent = messageController.text;
-    await context.read<TChatCubit>().updateMessage(
-      messageId: editingMessage!.id,
-      content: newContent,
-    );
-    setState(() {
-      messageController.clear();
-      isEditMode = false;
-      editingMessage = null;
-    });
-    context.read<TChatCubit>().setIsMessagePending(false);
-  }
-
-  void cancelEdit() {
-    setState(() {
-      isEditMode = false;
-      editingMessage = null;
-      messageController.clear();
-    });
+    try {
+      final String newContent = messageController.text;
+      await context.read<TChatCubit>().updateMessage(
+        messageId: editingMessage!.id,
+        content: newContent,
+      );
+      setState(() {
+        messageController.clear();
+        isEditMode = false;
+        editingMessage = null;
+      });
+    } catch (e) {
+      rethrow;
+    } finally {
+      if (context.mounted) {
+        context.read<TChatCubit>().setIsMessagePending(false);
+      }
+    }
   }
 }

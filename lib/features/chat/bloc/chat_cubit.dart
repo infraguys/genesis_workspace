@@ -7,8 +7,8 @@ import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
-import 'package:genesis_workspace/core/mixins/chat/chat_common_mixin.dart';
-import 'package:genesis_workspace/core/mixins/chat/chat_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
@@ -39,7 +39,9 @@ import 'package:injectable/injectable.dart';
 part 'chat_state.dart';
 
 @injectable
-class ChatCubit extends Cubit<ChatState> with ChatCommonMixin<ChatState> implements TypingCapable {
+class ChatCubit extends Cubit<ChatState>
+    with ChatCubitMixin<ChatState>
+    implements ChatCubitCapable {
   ChatCubit(
     this._realTimeService,
     this._getMessagesUseCase,
@@ -68,6 +70,8 @@ class ChatCubit extends Cubit<ChatState> with ChatCommonMixin<ChatState> impleme
           uploadFileError: null,
           isEdit: false,
           editingMessage: null,
+          editingAttachments: [],
+          isEdited: false,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -132,12 +136,17 @@ class ChatCubit extends Cubit<ChatState> with ChatCommonMixin<ChatState> impleme
   Set<int> getPendingToMarkAsRead(ChatState s) => s.pendingToMarkAsRead;
 
   @override
+  List<EditingAttachment> getEditingAttachments(ChatState s) => s.editingAttachments;
+
+  @override
   ChatState copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,
     String? uploadFileError,
     String? uploadFileErrorName,
     List<MessageEntity>? messages,
+    List<EditingAttachment>? editingAttachments,
+    bool? isEdited,
   }) {
     return state.copyWith(
       uploadedFiles: uploadedFiles ?? state.uploadedFiles,
@@ -145,6 +154,8 @@ class ChatCubit extends Cubit<ChatState> with ChatCommonMixin<ChatState> impleme
       uploadFileError: uploadFileError,
       uploadFileErrorName: uploadFileErrorName,
       messages: messages ?? state.messages,
+      editingAttachments: editingAttachments ?? state.editingAttachments,
+      isEdited: isEdited ?? state.isEdited,
     );
   }
 
@@ -246,7 +257,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCommonMixin<ChatState> impleme
 
   Future<void> sendMessage({required int chatId, required String content}) async {
     emit(state.copyWith(isMessagePending: true));
-    final String composed = buildMessageWithUploadedFilesCommon(content: content);
+    final String composed = buildMessageContent(content: content);
 
     final body = SendMessageRequestEntity(
       type: SendMessageType.direct,
