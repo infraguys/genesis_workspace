@@ -232,7 +232,14 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
       await updateMessageUseCase.call(
         UpdateMessageRequestEntity(messageId: messageId, content: composed),
       );
-      emit(copyWithCommon(uploadedFilesString: '', uploadedFiles: [], editingAttachments: []));
+      emit(
+        copyWithCommon(
+          uploadedFilesString: '',
+          uploadedFiles: [],
+          editingAttachments: [],
+          isEdited: false,
+        ),
+      );
     } catch (e) {
       inspect(e);
       rethrow;
