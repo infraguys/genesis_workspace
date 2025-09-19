@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
@@ -48,6 +50,15 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     });
   }
 
+  Future<void> _handleTextChanged() async {
+    setState(() => currentText = messageController.text);
+    await context.read<TChatCubit>().changeTyping(
+      op: currentText.trim().isEmpty ? TypingEventOp.stop : TypingEventOp.start,
+    );
+  }
+
+  //Quote message
+
   Future<void> onTapQuote(int messageId) async {
     try {
       context.read<TChatCubit>().setIsMessagePending(true);
@@ -63,16 +74,10 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         insertQuoteAndFocus(textToInsert: quote);
       });
     } catch (e) {
+      inspect(e);
     } finally {
       context.read<TChatCubit>().setIsMessagePending(false);
     }
-  }
-
-  Future<void> _handleTextChanged() async {
-    setState(() => currentText = messageController.text);
-    await context.read<TChatCubit>().changeTyping(
-      op: currentText.trim().isEmpty ? TypingEventOp.stop : TypingEventOp.start,
-    );
   }
 
   void insertQuoteAndFocus({required String textToInsert, bool append = false}) {
@@ -106,21 +111,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     }
   }
 
-  void onCancelEdit() {
-    context.read<TChatCubit>().cancelEdit();
-    context.read<TChatCubit>().setIsMessagePending(false);
-    setState(() {
-      isEditMode = false;
-      editingMessage = null;
-      messageController.clear();
-    });
-  }
-
-  String extractMessageText(String content) {
-    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
-    final String cleaned = content.replaceAll(pattern, '').trim();
-    return cleaned.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
-  }
+  //Edit message
 
   Future<void> onTapEditMessage(UpdateMessageRequestEntity body) async {
     try {
@@ -145,6 +136,16 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     }
   }
 
+  void onCancelEdit() {
+    context.read<TChatCubit>().cancelEdit();
+    context.read<TChatCubit>().setIsMessagePending(false);
+    setState(() {
+      isEditMode = false;
+      editingMessage = null;
+      messageController.clear();
+    });
+  }
+
   Future<void> submitEdit() async {
     context.read<TChatCubit>().setIsMessagePending(true);
     if (editingMessage == null) return;
@@ -166,5 +167,11 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         context.read<TChatCubit>().setIsMessagePending(false);
       }
     }
+  }
+
+  String extractMessageText(String content) {
+    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+    final String cleaned = content.replaceAll(pattern, '').trim();
+    return cleaned.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
   }
 }

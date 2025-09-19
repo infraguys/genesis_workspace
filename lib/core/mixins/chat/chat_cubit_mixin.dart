@@ -1,4 +1,3 @@
-// lib/features/chat/common/chat_common_mixin.dart
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
@@ -51,6 +50,8 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
 
   final Map<String, CancelToken> _uploadCancelTokens = <String, CancelToken>{};
   Timer? _readMessageDebounceTimer;
+
+  //Upload files
 
   Future<void> uploadImagesCommon({List<XFile>? droppedImages}) async {
     try {
@@ -223,6 +224,8 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     emit(copyWithCommon(uploadedFiles: next));
   }
 
+  //Update message
+
   Future<void> updateMessage({required int messageId, required String content}) async {
     try {
       final composed = buildMessageContent(content: content);
@@ -335,73 +338,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     emit(copyWithCommon(editingAttachments: attachments));
   }
 
-  void onMessageFlagsEventsCommon(UpdateMessageFlagsEventEntity event) {
-    final List<MessageEntity> current = List.of(getStateMessages(state));
-    bool changed = false;
-
-    for (final int messageId in event.messages) {
-      final int index = current.indexWhere((m) => m.id == messageId);
-      if (index == -1) continue;
-
-      final MessageEntity message = current[index];
-
-      if (event.flag == MessageFlag.read) {
-        final MessageEntity updated = message.copyWith(
-          flags: [...message.flags ?? <String>[], MessageFlag.read.name],
-        );
-        current[index] = updated;
-        changed = true;
-      } else if (event.flag == MessageFlag.starred) {
-        if (event.op == UpdateMessageFlagsOp.add) {
-          final MessageEntity updated = message.copyWith(
-            flags: [...message.flags ?? <String>[], MessageFlag.starred.name],
-          );
-          current[index] = updated;
-        } else if (event.op == UpdateMessageFlagsOp.remove) {
-          final List<String> nextFlags = [...?message.flags]..remove(MessageFlag.starred.name);
-          final MessageEntity updated = message.copyWith(flags: nextFlags);
-          current[index] = updated;
-        }
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      emit(copyWithCommon(messages: current));
-    }
-  }
-
-  void onReactionEventsCommon(ReactionEventEntity event) {
-    final List<MessageEntity> current = List.of(getStateMessages(state));
-    final int index = current.indexWhere((m) => m.id == event.messageId);
-    if (index == -1) return;
-
-    final MessageEntity message = current[index];
-    final List<ReactionEntity> reactions = List.of(message.reactions);
-
-    if (event.op == ReactionOp.add) {
-      reactions.add(
-        ReactionEntity(
-          emojiName: event.emojiName,
-          emojiCode: event.emojiCode,
-          reactionType: event.reactionType,
-          userId: event.userId,
-        ),
-      );
-    } else {
-      reactions.removeWhere((r) => r.userId == event.userId && r.emojiName == event.emojiName);
-    }
-
-    current[index] = message.copyWith(reactions: reactions);
-    emit(copyWithCommon(messages: current));
-  }
-
-  void onDeleteMessageEventsCommon(DeleteMessageEventEntity event) {
-    final List<MessageEntity> next = List.of(getStateMessages(state))
-      ..removeWhere((m) => m.id == event.messageId);
-    emit(copyWithCommon(messages: next));
-  }
-
+  //Read message
   void scheduleMarkAsReadCommon(int messageId) {
     final Set<int> bucket = getPendingToMarkAsRead(state);
     bucket.add(messageId);
@@ -437,6 +374,75 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     } catch (_) {
       // no-op
     }
+  }
+
+  //Events handlers
+
+  void onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
+    final List<MessageEntity> current = List.of(getStateMessages(state));
+    bool changed = false;
+
+    for (final int messageId in event.messages) {
+      final int index = current.indexWhere((m) => m.id == messageId);
+      if (index == -1) continue;
+
+      final MessageEntity message = current[index];
+
+      if (event.flag == MessageFlag.read) {
+        final MessageEntity updated = message.copyWith(
+          flags: [...message.flags ?? <String>[], MessageFlag.read.name],
+        );
+        current[index] = updated;
+        changed = true;
+      } else if (event.flag == MessageFlag.starred) {
+        if (event.op == UpdateMessageFlagsOp.add) {
+          final MessageEntity updated = message.copyWith(
+            flags: [...message.flags ?? <String>[], MessageFlag.starred.name],
+          );
+          current[index] = updated;
+        } else if (event.op == UpdateMessageFlagsOp.remove) {
+          final List<String> nextFlags = [...?message.flags]..remove(MessageFlag.starred.name);
+          final MessageEntity updated = message.copyWith(flags: nextFlags);
+          current[index] = updated;
+        }
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      emit(copyWithCommon(messages: current));
+    }
+  }
+
+  void onReactionEvents(ReactionEventEntity event) {
+    final List<MessageEntity> current = List.of(getStateMessages(state));
+    final int index = current.indexWhere((m) => m.id == event.messageId);
+    if (index == -1) return;
+
+    final MessageEntity message = current[index];
+    final List<ReactionEntity> reactions = List.of(message.reactions);
+
+    if (event.op == ReactionOp.add) {
+      reactions.add(
+        ReactionEntity(
+          emojiName: event.emojiName,
+          emojiCode: event.emojiCode,
+          reactionType: event.reactionType,
+          userId: event.userId,
+        ),
+      );
+    } else {
+      reactions.removeWhere((r) => r.userId == event.userId && r.emojiName == event.emojiName);
+    }
+
+    current[index] = message.copyWith(reactions: reactions);
+    emit(copyWithCommon(messages: current));
+  }
+
+  void onDeleteMessageEvents(DeleteMessageEventEntity event) {
+    final List<MessageEntity> next = List.of(getStateMessages(state))
+      ..removeWhere((m) => m.id == event.messageId);
+    emit(copyWithCommon(messages: next));
   }
 
   void onUpdateMessageEvents(UpdateMessageEventEntity event) {

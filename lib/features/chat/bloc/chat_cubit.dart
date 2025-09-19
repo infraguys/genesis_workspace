@@ -2,18 +2,14 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/enums/message_flag.dart';
-import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
-import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
@@ -77,11 +73,11 @@ class ChatCubit extends Cubit<ChatState>
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
     _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
     _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
-      _onMessageFlagsEvents,
+      onMessageFlagsEvents,
     );
-    _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(_onReactionEvents);
+    _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(onReactionEvents);
     _deleteMessageSubscription = _realTimeService.deleteMessageEventsStream.listen(
-      _onDeleteMessageEvents,
+      onDeleteMessageEvents,
     );
     _updateMessageSubscription = _realTimeService.updateMessageEventsStream.listen(
       onUpdateMessageEvents,
@@ -295,72 +291,6 @@ class ChatCubit extends Cubit<ChatState>
       state.messages = [...state.messages, event.message];
       emit(state.copyWith(messages: state.messages));
     }
-  }
-
-  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
-    for (var messageId in event.messages) {
-      if (event.flag == MessageFlag.read) {
-        MessageEntity message = state.messages.firstWhere(
-          (message) => message.id == messageId,
-          orElse: () => MessageEntity.fake(),
-        );
-        final int index = state.messages.indexOf(message);
-        MessageEntity changedMessage = message.copyWith(
-          flags: [...message.flags ?? [], MessageFlag.read.name],
-        );
-        state.messages[index] = changedMessage;
-      }
-      if (event.flag == MessageFlag.starred) {
-        MessageEntity message = state.messages.firstWhere(
-          (message) => message.id == messageId,
-          orElse: () => MessageEntity.fake(),
-        );
-        final int index = state.messages.indexOf(message);
-        if (event.op == UpdateMessageFlagsOp.add) {
-          MessageEntity changedMessage = message.copyWith(
-            flags: [...message.flags ?? [], MessageFlag.starred.name],
-          );
-          state.messages[index] = changedMessage;
-        } else if (event.op == UpdateMessageFlagsOp.remove) {
-          MessageEntity changedMessage = message;
-          changedMessage.flags?.remove(MessageFlag.starred.name);
-          state.messages[index] = changedMessage;
-        }
-      }
-    }
-    emit(state.copyWith(messages: state.messages));
-  }
-
-  void _onReactionEvents(ReactionEventEntity event) {
-    MessageEntity message = state.messages.firstWhere(
-      (message) => message.id == event.messageId,
-      orElse: () => MessageEntity.fake(),
-    );
-    final int index = state.messages.indexOf(message);
-    List<ReactionEntity> reactions = message.reactions;
-    if (event.op == ReactionOp.add) {
-      reactions.add(
-        ReactionEntity(
-          emojiName: event.emojiName,
-          emojiCode: event.emojiCode,
-          reactionType: event.reactionType,
-          userId: event.userId,
-        ),
-      );
-    } else if (event.op == ReactionOp.remove) {
-      reactions.removeWhere(
-        (reaction) => (reaction.userId == event.userId) && (reaction.emojiName == event.emojiName),
-      );
-    }
-    MessageEntity changedMessage = message.copyWith(reactions: reactions);
-    state.messages[index] = changedMessage;
-    emit(state.copyWith(messages: state.messages));
-  }
-
-  void _onDeleteMessageEvents(DeleteMessageEventEntity event) {
-    final updatedMessages = [...state.messages];
-    updatedMessages.removeWhere((message) => message.id == event.messageId);
-    emit(state.copyWith(messages: updatedMessages));
   }
 
   @override
