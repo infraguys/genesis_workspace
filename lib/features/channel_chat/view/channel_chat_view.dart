@@ -328,6 +328,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                         final bool isSendEnabled =
                             canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
 
+                        final bool isEditEnabled = isSendEnabled || state.isEdited;
+
                         return Container(
                           key: dropAreaKey,
                           child: MessageInput(
@@ -347,6 +349,15 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     } catch (e) {}
                                   }
                                 : null,
+                            onEdit: isEditEnabled
+                                ? () async {
+                                    try {
+                                      await submitEdit();
+                                    } on DioException catch (e) {
+                                      showErrorSnackBar(context, exception: e);
+                                    }
+                                  }
+                                : null,
                             onUploadFile: () async {
                               await context.read<ChannelChatCubit>().uploadFilesCommon();
                             },
@@ -356,17 +367,14 @@ class _ChannelChatViewState extends State<ChannelChatView>
                             onUploadImage: () async {
                               await context.read<ChannelChatCubit>().uploadImagesCommon();
                             },
-                            onEdit: () async {
-                              try {
-                                await submitEdit();
-                              } on DioException catch (e) {
-                                showErrorSnackBar(context, exception: e);
-                              }
-                            },
                             isDropOver: isDropOver,
                             onCancelEdit: onCancelEdit,
                             isEdit: isEditMode,
                             editingMessage: editingMessage,
+                            editingFiles: state.editingAttachments,
+                            onRemoveEditingAttachment: (attachment) {
+                              context.read<ChannelChatCubit>().removeEditingAttachment(attachment);
+                            },
                           ),
                         );
                       },

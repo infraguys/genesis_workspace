@@ -155,6 +155,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
       uploadFileError: uploadFileError,
       uploadFileErrorName: uploadFileErrorName,
       messages: messages ?? state.messages,
+      editingAttachments: editingAttachments ?? state.editingAttachments,
       isEdited: isEdited ?? state.isEdited,
     );
   }
