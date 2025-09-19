@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
@@ -307,6 +308,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
                           ),
                         );
                       }
+                      if (platformInfo.isDesktop) {
+                        messageInputFocusNode.requestFocus();
+                      }
                     },
                     child: BlocBuilder<ChannelChatCubit, ChannelChatState>(
                       buildWhen: (prev, current) => prev.uploadedFiles != current.uploadedFiles,
@@ -346,7 +350,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                         content: content,
                                         topic: state.topic?.name,
                                       );
-                                    } catch (e) {}
+                                    } catch (e) {
+                                    } finally {
+                                      if (platformInfo.isDesktop) {
+                                        messageInputFocusNode.requestFocus();
+                                      }
+                                    }
                                   }
                                 : null,
                             onEdit: isEditEnabled
@@ -355,17 +364,27 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                       await submitEdit();
                                     } on DioException catch (e) {
                                       showErrorSnackBar(context, exception: e);
+                                    } finally {
+                                      if (platformInfo.isDesktop) {
+                                        messageInputFocusNode.requestFocus();
+                                      }
                                     }
                                   }
                                 : null,
                             onUploadFile: () async {
                               await context.read<ChannelChatCubit>().uploadFilesCommon();
+                              if (platformInfo.isDesktop) {
+                                messageInputFocusNode.requestFocus();
+                              }
                             },
                             onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
                             onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
                             files: inputState.uploadedFiles,
                             onUploadImage: () async {
                               await context.read<ChannelChatCubit>().uploadImagesCommon();
+                              if (platformInfo.isDesktop) {
+                                messageInputFocusNode.requestFocus();
+                              }
                             },
                             isDropOver: isDropOver,
                             onCancelEdit: onCancelEdit,
