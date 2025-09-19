@@ -98,11 +98,13 @@
   "message_actions": {
     "quote": "Quote this message",
     "delete": "Delete this message",
-    "star": "Star this message"
+    "star": "Star this message",
+    "edit": "Edit this message"
   },
   "attachment_button": {
     "file": "Pick a file",
     "image": "Pick an image"
   },
-  "drop_files_to_upload": "Drop files here to upload"
+  "drop_files_to_upload": "Drop files here to upload",
+  "cancel_editing": "Cancel editing"
 }

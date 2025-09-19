@@ -38,6 +38,7 @@ const _$EventTypeEnumMap = {
   EventType.updateMessageFlags: 'update_message_flags',
   EventType.reaction: 'reaction',
   EventType.deleteMessage: 'delete_message',
+  EventType.updateMessage: 'update_message',
   EventType.unsupported: 'unsupported',
 };
 

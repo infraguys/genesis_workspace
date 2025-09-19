@@ -9,6 +9,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/message
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
@@ -55,6 +56,11 @@ class RealTimeService {
   Stream<DeleteMessageEventEntity> get deleteMessageEventsStream =>
       _deleteMessageEventsController.stream;
 
+  StreamController<UpdateMessageEventEntity> _updateMessageEventsController =
+      StreamController<UpdateMessageEventEntity>.broadcast();
+  Stream<UpdateMessageEventEntity> get updateMessageEventsStream =>
+      _updateMessageEventsController.stream;
+
   Future<RegisterQueueEntity> registerQueue() async {
     try {
       final RegisterQueueEntity response = await _registerQueueUseCase.call(
@@ -91,6 +97,8 @@ class RealTimeService {
             _presenceEventsController.add(event as PresenceEventEntity);
           case EventType.deleteMessage:
             _deleteMessageEventsController.add(event as DeleteMessageEventEntity);
+          case EventType.updateMessage:
+            _updateMessageEventsController.add(event as UpdateMessageEventEntity);
           default:
             break;
         }
@@ -126,6 +134,9 @@ class RealTimeService {
     }
     if (_deleteMessageEventsController.isClosed) {
       _deleteMessageEventsController = StreamController<DeleteMessageEventEntity>.broadcast();
+    }
+    if (_updateMessageEventsController.isClosed) {
+      _updateMessageEventsController = StreamController<UpdateMessageEventEntity>.broadcast();
     }
     if (_isPolling) return;
     try {

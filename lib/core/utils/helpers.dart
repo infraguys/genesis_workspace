@@ -256,3 +256,9 @@ String? _tryToFilePath(Uri? uri) {
     return null;
   }
 }
+
+String extractMessageText(String content) {
+  final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+  final String cleaned = content.replaceAll(pattern, '').trim();
+  return cleaned.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
+}

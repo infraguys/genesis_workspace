@@ -7,6 +7,7 @@ class MessageActions extends StatelessWidget {
   final Function()? onTapQuote;
   final bool isStarred;
   final bool isMyMessage;
+  final VoidCallback? onTapEdit;
   const MessageActions({
     super.key,
     required this.onTapStarred,
@@ -14,6 +15,7 @@ class MessageActions extends StatelessWidget {
     required this.isStarred,
     required this.isMyMessage,
     required this.onTapDelete,
+    this.onTapEdit,
   });
 
   @override
@@ -47,10 +49,12 @@ class MessageActions extends StatelessWidget {
               icon: Icon(Icons.delete, color: theme.colorScheme.error),
             ),
           ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.copy, color: theme.colorScheme.onSurface),
-        ),
+        if (isMyMessage)
+          IconButton(
+            tooltip: 'Edit',
+            onPressed: onTapEdit,
+            icon: Icon(Icons.edit, color: theme.colorScheme.onSurface),
+          ),
       ],
     );
   }

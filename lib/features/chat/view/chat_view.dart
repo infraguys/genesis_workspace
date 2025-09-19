@@ -1,31 +1,31 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
-import 'package:genesis_workspace/core/enums/typing_event_op.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
-import 'package:flutter/foundation.dart';
-import 'package:genesis_workspace/core/utils/web_drop.dart';
 
 class ChatView extends StatefulWidget {
   final int userId;
@@ -37,56 +37,11 @@ class ChatView extends StatefulWidget {
   State<ChatView> createState() => _ChatViewState();
 }
 
-class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
+class _ChatViewState extends State<ChatView>
+    with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
-  late final TextEditingController _messageController;
-
-  final FocusNode _messageInputFocusNode = FocusNode();
-
-  String _currentText = '';
-  bool isDropOver = false;
-  final GlobalKey _dropAreaKey = GlobalKey();
-  RemoveDropHandlers? _removeWebDnD;
-
-  Future<void> _onTextChanged() async {
-    setState(() {
-      _currentText = _messageController.text;
-    });
-    await context.read<ChatCubit>().changeTyping(
-      op: _currentText.isEmpty ? TypingEventOp.stop : TypingEventOp.start,
-    );
-  }
-
-  void insertQuoteAndFocus({required String textToInsert, bool append = false}) {
-    final String current = _messageController.text;
-    final String nextText = append && current.isNotEmpty ? '$current\n$textToInsert' : textToInsert;
-
-    _messageController.text = nextText;
-    _messageController.selection = TextSelection.collapsed(offset: nextText.length);
-    _messageInputFocusNode.requestFocus();
-  }
-
-  Future<void> onTapQuote(int messageId) async {
-    try {
-      context.read<ChatCubit>().setIsMessagePending(true);
-
-      final singleMessage = await context.read<MessagesCubit>().getMessageById(
-        messageId: messageId,
-        applyMarkdown: false,
-      );
-
-      final String quote = generateMessageQuote(singleMessage);
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        insertQuoteAndFocus(textToInsert: quote);
-      });
-    } catch (e) {
-    } finally {
-      context.read<ChatCubit>().setIsMessagePending(false);
-    }
-  }
 
   @override
   void initState() {
@@ -99,13 +54,13 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       unreadMessagesCount: widget.unreadMessagesCount,
     );
     _controller = ScrollController();
-    _messageController = TextEditingController();
+    messageController = TextEditingController();
 
-    _messageController.addListener(_onTextChanged);
+    messageController.addListener(onTextChanged);
     super.initState();
     if (kIsWeb) {
-      _removeWebDnD = attachWebDropHandlersForKey(
-        targetKey: _dropAreaKey,
+      removeWebDnD = attachWebDropHandlersForKey(
+        targetKey: dropAreaKey,
         onIsOverChange: (over) {
           if (isDropOver != over) {
             setState(() => isDropOver = over);
@@ -140,10 +95,10 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
-    _messageController.removeListener(_onTextChanged);
-    _messageController.dispose();
-    _messageInputFocusNode.dispose();
-    _removeWebDnD?.call();
+    messageController.removeListener(onTextChanged);
+    messageController.dispose();
+    messageInputFocusNode.dispose();
+    removeWebDnD?.call();
     super.dispose();
   }
 
@@ -295,6 +250,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                             isSkeleton: true,
                                             myUserId: _myUser.userId,
                                             onTapQuote: (_) {},
+                                            onTapEditMessage: (_) {},
                                           );
                                         },
                                       ),
@@ -310,6 +266,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                                       showTopic: true,
                                       myUserId: _myUser.userId,
                                       onTapQuote: onTapQuote,
+                                      onTapEditMessage: onTapEditMessage,
                                     ),
                             ),
                           ),
@@ -368,8 +325,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                       child: BlocBuilder<ChatCubit, ChatState>(
                         buildWhen: (prev, current) => (prev.uploadedFiles != current.uploadedFiles),
                         builder: (context, inputState) {
-                          final String currentText = _currentText.trim();
-                          final bool hasText = currentText.isNotEmpty;
+                          final String _currentText = currentText.trim();
+                          final bool hasText = _currentText.isNotEmpty;
 
                           final files = inputState.uploadedFiles;
                           final bool hasFiles = files.isNotEmpty;
@@ -385,37 +342,54 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
 
                           final bool isSendEnabled =
                               canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                          final bool isEditEnabled = isSendEnabled || state.isEdited;
 
                           return Container(
-                            key: _dropAreaKey,
+                            key: dropAreaKey,
                             child: MessageInput(
-                              controller: _messageController,
+                              controller: messageController,
                               isMessagePending: state.isMessagePending,
-                              focusNode: _messageInputFocusNode,
-                            onSend: isSendEnabled
-                                ? () async {
-                                    final content = _messageController.text;
-                                    _messageController.clear();
-                                    try {
-                                      await context.read<ChatCubit>().sendMessage(
-                                        chatId: state.userEntity!.userId,
-                                        content: content,
-                                      );
-                                    } catch (e) {
-                                      inspect(e);
+                              focusNode: messageInputFocusNode,
+                              onSend: isSendEnabled
+                                  ? () async {
+                                      final content = messageController.text;
+                                      messageController.clear();
+                                      try {
+                                        await context.read<ChatCubit>().sendMessage(
+                                          chatId: state.userEntity!.userId,
+                                          content: content,
+                                        );
+                                      } catch (e) {
+                                        inspect(e);
+                                      }
                                     }
-                                  }
-                                : null,
-                            onUploadFile: () async {
-                              await context.read<ChatCubit>().uploadFilesCommon();
-                            },
-                            onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
-                            onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
-                            files: inputState.uploadedFiles,
+                                  : null,
+                              onEdit: isEditEnabled
+                                  ? () async {
+                                      try {
+                                        await submitEdit();
+                                      } on DioException catch (e) {
+                                        showErrorSnackBar(context, exception: e);
+                                      }
+                                    }
+                                  : null,
+                              onUploadFile: () async {
+                                await context.read<ChatCubit>().uploadFilesCommon();
+                              },
+                              onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
+                              onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
+                              files: inputState.uploadedFiles,
                               onUploadImage: () async {
                                 await context.read<ChatCubit>().uploadImagesCommon();
                               },
                               isDropOver: isDropOver,
+                              onCancelEdit: onCancelEdit,
+                              isEdit: isEditMode,
+                              editingMessage: editingMessage,
+                              editingFiles: state.editingAttachments,
+                              onRemoveEditingAttachment: (attachment) {
+                                context.read<ChatCubit>().removeEditingAttachment(attachment);
+                              },
                             ),
                           );
                         },
