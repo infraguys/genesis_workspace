@@ -265,7 +265,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     final uploadedFiles = getUploadedFiles(state);
 
     final String trimmedContent = stripExistingAttachmentsFromContent
-        ? _removeAttachmentsFromContent(content)
+        ? extractMessageText(content)
         : content.trim();
 
     final List<String> editingLinks = editingAttachments
@@ -283,7 +283,6 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
         .where((link) => link.isNotEmpty)
         .toList();
 
-    // Дедупликация с сохранением порядка
     final LinkedHashSet<String> uniqueFileLinks = LinkedHashSet<String>()
       ..addAll(editingLinks)
       ..addAll(uploadedLinks);
@@ -299,12 +298,6 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     }
 
     return nonEmptyParts.join('\n');
-  }
-
-  String _removeAttachmentsFromContent(String content) {
-    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
-    final String withoutAttachments = content.replaceAll(pattern, '');
-    return withoutAttachments.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
   }
 
   List<EditingAttachment> parseAttachments(String content) {
@@ -447,13 +440,12 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
 
   void onUpdateMessageEvents(UpdateMessageEventEntity event) {
     final updatedMessages = [...getStateMessages(state)];
-    final updatedMessage = updatedMessages.firstWhere(
-      (message) => message.id == event.messageId,
-      orElse: () => MessageEntity.fake(),
-    );
-    final int index = updatedMessages.indexOf(updatedMessage);
-    updatedMessages[index] = updatedMessage.copyWith(content: event.renderedContent);
-    emit(copyWithCommon(messages: updatedMessages));
+    final int index = updatedMessages.indexWhere((m) => m.id == event.messageId);
+    if (index != -1) {
+      final MessageEntity message = updatedMessages[index];
+      updatedMessages[index] = message.copyWith(content: event.renderedContent);
+      emit(copyWithCommon(messages: updatedMessages));
+    }
   }
 
   void disposeCommon() {

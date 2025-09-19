@@ -168,10 +168,4 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
       }
     }
   }
-
-  String extractMessageText(String content) {
-    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
-    final String cleaned = content.replaceAll(pattern, '').trim();
-    return cleaned.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
-  }
 }

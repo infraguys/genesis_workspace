@@ -15,7 +15,7 @@ class EditingAttachmentTile extends StatelessWidget {
     final bool isImage = attachment.type == UploadFileType.image;
 
     return Container(
-      width: 84, // уже по ширине, чем твои 96
+      width: 84,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
