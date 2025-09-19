@@ -5,6 +5,7 @@ import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_action.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
@@ -279,7 +280,7 @@ class _MessageInputState extends State<MessageInput> {
                             focusNode: widget.focusNode,
                             minLines: 1,
                             maxLines: 4,
-                            autofocus: currentSize(context) >= ScreenSize.lTablet,
+                            autofocus: platformInfo.isDesktop,
                             onTap: () {
                               if (currentSize(context) < ScreenSize.lTablet) {
                                 context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
@@ -296,7 +297,9 @@ class _MessageInputState extends State<MessageInput> {
                                   widget.onSend!();
                                 }
                               }
-                              widget.focusNode.requestFocus();
+                              if (platformInfo.isDesktop) {
+                                widget.focusNode.requestFocus();
+                              }
                             },
                             decoration: InputDecoration(
                               border: InputBorder.none,
