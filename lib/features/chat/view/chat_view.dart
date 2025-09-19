@@ -10,6 +10,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
@@ -321,6 +322,9 @@ class _ChatViewState extends State<ChatView>
                             context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
                           );
                         }
+                        if (platformInfo.isDesktop) {
+                          messageInputFocusNode.requestFocus();
+                        }
                       },
                       child: BlocBuilder<ChatCubit, ChatState>(
                         buildWhen: (prev, current) => (prev.uploadedFiles != current.uploadedFiles),
@@ -361,6 +365,10 @@ class _ChatViewState extends State<ChatView>
                                         );
                                       } catch (e) {
                                         inspect(e);
+                                      } finally {
+                                        if (platformInfo.isDesktop) {
+                                          messageInputFocusNode.requestFocus();
+                                        }
                                       }
                                     }
                                   : null,
@@ -370,17 +378,27 @@ class _ChatViewState extends State<ChatView>
                                         await submitEdit();
                                       } on DioException catch (e) {
                                         showErrorSnackBar(context, exception: e);
+                                      } finally {
+                                        if (platformInfo.isDesktop) {
+                                          messageInputFocusNode.requestFocus();
+                                        }
                                       }
                                     }
                                   : null,
                               onUploadFile: () async {
                                 await context.read<ChatCubit>().uploadFilesCommon();
+                                if (platformInfo.isDesktop) {
+                                  messageInputFocusNode.requestFocus();
+                                }
                               },
                               onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
                               onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
                               files: inputState.uploadedFiles,
                               onUploadImage: () async {
                                 await context.read<ChatCubit>().uploadImagesCommon();
+                                if (platformInfo.isDesktop) {
+                                  messageInputFocusNode.requestFocus();
+                                }
                               },
                               isDropOver: isDropOver,
                               onCancelEdit: onCancelEdit,
