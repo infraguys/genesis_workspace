@@ -279,6 +279,7 @@ class _MessageInputState extends State<MessageInput> {
                             focusNode: widget.focusNode,
                             minLines: 1,
                             maxLines: 4,
+                            autofocus: currentSize(context) >= ScreenSize.lTablet,
                             onTap: () {
                               if (currentSize(context) < ScreenSize.lTablet) {
                                 context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
@@ -295,6 +296,7 @@ class _MessageInputState extends State<MessageInput> {
                                   widget.onSend!();
                                 }
                               }
+                              widget.focusNode.requestFocus();
                             },
                             decoration: InputDecoration(
                               border: InputBorder.none,
