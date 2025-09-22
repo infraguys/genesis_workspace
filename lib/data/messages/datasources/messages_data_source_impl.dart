@@ -131,7 +131,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   }) async {
     try {
       final FormData formData = FormData();
-      final MultipartFile part = kIsWeb
+      final MultipartFile part = (kIsWeb || body.file.path == null || body.file.path!.isEmpty)
           ? MultipartFile.fromBytes(body.file.bytes!, filename: body.file.name)
           : await MultipartFile.fromFile(body.file.path ?? '', filename: body.file.name);
       formData.files.add(MapEntry('file', part));

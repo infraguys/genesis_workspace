@@ -144,6 +144,8 @@ import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart'
     as _i1068;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
+import 'package:genesis_workspace/services/paste/paste_capture_service.dart'
+    as _i113;
 import 'package:genesis_workspace/services/real_time/real_time_service.dart'
     as _i82;
 import 'package:genesis_workspace/services/token_storage/token_storage.dart'
@@ -180,6 +182,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
+    );
+    gh.lazySingleton<_i113.PasteCaptureService>(
+      () => _i113.PasteCaptureService(),
     );
     gh.lazySingleton<_i435.LocalizationService>(
       () => _i435.LocalizationService(),

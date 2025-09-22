@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -24,6 +25,7 @@ import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
@@ -43,6 +45,7 @@ class _ChatViewState extends State<ChatView>
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
+  final PasteCaptureService pasteCaptureService = getIt<PasteCaptureService>();
 
   @override
   void initState() {
@@ -348,66 +351,103 @@ class _ChatViewState extends State<ChatView>
                               canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
                           final bool isEditEnabled = isSendEnabled || state.isEdited;
 
-                          return Container(
-                            key: dropAreaKey,
-                            child: MessageInput(
-                              controller: messageController,
-                              isMessagePending: state.isMessagePending,
-                              focusNode: messageInputFocusNode,
-                              onSend: isSendEnabled
-                                  ? () async {
-                                      final content = messageController.text;
-                                      messageController.clear();
-                                      try {
-                                        await context.read<ChatCubit>().sendMessage(
-                                          chatId: state.userEntity!.userId,
-                                          content: content,
-                                        );
-                                      } catch (e) {
-                                        inspect(e);
-                                      } finally {
-                                        if (platformInfo.isDesktop) {
-                                          messageInputFocusNode.requestFocus();
+                          return Actions(
+                            actions: <Type, Action<Intent>>{
+                              PasteTextIntent: _ChatPasteAction(
+                                onPaste: () async {
+                                  try {
+                                    final captured = await pasteCaptureService.captureNow();
+
+                                    switch (captured.runtimeType) {
+                                      case String:
+                                        messageController.text =
+                                            '${messageController.text}$captured';
+                                        break;
+
+                                      case PlatformFile:
+                                        final PlatformFile platformFile = captured as PlatformFile;
+                                        // await onPasteFiles([platformFile]);
+                                        // break;
+                                        final extension = extensionOf(
+                                          platformFile.name,
+                                        ).toLowerCase();
+                                        if (isImageExtension(extension)) {
+                                          await onPasteImage([platformFile]);
+                                        } else {
+                                          await onPasteFiles([platformFile]);
+                                        }
+                                        break;
+
+                                      default:
+                                        print('Unknown type: ${captured.runtimeType}');
+                                    }
+                                  } catch (e) {
+                                    inspect(e);
+                                  }
+                                },
+                              ),
+                            },
+                            child: Container(
+                              key: dropAreaKey,
+                              child: MessageInput(
+                                controller: messageController,
+                                isMessagePending: state.isMessagePending,
+                                focusNode: messageInputFocusNode,
+                                onSend: isSendEnabled
+                                    ? () async {
+                                        final content = messageController.text;
+                                        messageController.clear();
+                                        try {
+                                          await context.read<ChatCubit>().sendMessage(
+                                            chatId: state.userEntity!.userId,
+                                            content: content,
+                                          );
+                                        } catch (e) {
+                                          inspect(e);
+                                        } finally {
+                                          if (platformInfo.isDesktop) {
+                                            messageInputFocusNode.requestFocus();
+                                          }
                                         }
                                       }
-                                    }
-                                  : null,
-                              onEdit: isEditEnabled
-                                  ? () async {
-                                      try {
-                                        await submitEdit();
-                                      } on DioException catch (e) {
-                                        showErrorSnackBar(context, exception: e);
-                                      } finally {
-                                        if (platformInfo.isDesktop) {
-                                          messageInputFocusNode.requestFocus();
+                                    : null,
+                                onEdit: isEditEnabled
+                                    ? () async {
+                                        try {
+                                          await submitEdit();
+                                        } on DioException catch (e) {
+                                          showErrorSnackBar(context, exception: e);
+                                        } finally {
+                                          if (platformInfo.isDesktop) {
+                                            messageInputFocusNode.requestFocus();
+                                          }
                                         }
                                       }
-                                    }
-                                  : null,
-                              onUploadFile: () async {
-                                await context.read<ChatCubit>().uploadFilesCommon();
-                                if (platformInfo.isDesktop) {
-                                  messageInputFocusNode.requestFocus();
-                                }
-                              },
-                              onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
-                              onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
-                              files: inputState.uploadedFiles,
-                              onUploadImage: () async {
-                                await context.read<ChatCubit>().uploadImagesCommon();
-                                if (platformInfo.isDesktop) {
-                                  messageInputFocusNode.requestFocus();
-                                }
-                              },
-                              isDropOver: isDropOver,
-                              onCancelEdit: onCancelEdit,
-                              isEdit: isEditMode,
-                              editingMessage: editingMessage,
-                              editingFiles: state.editingAttachments,
-                              onRemoveEditingAttachment: (attachment) {
-                                context.read<ChatCubit>().removeEditingAttachment(attachment);
-                              },
+                                    : null,
+                                onUploadFile: () async {
+                                  await context.read<ChatCubit>().uploadFilesCommon();
+                                  if (platformInfo.isDesktop) {
+                                    messageInputFocusNode.requestFocus();
+                                  }
+                                },
+                                onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
+                                onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
+                                files: inputState.uploadedFiles,
+                                onUploadImage: () async {
+                                  await context.read<ChatCubit>().uploadImagesCommon();
+                                  if (platformInfo.isDesktop) {
+                                    messageInputFocusNode.requestFocus();
+                                  }
+                                },
+                                isDropOver: isDropOver,
+                                onCancelEdit: onCancelEdit,
+                                isEdit: isEditMode,
+                                editingMessage: editingMessage,
+                                editingFiles: state.editingAttachments,
+                                onRemoveEditingAttachment: (attachment) {
+                                  context.read<ChatCubit>().removeEditingAttachment(attachment);
+                                },
+                              ),
                             ),
                           );
                         },
@@ -421,5 +461,16 @@ class _ChatViewState extends State<ChatView>
         );
       },
     );
+  }
+}
+
+class _ChatPasteAction extends Action<PasteTextIntent> {
+  _ChatPasteAction({required this.onPaste});
+  final Future<void> Function() onPaste;
+
+  @override
+  Future<Object?> invoke(PasteTextIntent intent) async {
+    await onPaste();
+    return null;
   }
 }

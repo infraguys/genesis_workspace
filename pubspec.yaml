@@ -69,6 +69,7 @@ dependencies:
   super_drag_and_drop: ^0.9.1
   path: ^1.9.1
   cross_file: ^0.3.4+2
+  super_clipboard: ^0.9.1
 
 dev_dependencies:
   flutter_test:

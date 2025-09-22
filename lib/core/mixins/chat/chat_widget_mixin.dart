@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
@@ -9,6 +10,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:image_picker/image_picker.dart';
 
 abstract class ChatCubitCapable {
   Future<void> changeTyping({required TypingEventOp op});
@@ -17,6 +19,11 @@ abstract class ChatCubitCapable {
   void setUploadedFiles(String content);
   void removeEditingAttachment(EditingAttachment attachment);
   void cancelEdit();
+  Future<void> uploadFilesCommon({List<PlatformFile>? droppedFiles});
+  Future<void> uploadImagesCommon({
+    List<XFile>? droppedImages,
+    List<PlatformFile> droppedPlatformImages,
+  });
 }
 
 mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends StatefulWidget>
@@ -167,5 +174,15 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         context.read<TChatCubit>().setIsMessagePending(false);
       }
     }
+  }
+
+  // Paste files
+  Future<void> onPasteFiles(List<PlatformFile>? files) async {
+    await context.read<TChatCubit>().uploadFilesCommon(droppedFiles: files);
+  }
+
+  // Paste files
+  Future<void> onPasteImage(List<PlatformFile>? files) async {
+    await context.read<TChatCubit>().uploadImagesCommon(droppedPlatformImages: files ?? []);
   }
 }

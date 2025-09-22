@@ -24,6 +24,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/reactio
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
 
 mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   UploadFileUseCase get uploadFileUseCase;
@@ -53,40 +54,88 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
 
   //Upload files
 
-  Future<void> uploadImagesCommon({List<XFile>? droppedImages}) async {
+  Future<void> uploadImagesCommon({
+    List<XFile>? droppedImages,
+    List<PlatformFile>? droppedPlatformImages,
+  }) async {
     try {
-      final List<XFile> images = droppedImages ?? await pickImages();
-      if (images.isEmpty) return;
+      // 1) Если пришли PlatformFile — используем их напрямую
+      final List<PlatformFile> platformFiles =
+          (droppedPlatformImages != null && droppedPlatformImages.isNotEmpty)
+          ? droppedPlatformImages
+          : <PlatformFile>[];
+
+      // 2) Если нет — тогда работаем с XFile (из picker)
+      final List<XFile> xfiles = (platformFiles.isEmpty)
+          ? (droppedImages ?? await pickImages())
+          : const <XFile>[];
+
+      if (platformFiles.isEmpty && xfiles.isEmpty) return;
 
       final List<Future<void>> uploadTasks = <Future<void>>[];
 
-      for (final XFile image in images) {
-        final int fileSize = await image.length();
-        final String localId = generateFileLocalId(image.name);
-        final Uint8List bytes = await image.readAsBytes();
+      // === ВЕТКА A: PlatformFile (вставка из clipboard/drag&drop) ===
+      for (final PlatformFile platformfile in platformFiles) {
+        final Uint8List bytes = platformfile.bytes ?? Uint8List(0);
+        final int fileSize = bytes.isNotEmpty ? bytes.length : platformfile.size;
+        final String localId = generateFileLocalId(platformfile.name);
 
         final UploadingFileEntity placeholder = UploadingFileEntity(
           localId: localId,
-          filename: image.name,
+          filename: platformfile.name,
           size: fileSize,
           bytesSent: 0,
           bytesTotal: fileSize == 0 ? null : fileSize,
           type: UploadFileType.image,
-          path: image.path,
+          path: (platformfile.path != null && platformfile.path!.isNotEmpty)
+              ? platformfile.path
+              : null,
           bytes: bytes,
         );
         _addUploadingFile(placeholder);
 
-        final PlatformFile platformFile = PlatformFile(
-          name: image.name,
+        uploadTasks.add(
+          _uploadSingleFileCommon(
+            platformFile: PlatformFile(
+              name: platformfile.name,
+              size: fileSize,
+              path: (platformfile.path != null && platformfile.path!.isNotEmpty)
+                  ? platformfile.path
+                  : null,
+              bytes: bytes.isNotEmpty ? bytes : null,
+            ),
+            localId: localId,
+            type: UploadFileType.image,
+          ),
+        );
+      }
+
+      // === ВЕТКА B: XFile (image_picker) ===
+      for (final XFile x in xfiles) {
+        final Uint8List bytes = await x.readAsBytes();
+        final int fileSize = bytes.length;
+        final String localId = generateFileLocalId(x.name);
+
+        final UploadingFileEntity placeholder = UploadingFileEntity(
+          localId: localId,
+          filename: x.name,
           size: fileSize,
-          path: image.path,
+          bytesSent: 0,
+          bytesTotal: fileSize == 0 ? null : fileSize,
+          type: UploadFileType.image,
+          path: (x.path.isNotEmpty) ? x.path : null, // НЕ ''
           bytes: bytes,
         );
+        _addUploadingFile(placeholder);
 
         uploadTasks.add(
           _uploadSingleFileCommon(
-            platformFile: platformFile,
+            platformFile: PlatformFile(
+              name: x.name,
+              size: fileSize,
+              path: (x.path.isNotEmpty) ? x.path : null,
+              bytes: bytes,
+            ),
             localId: localId,
             type: UploadFileType.image,
           ),
@@ -94,9 +143,9 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
       }
 
       await Future.wait(uploadTasks, eagerError: true);
-    } catch (e, st) {
-      inspect(e);
-      inspect(st);
+    } catch (error, stackTrace) {
+      inspect(error);
+      inspect(stackTrace);
     }
   }
 
@@ -135,6 +184,56 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
 
     if (uploadTasks.isEmpty) return;
     await Future.wait(uploadTasks, eagerError: true);
+  }
+
+  String? _guessImageMimeType(String fileName) {
+    final String ext = path.extension(fileName).toLowerCase();
+    switch (ext) {
+      case '.png':
+        return 'image/png';
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.gif':
+        return 'image/gif';
+      case '.webp':
+        return 'image/webp';
+      default:
+        return null;
+    }
+  }
+
+  XFile _xfileFromPlatformFile(PlatformFile platformFile) {
+    if (platformFile.bytes != null) {
+      final Uint8List data = platformFile.bytes!;
+      return XFile.fromData(
+        data,
+        name: platformFile.name,
+        length: data.length,
+        mimeType: _guessImageMimeType(platformFile.name),
+      );
+    }
+    if (platformFile.path != null && platformFile.path!.isNotEmpty) {
+      return XFile(
+        platformFile.path!,
+        name: platformFile.name,
+        // mimeType не обязателен
+      );
+    }
+    throw StateError('PlatformFile "${platformFile.name}" не содержит ни bytes, ни path.');
+  }
+
+  Future<List<XFile>> _normalizeImages({
+    List<XFile>? droppedImages,
+    List<PlatformFile>? droppedPlatformImages,
+  }) async {
+    if (droppedImages != null && droppedImages.isNotEmpty) {
+      return droppedImages;
+    }
+    if (droppedPlatformImages != null && droppedPlatformImages.isNotEmpty) {
+      return droppedPlatformImages.map(_xfileFromPlatformFile).toList(growable: false);
+    }
+    return await pickImages();
   }
 
   Future<void> _uploadSingleFileCommon({

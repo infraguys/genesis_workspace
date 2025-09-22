@@ -34,14 +34,32 @@ class AttachmentTile extends StatefulWidget {
 }
 
 class _AttachmentTileState extends State<AttachmentTile> {
-  String _cachedPreviewPath = '';
+  String? _cachedPreviewPath;
+  bool isImage = false;
+  String? effectivePath;
+  ImageProvider? previewImage;
 
   @override
   void initState() {
     super.initState();
-    if (widget.file.type == UploadFileType.image && widget.file.path.isNotEmpty) {
-      _cachedPreviewPath = widget.file.path;
+    if (widget.file.type == UploadFileType.image &&
+        widget.file.path != null &&
+        widget.file.path!.isNotEmpty) {
+      _cachedPreviewPath = widget.file.path!;
     }
+    isImage = widget.file.type == UploadFileType.image;
+
+    effectivePath = isImage
+        ? ((widget.file.path != null && widget.file.path!.isNotEmpty)
+              ? widget.file.path
+              : _cachedPreviewPath)
+        : null;
+
+    previewImage =
+        (isImage &&
+            ((effectivePath != null && effectivePath!.isNotEmpty) || widget.file.bytes.isNotEmpty))
+        ? createAttachmentImageProvider(path: effectivePath, bytes: widget.file.bytes)
+        : null;
   }
 
   @override
@@ -49,12 +67,13 @@ class _AttachmentTileState extends State<AttachmentTile> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.file.localId != oldWidget.file.localId) {
-      _cachedPreviewPath = widget.file.type == UploadFileType.image ? widget.file.path : '';
+      _cachedPreviewPath = widget.file.type == UploadFileType.image ? widget.file.path : null;
       return;
     }
 
     if (widget.file.type == UploadFileType.image &&
-        widget.file.path.isNotEmpty &&
+        widget.file.path != null &&
+        widget.file.path!.isNotEmpty &&
         widget.file.path != oldWidget.file.path) {
       _cachedPreviewPath = widget.file.path;
     }
@@ -63,16 +82,6 @@ class _AttachmentTileState extends State<AttachmentTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bool isImage = widget.file.type == UploadFileType.image;
-
-    final String effectivePath = isImage
-        ? (widget.file.path.isNotEmpty ? widget.file.path : _cachedPreviewPath)
-        : '';
-
-    final ImageProvider? previewImage = (isImage && effectivePath.isNotEmpty)
-        ? createAttachmentImageProvider(effectivePath)
-        : null;
-
     final double? progressValue = _computeProgress(widget.bytesSent, widget.bytesTotal);
     final String? percentText = progressValue != null
         ? '${(progressValue * 100).clamp(0, 100).toStringAsFixed(0)}%'
@@ -103,7 +112,7 @@ class _AttachmentTileState extends State<AttachmentTile> {
                       tag: widget.file.bytes.toString(),
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          image: DecorationImage(image: previewImage, fit: BoxFit.cover),
+                          image: DecorationImage(image: previewImage!, fit: BoxFit.cover),
                         ),
                       ),
                     ),
