@@ -63,6 +63,8 @@ class TranslationsRu extends Translations {
 	@override String get error => 'Ошибка';
 	@override late final TranslationsMessageActionsRu messageActions = TranslationsMessageActionsRu._(_root);
 	@override late final TranslationsAttachmentButtonRu attachmentButton = TranslationsAttachmentButtonRu._(_root);
+	@override String get dropFilesToUpload => 'Отпустите файлы, чтобы загрузить';
+	@override String get cancelEditing => 'Отменить редактирование';
 }
 
 // Path: auth
@@ -227,6 +229,7 @@ class TranslationsMessageActionsRu extends TranslationsMessageActionsEn {
 	@override String get quote => 'Цитировать это сообщение';
 	@override String get delete => 'Удалить это сообщение';
 	@override String get star => 'Отметить это сообщение';
+	@override String get edit => 'Редактировать это сообщение';
 }
 
 // Path: attachmentButton

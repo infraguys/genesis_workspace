@@ -47,6 +47,8 @@ import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction
     as _i513;
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart'
     as _i116;
+import 'package:genesis_workspace/domain/messages/usecases/update_message_use_case.dart'
+    as _i1005;
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart'
     as _i664;
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart'
@@ -217,6 +219,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i207.GetMessagesUseCase>(
       () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i1005.UpdateMessageUseCase>(
+      () => _i1005.UpdateMessageUseCase(gh<_i857.MessagesRepository>()),
+    );
     gh.factory<_i513.RemoveEmojiReactionUseCase>(
       () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
@@ -243,18 +248,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i75.GetTokenUseCase>(
       () => _i75.GetTokenUseCase(gh<_i958.TokenStorage>()),
-    );
-    gh.lazySingleton<_i592.MessagesCubit>(
-      () => _i592.MessagesCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i276.AddEmojiReactionUseCase>(),
-        gh<_i513.RemoveEmojiReactionUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i455.DeleteMessageUseCase>(),
-        gh<_i699.GetMessageByIdUseCase>(),
-      ),
-      dispose: _i592.disposeMessagesCubit,
     );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(
@@ -305,20 +298,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i440.DioFactory>(),
       ),
     );
-    gh.factory<_i277.ChatCubit>(
-      () => _i277.ChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i773.GetUserByIdUseCase>(),
-        gh<_i394.GetUserPresenceUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-      ),
-    );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
+    );
+    gh.lazySingleton<_i592.MessagesCubit>(
+      () => _i592.MessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i276.AddEmojiReactionUseCase>(),
+        gh<_i513.RemoveEmojiReactionUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i455.DeleteMessageUseCase>(),
+        gh<_i699.GetMessageByIdUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+      ),
+      dispose: _i592.disposeMessagesCubit,
     );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
@@ -330,6 +324,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i720.GetChannelByIdUseCase>(),
         gh<_i699.GetTopicsUseCase>(),
         gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
       ),
     );
     gh.factory<_i758.MentionsCubit>(
@@ -346,6 +341,19 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i82.RealTimeService>(),
         gh<_i547.GetOwnUserUseCase>(),
         gh<_i832.UpdatePresenceUseCase>(),
+      ),
+    );
+    gh.factory<_i277.ChatCubit>(
+      () => _i277.ChatCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i773.GetUserByIdUseCase>(),
+        gh<_i394.GetUserPresenceUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
       ),
     );
     gh.factory<_i911.RecentDmRepository>(

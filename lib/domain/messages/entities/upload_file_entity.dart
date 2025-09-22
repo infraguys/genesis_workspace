@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
 import 'package:genesis_workspace/domain/common/entities/response_entity.dart';
@@ -43,6 +44,25 @@ class UploadFileRequestEntity {
 }
 
 enum UploadFileType { file, image }
+
+class EditingAttachment extends Equatable {
+  final String filename;
+  final String extension;
+  final String url;
+  final UploadFileType type;
+  final String rawString;
+
+  EditingAttachment({
+    required this.filename,
+    required this.extension,
+    required this.url,
+    required this.type,
+    required this.rawString,
+  });
+
+  @override
+  List<Object?> get props => [filename, extension, url, type, rawString];
+}
 
 sealed class UploadFileEntity {
   final String localId;

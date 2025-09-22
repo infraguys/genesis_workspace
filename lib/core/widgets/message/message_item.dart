@@ -11,10 +11,11 @@ import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.d
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -29,6 +30,7 @@ class MessageItem extends StatelessWidget {
   final int myUserId;
   final bool isNewDay;
   final Function(int messageId) onTapQuote;
+  final Function(UpdateMessageRequestEntity body) onTapEditMessage;
 
   MessageItem({
     super.key,
@@ -40,6 +42,7 @@ class MessageItem extends StatelessWidget {
     required this.myUserId,
     this.isNewDay = false,
     required this.onTapQuote,
+    required this.onTapEditMessage,
   });
 
   final actionsPopupKey = GlobalKey<CustomPopupState>();
@@ -68,11 +71,7 @@ class MessageItem extends StatelessWidget {
       try {
         await messagesCubit.addEmojiReaction(message.id, emojiName: emojiName);
       } on DioException catch (e) {
-        final dynamic data = e.response?.data;
-        final String errorMessage = (data is Map && data['msg'] is String)
-            ? data['msg'] as String
-            : context.t.error;
-        messenger?.showSnackBar(SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+        showErrorSnackBar(context, exception: e);
       }
     }
 
@@ -84,11 +83,7 @@ class MessageItem extends StatelessWidget {
           await messagesCubit.addStarredFlag(message.id);
         }
       } on DioException catch (e) {
-        final dynamic data = e.response?.data;
-        final String errorMessage = (data is Map && data['msg'] is String)
-            ? data['msg'] as String
-            : context.t.error;
-        messenger?.showSnackBar(SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+        showErrorSnackBar(context, exception: e);
       }
     }
 
@@ -96,11 +91,7 @@ class MessageItem extends StatelessWidget {
       try {
         await messagesCubit.deleteMessage(message.id);
       } on DioException catch (e) {
-        final dynamic data = e.response?.data;
-        final String errorMessage = (data is Map && data['msg'] is String)
-            ? data['msg'] as String
-            : 'Failed to delete message';
-        messenger?.showSnackBar(SnackBar(content: Text(errorMessage), backgroundColor: Colors.red));
+        showErrorSnackBar(context, exception: e);
       }
     }
 
@@ -169,6 +160,14 @@ class MessageItem extends StatelessWidget {
             onTapQuote: () {
               onTapQuote(message.id);
             },
+            onTapEdit: () async {
+              final body = UpdateMessageRequestEntity(
+                messageId: message.id,
+                content: message.content,
+              );
+              // print(message.content);
+              onTapEditMessage(body);
+            },
           ),
           child: ConstrainedBox(
             key: messageKey,
@@ -204,6 +203,13 @@ class MessageItem extends StatelessWidget {
                             onTapQuote(message.id);
                           },
                           onClose: () => overlay.remove(),
+                          onEdit: () {
+                            final body = UpdateMessageRequestEntity(
+                              messageId: message.id,
+                              content: message.content,
+                            );
+                            onTapEditMessage(body);
+                          },
                           messageContent: MessageHtml(content: message.content),
                           isOwnMessage: isMyMessage,
                         ),

@@ -1,5 +1,5 @@
-// lib/features/chat/common/chat_common_mixin.dart
 import 'dart:async';
+import 'dart:collection';
 import 'dart:developer';
 import 'dart:typed_data';
 
@@ -13,18 +13,22 @@ import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
+import 'package:genesis_workspace/domain/messages/usecases/update_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:image_picker/image_picker.dart';
 
-mixin ChatCommonMixin<S extends Object> on Cubit<S> {
+mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   UploadFileUseCase get uploadFileUseCase;
   UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase;
+  UpdateMessageUseCase get updateMessageUseCase;
 
   List<UploadFileEntity> getUploadedFiles(S state);
   String getUploadedFilesString(S state);
@@ -32,6 +36,7 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
   String? getUploadFileErrorName(S state);
   List<MessageEntity> getStateMessages(S state);
   Set<int> getPendingToMarkAsRead(S state);
+  List<EditingAttachment> getEditingAttachments(S state);
 
   S copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
@@ -39,14 +44,18 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     String? uploadFileError,
     String? uploadFileErrorName,
     List<MessageEntity>? messages,
+    List<EditingAttachment>? editingAttachments,
+    bool? isEdited,
   });
 
   final Map<String, CancelToken> _uploadCancelTokens = <String, CancelToken>{};
   Timer? _readMessageDebounceTimer;
 
-  Future<void> uploadImagesCommon() async {
+  //Upload files
+
+  Future<void> uploadImagesCommon({List<XFile>? droppedImages}) async {
     try {
-      final List<XFile> images = await pickImages();
+      final List<XFile> images = droppedImages ?? await pickImages();
       if (images.isEmpty) return;
 
       final List<Future<void>> uploadTasks = <Future<void>>[];
@@ -91,8 +100,8 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     }
   }
 
-  Future<void> uploadFilesCommon() async {
-    final List<PlatformFile>? platformFiles = await pickNonImageFiles();
+  Future<void> uploadFilesCommon({List<PlatformFile>? droppedFiles}) async {
+    final List<PlatformFile>? platformFiles = droppedFiles ?? await pickNonImageFiles();
     if (platformFiles == null || platformFiles.isEmpty) return;
 
     final List<Future<void>> uploadTasks = <Future<void>>[];
@@ -215,73 +224,121 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     emit(copyWithCommon(uploadedFiles: next));
   }
 
-  void onMessageFlagsEventsCommon(UpdateMessageFlagsEventEntity event) {
-    final List<MessageEntity> current = List.of(getStateMessages(state));
-    bool changed = false;
+  //Update message
 
-    for (final int messageId in event.messages) {
-      final int index = current.indexWhere((m) => m.id == messageId);
-      if (index == -1) continue;
-
-      final MessageEntity message = current[index];
-
-      if (event.flag == MessageFlag.read) {
-        final MessageEntity updated = message.copyWith(
-          flags: [...message.flags ?? <String>[], MessageFlag.read.name],
-        );
-        current[index] = updated;
-        changed = true;
-      } else if (event.flag == MessageFlag.starred) {
-        if (event.op == UpdateMessageFlagsOp.add) {
-          final MessageEntity updated = message.copyWith(
-            flags: [...message.flags ?? <String>[], MessageFlag.starred.name],
-          );
-          current[index] = updated;
-        } else if (event.op == UpdateMessageFlagsOp.remove) {
-          final List<String> nextFlags = [...?message.flags]..remove(MessageFlag.starred.name);
-          final MessageEntity updated = message.copyWith(flags: nextFlags);
-          current[index] = updated;
-        }
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      emit(copyWithCommon(messages: current));
-    }
-  }
-
-  void onReactionEventsCommon(ReactionEventEntity event) {
-    final List<MessageEntity> current = List.of(getStateMessages(state));
-    final int index = current.indexWhere((m) => m.id == event.messageId);
-    if (index == -1) return;
-
-    final MessageEntity message = current[index];
-    final List<ReactionEntity> reactions = List.of(message.reactions);
-
-    if (event.op == ReactionOp.add) {
-      reactions.add(
-        ReactionEntity(
-          emojiName: event.emojiName,
-          emojiCode: event.emojiCode,
-          reactionType: event.reactionType,
-          userId: event.userId,
+  Future<void> updateMessage({required int messageId, required String content}) async {
+    try {
+      final composed = buildMessageContent(content: content);
+      await updateMessageUseCase.call(
+        UpdateMessageRequestEntity(messageId: messageId, content: composed),
+      );
+      emit(
+        copyWithCommon(
+          uploadedFilesString: '',
+          uploadedFiles: [],
+          editingAttachments: [],
+          isEdited: false,
         ),
       );
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
+  void cancelEdit() {
+    emit(
+      copyWithCommon(
+        isEdited: false,
+        editingAttachments: [],
+        uploadedFilesString: '',
+        uploadedFiles: [],
+      ),
+    );
+  }
+
+  void removeEditingAttachment(EditingAttachment attachment) {
+    final updatedAttachments = [...getEditingAttachments(state)];
+    updatedAttachments.remove(attachment);
+    emit(copyWithCommon(editingAttachments: updatedAttachments, isEdited: true));
+  }
+
+  String buildMessageContent({
+    required String content,
+    bool placeFilesOnTop = true,
+    bool stripExistingAttachmentsFromContent = true,
+  }) {
+    final editingAttachments = getEditingAttachments(state);
+    final uploadedFiles = getUploadedFiles(state);
+
+    final String trimmedContent = stripExistingAttachmentsFromContent
+        ? extractMessageText(content)
+        : content.trim();
+
+    final List<String> editingLinks = editingAttachments
+        .map((attachment) {
+          final String raw = (attachment.rawString ?? '').trim();
+          if (raw.isNotEmpty) return raw;
+          return '[${attachment.filename}](${attachment.url})';
+        })
+        .where((link) => link.isNotEmpty)
+        .toList();
+
+    final List<String> uploadedLinks = uploadedFiles
+        .whereType<UploadedFileEntity>()
+        .map((file) => '[${file.filename}](${file.url})')
+        .where((link) => link.isNotEmpty)
+        .toList();
+
+    final LinkedHashSet<String> uniqueFileLinks = LinkedHashSet<String>()
+      ..addAll(editingLinks)
+      ..addAll(uploadedLinks);
+
+    final List<String> nonEmptyParts = [];
+
+    if (placeFilesOnTop) {
+      if (uniqueFileLinks.isNotEmpty) nonEmptyParts.addAll(uniqueFileLinks);
+      if (trimmedContent.isNotEmpty) nonEmptyParts.add(trimmedContent);
     } else {
-      reactions.removeWhere((r) => r.userId == event.userId && r.emojiName == event.emojiName);
+      if (trimmedContent.isNotEmpty) nonEmptyParts.add(trimmedContent);
+      if (uniqueFileLinks.isNotEmpty) nonEmptyParts.addAll(uniqueFileLinks);
     }
 
-    current[index] = message.copyWith(reactions: reactions);
-    emit(copyWithCommon(messages: current));
+    return nonEmptyParts.join('\n');
   }
 
-  void onDeleteMessageEventsCommon(DeleteMessageEventEntity event) {
-    final List<MessageEntity> next = List.of(getStateMessages(state))
-      ..removeWhere((m) => m.id == event.messageId);
-    emit(copyWithCommon(messages: next));
+  List<EditingAttachment> parseAttachments(String content) {
+    final RegExp pattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+    final Iterable<RegExpMatch> matches = pattern.allMatches(content);
+
+    final List<EditingAttachment> attachments = matches.map((match) {
+      final String rawString = match.group(0)!;
+      final String filename = match.group(1)!;
+      final String extension = filename.split('.').last;
+      final String url = match.group(2)!;
+
+      final UploadFileType type = AppConstants.kImageExtensions.contains(extension)
+          ? UploadFileType.image
+          : UploadFileType.file;
+
+      return EditingAttachment(
+        filename: filename,
+        extension: extension,
+        url: url,
+        type: type,
+        rawString: rawString,
+      );
+    }).toList();
+
+    return attachments;
   }
 
+  void setUploadedFiles(String content) {
+    List<EditingAttachment> attachments = parseAttachments(content);
+    emit(copyWithCommon(editingAttachments: attachments));
+  }
+
+  //Read message
   void scheduleMarkAsReadCommon(int messageId) {
     final Set<int> bucket = getPendingToMarkAsRead(state);
     bucket.add(messageId);
@@ -319,14 +376,83 @@ mixin ChatCommonMixin<S extends Object> on Cubit<S> {
     }
   }
 
-  String buildMessageWithUploadedFilesCommon({required String content}) {
-    final String filesBlock = getUploadedFiles(state)
-        .whereType<UploadedFileEntity>()
-        .map((f) => '[${f.filename}](${f.url})')
-        .fold<String>('', (acc, link) => appendFileLink(acc, link));
+  //Events handlers
 
-    final Iterable<String> parts = <String>[filesBlock, content].where((p) => p.isNotEmpty);
-    return parts.join('\n');
+  void onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
+    final List<MessageEntity> current = List.of(getStateMessages(state));
+    bool changed = false;
+
+    for (final int messageId in event.messages) {
+      final int index = current.indexWhere((m) => m.id == messageId);
+      if (index == -1) continue;
+
+      final MessageEntity message = current[index];
+
+      if (event.flag == MessageFlag.read) {
+        final MessageEntity updated = message.copyWith(
+          flags: [...message.flags ?? <String>[], MessageFlag.read.name],
+        );
+        current[index] = updated;
+        changed = true;
+      } else if (event.flag == MessageFlag.starred) {
+        if (event.op == UpdateMessageFlagsOp.add) {
+          final MessageEntity updated = message.copyWith(
+            flags: [...message.flags ?? <String>[], MessageFlag.starred.name],
+          );
+          current[index] = updated;
+        } else if (event.op == UpdateMessageFlagsOp.remove) {
+          final List<String> nextFlags = [...?message.flags]..remove(MessageFlag.starred.name);
+          final MessageEntity updated = message.copyWith(flags: nextFlags);
+          current[index] = updated;
+        }
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      emit(copyWithCommon(messages: current));
+    }
+  }
+
+  void onReactionEvents(ReactionEventEntity event) {
+    final List<MessageEntity> current = List.of(getStateMessages(state));
+    final int index = current.indexWhere((m) => m.id == event.messageId);
+    if (index == -1) return;
+
+    final MessageEntity message = current[index];
+    final List<ReactionEntity> reactions = List.of(message.reactions);
+
+    if (event.op == ReactionOp.add) {
+      reactions.add(
+        ReactionEntity(
+          emojiName: event.emojiName,
+          emojiCode: event.emojiCode,
+          reactionType: event.reactionType,
+          userId: event.userId,
+        ),
+      );
+    } else {
+      reactions.removeWhere((r) => r.userId == event.userId && r.emojiName == event.emojiName);
+    }
+
+    current[index] = message.copyWith(reactions: reactions);
+    emit(copyWithCommon(messages: current));
+  }
+
+  void onDeleteMessageEvents(DeleteMessageEventEntity event) {
+    final List<MessageEntity> next = List.of(getStateMessages(state))
+      ..removeWhere((m) => m.id == event.messageId);
+    emit(copyWithCommon(messages: next));
+  }
+
+  void onUpdateMessageEvents(UpdateMessageEventEntity event) {
+    final updatedMessages = [...getStateMessages(state)];
+    final int index = updatedMessages.indexWhere((m) => m.id == event.messageId);
+    if (index != -1) {
+      final MessageEntity message = updatedMessages[index];
+      updatedMessages[index] = message.copyWith(content: event.renderedContent);
+      emit(copyWithCommon(messages: updatedMessages));
+    }
   }
 
   void disposeCommon() {

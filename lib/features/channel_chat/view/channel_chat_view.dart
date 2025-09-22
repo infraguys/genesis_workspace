@@ -1,20 +1,29 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/enums/typing_event_op.dart';
+import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChannelChatView extends StatefulWidget {
   final int channelId;
@@ -32,73 +41,60 @@ class ChannelChatView extends StatefulWidget {
   State<ChannelChatView> createState() => _ChannelChatViewState();
 }
 
-class _ChannelChatViewState extends State<ChannelChatView> {
+class _ChannelChatViewState extends State<ChannelChatView>
+    with ChatWidgetMixin<ChannelChatCubit, ChannelChatView>, WidgetsBindingObserver {
   late final Future _future;
   late final UserEntity _myUser;
   late final ScrollController _scrollController;
-  late final TextEditingController _messageController;
-
-  final FocusNode _messageInputFocusNode = FocusNode();
-
-  String _currentText = '';
-
-  void _onScroll() {
-    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
-        !context.read<ChannelChatCubit>().state.isLoadingMore) {
-      context.read<ChannelChatCubit>().loadMoreMessages();
-    }
-  }
-
-  Future<void> _onTextChanged() async {
-    setState(() {
-      _currentText = _messageController.text;
-    });
-    await context.read<ChannelChatCubit>().changeTyping(
-      op: _currentText.isEmpty ? TypingEventOp.stop : TypingEventOp.start,
-    );
-  }
-
-  void insertQuoteAndFocus({required String textToInsert, bool append = false}) {
-    final String current = _messageController.text;
-    final String nextText = append && current.isNotEmpty ? '$current\n$textToInsert' : textToInsert;
-
-    _messageController.text = nextText;
-    _messageController.selection = TextSelection.collapsed(offset: nextText.length);
-    _messageInputFocusNode.requestFocus();
-  }
-
-  Future<void> onTapQuote(int messageId) async {
-    try {
-      context.read<ChannelChatCubit>().setIsMessagePending(true);
-
-      final singleMessage = await context.read<MessagesCubit>().getMessageById(
-        messageId: messageId,
-        applyMarkdown: false,
-      );
-
-      final String quote = generateMessageQuote(singleMessage);
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        insertQuoteAndFocus(textToInsert: quote);
-      });
-    } catch (e) {
-    } finally {
-      context.read<ChannelChatCubit>().setIsMessagePending(false);
-    }
-  }
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    _scrollController = ScrollController();
     _myUser = context.read<ProfileCubit>().state.user!;
     _future = context.read<ChannelChatCubit>().getInitialData(
       streamId: widget.channelId,
       topicName: widget.topicName,
       unreadMessagesCount: widget.unreadMessagesCount,
     );
-    _scrollController = ScrollController()..addListener(_onScroll);
-    _messageController = TextEditingController();
-    _messageController.addListener(_onTextChanged);
+    messageController = TextEditingController();
+    messageController.addListener(onTextChanged);
     super.initState();
+    if (kIsWeb) {
+      removeWebDnD = attachWebDropHandlersForKey(
+        targetKey: dropAreaKey,
+        onIsOverChange: (over) {
+          if (isDropOver != over) {
+            setState(() => isDropOver = over);
+          }
+        },
+        onDrop: (dropped) async {
+          setState(() => isDropOver = false);
+          final nonImageFiles = <PlatformFile>[];
+          final imageFiles = <XFile>[];
+          for (final item in dropped) {
+            final name = item.name;
+            final ext = extensionOf(name);
+            final bytes = Uint8List.fromList(item.bytes);
+            if (isImageExtension(ext)) {
+              imageFiles.add(XFile.fromData(bytes, name: name));
+            } else {
+              nonImageFiles.add(PlatformFile(name: name, size: item.size, bytes: bytes));
+            }
+          }
+          if (nonImageFiles.isNotEmpty) {
+            unawaited(
+              context.read<ChannelChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
+            );
+          }
+          if (imageFiles.isNotEmpty) {
+            unawaited(
+              context.read<ChannelChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
+            );
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -121,17 +117,18 @@ class _ChannelChatViewState extends State<ChannelChatView> {
           });
     }
 
-    _messageController.clear();
+    messageController.clear();
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
+    // _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    _messageController.removeListener(_onTextChanged);
-    _messageController.dispose();
-    _messageInputFocusNode.dispose();
+    messageController.removeListener(onTextChanged);
+    messageController.dispose();
+    messageInputFocusNode.dispose();
+    removeWebDnD?.call();
     super.dispose();
   }
 
@@ -238,7 +235,8 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                       isSkeleton: true,
                                       messageOrder: MessageUIOrder.single,
                                       myUserId: _myUser.userId,
-                                      onTapQuote: onTapQuote,
+                                      onTapQuote: (_) {},
+                                      onTapEditMessage: (_) {},
                                     );
                                   },
                                 ),
@@ -254,56 +252,152 @@ class _ChannelChatViewState extends State<ChannelChatView> {
                                 loadMore: context.read<ChannelChatCubit>().loadMoreMessages,
                                 myUserId: _myUser.userId,
                                 onTapQuote: onTapQuote,
+                                onTapEditMessage: onTapEditMessage,
                               ),
                       ),
                     ),
-                  BlocBuilder<ChannelChatCubit, ChannelChatState>(
-                    buildWhen: (prev, current) => prev.uploadedFiles != current.uploadedFiles,
-                    builder: (context, inputState) {
-                      final String currentText = _currentText.trim();
-                      final bool hasText = currentText.isNotEmpty;
-
-                      final files = inputState.uploadedFiles;
-                      final bool hasFiles = files.isNotEmpty;
-                      final bool hasUploadingFiles = files.any(
-                        (file) => file is UploadingFileEntity,
-                      );
-
-                      final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
-                      final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
-                      final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
-
-                      final bool isSendEnabled =
-                          canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
-
-                      return MessageInput(
-                        controller: _messageController,
-                        isMessagePending: state.isMessagePending,
-                        focusNode: _messageInputFocusNode,
-                        onSend: isSendEnabled
-                            ? () async {
-                                final content = _messageController.text;
-                                _messageController.clear();
-                                try {
-                                  await context.read<ChannelChatCubit>().sendMessage(
-                                    streamId: state.channel!.streamId,
-                                    content: content,
-                                    topic: state.topic?.name,
-                                  );
-                                } catch (e) {}
-                              }
-                            : null,
-                        onUploadFile: () async {
-                          await context.read<ChannelChatCubit>().uploadFilesCommon();
-                        },
-                        onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
-                        onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
-                        files: inputState.uploadedFiles,
-                        onUploadImage: () async {
-                          await context.read<ChannelChatCubit>().uploadImagesCommon();
-                        },
-                      );
+                  DropRegion(
+                    formats: Formats.standardFormats,
+                    hitTestBehavior: HitTestBehavior.opaque,
+                    onDropOver: (DropOverEvent event) async {
+                      if (!isDropOver) {
+                        setState(() {
+                          isDropOver = true;
+                        });
+                      }
+                      return DropOperation.link;
                     },
+                    onDropLeave: (_) {
+                      if (isDropOver) {
+                        setState(() {
+                          isDropOver = false;
+                        });
+                      }
+                    },
+                    onPerformDrop: (PerformDropEvent event) async {
+                      setState(() => isDropOver = false);
+                      final List<PlatformFile> droppedFiles = await toPlatformFiles(event);
+
+                      final List<PlatformFile> nonImageFiles = <PlatformFile>[];
+                      final List<XFile> imageFiles = <XFile>[];
+
+                      for (final pf in droppedFiles) {
+                        final ext = extensionOf(pf.name);
+                        if (isImageExtension(ext)) {
+                          if (pf.path != null && pf.path!.isNotEmpty) {
+                            imageFiles.add(XFile(pf.path!, name: pf.name));
+                          } else if (pf.bytes != null) {
+                            imageFiles.add(XFile.fromData(pf.bytes!, name: pf.name));
+                          }
+                        } else {
+                          nonImageFiles.add(pf);
+                        }
+                      }
+
+                      if (nonImageFiles.isNotEmpty) {
+                        unawaited(
+                          context.read<ChannelChatCubit>().uploadFilesCommon(
+                            droppedFiles: nonImageFiles,
+                          ),
+                        );
+                      }
+                      if (imageFiles.isNotEmpty) {
+                        unawaited(
+                          context.read<ChannelChatCubit>().uploadImagesCommon(
+                            droppedImages: imageFiles,
+                          ),
+                        );
+                      }
+                      if (platformInfo.isDesktop) {
+                        messageInputFocusNode.requestFocus();
+                      }
+                    },
+                    child: BlocBuilder<ChannelChatCubit, ChannelChatState>(
+                      buildWhen: (prev, current) => prev.uploadedFiles != current.uploadedFiles,
+                      builder: (context, inputState) {
+                        final String _currentText = currentText.trim();
+                        final bool hasText = _currentText.isNotEmpty;
+
+                        final files = inputState.uploadedFiles;
+                        final bool hasFiles = files.isNotEmpty;
+                        final bool hasUploadingFiles = files.any(
+                          (file) => file is UploadingFileEntity,
+                        );
+
+                        final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
+                        final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
+                        final bool canSendByTextAndFiles =
+                            hasText && hasFiles && !hasUploadingFiles;
+
+                        final bool isSendEnabled =
+                            canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+
+                        final bool isEditEnabled = isSendEnabled || state.isEdited;
+
+                        return Container(
+                          key: dropAreaKey,
+                          child: MessageInput(
+                            controller: messageController,
+                            isMessagePending: state.isMessagePending,
+                            focusNode: messageInputFocusNode,
+                            onSend: isSendEnabled
+                                ? () async {
+                                    final content = messageController.text;
+                                    messageController.clear();
+                                    try {
+                                      await context.read<ChannelChatCubit>().sendMessage(
+                                        streamId: state.channel!.streamId,
+                                        content: content,
+                                        topic: state.topic?.name,
+                                      );
+                                    } catch (e) {
+                                    } finally {
+                                      if (platformInfo.isDesktop) {
+                                        messageInputFocusNode.requestFocus();
+                                      }
+                                    }
+                                  }
+                                : null,
+                            onEdit: isEditEnabled
+                                ? () async {
+                                    try {
+                                      await submitEdit();
+                                    } on DioException catch (e) {
+                                      showErrorSnackBar(context, exception: e);
+                                    } finally {
+                                      if (platformInfo.isDesktop) {
+                                        messageInputFocusNode.requestFocus();
+                                      }
+                                    }
+                                  }
+                                : null,
+                            onUploadFile: () async {
+                              await context.read<ChannelChatCubit>().uploadFilesCommon();
+                              if (platformInfo.isDesktop) {
+                                messageInputFocusNode.requestFocus();
+                              }
+                            },
+                            onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
+                            onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
+                            files: inputState.uploadedFiles,
+                            onUploadImage: () async {
+                              await context.read<ChannelChatCubit>().uploadImagesCommon();
+                              if (platformInfo.isDesktop) {
+                                messageInputFocusNode.requestFocus();
+                              }
+                            },
+                            isDropOver: isDropOver,
+                            onCancelEdit: onCancelEdit,
+                            isEdit: isEditMode,
+                            editingMessage: editingMessage,
+                            editingFiles: state.editingAttachments,
+                            onRemoveEditingAttachment: (attachment) {
+                              context.read<ChannelChatCubit>().removeEditingAttachment(attachment);
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               );

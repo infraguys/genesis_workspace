@@ -2,7 +2,7 @@ name: genesis_workspace
 description: "Genesis Workspace application."
 publish_to: 'none'
 
-version: 1.1.0+1
+version: 1.1.2+1
 
 environment:
   sdk: ^3.8.1
@@ -66,6 +66,9 @@ dependencies:
   file_picker: ^10.3.3
   mime: ^2.0.0
   image_picker: ^1.2.0
+  super_drag_and_drop: ^0.9.1
+  path: ^1.9.1
+  cross_file: ^0.3.4+2
 
 dev_dependencies:
   flutter_test:

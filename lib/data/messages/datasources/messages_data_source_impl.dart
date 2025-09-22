@@ -14,6 +14,7 @@ import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/send_message_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/single_message_dto.dart';
+import 'package:genesis_workspace/data/messages/dto/update_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_messages_flags_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
 import 'package:genesis_workspace/data/messages/tus/platform_chunk_reader_stub.dart'
@@ -107,6 +108,16 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   Future<DeleteMessageResponseDto> deleteMessage(DeleteMessageRequestDto body) async {
     try {
       return await apiClient.deleteMessage(body.messageId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpdateMessageResponseDto> updateMessage(UpdateMessageRequestDto body) async {
+    try {
+      final response = await apiClient.updateMessage(body.messageId, body.content);
+      return response;
     } catch (e) {
       rethrow;
     }

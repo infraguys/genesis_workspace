@@ -7,6 +7,7 @@ import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/single_message_dto.dart';
+import 'package:genesis_workspace/data/messages/dto/update_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -40,6 +41,12 @@ abstract class MessagesApiClient {
     @Query("stream_id") int? streamId,
     @Query("topic") String? topic,
     @Query("read_by_sender") bool? readBySender,
+  );
+
+  @PATCH('/messages/{message_id}')
+  Future<UpdateMessageResponseDto> updateMessage(
+    @Path('message_id') int messageId,
+    @Query("content") String content,
   );
 
   @POST('/messages/flags')

@@ -88,7 +88,7 @@ class MessageEntity {
   /// ✅ Fake factory for skeleton/loading state
   factory MessageEntity.fake({bool isMe = false}) {
     return MessageEntity(
-      id: 0,
+      id: -1,
       isMeMessage: isMe,
       avatarUrl: null,
       content: 'Loading message content...', // Placeholder text

@@ -16,6 +16,8 @@ class ChannelChatState {
   String uploadedFilesString;
   String? uploadFileError;
   String? uploadFileErrorName;
+  List<EditingAttachment> editingAttachments;
+  bool isEdited;
 
   ChannelChatState({
     required this.messages,
@@ -33,6 +35,8 @@ class ChannelChatState {
     required this.uploadedFilesString,
     this.uploadFileError,
     this.uploadFileErrorName,
+    required this.editingAttachments,
+    required this.isEdited,
   });
 
   ChannelChatState copyWith({
@@ -51,6 +55,8 @@ class ChannelChatState {
     String? uploadedFilesString,
     String? uploadFileError,
     String? uploadFileErrorName,
+    List<EditingAttachment>? editingAttachments,
+    bool? isEdited,
   }) {
     return ChannelChatState(
       messages: messages ?? this.messages,
@@ -68,6 +74,8 @@ class ChannelChatState {
       uploadedFilesString: uploadedFilesString ?? this.uploadedFilesString,
       uploadFileError: uploadFileError ?? this.uploadFileError,
       uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
+      editingAttachments: editingAttachments ?? this.editingAttachments,
+      isEdited: isEdited ?? this.isEdited,
     );
   }
 }
