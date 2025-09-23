@@ -24,11 +24,9 @@ class PasteCaptureService {
     final PlatformFile? pastedImage = await _tryReadImageAsPlatformFile(reader);
     if (pastedImage != null) return pastedImage;
 
-    // 2) PDF (пример для не-изображений)
     final PlatformFile? pastedPdf = await _tryReadSingleFile(
       reader,
-      Formats.pdf,
-      defaultName: 'pasted_document.pdf',
+      defaultName: 'pasted_document',
     );
     if (pastedPdf != null) return pastedPdf;
 
@@ -60,37 +58,50 @@ class PasteCaptureService {
   }
 
   Future<PlatformFile?> _tryReadSingleFile(
-    ClipboardReader reader,
-    format, {
+    ClipboardReader reader, {
     required String defaultName,
   }) async {
-    if (!reader.canProvide(format)) return null;
+    final filesFormats = [
+      Formats.pdf,
+      Formats.doc,
+      Formats.docx,
+      Formats.xls,
+      Formats.xlsx,
+      Formats.ppt,
+      Formats.pptx,
+      Formats.zip,
+      Formats.exe,
+      Formats.apk,
+      Formats.jar,
+      Formats.iso,
+    ];
+    for (final format in filesFormats) {
+      if (!reader.canProvide(format)) continue;
+      final Completer<PlatformFile> completer = Completer<PlatformFile>();
+      reader.getFile(format, (dataFile) async {
+        final String filename = (dataFile.fileName?.trim().isNotEmpty ?? false)
+            ? dataFile.fileName!.trim()
+            : (await reader.getSuggestedName() ?? defaultName);
 
-    final Completer<PlatformFile> completer = Completer<PlatformFile>();
+        final Stream<Uint8List> stream = dataFile.getStream();
 
-    reader.getFile(format, (dataFile) async {
-      final String filename = (dataFile.fileName?.trim().isNotEmpty ?? false)
-          ? dataFile.fileName!.trim()
-          : (await reader.getSuggestedName() ?? defaultName);
-
-      final Stream<Uint8List> stream = dataFile.getStream();
-
-      if (kIsWeb) {
-        final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
-        await for (final Uint8List chunk in stream) {
-          bytesBuilder.add(chunk);
+        if (kIsWeb) {
+          final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
+          await for (final Uint8List chunk in stream) {
+            bytesBuilder.add(chunk);
+          }
+          final Uint8List bytes = bytesBuilder.takeBytes();
+          completer.complete(PlatformFile(name: filename, size: bytes.length, bytes: bytes));
+        } else {
+          final _SpoolResult spool = await _spoolStreamToTempFile(stream, suggestedName: filename);
+          completer.complete(
+            PlatformFile(name: spool.fileName, size: spool.sizeBytes, path: spool.path),
+          );
         }
-        final Uint8List bytes = bytesBuilder.takeBytes();
-        completer.complete(PlatformFile(name: filename, size: bytes.length, bytes: bytes));
-      } else {
-        final _SpoolResult spool = await _spoolStreamToTempFile(stream, suggestedName: filename);
-        completer.complete(
-          PlatformFile(name: spool.fileName, size: spool.sizeBytes, path: spool.path),
-        );
-      }
-    });
-
-    return completer.future;
+      });
+      return completer.future;
+    }
+    return null;
   }
 
   Future<_SpoolResult> _spoolStreamToTempFile(
