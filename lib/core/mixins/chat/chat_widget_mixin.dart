@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/web_drop_types.dart';
@@ -11,7 +12,9 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 abstract class ChatCubitCapable {
   Future<void> changeTyping({required TypingEventOp op});
@@ -27,14 +30,27 @@ abstract class ChatCubitCapable {
   });
 }
 
+class ChatPasteAction extends Action<PasteTextIntent> {
+  ChatPasteAction({required this.onPaste});
+  final Future<void> Function() onPaste;
+
+  @override
+  Future<Object?> invoke(PasteTextIntent intent) async {
+    await onPaste();
+    return null;
+  }
+}
+
 mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends StatefulWidget>
     on State<TWidget> {
   late final TextEditingController messageController;
   final FocusNode messageInputFocusNode = FocusNode();
+  final PasteCaptureService pasteCaptureService = getIt<PasteCaptureService>();
 
   String currentText = '';
   bool isEditMode = false;
   MessageEntity? editingMessage;
+  final events = ClipboardEvents.instance;
 
   bool isDropOver = false;
   final GlobalKey dropAreaKey = GlobalKey();

@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -25,10 +24,8 @@ import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChatView extends StatefulWidget {
@@ -46,8 +43,6 @@ class _ChatViewState extends State<ChatView>
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
-  final PasteCaptureService pasteCaptureService = getIt<PasteCaptureService>();
-  final events = ClipboardEvents.instance;
 
   @override
   void initState() {
@@ -362,7 +357,7 @@ class _ChatViewState extends State<ChatView>
 
                           return Actions(
                             actions: <Type, Action<Intent>>{
-                              PasteTextIntent: _ChatPasteAction(
+                              PasteTextIntent: ChatPasteAction(
                                 onPaste: () async {
                                   try {
                                     final captured = await pasteCaptureService.captureNow();
@@ -447,16 +442,5 @@ class _ChatViewState extends State<ChatView>
         );
       },
     );
-  }
-}
-
-class _ChatPasteAction extends Action<PasteTextIntent> {
-  _ChatPasteAction({required this.onPaste});
-  final Future<void> Function() onPaste;
-
-  @override
-  Future<Object?> invoke(PasteTextIntent intent) async {
-    await onPaste();
-    return null;
   }
 }
