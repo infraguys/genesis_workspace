@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:file_picker/file_picker.dart';
@@ -184,5 +185,26 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   // Paste files
   Future<void> onPasteImage(List<PlatformFile>? files) async {
     await context.read<TChatCubit>().uploadImagesCommon(droppedPlatformImages: files ?? []);
+  }
+
+  void handleCaptured(dynamic captured) {
+    switch (captured.runtimeType) {
+      case String:
+        messageController.text = '${messageController.text}$captured';
+        break;
+
+      case PlatformFile:
+        final PlatformFile platformFile = captured as PlatformFile;
+        final extension = extensionOf(platformFile.name).toLowerCase();
+        if (isImageExtension(extension)) {
+          unawaited(onPasteImage([platformFile]));
+        } else {
+          unawaited(onPasteFiles([platformFile]));
+        }
+        break;
+
+      default:
+        print('Unknown type: ${captured.runtimeType}');
+    }
   }
 }

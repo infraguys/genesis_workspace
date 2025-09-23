@@ -28,6 +28,7 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChatView extends StatefulWidget {
@@ -46,6 +47,7 @@ class _ChatViewState extends State<ChatView>
   late final ScrollController _controller;
   late final UserEntity _myUser;
   final PasteCaptureService pasteCaptureService = getIt<PasteCaptureService>();
+  final events = ClipboardEvents.instance;
 
   @override
   void initState() {
@@ -92,6 +94,13 @@ class _ChatViewState extends State<ChatView>
           }
         },
       );
+      if (events != null) {
+        events!.registerPasteEventListener((event) async {
+          final reader = await event.getClipboardReader();
+          final captured = await pasteCaptureService.captureNow(isWeb: true, webReader: reader);
+          handleCaptured(captured);
+        });
+      }
     }
   }
 
@@ -357,30 +366,7 @@ class _ChatViewState extends State<ChatView>
                                 onPaste: () async {
                                   try {
                                     final captured = await pasteCaptureService.captureNow();
-
-                                    switch (captured.runtimeType) {
-                                      case String:
-                                        messageController.text =
-                                            '${messageController.text}$captured';
-                                        break;
-
-                                      case PlatformFile:
-                                        final PlatformFile platformFile = captured as PlatformFile;
-                                        // await onPasteFiles([platformFile]);
-                                        // break;
-                                        final extension = extensionOf(
-                                          platformFile.name,
-                                        ).toLowerCase();
-                                        if (isImageExtension(extension)) {
-                                          await onPasteImage([platformFile]);
-                                        } else {
-                                          await onPasteFiles([platformFile]);
-                                        }
-                                        break;
-
-                                      default:
-                                        print('Unknown type: ${captured.runtimeType}');
-                                    }
+                                    handleCaptured(captured);
                                   } catch (e) {
                                     inspect(e);
                                   }

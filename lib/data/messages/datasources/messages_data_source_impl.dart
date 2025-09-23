@@ -17,9 +17,7 @@ import 'package:genesis_workspace/data/messages/dto/single_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_messages_flags_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
-import 'package:genesis_workspace/data/messages/tus/platform_chunk_reader_stub.dart'
-    if (dart.library.html) 'package:genesis_workspace/data/messages/tus/platform_chunk_reader_web.dart'
-    if (dart.library.io) 'package:genesis_workspace/data/messages/tus/platform_chunk_reader_io.dart';
+import 'package:genesis_workspace/data/messages/tus/platform_chunk_reader.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mime/mime.dart';
 
