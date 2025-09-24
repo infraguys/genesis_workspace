@@ -20,9 +20,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/update_
 import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
-import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart';
-import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -38,8 +36,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     this._getAllPresencesUseCase,
     this._getUsersUseCase,
     this._getMessagesUseCase,
-    this._addRecentDmUseCase,
-    this._getRecentDmsUseCase,
   ) : super(
         DirectMessagesState(
           users: [],
@@ -69,8 +65,6 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   final GetMessagesUseCase _getMessagesUseCase;
   final GetUsersUseCase _getUsersUseCase;
   final GetAllPresencesUseCase _getAllPresencesUseCase;
-  final AddRecentDmUseCase _addRecentDmUseCase;
-  final GetRecentDmsUseCase _getRecentDmsUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -78,14 +72,14 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   late final StreamSubscription<PresenceEventEntity> _presenceSubscription;
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
 
-  setSelfUser(UserEntity? user) {
+  void setSelfUser(UserEntity? user) {
     if (state.selfUser == null) {
       state.selfUser = user;
       emit(state.copyWith(selfUser: state.selfUser));
     }
   }
 
-  selectUserChat({int? userId, int? unreadMessagesCount}) {
+  void selectUserChat({int? userId, int? unreadMessagesCount}) {
     emit(state.copyWith(selectedUserId: userId, selectedUnreadMessagesCount: unreadMessagesCount));
   }
 

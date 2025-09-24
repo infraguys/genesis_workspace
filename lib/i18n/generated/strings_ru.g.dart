@@ -105,6 +105,7 @@ class TranslationsNavBarRu extends TranslationsNavBarEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
+	@override String get allChats => 'Все чаты';
 	@override String get directMessages => 'Личные сообщения';
 	@override String get settings => 'Настройки';
 	@override String get menu => 'Меню';

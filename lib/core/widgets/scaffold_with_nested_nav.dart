@@ -121,6 +121,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                         labelType: NavigationRailLabelType.all,
                         destinations: [
                           NavigationRailDestination(
+                            label: Text(context.t.navBar.allChats),
+                            icon: Icon(Icons.chat),
+                          ),
+                          NavigationRailDestination(
                             label: Text(context.t.navBar.directMessages),
                             icon: Badge(
                               isLabelVisible: state.messages.any(

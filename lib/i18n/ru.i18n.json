@@ -29,6 +29,7 @@
   "typing": "Печатает",
   "online": "В сети",
   "nav_bar": {
+    "all_chats": "Все чаты",
     "direct_messages": "Личные сообщения",
     "settings": "Настройки",
     "menu": "Меню",

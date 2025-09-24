@@ -30,6 +30,7 @@
   "typing": "Typing",
   "online": "Online",
   "nav_bar": {
+    "all_chats": "All chats",
     "direct_messages": "Direct Messages",
     "settings": "Settings",
     "menu": "Menu",

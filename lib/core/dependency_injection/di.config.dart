@@ -89,6 +89,8 @@ import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart
     as _i487;
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart'
     as _i832;
+import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart'
+    as _i404;
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart'
     as _i672;
 import 'package:genesis_workspace/features/authentication/data/repositories_impl/auth_repository_impl.dart'
@@ -168,6 +170,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
+    gh.factory<_i404.AllChatsCubit>(() => _i404.AllChatsCubit());
     gh.lazySingleton<_i606.AppDatabase>(
       () => coreModule.appDatabase(),
       dispose: (i) => i.dispose(),
@@ -361,6 +364,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1005.UpdateMessageUseCase>(),
       ),
     );
+    gh.factory<_i852.DirectMessagesCubit>(
+      () => _i852.DirectMessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i837.GetAllPresencesUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+      ),
+    );
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
     );
@@ -401,16 +412,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i819.DeleteCsrftokenUseCase>(
       () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
-    );
-    gh.factory<_i852.DirectMessagesCubit>(
-      () => _i852.DirectMessagesCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i837.GetAllPresencesUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i812.AddRecentDmUseCase>(),
-        gh<_i445.GetRecentDmsUseCase>(),
-      ),
     );
     gh.factory<_i155.SettingsCubit>(
       () => _i155.SettingsCubit(

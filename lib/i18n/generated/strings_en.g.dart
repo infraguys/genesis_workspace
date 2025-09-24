@@ -199,6 +199,9 @@ class TranslationsNavBarEn {
 
 	// Translations
 
+	/// en: 'All chats'
+	String get allChats => 'All chats';
+
 	/// en: 'Direct Messages'
 	String get directMessages => 'Direct Messages';
 
