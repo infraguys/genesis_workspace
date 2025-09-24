@@ -123,6 +123,7 @@ class _AllChatsViewState extends State<AllChatsView> {
         initialChannelId: widget.initialChannelId,
         initialTopicName: widget.initialTopicName,
       ),
+      context.read<AllChatsCubit>().loadFolders(),
     ]);
     super.initState();
   }

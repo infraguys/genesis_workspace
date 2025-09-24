@@ -13,6 +13,11 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
+import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart' as _i483;
+import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_source.dart'
+    as _i277;
+import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_repository_impl.dart'
+    as _i957;
 import 'package:genesis_workspace/data/database/app_database.dart' as _i606;
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart'
     as _i253;
@@ -33,6 +38,12 @@ import 'package:genesis_workspace/data/users/repositories_impl/recent_dm_reposit
     as _i265;
 import 'package:genesis_workspace/data/users/repositories_impl/users_repository_impl.dart'
     as _i675;
+import 'package:genesis_workspace/domain/all_chats/repositories/folder_repository.dart'
+    as _i48;
+import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart'
+    as _i125;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart'
+    as _i815;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
     as _i857;
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
@@ -170,7 +181,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
-    gh.factory<_i404.AllChatsCubit>(() => _i404.AllChatsCubit());
     gh.lazySingleton<_i606.AppDatabase>(
       () => coreModule.appDatabase(),
       dispose: (i) => i.dispose(),
@@ -251,8 +261,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i42.UploadFileUseCase>(
       () => _i42.UploadFileUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
+    );
+    gh.factory<_i277.FolderLocalDataSource>(
+      () => _i277.FolderLocalDataSource(gh<_i483.FolderDao>()),
     );
     gh.factory<_i75.GetTokenUseCase>(
       () => _i75.GetTokenUseCase(gh<_i958.TokenStorage>()),
@@ -351,6 +365,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i832.UpdatePresenceUseCase>(),
       ),
     );
+    gh.factory<_i48.FolderRepository>(
+      () => _i957.FolderRepositoryImpl(gh<_i277.FolderLocalDataSource>()),
+    );
     gh.factory<_i277.ChatCubit>(
       () => _i277.ChatCubit(
         gh<_i82.RealTimeService>(),
@@ -375,11 +392,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
     );
+    gh.factory<_i812.AddRecentDmUseCase>(
+      () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
+    );
     gh.factory<_i445.GetRecentDmsUseCase>(
       () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
     );
-    gh.factory<_i812.AddRecentDmUseCase>(
-      () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
+    gh.factory<_i125.AddFolderUseCase>(
+      () => _i125.AddFolderUseCase(gh<_i48.FolderRepository>()),
+    );
+    gh.factory<_i815.GetFoldersUseCase>(
+      () => _i815.GetFoldersUseCase(gh<_i48.FolderRepository>()),
     );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
@@ -397,6 +420,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i404.AllChatsCubit>(
+      () => _i404.AllChatsCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+      ),
     );
     gh.factory<_i721.SaveSessionIdUseCase>(
       () => _i721.SaveSessionIdUseCase(gh<_i1022.AuthRepository>()),
