@@ -4,13 +4,23 @@ class AllChatsState {
   final DmUserEntity? selectedDmChat;
   final ChannelEntity? selectedChannel;
   final TopicEntity? selectedTopic;
+  final List<FolderItemEntity> folders;
+  final int selectedFolderIndex;
 
-  AllChatsState({this.selectedDmChat, this.selectedChannel, this.selectedTopic});
+  AllChatsState({
+    this.selectedDmChat,
+    this.selectedChannel,
+    this.selectedTopic,
+    required this.folders,
+    required this.selectedFolderIndex,
+  });
 
   AllChatsState copyWith({
     Object? selectedDmChat = _noChange,
     Object? selectedChannel = _noChange,
     Object? selectedTopic = _noChange,
+    List<FolderItemEntity>? folders,
+    int? selectedFolderIndex,
   }) {
     return AllChatsState(
       selectedDmChat: identical(selectedDmChat, _noChange)
@@ -22,6 +32,8 @@ class AllChatsState {
       selectedTopic: identical(selectedTopic, _noChange)
           ? this.selectedTopic
           : selectedTopic as TopicEntity?,
+      folders: folders ?? this.folders,
+      selectedFolderIndex: selectedFolderIndex ?? this.selectedFolderIndex,
     );
   }
 

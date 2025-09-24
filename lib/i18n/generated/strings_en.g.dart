@@ -114,6 +114,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Cancel editing'
 	String get cancelEditing => 'Cancel editing';
+
+	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
 }
 
 // Path: auth
@@ -393,4 +395,40 @@ class TranslationsAttachmentButtonEn {
 
 	/// en: 'Pick an image'
 	String get image => 'Pick an image';
+}
+
+// Path: folders
+class TranslationsFoldersEn {
+	TranslationsFoldersEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'All'
+	String get all => 'All';
+
+	/// en: 'Folders'
+	String get title => 'Folders';
+
+	/// en: 'New folder'
+	String get newFolderTitle => 'New folder';
+
+	/// en: 'Folder name'
+	String get nameLabel => 'Folder name';
+
+	/// en: 'Folder color'
+	String get colorLabel => 'Folder color';
+
+	/// en: 'Icon'
+	String get iconLabel => 'Icon';
+
+	/// en: 'Preview'
+	String get preview => 'Preview';
+
+	/// en: 'Create'
+	String get create => 'Create';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
 }

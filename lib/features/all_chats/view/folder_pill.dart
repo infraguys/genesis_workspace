@@ -13,7 +13,6 @@ class FolderPill extends StatelessWidget {
     final Color backgroundColor = isSelected
         ? folder.backgroundColor?.withValues(alpha: 0.1) ?? schema.primary.withValues(alpha: 0.2)
         : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6);
-    final Color borderColor = isSelected ? schema.primary : Colors.transparent;
     final Color foregroundColor = Theme.of(context).colorScheme.onSurfaceVariant;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -28,7 +27,9 @@ class FolderPill extends StatelessWidget {
           ),
         ),
         child: InkWell(
-          // customBorder: const StadiumBorder(),
+          hoverColor:
+              folder.backgroundColor?.withValues(alpha: 0.1) ??
+              schema.primary.withValues(alpha: 0.2),
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
@@ -39,9 +40,9 @@ class FolderPill extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(folder.iconData, size: 18, color: foregroundColor),
+                Icon(folder.iconData, size: 18, color: folder.backgroundColor),
                 const SizedBox(width: 8),
-                Text(folder.title, style: TextStyle(color: foregroundColor)),
+                Text(folder.displayTitle(context), style: TextStyle(color: foregroundColor)),
                 if (folder.unreadCount > 0) ...[
                   const SizedBox(width: 8),
                   Container(

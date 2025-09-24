@@ -112,5 +112,16 @@
     "image": "Выбрать изображение"
   },
   "drop_files_to_upload": "Отпустите файлы, чтобы загрузить",
-  "cancel_editing": "Отменить редактирование"
+  "cancel_editing": "Отменить редактирование",
+  "folders": {
+    "all": "Все",
+    "title": "Папки",
+    "newFolderTitle": "Новая папка",
+    "nameLabel": "Название папки",
+    "colorLabel": "Цвет папки",
+    "iconLabel": "Иконка",
+    "preview": "Предпросмотр",
+    "create": "Создать",
+    "cancel": "Отмена"
+  }
 }

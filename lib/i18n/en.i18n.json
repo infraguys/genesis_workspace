@@ -107,5 +107,16 @@
     "image": "Pick an image"
   },
   "drop_files_to_upload": "Drop files here to upload",
-  "cancel_editing": "Cancel editing"
+  "cancel_editing": "Cancel editing",
+  "folders": {
+    "all": "All",
+    "title": "Folders",
+    "newFolderTitle": "New folder",
+    "nameLabel": "Folder name",
+    "colorLabel": "Folder color",
+    "iconLabel": "Icon",
+    "preview": "Preview",
+    "create": "Create",
+    "cancel": "Cancel"
+  }
 }

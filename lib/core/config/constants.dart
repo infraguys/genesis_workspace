@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,6 +62,36 @@ class AppConstants {
     '7z',
     'json',
     'xml',
+  ];
+
+  static const List<IconData> folderIcons = <IconData>[
+    Icons.folder,
+    Icons.star,
+    Icons.work,
+    Icons.chat_bubble,
+    Icons.mail,
+    Icons.favorite,
+    Icons.school,
+    Icons.code,
+    Icons.task_alt,
+    Icons.pin_drop,
+    Icons.bookmark,
+    Icons.bolt,
+    Icons.shopping_bag,
+    Icons.sports_esports,
+    Icons.movie,
+    Icons.music_note,
+  ];
+
+  static const List<Color> folderColors = <Color>[
+    Color(0xFFEF4444), // red
+    Color(0xFFF59E0B), // amber
+    Color(0xFF10B981), // emerald
+    Color(0xFF3B82F6), // blue
+    Color(0xFF8B5CF6), // violet
+    Color(0xFFF43F5E), // rose
+    Color(0xFF14B8A6), // teal
+    Color(0xFF6B7280), // gray
   ];
 }
 
