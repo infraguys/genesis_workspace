@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 
 class FolderPill extends StatelessWidget {
   final FolderItemEntity folder;
   final bool isSelected;
   final void Function()? onTap;
-  const FolderPill({super.key, required this.isSelected, this.onTap, required this.folder});
+  final void Function()? onEdit;
+  final void Function()? onDelete;
+  const FolderPill({
+    super.key,
+    required this.isSelected,
+    this.onTap,
+    required this.folder,
+    this.onEdit,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +45,16 @@ class FolderPill extends StatelessWidget {
             topRight: Radius.circular(12),
           ),
           onTap: onTap,
+          onSecondaryTapDown: (details) {
+            if (folder.systemType != null) return;
+            _showContextMenu(context, details.globalPosition);
+          },
+          onLongPress: () {
+            if (folder.systemType != null) return;
+            final box = context.findRenderObject() as RenderBox?;
+            final pos = box?.localToGlobal(Offset.zero) ?? Offset.zero;
+            _showContextMenu(context, pos);
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
@@ -66,5 +86,22 @@ class FolderPill extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showContextMenu(BuildContext context, Offset position) async {
+    if (onEdit == null && onDelete == null) return;
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
+      items: [
+        if (onEdit != null) PopupMenuItem(value: 'edit', child: Text(context.t.folders.edit)),
+        if (onDelete != null) PopupMenuItem(value: 'delete', child: Text(context.t.folders.delete)),
+      ],
+    );
+    if (selected == 'edit') {
+      onEdit?.call();
+    } else if (selected == 'delete') {
+      onDelete?.call();
+    }
   }
 }

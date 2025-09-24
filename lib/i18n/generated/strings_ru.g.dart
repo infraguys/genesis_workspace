@@ -261,4 +261,11 @@ class TranslationsFoldersRu extends TranslationsFoldersEn {
 	@override String get preview => 'Предпросмотр';
 	@override String get create => 'Создать';
 	@override String get cancel => 'Отмена';
+	@override String get addToFolder => 'Добавить в папку';
+	@override String get selectFolders => 'Выберите папки';
+	@override String get save => 'Сохранить';
+	@override String get edit => 'Редактировать папку';
+	@override String get delete => 'Удалить';
+	@override String get deleteConfirmTitle => 'Удалить папку?';
+	@override String deleteConfirmText({required Object folderName}) => 'Вы уверены, что хотите удалить "${folderName}"?';
 }

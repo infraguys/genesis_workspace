@@ -24,12 +24,14 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem>
   static const Curve _animationCurve = Curves.easeInOut;
 
   void _handleHeaderTap() {
-    if (isExpanded == true) {
-      setState(() => isExpanded = !isExpanded);
-      return;
-    } else {
-      setState(() => isExpanded = !isExpanded);
-      widget.onTap?.call();
+    final bool wasExpanded = isExpanded;
+    setState(() => isExpanded = !isExpanded);
+    if (!wasExpanded) {
+      if (widget.onTap != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.onTap!.call();
+        });
+      }
     }
   }
 

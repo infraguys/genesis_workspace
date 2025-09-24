@@ -6,6 +6,8 @@ class AllChatsState {
   final TopicEntity? selectedTopic;
   final List<FolderItemEntity> folders;
   final int selectedFolderIndex;
+  final Set<int>? filterDmUserIds;
+  final Set<int>? filterChannelIds;
 
   AllChatsState({
     this.selectedDmChat,
@@ -13,6 +15,8 @@ class AllChatsState {
     this.selectedTopic,
     required this.folders,
     required this.selectedFolderIndex,
+    this.filterDmUserIds,
+    this.filterChannelIds,
   });
 
   AllChatsState copyWith({
@@ -21,6 +25,8 @@ class AllChatsState {
     Object? selectedTopic = _noChange,
     List<FolderItemEntity>? folders,
     int? selectedFolderIndex,
+    Object? filterDmUserIds,
+    Object? filterChannelIds,
   }) {
     return AllChatsState(
       selectedDmChat: identical(selectedDmChat, _noChange)
@@ -34,6 +40,12 @@ class AllChatsState {
           : selectedTopic as TopicEntity?,
       folders: folders ?? this.folders,
       selectedFolderIndex: selectedFolderIndex ?? this.selectedFolderIndex,
+      filterDmUserIds: identical(filterDmUserIds, _noChange)
+          ? this.filterDmUserIds
+          : filterDmUserIds as Set<int>?,
+      filterChannelIds: identical(filterChannelIds, _noChange)
+          ? this.filterChannelIds
+          : filterChannelIds as Set<int>?,
     );
   }
 

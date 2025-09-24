@@ -79,7 +79,7 @@ final router = GoRouter(
             if (kIsWeb) ...[
               GoRoute(
                 path: '${Routes.directMessages}/:userId',
-                name: Routes.chat,
+                name: 'allChatsChat',
                 builder: (context, state) {
                   final userId = int.parse(state.pathParameters['userId']!);
                   final extra = state.extra as Map<String, dynamic>?;
@@ -141,7 +141,7 @@ final router = GoRouter(
             if (kIsWeb) ...[
               GoRoute(
                 path: '${Routes.channels}/:channelId',
-                name: Routes.channelChat,
+                name: 'allChatsChannelChat',
                 pageBuilder: (context, state) {
                   final channelIdString = state.pathParameters['channelId'];
                   final channelId = int.tryParse(channelIdString ?? '');
@@ -166,7 +166,7 @@ final router = GoRouter(
               ),
               GoRoute(
                 path: '${Routes.channels}/:channelId/:topicName',
-                name: Routes.channelChatTopic,
+                name: 'allChatsChannelChatTopic',
                 pageBuilder: (context, state) {
                   final channelIdString = state.pathParameters['channelId'];
                   final topicName = state.pathParameters['topicName'];
@@ -324,7 +324,7 @@ final router = GoRouter(
       name: Routes.auth,
       redirect: (BuildContext context, GoRouterState state) {
         if (context.read<AuthCubit>().state.isAuthorized) {
-          return Routes.directMessages;
+          return Routes.allChats;
         }
         return null;
       },

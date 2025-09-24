@@ -36,5 +36,24 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
   }
 
   Future<void> clear() => delete(folders).go();
-}
 
+  Future<int> updateFolder({
+    required int id,
+    String? title,
+    int? iconCodePoint,
+    int? backgroundColorValue,
+    int? unreadCount,
+  }) async {
+    final companion = FoldersCompanion(
+      title: title != null ? Value(title) : const Value.absent(),
+      iconCodePoint:
+          iconCodePoint != null ? Value(iconCodePoint) : const Value.absent(),
+      backgroundColorValue: backgroundColorValue != null
+          ? Value(backgroundColorValue)
+          : const Value.absent(),
+      unreadCount:
+          unreadCount != null ? Value(unreadCount) : const Value.absent(),
+    );
+    return (update(folders)..where((tbl) => tbl.id.equals(id))).write(companion);
+  }
+}

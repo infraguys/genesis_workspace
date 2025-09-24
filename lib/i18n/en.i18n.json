@@ -117,6 +117,13 @@
     "iconLabel": "Icon",
     "preview": "Preview",
     "create": "Create",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "addToFolder": "Add to folder",
+    "selectFolders": "Select folders",
+    "save": "Save",
+    "edit": "Edit folder",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete folder?",
+    "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?"
   }
 }

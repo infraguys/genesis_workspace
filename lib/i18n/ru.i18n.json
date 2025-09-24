@@ -122,6 +122,13 @@
     "iconLabel": "Иконка",
     "preview": "Предпросмотр",
     "create": "Создать",
-    "cancel": "Отмена"
+    "cancel": "Отмена",
+    "addToFolder": "Добавить в папку",
+    "selectFolders": "Выберите папки",
+    "save": "Сохранить",
+    "edit": "Редактировать папку",
+    "delete": "Удалить",
+    "deleteConfirmTitle": "Удалить папку?",
+    "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?"
   }
 }

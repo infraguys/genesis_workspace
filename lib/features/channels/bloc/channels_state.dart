@@ -1,6 +1,6 @@
 part of 'channels_cubit.dart';
 
-class ChannelsState {
+class ChannelsState extends Equatable {
   List<ChannelEntity> channels;
   List<MessageEntity> unreadMessages;
   int? pendingTopicsId;
@@ -38,4 +38,7 @@ class ChannelsState {
       selectedChannel: selectedChannel ?? this.selectedChannel,
     );
   }
+
+  @override
+  List<Object?> get props => [channels];
 }

@@ -6,8 +6,9 @@ import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart'
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class CreateFolderDialog extends StatefulWidget {
-  final Function(FolderItemEntity folder) onCreate;
-  const CreateFolderDialog({super.key, required this.onCreate});
+  final Function(FolderItemEntity folder) onSubmit;
+  final FolderItemEntity? initial;
+  const CreateFolderDialog({super.key, required this.onSubmit, this.initial});
 
   @override
   State<CreateFolderDialog> createState() => _CreateFolderDialogState();
@@ -25,8 +26,11 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   @override
   void initState() {
     super.initState();
-    selectedIconData = Icons.folder;
-    selectedColor = AppConstants.folderColors.first;
+    selectedIconData = widget.initial?.iconData ?? Icons.folder;
+    selectedColor = widget.initial?.backgroundColor ?? AppConstants.folderColors.first;
+    if (widget.initial?.title != null) {
+      titleController.text = widget.initial!.title!;
+    }
     titleController.addListener(() => setState(() {}));
   }
 
@@ -37,8 +41,9 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     super.dispose();
   }
 
-  FolderItemEntity onCreatePressed() {
+  FolderItemEntity onSubmitPressed() {
     final FolderItemEntity folder = FolderItemEntity(
+      id: widget.initial?.id,
       title: titleController.text.trim(),
       iconData: selectedIconData!,
       backgroundColor: selectedColor,
@@ -72,19 +77,16 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                   automaticallyImplyLeading: false,
                   title: Text(context.t.folders.newFolderTitle),
                   actions: [
-                    TextButton(
-                      onPressed: Navigator.of(context).pop,
-                      child: Text(context.t.folders.cancel),
-                    ),
+                    TextButton(onPressed: Navigator.of(context).pop, child: Text(context.t.folders.cancel)),
                     const SizedBox(width: 4),
                     TextButton(
                       onPressed: isCreateEnabled
                           ? () {
-                              final FolderItemEntity folder = onCreatePressed();
-                              widget.onCreate(folder);
+                              final FolderItemEntity folder = onSubmitPressed();
+                              widget.onSubmit(folder);
                             }
                           : null,
-                      child: Text(context.t.folders.create),
+                      child: Text(widget.initial == null ? context.t.folders.create : context.t.folders.save),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -111,7 +113,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                           ),
                         ),
                       ),
-                      onSubmitted: (_) => onCreatePressed(),
+                      onSubmitted: (_) => onSubmitPressed(),
                     ),
                   ),
                 ),

@@ -16,7 +16,6 @@ import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:go_router/go_router.dart';
 
 class AllChatsView extends StatefulWidget {
   final int? initialUserId;
@@ -105,9 +104,22 @@ class _AllChatsViewState extends State<AllChatsView> {
     return showDialog(
       context: context,
       builder: (dialogContext) => CreateFolderDialog(
-        onCreate: (folder) {
-          context.read<AllChatsCubit>().addFolder(folder);
-          context.pop();
+        onSubmit: (folder) async {
+          await context.read<AllChatsCubit>().addFolder(folder);
+          Navigator.of(dialogContext).pop();
+        },
+      ),
+    );
+  }
+
+  Future<void> editFolder(BuildContext context, FolderItemEntity folder) {
+    return showDialog(
+      context: context,
+      builder: (dialogContext) => CreateFolderDialog(
+        initial: folder,
+        onSubmit: (updated) async {
+          await context.read<AllChatsCubit>().updateFolder(updated);
+          Navigator.of(dialogContext).pop();
         },
       ),
     );
@@ -160,6 +172,11 @@ class _AllChatsViewState extends State<AllChatsView> {
                 return Center(child: CircularProgressIndicator());
               }
               return BlocBuilder<AllChatsCubit, AllChatsState>(
+                buildWhen: (prev, cur) =>
+                    prev.selectedFolderIndex != cur.selectedFolderIndex ||
+                    prev.folders != cur.folders ||
+                    prev.filterDmUserIds != cur.filterDmUserIds ||
+                    prev.filterChannelIds != cur.filterChannelIds,
                 builder: (context, state) {
                   return Row(
                     children: [
@@ -213,6 +230,43 @@ class _AllChatsViewState extends State<AllChatsView> {
                                         onTap: () {
                                           context.read<AllChatsCubit>().selectFolder(index);
                                         },
+                                        onEdit: (folder.systemType == null)
+                                            ? () => editFolder(context, folder)
+                                            : null,
+                                        onDelete: (folder.systemType == null)
+                                            ? () async {
+                                                final confirmed = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (dialogContext) => AlertDialog(
+                                                    title: Text(
+                                                      context.t.folders.deleteConfirmTitle,
+                                                    ),
+                                                    content: Text(
+                                                      context.t.folders.deleteConfirmText(
+                                                        folderName: folder.title ?? '',
+                                                      ),
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.of(dialogContext).pop(false),
+                                                        child: Text(context.t.folders.cancel),
+                                                      ),
+                                                      FilledButton(
+                                                        onPressed: () =>
+                                                            Navigator.of(dialogContext).pop(true),
+                                                        child: Text(context.t.folders.delete),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                if (confirmed == true) {
+                                                  await context.read<AllChatsCubit>().deleteFolder(
+                                                    folder,
+                                                  );
+                                                }
+                                              }
+                                            : null,
                                       );
                                     },
                                   ),
@@ -238,12 +292,14 @@ class _AllChatsViewState extends State<AllChatsView> {
                                     return Container(
                                       color: color,
                                       child: Column(
-                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisSize: MainAxisSize.max,
                                         crossAxisAlignment: CrossAxisAlignment.stretch,
                                         children: [
-                                          const AllChatsDms(),
+                                          AllChatsDms(filteredDms: state.filterDmUserIds),
                                           const Divider(height: 1),
-                                          const AllChatsChannels(),
+                                          AllChatsChannels(
+                                            filteredChannels: state.filterChannelIds,
+                                          ),
                                         ],
                                       ),
                                     );

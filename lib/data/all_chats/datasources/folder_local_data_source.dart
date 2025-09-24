@@ -25,11 +25,26 @@ class FolderLocalDataSource {
 
   FolderItemEntity _mapDbToEntity(Folder row) {
     return FolderItemEntity(
+      id: row.id,
       title: row.title,
       iconData: IconData(row.iconCodePoint, fontFamily: 'MaterialIcons'),
       backgroundColor: row.backgroundColorValue != null ? Color(row.backgroundColorValue!) : null,
       unreadCount: row.unreadCount,
     );
   }
-}
 
+  Future<void> update(FolderItemEntity folder) async {
+    if (folder.id == null) return;
+    await _dao.updateFolder(
+      id: folder.id!,
+      title: folder.title,
+      iconCodePoint: folder.iconData.codePoint,
+      backgroundColorValue: folder.backgroundColor?.value,
+      unreadCount: folder.unreadCount,
+    );
+  }
+
+  Future<void> delete(int id) async {
+    await _dao.deleteById(id);
+  }
+}

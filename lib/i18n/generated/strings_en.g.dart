@@ -431,4 +431,25 @@ class TranslationsFoldersEn {
 
 	/// en: 'Cancel'
 	String get cancel => 'Cancel';
+
+	/// en: 'Add to folder'
+	String get addToFolder => 'Add to folder';
+
+	/// en: 'Select folders'
+	String get selectFolders => 'Select folders';
+
+	/// en: 'Save'
+	String get save => 'Save';
+
+	/// en: 'Edit folder'
+	String get edit => 'Edit folder';
+
+	/// en: 'Delete'
+	String get delete => 'Delete';
+
+	/// en: 'Delete folder?'
+	String get deleteConfirmTitle => 'Delete folder?';
+
+	/// en: 'Are you sure you want to delete "{folderName}"?'
+	String deleteConfirmText({required Object folderName}) => 'Are you sure you want to delete "${folderName}"?';
 }

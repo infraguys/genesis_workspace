@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
@@ -152,9 +153,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     emit(state.copyWith(pendingTopicsId: state.pendingTopicsId));
     try {
       final response = await _getTopicsUseCase.call(streamId);
-      state.pendingTopicsId = null;
-      final indexOfChannel = state.channels.indexWhere((element) => element.streamId == streamId);
-      final channel = state.channels[indexOfChannel];
+      final updatedChannels = [...state.channels];
+      final indexOfChannel = updatedChannels.indexWhere((element) => element.streamId == streamId);
+      final channel = updatedChannels[indexOfChannel];
 
       channel.topics = response;
       for (var message in state.unreadMessages) {
@@ -165,9 +166,12 @@ class ChannelsCubit extends Cubit<ChannelsState> {
           topic?.unreadMessages.add(message.id);
         }
       }
-      emit(state.copyWith(pendingTopicsId: state.pendingTopicsId, channels: state.channels));
+      emit(state.copyWith(channels: updatedChannels));
     } catch (e) {
       inspect(e);
+    } finally {
+      state.pendingTopicsId = null;
+      emit(state.copyWith(pendingTopicsId: state.pendingTopicsId));
     }
   }
 

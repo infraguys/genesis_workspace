@@ -17,5 +17,12 @@ class FolderRepositoryImpl implements FolderRepository {
   Future<List<FolderItemEntity>> getFolders() async {
     return _local.getAll();
   }
-}
 
+  Future<void> updateFolder(FolderItemEntity folder) async {
+    await _local.update(folder);
+  }
+
+  Future<void> deleteFolder(int id) async {
+    await _local.delete(id);
+  }
+}
