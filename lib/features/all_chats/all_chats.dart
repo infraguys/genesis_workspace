@@ -13,9 +13,9 @@ class AllChats extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (context) => getIt<ChannelsCubit>()),
         BlocProvider(create: (context) => getIt<AllChatsCubit>()),
         BlocProvider(create: (context) => getIt<DirectMessagesCubit>()),
-        BlocProvider(create: (context) => getIt<ChannelsCubit>()),
       ],
       child: AllChatsView(),
     );

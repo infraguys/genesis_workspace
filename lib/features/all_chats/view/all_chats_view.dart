@@ -42,39 +42,6 @@ class _AllChatsViewState extends State<AllChatsView> {
   late final Future _future;
   final TextEditingController _searchController = TextEditingController();
 
-  final List<FolderItemEntity> _folders = const [
-    FolderItemEntity(
-      title: 'Unread',
-      iconData: Icons.markunread,
-      unreadCount: 12,
-      backgroundColor: Color(0xFF4FC3F7),
-    ),
-    FolderItemEntity(
-      title: 'Personal',
-      iconData: Icons.person,
-      unreadCount: 3,
-      backgroundColor: Color(0xFF81C784),
-    ),
-    FolderItemEntity(
-      title: 'Work',
-      iconData: Icons.work,
-      unreadCount: 5,
-      backgroundColor: Color(0xFFFFB74D),
-    ),
-    FolderItemEntity(
-      title: 'Channels',
-      iconData: Icons.tag,
-      unreadCount: 9,
-      backgroundColor: Color(0xFFBA68C8),
-    ),
-    FolderItemEntity(
-      title: 'Bots',
-      iconData: Icons.smart_toy,
-      unreadCount: 0,
-      backgroundColor: Color(0xFFE57373),
-    ),
-  ];
-
   final ScrollController _foldersScrollController = ScrollController();
 
   Color _currentFolderBackground(
@@ -297,8 +264,22 @@ class _AllChatsViewState extends State<AllChatsView> {
                                         children: [
                                           AllChatsDms(filteredDms: state.filterDmUserIds),
                                           const Divider(height: 1),
-                                          AllChatsChannels(
-                                            filteredChannels: state.filterChannelIds,
+                                          BlocBuilder<ChannelsCubit, ChannelsState>(
+                                            builder: (context, channelsState) {
+                                              final channels = state.filterChannelIds == null
+                                                  ? channelsState.channels
+                                                  : channelsState.channels
+                                                        .where(
+                                                          (ch) => state.filterChannelIds!.contains(
+                                                            ch.streamId,
+                                                          ),
+                                                        )
+                                                        .toList();
+                                              return AllChatsChannels(
+                                                filterChannelIds: state.filterChannelIds,
+                                                channels: channels,
+                                              );
+                                            },
                                           ),
                                         ],
                                       ),

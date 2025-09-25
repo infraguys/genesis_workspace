@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
@@ -82,7 +81,6 @@ class ChannelsCubit extends Cubit<ChannelsState> {
             .map((message) => message.id)
             .toSet();
       }
-      state.channels = channels;
       emit(state.copyWith(unreadMessages: unreadMessages, channels: channels));
     } catch (e) {
       inspect(e);
@@ -183,8 +181,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
         channel.unreadMessages.add(message.id);
       }
     }
-    state.channels = channels;
-    emit(state.copyWith(channels: state.channels));
+    emit(state.copyWith(channels: channels));
   }
 
   void _onMessageEvents(MessageEventEntity event) {

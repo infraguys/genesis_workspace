@@ -69,7 +69,6 @@ class AllChatsDms extends StatelessWidget {
                     isLongPress: true,
                     content: Container(
                       width: 240,
-                      height: 64,
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),

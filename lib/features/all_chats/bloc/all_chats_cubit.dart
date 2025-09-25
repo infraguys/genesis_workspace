@@ -94,10 +94,12 @@ class AllChatsCubit extends Cubit<AllChatsState> {
 
   Future<void> setFoldersForDm(int userId, List<int> folderIds) async {
     await _setFoldersForTargetUseCase(FolderTarget.dm(userId), folderIds);
+    _applyFolderFilter();
   }
 
   Future<void> setFoldersForChannel(int streamId, List<int> folderIds) async {
     await _setFoldersForTargetUseCase(FolderTarget.channel(streamId), folderIds);
+    _applyFolderFilter();
   }
 
   Future<List<int>> getFolderIdsForDm(int userId) {
@@ -129,13 +131,13 @@ class AllChatsCubit extends Cubit<AllChatsState> {
       emit(state.copyWith(filterDmUserIds: null, filterChannelIds: null));
       return;
     }
-    final FolderItemEntity f = state.folders[idx];
-    if (f.id == null) {
+    final FolderItemEntity folder = state.folders[idx];
+    if (folder.id == null) {
       emit(state.copyWith(filterDmUserIds: null, filterChannelIds: null));
       return;
     }
     final repo = getIt<FolderMembershipRepository>();
-    final members = await repo.getMembersForFolder(f.id!);
+    final members = await repo.getMembersForFolder(folder.id!);
     emit(
       state.copyWith(
         filterDmUserIds: members.dmUserIds.toSet(),
