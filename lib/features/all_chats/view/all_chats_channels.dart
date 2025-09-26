@@ -2,15 +2,24 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/channel_down_expanded_item.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class AllChatsChannels extends StatefulWidget {
   final Set<int>? filterChannelIds;
-  const AllChatsChannels({super.key, required this.filterChannelIds});
+  final bool embeddedInParentScroll;
+
+  const AllChatsChannels({
+    super.key,
+    required this.filterChannelIds,
+    this.embeddedInParentScroll = false,
+  });
 
   @override
   State<AllChatsChannels> createState() => _AllChatsChannelsState();
@@ -28,7 +37,7 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
     super.initState();
     expandController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 220),
       reverseDuration: const Duration(milliseconds: 180),
     );
     expandAnimation = CurvedAnimation(
@@ -55,6 +64,46 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
     }
   }
 
+  Widget _buildList(BuildContext context, List<ChannelEntity> channels) {
+    final isDesktop = currentSize(context) > ScreenSize.lTablet;
+    final listView = ListView.separated(
+      controller: widget.embeddedInParentScroll ? null : scrollController,
+      shrinkWrap: true,
+      physics: widget.embeddedInParentScroll
+          ? const NeverScrollableScrollPhysics()
+          : const AlwaysScrollableScrollPhysics(),
+      itemCount: channels.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final ChannelEntity channel = channels[index];
+        return ChannelDownExpandedItem(
+          key: ValueKey('channel-${channel.streamId}'),
+          channel: channel,
+          onTap: () async {
+            context.read<AllChatsCubit>().selectChannel(channel: channel);
+            unawaited(context.read<ChannelsCubit>().getChannelTopics(streamId: channel.streamId));
+          },
+          onTopicTap: (topic) {
+            if (isDesktop) {
+              context.read<AllChatsCubit>().selectChannel(channel: channel, topic: topic);
+            } else {
+              context.pushNamed(
+                Routes.channelChatTopic,
+                pathParameters: {'channelId': channel.streamId.toString(), 'topicName': topic.name},
+                extra: {'unreadMessagesCount': topic.unreadMessages.length},
+              );
+            }
+          },
+        );
+      },
+    );
+
+    if (widget.embeddedInParentScroll) {
+      return listView;
+    }
+    return ConstrainedBox(constraints: const BoxConstraints(maxHeight: 480), child: listView);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChannelsCubit, ChannelsState>(
@@ -72,7 +121,6 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Заголовок с кнопкой сворачивания
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               child: Row(
@@ -96,45 +144,13 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
                 ],
               ),
             ),
-
-            // Анимируемая область со списком каналов
             ClipRect(
               child: SizeTransition(
                 sizeFactor: expandAnimation,
                 axisAlignment: -1.0,
                 child: FadeTransition(
                   opacity: expandAnimation,
-                  child: ConstrainedBox(
-                    // Выбери подходящий лимит высоты под свой лэйаут
-                    constraints: const BoxConstraints(maxHeight: 480),
-                    child: ListView.separated(
-                      controller: scrollController,
-                      shrinkWrap: true,
-                      itemCount: channels.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final ChannelEntity channel = channels[index];
-                        return ChannelDownExpandedItem(
-                          key: ValueKey('channel-${channel.streamId}'),
-                          channel: channel,
-                          onTap: () async {
-                            context.read<AllChatsCubit>().selectChannel(channel: channel);
-                            unawaited(
-                              context.read<ChannelsCubit>().getChannelTopics(
-                                streamId: channel.streamId,
-                              ),
-                            );
-                          },
-                          onTopicTap: (topic) {
-                            context.read<AllChatsCubit>().selectChannel(
-                              channel: channel,
-                              topic: topic,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                  child: _buildList(context, channels),
                 ),
               ),
             ),

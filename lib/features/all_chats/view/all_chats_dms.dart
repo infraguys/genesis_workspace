@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
 class AllChatsDms extends StatefulWidget {
   final Set<int>? filteredDms;
-  const AllChatsDms({super.key, required this.filteredDms});
+  final bool embeddedInParentScroll;
+
+  const AllChatsDms({super.key, required this.filteredDms, this.embeddedInParentScroll = false});
 
   @override
   State<AllChatsDms> createState() => _AllChatsDmsState();
@@ -27,7 +31,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     super.initState();
     expandController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 220),
       reverseDuration: const Duration(milliseconds: 180),
     );
     expandAnimation = CurvedAnimation(
@@ -51,6 +55,85 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     } else {
       expandController.reverse();
     }
+  }
+
+  Widget _buildList(BuildContext context, List<DmUserEntity> users) {
+    final isDesktop = currentSize(context) > ScreenSize.lTablet;
+    final listView = ListView.builder(
+      shrinkWrap: true,
+      physics: widget.embeddedInParentScroll
+          ? const NeverScrollableScrollPhysics()
+          : const AlwaysScrollableScrollPhysics(),
+      itemCount: users.length,
+      itemBuilder: (BuildContext context, int index) {
+        final DmUserEntity user = users[index];
+        final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
+
+        return CustomPopup(
+          key: popupKey,
+          position: PopupPosition.auto,
+          contentPadding: EdgeInsets.zero,
+          isLongPress: true,
+          content: Container(
+            width: 240,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+              ),
+              boxShadow: kElevationToShadow[3],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: ListTile(
+                leading: const Icon(Icons.folder_open),
+                title: Text(context.t.folders.addToFolder),
+                onTap: () async {
+                  context.pop();
+                  await context.read<AllChatsCubit>().loadFolders();
+                  await showDialog(
+                    context: context,
+                    builder: (_) => SelectFoldersDialog(
+                      loadSelectedFolderIds: () =>
+                          context.read<AllChatsCubit>().getFolderIdsForDm(user.userId),
+                      onSave: (selectedFolderIds) => context.read<AllChatsCubit>().setFoldersForDm(
+                        user.userId,
+                        selectedFolderIds,
+                      ),
+                      folders: context.read<AllChatsCubit>().state.folders,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          child: GestureDetector(
+            onSecondaryTap: () => popupKey.currentState?.show(),
+            child: UserTile(
+              key: ValueKey(user.userId),
+              user: user,
+              onTap: () {
+                if (isDesktop) {
+                  context.read<AllChatsCubit>().selectDmChat(user);
+                } else {
+                  context.pushNamed(
+                    Routes.chat,
+                    pathParameters: {'userId': user.userId.toString()},
+                    extra: {'unreadMessagesCount': user.unreadMessages.length},
+                  );
+                }
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (widget.embeddedInParentScroll) {
+      return listView;
+    }
+    return ConstrainedBox(constraints: const BoxConstraints(maxHeight: 500), child: listView);
   }
 
   @override
@@ -97,73 +180,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
               child: SizeTransition(
                 sizeFactor: expandAnimation,
                 axisAlignment: -1.0,
-                child: FadeTransition(
-                  opacity: expandAnimation,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 400),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: users.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final DmUserEntity user = users[index];
-                        final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
-
-                        return CustomPopup(
-                          key: popupKey,
-                          position: PopupPosition.auto,
-                          contentPadding: EdgeInsets.zero,
-                          isLongPress: true,
-                          content: Container(
-                            width: 240,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outlineVariant.withOpacity(0.5),
-                              ),
-                              boxShadow: kElevationToShadow[3],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: ListTile(
-                                leading: const Icon(Icons.folder_open),
-                                title: Text(context.t.folders.addToFolder),
-                                onTap: () async {
-                                  context.pop();
-                                  await context.read<AllChatsCubit>().loadFolders();
-                                  await showDialog(
-                                    context: context,
-                                    builder: (_) => SelectFoldersDialog(
-                                      loadSelectedFolderIds: () => context
-                                          .read<AllChatsCubit>()
-                                          .getFolderIdsForDm(user.userId),
-                                      onSave: (selectedFolderIds) => context
-                                          .read<AllChatsCubit>()
-                                          .setFoldersForDm(user.userId, selectedFolderIds),
-                                      folders: context.read<AllChatsCubit>().state.folders,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onSecondaryTap: () => popupKey.currentState?.show(),
-                            child: UserTile(
-                              key: ValueKey(user.userId),
-                              user: user,
-                              onTap: () {
-                                context.read<AllChatsCubit>().selectDmChat(user);
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                child: FadeTransition(opacity: expandAnimation, child: _buildList(context, users)),
               ),
             ),
           ],

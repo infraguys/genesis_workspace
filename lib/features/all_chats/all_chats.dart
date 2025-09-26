@@ -7,7 +7,10 @@ import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 
 class AllChats extends StatelessWidget {
-  const AllChats({super.key});
+  final int? initialUserId;
+  final int? initialChannelId;
+  final String? initialTopicName;
+  const AllChats({super.key, this.initialUserId, this.initialChannelId, this.initialTopicName});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +20,11 @@ class AllChats extends StatelessWidget {
         BlocProvider(create: (context) => getIt<AllChatsCubit>()),
         BlocProvider(create: (context) => getIt<DirectMessagesCubit>()),
       ],
-      child: AllChatsView(),
+      child: AllChatsView(
+        initialUserId: initialUserId,
+        initialChannelId: initialChannelId,
+        initialTopicName: initialTopicName,
+      ),
     );
   }
 }

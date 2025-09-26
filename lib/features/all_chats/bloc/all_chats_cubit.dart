@@ -122,6 +122,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   }
 
   void selectFolder(int newIndex) {
+    if (state.selectedFolderIndex == newIndex) return;
     emit(state.copyWith(selectedFolderIndex: newIndex));
     _applyFolderFilter();
   }

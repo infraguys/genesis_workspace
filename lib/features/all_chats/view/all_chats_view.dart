@@ -95,7 +95,9 @@ class _AllChatsViewState extends State<AllChatsView> {
   @override
   void initState() {
     _sidebarWidth = _defaultWidth.clamp(_sidebarMinWidth, _sidebarMaxWidth).toDouble();
-    context.read<DirectMessagesCubit>().selectUserChat(userId: widget.initialUserId);
+    if (widget.initialUserId != null) {
+      context.read<DirectMessagesCubit>().selectUserChat(userId: widget.initialUserId);
+    }
     _future = Future.wait([
       context.read<DirectMessagesCubit>().getUsers(),
       context.read<ChannelsCubit>().getChannels(
@@ -120,12 +122,28 @@ class _AllChatsViewState extends State<AllChatsView> {
     final Color borderColor = (_isHandleHovered || _isDragging)
         ? borderActiveColor
         : borderIdleColor;
-    final theme = Theme.of(context);
 
-    final isDesktopWidth = currentSize(context) > ScreenSize.lTablet;
+    final bool isDesktopWidth = currentSize(context) > ScreenSize.lTablet;
+
+    final PreferredSizeWidget appBar = isDesktopWidth
+        ? WorkspaceAppBar(title: context.t.navBar.allChats)
+        : AppBar(
+            title: Text(context.t.navBar.allChats),
+            centerTitle: false,
+            toolbarHeight: 44,
+            elevation: 0,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  createNewFolder(context);
+                },
+                icon: Icon(Icons.add),
+              ),
+            ],
+          );
 
     return Scaffold(
-      appBar: const WorkspaceAppBar(title: 'All chats'),
+      appBar: appBar,
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, profileState) {
           if (profileState.user != null) {
@@ -136,7 +154,7 @@ class _AllChatsViewState extends State<AllChatsView> {
             future: _future,
             builder: (BuildContext context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
               return BlocBuilder<AllChatsCubit, AllChatsState>(
                 buildWhen: (prev, cur) =>
@@ -145,43 +163,227 @@ class _AllChatsViewState extends State<AllChatsView> {
                     prev.filterDmUserIds != cur.filterDmUserIds ||
                     prev.filterChannelIds != cur.filterChannelIds,
                 builder: (context, state) {
-                  return Row(
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: isDesktopWidth
-                              ? _sidebarWidth
-                              : MediaQuery.sizeOf(context).width,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              right: BorderSide(color: borderColor, width: _dragHandleVisualWidth),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      context.t.folders.title,
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        createNewFolder(context);
-                                      },
-                                      icon: Icon(Icons.add),
-                                    ),
-                                  ],
+                  if (isDesktopWidth) {
+                    return Row(
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: _sidebarWidth),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                right: BorderSide(
+                                  color: borderColor,
+                                  width: _dragHandleVisualWidth,
                                 ),
                               ),
-
-                              SizedBox(
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        context.t.folders.title,
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
+                                      IconButton(
+                                        onPressed: () => createNewFolder(context),
+                                        icon: const Icon(Icons.add),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 46,
+                                  child: ScrollConfiguration(
+                                    behavior: ScrollConfiguration.of(
+                                      context,
+                                    ).copyWith(scrollbars: false),
+                                    child: ListView.builder(
+                                      controller: _foldersScrollController,
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: state.folders.length,
+                                      itemBuilder: (context, index) {
+                                        final FolderItemEntity folder = state.folders[index];
+                                        final bool isSelected = state.selectedFolderIndex == index;
+                                        return FolderPill(
+                                          isSelected: isSelected,
+                                          folder: folder,
+                                          onTap: () =>
+                                              context.read<AllChatsCubit>().selectFolder(index),
+                                          onEdit: (folder.systemType == null)
+                                              ? () => editFolder(context, folder)
+                                              : null,
+                                          onDelete: (folder.systemType == null)
+                                              ? () async {
+                                                  final confirmed = await showDialog<bool>(
+                                                    context: context,
+                                                    builder: (dialogContext) => AlertDialog(
+                                                      title: Text(
+                                                        context.t.folders.deleteConfirmTitle,
+                                                      ),
+                                                      content: Text(
+                                                        context.t.folders.deleteConfirmText(
+                                                          folderName: folder.title ?? '',
+                                                        ),
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () => Navigator.of(
+                                                            dialogContext,
+                                                          ).pop(false),
+                                                          child: Text(context.t.folders.cancel),
+                                                        ),
+                                                        FilledButton(
+                                                          onPressed: () =>
+                                                              Navigator.of(dialogContext).pop(true),
+                                                          child: Text(context.t.folders.delete),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                  if (confirmed == true) {
+                                                    await context
+                                                        .read<AllChatsCubit>()
+                                                        .deleteFolder(folder);
+                                                  }
+                                                }
+                                              : null,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: TweenAnimationBuilder<Color?>(
+                                    tween: ColorTween(
+                                      begin: _currentFolderBackground(
+                                        context,
+                                        selectedIndex: state.selectedFolderIndex,
+                                        folders: state.folders,
+                                      ),
+                                      end: _currentFolderBackground(
+                                        context,
+                                        selectedIndex: state.selectedFolderIndex,
+                                        folders: state.folders,
+                                      ),
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    builder: (context, color, _) {
+                                      return ScrollConfiguration(
+                                        behavior: ScrollConfiguration.of(
+                                          context,
+                                        ).copyWith(scrollbars: false),
+                                        child: SingleChildScrollView(
+                                          child: Container(
+                                            color: color,
+                                            child: state.isEmptyFolder
+                                                ? Center(
+                                                    child: Text(context.t.folders.folderIsEmpty),
+                                                  )
+                                                : Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                    children: [
+                                                      AllChatsDms(
+                                                        filteredDms: state.filterDmUserIds,
+                                                      ),
+                                                      const Divider(height: 1),
+                                                      AllChatsChannels(
+                                                        filterChannelIds: state.filterChannelIds,
+                                                      ),
+                                                    ],
+                                                  ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (isDesktopWidth)
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: BlocBuilder<AllChatsCubit, AllChatsState>(
+                                    buildWhen: (prev, current) =>
+                                        prev.selectedDmChat != current.selectedDmChat ||
+                                        prev.selectedChannel != current.selectedChannel ||
+                                        prev.selectedTopic != current.selectedTopic,
+                                    builder: (context, selectedChatState) {
+                                      if (selectedChatState.selectedDmChat != null) {
+                                        return Chat(
+                                          key: ObjectKey(selectedChatState.selectedDmChat!.userId),
+                                          userId: selectedChatState.selectedDmChat!.userId,
+                                          unreadMessagesCount: selectedChatState
+                                              .selectedDmChat
+                                              ?.unreadMessages
+                                              .length,
+                                        );
+                                      }
+                                      if (selectedChatState.selectedChannel != null) {
+                                        return ChannelChat(
+                                          key: ObjectKey(
+                                            selectedChatState.selectedChannel!.streamId,
+                                          ),
+                                          channelId: selectedChatState.selectedChannel!.streamId,
+                                          topicName: selectedChatState.selectedTopic?.name,
+                                        );
+                                      }
+                                      return Center(child: Text(context.t.selectAnyChat));
+                                    },
+                                  ),
+                                ),
+                                // ресайз-хэндл без изменений
+                                Positioned(
+                                  left: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  width: _dragHandleHitWidth,
+                                  child: MouseRegion(
+                                    onEnter: (_) => setState(() => _isHandleHovered = true),
+                                    onExit: (_) => setState(() => _isHandleHovered = false),
+                                    cursor: SystemMouseCursors.resizeColumn,
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onHorizontalDragStart: (_) =>
+                                          setState(() => _isDragging = true),
+                                      onHorizontalDragUpdate: (details) =>
+                                          _updateWidth(details.delta.dx),
+                                      onHorizontalDragEnd: (_) =>
+                                          setState(() => _isDragging = false),
+                                      onDoubleTap: () {
+                                        setState(() {
+                                          _sidebarWidth = _defaultWidth
+                                              .clamp(_sidebarMinWidth, _sidebarMaxWidth)
+                                              .toDouble();
+                                        });
+                                      },
+                                      child: const SizedBox.expand(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    );
+                  }
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: SizedBox(
                                 height: 46,
                                 child: ScrollConfiguration(
                                   behavior: ScrollConfiguration.of(
@@ -189,18 +391,20 @@ class _AllChatsViewState extends State<AllChatsView> {
                                   ).copyWith(scrollbars: false),
                                   child: ListView.builder(
                                     controller: _foldersScrollController,
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ).copyWith(right: 64),
                                     scrollDirection: Axis.horizontal,
                                     itemCount: state.folders.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                      late final FolderItemEntity folder = state.folders[index];
+                                    itemBuilder: (context, index) {
+                                      final FolderItemEntity folder = state.folders[index];
                                       final bool isSelected = state.selectedFolderIndex == index;
+
                                       return FolderPill(
                                         isSelected: isSelected,
                                         folder: folder,
-                                        onTap: () {
-                                          context.read<AllChatsCubit>().selectFolder(index);
-                                        },
+                                        onTap: () =>
+                                            context.read<AllChatsCubit>().selectFolder(index),
                                         onEdit: (folder.systemType == null)
                                             ? () => editFolder(context, folder)
                                             : null,
@@ -243,106 +447,30 @@ class _AllChatsViewState extends State<AllChatsView> {
                                   ),
                                 ),
                               ),
-                              Expanded(
-                                child: TweenAnimationBuilder<Color?>(
-                                  tween: ColorTween(
-                                    begin: _currentFolderBackground(
-                                      context,
-                                      selectedIndex: state.selectedFolderIndex,
-                                      folders: state.folders,
-                                    ),
-                                    end: _currentFolderBackground(
-                                      context,
-                                      selectedIndex: state.selectedFolderIndex,
-                                      folders: state.folders,
-                                    ),
-                                  ),
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                  builder: (BuildContext context, Color? color, Widget? child) {
-                                    return Container(
-                                      color: color,
-                                      child: state.isEmptyFolder
-                                          ? Center(child: Text(context.t.folders.folderIsEmpty))
-                                          : Column(
-                                              mainAxisSize: MainAxisSize.max,
-                                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                                              children: [
-                                                AllChatsDms(filteredDms: state.filterDmUserIds),
-                                                const Divider(height: 1),
-                                                AllChatsChannels(
-                                                  filterChannelIds: state.filterChannelIds,
-                                                ),
-                                              ],
-                                            ),
-                                    );
-                                  },
+                            ),
+                            SliverToBoxAdapter(
+                              child: AllChatsDms(
+                                filteredDms: state.filterDmUserIds,
+                                embeddedInParentScroll: true,
+                              ),
+                            ),
+                            // Channels (встроено в общий скролл)
+                            SliverToBoxAdapter(
+                              child: AllChatsChannels(
+                                filterChannelIds: state.filterChannelIds,
+                                embeddedInParentScroll: true,
+                              ),
+                            ),
+                            if (state.isEmptyFolder)
+                              SliverPadding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                sliver: SliverToBoxAdapter(
+                                  child: Center(child: Text(context.t.folders.folderIsEmpty)),
                                 ),
                               ),
-                            ],
-                          ),
+                          ],
                         ),
                       ),
-                      if (isDesktopWidth)
-                        Expanded(
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: BlocBuilder<AllChatsCubit, AllChatsState>(
-                                  buildWhen: (prev, current) =>
-                                      (prev.selectedDmChat != current.selectedDmChat) ||
-                                      (prev.selectedChannel != current.selectedChannel) ||
-                                      (prev.selectedTopic != current.selectedTopic),
-                                  builder: (context, selectedChatState) {
-                                    if (selectedChatState.selectedDmChat != null) {
-                                      return Chat(
-                                        key: ObjectKey(selectedChatState.selectedDmChat!.userId),
-                                        userId: selectedChatState.selectedDmChat!.userId,
-                                        unreadMessagesCount:
-                                            selectedChatState.selectedDmChat?.unreadMessages.length,
-                                      );
-                                    }
-                                    if (selectedChatState.selectedChannel != null) {
-                                      return ChannelChat(
-                                        key: ObjectKey(selectedChatState.selectedChannel!.streamId),
-                                        channelId: selectedChatState.selectedChannel!.streamId,
-                                        topicName: selectedChatState.selectedTopic?.name,
-                                      );
-                                    }
-                                    return Center(child: Text(context.t.selectAnyChat));
-                                  },
-                                ),
-                              ),
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: _dragHandleHitWidth,
-                                child: MouseRegion(
-                                  onEnter: (_) => setState(() => _isHandleHovered = true),
-                                  onExit: (_) => setState(() => _isHandleHovered = false),
-                                  cursor: SystemMouseCursors.resizeColumn,
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.translucent,
-                                    onHorizontalDragStart: (_) =>
-                                        setState(() => _isDragging = true),
-                                    onHorizontalDragUpdate: (details) =>
-                                        _updateWidth(details.delta.dx),
-                                    onHorizontalDragEnd: (_) => setState(() => _isDragging = false),
-                                    onDoubleTap: () {
-                                      setState(
-                                        () => _sidebarWidth = _defaultWidth
-                                            .clamp(_sidebarMinWidth, _sidebarMaxWidth)
-                                            .toDouble(),
-                                      );
-                                    },
-                                    child: const SizedBox.expand(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                     ],
                   );
                 },

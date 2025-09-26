@@ -76,23 +76,6 @@ final router = GoRouter(
                 return AllChats();
               },
             ),
-            if (kIsWeb) ...[
-              GoRoute(
-                path: '${Routes.directMessages}/:userId',
-                name: 'allChatsChat',
-                builder: (context, state) {
-                  final userId = int.parse(state.pathParameters['userId']!);
-                  final extra = state.extra as Map<String, dynamic>?;
-                  final unread = extra?['unreadMessagesCount'] ?? 0;
-
-                  if (currentSize(context) > ScreenSize.lTablet) {
-                    return DirectMessages(initialUserId: userId);
-                  } else {
-                    return Chat(userId: userId, unreadMessagesCount: unread);
-                  }
-                },
-              ),
-            ],
           ],
         ),
         StatefulShellBranch(
