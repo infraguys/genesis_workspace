@@ -56,6 +56,8 @@ import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_t
     as _i714;
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart'
     as _i815;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart'
+    as _i438;
 import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart'
     as _i744;
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart'
@@ -462,6 +464,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
+    gh.factory<_i438.GetMembersForFolderUseCase>(
+      () => _i438.GetMembersForFolderUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
     gh.factory<_i433.DeleteTokenUseCase>(
       () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
@@ -485,17 +492,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i819.DeleteCsrftokenUseCase>(
       () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
-    );
-    gh.factory<_i404.AllChatsCubit>(
-      () => _i404.AllChatsCubit(
-        gh<_i125.AddFolderUseCase>(),
-        gh<_i815.GetFoldersUseCase>(),
-        gh<_i7.UpdateFolderUseCase>(),
-        gh<_i849.DeleteFolderUseCase>(),
-        gh<_i395.SetFoldersForTargetUseCase>(),
-        gh<_i714.GetFolderIdsForTargetUseCase>(),
-        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
-      ),
     );
     gh.factory<_i155.SettingsCubit>(
       () => _i155.SettingsCubit(
@@ -523,6 +519,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i819.DeleteCsrftokenUseCase>(),
       ),
       dispose: _i862.disposeAuthCubit,
+    );
+    gh.factory<_i404.AllChatsCubit>(
+      () => _i404.AllChatsCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+        gh<_i7.UpdateFolderUseCase>(),
+        gh<_i849.DeleteFolderUseCase>(),
+        gh<_i395.SetFoldersForTargetUseCase>(),
+        gh<_i714.GetFolderIdsForTargetUseCase>(),
+        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
+        gh<_i438.GetMembersForFolderUseCase>(),
+      ),
     );
     return this;
   }

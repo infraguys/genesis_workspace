@@ -124,6 +124,7 @@
     "edit": "Edit folder",
     "delete": "Delete",
     "deleteConfirmTitle": "Delete folder?",
-    "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?"
+    "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?",
+    "folder_is_empty": "Folder is empty"
   }
 }

@@ -129,6 +129,7 @@
     "edit": "Редактировать папку",
     "delete": "Удалить",
     "deleteConfirmTitle": "Удалить папку?",
-    "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?"
+    "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
+   "folder_is_empty": "Папка пустая"
   }
 }

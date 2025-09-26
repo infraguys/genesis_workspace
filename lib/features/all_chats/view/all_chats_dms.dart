@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
-import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
 class AllChatsDms extends StatelessWidget {
@@ -18,44 +15,28 @@ class AllChatsDms extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(
-            context.t.navBar.directMessages,
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        BlocConsumer<DirectMessagesCubit, DirectMessagesState>(
-          listenWhen: (previous, next) => previous.selectedUserId != next.selectedUserId,
-          listener: (context, state) {
-            if (currentSize(context) > ScreenSize.lTablet) {
-              final String targetPath = (state.selectedUserId == null)
-                  ? Routes.directMessages
-                  : '${Routes.directMessages}/${state.selectedUserId}';
-
-              final String currentLocation = GoRouterState.of(context).uri.toString();
-
-              if (currentLocation != targetPath) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  updateBrowserUrlPath(targetPath);
-                });
-              }
-            }
-          },
-          builder: (context, directMessagesState) {
-            final users = filteredDms == null
-                ? directMessagesState.recentDmsUsers
-                : directMessagesState.recentDmsUsers
-                      .where((u) => filteredDms!.contains(u.userId))
-                      .toList(growable: false);
-            if (users.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            return ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 500),
+    return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
+      builder: (context, directMessagesState) {
+        final users = filteredDms == null
+            ? directMessagesState.recentDmsUsers
+            : directMessagesState.recentDmsUsers
+                  .where((u) => filteredDms!.contains(u.userId))
+                  .toList(growable: false);
+        if (users.isEmpty) {
+          return SizedBox.shrink();
+        }
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                context.t.navBar.directMessages,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 400),
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: users.length,
@@ -83,7 +64,6 @@ class AllChatsDms extends StatelessWidget {
                           leading: const Icon(Icons.folder_open),
                           title: Text(context.t.folders.addToFolder),
                           onTap: () async {
-                            // popupKey.currentState?.hide();
                             context.pop();
                             await context.read<AllChatsCubit>().loadFolders();
                             await showDialog(
@@ -112,10 +92,10 @@ class AllChatsDms extends StatelessWidget {
                   );
                 },
               ),
-            );
-          },
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -258,31 +258,32 @@ class _AllChatsViewState extends State<AllChatsView> {
                                   builder: (BuildContext context, Color? color, Widget? child) {
                                     return Container(
                                       color: color,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        children: [
-                                          AllChatsDms(filteredDms: state.filterDmUserIds),
-                                          const Divider(height: 1),
-                                          BlocBuilder<ChannelsCubit, ChannelsState>(
-                                            builder: (context, channelsState) {
-                                              final channels = state.filterChannelIds == null
-                                                  ? channelsState.channels
-                                                  : channelsState.channels
-                                                        .where(
-                                                          (ch) => state.filterChannelIds!.contains(
-                                                            ch.streamId,
-                                                          ),
-                                                        )
-                                                        .toList();
-                                              return AllChatsChannels(
-                                                filterChannelIds: state.filterChannelIds,
-                                                channels: channels,
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
+                                      child: state.isEmptyFolder
+                                          ? Center(child: Text(context.t.folders.folderIsEmpty))
+                                          : Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                              children: [
+                                                AllChatsDms(filteredDms: state.filterDmUserIds),
+                                                const Divider(height: 1),
+                                                BlocBuilder<ChannelsCubit, ChannelsState>(
+                                                  builder: (context, channelsState) {
+                                                    final channels = state.filterChannelIds == null
+                                                        ? channelsState.channels
+                                                        : channelsState.channels
+                                                              .where(
+                                                                (ch) => state.filterChannelIds!
+                                                                    .contains(ch.streamId),
+                                                              )
+                                                              .toList();
+                                                    return AllChatsChannels(
+                                                      filterChannelIds: state.filterChannelIds,
+                                                      channels: channels,
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
                                     );
                                   },
                                 ),

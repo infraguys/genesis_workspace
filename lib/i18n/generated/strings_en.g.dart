@@ -452,4 +452,7 @@ class TranslationsFoldersEn {
 
 	/// en: 'Are you sure you want to delete "{folderName}"?'
 	String deleteConfirmText({required Object folderName}) => 'Are you sure you want to delete "${folderName}"?';
+
+	/// en: 'Folder is empty'
+	String get folderIsEmpty => 'Folder is empty';
 }

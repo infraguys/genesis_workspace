@@ -30,6 +30,14 @@ class _AllChatsChannelsState extends State<AllChatsChannels> {
   Widget build(BuildContext context) {
     return BlocBuilder<ChannelsCubit, ChannelsState>(
       builder: (context, state) {
+        final channels = widget.filterChannelIds == null
+            ? state.channels
+            : state.channels
+                  .where((channel) => widget.filterChannelIds!.contains(channel.streamId))
+                  .toList();
+        if (channels.isEmpty) {
+          return SizedBox.shrink();
+        }
         return Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,10 +53,10 @@ class _AllChatsChannelsState extends State<AllChatsChannels> {
               Expanded(
                 child: ListView.separated(
                   controller: _scrollController,
-                  itemCount: state.channels.length,
+                  itemCount: channels.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    final ChannelEntity channel = state.channels[index];
+                    final ChannelEntity channel = channels[index];
                     return ChannelDownExpandedItem(
                       key: ValueKey('channel-${channel.streamId}'),
                       channel: channel,

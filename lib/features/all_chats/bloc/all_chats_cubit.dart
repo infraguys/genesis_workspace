@@ -2,13 +2,12 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_target.dart';
-import 'package:genesis_workspace/domain/all_chats/repositories/folder_membership_repository.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_target_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
@@ -29,6 +28,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   final SetFoldersForTargetUseCase _setFoldersForTargetUseCase;
   final GetFolderIdsForTargetUseCase _getFolderIdsForTargetUseCase;
   final RemoveAllMembershipsForFolderUseCase _removeAllMembershipsForFolderUseCase;
+  final GetMembersForFolderUseCase _getMembersForFolderUseCase;
 
   AllChatsCubit(
     this._addFolderUseCase,
@@ -38,6 +38,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     this._setFoldersForTargetUseCase,
     this._getFolderIdsForTargetUseCase,
     this._removeAllMembershipsForFolderUseCase,
+    this._getMembersForFolderUseCase,
   ) : super(
         AllChatsState(
           selectedChannel: null,
@@ -136,8 +137,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
       emit(state.copyWith(filterDmUserIds: null, filterChannelIds: null));
       return;
     }
-    final repo = getIt<FolderMembershipRepository>();
-    final members = await repo.getMembersForFolder(folder.id!);
+    final members = await _getMembersForFolderUseCase(folder.id!);
     emit(
       state.copyWith(
         filterDmUserIds: members.dmUserIds.toSet(),

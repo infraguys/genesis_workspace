@@ -268,4 +268,5 @@ class TranslationsFoldersRu extends TranslationsFoldersEn {
 	@override String get delete => 'Удалить';
 	@override String get deleteConfirmTitle => 'Удалить папку?';
 	@override String deleteConfirmText({required Object folderName}) => 'Вы уверены, что хотите удалить "${folderName}"?';
+	@override String get folderIsEmpty => 'Папка пустая';
 }

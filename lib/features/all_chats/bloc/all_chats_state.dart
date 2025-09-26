@@ -9,6 +9,10 @@ class AllChatsState {
   final Set<int>? filterDmUserIds;
   final Set<int>? filterChannelIds;
 
+  bool get isEmptyFolder =>
+      ((filterChannelIds?.isEmpty ?? false) && (filterDmUserIds?.isEmpty ?? false)) &&
+      selectedFolderIndex != 0;
+
   AllChatsState({
     this.selectedDmChat,
     this.selectedChannel,
