@@ -70,28 +70,28 @@ class AppConstants {
     Icons.work,
     Icons.chat_bubble,
     Icons.mail,
-    Icons.favorite,
-    Icons.school,
+    Icons.groups,
     Icons.code,
     Icons.task_alt,
-    Icons.pin_drop,
+    Icons.push_pin,
     Icons.bookmark,
     Icons.bolt,
-    Icons.shopping_bag,
-    Icons.sports_esports,
-    Icons.movie,
-    Icons.music_note,
+    Icons.calendar_today,
+    Icons.description,
+    Icons.campaign,
+    Icons.bug_report,
+    Icons.security,
   ];
 
   static const List<Color> folderColors = <Color>[
-    Color(0xFFEF4444), // red
-    Color(0xFFF59E0B), // amber
-    Color(0xFF10B981), // emerald
-    Color(0xFF3B82F6), // blue
-    Color(0xFF8B5CF6), // violet
-    Color(0xFFF43F5E), // rose
-    Color(0xFF14B8A6), // teal
-    Color(0xFF6B7280), // gray
+    Color(0xFF2563EB),
+    Color(0xFF4F46E5),
+    Color(0xFF0D9488),
+    Color(0xFF059669),
+    Color(0xFFF59E0B),
+    Color(0xFFDC2626),
+    Color(0xFF6B7280),
+    Color(0xFF334155),
   ];
 }
 

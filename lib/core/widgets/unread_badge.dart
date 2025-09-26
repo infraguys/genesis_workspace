@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 
 class UnreadBadge extends StatelessWidget {
   final int count;
-  final EdgeInsetsGeometry? margin;
-  final String? semanticsLabel;
 
-  const UnreadBadge({super.key, required this.count, this.margin, this.semanticsLabel});
+  const UnreadBadge({super.key, required this.count});
 
   String _formatCount(int value) => value > 999 ? '999+' : value.toString();
 
