@@ -161,6 +161,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       // 3️⃣ Если все равны — сортируем по имени
       return user1.fullName.compareTo(user2.fullName);
     });
+
     emit(state.copyWith(users: sortedUsers, filteredUsers: sortedUsers));
   }
 

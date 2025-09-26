@@ -147,8 +147,12 @@ class _AllChatsViewState extends State<AllChatsView> {
                 builder: (context, state) {
                   return Row(
                     children: [
-                      SizedBox(
-                        width: _sidebarWidth,
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: isDesktopWidth
+                              ? _sidebarWidth
+                              : MediaQuery.sizeOf(context).width,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border(
@@ -266,21 +270,8 @@ class _AllChatsViewState extends State<AllChatsView> {
                                               children: [
                                                 AllChatsDms(filteredDms: state.filterDmUserIds),
                                                 const Divider(height: 1),
-                                                BlocBuilder<ChannelsCubit, ChannelsState>(
-                                                  builder: (context, channelsState) {
-                                                    final channels = state.filterChannelIds == null
-                                                        ? channelsState.channels
-                                                        : channelsState.channels
-                                                              .where(
-                                                                (ch) => state.filterChannelIds!
-                                                                    .contains(ch.streamId),
-                                                              )
-                                                              .toList();
-                                                    return AllChatsChannels(
-                                                      filterChannelIds: state.filterChannelIds,
-                                                      channels: channels,
-                                                    );
-                                                  },
+                                                AllChatsChannels(
+                                                  filterChannelIds: state.filterChannelIds,
                                                 ),
                                               ],
                                             ),

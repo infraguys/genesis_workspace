@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
@@ -123,10 +124,16 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                       ),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
-                          '# ${widget.channel.name}',
-                          style: channelTextStyle,
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '# ${widget.channel.name}',
+                              style: channelTextStyle,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            UnreadBadge(count: widget.channel.unreadMessages.length),
+                          ],
                         ),
                       ),
                     ],
@@ -164,7 +171,13 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                                       horizontal: 12,
                                       vertical: 8,
                                     ),
-                                    child: Text('• ${topic.name}', style: topicTextStyle),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('• ${topic.name}', style: topicTextStyle),
+                                        UnreadBadge(count: topic.unreadMessages.length),
+                                      ],
+                                    ),
                                   ),
                                 );
                               }

@@ -213,7 +213,8 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     final unreadMessages = [...state.unreadMessages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       unreadMessages.removeWhere((message) => event.messages.contains(message.id));
-      final channels = state.channels.map((channel) {
+      final channels = [...state.channels];
+      channels.map((channel) {
         channel.unreadMessages.removeAll(event.messages);
         for (var topic in channel.topics) {
           topic.unreadMessages.removeAll(event.messages);

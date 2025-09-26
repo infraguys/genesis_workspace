@@ -175,6 +175,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             onTap: _goBranch,
                             items: [
                               BottomNavigationBarItem(
+                                label: context.t.navBar.allChats,
+                                icon: Icon(Icons.chat),
+                              ),
+                              BottomNavigationBarItem(
                                 label: context.t.navBar.directMessages,
                                 icon: Badge(
                                   isLabelVisible: state.messages.any(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -24,10 +25,7 @@ class UserTile extends StatelessWidget {
         style: theme.textTheme.labelSmall,
       ),
       leading: UserAvatar(avatarUrl: user.avatarUrl),
-      trailing: Badge.count(
-        count: user.unreadMessages.length,
-        isLabelVisible: user.unreadMessages.isNotEmpty,
-      ),
+      trailing: UnreadBadge(count: user.unreadMessages.length),
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
     );
   }

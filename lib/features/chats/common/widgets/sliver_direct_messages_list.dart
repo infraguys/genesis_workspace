@@ -46,7 +46,7 @@ class SliverDirectMessagesList extends StatelessWidget {
             minExtentHeight: 0, // полностью схлопывается
             maxExtentHeight: 56,
             child: Container(
-              color: theme.colorScheme.inversePrimary, // чтобы не мигало под AppBar
+              color: theme.colorScheme.inversePrimary,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: DmSearchField(
                 searchController: searchController,
@@ -81,7 +81,6 @@ class SliverDirectMessagesList extends StatelessWidget {
                 );
               }
 
-              // Разделители между элементами, аналог ListView.separated
               final int sliverChildCount = displayedUsers.length * 2 - 1;
 
               return SliverList.builder(

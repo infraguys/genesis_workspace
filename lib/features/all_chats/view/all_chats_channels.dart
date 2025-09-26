@@ -9,74 +9,136 @@ import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class AllChatsChannels extends StatefulWidget {
-  final List<ChannelEntity> channels;
   final Set<int>? filterChannelIds;
-  const AllChatsChannels({super.key, required this.filterChannelIds, required this.channels});
+  const AllChatsChannels({super.key, required this.filterChannelIds});
 
   @override
   State<AllChatsChannels> createState() => _AllChatsChannelsState();
 }
 
-class _AllChatsChannelsState extends State<AllChatsChannels> {
-  final ScrollController _scrollController = ScrollController();
+class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProviderStateMixin {
+  final ScrollController scrollController = ScrollController();
+
+  late final AnimationController expandController;
+  late final Animation<double> expandAnimation;
+  bool isExpanded = true;
+
+  @override
+  void initState() {
+    super.initState();
+    expandController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+      reverseDuration: const Duration(milliseconds: 180),
+    );
+    expandAnimation = CurvedAnimation(
+      parent: expandController,
+      curve: Curves.easeInOut,
+      reverseCurve: Curves.easeInOut,
+    );
+    expandController.value = 1.0;
+  }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    scrollController.dispose();
+    expandController.dispose();
     super.dispose();
+  }
+
+  void toggleExpanded() {
+    setState(() => isExpanded = !isExpanded);
+    if (isExpanded) {
+      expandController.forward();
+    } else {
+      expandController.reverse();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChannelsCubit, ChannelsState>(
       builder: (context, state) {
-        final channels = widget.filterChannelIds == null
+        final List<ChannelEntity> channels = (widget.filterChannelIds == null)
             ? state.channels
             : state.channels
                   .where((channel) => widget.filterChannelIds!.contains(channel.streamId))
                   .toList();
+
         if (channels.isEmpty) {
-          return SizedBox.shrink();
+          return const SizedBox.shrink();
         }
-        return Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  context.t.navBar.channels,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Заголовок с кнопкой сворачивания
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.t.navBar.channels,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    splashRadius: 22,
+                    onPressed: toggleExpanded,
+                    icon: AnimatedRotation(
+                      duration: const Duration(milliseconds: 200),
+                      turns: isExpanded ? 0.5 : 0.0,
+                      child: const Icon(Icons.keyboard_arrow_down),
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: ListView.separated(
-                  controller: _scrollController,
-                  itemCount: channels.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final ChannelEntity channel = channels[index];
-                    return ChannelDownExpandedItem(
-                      key: ValueKey('channel-${channel.streamId}'),
-                      channel: channel,
-                      onTap: () async {
-                        context.read<AllChatsCubit>().selectChannel(channel: channel);
-                        unawaited(
-                          context.read<ChannelsCubit>().getChannelTopics(
-                            streamId: channel.streamId,
-                          ),
+            ),
+
+            // Анимируемая область со списком каналов
+            ClipRect(
+              child: SizeTransition(
+                sizeFactor: expandAnimation,
+                axisAlignment: -1.0,
+                child: FadeTransition(
+                  opacity: expandAnimation,
+                  child: ConstrainedBox(
+                    // Выбери подходящий лимит высоты под свой лэйаут
+                    constraints: const BoxConstraints(maxHeight: 480),
+                    child: ListView.separated(
+                      controller: scrollController,
+                      shrinkWrap: true,
+                      itemCount: channels.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final ChannelEntity channel = channels[index];
+                        return ChannelDownExpandedItem(
+                          key: ValueKey('channel-${channel.streamId}'),
+                          channel: channel,
+                          onTap: () async {
+                            context.read<AllChatsCubit>().selectChannel(channel: channel);
+                            unawaited(
+                              context.read<ChannelsCubit>().getChannelTopics(
+                                streamId: channel.streamId,
+                              ),
+                            );
+                          },
+                          onTopicTap: (topic) {
+                            context.read<AllChatsCubit>().selectChannel(
+                              channel: channel,
+                              topic: topic,
+                            );
+                          },
                         );
                       },
-                      onTopicTap: (topic) {
-                        context.read<AllChatsCubit>().selectChannel(channel: channel, topic: topic);
-                      },
-                    );
-                  },
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
