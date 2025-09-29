@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
@@ -12,6 +13,7 @@ import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
+import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
@@ -281,81 +283,14 @@ class _ChatViewState extends State<ChatView>
                                       Positioned(
                                         bottom: 0,
                                         left: 50,
-                                        child: AnimatedOpacity(
-                                          opacity: state.showMentionPopup ? 1 : 0,
-                                          duration: const Duration(milliseconds: 100),
-                                          curve: Curves.easeInOut,
-                                          child: Material(
-                                            elevation: 8,
-                                            borderRadius: BorderRadius.circular(12),
-                                            color: theme.colorScheme.surface,
-                                            clipBehavior: Clip.antiAliasWithSaveLayer,
-                                            child: Container(
-                                              width: 300,
-                                              height: 200,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              child: Builder(
-                                                builder: (context) {
-                                                  if (state.suggestedMentions.isEmpty &&
-                                                      state.isSuggestionsPending) {
-                                                    return Center(
-                                                      child: CircularProgressIndicator(),
-                                                    );
-                                                  }
-                                                  if (state.filteredSuggestedMentions.isEmpty) {
-                                                    return Center(
-                                                      child: Text(
-                                                        context.t.nothingFound,
-                                                        style: theme.textTheme.bodyMedium!.copyWith(
-                                                          color: theme.colorScheme.onSurface
-                                                              .withValues(alpha: 0.4),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                  return Column(
-                                                    children: [
-                                                      if (state.isSuggestionsPending)
-                                                        LinearProgressIndicator(),
-                                                      Expanded(
-                                                        child: ListView.separated(
-                                                          padding: const EdgeInsets.symmetric(
-                                                            vertical: 8,
-                                                          ),
-                                                          itemCount: state
-                                                              .filteredSuggestedMentions
-                                                              .length,
-                                                          separatorBuilder: (_, _) =>
-                                                              const SizedBox(height: 4),
-                                                          itemBuilder: (context, index) {
-                                                            final UserEntity user = state
-                                                                .filteredSuggestedMentions[index];
-                                                            return InkWell(
-                                                              child: Padding(
-                                                                padding: const EdgeInsets.symmetric(
-                                                                  horizontal: 12,
-                                                                  vertical: 10,
-                                                                ),
-                                                                child: Text(
-                                                                  user.fullName,
-                                                                  overflow: TextOverflow.ellipsis,
-                                                                  style: Theme.of(
-                                                                    context,
-                                                                  ).textTheme.bodyMedium,
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          ),
+                                        child: MentionSuggestions(
+                                          showPopup: state.showMentionPopup,
+                                          suggestedMentions: state.suggestedMentions,
+                                          isSuggestionsPending: state.isSuggestionsPending,
+                                          filteredSuggestedMentions:
+                                              state.filteredSuggestedMentions,
+                                          onSelectMention: onMentionSelected,
+                                          inputFocusNode: messageInputFocusNode,
                                         ),
                                       ),
                                     ],
