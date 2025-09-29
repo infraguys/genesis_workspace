@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/all_chats_channels.dart';
@@ -125,8 +124,8 @@ class _AllChatsViewState extends State<AllChatsView> {
 
     final bool isDesktopWidth = currentSize(context) > ScreenSize.lTablet;
 
-    final PreferredSizeWidget appBar = isDesktopWidth
-        ? WorkspaceAppBar(title: context.t.navBar.allChats)
+    final PreferredSizeWidget? appBar = isDesktopWidth
+        ? null
         : AppBar(
             title: Text(context.t.navBar.allChats),
             centerTitle: false,

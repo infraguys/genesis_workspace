@@ -57,87 +57,10 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     }
   }
 
-  Widget _buildList(BuildContext context, List<DmUserEntity> users) {
-    final isDesktop = currentSize(context) > ScreenSize.lTablet;
-    final listView = ListView.builder(
-      shrinkWrap: true,
-      physics: widget.embeddedInParentScroll
-          ? const NeverScrollableScrollPhysics()
-          : const AlwaysScrollableScrollPhysics(),
-      itemCount: users.length,
-      itemBuilder: (BuildContext context, int index) {
-        final DmUserEntity user = users[index];
-        final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
-
-        return CustomPopup(
-          key: popupKey,
-          position: PopupPosition.auto,
-          contentPadding: EdgeInsets.zero,
-          isLongPress: true,
-          content: Container(
-            width: 240,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
-              ),
-              boxShadow: kElevationToShadow[3],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: ListTile(
-                leading: const Icon(Icons.folder_open),
-                title: Text(context.t.folders.addToFolder),
-                onTap: () async {
-                  context.pop();
-                  await context.read<AllChatsCubit>().loadFolders();
-                  await showDialog(
-                    context: context,
-                    builder: (_) => SelectFoldersDialog(
-                      loadSelectedFolderIds: () =>
-                          context.read<AllChatsCubit>().getFolderIdsForDm(user.userId),
-                      onSave: (selectedFolderIds) => context.read<AllChatsCubit>().setFoldersForDm(
-                        user.userId,
-                        selectedFolderIds,
-                      ),
-                      folders: context.read<AllChatsCubit>().state.folders,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          child: GestureDetector(
-            onSecondaryTap: () => popupKey.currentState?.show(),
-            child: UserTile(
-              key: ValueKey(user.userId),
-              user: user,
-              onTap: () {
-                if (isDesktop) {
-                  context.read<AllChatsCubit>().selectDmChat(user);
-                } else {
-                  context.pushNamed(
-                    Routes.chat,
-                    pathParameters: {'userId': user.userId.toString()},
-                    extra: {'unreadMessagesCount': user.unreadMessages.length},
-                  );
-                }
-              },
-            ),
-          ),
-        );
-      },
-    );
-
-    if (widget.embeddedInParentScroll) {
-      return listView;
-    }
-    return ConstrainedBox(constraints: const BoxConstraints(maxHeight: 500), child: listView);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isDesktop = currentSize(context) > ScreenSize.lTablet;
+
     return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
       builder: (context, directMessagesState) {
         final List<DmUserEntity> users = (widget.filteredDms == null)
@@ -180,7 +103,84 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
               child: SizeTransition(
                 sizeFactor: expandAnimation,
                 axisAlignment: -1.0,
-                child: FadeTransition(opacity: expandAnimation, child: _buildList(context, users)),
+                child: FadeTransition(
+                  opacity: expandAnimation,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 500),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: widget.embeddedInParentScroll
+                          ? const NeverScrollableScrollPhysics()
+                          : const AlwaysScrollableScrollPhysics(),
+                      itemCount: users.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final DmUserEntity user = users[index];
+                        final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
+
+                        return CustomPopup(
+                          key: popupKey,
+                          position: PopupPosition.auto,
+                          contentPadding: EdgeInsets.zero,
+                          isLongPress: true,
+                          content: Container(
+                            width: 240,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outlineVariant.withOpacity(0.5),
+                              ),
+                              boxShadow: kElevationToShadow[3],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: ListTile(
+                                leading: const Icon(Icons.folder_open),
+                                title: Text(context.t.folders.addToFolder),
+                                onTap: () async {
+                                  context.pop();
+                                  await context.read<AllChatsCubit>().loadFolders();
+                                  await showDialog(
+                                    context: context,
+                                    builder: (_) => SelectFoldersDialog(
+                                      loadSelectedFolderIds: () => context
+                                          .read<AllChatsCubit>()
+                                          .getFolderIdsForDm(user.userId),
+                                      onSave: (selectedFolderIds) => context
+                                          .read<AllChatsCubit>()
+                                          .setFoldersForDm(user.userId, selectedFolderIds),
+                                      folders: context.read<AllChatsCubit>().state.folders,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onSecondaryTap: () => popupKey.currentState?.show(),
+                            child: UserTile(
+                              key: ValueKey(user.userId),
+                              user: user,
+                              onTap: () {
+                                if (isDesktop) {
+                                  context.read<AllChatsCubit>().selectDmChat(user);
+                                } else {
+                                  context.pushNamed(
+                                    Routes.chat,
+                                    pathParameters: {'userId': user.userId.toString()},
+                                    extra: {'unreadMessagesCount': user.unreadMessages.length},
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

@@ -34,7 +34,7 @@ ci_prod_apk:
 	make clean
 	make generate
 	make slang
-	flutter build apk --flavor prod -t lib/prod.dart --dart-define-from-file=env.json --no-tree-shake-icons
+	flutter build apk --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
 
 ci_stage_apk:
 	make clean

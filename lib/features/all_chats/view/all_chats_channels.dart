@@ -106,55 +106,53 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
                 ],
               ),
             ),
-            ClipRect(
-              child: SizeTransition(
-                sizeFactor: expandAnimation,
-                axisAlignment: -1.0,
-                child: FadeTransition(
-                  opacity: expandAnimation,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
-                    child: ListView.separated(
-                      controller: scrollController,
-                      shrinkWrap: true,
-                      physics: widget.embeddedInParentScroll
-                          ? const NeverScrollableScrollPhysics()
-                          : const AlwaysScrollableScrollPhysics(),
-                      itemCount: channels.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final ChannelEntity channel = channels[index];
-                        return ChannelDownExpandedItem(
-                          key: ValueKey('channel-${channel.streamId}'),
-                          channel: channel,
-                          onTap: () async {
-                            context.read<AllChatsCubit>().selectChannel(channel: channel);
-                            unawaited(
-                              context.read<ChannelsCubit>().getChannelTopics(
-                                streamId: channel.streamId,
-                              ),
+            SizeTransition(
+              sizeFactor: expandAnimation,
+              axisAlignment: -1.0,
+              child: FadeTransition(
+                opacity: expandAnimation,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
+                  child: ListView.separated(
+                    controller: scrollController,
+                    shrinkWrap: true,
+                    physics: widget.embeddedInParentScroll
+                        ? const NeverScrollableScrollPhysics()
+                        : const AlwaysScrollableScrollPhysics(),
+                    itemCount: channels.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final ChannelEntity channel = channels[index];
+                      return ChannelDownExpandedItem(
+                        key: ValueKey('channel-${channel.streamId}'),
+                        channel: channel,
+                        onTap: () async {
+                          context.read<AllChatsCubit>().selectChannel(channel: channel);
+                          unawaited(
+                            context.read<ChannelsCubit>().getChannelTopics(
+                              streamId: channel.streamId,
+                            ),
+                          );
+                        },
+                        onTopicTap: (topic) {
+                          if (isDesktop) {
+                            context.read<AllChatsCubit>().selectChannel(
+                              channel: channel,
+                              topic: topic,
                             );
-                          },
-                          onTopicTap: (topic) {
-                            if (isDesktop) {
-                              context.read<AllChatsCubit>().selectChannel(
-                                channel: channel,
-                                topic: topic,
-                              );
-                            } else {
-                              context.pushNamed(
-                                Routes.channelChatTopic,
-                                pathParameters: {
-                                  'channelId': channel.streamId.toString(),
-                                  'topicName': topic.name,
-                                },
-                                extra: {'unreadMessagesCount': topic.unreadMessages.length},
-                              );
-                            }
-                          },
-                        );
-                      },
-                    ),
+                          } else {
+                            context.pushNamed(
+                              Routes.channelChatTopic,
+                              pathParameters: {
+                                'channelId': channel.streamId.toString(),
+                                'topicName': topic.name,
+                              },
+                              extra: {'unreadMessagesCount': topic.unreadMessages.length},
+                            );
+                          }
+                        },
+                      );
+                    },
                   ),
                 ),
               ),
