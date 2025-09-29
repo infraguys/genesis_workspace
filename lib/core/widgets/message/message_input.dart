@@ -128,8 +128,10 @@ class _MessageInputState extends State<MessageInput> {
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
       builder: (context, emojiState) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            SizedBox(height: 12),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               switchInCurve: Curves.easeOut,

@@ -27,8 +27,10 @@ import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dar
 import 'package:genesis_workspace/domain/users/entities/stream_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_channel_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -49,6 +51,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     this._getTopicsUseCase,
     this._uploadFileUseCase,
     this._updateMessageUseCase,
+    this._getUsersUseCase,
   ) : super(
         ChannelChatState(
           messages: [],
@@ -68,6 +71,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           uploadFileError: null,
           editingAttachments: [],
           isEdited: false,
+          showMentionPopup: false,
+          suggestedMentions: [],
+          isSuggestionsPending: false,
+          filteredSuggestedMentions: [],
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -95,6 +102,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   final GetTopicsUseCase _getTopicsUseCase;
   final UploadFileUseCase _uploadFileUseCase;
   final UpdateMessageUseCase _updateMessageUseCase;
+  final GetUsersUseCase _getUsersUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -113,6 +121,9 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   @override
   UpdateMessageUseCase get updateMessageUseCase => _updateMessageUseCase;
+
+  @override
+  GetUsersUseCase get getUsersUseCase => _getUsersUseCase;
 
   @override
   List<UploadFileEntity> getUploadedFiles(ChannelChatState s) => s.uploadedFiles;
@@ -136,6 +147,18 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   List<EditingAttachment> getEditingAttachments(ChannelChatState s) => s.editingAttachments;
 
   @override
+  getShowMentionPopup(ChannelChatState s) => s.showMentionPopup;
+
+  @override
+  getSuggestedMentions(ChannelChatState s) => s.suggestedMentions;
+
+  @override
+  getIsSuggestionsPending(ChannelChatState s) => s.isSuggestionsPending;
+
+  @override
+  getFilteredSuggestedMentions(ChannelChatState s) => s.filteredSuggestedMentions;
+
+  @override
   ChannelChatState copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,
@@ -144,6 +167,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     List<MessageEntity>? messages,
     List<EditingAttachment>? editingAttachments,
     bool? isEdited,
+    bool? showMentionPopup,
+    List<UserEntity>? suggestedMentions,
+    bool? isSuggestionsPending,
+    List<UserEntity>? filteredSuggestedMentions,
   }) {
     return state.copyWith(
       uploadedFiles: uploadedFiles ?? state.uploadedFiles,
@@ -153,6 +180,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
       messages: messages ?? state.messages,
       editingAttachments: editingAttachments ?? state.editingAttachments,
       isEdited: isEdited ?? state.isEdited,
+      showMentionPopup: showMentionPopup ?? state.showMentionPopup,
+      suggestedMentions: suggestedMentions ?? state.suggestedMentions,
+      isSuggestionsPending: isSuggestionsPending ?? state.isSuggestionsPending,
+      filteredSuggestedMentions: filteredSuggestedMentions ?? state.filteredSuggestedMentions,
     );
   }
 

@@ -346,6 +346,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
     );
+    gh.factory<_i277.ChatCubit>(
+      () => _i277.ChatCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i773.GetUserByIdUseCase>(),
+        gh<_i394.GetUserPresenceUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(
         gh<_i82.RealTimeService>(),
@@ -358,19 +372,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1005.UpdateMessageUseCase>(),
       ),
       dispose: _i592.disposeMessagesCubit,
-    );
-    gh.factory<_i739.ChannelChatCubit>(
-      () => _i739.ChannelChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i720.GetChannelByIdUseCase>(),
-        gh<_i699.GetTopicsUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-        gh<_i1005.UpdateMessageUseCase>(),
-      ),
     );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
@@ -394,17 +395,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i48.FolderRepository>(
       () => _i957.FolderRepositoryImpl(gh<_i277.FolderLocalDataSource>()),
     );
-    gh.factory<_i277.ChatCubit>(
-      () => _i277.ChatCubit(
+    gh.factory<_i739.ChannelChatCubit>(
+      () => _i739.ChannelChatCubit(
         gh<_i82.RealTimeService>(),
         gh<_i207.GetMessagesUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
         gh<_i487.SetTypingUseCase>(),
         gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i773.GetUserByIdUseCase>(),
-        gh<_i394.GetUserPresenceUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i720.GetChannelByIdUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
         gh<_i42.UploadFileUseCase>(),
         gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
       ),
     );
     gh.factory<_i852.DirectMessagesCubit>(

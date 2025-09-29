@@ -59,7 +59,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
       unreadMessagesCount: widget.unreadMessagesCount,
     );
     messageController = TextEditingController();
-    messageController.addListener(onTextChanged);
+    messageController
+      ..addListener(onTextChanged)
+      ..addListener(mentionListener);
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -133,7 +135,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
   void dispose() {
     // _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    messageController.removeListener(onTextChanged);
+    messageController
+      ..removeListener(onTextChanged)
+      ..removeListener(mentionListener);
     messageController.dispose();
     messageInputFocusNode.dispose();
     removeWebDnD?.call();

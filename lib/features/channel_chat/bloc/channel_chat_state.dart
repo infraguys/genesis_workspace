@@ -18,6 +18,10 @@ class ChannelChatState {
   String? uploadFileErrorName;
   List<EditingAttachment> editingAttachments;
   bool isEdited;
+  bool showMentionPopup;
+  List<UserEntity> suggestedMentions;
+  bool isSuggestionsPending;
+  List<UserEntity> filteredSuggestedMentions;
 
   ChannelChatState({
     required this.messages,
@@ -37,6 +41,10 @@ class ChannelChatState {
     this.uploadFileErrorName,
     required this.editingAttachments,
     required this.isEdited,
+    required this.showMentionPopup,
+    required this.suggestedMentions,
+    required this.isSuggestionsPending,
+    required this.filteredSuggestedMentions,
   });
 
   ChannelChatState copyWith({
@@ -57,6 +65,10 @@ class ChannelChatState {
     String? uploadFileErrorName,
     List<EditingAttachment>? editingAttachments,
     bool? isEdited,
+    bool? showMentionPopup,
+    List<UserEntity>? suggestedMentions,
+    bool? isSuggestionsPending,
+    List<UserEntity>? filteredSuggestedMentions,
   }) {
     return ChannelChatState(
       messages: messages ?? this.messages,
@@ -76,6 +88,10 @@ class ChannelChatState {
       uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
       editingAttachments: editingAttachments ?? this.editingAttachments,
       isEdited: isEdited ?? this.isEdited,
+      showMentionPopup: showMentionPopup ?? this.showMentionPopup,
+      suggestedMentions: suggestedMentions ?? this.suggestedMentions,
+      isSuggestionsPending: isSuggestionsPending ?? this.isSuggestionsPending,
+      filteredSuggestedMentions: filteredSuggestedMentions ?? this.filteredSuggestedMentions,
     );
   }
 }

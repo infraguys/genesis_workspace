@@ -28,6 +28,8 @@ abstract class ChatCubitCapable {
     List<XFile>? droppedImages,
     List<PlatformFile> droppedPlatformImages,
   });
+  void setShowMentionPopup(bool value);
+  Future<void> getMentionSuggestions({String? query, List<int> chatMembers});
 }
 
 class ChatPasteAction extends Action<PasteTextIntent> {
@@ -68,10 +70,39 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     messageInputFocusNode.dispose();
   }
 
-  Future<void> onTextChanged() async {
+  void onTextChanged() {
     setState(() {
       currentText = messageController.text;
     });
+  }
+
+  void mentionListener() {
+    final text = messageController.text;
+    final cursorPosition = messageController.selection.baseOffset;
+
+    if (cursorPosition <= 0) {
+      context.read<TChatCubit>().setShowMentionPopup(false);
+      return;
+    }
+
+    final mentionTriggerRegExp = RegExp(r'(^|\s)@([a-zA-Z0-9_]+)?');
+    final matches = mentionTriggerRegExp.allMatches(text);
+
+    RegExpMatch? activeMatch;
+    for (final match in matches) {
+      if (match.end == cursorPosition) {
+        activeMatch = match;
+        break;
+      }
+    }
+
+    if (activeMatch != null) {
+      final query = activeMatch.group(2) ?? '';
+      context.read<TChatCubit>().setShowMentionPopup(true);
+      context.read<TChatCubit>().getMentionSuggestions(query: query);
+    } else {
+      context.read<TChatCubit>().setShowMentionPopup(false);
+    }
   }
 
   Future<void> _handleTextChanged() async {

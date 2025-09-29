@@ -23,6 +23,8 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 
@@ -30,6 +32,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   UploadFileUseCase get uploadFileUseCase;
   UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase;
   UpdateMessageUseCase get updateMessageUseCase;
+  GetUsersUseCase get getUsersUseCase;
 
   List<UploadFileEntity> getUploadedFiles(S state);
   String getUploadedFilesString(S state);
@@ -38,6 +41,10 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   List<MessageEntity> getStateMessages(S state);
   Set<int> getPendingToMarkAsRead(S state);
   List<EditingAttachment> getEditingAttachments(S state);
+  bool getShowMentionPopup(S state);
+  List<UserEntity> getSuggestedMentions(S state);
+  bool getIsSuggestionsPending(S state);
+  List<UserEntity> getFilteredSuggestedMentions(S state);
 
   S copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
@@ -47,13 +54,16 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     List<MessageEntity>? messages,
     List<EditingAttachment>? editingAttachments,
     bool? isEdited,
+    bool? showMentionPopup,
+    List<UserEntity> suggestedMentions,
+    bool? isSuggestionsPending,
+    List<UserEntity>? filteredSuggestedMentions,
   });
 
   final Map<String, CancelToken> _uploadCancelTokens = <String, CancelToken>{};
   Timer? _readMessageDebounceTimer;
 
   //Upload files
-
   Future<void> uploadImagesCommon({
     List<XFile>? droppedImages,
     List<PlatformFile>? droppedPlatformImages,
@@ -472,6 +482,44 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
       );
     } catch (_) {
       // no-op
+    }
+  }
+
+  //Mentions
+  setShowMentionPopup(bool value) {
+    if (getShowMentionPopup(state) != value) {
+      emit(copyWithCommon(showMentionPopup: value));
+    }
+  }
+
+  Future<void> getMentionSuggestions({String? query, List<int>? chatMembers}) async {
+    if (getShowMentionPopup(state)) {
+      emit(copyWithCommon(isSuggestionsPending: true));
+      List<UserEntity> users = getSuggestedMentions(state);
+      List<UserEntity> filteredUsers = [];
+      try {
+        if (users.isEmpty) {
+          final response = await getUsersUseCase.call();
+          users = response;
+          emit(copyWithCommon(suggestedMentions: response));
+        }
+        if (query != null) {
+          final lowerQuery = query.toLowerCase();
+          for (var user in users) {
+            if (user.fullName.toLowerCase().contains(lowerQuery) ||
+                user.email.toLowerCase().contains(lowerQuery)) {
+              filteredUsers.add(user);
+            }
+          }
+        } else {
+          filteredUsers = users;
+        }
+        emit(copyWithCommon(filteredSuggestedMentions: filteredUsers));
+      } catch (e) {
+        inspect(e);
+      } finally {
+        emit(copyWithCommon(isSuggestionsPending: false));
+      }
     }
   }
 

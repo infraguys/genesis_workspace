@@ -70,6 +70,7 @@ class TranslationsRu implements Translations {
 	@override String get drop_files_to_upload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancel_editing => 'Отменить редактирование';
 	@override late final _TranslationsFoldersRu folders = _TranslationsFoldersRu._(_root);
+	@override String get nothing_found => 'Ничего не нашли';
 }
 
 // Path: auth
@@ -387,6 +388,7 @@ extension on TranslationsRu {
 			case 'folders.deleteConfirmTitle': return 'Удалить папку?';
 			case 'folders.deleteConfirmText': return 'Вы уверены, что хотите удалить "{folderName}"?';
 			case 'folders.folder_is_empty': return 'Папка пустая';
+			case 'nothing_found': return 'Ничего не нашли';
 			default: return null;
 		}
 	}

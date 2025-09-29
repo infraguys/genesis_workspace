@@ -28,6 +28,7 @@ import 'package:genesis_workspace/domain/users/entities/typing_request_entity.da
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -48,6 +49,7 @@ class ChatCubit extends Cubit<ChatState>
     this._getUserPresenceUseCase,
     this._uploadFileUseCase,
     this._updateMessageUseCase,
+    this._getUsersUseCase,
   ) : super(
         ChatState(
           messages: [],
@@ -68,6 +70,10 @@ class ChatCubit extends Cubit<ChatState>
           editingMessage: null,
           editingAttachments: [],
           isEdited: false,
+          showMentionPopup: false,
+          suggestedMentions: [],
+          isSuggestionsPending: false,
+          filteredSuggestedMentions: [],
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -94,6 +100,7 @@ class ChatCubit extends Cubit<ChatState>
   final GetUserPresenceUseCase _getUserPresenceUseCase;
   final UploadFileUseCase _uploadFileUseCase;
   final UpdateMessageUseCase _updateMessageUseCase;
+  final GetUsersUseCase _getUsersUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -112,6 +119,9 @@ class ChatCubit extends Cubit<ChatState>
 
   @override
   UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase => _updateMessagesFlagsUseCase;
+
+  @override
+  GetUsersUseCase get getUsersUseCase => _getUsersUseCase;
 
   @override
   List<UploadFileEntity> getUploadedFiles(ChatState s) => s.uploadedFiles;
@@ -135,6 +145,18 @@ class ChatCubit extends Cubit<ChatState>
   List<EditingAttachment> getEditingAttachments(ChatState s) => s.editingAttachments;
 
   @override
+  bool getShowMentionPopup(ChatState s) => s.showMentionPopup;
+
+  @override
+  List<UserEntity> getSuggestedMentions(ChatState s) => s.suggestedMentions;
+
+  @override
+  bool getIsSuggestionsPending(ChatState s) => s.isSuggestionsPending;
+
+  @override
+  List<UserEntity> getFilteredSuggestedMentions(ChatState s) => s.filteredSuggestedMentions;
+
+  @override
   ChatState copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,
@@ -143,6 +165,10 @@ class ChatCubit extends Cubit<ChatState>
     List<MessageEntity>? messages,
     List<EditingAttachment>? editingAttachments,
     bool? isEdited,
+    bool? showMentionPopup,
+    List<UserEntity>? suggestedMentions,
+    bool? isSuggestionsPending,
+    List<UserEntity>? filteredSuggestedMentions,
   }) {
     return state.copyWith(
       uploadedFiles: uploadedFiles ?? state.uploadedFiles,
@@ -152,6 +178,10 @@ class ChatCubit extends Cubit<ChatState>
       messages: messages ?? state.messages,
       editingAttachments: editingAttachments ?? state.editingAttachments,
       isEdited: isEdited ?? state.isEdited,
+      showMentionPopup: showMentionPopup ?? state.showMentionPopup,
+      suggestedMentions: suggestedMentions ?? state.suggestedMentions,
+      isSuggestionsPending: isSuggestionsPending ?? state.isSuggestionsPending,
+      filteredSuggestedMentions: filteredSuggestedMentions ?? state.filteredSuggestedMentions,
     );
   }
 

@@ -121,6 +121,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get cancel_editing => 'Cancel editing';
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn._(_root);
+
+	/// en: 'Nothing found'
+	String get nothing_found => 'Nothing found';
 }
 
 // Path: auth
@@ -568,6 +571,7 @@ extension on Translations {
 			case 'folders.deleteConfirmTitle': return 'Delete folder?';
 			case 'folders.deleteConfirmText': return 'Are you sure you want to delete "{folderName}"?';
 			case 'folders.folder_is_empty': return 'Folder is empty';
+			case 'nothing_found': return 'Nothing found';
 			default: return null;
 		}
 	}
