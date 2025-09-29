@@ -77,7 +77,10 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                   automaticallyImplyLeading: false,
                   title: Text(context.t.folders.newFolderTitle),
                   actions: [
-                    TextButton(onPressed: Navigator.of(context).pop, child: Text(context.t.folders.cancel)),
+                    TextButton(
+                      onPressed: Navigator.of(context).pop,
+                      child: Text(context.t.folders.cancel),
+                    ),
                     const SizedBox(width: 4),
                     TextButton(
                       onPressed: isCreateEnabled
@@ -86,7 +89,9 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                               widget.onSubmit(folder);
                             }
                           : null,
-                      child: Text(widget.initial == null ? context.t.folders.create : context.t.folders.save),
+                      child: Text(
+                        widget.initial == null ? context.t.folders.create : context.t.folders.save,
+                      ),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -169,14 +174,14 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
                   sliver: SliverGrid.builder(
-                    itemCount: AppConstants.folderIcons.length,
+                    itemCount: FolderIconsConstants.folderIcons.length,
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 6,
                       mainAxisSpacing: 8,
                       crossAxisSpacing: 8,
                     ),
                     itemBuilder: (context, index) {
-                      final IconData iconData = AppConstants.folderIcons[index];
+                      final IconData iconData = FolderIconsConstants.folderIcons[index];
                       final bool isSelected = iconData == selectedIconData;
                       return InkWell(
                         onTap: () => setState(() => selectedIconData = iconData),

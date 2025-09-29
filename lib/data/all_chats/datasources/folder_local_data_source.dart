@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:injectable/injectable.dart';
 
 @injectable
 class FolderLocalDataSource {
@@ -27,7 +28,7 @@ class FolderLocalDataSource {
     return FolderItemEntity(
       id: row.id,
       title: row.title,
-      iconData: IconData(row.iconCodePoint, fontFamily: 'MaterialIcons'),
+      iconData: FolderIconsConstants.resolve(row.iconCodePoint),
       backgroundColor: row.backgroundColorValue != null ? Color(row.backgroundColorValue!) : null,
       unreadCount: row.unreadCount,
     );
