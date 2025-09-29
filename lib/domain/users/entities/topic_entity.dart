@@ -9,4 +9,14 @@ class TopicEntity extends Equatable {
 
   @override
   List<Object> get props => [name];
+
+  factory TopicEntity.fake({int? index, int? maxId, String? name, Set<int>? unreadMessages}) {
+    final int topicIndex = index ?? 0;
+
+    return TopicEntity(
+      maxId: maxId ?? (topicIndex + 1) * 100,
+      name: name ?? "Topic $topicIndex",
+      unreadMessages: unreadMessages ?? {1, 2},
+    );
+  }
 }

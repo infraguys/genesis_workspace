@@ -1,7 +1,7 @@
 part of 'channels_cubit.dart';
 
 class ChannelsState {
-  List<ChannelEntity> channels;
+  final List<ChannelEntity> channels;
   List<MessageEntity> unreadMessages;
   int? pendingTopicsId;
   int? selectedChannelId;

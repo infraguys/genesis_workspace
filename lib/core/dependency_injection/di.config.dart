@@ -13,6 +13,17 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
+import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart' as _i483;
+import 'package:genesis_workspace/data/all_chats/dao/folder_item_dao.dart'
+    as _i909;
+import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_source.dart'
+    as _i277;
+import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart'
+    as _i180;
+import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_membership_repository_impl.dart'
+    as _i770;
+import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_repository_impl.dart'
+    as _i957;
 import 'package:genesis_workspace/data/database/app_database.dart' as _i606;
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart'
     as _i253;
@@ -33,6 +44,26 @@ import 'package:genesis_workspace/data/users/repositories_impl/recent_dm_reposit
     as _i265;
 import 'package:genesis_workspace/data/users/repositories_impl/users_repository_impl.dart'
     as _i675;
+import 'package:genesis_workspace/domain/all_chats/repositories/folder_membership_repository.dart'
+    as _i915;
+import 'package:genesis_workspace/domain/all_chats/repositories/folder_repository.dart'
+    as _i48;
+import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart'
+    as _i125;
+import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart'
+    as _i849;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_target_use_case.dart'
+    as _i714;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart'
+    as _i815;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart'
+    as _i438;
+import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart'
+    as _i744;
+import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart'
+    as _i395;
+import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart'
+    as _i7;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
     as _i857;
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
@@ -89,6 +120,8 @@ import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart
     as _i487;
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart'
     as _i832;
+import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart'
+    as _i404;
 import 'package:genesis_workspace/features/authentication/data/datasources/auth_remote_data_source.dart'
     as _i672;
 import 'package:genesis_workspace/features/authentication/data/repositories_impl/auth_repository_impl.dart'
@@ -248,8 +281,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i42.UploadFileUseCase>(
       () => _i42.UploadFileUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i909.FolderItemDao>(
+      () => _i909.FolderItemDao(gh<_i606.AppDatabase>()),
+    );
+    gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
+    );
+    gh.factory<_i277.FolderLocalDataSource>(
+      () => _i277.FolderLocalDataSource(gh<_i483.FolderDao>()),
     );
     gh.factory<_i75.GetTokenUseCase>(
       () => _i75.GetTokenUseCase(gh<_i958.TokenStorage>()),
@@ -335,6 +375,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
     );
+    gh.factory<_i180.FolderMembershipLocalDataSource>(
+      () => _i180.FolderMembershipLocalDataSource(gh<_i909.FolderItemDao>()),
+    );
     gh.lazySingleton<_i1022.AuthRepository>(
       () => _i44.AuthRepositoryImpl(
         gh<_i672.AuthRemoteDataSource>(),
@@ -347,6 +390,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i547.GetOwnUserUseCase>(),
         gh<_i832.UpdatePresenceUseCase>(),
       ),
+    );
+    gh.factory<_i48.FolderRepository>(
+      () => _i957.FolderRepositoryImpl(gh<_i277.FolderLocalDataSource>()),
     );
     gh.factory<_i277.ChatCubit>(
       () => _i277.ChatCubit(
@@ -361,6 +407,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1005.UpdateMessageUseCase>(),
       ),
     );
+    gh.factory<_i852.DirectMessagesCubit>(
+      () => _i852.DirectMessagesCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i837.GetAllPresencesUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+      ),
+    );
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
     );
@@ -370,12 +424,49 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i812.AddRecentDmUseCase>(
       () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
     );
+    gh.factory<_i849.DeleteFolderUseCase>(
+      () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
+    );
+    gh.factory<_i7.UpdateFolderUseCase>(
+      () => _i7.UpdateFolderUseCase(gh<_i48.FolderRepository>()),
+    );
+    gh.factory<_i125.AddFolderUseCase>(
+      () => _i125.AddFolderUseCase(gh<_i48.FolderRepository>()),
+    );
+    gh.factory<_i815.GetFoldersUseCase>(
+      () => _i815.GetFoldersUseCase(gh<_i48.FolderRepository>()),
+    );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
         gh<_i82.RealTimeService>(),
         gh<_i699.GetTopicsUseCase>(),
         gh<_i207.GetMessagesUseCase>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
+      ),
+    );
+    gh.factory<_i915.FolderMembershipRepository>(
+      () => _i770.FolderMembershipRepositoryImpl(
+        gh<_i180.FolderMembershipLocalDataSource>(),
+      ),
+    );
+    gh.factory<_i744.RemoveAllMembershipsForFolderUseCase>(
+      () => _i744.RemoveAllMembershipsForFolderUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i395.SetFoldersForTargetUseCase>(
+      () => _i395.SetFoldersForTargetUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i438.GetMembersForFolderUseCase>(
+      () => _i438.GetMembersForFolderUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i714.GetFolderIdsForTargetUseCase>(
+      () => _i714.GetFolderIdsForTargetUseCase(
+        gh<_i915.FolderMembershipRepository>(),
       ),
     );
     gh.factory<_i433.DeleteTokenUseCase>(
@@ -401,16 +492,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i819.DeleteCsrftokenUseCase>(
       () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
-    );
-    gh.factory<_i852.DirectMessagesCubit>(
-      () => _i852.DirectMessagesCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i837.GetAllPresencesUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i812.AddRecentDmUseCase>(),
-        gh<_i445.GetRecentDmsUseCase>(),
-      ),
     );
     gh.factory<_i155.SettingsCubit>(
       () => _i155.SettingsCubit(
@@ -438,6 +519,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i819.DeleteCsrftokenUseCase>(),
       ),
       dispose: _i862.disposeAuthCubit,
+    );
+    gh.factory<_i404.AllChatsCubit>(
+      () => _i404.AllChatsCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+        gh<_i7.UpdateFolderUseCase>(),
+        gh<_i849.DeleteFolderUseCase>(),
+        gh<_i395.SetFoldersForTargetUseCase>(),
+        gh<_i714.GetFolderIdsForTargetUseCase>(),
+        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
+        gh<_i438.GetMembersForFolderUseCase>(),
+      ),
     );
     return this;
   }

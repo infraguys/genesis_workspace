@@ -69,6 +69,7 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsAttachmentButtonRu attachment_button = _TranslationsAttachmentButtonRu._(_root);
 	@override String get drop_files_to_upload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancel_editing => 'Отменить редактирование';
+	@override late final _TranslationsFoldersRu folders = _TranslationsFoldersRu._(_root);
 }
 
 // Path: auth
@@ -109,6 +110,7 @@ class _TranslationsNavBarRu implements TranslationsNavBarEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
+	@override String get all_chats => 'Все чаты';
 	@override String get direct_messages => 'Личные сообщения';
 	@override String get settings => 'Настройки';
 	@override String get menu => 'Меню';
@@ -247,6 +249,32 @@ class _TranslationsAttachmentButtonRu implements TranslationsAttachmentButtonEn 
 	@override String get image => 'Выбрать изображение';
 }
 
+// Path: folders
+class _TranslationsFoldersRu implements TranslationsFoldersEn {
+	_TranslationsFoldersRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get all => 'Все';
+	@override String get title => 'Папки';
+	@override String get newFolderTitle => 'Новая папка';
+	@override String get nameLabel => 'Название папки';
+	@override String get colorLabel => 'Цвет папки';
+	@override String get iconLabel => 'Иконка';
+	@override String get preview => 'Предпросмотр';
+	@override String get create => 'Создать';
+	@override String get cancel => 'Отмена';
+	@override String get addToFolder => 'Добавить в папку';
+	@override String get selectFolders => 'Выберите папки';
+	@override String get save => 'Сохранить';
+	@override String get edit => 'Редактировать папку';
+	@override String get delete => 'Удалить';
+	@override String get deleteConfirmTitle => 'Удалить папку?';
+	@override String get deleteConfirmText => 'Вы уверены, что хотите удалить "{folderName}"?';
+	@override String get folder_is_empty => 'Папка пустая';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsRu {
@@ -279,6 +307,7 @@ extension on TranslationsRu {
 			case 'login': return 'Войти';
 			case 'typing': return 'Печатает';
 			case 'online': return 'В сети';
+			case 'nav_bar.all_chats': return 'Все чаты';
 			case 'nav_bar.direct_messages': return 'Личные сообщения';
 			case 'nav_bar.settings': return 'Настройки';
 			case 'nav_bar.menu': return 'Меню';
@@ -341,6 +370,23 @@ extension on TranslationsRu {
 			case 'attachment_button.image': return 'Выбрать изображение';
 			case 'drop_files_to_upload': return 'Отпустите файлы, чтобы загрузить';
 			case 'cancel_editing': return 'Отменить редактирование';
+			case 'folders.all': return 'Все';
+			case 'folders.title': return 'Папки';
+			case 'folders.newFolderTitle': return 'Новая папка';
+			case 'folders.nameLabel': return 'Название папки';
+			case 'folders.colorLabel': return 'Цвет папки';
+			case 'folders.iconLabel': return 'Иконка';
+			case 'folders.preview': return 'Предпросмотр';
+			case 'folders.create': return 'Создать';
+			case 'folders.cancel': return 'Отмена';
+			case 'folders.addToFolder': return 'Добавить в папку';
+			case 'folders.selectFolders': return 'Выберите папки';
+			case 'folders.save': return 'Сохранить';
+			case 'folders.edit': return 'Редактировать папку';
+			case 'folders.delete': return 'Удалить';
+			case 'folders.deleteConfirmTitle': return 'Удалить папку?';
+			case 'folders.deleteConfirmText': return 'Вы уверены, что хотите удалить "{folderName}"?';
+			case 'folders.folder_is_empty': return 'Папка пустая';
 			default: return null;
 		}
 	}

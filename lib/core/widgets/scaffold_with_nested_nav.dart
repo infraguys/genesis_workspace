@@ -121,6 +121,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                         labelType: NavigationRailLabelType.all,
                         destinations: [
                           NavigationRailDestination(
+                            label: Text(context.t.navBar.allChats),
+                            icon: Icon(Icons.chat),
+                          ),
+                          NavigationRailDestination(
                             label: Text(context.t.navBar.directMessages),
                             icon: Badge(
                               isLabelVisible: state.messages.any(
@@ -170,6 +174,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             type: BottomNavigationBarType.shifting,
                             onTap: _goBranch,
                             items: [
+                              BottomNavigationBarItem(
+                                label: context.t.navBar.allChats,
+                                icon: Icon(Icons.chat),
+                              ),
                               BottomNavigationBarItem(
                                 label: context.t.navBar.directMessages,
                                 icon: Badge(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 
@@ -67,10 +68,7 @@ class ChannelItem extends StatelessWidget {
                 ],
               ),
             ),
-            Badge.count(
-              count: channel.unreadMessages.length,
-              isLabelVisible: channel.unreadMessages.isNotEmpty,
-            ),
+            UnreadBadge(count: channel.unreadMessages.length),
           ],
         ),
       ),

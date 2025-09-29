@@ -65,6 +65,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsAttachmentButtonRu attachmentButton = TranslationsAttachmentButtonRu._(_root);
 	@override String get dropFilesToUpload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancelEditing => 'Отменить редактирование';
+	@override late final TranslationsFoldersRu folders = TranslationsFoldersRu._(_root);
 }
 
 // Path: auth
@@ -105,6 +106,7 @@ class TranslationsNavBarRu extends TranslationsNavBarEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
+	@override String get allChats => 'Все чаты';
 	@override String get directMessages => 'Личные сообщения';
 	@override String get settings => 'Настройки';
 	@override String get menu => 'Меню';
@@ -241,4 +243,30 @@ class TranslationsAttachmentButtonRu extends TranslationsAttachmentButtonEn {
 	// Translations
 	@override String get file => 'Выбрать файл';
 	@override String get image => 'Выбрать изображение';
+}
+
+// Path: folders
+class TranslationsFoldersRu extends TranslationsFoldersEn {
+	TranslationsFoldersRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get all => 'Все';
+	@override String get title => 'Папки';
+	@override String get newFolderTitle => 'Новая папка';
+	@override String get nameLabel => 'Название папки';
+	@override String get colorLabel => 'Цвет папки';
+	@override String get iconLabel => 'Иконка';
+	@override String get preview => 'Предпросмотр';
+	@override String get create => 'Создать';
+	@override String get cancel => 'Отмена';
+	@override String get addToFolder => 'Добавить в папку';
+	@override String get selectFolders => 'Выберите папки';
+	@override String get save => 'Сохранить';
+	@override String get edit => 'Редактировать папку';
+	@override String get delete => 'Удалить';
+	@override String get deleteConfirmTitle => 'Удалить папку?';
+	@override String deleteConfirmText({required Object folderName}) => 'Вы уверены, что хотите удалить "${folderName}"?';
+	@override String get folderIsEmpty => 'Папка пустая';
 }
