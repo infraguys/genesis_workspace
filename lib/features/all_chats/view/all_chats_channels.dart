@@ -64,48 +64,10 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
     }
   }
 
-  Widget _buildList(BuildContext context, List<ChannelEntity> channels) {
-    final isDesktop = currentSize(context) > ScreenSize.lTablet;
-    final listView = ListView.separated(
-      controller: widget.embeddedInParentScroll ? null : scrollController,
-      shrinkWrap: true,
-      physics: widget.embeddedInParentScroll
-          ? const NeverScrollableScrollPhysics()
-          : const AlwaysScrollableScrollPhysics(),
-      itemCount: channels.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final ChannelEntity channel = channels[index];
-        return ChannelDownExpandedItem(
-          key: ValueKey('channel-${channel.streamId}'),
-          channel: channel,
-          onTap: () async {
-            context.read<AllChatsCubit>().selectChannel(channel: channel);
-            unawaited(context.read<ChannelsCubit>().getChannelTopics(streamId: channel.streamId));
-          },
-          onTopicTap: (topic) {
-            if (isDesktop) {
-              context.read<AllChatsCubit>().selectChannel(channel: channel, topic: topic);
-            } else {
-              context.pushNamed(
-                Routes.channelChatTopic,
-                pathParameters: {'channelId': channel.streamId.toString(), 'topicName': topic.name},
-                extra: {'unreadMessagesCount': topic.unreadMessages.length},
-              );
-            }
-          },
-        );
-      },
-    );
-
-    if (widget.embeddedInParentScroll) {
-      return listView;
-    }
-    return ConstrainedBox(constraints: const BoxConstraints(maxHeight: 480), child: listView);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isDesktop = currentSize(context) > ScreenSize.lTablet;
+
     return BlocBuilder<ChannelsCubit, ChannelsState>(
       builder: (context, state) {
         final List<ChannelEntity> channels = (widget.filterChannelIds == null)
@@ -150,7 +112,50 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
                 axisAlignment: -1.0,
                 child: FadeTransition(
                   opacity: expandAnimation,
-                  child: _buildList(context, channels),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
+                    child: ListView.separated(
+                      controller: scrollController,
+                      shrinkWrap: true,
+                      physics: widget.embeddedInParentScroll
+                          ? const NeverScrollableScrollPhysics()
+                          : const AlwaysScrollableScrollPhysics(),
+                      itemCount: channels.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final ChannelEntity channel = channels[index];
+                        return ChannelDownExpandedItem(
+                          key: ValueKey('channel-${channel.streamId}'),
+                          channel: channel,
+                          onTap: () async {
+                            context.read<AllChatsCubit>().selectChannel(channel: channel);
+                            unawaited(
+                              context.read<ChannelsCubit>().getChannelTopics(
+                                streamId: channel.streamId,
+                              ),
+                            );
+                          },
+                          onTopicTap: (topic) {
+                            if (isDesktop) {
+                              context.read<AllChatsCubit>().selectChannel(
+                                channel: channel,
+                                topic: topic,
+                              );
+                            } else {
+                              context.pushNamed(
+                                Routes.channelChatTopic,
+                                pathParameters: {
+                                  'channelId': channel.streamId.toString(),
+                                  'topicName': topic.name,
+                                },
+                                extra: {'unreadMessagesCount': topic.unreadMessages.length},
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),

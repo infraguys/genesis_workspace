@@ -454,7 +454,6 @@ class _AllChatsViewState extends State<AllChatsView> {
                                 embeddedInParentScroll: true,
                               ),
                             ),
-                            // Channels (встроено в общий скролл)
                             SliverToBoxAdapter(
                               child: AllChatsChannels(
                                 filterChannelIds: state.filterChannelIds,

@@ -119,6 +119,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Cancel editing'
 	String get cancel_editing => 'Cancel editing';
+
+	late final TranslationsFoldersEn folders = TranslationsFoldersEn._(_root);
 }
 
 // Path: auth
@@ -203,6 +205,9 @@ class TranslationsNavBarEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'All chats'
+	String get all_chats => 'All chats';
 
 	/// en: 'Direct Messages'
 	String get direct_messages => 'Direct Messages';
@@ -397,6 +402,66 @@ class TranslationsAttachmentButtonEn {
 	String get image => 'Pick an image';
 }
 
+// Path: folders
+class TranslationsFoldersEn {
+	TranslationsFoldersEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'All'
+	String get all => 'All';
+
+	/// en: 'Folders'
+	String get title => 'Folders';
+
+	/// en: 'New folder'
+	String get newFolderTitle => 'New folder';
+
+	/// en: 'Folder name'
+	String get nameLabel => 'Folder name';
+
+	/// en: 'Folder color'
+	String get colorLabel => 'Folder color';
+
+	/// en: 'Icon'
+	String get iconLabel => 'Icon';
+
+	/// en: 'Preview'
+	String get preview => 'Preview';
+
+	/// en: 'Create'
+	String get create => 'Create';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
+
+	/// en: 'Add to folder'
+	String get addToFolder => 'Add to folder';
+
+	/// en: 'Select folders'
+	String get selectFolders => 'Select folders';
+
+	/// en: 'Save'
+	String get save => 'Save';
+
+	/// en: 'Edit folder'
+	String get edit => 'Edit folder';
+
+	/// en: 'Delete'
+	String get delete => 'Delete';
+
+	/// en: 'Delete folder?'
+	String get deleteConfirmTitle => 'Delete folder?';
+
+	/// en: 'Are you sure you want to delete "{folderName}"?'
+	String get deleteConfirmText => 'Are you sure you want to delete "{folderName}"?';
+
+	/// en: 'Folder is empty'
+	String get folder_is_empty => 'Folder is empty';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -429,6 +494,7 @@ extension on Translations {
 			case 'login': return 'Login';
 			case 'typing': return 'Typing';
 			case 'online': return 'Online';
+			case 'nav_bar.all_chats': return 'All chats';
 			case 'nav_bar.direct_messages': return 'Direct Messages';
 			case 'nav_bar.settings': return 'Settings';
 			case 'nav_bar.menu': return 'Menu';
@@ -485,6 +551,23 @@ extension on Translations {
 			case 'attachment_button.image': return 'Pick an image';
 			case 'drop_files_to_upload': return 'Drop files here to upload';
 			case 'cancel_editing': return 'Cancel editing';
+			case 'folders.all': return 'All';
+			case 'folders.title': return 'Folders';
+			case 'folders.newFolderTitle': return 'New folder';
+			case 'folders.nameLabel': return 'Folder name';
+			case 'folders.colorLabel': return 'Folder color';
+			case 'folders.iconLabel': return 'Icon';
+			case 'folders.preview': return 'Preview';
+			case 'folders.create': return 'Create';
+			case 'folders.cancel': return 'Cancel';
+			case 'folders.addToFolder': return 'Add to folder';
+			case 'folders.selectFolders': return 'Select folders';
+			case 'folders.save': return 'Save';
+			case 'folders.edit': return 'Edit folder';
+			case 'folders.delete': return 'Delete';
+			case 'folders.deleteConfirmTitle': return 'Delete folder?';
+			case 'folders.deleteConfirmText': return 'Are you sure you want to delete "{folderName}"?';
+			case 'folders.folder_is_empty': return 'Folder is empty';
 			default: return null;
 		}
 	}

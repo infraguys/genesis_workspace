@@ -281,10 +281,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i42.UploadFileUseCase>(
       () => _i42.UploadFileUseCase(gh<_i857.MessagesRepository>()),
     );
-    gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
     gh.factory<_i909.FolderItemDao>(
       () => _i909.FolderItemDao(gh<_i606.AppDatabase>()),
     );
+    gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
     );
@@ -418,23 +418,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
     );
+    gh.factory<_i445.GetRecentDmsUseCase>(
+      () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
+    );
     gh.factory<_i812.AddRecentDmUseCase>(
       () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
     );
-    gh.factory<_i445.GetRecentDmsUseCase>(
-      () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
+    gh.factory<_i849.DeleteFolderUseCase>(
+      () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
+    );
+    gh.factory<_i7.UpdateFolderUseCase>(
+      () => _i7.UpdateFolderUseCase(gh<_i48.FolderRepository>()),
     );
     gh.factory<_i125.AddFolderUseCase>(
       () => _i125.AddFolderUseCase(gh<_i48.FolderRepository>()),
     );
     gh.factory<_i815.GetFoldersUseCase>(
       () => _i815.GetFoldersUseCase(gh<_i48.FolderRepository>()),
-    );
-    gh.factory<_i7.UpdateFolderUseCase>(
-      () => _i7.UpdateFolderUseCase(gh<_i48.FolderRepository>()),
-    );
-    gh.factory<_i849.DeleteFolderUseCase>(
-      () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
@@ -449,23 +449,23 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i180.FolderMembershipLocalDataSource>(),
       ),
     );
-    gh.factory<_i395.SetFoldersForTargetUseCase>(
-      () => _i395.SetFoldersForTargetUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
-    gh.factory<_i714.GetFolderIdsForTargetUseCase>(
-      () => _i714.GetFolderIdsForTargetUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
     gh.factory<_i744.RemoveAllMembershipsForFolderUseCase>(
       () => _i744.RemoveAllMembershipsForFolderUseCase(
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
+    gh.factory<_i395.SetFoldersForTargetUseCase>(
+      () => _i395.SetFoldersForTargetUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
     gh.factory<_i438.GetMembersForFolderUseCase>(
       () => _i438.GetMembersForFolderUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i714.GetFolderIdsForTargetUseCase>(
+      () => _i714.GetFolderIdsForTargetUseCase(
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
