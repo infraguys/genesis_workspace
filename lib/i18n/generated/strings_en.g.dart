@@ -116,6 +116,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get cancelEditing => 'Cancel editing';
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
+
+	/// en: 'Nothing found'
+	String get nothingFound => 'Nothing found';
 }
 
 // Path: auth

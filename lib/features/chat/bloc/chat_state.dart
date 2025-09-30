@@ -20,6 +20,10 @@ class ChatState {
   MessageEntity? editingMessage;
   List<EditingAttachment> editingAttachments;
   bool isEdited;
+  bool showMentionPopup;
+  List<UserEntity> suggestedMentions;
+  List<UserEntity> filteredSuggestedMentions;
+  bool isSuggestionsPending;
 
   ChatState({
     required this.messages,
@@ -41,6 +45,10 @@ class ChatState {
     this.editingMessage,
     required this.editingAttachments,
     required this.isEdited,
+    required this.showMentionPopup,
+    required this.suggestedMentions,
+    required this.isSuggestionsPending,
+    required this.filteredSuggestedMentions,
   });
 
   ChatState copyWith({
@@ -63,6 +71,10 @@ class ChatState {
     MessageEntity? editingMessage,
     List<EditingAttachment>? editingAttachments,
     bool? isEdited,
+    bool? showMentionPopup,
+    List<UserEntity>? suggestedMentions,
+    List<UserEntity>? filteredSuggestedMentions,
+    bool? isSuggestionsPending,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -84,6 +96,10 @@ class ChatState {
       editingMessage: editingMessage ?? this.editingMessage,
       editingAttachments: editingAttachments ?? this.editingAttachments,
       isEdited: isEdited ?? this.isEdited,
+      showMentionPopup: showMentionPopup ?? this.showMentionPopup,
+      suggestedMentions: suggestedMentions ?? this.suggestedMentions,
+      isSuggestionsPending: isSuggestionsPending ?? this.isSuggestionsPending,
+      filteredSuggestedMentions: filteredSuggestedMentions ?? this.filteredSuggestedMentions,
     );
   }
 }

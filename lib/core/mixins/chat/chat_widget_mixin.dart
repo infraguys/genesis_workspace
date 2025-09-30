@@ -28,6 +28,8 @@ abstract class ChatCubitCapable {
     List<XFile>? droppedImages,
     List<PlatformFile> droppedPlatformImages,
   });
+  void setShowMentionPopup(bool value);
+  Future<void> getMentionSuggestions({String? query});
 }
 
 class ChatPasteAction extends Action<PasteTextIntent> {
@@ -45,6 +47,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     on State<TWidget> {
   late final TextEditingController messageController;
   final FocusNode messageInputFocusNode = FocusNode();
+  final FocusNode mentionFocusNode = FocusNode(debugLabel: 'MentionSuggestionsFocus');
   final PasteCaptureService pasteCaptureService = getIt<PasteCaptureService>();
 
   String currentText = '';
@@ -66,12 +69,84 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     messageController.removeListener(_handleTextChanged);
     messageController.dispose();
     messageInputFocusNode.dispose();
+    mentionFocusNode.dispose();
   }
 
-  Future<void> onTextChanged() async {
+  void onTextChanged() {
     setState(() {
       currentText = messageController.text;
     });
+  }
+
+  //mention
+  void mentionListener() {
+    final text = messageController.text;
+    final cursorPosition = messageController.selection.baseOffset;
+
+    if (cursorPosition <= 0) {
+      context.read<TChatCubit>().setShowMentionPopup(false);
+      return;
+    }
+
+    final mentionTriggerRegExp = RegExp(r'(^|\s)@([a-zA-Z0-9_]+)?');
+    final matches = mentionTriggerRegExp.allMatches(text);
+
+    RegExpMatch? activeMatch;
+    for (final match in matches) {
+      if (match.end == cursorPosition) {
+        activeMatch = match;
+        break;
+      }
+    }
+
+    if (activeMatch != null) {
+      final query = activeMatch.group(2) ?? '';
+      context.read<TChatCubit>().setShowMentionPopup(true);
+      context.read<TChatCubit>().getMentionSuggestions(query: query);
+    } else {
+      context.read<TChatCubit>().setShowMentionPopup(false);
+    }
+  }
+
+  void onMentionSelected(String fullName) {
+    final int cursorPosition = messageController.selection.baseOffset;
+    final String text = messageController.text;
+
+    final RegExp mentionTriggerRegExp = RegExp(r'(^|\s)@([a-zA-Z0-9_]+)?');
+    final Iterable<RegExpMatch> matches = mentionTriggerRegExp.allMatches(text);
+
+    RegExpMatch? activeMatch;
+    for (final RegExpMatch match in matches) {
+      if (match.end == cursorPosition) {
+        activeMatch = match;
+        break;
+      }
+    }
+
+    final String replacement = '@**$fullName**';
+
+    if (activeMatch != null) {
+      final int prefixLen = (activeMatch.group(1) ?? '').length;
+      final int mentionStart = activeMatch.start + prefixLen;
+      final int mentionEnd = activeMatch.end;
+
+      final String before = text.substring(0, mentionStart);
+      final String after = text.substring(mentionEnd);
+
+      final String newText = '$before$replacement$after';
+      messageController.text = newText;
+
+      final int newOffset = (before + replacement).length;
+      messageController.selection = TextSelection.collapsed(offset: newOffset);
+    } else {
+      final String before = text.substring(0, cursorPosition);
+      final String after = text.substring(cursorPosition);
+      final String newText = '$before$replacement$after';
+      messageController.text = newText;
+      messageController.selection = TextSelection.collapsed(offset: (before + replacement).length);
+    }
+
+    messageInputFocusNode.requestFocus();
   }
 
   Future<void> _handleTextChanged() async {

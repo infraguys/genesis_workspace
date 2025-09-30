@@ -66,6 +66,7 @@ class TranslationsRu extends Translations {
 	@override String get dropFilesToUpload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancelEditing => 'Отменить редактирование';
 	@override late final TranslationsFoldersRu folders = TranslationsFoldersRu._(_root);
+	@override String get nothingFound => 'Ничего не нашли';
 }
 
 // Path: auth
