@@ -200,8 +200,17 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     String? topicName,
     bool? didUpdateWidget,
     int? unreadMessagesCount,
+    int? myUserId,
   }) async {
-    emit(state.copyWith(channel: null, topic: null, messages: [], channelMembers: {}));
+    emit(
+      state.copyWith(
+        channel: null,
+        topic: null,
+        messages: [],
+        channelMembers: {},
+        myUserId: myUserId,
+      ),
+    );
     try {
       await Future.wait([
         getChannel(streamId: streamId),

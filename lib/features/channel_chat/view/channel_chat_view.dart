@@ -5,11 +5,13 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
+import 'package:genesis_workspace/core/utils/message_input_intents/mention_navigation_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
@@ -18,6 +20,7 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
@@ -27,17 +30,6 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
-
-class _MentionNavIntent extends Intent {
-  const _MentionNavIntent._(this.direction);
-  const _MentionNavIntent.down() : this._(TraversalDirection.down);
-  const _MentionNavIntent.up() : this._(TraversalDirection.up);
-  final TraversalDirection direction;
-}
-
-class _MentionSelectIntent extends Intent {
-  const _MentionSelectIntent();
-}
 
 class ChannelChatView extends StatefulWidget {
   final int channelId;
@@ -71,6 +63,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
       streamId: widget.channelId,
       topicName: widget.topicName,
       unreadMessagesCount: widget.unreadMessagesCount,
+      myUserId: _myUser.userId,
     );
     messageController = TextEditingController();
     messageController
@@ -394,17 +387,50 @@ class _ChannelChatViewState extends State<ChannelChatView>
                           child: Shortcuts(
                             shortcuts: state.showMentionPopup
                                 ? <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowDown): const _MentionNavIntent.down(),
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const _MentionNavIntent.up(),
-                                    LogicalKeySet(LogicalKeyboardKey.enter): const _MentionSelectIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter): const _MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
+                                        const MentionNavIntent.down(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
+                                        const MentionNavIntent.up(),
+                                    LogicalKeySet(LogicalKeyboardKey.enter):
+                                        const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter):
+                                        const MentionSelectIntent(),
                                   }
-                                : const <ShortcutActivator, Intent>{},
+                                : <ShortcutActivator, Intent>{
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
+                                        const EditLastMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.escape):
+                                        const CancelEditMessageIntent(),
+                                  },
                             child: Actions(
                               actions: <Type, Action<Intent>>{
-                                _MentionNavIntent: CallbackAction<_MentionNavIntent>(
+                                CancelEditMessageIntent: CallbackAction<CancelEditMessageIntent>(
+                                  onInvoke: (_) {
+                                    print("esp");
+                                    if (isEditMode) {
+                                      onCancelEdit();
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                    final lastMessage = state.messages.lastWhere(
+                                      (message) => message.senderId == state.myUserId,
+                                    );
+                                    onTapEditMessage(
+                                      UpdateMessageRequestEntity(
+                                        messageId: lastMessage.id,
+                                        content: lastMessage.content,
+                                      ),
+                                    );
+                                    return null;
+                                  },
+                                ),
+                                MentionNavIntent: CallbackAction<MentionNavIntent>(
+                                  onInvoke: (intent) {
+                                    if (state.showMentionPopup &&
+                                        state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       if (intent.direction == TraversalDirection.down) {
                                         st?.moveNext();
@@ -415,9 +441,10 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     return null;
                                   },
                                 ),
-                                _MentionSelectIntent: CallbackAction<_MentionSelectIntent>(
+                                MentionSelectIntent: CallbackAction<MentionSelectIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup &&
+                                        state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                     }
@@ -432,7 +459,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   isMessagePending: state.isMessagePending,
                                   focusNode: messageInputFocusNode,
                                   onSubmitIntercept: () {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup &&
+                                        state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                       return true;
@@ -479,7 +507,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   onRemoveFile: context
                                       .read<ChannelChatCubit>()
                                       .removeUploadedFileCommon,
-                                  onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
+                                  onCancelUpload: context
+                                      .read<ChannelChatCubit>()
+                                      .cancelUploadCommon,
                                   files: inputState.uploadedFiles,
                                   onUploadImage: () async {
                                     await context.read<ChannelChatCubit>().uploadImagesCommon();

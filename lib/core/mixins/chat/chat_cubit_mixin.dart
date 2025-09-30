@@ -506,16 +506,17 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
           emit(copyWithCommon(suggestedMentions: response));
         }
 
-        if (query != null) {
+        if (query != null && query.isNotEmpty) {
           final lowerQuery = query.toLowerCase();
-          for (var user in users) {
-            if (user.fullName.toLowerCase().contains(lowerQuery) ||
-                user.email.toLowerCase().contains(lowerQuery)) {
-              filteredUsers.add(user);
-            }
-          }
+          filteredUsers = users
+              .where(
+                (user) =>
+                    user.fullName.toLowerCase().contains(lowerQuery) ||
+                    user.email.toLowerCase().contains(lowerQuery),
+              )
+              .toList();
         } else {
-          filteredUsers = users;
+          filteredUsers = users.toList();
         }
 
         filteredUsers.sort((a, b) {

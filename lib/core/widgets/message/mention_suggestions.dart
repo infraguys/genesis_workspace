@@ -38,7 +38,9 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
     if (widget.filteredSuggestedMentions.isEmpty) return;
     final int lastIndex = widget.filteredSuggestedMentions.length - 1;
     setState(() {
-      focusedMentionIndex = (focusedMentionIndex >= lastIndex) ? lastIndex : focusedMentionIndex + 1;
+      focusedMentionIndex = (focusedMentionIndex >= lastIndex)
+          ? lastIndex
+          : focusedMentionIndex + 1;
     });
     _scrollToFocused();
   }
@@ -81,8 +83,6 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
       }
     }
   }
-
-  // We intentionally avoid stealing focus from the input for better UX.
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (!widget.showPopup || widget.filteredSuggestedMentions.isEmpty) {
