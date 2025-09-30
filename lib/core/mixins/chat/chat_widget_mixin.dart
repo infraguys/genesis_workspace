@@ -47,7 +47,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     on State<TWidget> {
   late final TextEditingController messageController;
   final FocusNode messageInputFocusNode = FocusNode();
-  final FocusNode mentionFocusNode = FocusNode();
+  final FocusNode mentionFocusNode = FocusNode(debugLabel: 'MentionSuggestionsFocus');
   final PasteCaptureService pasteCaptureService = getIt<PasteCaptureService>();
 
   String currentText = '';
