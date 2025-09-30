@@ -102,6 +102,8 @@ import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_ca
     as _i837;
 import 'package:genesis_workspace/domain/users/usecases/get_channel_by_id_use_case.dart'
     as _i720;
+import 'package:genesis_workspace/domain/users/usecases/get_channel_members_use_case.dart'
+    as _i771;
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart'
     as _i547;
 import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart'
@@ -336,6 +338,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i771.GetChannelMembersUseCase>(
+      () => _i771.GetChannelMembersUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => coreModule.dio(
         gh<_i460.SharedPreferences>(),
@@ -395,20 +400,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i48.FolderRepository>(
       () => _i957.FolderRepositoryImpl(gh<_i277.FolderLocalDataSource>()),
     );
-    gh.factory<_i739.ChannelChatCubit>(
-      () => _i739.ChannelChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i720.GetChannelByIdUseCase>(),
-        gh<_i699.GetTopicsUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-        gh<_i1005.UpdateMessageUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-      ),
-    );
     gh.factory<_i852.DirectMessagesCubit>(
       () => _i852.DirectMessagesCubit(
         gh<_i82.RealTimeService>(),
@@ -449,6 +440,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i915.FolderMembershipRepository>(
       () => _i770.FolderMembershipRepositoryImpl(
         gh<_i180.FolderMembershipLocalDataSource>(),
+      ),
+    );
+    gh.factory<_i739.ChannelChatCubit>(
+      () => _i739.ChannelChatCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i720.GetChannelByIdUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+        gh<_i771.GetChannelMembersUseCase>(),
       ),
     );
     gh.factory<_i744.RemoveAllMembershipsForFolderUseCase>(

@@ -45,6 +45,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   List<UserEntity> getSuggestedMentions(S state);
   bool getIsSuggestionsPending(S state);
   List<UserEntity> getFilteredSuggestedMentions(S state);
+  Set<int> getChannelMembers(S state);
 
   S copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
@@ -492,7 +493,8 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     }
   }
 
-  Future<void> getMentionSuggestions({String? query, List<int>? chatMembers}) async {
+  Future<void> getMentionSuggestions({String? query}) async {
+    final chatMembers = getChannelMembers(state).toList();
     if (getShowMentionPopup(state)) {
       emit(copyWithCommon(isSuggestionsPending: true));
       List<UserEntity> users = getSuggestedMentions(state);
@@ -503,6 +505,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
           users = response;
           emit(copyWithCommon(suggestedMentions: response));
         }
+
         if (query != null) {
           final lowerQuery = query.toLowerCase();
           for (var user in users) {
@@ -514,6 +517,17 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
         } else {
           filteredUsers = users;
         }
+
+        filteredUsers.sort((a, b) {
+          final indexA = chatMembers.indexOf(a.userId);
+          final indexB = chatMembers.indexOf(b.userId);
+
+          if (indexA == -1 && indexB == -1) return 0;
+          if (indexA == -1) return 1;
+          if (indexB == -1) return -1;
+          return indexA.compareTo(indexB);
+        });
+
         emit(copyWithCommon(filteredSuggestedMentions: filteredUsers));
       } catch (e) {
         inspect(e);

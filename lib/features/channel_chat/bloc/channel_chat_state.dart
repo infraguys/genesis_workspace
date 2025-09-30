@@ -22,6 +22,7 @@ class ChannelChatState {
   List<UserEntity> suggestedMentions;
   bool isSuggestionsPending;
   List<UserEntity> filteredSuggestedMentions;
+  Set<int> channelMembers;
 
   ChannelChatState({
     required this.messages,
@@ -45,6 +46,7 @@ class ChannelChatState {
     required this.suggestedMentions,
     required this.isSuggestionsPending,
     required this.filteredSuggestedMentions,
+    required this.channelMembers,
   });
 
   ChannelChatState copyWith({
@@ -69,6 +71,7 @@ class ChannelChatState {
     List<UserEntity>? suggestedMentions,
     bool? isSuggestionsPending,
     List<UserEntity>? filteredSuggestedMentions,
+    Set<int>? channelMembers,
   }) {
     return ChannelChatState(
       messages: messages ?? this.messages,
@@ -92,6 +95,7 @@ class ChannelChatState {
       suggestedMentions: suggestedMentions ?? this.suggestedMentions,
       isSuggestionsPending: isSuggestionsPending ?? this.isSuggestionsPending,
       filteredSuggestedMentions: filteredSuggestedMentions ?? this.filteredSuggestedMentions,
+      channelMembers: channelMembers ?? this.channelMembers,
     );
   }
 }

@@ -157,6 +157,9 @@ class ChatCubit extends Cubit<ChatState>
   List<UserEntity> getFilteredSuggestedMentions(ChatState s) => s.filteredSuggestedMentions;
 
   @override
+  getChannelMembers(ChatState s) => s.chatId != null ? {s.chatId!} : {};
+
+  @override
   ChatState copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,

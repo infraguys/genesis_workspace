@@ -29,7 +29,7 @@ abstract class ChatCubitCapable {
     List<PlatformFile> droppedPlatformImages,
   });
   void setShowMentionPopup(bool value);
-  Future<void> getMentionSuggestions({String? query, List<int> chatMembers});
+  Future<void> getMentionSuggestions({String? query});
 }
 
 class ChatPasteAction extends Action<PasteTextIntent> {
@@ -47,6 +47,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     on State<TWidget> {
   late final TextEditingController messageController;
   final FocusNode messageInputFocusNode = FocusNode();
+  final FocusNode mentionFocusNode = FocusNode(debugLabel: 'MentionSuggestionsFocus');
   final PasteCaptureService pasteCaptureService = getIt<PasteCaptureService>();
 
   String currentText = '';
@@ -68,6 +69,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     messageController.removeListener(_handleTextChanged);
     messageController.dispose();
     messageInputFocusNode.dispose();
+    mentionFocusNode.dispose();
   }
 
   void onTextChanged() {

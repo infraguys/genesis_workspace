@@ -11,6 +11,7 @@ import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
+import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
@@ -253,18 +254,35 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   },
                                 ),
                               )
-                            : MessagesList(
-                                messages: state.messages,
-                                controller: _scrollController,
-                                showTopic: state.topic == null,
-                                isLoadingMore: state.isLoadingMore || state.isMessagesPending,
-                                onRead: (id) {
-                                  context.read<ChannelChatCubit>().scheduleMarkAsReadCommon(id);
-                                },
-                                loadMore: context.read<ChannelChatCubit>().loadMoreMessages,
-                                myUserId: _myUser.userId,
-                                onTapQuote: onTapQuote,
-                                onTapEditMessage: onTapEditMessage,
+                            : Stack(
+                                children: [
+                                  MessagesList(
+                                    messages: state.messages,
+                                    controller: _scrollController,
+                                    showTopic: state.topic == null,
+                                    isLoadingMore: state.isLoadingMore || state.isMessagesPending,
+                                    onRead: (id) {
+                                      context.read<ChannelChatCubit>().scheduleMarkAsReadCommon(id);
+                                    },
+                                    loadMore: context.read<ChannelChatCubit>().loadMoreMessages,
+                                    myUserId: _myUser.userId,
+                                    onTapQuote: onTapQuote,
+                                    onTapEditMessage: onTapEditMessage,
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 50,
+                                    child: MentionSuggestions(
+                                      mentionFocusNode: mentionFocusNode,
+                                      showPopup: state.showMentionPopup,
+                                      suggestedMentions: state.suggestedMentions,
+                                      isSuggestionsPending: state.isSuggestionsPending,
+                                      filteredSuggestedMentions: state.filteredSuggestedMentions,
+                                      onSelectMention: onMentionSelected,
+                                      inputFocusNode: messageInputFocusNode,
+                                    ),
+                                  ),
+                                ],
                               ),
                       ),
                     ),

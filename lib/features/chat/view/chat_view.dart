@@ -113,6 +113,7 @@ class _ChatViewState extends State<ChatView>
     messageController.dispose();
     messageInputFocusNode.dispose();
     removeWebDnD?.call();
+
     super.dispose();
   }
 
@@ -284,6 +285,7 @@ class _ChatViewState extends State<ChatView>
                                         bottom: 0,
                                         left: 50,
                                         child: MentionSuggestions(
+                                          mentionFocusNode: mentionFocusNode,
                                           showPopup: state.showMentionPopup,
                                           suggestedMentions: state.suggestedMentions,
                                           isSuggestionsPending: state.isSuggestionsPending,

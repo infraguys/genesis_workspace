@@ -106,4 +106,13 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<ChannelMembersResponseDto> getChannelMembers(ChannelMembersRequestDto body) async {
+    try {
+      return await apiClient.getChannelMembers(body.streamId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

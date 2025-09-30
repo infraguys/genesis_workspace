@@ -6,6 +6,7 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MentionSuggestions extends StatefulWidget {
   final FocusNode inputFocusNode;
+  final FocusNode mentionFocusNode;
   final bool showPopup;
   final List<UserEntity> suggestedMentions;
   final bool isSuggestionsPending;
@@ -20,6 +21,7 @@ class MentionSuggestions extends StatefulWidget {
     required this.isSuggestionsPending,
     required this.filteredSuggestedMentions,
     required this.onSelectMention,
+    required this.mentionFocusNode,
   });
 
   @override
@@ -27,7 +29,6 @@ class MentionSuggestions extends StatefulWidget {
 }
 
 class _MentionSuggestionsState extends State<MentionSuggestions> {
-  final FocusNode focusNode = FocusNode(debugLabel: 'MentionSuggestionsFocus');
   final ScrollController _scrollController = ScrollController();
 
   int focusedMentionIndex = 0;
@@ -60,9 +61,9 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
   }
 
   void _requestFocus() {
-    if (!focusNode.hasFocus) {
+    if (!widget.mentionFocusNode.hasFocus) {
       widget.inputFocusNode.unfocus();
-      focusNode.requestFocus();
+      widget.mentionFocusNode.requestFocus();
     }
   }
 
@@ -96,7 +97,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
       return KeyEventResult.handled;
     } else {
       widget.inputFocusNode.requestFocus();
-      return KeyEventResult.handled;
+      return KeyEventResult.ignored;
     }
     return KeyEventResult.ignored;
   }
@@ -130,7 +131,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
       child: IgnorePointer(
         ignoring: !widget.showPopup,
         child: Focus(
-          focusNode: focusNode,
+          focusNode: widget.mentionFocusNode,
           onKeyEvent: _onKey,
           child: Material(
             elevation: 8,
