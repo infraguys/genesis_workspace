@@ -406,7 +406,6 @@ class _ChannelChatViewState extends State<ChannelChatView>
                               actions: <Type, Action<Intent>>{
                                 CancelEditMessageIntent: CallbackAction<CancelEditMessageIntent>(
                                   onInvoke: (_) {
-                                    print("esp");
                                     if (isEditMode) {
                                       onCancelEdit();
                                     }
@@ -415,9 +414,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                 ),
                                 EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
                                   onInvoke: (intent) {
-                                    final lastMessage = state.messages.lastWhere(
+                                    final lastMessageIndex = state.messages.lastIndexWhere(
                                       (message) => message.senderId == state.myUserId,
                                     );
+                                    if (lastMessageIndex == -1) return null;
+
+                                    final lastMessage = state.messages[lastMessageIndex];
                                     onTapEditMessage(
                                       UpdateMessageRequestEntity(
                                         messageId: lastMessage.id,
