@@ -11,8 +11,11 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
+import 'package:genesis_workspace/core/utils/message_input_intents/mention_navigation_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
+import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
@@ -20,6 +23,7 @@ import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
@@ -29,17 +33,6 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
-
-class _MentionNavIntent extends Intent {
-  const _MentionNavIntent._(this.direction);
-  const _MentionNavIntent.down() : this._(TraversalDirection.down);
-  const _MentionNavIntent.up() : this._(TraversalDirection.up);
-  final TraversalDirection direction;
-}
-
-class _MentionSelectIntent extends Intent {
-  const _MentionSelectIntent();
-}
 
 class ChatView extends StatefulWidget {
   final int userId;
@@ -69,7 +62,7 @@ class _ChatViewState extends State<ChatView>
       unreadMessagesCount: widget.unreadMessagesCount,
     );
     _controller = ScrollController();
-    messageController = TextEditingController();
+    messageController = ChatTextEditingController();
 
     messageController
       ..addListener(onTextChanged)
@@ -402,17 +395,52 @@ class _ChatViewState extends State<ChatView>
                           child: Shortcuts(
                             shortcuts: state.showMentionPopup
                                 ? <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowDown): const _MentionNavIntent.down(),
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const _MentionNavIntent.up(),
-                                    LogicalKeySet(LogicalKeyboardKey.enter): const _MentionSelectIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter): const _MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
+                                        const MentionNavIntent.down(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
+                                        const MentionNavIntent.up(),
+                                    LogicalKeySet(LogicalKeyboardKey.enter):
+                                        const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter):
+                                        const MentionSelectIntent(),
                                   }
-                                : const <ShortcutActivator, Intent>{},
+                                : <ShortcutActivator, Intent>{
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
+                                        const EditLastMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.escape):
+                                        const CancelEditMessageIntent(),
+                                  },
                             child: Actions(
                               actions: <Type, Action<Intent>>{
-                                _MentionNavIntent: CallbackAction<_MentionNavIntent>(
+                                CancelEditMessageIntent: CallbackAction<CancelEditMessageIntent>(
+                                  onInvoke: (_) {
+                                    if (isEditMode) {
+                                      onCancelEdit();
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                    final lastMessageIndex = state.messages.lastIndexWhere(
+                                      (message) => message.senderId == state.myUserId,
+                                    );
+                                    if (lastMessageIndex == -1) return null;
+
+                                    final lastMessage = state.messages[lastMessageIndex];
+                                    onTapEditMessage(
+                                      UpdateMessageRequestEntity(
+                                        messageId: lastMessage.id,
+                                        content: lastMessage.content,
+                                      ),
+                                    );
+                                    return null;
+                                  },
+                                ),
+                                MentionNavIntent: CallbackAction<MentionNavIntent>(
+                                  onInvoke: (intent) {
+                                    if (state.showMentionPopup &&
+                                        state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       if (intent.direction == TraversalDirection.down) {
                                         st?.moveNext();
@@ -423,9 +451,10 @@ class _ChatViewState extends State<ChatView>
                                     return null;
                                   },
                                 ),
-                                _MentionSelectIntent: CallbackAction<_MentionSelectIntent>(
+                                MentionSelectIntent: CallbackAction<MentionSelectIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup &&
+                                        state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                     }
@@ -440,7 +469,8 @@ class _ChatViewState extends State<ChatView>
                                   isMessagePending: state.isMessagePending,
                                   focusNode: messageInputFocusNode,
                                   onSubmitIntercept: () {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup &&
+                                        state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                       return true;

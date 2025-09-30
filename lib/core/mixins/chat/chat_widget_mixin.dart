@@ -68,8 +68,8 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   void disposeChatInputEditMixin() {
     messageController.removeListener(_handleTextChanged);
     messageController.dispose();
-    messageInputFocusNode.dispose();
     mentionFocusNode.dispose();
+    messageInputFocusNode.dispose();
   }
 
   void onTextChanged() {
