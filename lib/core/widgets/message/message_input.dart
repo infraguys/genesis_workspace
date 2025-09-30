@@ -32,6 +32,8 @@ class MessageInput extends StatefulWidget {
   final bool isDropOver;
   final MessageEntity? editingMessage;
   final Function(EditingAttachment)? onRemoveEditingAttachment;
+  // If returns true, the submit is considered handled and default send/edit is skipped
+  final bool Function()? onSubmitIntercept;
 
   const MessageInput({
     super.key,
@@ -51,6 +53,7 @@ class MessageInput extends StatefulWidget {
     this.editingMessage,
     this.editingFiles,
     this.onRemoveEditingAttachment,
+    this.onSubmitIntercept,
   });
 
   @override
@@ -290,6 +293,13 @@ class _MessageInputState extends State<MessageInput> {
                             },
                             textInputAction: TextInputAction.send,
                             onSubmitted: (value) {
+                              // Allow caller to intercept Enter (e.g., when mention popup is open)
+                              if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
+                                if (platformInfo.isDesktop) {
+                                  widget.focusNode.requestFocus();
+                                }
+                                return;
+                              }
                               if (widget.isEdit) {
                                 if (widget.onEdit != null) {
                                   widget.onEdit!();

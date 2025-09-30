@@ -30,6 +30,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
+class _MentionNavIntent extends Intent {
+  const _MentionNavIntent._(this.direction);
+  const _MentionNavIntent.down() : this._(TraversalDirection.down);
+  const _MentionNavIntent.up() : this._(TraversalDirection.up);
+  final TraversalDirection direction;
+}
+
+class _MentionSelectIntent extends Intent {
+  const _MentionSelectIntent();
+}
+
 class ChatView extends StatefulWidget {
   final int userId;
   final int? unreadMessagesCount;
@@ -45,6 +56,7 @@ class _ChatViewState extends State<ChatView>
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
+  final GlobalKey _mentionKey = GlobalKey();
 
   @override
   void initState() {
@@ -285,6 +297,7 @@ class _ChatViewState extends State<ChatView>
                                         bottom: 0,
                                         left: 50,
                                         child: MentionSuggestions(
+                                          key: _mentionKey,
                                           mentionFocusNode: mentionFocusNode,
                                           showPopup: state.showMentionPopup,
                                           suggestedMentions: state.suggestedMentions,
@@ -386,66 +399,110 @@ class _ChatViewState extends State<ChatView>
                               },
                             ),
                           },
-                          child: Container(
-                            key: dropAreaKey,
-                            child: MessageInput(
-                              controller: messageController,
-                              isMessagePending: state.isMessagePending,
-                              focusNode: messageInputFocusNode,
-                              onSend: isSendEnabled
-                                  ? () async {
-                                      final content = messageController.text;
-                                      messageController.clear();
-                                      try {
-                                        await context.read<ChatCubit>().sendMessage(
-                                          chatId: state.userEntity!.userId,
-                                          content: content,
-                                        );
-                                      } catch (e) {
-                                        inspect(e);
-                                      } finally {
-                                        if (platformInfo.isDesktop) {
-                                          messageInputFocusNode.requestFocus();
-                                        }
+                          child: Shortcuts(
+                            shortcuts: state.showMentionPopup
+                                ? <ShortcutActivator, Intent>{
+                                    LogicalKeySet(LogicalKeyboardKey.arrowDown): const _MentionNavIntent.down(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const _MentionNavIntent.up(),
+                                    LogicalKeySet(LogicalKeyboardKey.enter): const _MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter): const _MentionSelectIntent(),
+                                  }
+                                : const <ShortcutActivator, Intent>{},
+                            child: Actions(
+                              actions: <Type, Action<Intent>>{
+                                _MentionNavIntent: CallbackAction<_MentionNavIntent>(
+                                  onInvoke: (intent) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                      final st = _mentionKey.currentState as dynamic?;
+                                      if (intent.direction == TraversalDirection.down) {
+                                        st?.moveNext();
+                                      } else {
+                                        st?.movePrevious();
                                       }
                                     }
-                                  : null,
-                              onEdit: isEditEnabled
-                                  ? () async {
-                                      try {
-                                        await submitEdit();
-                                      } on DioException catch (e) {
-                                        showErrorSnackBar(context, exception: e);
-                                      } finally {
-                                        if (platformInfo.isDesktop) {
-                                          messageInputFocusNode.requestFocus();
-                                        }
-                                      }
+                                    return null;
+                                  },
+                                ),
+                                _MentionSelectIntent: CallbackAction<_MentionSelectIntent>(
+                                  onInvoke: (intent) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                      final st = _mentionKey.currentState as dynamic?;
+                                      st?.selectFocused();
                                     }
-                                  : null,
-                              onUploadFile: () async {
-                                await context.read<ChatCubit>().uploadFilesCommon();
-                                if (platformInfo.isDesktop) {
-                                  messageInputFocusNode.requestFocus();
-                                }
+                                    return null;
+                                  },
+                                ),
                               },
-                              onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
-                              onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
-                              files: inputState.uploadedFiles,
-                              onUploadImage: () async {
-                                await context.read<ChatCubit>().uploadImagesCommon();
-                                if (platformInfo.isDesktop) {
-                                  messageInputFocusNode.requestFocus();
-                                }
-                              },
-                              isDropOver: isDropOver,
-                              onCancelEdit: onCancelEdit,
-                              isEdit: isEditMode,
-                              editingMessage: editingMessage,
-                              editingFiles: state.editingAttachments,
-                              onRemoveEditingAttachment: (attachment) {
-                                context.read<ChatCubit>().removeEditingAttachment(attachment);
-                              },
+                              child: Container(
+                                key: dropAreaKey,
+                                child: MessageInput(
+                                  controller: messageController,
+                                  isMessagePending: state.isMessagePending,
+                                  focusNode: messageInputFocusNode,
+                                  onSubmitIntercept: () {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                      final st = _mentionKey.currentState as dynamic?;
+                                      st?.selectFocused();
+                                      return true;
+                                    }
+                                    return false;
+                                  },
+                                  onSend: isSendEnabled
+                                      ? () async {
+                                          final content = messageController.text;
+                                          messageController.clear();
+                                          try {
+                                            await context.read<ChatCubit>().sendMessage(
+                                              chatId: state.userEntity!.userId,
+                                              content: content,
+                                            );
+                                          } catch (e) {
+                                            inspect(e);
+                                          } finally {
+                                            if (platformInfo.isDesktop) {
+                                              messageInputFocusNode.requestFocus();
+                                            }
+                                          }
+                                        }
+                                      : null,
+                                  onEdit: isEditEnabled
+                                      ? () async {
+                                          try {
+                                            await submitEdit();
+                                          } on DioException catch (e) {
+                                            showErrorSnackBar(context, exception: e);
+                                          } finally {
+                                            if (platformInfo.isDesktop) {
+                                              messageInputFocusNode.requestFocus();
+                                            }
+                                          }
+                                        }
+                                      : null,
+                                  onUploadFile: () async {
+                                    await context.read<ChatCubit>().uploadFilesCommon();
+                                    if (platformInfo.isDesktop) {
+                                      messageInputFocusNode.requestFocus();
+                                    }
+                                  },
+                                  onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
+                                  onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
+                                  files: inputState.uploadedFiles,
+                                  onUploadImage: () async {
+                                    await context.read<ChatCubit>().uploadImagesCommon();
+                                    if (platformInfo.isDesktop) {
+                                      messageInputFocusNode.requestFocus();
+                                    }
+                                  },
+                                  isDropOver: isDropOver,
+                                  onCancelEdit: onCancelEdit,
+                                  isEdit: isEditMode,
+                                  editingMessage: editingMessage,
+                                  editingFiles: state.editingAttachments,
+                                  onRemoveEditingAttachment: (attachment) {
+                                    context.read<ChatCubit>().removeEditingAttachment(attachment);
+                                  },
+                                ),
+                              ),
                             ),
                           ),
                         );

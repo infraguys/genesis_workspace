@@ -33,6 +33,28 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
 
   int focusedMentionIndex = 0;
 
+  // Public helpers to control selection from parent via GlobalKey
+  void moveNext() {
+    if (widget.filteredSuggestedMentions.isEmpty) return;
+    final int lastIndex = widget.filteredSuggestedMentions.length - 1;
+    setState(() {
+      focusedMentionIndex = (focusedMentionIndex >= lastIndex) ? lastIndex : focusedMentionIndex + 1;
+    });
+    _scrollToFocused();
+  }
+
+  void movePrevious() {
+    if (widget.filteredSuggestedMentions.isEmpty) return;
+    setState(() {
+      focusedMentionIndex = (focusedMentionIndex <= 0) ? 0 : focusedMentionIndex - 1;
+    });
+    _scrollToFocused();
+  }
+
+  void selectFocused() {
+    selectMention(focusedMentionIndex);
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -44,8 +66,8 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
     super.didUpdateWidget(oldWidget);
 
     if (!oldWidget.showPopup && widget.showPopup) {
+      // Reset selection when the popup is shown, but do not steal focus
       focusedMentionIndex = 0;
-      _requestFocus();
     }
 
     if (oldWidget.filteredSuggestedMentions.length != widget.filteredSuggestedMentions.length) {
@@ -60,12 +82,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
     }
   }
 
-  void _requestFocus() {
-    if (!widget.mentionFocusNode.hasFocus) {
-      widget.inputFocusNode.unfocus();
-      widget.mentionFocusNode.requestFocus();
-    }
-  }
+  // We intentionally avoid stealing focus from the input for better UX.
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (!widget.showPopup || widget.filteredSuggestedMentions.isEmpty) {
@@ -95,9 +112,6 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
         event.logicalKey == LogicalKeyboardKey.numpadEnter) {
       selectMention(focusedMentionIndex);
       return KeyEventResult.handled;
-    } else {
-      widget.inputFocusNode.requestFocus();
-      return KeyEventResult.ignored;
     }
     return KeyEventResult.ignored;
   }
@@ -132,6 +146,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
         ignoring: !widget.showPopup,
         child: Focus(
           focusNode: widget.mentionFocusNode,
+          canRequestFocus: false,
           onKeyEvent: _onKey,
           child: Material(
             elevation: 8,
