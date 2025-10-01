@@ -2,6 +2,7 @@ import 'package:genesis_workspace/data/users/datasources/users_remote_data_sourc
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/channel_members_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
@@ -116,6 +117,16 @@ class UsersRepositoryImpl implements UsersRepository {
   Future<ChannelByIdResponseEntity> getChannelById(ChannelByIdRequestEntity body) async {
     try {
       final response = await usersRemoteDataSource.getChannelById(body.toDto());
+      return response.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ChannelMembersResponseEntity> getChannelMembers(ChannelMembersRequestEntity body) async {
+    try {
+      final response = await usersRemoteDataSource.getChannelMembers(body.toDto());
       return response.toEntity();
     } catch (e) {
       rethrow;

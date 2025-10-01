@@ -30,6 +30,7 @@
   "typing": "Typing",
   "online": "Online",
   "nav_bar": {
+    "all_chats": "All chats",
     "direct_messages": "Direct Messages",
     "settings": "Settings",
     "menu": "Menu",
@@ -106,5 +107,25 @@
     "image": "Pick an image"
   },
   "drop_files_to_upload": "Drop files here to upload",
-  "cancel_editing": "Cancel editing"
+  "cancel_editing": "Cancel editing",
+  "folders": {
+    "all": "All",
+    "title": "Folders",
+    "newFolderTitle": "New folder",
+    "nameLabel": "Folder name",
+    "colorLabel": "Folder color",
+    "iconLabel": "Icon",
+    "preview": "Preview",
+    "create": "Create",
+    "cancel": "Cancel",
+    "addToFolder": "Add to folder",
+    "selectFolders": "Select folders",
+    "save": "Save",
+    "edit": "Edit folder",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete folder?",
+    "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?",
+    "folder_is_empty": "Folder is empty"
+  },
+  "nothing_found": "Nothing found"
 }

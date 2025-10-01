@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 
-ImageProvider? createAttachmentImageProvider(String path) => null;
+ImageProvider? createAttachmentImageProvider({Uint8List? bytes, String? path}) => null;

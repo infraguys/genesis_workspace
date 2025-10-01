@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
+import 'package:genesis_workspace/features/all_chats/all_chats.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/authentication/presentation/view/paste_code_view.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -26,6 +27,7 @@ import '../features/authentication/presentation/auth.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorDMKey = GlobalKey<NavigatorState>(debugLabel: 'shellDM');
 final shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');
+final _shellNavigatorAllChatsKey = GlobalKey<NavigatorState>(debugLabel: 'shellAllChats');
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
 final _shellNavigatorMenuKey = GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
@@ -33,6 +35,7 @@ class Routes {
   static const String splashScreen = '/';
   static const String auth = '/auth';
   static const String pasteToken = '/paste-token';
+  static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
   static const String channels = '/channels';
   static const String settings = '/settings';
@@ -57,6 +60,24 @@ final router = GoRouter(
         return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
       },
       branches: [
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorAllChatsKey,
+          routes: [
+            GoRoute(
+              path: Routes.allChats,
+              name: Routes.allChats,
+              redirect: (BuildContext context, GoRouterState state) {
+                if (!context.read<AuthCubit>().state.isAuthorized) {
+                  return Routes.auth;
+                }
+                return null;
+              },
+              builder: (context, state) {
+                return AllChats();
+              },
+            ),
+          ],
+        ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorDMKey,
           routes: [
@@ -103,7 +124,7 @@ final router = GoRouter(
             if (kIsWeb) ...[
               GoRoute(
                 path: '${Routes.channels}/:channelId',
-                name: Routes.channelChat,
+                name: 'allChatsChannelChat',
                 pageBuilder: (context, state) {
                   final channelIdString = state.pathParameters['channelId'];
                   final channelId = int.tryParse(channelIdString ?? '');
@@ -128,7 +149,7 @@ final router = GoRouter(
               ),
               GoRoute(
                 path: '${Routes.channels}/:channelId/:topicName',
-                name: Routes.channelChatTopic,
+                name: 'allChatsChannelChatTopic',
                 pageBuilder: (context, state) {
                   final channelIdString = state.pathParameters['channelId'];
                   final topicName = state.pathParameters['topicName'];
@@ -286,7 +307,7 @@ final router = GoRouter(
       name: Routes.auth,
       redirect: (BuildContext context, GoRouterState state) {
         if (context.read<AuthCubit>().state.isAuthorized) {
-          return Routes.directMessages;
+          return Routes.allChats;
         }
         return null;
       },

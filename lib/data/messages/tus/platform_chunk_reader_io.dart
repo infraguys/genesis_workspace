@@ -5,7 +5,29 @@ import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
 
 import 'platform_chunk_reader_stub.dart';
 
-export 'platform_chunk_reader_stub.dart'; // 👈 реэкспорт интерфейса
+class _MemoryChunkReader implements PlatformChunkReader {
+  final Uint8List data;
+  _MemoryChunkReader(this.data);
+
+  @override
+  Future<void> open() async {}
+
+  @override
+  Future<int> length() async => data.length;
+
+  @override
+  Future<Uint8List> read(int offset, int count) async {
+    final int end = (offset + count) > data.length ? data.length : (offset + count);
+    if (offset < 0 || offset >= data.length || offset >= end) {
+      return Uint8List(0);
+    }
+    // sublistView не копирует данные
+    return Uint8List.sublistView(data, offset, end);
+  }
+
+  @override
+  Future<void> close() async {}
+}
 
 class _IoChunkReader implements PlatformChunkReader {
   final String path;
@@ -18,12 +40,15 @@ class _IoChunkReader implements PlatformChunkReader {
   }
 
   @override
-  Future<int> length() async => File(path).length();
+  Future<int> length() async {
+    final RandomAccessFile raf = _raf ??= await File(path).open();
+    return await raf.length();
+  }
 
   @override
   Future<Uint8List> read(int offset, int count) async {
     final RandomAccessFile raf = _raf!;
-    raf.setPositionSync(offset);
+    await raf.setPosition(offset);
     final List<int> bytes = await raf.read(count);
     return Uint8List.fromList(bytes);
   }
@@ -36,9 +61,15 @@ class _IoChunkReader implements PlatformChunkReader {
 }
 
 PlatformChunkReader createPlatformChunkReader(UploadFileRequestDto body) {
-  final String? path = body.file.path;
-  if (path == null || path.isEmpty) {
-    throw StateError('IO reader requires a valid file path');
+  final Uint8List? bytes = body.file.bytes;
+  if (bytes != null && bytes.isNotEmpty) {
+    return _MemoryChunkReader(bytes);
   }
-  return _IoChunkReader(path);
+
+  final String? filePath = body.file.path;
+  if (filePath != null && filePath.isNotEmpty) {
+    return _IoChunkReader(filePath);
+  }
+
+  throw StateError('PlatformChunkReader: neither bytes nor path provided');
 }

@@ -81,7 +81,6 @@ class ChannelsCubit extends Cubit<ChannelsState> {
             .map((message) => message.id)
             .toSet();
       }
-      state.channels = channels;
       emit(state.copyWith(unreadMessages: unreadMessages, channels: channels));
     } catch (e) {
       inspect(e);
@@ -152,9 +151,9 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     emit(state.copyWith(pendingTopicsId: state.pendingTopicsId));
     try {
       final response = await _getTopicsUseCase.call(streamId);
-      state.pendingTopicsId = null;
-      final indexOfChannel = state.channels.indexWhere((element) => element.streamId == streamId);
-      final channel = state.channels[indexOfChannel];
+      final updatedChannels = [...state.channels];
+      final indexOfChannel = updatedChannels.indexWhere((element) => element.streamId == streamId);
+      final channel = updatedChannels[indexOfChannel];
 
       channel.topics = response;
       for (var message in state.unreadMessages) {
@@ -165,9 +164,12 @@ class ChannelsCubit extends Cubit<ChannelsState> {
           topic?.unreadMessages.add(message.id);
         }
       }
-      emit(state.copyWith(pendingTopicsId: state.pendingTopicsId, channels: state.channels));
+      emit(state.copyWith(channels: updatedChannels));
     } catch (e) {
       inspect(e);
+    } finally {
+      state.pendingTopicsId = null;
+      emit(state.copyWith(pendingTopicsId: state.pendingTopicsId));
     }
   }
 
@@ -179,12 +181,14 @@ class ChannelsCubit extends Cubit<ChannelsState> {
         channel.unreadMessages.add(message.id);
       }
     }
-    state.channels = channels;
-    emit(state.copyWith(channels: state.channels));
+    emit(state.copyWith(channels: channels));
   }
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
+    if (message.senderId == state.selfUser!.userId) {
+      return;
+    }
     final channels = [...state.channels];
     final unreadMessages = [...state.unreadMessages];
     if (message.type == MessageType.stream && message.hasUnreadMessages) {
@@ -209,7 +213,8 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     final unreadMessages = [...state.unreadMessages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       unreadMessages.removeWhere((message) => event.messages.contains(message.id));
-      final channels = state.channels.map((channel) {
+      final channels = [...state.channels];
+      channels.map((channel) {
         channel.unreadMessages.removeAll(event.messages);
         for (var topic in channel.topics) {
           topic.unreadMessages.removeAll(event.messages);

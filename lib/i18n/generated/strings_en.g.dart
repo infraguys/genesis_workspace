@@ -114,6 +114,11 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Cancel editing'
 	String get cancelEditing => 'Cancel editing';
+
+	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
+
+	/// en: 'Nothing found'
+	String get nothingFound => 'Nothing found';
 }
 
 // Path: auth
@@ -198,6 +203,9 @@ class TranslationsNavBarEn {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'All chats'
+	String get allChats => 'All chats';
 
 	/// en: 'Direct Messages'
 	String get directMessages => 'Direct Messages';
@@ -390,4 +398,64 @@ class TranslationsAttachmentButtonEn {
 
 	/// en: 'Pick an image'
 	String get image => 'Pick an image';
+}
+
+// Path: folders
+class TranslationsFoldersEn {
+	TranslationsFoldersEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'All'
+	String get all => 'All';
+
+	/// en: 'Folders'
+	String get title => 'Folders';
+
+	/// en: 'New folder'
+	String get newFolderTitle => 'New folder';
+
+	/// en: 'Folder name'
+	String get nameLabel => 'Folder name';
+
+	/// en: 'Folder color'
+	String get colorLabel => 'Folder color';
+
+	/// en: 'Icon'
+	String get iconLabel => 'Icon';
+
+	/// en: 'Preview'
+	String get preview => 'Preview';
+
+	/// en: 'Create'
+	String get create => 'Create';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
+
+	/// en: 'Add to folder'
+	String get addToFolder => 'Add to folder';
+
+	/// en: 'Select folders'
+	String get selectFolders => 'Select folders';
+
+	/// en: 'Save'
+	String get save => 'Save';
+
+	/// en: 'Edit folder'
+	String get edit => 'Edit folder';
+
+	/// en: 'Delete'
+	String get delete => 'Delete';
+
+	/// en: 'Delete folder?'
+	String get deleteConfirmTitle => 'Delete folder?';
+
+	/// en: 'Are you sure you want to delete "{folderName}"?'
+	String deleteConfirmText({required Object folderName}) => 'Are you sure you want to delete "${folderName}"?';
+
+	/// en: 'Folder is empty'
+	String get folderIsEmpty => 'Folder is empty';
 }

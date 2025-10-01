@@ -12,6 +12,7 @@ targets:
           - lib/features/**/bloc/**.dart
           - lib/services/real_time/**.dart
           - lib/services/localization/localization_service.dart
+          - lib/services/paste/paste_capture_service.dart
           - lib/data/**/datasources/**.dart
           - lib/data/**/repositories_impl/**.dart
           - lib/data/**/dao/**.dart

@@ -24,11 +24,15 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/channel_members_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/stream_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_channel_by_id_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_channel_members_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
@@ -49,6 +53,8 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     this._getTopicsUseCase,
     this._uploadFileUseCase,
     this._updateMessageUseCase,
+    this._getUsersUseCase,
+    this._getChannelMembersUseCase,
   ) : super(
         ChannelChatState(
           messages: [],
@@ -68,6 +74,11 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           uploadFileError: null,
           editingAttachments: [],
           isEdited: false,
+          showMentionPopup: false,
+          suggestedMentions: [],
+          isSuggestionsPending: false,
+          filteredSuggestedMentions: [],
+          channelMembers: {},
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -95,6 +106,8 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   final GetTopicsUseCase _getTopicsUseCase;
   final UploadFileUseCase _uploadFileUseCase;
   final UpdateMessageUseCase _updateMessageUseCase;
+  final GetUsersUseCase _getUsersUseCase;
+  final GetChannelMembersUseCase _getChannelMembersUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -113,6 +126,9 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   @override
   UpdateMessageUseCase get updateMessageUseCase => _updateMessageUseCase;
+
+  @override
+  GetUsersUseCase get getUsersUseCase => _getUsersUseCase;
 
   @override
   List<UploadFileEntity> getUploadedFiles(ChannelChatState s) => s.uploadedFiles;
@@ -136,6 +152,21 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   List<EditingAttachment> getEditingAttachments(ChannelChatState s) => s.editingAttachments;
 
   @override
+  getShowMentionPopup(ChannelChatState s) => s.showMentionPopup;
+
+  @override
+  getSuggestedMentions(ChannelChatState s) => s.suggestedMentions;
+
+  @override
+  getIsSuggestionsPending(ChannelChatState s) => s.isSuggestionsPending;
+
+  @override
+  getFilteredSuggestedMentions(ChannelChatState s) => s.filteredSuggestedMentions;
+
+  @override
+  getChannelMembers(ChannelChatState s) => s.channelMembers;
+
+  @override
   ChannelChatState copyWithCommon({
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,
@@ -144,6 +175,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     List<MessageEntity>? messages,
     List<EditingAttachment>? editingAttachments,
     bool? isEdited,
+    bool? showMentionPopup,
+    List<UserEntity>? suggestedMentions,
+    bool? isSuggestionsPending,
+    List<UserEntity>? filteredSuggestedMentions,
   }) {
     return state.copyWith(
       uploadedFiles: uploadedFiles ?? state.uploadedFiles,
@@ -153,6 +188,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
       messages: messages ?? state.messages,
       editingAttachments: editingAttachments ?? state.editingAttachments,
       isEdited: isEdited ?? state.isEdited,
+      showMentionPopup: showMentionPopup ?? state.showMentionPopup,
+      suggestedMentions: suggestedMentions ?? state.suggestedMentions,
+      isSuggestionsPending: isSuggestionsPending ?? state.isSuggestionsPending,
+      filteredSuggestedMentions: filteredSuggestedMentions ?? state.filteredSuggestedMentions,
     );
   }
 
@@ -161,8 +200,17 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     String? topicName,
     bool? didUpdateWidget,
     int? unreadMessagesCount,
+    int? myUserId,
   }) async {
-    emit(state.copyWith(channel: null, topic: null, messages: []));
+    emit(
+      state.copyWith(
+        channel: null,
+        topic: null,
+        messages: [],
+        channelMembers: {},
+        myUserId: myUserId,
+      ),
+    );
     try {
       await Future.wait([
         getChannel(streamId: streamId),
@@ -183,7 +231,15 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         ChannelByIdRequestEntity(streamId: streamId),
       );
       final channel = response.stream;
-      emit(state.copyWith(channel: channel));
+      final channelMembersResponse = await _getChannelMembersUseCase.call(
+        ChannelMembersRequestEntity(streamId: channel.streamId),
+      );
+      emit(
+        state.copyWith(
+          channel: channel,
+          channelMembers: channelMembersResponse.subscribers.toSet(),
+        ),
+      );
     } catch (e) {
       inspect(e);
     }
@@ -222,11 +278,17 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           numAfter: 0,
         ),
       );
+      final Set<int> channelMembers = {...state.channelMembers};
+      final sortedChannelMembers = _sortChannelMembersByRecentMessages(
+        channelMembers: channelMembers,
+        recentSenderIds: response.messages.reversed.map((message) => message.senderId).toList(),
+      );
       emit(
         state.copyWith(
           messages: response.messages,
           isAllMessagesLoaded: response.foundOldest,
           lastMessageId: response.messages.first.id,
+          channelMembers: sortedChannelMembers,
         ),
       );
     } catch (e) {
@@ -254,11 +316,12 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;
         state.isAllMessagesLoaded = response.foundOldest;
-        state.messages = [...response.messages, ...state.messages];
+        List<MessageEntity> messages = [...state.messages];
+        messages = [...response.messages, ...messages];
         state.isLoadingMore = false;
         emit(
           state.copyWith(
-            messages: state.messages,
+            messages: messages,
             isLoadingMore: state.isLoadingMore,
             isAllMessagesLoaded: state.isAllMessagesLoaded,
           ),
@@ -289,6 +352,29 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     } finally {
       emit(state.copyWith(isMessagePending: false));
     }
+  }
+
+  Set<int> _sortChannelMembersByRecentMessages({
+    required Set<int> channelMembers,
+    required List<int> recentSenderIds,
+  }) {
+    final List<int> sortedMembers = [];
+
+    final Set<int> seen = {};
+    for (final senderId in recentSenderIds) {
+      if (channelMembers.contains(senderId) && !seen.contains(senderId)) {
+        sortedMembers.add(senderId);
+        seen.add(senderId);
+      }
+    }
+
+    for (final memberId in channelMembers) {
+      if (!seen.contains(memberId)) {
+        sortedMembers.add(memberId);
+      }
+    }
+
+    return sortedMembers.toSet();
   }
 
   @override

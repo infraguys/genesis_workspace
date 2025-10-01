@@ -29,6 +29,7 @@
   "typing": "Печатает",
   "online": "В сети",
   "nav_bar": {
+    "all_chats": "Все чаты",
     "direct_messages": "Личные сообщения",
     "settings": "Настройки",
     "menu": "Меню",
@@ -111,5 +112,25 @@
     "image": "Выбрать изображение"
   },
   "drop_files_to_upload": "Отпустите файлы, чтобы загрузить",
-  "cancel_editing": "Отменить редактирование"
+  "cancel_editing": "Отменить редактирование",
+  "folders": {
+    "all": "Все",
+    "title": "Папки",
+    "newFolderTitle": "Новая папка",
+    "nameLabel": "Название папки",
+    "colorLabel": "Цвет папки",
+    "iconLabel": "Иконка",
+    "preview": "Предпросмотр",
+    "create": "Создать",
+    "cancel": "Отмена",
+    "addToFolder": "Добавить в папку",
+    "selectFolders": "Выберите папки",
+    "save": "Сохранить",
+    "edit": "Редактировать папку",
+    "delete": "Удалить",
+    "deleteConfirmTitle": "Удалить папку?",
+    "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
+   "folder_is_empty": "Папка пустая"
+  },
+  "nothing_found": "Ничего не нашли"
 }

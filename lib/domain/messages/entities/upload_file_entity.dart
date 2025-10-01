@@ -69,7 +69,7 @@ sealed class UploadFileEntity {
   final String filename;
   final int size;
   final UploadFileType type;
-  final String path;
+  final String? path;
   final Uint8List bytes;
 
   const UploadFileEntity({
@@ -77,7 +77,7 @@ sealed class UploadFileEntity {
     required this.filename,
     required this.size,
     required this.type,
-    required this.path,
+    this.path,
     required this.bytes,
   });
 }
@@ -91,7 +91,7 @@ class UploadedFileEntity extends UploadFileEntity {
     required super.filename,
     required super.type,
     required super.size,
-    required super.path,
+    super.path,
     required super.bytes,
     required this.url,
     this.uri,
