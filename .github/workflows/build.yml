@@ -36,7 +36,9 @@ jobs:
     strategy:
       fail-fast: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 30
       - name: Build Genesis Workspace Android & Web
         env:
             DEV_KEYS: ${{ secrets.DEV_KEYS }}
