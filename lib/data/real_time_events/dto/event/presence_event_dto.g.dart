@@ -35,5 +35,6 @@ const _$EventTypeEnumMap = {
   EventType.reaction: 'reaction',
   EventType.deleteMessage: 'delete_message',
   EventType.updateMessage: 'update_message',
+  EventType.subscription: 'subscription',
   EventType.unsupported: 'unsupported',
 };

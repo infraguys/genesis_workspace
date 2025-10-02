@@ -9,6 +9,7 @@ import 'package:genesis_workspace/data/users/dto/presences_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/topics_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/update_presence_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_presence_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
@@ -54,6 +55,12 @@ abstract class UsersApiClient {
 
   @GET('/users/me/{stream_id}/topics')
   Future<TopicsResponseDto> getChannelTopics(@Path('stream_id') int streamId);
+
+  @FormUrlEncoded()
+  @POST('/users/me/subscriptions/properties')
+  Future<UpdateSubscriptionSettingsResponseDto> updateSubscriptionSettings(
+    @Field('subscription_data') String subscriptionData,
+  );
 
   @GET('/streams/{stream_id}/members')
   Future<ChannelMembersResponseDto> getChannelMembers(@Path('stream_id') int streamId);

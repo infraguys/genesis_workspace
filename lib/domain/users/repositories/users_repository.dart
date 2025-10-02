@@ -6,6 +6,7 @@ import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_response_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_presence_entity.dart';
 
@@ -21,4 +22,7 @@ abstract class UsersRepository {
   Future<UpdatePresenceResponseEntity> updatePresence(UpdatePresenceRequestEntity body);
   Future<ChannelByIdResponseEntity> getChannelById(ChannelByIdRequestEntity body);
   Future<ChannelMembersResponseEntity> getChannelMembers(ChannelMembersRequestEntity body);
+  Future<UpdateSubscriptionResponseEntity> updateSubscriptionSettings(
+    UpdateSubscriptionRequestEntity body,
+  );
 }

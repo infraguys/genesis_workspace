@@ -11,6 +11,8 @@ class SubscriptionDto {
   final int streamId;
   final String description;
   final String color;
+  @JsonKey(name: 'is_muted')
+  final bool isMuted;
 
   SubscriptionDto({
     required this.name,
@@ -18,6 +20,7 @@ class SubscriptionDto {
     required this.streamId,
     required this.description,
     required this.color,
+    required this.isMuted,
   });
 
   factory SubscriptionDto.fromJson(Map<String, dynamic> json) => _$SubscriptionDtoFromJson(json);
@@ -29,5 +32,6 @@ class SubscriptionDto {
     streamId: streamId,
     description: description,
     color: color,
+    isMuted: isMuted,
   );
 }

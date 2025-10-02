@@ -10,6 +10,7 @@ class FolderItemEntity {
   final int unreadCount;
   final Color? backgroundColor;
   final SystemFolderType? systemType;
+  // final FolderMembers? folderMembers;
 
   const FolderItemEntity({
     this.id,
@@ -18,7 +19,28 @@ class FolderItemEntity {
     this.unreadCount = 0,
     this.backgroundColor,
     this.systemType,
+    // this.folderMembers,
   });
+
+  FolderItemEntity copyWith({
+    int? id,
+    String? title,
+    IconData? iconData,
+    int? unreadCount,
+    Color? backgroundColor,
+    SystemFolderType? systemType,
+    // FolderMembers? folderMembers,
+  }) {
+    return FolderItemEntity(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      iconData: iconData ?? this.iconData,
+      unreadCount: unreadCount ?? this.unreadCount,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      systemType: systemType ?? this.systemType,
+      // folderMembers: folderMembers ?? this.folderMembers,
+    );
+  }
 }
 
 extension FolderItemPresentation on FolderItemEntity {

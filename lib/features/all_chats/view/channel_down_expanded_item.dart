@@ -7,6 +7,7 @@ import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
+import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -49,10 +50,11 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle channelTextStyle = Theme.of(context).textTheme.bodyLarge!;
-    final TextStyle topicTextStyle = Theme.of(
-      context,
-    ).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant);
+    final theme = Theme.of(context);
+    final TextStyle channelTextStyle = theme.textTheme.bodyLarge!;
+    final TextStyle topicTextStyle = theme.textTheme.bodyMedium!.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
 
     return GestureDetector(
       onSecondaryTap: () => popupKey.currentState?.show(),
@@ -74,28 +76,50 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
           ),
           child: Material(
             color: Colors.transparent,
-            child: ListTile(
-              leading: const Icon(Icons.folder_open),
-              title: Text(context.t.folders.addToFolder),
-              onTap: () async {
-                Navigator.of(context).pop();
-                await context.read<AllChatsCubit>().loadFolders();
-                if (context.mounted) {
-                  await showDialog(
-                    context: context,
-                    builder: (_) => SelectFoldersDialog(
-                      loadSelectedFolderIds: () => context
-                          .read<AllChatsCubit>()
-                          .getFolderIdsForChannel(widget.channel.streamId),
-                      onSave: (ids) => context.read<AllChatsCubit>().setFoldersForChannel(
-                        widget.channel.streamId,
-                        ids,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                widget.channel.isMuted
+                    ? ListTile(
+                        leading: const Icon(Icons.headset),
+                        title: Text(context.t.channel.unmuteChannel),
+                        onTap: () async {
+                          Navigator.of(context).pop();
+                          await context.read<ChannelsCubit>().unmuteChannel(widget.channel);
+                        },
+                      )
+                    : ListTile(
+                        leading: const Icon(Icons.headset_off),
+                        title: Text(context.t.channel.muteChannel),
+                        onTap: () async {
+                          Navigator.of(context).pop();
+                          await context.read<ChannelsCubit>().muteChannel(widget.channel);
+                        },
                       ),
-                      folders: context.read<AllChatsCubit>().state.folders,
-                    ),
-                  );
-                }
-              },
+                ListTile(
+                  leading: const Icon(Icons.folder_open),
+                  title: Text(context.t.folders.addToFolder),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await context.read<AllChatsCubit>().loadFolders();
+                    if (context.mounted) {
+                      await showDialog(
+                        context: context,
+                        builder: (_) => SelectFoldersDialog(
+                          loadSelectedFolderIds: () => context
+                              .read<AllChatsCubit>()
+                              .getFolderIdsForChannel(widget.channel.streamId),
+                          onSave: (ids) => context.read<AllChatsCubit>().setFoldersForChannel(
+                            widget.channel.streamId,
+                            ids,
+                          ),
+                          folders: context.read<AllChatsCubit>().state.folders,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
             ),
           ),
         ),
@@ -127,12 +151,26 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              '# ${widget.channel.name}',
-                              style: channelTextStyle,
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              spacing: 8,
+                              children: [
+                                Text(
+                                  '# ${widget.channel.name}',
+                                  style: channelTextStyle,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (widget.channel.isMuted)
+                                  Icon(
+                                    Icons.headset_off,
+                                    size: 12,
+                                    color: theme.colorScheme.outlineVariant,
+                                  ),
+                              ],
                             ),
-                            UnreadBadge(count: widget.channel.unreadMessages.length),
+                            UnreadBadge(
+                              count: widget.channel.unreadMessages.length,
+                              isMuted: widget.channel.isMuted,
+                            ),
                           ],
                         ),
                       ),

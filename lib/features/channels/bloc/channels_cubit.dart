@@ -4,20 +4,25 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/core/enums/subscription_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/subscription_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/update_subscription_settings_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
 
@@ -32,6 +37,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     this._getTopicsUseCase,
     this._getMessagesUseCase,
     this._getSubscribedChannelsUseCase,
+    this._updateSubscriptionSettingsUseCase,
   ) : super(
         ChannelsState(
           channels: [],
@@ -50,15 +56,20 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(
       _onDeleteMessageEvents,
     );
+    _subscriptionEventsSubscription = _realTimeService.subscriptionEventsStream.listen(
+      _onSubscriptionEvents,
+    );
   }
 
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
   final GetMessagesUseCase _getMessagesUseCase;
+  final UpdateSubscriptionSettingsUseCase _updateSubscriptionSettingsUseCase;
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsSubscription;
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
+  late final StreamSubscription<SubscriptionEventEntity> _subscriptionEventsSubscription;
 
   Future<void> getUnreadMessages() async {
     try {
@@ -122,7 +133,12 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   Future<void> getChannels({int? initialChannelId, String? initialTopicName}) async {
     try {
       final response = await _getSubscribedChannelsUseCase.call(true);
-      emit(state.copyWith(channels: response.map((e) => e.toChannelEntity()).toList()));
+      final channels = response.map((e) => e.toChannelEntity()).toList()
+        ..sort((a, b) {
+          if (a.isMuted == b.isMuted) return 0;
+          return a.isMuted ? 1 : -1;
+        });
+      emit(state.copyWith(channels: channels));
       if (initialChannelId != null) {
         emit(state.copyWith(selectedChannelId: initialChannelId));
         final indexOfChannel = state.channels.indexWhere(
@@ -184,9 +200,40 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     emit(state.copyWith(channels: channels));
   }
 
+  Future<void> muteChannel(ChannelEntity channel) async {
+    try {
+      final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
+        updates: [SubscriptionUpdateEntity(streamId: channel.streamId, isMuted: true)],
+      );
+      await _updateSubscriptionSettingsUseCase.call(body);
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> unmuteChannel(ChannelEntity channel) async {
+    try {
+      final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
+        updates: [SubscriptionUpdateEntity(streamId: channel.streamId, isMuted: false)],
+      );
+      await _updateSubscriptionSettingsUseCase.call(body);
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  _sortChannels() {
+    final channels = [...state.channels].map((e) => e.toChannelEntity()).toList()
+      ..sort((a, b) {
+        if (a.isMuted == b.isMuted) return 0;
+        return a.isMuted ? 1 : -1;
+      });
+    emit(state.copyWith(channels: channels));
+  }
+
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
-    if (message.senderId == state.selfUser!.userId) {
+    if (message.senderId == state.selfUser?.userId) {
       return;
     }
     final channels = [...state.channels];
@@ -238,11 +285,31 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     emit(state.copyWith(channels: updatedChannels));
   }
 
+  void _onSubscriptionEvents(SubscriptionEventEntity event) {
+    List<ChannelEntity> channels = [...state.channels];
+    ChannelEntity channel = channels.firstWhere(
+      (channel) => channel.streamId == event.streamId,
+      orElse: ChannelEntity.fake,
+    );
+    final int indexOfChannel = channels.indexOf(channel);
+    if (event.op == SubscriptionOp.update && event.property == SubscriptionProperty.isMuted) {
+      if (event.value.raw == true) {
+        channel = channel.copyWith(isMuted: true);
+      } else {
+        channel = channel.copyWith(isMuted: false);
+      }
+      channels[indexOfChannel] = channel;
+      emit(state.copyWith(channels: channels));
+      _sortChannels();
+    }
+  }
+
   @override
   Future<void> close() {
     _messagesEventsSubscription.cancel();
     _messageFlagsSubscription.cancel();
     _deleteMessageEventsSubscription.cancel();
+    _subscriptionEventsSubscription.cancel();
     return super.close();
   }
 }

@@ -44,13 +44,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
           selectedChannel: null,
           selectedDmChat: null,
           selectedTopic: null,
-          folders: [
-            FolderItemEntity(
-              systemType: SystemFolderType.all,
-              iconData: Icons.markunread,
-              unreadCount: 0,
-            ),
-          ],
+          folders: [],
           selectedFolderIndex: 0,
         ),
       );
@@ -58,7 +52,9 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<void> addFolder(FolderItemEntity folder) async {
     try {
       await _addFolderUseCase.call(folder);
-      await loadFolders();
+      final updatedFolders = [...state.folders];
+      updatedFolders.add(folder);
+      emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
       inspect(e);
     }
@@ -66,7 +62,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
 
   Future<void> loadFolders() async {
     final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call();
-    final List<FolderItemEntity> withSystem = [
+    final List<FolderItemEntity> initialFolders = [
       FolderItemEntity(
         systemType: SystemFolderType.all,
         iconData: Icons.markunread,
@@ -74,71 +70,131 @@ class AllChatsCubit extends Cubit<AllChatsState> {
       ),
       ...dbFolders,
     ];
-    final int currentIdx = state.selectedFolderIndex;
-    final int clampedIdx = currentIdx.clamp(0, withSystem.length - 1);
-    emit(state.copyWith(folders: withSystem, selectedFolderIndex: clampedIdx));
-    await _applyFolderFilter();
+    emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
+    // await _applyFolderFilter();
   }
 
   Future<void> updateFolder(FolderItemEntity folder) async {
     if (folder.systemType != null || folder.id == null) return;
+    final updatedFolders = [...state.folders];
+    final index = updatedFolders.indexWhere((element) => element.id == folder.id);
     await _updateFolderUseCase(folder);
-    await loadFolders();
+    updatedFolders[index] = folder;
+    emit(state.copyWith(folders: updatedFolders));
   }
 
   Future<void> deleteFolder(FolderItemEntity folder) async {
     if (folder.systemType != null || folder.id == null) return;
-    await _removeAllMembershipsForFolderUseCase(folder.id!);
-    await _deleteFolderUseCase(folder.id!);
-    await loadFolders();
+    final updatedFolders = [...state.folders];
+    final index = updatedFolders.indexWhere((element) => element.id == folder.id);
+    await _removeAllMembershipsForFolderUseCase.call(folder.id!);
+    await _deleteFolderUseCase.call(folder.id!);
+    updatedFolders.removeAt(index);
+    emit(state.copyWith(folders: updatedFolders));
   }
 
   Future<void> setFoldersForDm(int userId, List<int> folderIds) async {
-    await _setFoldersForTargetUseCase(FolderTarget.dm(userId), folderIds);
-    _applyFolderFilter();
+    await _setFoldersForTargetUseCase.call(FolderTarget.dm(userId), folderIds);
+    await _applyFolderFilter();
   }
 
   Future<void> setFoldersForChannel(int streamId, List<int> folderIds) async {
-    await _setFoldersForTargetUseCase(FolderTarget.channel(streamId), folderIds);
-    _applyFolderFilter();
+    await _setFoldersForTargetUseCase.call(FolderTarget.channel(streamId), folderIds);
+    await _applyFolderFilter();
   }
 
   Future<List<int>> getFolderIdsForDm(int userId) {
-    return _getFolderIdsForTargetUseCase(FolderTarget.dm(userId));
+    return _getFolderIdsForTargetUseCase.call(FolderTarget.dm(userId));
   }
 
   Future<List<int>> getFolderIdsForChannel(int streamId) {
-    return _getFolderIdsForTargetUseCase(FolderTarget.channel(streamId));
+    return _getFolderIdsForTargetUseCase.call(FolderTarget.channel(streamId));
   }
 
-  void selectDmChat(DmUserEntity? dmUserEntity) {
-    emit(state.copyWith(selectedDmChat: dmUserEntity, selectedTopic: null, selectedChannel: null));
-    _applyFolderFilter();
+  void selectDmChat(DmUserEntity? dmUserEntity) async {
+    state.selectedTopic = null;
+    state.selectedChannel = null;
+    emit(
+      state.copyWith(
+        selectedDmChat: dmUserEntity,
+        selectedTopic: state.selectedTopic,
+        selectedChannel: state.selectedChannel,
+      ),
+    );
+    // await _applyFolderFilter();
   }
 
-  void selectChannel({ChannelEntity? channel, TopicEntity? topic}) {
-    emit(state.copyWith(selectedChannel: channel, selectedTopic: topic, selectedDmChat: null));
-    _applyFolderFilter();
+  void selectChannel({ChannelEntity? channel, TopicEntity? topic}) async {
+    state.selectedDmChat = null;
+    emit(
+      state.copyWith(
+        selectedChannel: channel,
+        selectedTopic: topic,
+        selectedDmChat: state.selectedDmChat,
+      ),
+    );
+    // await _applyFolderFilter();
   }
 
-  void selectFolder(int newIndex) {
+  void selectFolder(int newIndex) async {
     if (state.selectedFolderIndex == newIndex) return;
     emit(state.copyWith(selectedFolderIndex: newIndex));
-    _applyFolderFilter();
+    FolderItemEntity folder = state.folders[newIndex];
+    if (folder.id == null) {
+      state.filterChannelIds = null;
+      state.filterDmUserIds = null;
+      emit(
+        state.copyWith(
+          filterDmUserIds: state.filterDmUserIds,
+          filterChannelIds: state.filterChannelIds,
+        ),
+      );
+      return;
+    }
+    final members = await _getMembersForFolderUseCase.call(folder.id!);
+    emit(
+      state.copyWith(
+        filterDmUserIds: members.dmUserIds.toSet(),
+        filterChannelIds: members.channelIds.toSet(),
+      ),
+    );
+    // emit(
+    //   state.copyWith(
+    //     filterDmUserIds: <int>{},
+    //     filterChannelIds: <int>{},
+    //   ),
+    // );
+    // await _applyFolderFilter();
   }
 
   Future<void> _applyFolderFilter() async {
     final int idx = state.selectedFolderIndex;
     if (idx <= 0 || idx >= state.folders.length) {
-      emit(state.copyWith(filterDmUserIds: null, filterChannelIds: null));
+      state.filterChannelIds = null;
+      state.filterDmUserIds = null;
+      emit(
+        state.copyWith(
+          filterDmUserIds: state.filterDmUserIds,
+          filterChannelIds: state.filterChannelIds,
+        ),
+      );
       return;
     }
-    final FolderItemEntity folder = state.folders[idx];
+    FolderItemEntity folder = state.folders[idx];
+
     if (folder.id == null) {
-      emit(state.copyWith(filterDmUserIds: null, filterChannelIds: null));
+      state.filterChannelIds = null;
+      state.filterDmUserIds = null;
+      emit(
+        state.copyWith(
+          filterDmUserIds: state.filterDmUserIds,
+          filterChannelIds: state.filterChannelIds,
+        ),
+      );
       return;
     }
-    final members = await _getMembersForFolderUseCase(folder.id!);
+
+    final members = await _getMembersForFolderUseCase.call(folder.id!);
     emit(
       state.copyWith(
         filterDmUserIds: members.dmUserIds.toSet(),

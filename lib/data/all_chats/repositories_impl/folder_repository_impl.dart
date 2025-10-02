@@ -5,26 +5,26 @@ import 'package:injectable/injectable.dart';
 
 @Injectable(as: FolderRepository)
 class FolderRepositoryImpl implements FolderRepository {
-  final FolderLocalDataSource _local;
-  FolderRepositoryImpl(this._local);
+  final FolderLocalDataSource _localRepository;
+  FolderRepositoryImpl(this._localRepository);
 
   @override
   Future<void> addFolder(FolderItemEntity folder) async {
-    await _local.add(folder);
+    await _localRepository.add(folder);
   }
 
   @override
   Future<List<FolderItemEntity>> getFolders() async {
-    return _local.getAll();
+    return _localRepository.getAll();
   }
 
   @override
   Future<void> updateFolder(FolderItemEntity folder) async {
-    await _local.update(folder);
+    await _localRepository.update(folder);
   }
 
   @override
   Future<void> deleteFolder(int id) async {
-    await _local.delete(id);
+    await _localRepository.delete(id);
   }
 }
