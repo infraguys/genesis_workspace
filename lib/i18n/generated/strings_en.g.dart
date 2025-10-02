@@ -116,6 +116,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get cancelEditing => 'Cancel editing';
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
+	late final TranslationsChannelEn channel = TranslationsChannelEn.internal(_root);
 
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
@@ -458,4 +459,19 @@ class TranslationsFoldersEn {
 
 	/// en: 'Folder is empty'
 	String get folderIsEmpty => 'Folder is empty';
+}
+
+// Path: channel
+class TranslationsChannelEn {
+	TranslationsChannelEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Mute channel'
+	String get muteChannel => 'Mute channel';
+
+	/// en: 'Unmute channel'
+	String get unmuteChannel => 'Unmute channel';
 }

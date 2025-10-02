@@ -15,6 +15,7 @@ SubscriptionDto _$SubscriptionDtoFromJson(Map<String, dynamic> json) =>
       streamId: (json['stream_id'] as num).toInt(),
       description: json['description'] as String,
       color: json['color'] as String,
+      isMuted: json['is_muted'] as bool,
     );
 
 Map<String, dynamic> _$SubscriptionDtoToJson(SubscriptionDto instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$SubscriptionDtoToJson(SubscriptionDto instance) =>
       'stream_id': instance.streamId,
       'description': instance.description,
       'color': instance.color,
+      'is_muted': instance.isMuted,
     };

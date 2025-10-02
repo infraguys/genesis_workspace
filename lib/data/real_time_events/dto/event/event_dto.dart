@@ -3,6 +3,7 @@ import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dar
 import 'package:genesis_workspace/data/real_time_events/dto/event/message_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/presence_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/reaction_event_dto.dart';
+import 'package:genesis_workspace/data/real_time_events/dto/event/subscription_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/typing_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/unsupported_event_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/update_message_event_dto.dart';
@@ -41,6 +42,8 @@ EventDto parseEventDto(Map<String, dynamic> json) {
       return DeleteMessageEventDto.fromJson(json);
     case EventType.updateMessage:
       return UpdateMessageEventDto.fromJson(json);
+    case EventType.subscription:
+      return SubscriptionEventDto.fromJson(json);
     default:
       return UnsupportedEventDto.fromJson(json);
   }

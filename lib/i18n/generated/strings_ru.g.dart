@@ -66,6 +66,7 @@ class TranslationsRu extends Translations {
 	@override String get dropFilesToUpload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancelEditing => 'Отменить редактирование';
 	@override late final TranslationsFoldersRu folders = TranslationsFoldersRu._(_root);
+	@override late final TranslationsChannelRu channel = TranslationsChannelRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
 }
 
@@ -270,4 +271,15 @@ class TranslationsFoldersRu extends TranslationsFoldersEn {
 	@override String get deleteConfirmTitle => 'Удалить папку?';
 	@override String deleteConfirmText({required Object folderName}) => 'Вы уверены, что хотите удалить "${folderName}"?';
 	@override String get folderIsEmpty => 'Папка пустая';
+}
+
+// Path: channel
+class TranslationsChannelRu extends TranslationsChannelEn {
+	TranslationsChannelRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get muteChannel => 'Заглушить канал';
+	@override String get unmuteChannel => 'Включить уведомления канала';
 }

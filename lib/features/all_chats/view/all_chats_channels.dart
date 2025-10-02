@@ -71,10 +71,10 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
     return BlocBuilder<ChannelsCubit, ChannelsState>(
       builder: (context, state) {
         final List<ChannelEntity> channels = (widget.filterChannelIds == null)
-            ? state.channels
-            : state.channels
-                  .where((channel) => widget.filterChannelIds!.contains(channel.streamId))
-                  .toList();
+            ? [...state.channels]
+            : [
+                ...state.channels,
+              ].where((channel) => widget.filterChannelIds!.contains(channel.streamId)).toList();
 
         if (channels.isEmpty) {
           return const SizedBox.shrink();

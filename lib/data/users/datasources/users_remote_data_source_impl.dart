@@ -115,4 +115,15 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<UpdateSubscriptionSettingsResponseDto> updateSubscriptionSettings(
+    UpdateSubscriptionSettingsRequestDto body,
+  ) async {
+    try {
+      return await apiClient.updateSubscriptionSettings(body.toForm());
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

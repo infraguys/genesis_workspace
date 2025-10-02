@@ -156,11 +156,11 @@ class _AllChatsViewState extends State<AllChatsView> {
                 return const Center(child: CircularProgressIndicator());
               }
               return BlocBuilder<AllChatsCubit, AllChatsState>(
-                buildWhen: (prev, cur) =>
-                    prev.selectedFolderIndex != cur.selectedFolderIndex ||
-                    prev.folders != cur.folders ||
-                    prev.filterDmUserIds != cur.filterDmUserIds ||
-                    prev.filterChannelIds != cur.filterChannelIds,
+                // buildWhen: (prev, cur) =>
+                // prev.selectedFolderIndex != cur.selectedFolderIndex ||
+                // prev.folders != cur.folders ||
+                // prev.filterDmUserIds != cur.filterDmUserIds ||
+                // prev.filterChannelIds != cur.filterChannelIds,
                 builder: (context, state) {
                   if (isDesktopWidth) {
                     return Row(
@@ -289,10 +289,14 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                                     children: [
                                                       AllChatsDms(
+                                                        key: const ValueKey('dms-list-desktop'),
                                                         filteredDms: state.filterDmUserIds,
                                                       ),
                                                       const Divider(height: 1),
                                                       AllChatsChannels(
+                                                        key: const ValueKey(
+                                                          'channels-list-desktop',
+                                                        ),
                                                         filterChannelIds: state.filterChannelIds,
                                                       ),
                                                     ],
@@ -449,12 +453,14 @@ class _AllChatsViewState extends State<AllChatsView> {
                             ),
                             SliverToBoxAdapter(
                               child: AllChatsDms(
+                                key: const ValueKey('dms-list-mobile'),
                                 filteredDms: state.filterDmUserIds,
                                 embeddedInParentScroll: true,
                               ),
                             ),
                             SliverToBoxAdapter(
                               child: AllChatsChannels(
+                                key: const ValueKey('channels-list-mobile'),
                                 filterChannelIds: state.filterChannelIds,
                                 embeddedInParentScroll: true,
                               ),

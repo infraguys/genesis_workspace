@@ -132,5 +132,9 @@
     "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
    "folder_is_empty": "Папка пустая"
   },
+  "channel": {
+    "muteChannel": "Заглушить канал",
+    "unmuteChannel": "Включить уведомления канала"
+  },
   "nothing_found": "Ничего не нашли"
 }

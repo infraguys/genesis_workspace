@@ -127,5 +127,9 @@
     "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?",
     "folder_is_empty": "Folder is empty"
   },
+  "channel": {
+    "muteChannel": "Mute channel",
+    "unmuteChannel": "Unmute channel"
+  },
   "nothing_found": "Nothing found"
 }
