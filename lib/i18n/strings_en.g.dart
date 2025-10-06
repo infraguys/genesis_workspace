@@ -270,6 +270,9 @@ class TranslationsSettingsEn {
 
 	/// en: 'Logout'
 	String get logout => 'Logout';
+
+	/// en: 'App version'
+	String get appVersion => 'App version';
 }
 
 // Path: date_labels
@@ -560,6 +563,7 @@ extension on Translations {
 			case 'search': return 'Search';
 			case 'settings.language': return 'Language';
 			case 'settings.logout': return 'Logout';
+			case 'settings.appVersion': return 'App version';
 			case 'date_labels.today': return 'Today';
 			case 'date_labels.yesterday': return 'Yesterday';
 			case 'inbox.title': return 'Inbox';

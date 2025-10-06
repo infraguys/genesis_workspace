@@ -157,6 +157,7 @@ class _TranslationsSettingsRu implements TranslationsSettingsEn {
 	// Translations
 	@override String get language => 'Язык';
 	@override String get logout => 'Выйти';
+	@override String get appVersion => 'Версия приложения';
 }
 
 // Path: date_labels
@@ -367,6 +368,7 @@ extension on TranslationsRu {
 			case 'search': return 'Поиск';
 			case 'settings.language': return 'Язык';
 			case 'settings.logout': return 'Выйти';
+			case 'settings.appVersion': return 'Версия приложения';
 			case 'date_labels.today': return 'Сегодня';
 			case 'date_labels.yesterday': return 'Вчера';
 			case 'inbox.title': return 'Входящие';
