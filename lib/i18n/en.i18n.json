@@ -61,7 +61,8 @@
   "search": "Search",
   "settings": {
     "language": "Language",
-    "logout": "Logout"
+    "logout": "Logout",
+    "appVersion": "App version"
   },
   "date_labels": {
     "today": "Today",

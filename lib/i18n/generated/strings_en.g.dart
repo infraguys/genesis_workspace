@@ -265,6 +265,9 @@ class TranslationsSettingsEn {
 
 	/// en: 'Logout'
 	String get logout => 'Logout';
+
+	/// en: 'App version'
+	String get appVersion => 'App version';
 }
 
 // Path: dateLabels
