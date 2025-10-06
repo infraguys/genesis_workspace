@@ -48,7 +48,6 @@ class AppDatabase extends _$AppDatabase {
           ['All', Icons.markunread.codePoint],
         );
 
-        // Уникальный индекс по system_type
         await customStatement(
           'CREATE UNIQUE INDEX IF NOT EXISTS idx_folders_system_type ON folders(system_type);',
         );

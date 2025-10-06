@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_repository.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/pinned_chats_repository.dart';
@@ -19,7 +20,7 @@ class GetFoldersUseCase {
       final folder = FolderItemEntity(
         id: row.id,
         title: row.title,
-        iconData: IconData(row.iconCodePoint, fontFamily: 'MaterialIcons'),
+        iconData: FolderIconsConstants.byCodePoint[row.iconCodePoint] ?? Icons.folder,
         unreadCount: row.unreadCount,
         backgroundColor: row.backgroundColorValue != null ? Color(row.backgroundColorValue!) : null,
         pinnedChats: folderPinnedChats,
