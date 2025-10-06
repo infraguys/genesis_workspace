@@ -197,6 +197,17 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _systemTypeMeta = const VerificationMeta(
+    'systemType',
+  );
+  @override
+  late final GeneratedColumn<String> systemType = GeneratedColumn<String>(
+    'system_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -204,6 +215,7 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
     iconCodePoint,
     backgroundColorValue,
     unreadCount,
+    systemType,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -257,6 +269,12 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
         ),
       );
     }
+    if (data.containsKey('system_type')) {
+      context.handle(
+        _systemTypeMeta,
+        systemType.isAcceptableOrUnknown(data['system_type']!, _systemTypeMeta),
+      );
+    }
     return context;
   }
 
@@ -286,6 +304,10 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
         DriftSqlType.int,
         data['${effectivePrefix}unread_count'],
       )!,
+      systemType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}system_type'],
+      ),
     );
   }
 
@@ -301,12 +323,14 @@ class Folder extends DataClass implements Insertable<Folder> {
   final int iconCodePoint;
   final int? backgroundColorValue;
   final int unreadCount;
+  final String? systemType;
   const Folder({
     required this.id,
     required this.title,
     required this.iconCodePoint,
     this.backgroundColorValue,
     required this.unreadCount,
+    this.systemType,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -318,6 +342,9 @@ class Folder extends DataClass implements Insertable<Folder> {
       map['background_color_value'] = Variable<int>(backgroundColorValue);
     }
     map['unread_count'] = Variable<int>(unreadCount);
+    if (!nullToAbsent || systemType != null) {
+      map['system_type'] = Variable<String>(systemType);
+    }
     return map;
   }
 
@@ -330,6 +357,9 @@ class Folder extends DataClass implements Insertable<Folder> {
           ? const Value.absent()
           : Value(backgroundColorValue),
       unreadCount: Value(unreadCount),
+      systemType: systemType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(systemType),
     );
   }
 
@@ -346,6 +376,7 @@ class Folder extends DataClass implements Insertable<Folder> {
         json['backgroundColorValue'],
       ),
       unreadCount: serializer.fromJson<int>(json['unreadCount']),
+      systemType: serializer.fromJson<String?>(json['systemType']),
     );
   }
   @override
@@ -357,6 +388,7 @@ class Folder extends DataClass implements Insertable<Folder> {
       'iconCodePoint': serializer.toJson<int>(iconCodePoint),
       'backgroundColorValue': serializer.toJson<int?>(backgroundColorValue),
       'unreadCount': serializer.toJson<int>(unreadCount),
+      'systemType': serializer.toJson<String?>(systemType),
     };
   }
 
@@ -366,6 +398,7 @@ class Folder extends DataClass implements Insertable<Folder> {
     int? iconCodePoint,
     Value<int?> backgroundColorValue = const Value.absent(),
     int? unreadCount,
+    Value<String?> systemType = const Value.absent(),
   }) => Folder(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -374,6 +407,7 @@ class Folder extends DataClass implements Insertable<Folder> {
         ? backgroundColorValue.value
         : this.backgroundColorValue,
     unreadCount: unreadCount ?? this.unreadCount,
+    systemType: systemType.present ? systemType.value : this.systemType,
   );
   Folder copyWithCompanion(FoldersCompanion data) {
     return Folder(
@@ -388,6 +422,9 @@ class Folder extends DataClass implements Insertable<Folder> {
       unreadCount: data.unreadCount.present
           ? data.unreadCount.value
           : this.unreadCount,
+      systemType: data.systemType.present
+          ? data.systemType.value
+          : this.systemType,
     );
   }
 
@@ -398,14 +435,21 @@ class Folder extends DataClass implements Insertable<Folder> {
           ..write('title: $title, ')
           ..write('iconCodePoint: $iconCodePoint, ')
           ..write('backgroundColorValue: $backgroundColorValue, ')
-          ..write('unreadCount: $unreadCount')
+          ..write('unreadCount: $unreadCount, ')
+          ..write('systemType: $systemType')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, iconCodePoint, backgroundColorValue, unreadCount);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    iconCodePoint,
+    backgroundColorValue,
+    unreadCount,
+    systemType,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -414,7 +458,8 @@ class Folder extends DataClass implements Insertable<Folder> {
           other.title == this.title &&
           other.iconCodePoint == this.iconCodePoint &&
           other.backgroundColorValue == this.backgroundColorValue &&
-          other.unreadCount == this.unreadCount);
+          other.unreadCount == this.unreadCount &&
+          other.systemType == this.systemType);
 }
 
 class FoldersCompanion extends UpdateCompanion<Folder> {
@@ -423,12 +468,14 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
   final Value<int> iconCodePoint;
   final Value<int?> backgroundColorValue;
   final Value<int> unreadCount;
+  final Value<String?> systemType;
   const FoldersCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.iconCodePoint = const Value.absent(),
     this.backgroundColorValue = const Value.absent(),
     this.unreadCount = const Value.absent(),
+    this.systemType = const Value.absent(),
   });
   FoldersCompanion.insert({
     this.id = const Value.absent(),
@@ -436,6 +483,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     required int iconCodePoint,
     this.backgroundColorValue = const Value.absent(),
     this.unreadCount = const Value.absent(),
+    this.systemType = const Value.absent(),
   }) : title = Value(title),
        iconCodePoint = Value(iconCodePoint);
   static Insertable<Folder> custom({
@@ -444,6 +492,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     Expression<int>? iconCodePoint,
     Expression<int>? backgroundColorValue,
     Expression<int>? unreadCount,
+    Expression<String>? systemType,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -452,6 +501,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
       if (backgroundColorValue != null)
         'background_color_value': backgroundColorValue,
       if (unreadCount != null) 'unread_count': unreadCount,
+      if (systemType != null) 'system_type': systemType,
     });
   }
 
@@ -461,6 +511,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     Value<int>? iconCodePoint,
     Value<int?>? backgroundColorValue,
     Value<int>? unreadCount,
+    Value<String?>? systemType,
   }) {
     return FoldersCompanion(
       id: id ?? this.id,
@@ -468,6 +519,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
       iconCodePoint: iconCodePoint ?? this.iconCodePoint,
       backgroundColorValue: backgroundColorValue ?? this.backgroundColorValue,
       unreadCount: unreadCount ?? this.unreadCount,
+      systemType: systemType ?? this.systemType,
     );
   }
 
@@ -489,6 +541,9 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     if (unreadCount.present) {
       map['unread_count'] = Variable<int>(unreadCount.value);
     }
+    if (systemType.present) {
+      map['system_type'] = Variable<String>(systemType.value);
+    }
     return map;
   }
 
@@ -499,7 +554,8 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
           ..write('title: $title, ')
           ..write('iconCodePoint: $iconCodePoint, ')
           ..write('backgroundColorValue: $backgroundColorValue, ')
-          ..write('unreadCount: $unreadCount')
+          ..write('unreadCount: $unreadCount, ')
+          ..write('systemType: $systemType')
           ..write(')'))
         .toString();
   }
@@ -1346,6 +1402,7 @@ typedef $$FoldersTableCreateCompanionBuilder =
       required int iconCodePoint,
       Value<int?> backgroundColorValue,
       Value<int> unreadCount,
+      Value<String?> systemType,
     });
 typedef $$FoldersTableUpdateCompanionBuilder =
     FoldersCompanion Function({
@@ -1354,6 +1411,7 @@ typedef $$FoldersTableUpdateCompanionBuilder =
       Value<int> iconCodePoint,
       Value<int?> backgroundColorValue,
       Value<int> unreadCount,
+      Value<String?> systemType,
     });
 
 class $$FoldersTableFilterComposer
@@ -1387,6 +1445,11 @@ class $$FoldersTableFilterComposer
 
   ColumnFilters<int> get unreadCount => $composableBuilder(
     column: $table.unreadCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get systemType => $composableBuilder(
+    column: $table.systemType,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1424,6 +1487,11 @@ class $$FoldersTableOrderingComposer
     column: $table.unreadCount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get systemType => $composableBuilder(
+    column: $table.systemType,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FoldersTableAnnotationComposer
@@ -1453,6 +1521,11 @@ class $$FoldersTableAnnotationComposer
 
   GeneratedColumn<int> get unreadCount => $composableBuilder(
     column: $table.unreadCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get systemType => $composableBuilder(
+    column: $table.systemType,
     builder: (column) => column,
   );
 }
@@ -1490,12 +1563,14 @@ class $$FoldersTableTableManager
                 Value<int> iconCodePoint = const Value.absent(),
                 Value<int?> backgroundColorValue = const Value.absent(),
                 Value<int> unreadCount = const Value.absent(),
+                Value<String?> systemType = const Value.absent(),
               }) => FoldersCompanion(
                 id: id,
                 title: title,
                 iconCodePoint: iconCodePoint,
                 backgroundColorValue: backgroundColorValue,
                 unreadCount: unreadCount,
+                systemType: systemType,
               ),
           createCompanionCallback:
               ({
@@ -1504,12 +1579,14 @@ class $$FoldersTableTableManager
                 required int iconCodePoint,
                 Value<int?> backgroundColorValue = const Value.absent(),
                 Value<int> unreadCount = const Value.absent(),
+                Value<String?> systemType = const Value.absent(),
               }) => FoldersCompanion.insert(
                 id: id,
                 title: title,
                 iconCodePoint: iconCodePoint,
                 backgroundColorValue: backgroundColorValue,
                 unreadCount: unreadCount,
+                systemType: systemType,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

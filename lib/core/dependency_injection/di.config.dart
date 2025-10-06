@@ -301,13 +301,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i42.UploadFileUseCase>(
       () => _i42.UploadFileUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i691.PinnedChatsDao>(
+      () => _i691.PinnedChatsDao(gh<_i606.AppDatabase>()),
+    );
     gh.factory<_i909.FolderItemDao>(
       () => _i909.FolderItemDao(gh<_i606.AppDatabase>()),
     );
     gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
-    gh.factory<_i691.PinnedChatsDao>(
-      () => _i691.PinnedChatsDao(gh<_i606.AppDatabase>()),
-    );
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
     );
@@ -329,8 +329,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
       ),
     );
+    gh.factory<_i771.GetChannelMembersUseCase>(
+      () => _i771.GetChannelMembersUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i394.GetUserPresenceUseCase>(
       () => _i394.GetUserPresenceUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i541.UpdateSubscriptionSettingsUseCase>(
+      () =>
+          _i541.UpdateSubscriptionSettingsUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i487.SetTypingUseCase>(
       () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
@@ -358,13 +365,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i771.GetChannelMembersUseCase>(
-      () => _i771.GetChannelMembersUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i541.UpdateSubscriptionSettingsUseCase>(
-      () =>
-          _i541.UpdateSubscriptionSettingsUseCase(gh<_i125.UsersRepository>()),
     );
     gh.lazySingleton<_i361.Dio>(
       () => coreModule.dio(
@@ -565,12 +565,6 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: _i862.disposeAuthCubit,
     );
-    gh.factory<_i1012.PinChatUseCase>(
-      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i126.GetPinnedChatsUseCase>(
-      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
     gh.factory<_i631.UnpinChatUseCase>(
       () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
     );
@@ -578,6 +572,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1057.UpdatePinnedChatOrderUseCase(
         gh<_i725.PinnedChatsRepository>(),
       ),
+    );
+    gh.factory<_i1012.PinChatUseCase>(
+      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i126.GetPinnedChatsUseCase>(
+      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
     );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(

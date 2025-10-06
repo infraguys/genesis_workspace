@@ -9,4 +9,5 @@ class Folders extends Table {
   IntColumn get backgroundColorValue => integer().nullable()();
 
   IntColumn get unreadCount => integer().withDefault(const Constant(0))();
+  TextColumn get systemType => text().nullable()();
 }
