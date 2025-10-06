@@ -127,6 +127,7 @@
     "selectFolders": "Выберите папки",
     "save": "Сохранить",
     "edit": "Редактировать папку",
+    "orderPinning": "Порядок закрепления",
     "delete": "Удалить",
     "deleteConfirmTitle": "Удалить папку?",
     "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
@@ -135,6 +136,10 @@
   "channel": {
     "muteChannel": "Заглушить канал",
     "unmuteChannel": "Включить уведомления канала"
+  },
+  "chat": {
+    "pinChat": "Закрепить чат",
+    "unpinChat": "Открепить чат"
   },
   "nothing_found": "Ничего не нашли"
 }

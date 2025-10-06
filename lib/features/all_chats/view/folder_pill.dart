@@ -97,7 +97,8 @@ class FolderPill extends StatelessWidget {
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
       items: [
         if (onEdit != null) PopupMenuItem(value: 'edit', child: Text(context.t.folders.edit)),
-        if (onEditPinning != null) PopupMenuItem(value: 'editPinning', child: Text("Edit pinning")),
+        if (onEditPinning != null)
+          PopupMenuItem(value: 'editPinning', child: Text(context.t.folders.orderPinning)),
         if (onDelete != null) PopupMenuItem(value: 'delete', child: Text(context.t.folders.delete)),
       ],
     );

@@ -51,12 +51,12 @@ class _AllChatsViewState extends State<AllChatsView> {
   }) {
     if (folders.isNotEmpty) {
       if (folders[selectedIndex].backgroundColor == null) {
-        return Theme.of(context).colorScheme.surface;
+        return Theme.of(context).colorScheme.surface.withValues(alpha: 0.10);
       }
       final Color base = folders[selectedIndex].backgroundColor!;
       return base.withValues(alpha: 0.10);
     } else {
-      return Theme.of(context).colorScheme.surface;
+      return Theme.of(context).colorScheme.surface.withValues(alpha: 0.10);
     }
   }
 
@@ -388,7 +388,6 @@ class _AllChatsViewState extends State<AllChatsView> {
                                     },
                                   ),
                                 ),
-                                // ресайз-хэндл без изменений
                                 Positioned(
                                   left: 0,
                                   top: 0,

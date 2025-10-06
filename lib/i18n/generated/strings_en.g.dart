@@ -117,6 +117,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
 	late final TranslationsChannelEn channel = TranslationsChannelEn.internal(_root);
+	late final TranslationsChatEn chat = TranslationsChatEn.internal(_root);
 
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
@@ -448,6 +449,9 @@ class TranslationsFoldersEn {
 	/// en: 'Edit folder'
 	String get edit => 'Edit folder';
 
+	/// en: 'Order pinning'
+	String get orderPinning => 'Order pinning';
+
 	/// en: 'Delete'
 	String get delete => 'Delete';
 
@@ -474,4 +478,19 @@ class TranslationsChannelEn {
 
 	/// en: 'Unmute channel'
 	String get unmuteChannel => 'Unmute channel';
+}
+
+// Path: chat
+class TranslationsChatEn {
+	TranslationsChatEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Pin chat'
+	String get pinChat => 'Pin chat';
+
+	/// en: 'Unpin chat'
+	String get unpinChat => 'Unpin chat';
 }

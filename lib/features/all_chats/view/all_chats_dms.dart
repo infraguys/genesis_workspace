@@ -178,7 +178,6 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                     constraints: const BoxConstraints(maxHeight: 500),
                     child: widget.isEditPinning
                         ? ReorderableListView.builder(
-                            // Мы сами рисуем ручку перетаскивания в trailing:
                             buildDefaultDragHandles: false,
                             shrinkWrap: true,
                             physics: widget.embeddedInParentScroll
@@ -188,20 +187,17 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                             onReorder: (int oldIndex, int newIndex) async {
                               if (newIndex > oldIndex) newIndex -= 1;
 
-                              // строим локальный порядок, не трогая bloc-данные
                               final List<DmUserEntity> local = List<DmUserEntity>.from(
                                 optimisticUsers ?? users,
                               );
                               final DmUserEntity moved = local.removeAt(oldIndex);
                               local.insert(newIndex, moved);
 
-                              // показываем немедленно без мерцаний
                               setState(() {
                                 isReorderingInProgress = true;
                                 optimisticUsers = local;
                               });
 
-                              // соседи по НОВОМУ локальному порядку
                               final int movedChatId = moved.userId;
                               final int? previousChatId = (newIndex - 1) >= 0
                                   ? local[newIndex - 1].userId
@@ -218,11 +214,10 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                   nextChatId: nextChatId,
                                 );
                               } finally {
-                                // разрешаем BlocBuilder поймать новый порядок из БД и заменить локальный
                                 if (mounted) {
                                   setState(() {
                                     isReorderingInProgress = false;
-                                    optimisticUsers = null; // вернёмся к filterUsers(...)
+                                    optimisticUsers = null;
                                   });
                                 }
                               }
@@ -232,15 +227,12 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                             },
                             itemBuilder: (BuildContext context, int index) {
                               final DmUserEntity user = users[index];
-
-                              // В режиме редактирования не показываем контекстное меню — только перетаскивание.
                               return KeyedSubtree(
                                 key: ValueKey<int>(user.userId),
                                 child: UserTile(
                                   key: ValueKey('pinned-${user.userId}'),
                                   user: user,
-                                  isPinned:
-                                      true, // тут заведомо true, т.к. список только закреплённых
+                                  isPinned: true,
                                   isEditPinning: true,
                                   trailingOverride: ReorderableDragStartListener(
                                     index: index,
@@ -251,7 +243,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                       ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                     ),
                                   ),
-                                  onTap: () {}, // тап в режиме редактирования можно игнорировать
+                                  onTap: () {},
                                 ),
                               );
                             },
@@ -295,7 +287,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                         isPinned
                                             ? ListTile(
                                                 leading: const Icon(Icons.push_pin_outlined),
-                                                title: Text('Unpin chat'),
+                                                title: Text(context.t.chat.unpinChat),
                                                 onTap: () async {
                                                   context.pop();
                                                   final pinnedChatId = widget
@@ -312,7 +304,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                               )
                                             : ListTile(
                                                 leading: const Icon(Icons.push_pin),
-                                                title: Text('Pin chat'),
+                                                title: Text(context.t.chat.pinChat),
                                                 onTap: () async {
                                                   context.pop();
                                                   await context.read<AllChatsCubit>().pinChat(

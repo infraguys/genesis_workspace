@@ -52,7 +52,12 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: Row(
                     children: [
-                      Expanded(child: Text(context.t.folders.selectFolders, style: Theme.of(context).textTheme.titleMedium)),
+                      Expanded(
+                        child: Text(
+                          context.t.folders.selectFolders,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
                         icon: const Icon(Icons.close),
@@ -66,6 +71,9 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                     shrinkWrap: true,
                     itemCount: userFolders.length,
                     itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return SizedBox.shrink();
+                      }
                       final f = userFolders[index];
                       final id = f.id!;
                       final selected = _selectedIds.contains(id);
@@ -114,7 +122,13 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                         child: Text(context.t.folders.cancel),
                       ),
                       const SizedBox(width: 8),
-                      FilledButton(onPressed: () async { await widget.onSave(_selectedIds); if (mounted) Navigator.of(context).pop(); }, child: Text(context.t.folders.save)),
+                      FilledButton(
+                        onPressed: () async {
+                          await widget.onSave(_selectedIds);
+                          if (mounted) Navigator.of(context).pop();
+                        },
+                        child: Text(context.t.folders.save),
+                      ),
                     ],
                   ),
                 ),

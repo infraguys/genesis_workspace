@@ -67,6 +67,7 @@ class TranslationsRu extends Translations {
 	@override String get cancelEditing => 'Отменить редактирование';
 	@override late final TranslationsFoldersRu folders = TranslationsFoldersRu._(_root);
 	@override late final TranslationsChannelRu channel = TranslationsChannelRu._(_root);
+	@override late final TranslationsChatRu chat = TranslationsChatRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
 }
 
@@ -267,6 +268,7 @@ class TranslationsFoldersRu extends TranslationsFoldersEn {
 	@override String get selectFolders => 'Выберите папки';
 	@override String get save => 'Сохранить';
 	@override String get edit => 'Редактировать папку';
+	@override String get orderPinning => 'Порядок закрепления';
 	@override String get delete => 'Удалить';
 	@override String get deleteConfirmTitle => 'Удалить папку?';
 	@override String deleteConfirmText({required Object folderName}) => 'Вы уверены, что хотите удалить "${folderName}"?';
@@ -282,4 +284,15 @@ class TranslationsChannelRu extends TranslationsChannelEn {
 	// Translations
 	@override String get muteChannel => 'Заглушить канал';
 	@override String get unmuteChannel => 'Включить уведомления канала';
+}
+
+// Path: chat
+class TranslationsChatRu extends TranslationsChatEn {
+	TranslationsChatRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get pinChat => 'Закрепить чат';
+	@override String get unpinChat => 'Открепить чат';
 }

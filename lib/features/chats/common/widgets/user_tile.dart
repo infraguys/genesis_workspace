@@ -43,11 +43,11 @@ class UserTile extends StatelessWidget {
       leading: UserAvatar(avatarUrl: user.avatarUrl),
       title: Row(
         children: [
-          Expanded(child: Text(user.fullName, overflow: TextOverflow.ellipsis)),
+          Text(user.fullName, overflow: TextOverflow.ellipsis),
           if (!isEditPinning && isPinned)
-            const Padding(
-              padding: EdgeInsets.only(left: 4),
-              child: Icon(Icons.push_pin_rounded, size: 12),
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Icon(Icons.push_pin, size: 12, color: theme.colorScheme.outlineVariant),
             ),
         ],
       ),

@@ -15,8 +15,21 @@ class ChannelDownExpandedItem extends StatefulWidget {
   final ChannelEntity channel;
   final VoidCallback? onTap;
   final void Function(TopicEntity topic)? onTopicTap;
+  final Widget? trailingOverride;
+  final bool isEditPinning;
+  final bool isPinned;
+  final int? pinnedChatId;
 
-  const ChannelDownExpandedItem({super.key, required this.channel, this.onTap, this.onTopicTap});
+  const ChannelDownExpandedItem({
+    super.key,
+    required this.channel,
+    this.onTap,
+    this.onTopicTap,
+    this.trailingOverride,
+    this.isEditPinning = false,
+    this.isPinned = false,
+    this.pinnedChatId,
+  });
 
   @override
   State<ChannelDownExpandedItem> createState() => _ChannelDownExpandedItemState();
@@ -55,6 +68,124 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
     final TextStyle topicTextStyle = theme.textTheme.bodyMedium!.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
+
+    final Widget content = Material(
+      color: Colors.transparent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: _handleHeaderTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Container(width: 3, height: 24, color: channelColor),
+                  const SizedBox(width: 8),
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.25 : 0.0,
+                    duration: _animationDuration,
+                    curve: _animationCurve,
+                    child: Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          spacing: 8,
+                          children: [
+                            Text(
+                              '# ${widget.channel.name}',
+                              style: channelTextStyle,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (widget.isPinned)
+                              Icon(
+                                Icons.push_pin,
+                                size: 12,
+                                color: theme.colorScheme.outlineVariant,
+                              ),
+                            if (widget.channel.isMuted)
+                              Icon(
+                                Icons.headset_off,
+                                size: 12,
+                                color: theme.colorScheme.outlineVariant,
+                              ),
+                          ],
+                        ),
+                        widget.trailingOverride ?? UnreadBadge(
+                          count: widget.channel.unreadMessages.length,
+                          isMuted: widget.channel.isMuted,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          AnimatedSize(
+            duration: _animationDuration,
+            curve: _animationCurve,
+            alignment: Alignment.topCenter,
+            child: isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 32),
+                    child: Skeletonizer(
+                      enabled: widget.channel.topics.isEmpty,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: widget.channel.topics.isEmpty
+                            ? 3
+                            : widget.channel.topics.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          if (widget.channel.topics.isEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              child: Text('• topic.name', style: topicTextStyle),
+                            );
+                          } else {
+                            final TopicEntity topic = widget.channel.topics[index];
+                            return InkWell(
+                              onTap: () => widget.onTopicTap?.call(topic),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('• ${topic.name}', style: topicTextStyle),
+                                    UnreadBadge(count: topic.unreadMessages.length),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+
+          const Divider(height: 1),
+        ],
+      ),
+    );
+
+    if (widget.isEditPinning) {
+      return content;
+    }
 
     return GestureDetector(
       onSecondaryTap: () => popupKey.currentState?.show(),
@@ -96,6 +227,27 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                           await context.read<ChannelsCubit>().muteChannel(widget.channel);
                         },
                       ),
+                if (widget.isPinned)
+                  ListTile(
+                    leading: const Icon(Icons.push_pin_outlined),
+                    title: Text(context.t.chat.unpinChat),
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      final int? id = widget.pinnedChatId;
+                      if (id != null) {
+                        await context.read<AllChatsCubit>().unpinChat(id);
+                      }
+                    },
+                  )
+                else
+                  ListTile(
+                    leading: const Icon(Icons.push_pin),
+                    title: Text(context.t.chat.pinChat),
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      await context.read<AllChatsCubit>().pinChat(chatId: widget.channel.streamId);
+                    },
+                  ),
                 ListTile(
                   leading: const Icon(Icons.folder_open),
                   title: Text(context.t.folders.addToFolder),
@@ -123,113 +275,7 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
             ),
           ),
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              InkWell(
-                onTap: _handleHeaderTap,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  child: Row(
-                    children: [
-                      Container(width: 3, height: 24, color: channelColor),
-                      const SizedBox(width: 8),
-                      AnimatedRotation(
-                        turns: isExpanded ? 0.25 : 0.0,
-                        duration: _animationDuration,
-                        curve: _animationCurve,
-                        child: Icon(
-                          Icons.chevron_right,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              spacing: 8,
-                              children: [
-                                Text(
-                                  '# ${widget.channel.name}',
-                                  style: channelTextStyle,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (widget.channel.isMuted)
-                                  Icon(
-                                    Icons.headset_off,
-                                    size: 12,
-                                    color: theme.colorScheme.outlineVariant,
-                                  ),
-                              ],
-                            ),
-                            UnreadBadge(
-                              count: widget.channel.unreadMessages.length,
-                              isMuted: widget.channel.isMuted,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              AnimatedSize(
-                duration: _animationDuration,
-                curve: _animationCurve,
-                alignment: Alignment.topCenter,
-                child: isExpanded
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 32),
-                        child: Skeletonizer(
-                          enabled: widget.channel.topics.isEmpty,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: widget.channel.topics.isEmpty
-                                ? 3
-                                : widget.channel.topics.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              if (widget.channel.topics.isEmpty) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  child: Text('• topic.name', style: topicTextStyle),
-                                );
-                              } else {
-                                final TopicEntity topic = widget.channel.topics[index];
-                                return InkWell(
-                                  onTap: () => widget.onTopicTap?.call(topic),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text('• ${topic.name}', style: topicTextStyle),
-                                        UnreadBadge(count: topic.unreadMessages.length),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-
-              const Divider(height: 1),
-            ],
-          ),
-        ),
+        child: content,
       ),
     );
   }
