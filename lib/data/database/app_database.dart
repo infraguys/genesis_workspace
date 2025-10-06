@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:flutter/material.dart' hide Table;
 import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart';
 import 'package:genesis_workspace/data/all_chats/dao/folder_item_dao.dart';
 import 'package:genesis_workspace/data/all_chats/dao/pinned_chats_dao.dart';
@@ -37,20 +36,8 @@ class AppDatabase extends _$AppDatabase {
         await migrator.createTable(pinnedChats);
       }
       if (from < 5) {
-        await migrator.addColumn(folders, folders.systemType);
-
-        await customStatement(
-          '''
-        INSERT INTO folders (title, icon_code_point, background_color_value, unread_count, system_type)
-        SELECT ?, ?, NULL, 0, 'all'
-        WHERE NOT EXISTS (SELECT 1 FROM folders WHERE system_type = 'all');
-      ''',
-          ['All', Icons.markunread.codePoint],
-        );
-
-        await customStatement(
-          'CREATE UNIQUE INDEX IF NOT EXISTS idx_folders_system_type ON folders(system_type);',
-        );
+        await migrator.deleteTable('folders');
+        await migrator.createTable(folders);
       }
     },
   );
