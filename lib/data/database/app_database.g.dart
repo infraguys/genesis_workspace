@@ -887,7 +887,7 @@ class $PinnedChatsTable extends PinnedChats
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    $customConstraints: 'REFERENCES folder_items(id) ON DELETE CASCADE',
+    $customConstraints: 'REFERENCES folders(id) ON DELETE CASCADE',
   );
   static const VerificationMeta _orderIndexMeta = const VerificationMeta(
     'orderIndex',
@@ -1223,6 +1223,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PinnedChatsTable pinnedChats = $PinnedChatsTable(this);
   late final RecentDmDao recentDmDao = RecentDmDao(this as AppDatabase);
   late final FolderDao folderDao = FolderDao(this as AppDatabase);
+  late final FolderItemDao folderItemDao = FolderItemDao(this as AppDatabase);
   late final PinnedChatsDao pinnedChatsDao = PinnedChatsDao(
     this as AppDatabase,
   );

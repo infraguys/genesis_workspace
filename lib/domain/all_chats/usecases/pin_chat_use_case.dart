@@ -6,7 +6,7 @@ class PinChatUseCase {
   final PinnedChatsRepository _repository;
   PinChatUseCase(this._repository);
 
-  Future<void> call({required int folderId, required int chatId}) async {
-    return await _repository.pinChat(folderId: folderId, chatId: chatId);
+  Future<void> call({required int folderId, required int chatId, required int orderIndex}) async {
+    return await _repository.pinChat(folderId: folderId, chatId: chatId, orderIndex: orderIndex);
   }
 }

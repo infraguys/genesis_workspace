@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class FolderPill extends StatelessWidget {
   final FolderItemEntity folder;
   final bool isSelected;
   final void Function()? onTap;
   final void Function()? onEdit;
+  final void Function()? onEditPinning;
   final void Function()? onDelete;
   const FolderPill({
     super.key,
@@ -14,6 +15,7 @@ class FolderPill extends StatelessWidget {
     this.onTap,
     required this.folder,
     this.onEdit,
+    this.onEditPinning,
     this.onDelete,
   });
 
@@ -89,12 +91,13 @@ class FolderPill extends StatelessWidget {
   }
 
   void _showContextMenu(BuildContext context, Offset position) async {
-    if (onEdit == null && onDelete == null) return;
+    if (onEdit == null && onDelete == null && onEditPinning == null) return;
     final selected = await showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
       items: [
         if (onEdit != null) PopupMenuItem(value: 'edit', child: Text(context.t.folders.edit)),
+        if (onEditPinning != null) PopupMenuItem(value: 'editPinning', child: Text("Edit pinning")),
         if (onDelete != null) PopupMenuItem(value: 'delete', child: Text(context.t.folders.delete)),
       ],
     );
@@ -102,6 +105,8 @@ class FolderPill extends StatelessWidget {
       onEdit?.call();
     } else if (selected == 'delete') {
       onDelete?.call();
+    } else if (selected == 'editPinning') {
+      onEditPinning?.call();
     }
   }
 }

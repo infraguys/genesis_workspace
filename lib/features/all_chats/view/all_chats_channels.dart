@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/channel_down_expanded_item.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
@@ -13,12 +14,16 @@ import 'package:go_router/go_router.dart';
 
 class AllChatsChannels extends StatefulWidget {
   final Set<int>? filterChannelIds;
+  final FolderItemEntity selectedFolder;
   final bool embeddedInParentScroll;
+  final bool isEditPinning;
 
   const AllChatsChannels({
     super.key,
     required this.filterChannelIds,
+    required this.selectedFolder,
     this.embeddedInParentScroll = false,
+    required this.isEditPinning,
   });
 
   @override
@@ -70,7 +75,8 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
 
     return BlocBuilder<ChannelsCubit, ChannelsState>(
       builder: (context, state) {
-        final List<ChannelEntity> channels = (widget.filterChannelIds == null)
+        final List<ChannelEntity> channels =
+            (widget.filterChannelIds == null || widget.selectedFolder.id == 0)
             ? [...state.channels]
             : [
                 ...state.channels,

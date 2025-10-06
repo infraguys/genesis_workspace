@@ -2,6 +2,7 @@ class PinnedChatEntity {
   final int id;
   final int folderId;
   final int chatId;
+  final int? orderIndex;
   final DateTime pinnedAt;
 
   PinnedChatEntity({
@@ -9,5 +10,6 @@ class PinnedChatEntity {
     required this.folderId,
     required this.chatId,
     required this.pinnedAt,
+    this.orderIndex,
   });
 }

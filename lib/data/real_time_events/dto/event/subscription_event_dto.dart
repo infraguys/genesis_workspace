@@ -13,7 +13,7 @@ class SubscriptionEventDto extends EventDto {
     required super.id,
     required super.type,
     required this.op,
-    required this.streamId,
+    this.streamId = -1,
     required this.property,
     required this.value,
   });

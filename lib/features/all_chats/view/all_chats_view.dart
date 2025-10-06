@@ -37,6 +37,7 @@ class _AllChatsViewState extends State<AllChatsView> {
   late double _sidebarWidth;
   bool _isHandleHovered = false;
   bool _isDragging = false;
+  bool _isEditPinning = false;
 
   late final Future _future;
   final TextEditingController _searchController = TextEditingController();
@@ -91,6 +92,18 @@ class _AllChatsViewState extends State<AllChatsView> {
     );
   }
 
+  void editPinning() {
+    setState(() {
+      _isEditPinning = true;
+    });
+  }
+
+  void stopEditPinning() {
+    setState(() {
+      _isEditPinning = false;
+    });
+  }
+
   @override
   void initState() {
     _sidebarWidth = _defaultWidth.clamp(_sidebarMinWidth, _sidebarMaxWidth).toDouble();
@@ -116,8 +129,9 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final Color borderIdleColor = Colors.grey.shade300;
-    final Color borderActiveColor = Theme.of(context).colorScheme.primary;
+    final Color borderActiveColor = theme.colorScheme.primary;
     final Color borderColor = (_isHandleHovered || _isDragging)
         ? borderActiveColor
         : borderIdleColor;
@@ -128,9 +142,11 @@ class _AllChatsViewState extends State<AllChatsView> {
         ? null
         : AppBar(
             title: Text(context.t.navBar.allChats),
-            centerTitle: false,
+            centerTitle: isDesktopWidth,
             toolbarHeight: 44,
             elevation: 0,
+            scrolledUnderElevation: 0,
+            backgroundColor: theme.colorScheme.surface,
             actions: [
               IconButton(
                 onPressed: () {
@@ -138,35 +154,41 @@ class _AllChatsViewState extends State<AllChatsView> {
                 },
                 icon: Icon(Icons.add),
               ),
+              if (_isEditPinning)
+                IconButton(
+                  onPressed: () {
+                    stopEditPinning();
+                  },
+                  icon: Icon(Icons.check, color: Colors.green),
+                ),
             ],
           );
 
     return Scaffold(
       appBar: appBar,
-      body: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, profileState) {
-          if (profileState.user != null) {
-            context.read<ChannelsCubit>().setSelfUser(profileState.user);
-            context.read<DirectMessagesCubit>().setSelfUser(profileState.user);
-          }
-          return FutureBuilder(
-            future: _future,
-            builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return BlocBuilder<AllChatsCubit, AllChatsState>(
-                // buildWhen: (prev, cur) =>
-                // prev.selectedFolderIndex != cur.selectedFolderIndex ||
-                // prev.folders != cur.folders ||
-                // prev.filterDmUserIds != cur.filterDmUserIds ||
-                // prev.filterChannelIds != cur.filterChannelIds,
-                builder: (context, state) {
-                  if (isDesktopWidth) {
+      body: SafeArea(
+        child: BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (context, profileState) {
+            if (profileState.user != null) {
+              context.read<ChannelsCubit>().setSelfUser(profileState.user);
+              context.read<DirectMessagesCubit>().setSelfUser(profileState.user);
+            }
+            return FutureBuilder(
+              future: _future,
+              builder: (BuildContext context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return BlocBuilder<AllChatsCubit, AllChatsState>(
+                  builder: (context, state) {
                     return Row(
                       children: [
                         ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: _sidebarWidth),
+                          constraints: BoxConstraints(
+                            maxWidth: isDesktopWidth
+                                ? _sidebarWidth
+                                : MediaQuery.sizeOf(context).width,
+                          ),
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border(
@@ -179,22 +201,34 @@ class _AllChatsViewState extends State<AllChatsView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        context.t.folders.title,
-                                        style: Theme.of(context).textTheme.titleMedium,
-                                      ),
-                                      IconButton(
-                                        onPressed: () => createNewFolder(context),
-                                        icon: const Icon(Icons.add),
-                                      ),
-                                    ],
+                                if (isDesktopWidth) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 12,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          context.t.folders.title,
+                                          style: theme.textTheme.titleMedium,
+                                        ),
+                                        _isEditPinning
+                                            ? IconButton(
+                                                onPressed: () {
+                                                  stopEditPinning();
+                                                },
+                                                icon: Icon(Icons.check, color: Colors.green),
+                                              )
+                                            : IconButton(
+                                                onPressed: () => createNewFolder(context),
+                                                icon: const Icon(Icons.add),
+                                              ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                ],
                                 SizedBox(
                                   height: 46,
                                   child: ScrollConfiguration(
@@ -211,12 +245,15 @@ class _AllChatsViewState extends State<AllChatsView> {
                                         final bool isSelected = state.selectedFolderIndex == index;
                                         return FolderPill(
                                           isSelected: isSelected,
-                                          folder: folder,
+                                          folder: index == 0
+                                              ? folder.copyWith(title: context.t.folders.all)
+                                              : folder,
                                           onTap: () =>
                                               context.read<AllChatsCubit>().selectFolder(index),
                                           onEdit: (folder.systemType == null)
                                               ? () => editFolder(context, folder)
                                               : null,
+                                          onEditPinning: () => editPinning(),
                                           onDelete: (folder.systemType == null)
                                               ? () async {
                                                   final confirmed = await showDialog<bool>(
@@ -293,6 +330,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                         filteredDms: state.filterDmUserIds,
                                                         selectedFolder: state
                                                             .folders[state.selectedFolderIndex],
+                                                        isEditPinning: _isEditPinning,
                                                       ),
                                                       const Divider(height: 1),
                                                       AllChatsChannels(
@@ -300,6 +338,9 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                           'channels-list-desktop',
                                                         ),
                                                         filterChannelIds: state.filterChannelIds,
+                                                        selectedFolder: state
+                                                            .folders[state.selectedFolderIndex],
+                                                        isEditPinning: _isEditPinning,
                                                       ),
                                                     ],
                                                   ),
@@ -381,110 +422,122 @@ class _AllChatsViewState extends State<AllChatsView> {
                           ),
                       ],
                     );
-                  }
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: CustomScrollView(
-                          slivers: [
-                            SliverToBoxAdapter(
-                              child: SizedBox(
-                                height: 46,
-                                child: ScrollConfiguration(
-                                  behavior: ScrollConfiguration.of(
-                                    context,
-                                  ).copyWith(scrollbars: false),
-                                  child: ListView.builder(
-                                    controller: _foldersScrollController,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ).copyWith(right: 64),
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: state.folders.length,
-                                    itemBuilder: (context, index) {
-                                      final FolderItemEntity folder = state.folders[index];
-                                      final bool isSelected = state.selectedFolderIndex == index;
 
-                                      return FolderPill(
-                                        isSelected: isSelected,
-                                        folder: folder,
-                                        onTap: () =>
-                                            context.read<AllChatsCubit>().selectFolder(index),
-                                        onEdit: (folder.systemType == null)
-                                            ? () => editFolder(context, folder)
-                                            : null,
-                                        onDelete: (folder.systemType == null)
-                                            ? () async {
-                                                final confirmed = await showDialog<bool>(
-                                                  context: context,
-                                                  builder: (dialogContext) => AlertDialog(
-                                                    title: Text(
-                                                      context.t.folders.deleteConfirmTitle,
-                                                    ),
-                                                    content: Text(
-                                                      context.t.folders.deleteConfirmText(
-                                                        folderName: folder.title ?? '',
-                                                      ),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.of(dialogContext).pop(false),
-                                                        child: Text(context.t.folders.cancel),
-                                                      ),
-                                                      FilledButton(
-                                                        onPressed: () =>
-                                                            Navigator.of(dialogContext).pop(true),
-                                                        child: Text(context.t.folders.delete),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                                if (confirmed == true) {
-                                                  await context.read<AllChatsCubit>().deleteFolder(
-                                                    folder,
-                                                  );
-                                                }
-                                              }
-                                            : null,
-                                      );
-                                    },
+                    return Row(
+                      children: [
+                        Column(
+                          children: [
+                            Expanded(
+                              child: CustomScrollView(
+                                slivers: [
+                                  SliverToBoxAdapter(
+                                    child: SizedBox(
+                                      height: 46,
+                                      child: ScrollConfiguration(
+                                        behavior: ScrollConfiguration.of(
+                                          context,
+                                        ).copyWith(scrollbars: false),
+                                        child: ListView.builder(
+                                          controller: _foldersScrollController,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                          ).copyWith(right: 64),
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: state.folders.length,
+                                          itemBuilder: (context, index) {
+                                            final FolderItemEntity folder = state.folders[index];
+                                            final bool isSelected =
+                                                state.selectedFolderIndex == index;
+
+                                            return FolderPill(
+                                              isSelected: isSelected,
+                                              folder: folder,
+                                              onTap: () =>
+                                                  context.read<AllChatsCubit>().selectFolder(index),
+                                              onEdit: (folder.systemType == null)
+                                                  ? () => editFolder(context, folder)
+                                                  : null,
+                                              onEditPinning: () => editPinning(),
+                                              onDelete: (folder.systemType == null)
+                                                  ? () async {
+                                                      final confirmed = await showDialog<bool>(
+                                                        context: context,
+                                                        builder: (dialogContext) => AlertDialog(
+                                                          title: Text(
+                                                            context.t.folders.deleteConfirmTitle,
+                                                          ),
+                                                          content: Text(
+                                                            context.t.folders.deleteConfirmText(
+                                                              folderName: folder.title ?? '',
+                                                            ),
+                                                          ),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () => Navigator.of(
+                                                                dialogContext,
+                                                              ).pop(false),
+                                                              child: Text(context.t.folders.cancel),
+                                                            ),
+                                                            FilledButton(
+                                                              onPressed: () => Navigator.of(
+                                                                dialogContext,
+                                                              ).pop(true),
+                                                              child: Text(context.t.folders.delete),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                      if (confirmed == true) {
+                                                        await context
+                                                            .read<AllChatsCubit>()
+                                                            .deleteFolder(folder);
+                                                      }
+                                                    }
+                                                  : null,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  SliverToBoxAdapter(
+                                    child: AllChatsDms(
+                                      key: const ValueKey('dms-list-mobile'),
+                                      filteredDms: state.filterDmUserIds,
+                                      selectedFolder: state.folders[state.selectedFolderIndex],
+                                      embeddedInParentScroll: true,
+                                      isEditPinning: _isEditPinning,
+                                    ),
+                                  ),
+                                  SliverToBoxAdapter(
+                                    child: AllChatsChannels(
+                                      key: const ValueKey('channels-list-mobile'),
+                                      filterChannelIds: state.filterChannelIds,
+                                      selectedFolder: state.folders[state.selectedFolderIndex],
+                                      embeddedInParentScroll: true,
+                                      isEditPinning: _isEditPinning,
+                                    ),
+                                  ),
+                                  if (state.isEmptyFolder)
+                                    SliverPadding(
+                                      padding: EdgeInsets.symmetric(vertical: 16),
+                                      sliver: SliverToBoxAdapter(
+                                        child: Center(child: Text(context.t.folders.folderIsEmpty)),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
-                            SliverToBoxAdapter(
-                              child: AllChatsDms(
-                                key: const ValueKey('dms-list-mobile'),
-                                filteredDms: state.filterDmUserIds,
-                                selectedFolder: state.folders[state.selectedFolderIndex],
-                                embeddedInParentScroll: true,
-                              ),
-                            ),
-                            SliverToBoxAdapter(
-                              child: AllChatsChannels(
-                                key: const ValueKey('channels-list-mobile'),
-                                filterChannelIds: state.filterChannelIds,
-                                embeddedInParentScroll: true,
-                              ),
-                            ),
-                            if (state.isEmptyFolder)
-                              SliverPadding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                sliver: SliverToBoxAdapter(
-                                  child: Center(child: Text(context.t.folders.folderIsEmpty)),
-                                ),
-                              ),
                           ],
                         ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          );
-        },
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

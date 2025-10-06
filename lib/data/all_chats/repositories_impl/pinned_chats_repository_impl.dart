@@ -19,6 +19,7 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
             folderId: chat.folderId,
             chatId: chat.chatId,
             pinnedAt: chat.pinnedAt,
+            orderIndex: chat.orderIndex,
           ),
         )
         .toList();
@@ -26,12 +27,35 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
   }
 
   @override
-  Future<void> pinChat({required int folderId, required int chatId}) async {
-    return await _localDataSource.pinChat(folderId: folderId, chatId: chatId);
+  Future<void> pinChat({
+    required int folderId,
+    required int chatId,
+    required int orderIndex,
+  }) async {
+    return await _localDataSource.pinChat(
+      folderId: folderId,
+      chatId: chatId,
+      orderIndex: orderIndex,
+    );
   }
 
   @override
   Future<void> unpinChat(int id) async {
     return await _localDataSource.unpinChat(id);
+  }
+
+  @override
+  Future<void> updatePinnedChatOrder({
+    required int folderId,
+    required int movedChatId,
+    int? previousChatId,
+    int? nextChatId,
+  }) async {
+    return await _localDataSource.updatePinnedChatOrder(
+      folderId: folderId,
+      movedChatId: movedChatId,
+      previousChatId: previousChatId,
+      nextChatId: nextChatId,
+    );
   }
 }

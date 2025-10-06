@@ -78,6 +78,8 @@ import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.
     as _i631;
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart'
     as _i7;
+import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart'
+    as _i1057;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
     as _i857;
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
@@ -572,6 +574,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i631.UnpinChatUseCase>(
       () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
     );
+    gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
+      () => _i1057.UpdatePinnedChatOrderUseCase(
+        gh<_i725.PinnedChatsRepository>(),
+      ),
+    );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(
         gh<_i125.AddFolderUseCase>(),
@@ -585,6 +592,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i126.GetPinnedChatsUseCase>(),
         gh<_i1012.PinChatUseCase>(),
         gh<_i631.UnpinChatUseCase>(),
+        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
       ),
     );
     return this;

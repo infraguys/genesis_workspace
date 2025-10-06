@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_target.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_target_use_case.dart';
@@ -14,6 +15,7 @@ import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_membershi
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
@@ -35,6 +37,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   final GetPinnedChatsUseCase _getPinnedChatsUseCase;
   final PinChatUseCase _pinChatUseCase;
   final UnpinChatUseCase _unpinChatUseCase;
+  final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
 
   AllChatsCubit(
     this._addFolderUseCase,
@@ -48,6 +51,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     this._getPinnedChatsUseCase,
     this._pinChatUseCase,
     this._unpinChatUseCase,
+    this._updatePinnedChatOrderUseCase,
   ) : super(
         AllChatsState(
           selectedChannel: null,
@@ -62,7 +66,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     try {
       await _addFolderUseCase.call(folder);
       final updatedFolders = [...state.folders];
-      updatedFolders.add(folder);
+      updatedFolders.add(folder.copyWith(id: updatedFolders.length));
       emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
       inspect(e);
@@ -94,9 +98,13 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<void> pinChat({required int chatId}) async {
     try {
       final int folderId = state.folders[state.selectedFolderIndex].id!;
-      await _pinChatUseCase.call(folderId: folderId, chatId: chatId);
       List<FolderItemEntity> updatedFolders = [...state.folders];
       FolderItemEntity folder = updatedFolders.firstWhere((folder) => folder.id == folderId);
+      await _pinChatUseCase.call(
+        folderId: folderId,
+        chatId: chatId,
+        orderIndex: folder.pinnedChats.length,
+      );
       final int indexOfFolder = updatedFolders.indexOf(folder);
       final pinnedChats = await _getPinnedChatsUseCase.call(folderId);
       folder = folder.copyWith(pinnedChats: pinnedChats);
@@ -117,10 +125,40 @@ class AllChatsCubit extends Cubit<AllChatsState> {
       final pinnedChats = await _getPinnedChatsUseCase.call(folderId);
       folder = folder.copyWith(pinnedChats: pinnedChats);
       updatedFolders[indexOfFolder] = folder;
-      inspect(updatedFolders);
       emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
       inspect(e);
+    }
+  }
+
+  Future<void> reorderPinnedChats({
+    required int folderId,
+    required int movedChatId,
+    int? previousChatId,
+    int? nextChatId,
+  }) async {
+    try {
+      await _updatePinnedChatOrderUseCase.call(
+        folderId: folderId,
+        movedChatId: movedChatId,
+        previousChatId: previousChatId,
+        nextChatId: nextChatId,
+      );
+
+      // перезагрузим пины для этой папки и переиздадим state
+      final List<PinnedChatEntity> refreshedPins = await _getPinnedChatsUseCase.call(folderId);
+
+      final List<FolderItemEntity> updatedFolders = [...state.folders];
+      final int folderIndex = updatedFolders.indexWhere((f) => f.id == folderId);
+      if (folderIndex != -1) {
+        final FolderItemEntity updatedFolder = updatedFolders[folderIndex].copyWith(
+          pinnedChats: refreshedPins,
+        );
+        updatedFolders[folderIndex] = updatedFolder;
+        emit(state.copyWith(folders: updatedFolders));
+      }
+    } catch (e, s) {
+      // обработка/логирование
     }
   }
 
@@ -134,6 +172,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   }
 
   Future<void> deleteFolder(FolderItemEntity folder) async {
+    if (folder.id == 0) return;
     if (folder.systemType != null || folder.id == null) return;
     final updatedFolders = [...state.folders];
     final index = updatedFolders.indexWhere((element) => element.id == folder.id);

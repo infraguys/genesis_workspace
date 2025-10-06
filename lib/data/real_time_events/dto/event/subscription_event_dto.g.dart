@@ -12,7 +12,7 @@ SubscriptionEventDto _$SubscriptionEventDtoFromJson(
   id: (json['id'] as num).toInt(),
   type: $enumDecode(_$EventTypeEnumMap, json['type']),
   op: $enumDecode(_$SubscriptionOpEnumMap, json['op']),
-  streamId: (json['stream_id'] as num).toInt(),
+  streamId: (json['stream_id'] as num?)?.toInt() ?? -1,
   property: $enumDecode(_$SubscriptionPropertyEnumMap, json['property']),
   value: SubscriptionValue.fromJson(json['value']),
 );
