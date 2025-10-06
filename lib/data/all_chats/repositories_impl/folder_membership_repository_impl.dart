@@ -1,13 +1,13 @@
-import 'package:injectable/injectable.dart';
+import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_target.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_membership_repository.dart';
-import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
-import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart';
+import 'package:injectable/injectable.dart';
 
 @Injectable(as: FolderMembershipRepository)
 class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
-  final FolderMembershipLocalDataSource _local;
-  FolderMembershipRepositoryImpl(this._local);
+  final FolderMembershipLocalDataSource _localDataSource;
+  FolderMembershipRepositoryImpl(this._localDataSource);
 
   String _typeToString(FolderTargetType type) {
     switch (type) {
@@ -20,7 +20,7 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
 
   @override
   Future<void> setFoldersForTarget(FolderTarget target, List<int> folderIds) async {
-    await _local.setItemFolders(
+    await _localDataSource.setItemFolders(
       itemType: _typeToString(target.type),
       targetId: target.targetId,
       folderIds: folderIds,
@@ -30,7 +30,7 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
 
   @override
   Future<List<int>> getFolderIdsForTarget(FolderTarget target) async {
-    return _local.getFolderIdsForItem(
+    return _localDataSource.getFolderIdsForItem(
       itemType: _typeToString(target.type),
       targetId: target.targetId,
       topicName: target.topicName,
@@ -38,11 +38,11 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
   }
 
   @override
-  Future<void> removeAllForFolder(int folderId) => _local.deleteByFolderId(folderId);
+  Future<void> removeAllForFolder(int folderId) => _localDataSource.deleteByFolderId(folderId);
 
   @override
   Future<FolderMembers> getMembersForFolder(int folderId) async {
-    final rows = await _local.getItemsForFolder(folderId);
+    final rows = await _localDataSource.getItemsForFolder(folderId);
     final dm = <int>[];
     final channels = <int>[];
     for (final r in rows) {

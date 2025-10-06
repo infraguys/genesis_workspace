@@ -858,14 +858,374 @@ class FolderItemsCompanion extends UpdateCompanion<FolderItem> {
   }
 }
 
+class $PinnedChatsTable extends PinnedChats
+    with TableInfo<$PinnedChatsTable, PinnedChat> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PinnedChatsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _folderIdMeta = const VerificationMeta(
+    'folderId',
+  );
+  @override
+  late final GeneratedColumn<int> folderId = GeneratedColumn<int>(
+    'folder_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'REFERENCES folder_items(id) ON DELETE CASCADE',
+  );
+  static const VerificationMeta _orderIndexMeta = const VerificationMeta(
+    'orderIndex',
+  );
+  @override
+  late final GeneratedColumn<int> orderIndex = GeneratedColumn<int>(
+    'order_index',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
+  @override
+  late final GeneratedColumn<int> chatId = GeneratedColumn<int>(
+    'chat_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pinnedAtMeta = const VerificationMeta(
+    'pinnedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> pinnedAt = GeneratedColumn<DateTime>(
+    'pinned_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    folderId,
+    orderIndex,
+    chatId,
+    pinnedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pinned_chats';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PinnedChat> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('folder_id')) {
+      context.handle(
+        _folderIdMeta,
+        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_folderIdMeta);
+    }
+    if (data.containsKey('order_index')) {
+      context.handle(
+        _orderIndexMeta,
+        orderIndex.isAcceptableOrUnknown(data['order_index']!, _orderIndexMeta),
+      );
+    }
+    if (data.containsKey('chat_id')) {
+      context.handle(
+        _chatIdMeta,
+        chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_chatIdMeta);
+    }
+    if (data.containsKey('pinned_at')) {
+      context.handle(
+        _pinnedAtMeta,
+        pinnedAt.isAcceptableOrUnknown(data['pinned_at']!, _pinnedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {folderId, chatId},
+  ];
+  @override
+  PinnedChat map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PinnedChat(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      folderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}folder_id'],
+      )!,
+      orderIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_index'],
+      ),
+      chatId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}chat_id'],
+      )!,
+      pinnedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}pinned_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PinnedChatsTable createAlias(String alias) {
+    return $PinnedChatsTable(attachedDatabase, alias);
+  }
+}
+
+class PinnedChat extends DataClass implements Insertable<PinnedChat> {
+  final int id;
+  final int folderId;
+  final int? orderIndex;
+  final int chatId;
+  final DateTime pinnedAt;
+  const PinnedChat({
+    required this.id,
+    required this.folderId,
+    this.orderIndex,
+    required this.chatId,
+    required this.pinnedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['folder_id'] = Variable<int>(folderId);
+    if (!nullToAbsent || orderIndex != null) {
+      map['order_index'] = Variable<int>(orderIndex);
+    }
+    map['chat_id'] = Variable<int>(chatId);
+    map['pinned_at'] = Variable<DateTime>(pinnedAt);
+    return map;
+  }
+
+  PinnedChatsCompanion toCompanion(bool nullToAbsent) {
+    return PinnedChatsCompanion(
+      id: Value(id),
+      folderId: Value(folderId),
+      orderIndex: orderIndex == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderIndex),
+      chatId: Value(chatId),
+      pinnedAt: Value(pinnedAt),
+    );
+  }
+
+  factory PinnedChat.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PinnedChat(
+      id: serializer.fromJson<int>(json['id']),
+      folderId: serializer.fromJson<int>(json['folderId']),
+      orderIndex: serializer.fromJson<int?>(json['orderIndex']),
+      chatId: serializer.fromJson<int>(json['chatId']),
+      pinnedAt: serializer.fromJson<DateTime>(json['pinnedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'folderId': serializer.toJson<int>(folderId),
+      'orderIndex': serializer.toJson<int?>(orderIndex),
+      'chatId': serializer.toJson<int>(chatId),
+      'pinnedAt': serializer.toJson<DateTime>(pinnedAt),
+    };
+  }
+
+  PinnedChat copyWith({
+    int? id,
+    int? folderId,
+    Value<int?> orderIndex = const Value.absent(),
+    int? chatId,
+    DateTime? pinnedAt,
+  }) => PinnedChat(
+    id: id ?? this.id,
+    folderId: folderId ?? this.folderId,
+    orderIndex: orderIndex.present ? orderIndex.value : this.orderIndex,
+    chatId: chatId ?? this.chatId,
+    pinnedAt: pinnedAt ?? this.pinnedAt,
+  );
+  PinnedChat copyWithCompanion(PinnedChatsCompanion data) {
+    return PinnedChat(
+      id: data.id.present ? data.id.value : this.id,
+      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      orderIndex: data.orderIndex.present
+          ? data.orderIndex.value
+          : this.orderIndex,
+      chatId: data.chatId.present ? data.chatId.value : this.chatId,
+      pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PinnedChat(')
+          ..write('id: $id, ')
+          ..write('folderId: $folderId, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('chatId: $chatId, ')
+          ..write('pinnedAt: $pinnedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, folderId, orderIndex, chatId, pinnedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PinnedChat &&
+          other.id == this.id &&
+          other.folderId == this.folderId &&
+          other.orderIndex == this.orderIndex &&
+          other.chatId == this.chatId &&
+          other.pinnedAt == this.pinnedAt);
+}
+
+class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
+  final Value<int> id;
+  final Value<int> folderId;
+  final Value<int?> orderIndex;
+  final Value<int> chatId;
+  final Value<DateTime> pinnedAt;
+  const PinnedChatsCompanion({
+    this.id = const Value.absent(),
+    this.folderId = const Value.absent(),
+    this.orderIndex = const Value.absent(),
+    this.chatId = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+  });
+  PinnedChatsCompanion.insert({
+    this.id = const Value.absent(),
+    required int folderId,
+    this.orderIndex = const Value.absent(),
+    required int chatId,
+    this.pinnedAt = const Value.absent(),
+  }) : folderId = Value(folderId),
+       chatId = Value(chatId);
+  static Insertable<PinnedChat> custom({
+    Expression<int>? id,
+    Expression<int>? folderId,
+    Expression<int>? orderIndex,
+    Expression<int>? chatId,
+    Expression<DateTime>? pinnedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (folderId != null) 'folder_id': folderId,
+      if (orderIndex != null) 'order_index': orderIndex,
+      if (chatId != null) 'chat_id': chatId,
+      if (pinnedAt != null) 'pinned_at': pinnedAt,
+    });
+  }
+
+  PinnedChatsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? folderId,
+    Value<int?>? orderIndex,
+    Value<int>? chatId,
+    Value<DateTime>? pinnedAt,
+  }) {
+    return PinnedChatsCompanion(
+      id: id ?? this.id,
+      folderId: folderId ?? this.folderId,
+      orderIndex: orderIndex ?? this.orderIndex,
+      chatId: chatId ?? this.chatId,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (folderId.present) {
+      map['folder_id'] = Variable<int>(folderId.value);
+    }
+    if (orderIndex.present) {
+      map['order_index'] = Variable<int>(orderIndex.value);
+    }
+    if (chatId.present) {
+      map['chat_id'] = Variable<int>(chatId.value);
+    }
+    if (pinnedAt.present) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PinnedChatsCompanion(')
+          ..write('id: $id, ')
+          ..write('folderId: $folderId, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('chatId: $chatId, ')
+          ..write('pinnedAt: $pinnedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $RecentDmsTable recentDms = $RecentDmsTable(this);
   late final $FoldersTable folders = $FoldersTable(this);
   late final $FolderItemsTable folderItems = $FolderItemsTable(this);
+  late final $PinnedChatsTable pinnedChats = $PinnedChatsTable(this);
   late final RecentDmDao recentDmDao = RecentDmDao(this as AppDatabase);
   late final FolderDao folderDao = FolderDao(this as AppDatabase);
+  late final PinnedChatsDao pinnedChatsDao = PinnedChatsDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -874,6 +1234,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     recentDms,
     folders,
     folderItems,
+    pinnedChats,
   ];
 }
 
@@ -1365,6 +1726,202 @@ typedef $$FolderItemsTableProcessedTableManager =
       FolderItem,
       PrefetchHooks Function()
     >;
+typedef $$PinnedChatsTableCreateCompanionBuilder =
+    PinnedChatsCompanion Function({
+      Value<int> id,
+      required int folderId,
+      Value<int?> orderIndex,
+      required int chatId,
+      Value<DateTime> pinnedAt,
+    });
+typedef $$PinnedChatsTableUpdateCompanionBuilder =
+    PinnedChatsCompanion Function({
+      Value<int> id,
+      Value<int> folderId,
+      Value<int?> orderIndex,
+      Value<int> chatId,
+      Value<DateTime> pinnedAt,
+    });
+
+class $$PinnedChatsTableFilterComposer
+    extends Composer<_$AppDatabase, $PinnedChatsTable> {
+  $$PinnedChatsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get folderId => $composableBuilder(
+    column: $table.folderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get chatId => $composableBuilder(
+    column: $table.chatId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get pinnedAt => $composableBuilder(
+    column: $table.pinnedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PinnedChatsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PinnedChatsTable> {
+  $$PinnedChatsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get folderId => $composableBuilder(
+    column: $table.folderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get chatId => $composableBuilder(
+    column: $table.chatId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get pinnedAt => $composableBuilder(
+    column: $table.pinnedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PinnedChatsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PinnedChatsTable> {
+  $$PinnedChatsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get folderId =>
+      $composableBuilder(column: $table.folderId, builder: (column) => column);
+
+  GeneratedColumn<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get chatId =>
+      $composableBuilder(column: $table.chatId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get pinnedAt =>
+      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+}
+
+class $$PinnedChatsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PinnedChatsTable,
+          PinnedChat,
+          $$PinnedChatsTableFilterComposer,
+          $$PinnedChatsTableOrderingComposer,
+          $$PinnedChatsTableAnnotationComposer,
+          $$PinnedChatsTableCreateCompanionBuilder,
+          $$PinnedChatsTableUpdateCompanionBuilder,
+          (
+            PinnedChat,
+            BaseReferences<_$AppDatabase, $PinnedChatsTable, PinnedChat>,
+          ),
+          PinnedChat,
+          PrefetchHooks Function()
+        > {
+  $$PinnedChatsTableTableManager(_$AppDatabase db, $PinnedChatsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PinnedChatsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PinnedChatsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PinnedChatsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> folderId = const Value.absent(),
+                Value<int?> orderIndex = const Value.absent(),
+                Value<int> chatId = const Value.absent(),
+                Value<DateTime> pinnedAt = const Value.absent(),
+              }) => PinnedChatsCompanion(
+                id: id,
+                folderId: folderId,
+                orderIndex: orderIndex,
+                chatId: chatId,
+                pinnedAt: pinnedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int folderId,
+                Value<int?> orderIndex = const Value.absent(),
+                required int chatId,
+                Value<DateTime> pinnedAt = const Value.absent(),
+              }) => PinnedChatsCompanion.insert(
+                id: id,
+                folderId: folderId,
+                orderIndex: orderIndex,
+                chatId: chatId,
+                pinnedAt: pinnedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PinnedChatsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PinnedChatsTable,
+      PinnedChat,
+      $$PinnedChatsTableFilterComposer,
+      $$PinnedChatsTableOrderingComposer,
+      $$PinnedChatsTableAnnotationComposer,
+      $$PinnedChatsTableCreateCompanionBuilder,
+      $$PinnedChatsTableUpdateCompanionBuilder,
+      (
+        PinnedChat,
+        BaseReferences<_$AppDatabase, $PinnedChatsTable, PinnedChat>,
+      ),
+      PinnedChat,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1375,4 +1932,6 @@ class $AppDatabaseManager {
       $$FoldersTableTableManager(_db, _db.folders);
   $$FolderItemsTableTableManager get folderItems =>
       $$FolderItemsTableTableManager(_db, _db.folderItems);
+  $$PinnedChatsTableTableManager get pinnedChats =>
+      $$PinnedChatsTableTableManager(_db, _db.pinnedChats);
 }

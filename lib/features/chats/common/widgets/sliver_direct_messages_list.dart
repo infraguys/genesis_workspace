@@ -93,6 +93,7 @@ class SliverDirectMessagesList extends StatelessWidget {
                   final DmUserEntity userEntity = displayedUsers[userIndex];
                   return UserTile(
                     user: userEntity,
+                    isPinned: false,
                     onTap: () {
                       if (currentSize(context) > ScreenSize.lTablet) {
                         context.read<DirectMessagesCubit>().selectUserChat(

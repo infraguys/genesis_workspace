@@ -7,8 +7,9 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class UserTile extends StatelessWidget {
   final DmUserEntity user;
+  final bool isPinned;
   final void Function() onTap;
-  const UserTile({super.key, required this.user, required this.onTap});
+  const UserTile({super.key, required this.user, required this.onTap, required this.isPinned});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,12 @@ class UserTile extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      title: Text(user.fullName, overflow: TextOverflow.ellipsis),
+      title: Row(
+        children: [
+          Text(user.fullName, overflow: TextOverflow.ellipsis),
+          if (isPinned) Icon(Icons.push_pin_rounded, size: 12),
+        ],
+      ),
       subtitle: Text(
         isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
         style: theme.textTheme.labelSmall,

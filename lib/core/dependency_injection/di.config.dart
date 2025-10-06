@@ -16,14 +16,20 @@ import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
 import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart' as _i483;
 import 'package:genesis_workspace/data/all_chats/dao/folder_item_dao.dart'
     as _i909;
+import 'package:genesis_workspace/data/all_chats/dao/pinned_chats_dao.dart'
+    as _i691;
 import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_source.dart'
     as _i277;
 import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart'
     as _i180;
+import 'package:genesis_workspace/data/all_chats/datasources/pinned_chats_local_data_source.dart'
+    as _i796;
 import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_membership_repository_impl.dart'
     as _i770;
 import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_repository_impl.dart'
     as _i957;
+import 'package:genesis_workspace/data/all_chats/repositories_impl/pinned_chats_repository_impl.dart'
+    as _i835;
 import 'package:genesis_workspace/data/database/app_database.dart' as _i606;
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart'
     as _i253;
@@ -48,6 +54,8 @@ import 'package:genesis_workspace/domain/all_chats/repositories/folder_membershi
     as _i915;
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_repository.dart'
     as _i48;
+import 'package:genesis_workspace/domain/all_chats/repositories/pinned_chats_repository.dart'
+    as _i725;
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart'
     as _i125;
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart'
@@ -58,10 +66,16 @@ import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case
     as _i815;
 import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart'
     as _i438;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart'
+    as _i126;
+import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart'
+    as _i1012;
 import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart'
     as _i744;
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart'
     as _i395;
+import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart'
+    as _i631;
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart'
     as _i7;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
@@ -289,6 +303,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i909.FolderItemDao(gh<_i606.AppDatabase>()),
     );
     gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
+    gh.factory<_i691.PinnedChatsDao>(
+      () => _i691.PinnedChatsDao(gh<_i606.AppDatabase>()),
+    );
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
     );
@@ -405,12 +422,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
       ),
     );
+    gh.factory<_i915.FolderMembershipRepository>(
+      () => _i770.FolderMembershipRepositoryImpl(
+        gh<_i180.FolderMembershipLocalDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i766.ProfileCubit>(
       () => _i766.ProfileCubit(
         gh<_i82.RealTimeService>(),
         gh<_i547.GetOwnUserUseCase>(),
         gh<_i832.UpdatePresenceUseCase>(),
       ),
+    );
+    gh.factory<_i48.FolderRepository>(
+      () => _i957.FolderRepositoryImpl(gh<_i277.FolderLocalDataSource>()),
     );
     gh.factory<_i852.DirectMessagesCubit>(
       () => _i852.DirectMessagesCubit(
@@ -419,6 +444,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i194.GetUsersUseCase>(),
         gh<_i207.GetMessagesUseCase>(),
       ),
+    );
+    gh.factory<_i796.PinnedChatsLocalDataSource>(
+      () => _i796.PinnedChatsLocalDataSource(gh<_i691.PinnedChatsDao>()),
     );
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
@@ -429,9 +457,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i812.AddRecentDmUseCase>(
       () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
     );
-    gh.factory<_i48.FolderRepository>(
-      () => _i957.FolderRepositoryImpl(gh<_i277.FolderLocalDataSource>()),
-    );
     gh.factory<_i849.DeleteFolderUseCase>(
       () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
@@ -440,14 +465,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i125.AddFolderUseCase>(
       () => _i125.AddFolderUseCase(gh<_i48.FolderRepository>()),
-    );
-    gh.factory<_i815.GetFoldersUseCase>(
-      () => _i815.GetFoldersUseCase(gh<_i48.FolderRepository>()),
-    );
-    gh.factory<_i915.FolderMembershipRepository>(
-      () => _i770.FolderMembershipRepositoryImpl(
-        gh<_i180.FolderMembershipLocalDataSource>(),
-      ),
     );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
@@ -508,10 +525,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i819.DeleteCsrftokenUseCase>(
       () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.lazySingleton<_i725.PinnedChatsRepository>(
+      () => _i835.PinnedChatsRepositoryImpl(
+        gh<_i796.PinnedChatsLocalDataSource>(),
+      ),
+    );
     gh.factory<_i155.SettingsCubit>(
       () => _i155.SettingsCubit(
         gh<_i812.AddRecentDmUseCase>(),
         gh<_i445.GetRecentDmsUseCase>(),
+      ),
+    );
+    gh.factory<_i815.GetFoldersUseCase>(
+      () => _i815.GetFoldersUseCase(
+        gh<_i48.FolderRepository>(),
+        gh<_i725.PinnedChatsRepository>(),
       ),
     );
     gh.lazySingleton<_i862.AuthCubit>(
@@ -535,6 +563,15 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: _i862.disposeAuthCubit,
     );
+    gh.factory<_i1012.PinChatUseCase>(
+      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i126.GetPinnedChatsUseCase>(
+      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i631.UnpinChatUseCase>(
+      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(
         gh<_i125.AddFolderUseCase>(),
@@ -545,6 +582,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i714.GetFolderIdsForTargetUseCase>(),
         gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
         gh<_i438.GetMembersForFolderUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
       ),
     );
     return this;

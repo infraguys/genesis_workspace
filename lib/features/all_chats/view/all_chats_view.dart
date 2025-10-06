@@ -291,6 +291,8 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                       AllChatsDms(
                                                         key: const ValueKey('dms-list-desktop'),
                                                         filteredDms: state.filterDmUserIds,
+                                                        selectedFolder: state
+                                                            .folders[state.selectedFolderIndex],
                                                       ),
                                                       const Divider(height: 1),
                                                       AllChatsChannels(
@@ -455,6 +457,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                               child: AllChatsDms(
                                 key: const ValueKey('dms-list-mobile'),
                                 filteredDms: state.filterDmUserIds,
+                                selectedFolder: state.folders[state.selectedFolderIndex],
                                 embeddedInParentScroll: true,
                               ),
                             ),

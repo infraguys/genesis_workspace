@@ -8,8 +8,11 @@ import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_ca
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_target_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
@@ -29,6 +32,9 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   final GetFolderIdsForTargetUseCase _getFolderIdsForTargetUseCase;
   final RemoveAllMembershipsForFolderUseCase _removeAllMembershipsForFolderUseCase;
   final GetMembersForFolderUseCase _getMembersForFolderUseCase;
+  final GetPinnedChatsUseCase _getPinnedChatsUseCase;
+  final PinChatUseCase _pinChatUseCase;
+  final UnpinChatUseCase _unpinChatUseCase;
 
   AllChatsCubit(
     this._addFolderUseCase,
@@ -39,6 +45,9 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     this._getFolderIdsForTargetUseCase,
     this._removeAllMembershipsForFolderUseCase,
     this._getMembersForFolderUseCase,
+    this._getPinnedChatsUseCase,
+    this._pinChatUseCase,
+    this._unpinChatUseCase,
   ) : super(
         AllChatsState(
           selectedChannel: null,
@@ -61,17 +70,58 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   }
 
   Future<void> loadFolders() async {
-    final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call();
-    final List<FolderItemEntity> initialFolders = [
-      FolderItemEntity(
-        systemType: SystemFolderType.all,
-        iconData: Icons.markunread,
-        unreadCount: 0,
-      ),
-      ...dbFolders,
-    ];
-    emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
-    // await _applyFolderFilter();
+    try {
+      final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call();
+      if (dbFolders.isEmpty) {
+        final initFolder = FolderItemEntity(
+          id: 0,
+          title: 'All',
+          systemType: SystemFolderType.all,
+          iconData: Icons.markunread,
+          unreadCount: 0,
+          pinnedChats: [],
+        );
+        await addFolder(initFolder);
+        return;
+      }
+      final List<FolderItemEntity> initialFolders = [...dbFolders];
+      emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> pinChat({required int chatId}) async {
+    try {
+      final int folderId = state.folders[state.selectedFolderIndex].id!;
+      await _pinChatUseCase.call(folderId: folderId, chatId: chatId);
+      List<FolderItemEntity> updatedFolders = [...state.folders];
+      FolderItemEntity folder = updatedFolders.firstWhere((folder) => folder.id == folderId);
+      final int indexOfFolder = updatedFolders.indexOf(folder);
+      final pinnedChats = await _getPinnedChatsUseCase.call(folderId);
+      folder = folder.copyWith(pinnedChats: pinnedChats);
+      updatedFolders[indexOfFolder] = folder;
+      emit(state.copyWith(folders: updatedFolders));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> unpinChat(int pinnedChatId) async {
+    try {
+      final int folderId = state.folders[state.selectedFolderIndex].id!;
+      await _unpinChatUseCase.call(pinnedChatId);
+      List<FolderItemEntity> updatedFolders = [...state.folders];
+      FolderItemEntity folder = updatedFolders.firstWhere((folder) => folder.id == folderId);
+      final int indexOfFolder = updatedFolders.indexOf(folder);
+      final pinnedChats = await _getPinnedChatsUseCase.call(folderId);
+      folder = folder.copyWith(pinnedChats: pinnedChats);
+      updatedFolders[indexOfFolder] = folder;
+      inspect(updatedFolders);
+      emit(state.copyWith(folders: updatedFolders));
+    } catch (e) {
+      inspect(e);
+    }
   }
 
   Future<void> updateFolder(FolderItemEntity folder) async {
@@ -103,12 +153,12 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     await _applyFolderFilter();
   }
 
-  Future<List<int>> getFolderIdsForDm(int userId) {
-    return _getFolderIdsForTargetUseCase.call(FolderTarget.dm(userId));
+  Future<List<int>> getFolderIdsForDm(int userId) async {
+    return await _getFolderIdsForTargetUseCase.call(FolderTarget.dm(userId));
   }
 
-  Future<List<int>> getFolderIdsForChannel(int streamId) {
-    return _getFolderIdsForTargetUseCase.call(FolderTarget.channel(streamId));
+  Future<List<int>> getFolderIdsForChannel(int streamId) async {
+    return await _getFolderIdsForTargetUseCase.call(FolderTarget.channel(streamId));
   }
 
   void selectDmChat(DmUserEntity? dmUserEntity) async {
@@ -121,7 +171,6 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         selectedChannel: state.selectedChannel,
       ),
     );
-    // await _applyFolderFilter();
   }
 
   void selectChannel({ChannelEntity? channel, TopicEntity? topic}) async {
@@ -133,7 +182,6 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         selectedDmChat: state.selectedDmChat,
       ),
     );
-    // await _applyFolderFilter();
   }
 
   void selectFolder(int newIndex) async {
@@ -158,13 +206,6 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         filterChannelIds: members.channelIds.toSet(),
       ),
     );
-    // emit(
-    //   state.copyWith(
-    //     filterDmUserIds: <int>{},
-    //     filterChannelIds: <int>{},
-    //   ),
-    // );
-    // await _applyFolderFilter();
   }
 
   Future<void> _applyFolderFilter() async {

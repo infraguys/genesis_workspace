@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
-import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/data/all_chats/tables/folder_table.dart';
+import 'package:genesis_workspace/data/database/app_database.dart';
+import 'package:injectable/injectable.dart';
 
 part 'folder_dao.g.dart';
 
@@ -11,6 +11,7 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
   FolderDao(AppDatabase db) : super(db);
 
   Future<int> insertFolder({
+    int? id,
     required String title,
     required int iconCodePoint,
     int? backgroundColorValue,
@@ -18,6 +19,7 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
   }) {
     return into(folders).insert(
       FoldersCompanion.insert(
+        id: id != null ? Value(id) : const Value.absent(),
         title: title,
         iconCodePoint: iconCodePoint,
         backgroundColorValue: Value(backgroundColorValue),
@@ -46,13 +48,11 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
   }) async {
     final companion = FoldersCompanion(
       title: title != null ? Value(title) : const Value.absent(),
-      iconCodePoint:
-          iconCodePoint != null ? Value(iconCodePoint) : const Value.absent(),
+      iconCodePoint: iconCodePoint != null ? Value(iconCodePoint) : const Value.absent(),
       backgroundColorValue: backgroundColorValue != null
           ? Value(backgroundColorValue)
           : const Value.absent(),
-      unreadCount:
-          unreadCount != null ? Value(unreadCount) : const Value.absent(),
+      unreadCount: unreadCount != null ? Value(unreadCount) : const Value.absent(),
     );
     return (update(folders)..where((tbl) => tbl.id.equals(id))).write(companion);
   }

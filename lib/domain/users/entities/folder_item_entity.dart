@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 enum SystemFolderType { all }
@@ -10,7 +11,7 @@ class FolderItemEntity {
   final int unreadCount;
   final Color? backgroundColor;
   final SystemFolderType? systemType;
-  // final FolderMembers? folderMembers;
+  final List<PinnedChatEntity> pinnedChats;
 
   const FolderItemEntity({
     this.id,
@@ -19,7 +20,7 @@ class FolderItemEntity {
     this.unreadCount = 0,
     this.backgroundColor,
     this.systemType,
-    // this.folderMembers,
+    required this.pinnedChats,
   });
 
   FolderItemEntity copyWith({
@@ -29,7 +30,7 @@ class FolderItemEntity {
     int? unreadCount,
     Color? backgroundColor,
     SystemFolderType? systemType,
-    // FolderMembers? folderMembers,
+    List<PinnedChatEntity>? pinnedChats,
   }) {
     return FolderItemEntity(
       id: id ?? this.id,
@@ -38,7 +39,7 @@ class FolderItemEntity {
       unreadCount: unreadCount ?? this.unreadCount,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       systemType: systemType ?? this.systemType,
-      // folderMembers: folderMembers ?? this.folderMembers,
+      pinnedChats: pinnedChats ?? this.pinnedChats,
     );
   }
 }
