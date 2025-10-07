@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
@@ -77,7 +78,9 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
               .where((user) => widget.filteredDms!.contains(user.userId))
               .toList();
 
-    final List<PinnedChatEntity> pinnedChats = widget.selectedFolder.pinnedChats;
+    final List<PinnedChatEntity> pinnedChats = widget.selectedFolder.pinnedChats
+        .where((chat) => chat.type == PinnedChatType.dm)
+        .toList();
     final Map<int, PinnedChatEntity> pinnedByChatId = {
       for (final pinned in pinnedChats) pinned.chatId: pinned,
     };
@@ -309,6 +312,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                                   context.pop();
                                                   await context.read<AllChatsCubit>().pinChat(
                                                     chatId: user.userId,
+                                                    type: PinnedChatType.dm,
                                                   );
                                                 },
                                               ),

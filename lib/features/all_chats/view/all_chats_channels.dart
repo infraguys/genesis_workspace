@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
@@ -87,7 +88,9 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
                 ...state.channels,
               ].where((channel) => widget.filterChannelIds!.contains(channel.streamId)).toList();
 
-        final pinnedChats = widget.selectedFolder.pinnedChats;
+        final pinnedChats = widget.selectedFolder.pinnedChats
+            .where((chat) => chat.type == PinnedChatType.channel)
+            .toList();
         final Map<int, PinnedChatEntity> pinnedByChatId = {
           for (final pinned in pinnedChats) pinned.chatId: pinned,
         };

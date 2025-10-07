@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
+import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
@@ -119,10 +120,11 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                               ),
                           ],
                         ),
-                        widget.trailingOverride ?? UnreadBadge(
-                          count: widget.channel.unreadMessages.length,
-                          isMuted: widget.channel.isMuted,
-                        ),
+                        widget.trailingOverride ??
+                            UnreadBadge(
+                              count: widget.channel.unreadMessages.length,
+                              isMuted: widget.channel.isMuted,
+                            ),
                       ],
                     ),
                   ),
@@ -143,9 +145,7 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                       child: ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: widget.channel.topics.isEmpty
-                            ? 3
-                            : widget.channel.topics.length,
+                        itemCount: widget.channel.topics.isEmpty ? 3 : widget.channel.topics.length,
                         itemBuilder: (BuildContext context, int index) {
                           if (widget.channel.topics.isEmpty) {
                             return Padding(
@@ -157,10 +157,7 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                             return InkWell(
                               onTap: () => widget.onTopicTap?.call(topic),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -245,7 +242,10 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                     title: Text(context.t.chat.pinChat),
                     onTap: () async {
                       Navigator.of(context).pop();
-                      await context.read<AllChatsCubit>().pinChat(chatId: widget.channel.streamId);
+                      await context.read<AllChatsCubit>().pinChat(
+                        chatId: widget.channel.streamId,
+                        type: PinnedChatType.channel,
+                      );
                     },
                   ),
                 ListTile(

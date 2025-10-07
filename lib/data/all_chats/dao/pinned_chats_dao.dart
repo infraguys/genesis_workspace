@@ -32,7 +32,11 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
   // ---------- Pin / Unpin ----------
 
   /// Пинуем чат в конец списка папки (дефолтное поведение)
-  Future<int> pinToEnd({required int folderId, required int chatId}) async {
+  Future<int> pinToEnd({
+    required int folderId,
+    required int chatId,
+    required PinnedChatType type,
+  }) async {
     return transaction(() async {
       // уникальность: если уже пиннут — просто вернуть id
       final existing = await getPinnedChatByIds(folderId: folderId, chatId: chatId);
@@ -53,15 +57,15 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
           folderId: folderId,
           chatId: chatId,
           orderIndex: Value(newIndex),
-          // pinnedAt выставится по дефолту currentDateAndTime
+          type: type,
         ),
-        mode: InsertMode.insert, // уникальность покрывает UNIQUE(folderId, chatId)
+        mode: InsertMode.insert,
       );
     });
   }
 
-  Future<void> pinChat({required int folderId, required int chatId}) {
-    return pinToEnd(folderId: folderId, chatId: chatId);
+  Future<void> pinChat({required int folderId, required int chatId, required PinnedChatType type}) {
+    return pinToEnd(folderId: folderId, chatId: chatId, type: type);
   }
 
   Future<void> unpinById(int pinnedChatId) {

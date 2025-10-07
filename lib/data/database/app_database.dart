@@ -21,7 +21,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,6 +48,15 @@ class AppDatabase extends _$AppDatabase {
         await migrator.create(folderItems);
         await migrator.create(pinnedChats);
         await migrator.create(recentDms);
+      }
+      if (from < 8) {
+        await migrator.alterTable(
+          TableMigration(
+            pinnedChats,
+            newColumns: [pinnedChats.type],
+            columnTransformer: {pinnedChats.type: const Constant('dm')},
+          ),
+        );
       }
     },
   );

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_target.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
@@ -95,7 +96,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     }
   }
 
-  Future<void> pinChat({required int chatId}) async {
+  Future<void> pinChat({required int chatId, required PinnedChatType type}) async {
     try {
       final int folderId = state.folders[state.selectedFolderIndex].id!;
       List<FolderItemEntity> updatedFolders = [...state.folders];
@@ -104,6 +105,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         folderId: folderId,
         chatId: chatId,
         orderIndex: folder.pinnedChats.length,
+        type: type,
       );
       final int indexOfFolder = updatedFolders.indexOf(folder);
       final pinnedChats = await _getPinnedChatsUseCase.call(folderId);

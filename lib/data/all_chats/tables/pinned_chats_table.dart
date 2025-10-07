@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+enum PinnedChatType { dm, channel }
+
 class PinnedChats extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get folderId =>
@@ -7,6 +9,7 @@ class PinnedChats extends Table {
   IntColumn get orderIndex => integer().nullable()();
   IntColumn get chatId => integer()();
   DateTimeColumn get pinnedAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get type => textEnum<PinnedChatType>()();
 
   @override
   List<Set<Column>> get uniqueKeys => [

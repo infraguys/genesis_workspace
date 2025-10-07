@@ -978,12 +978,22 @@ class $PinnedChatsTable extends PinnedChats
     defaultValue: currentDateAndTime,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<PinnedChatType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<PinnedChatType>($PinnedChatsTable.$convertertype);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     folderId,
     orderIndex,
     chatId,
     pinnedAt,
+    type,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1061,6 +1071,12 @@ class $PinnedChatsTable extends PinnedChats
         DriftSqlType.dateTime,
         data['${effectivePrefix}pinned_at'],
       )!,
+      type: $PinnedChatsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
     );
   }
 
@@ -1068,6 +1084,9 @@ class $PinnedChatsTable extends PinnedChats
   $PinnedChatsTable createAlias(String alias) {
     return $PinnedChatsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<PinnedChatType, String, String> $convertertype =
+      const EnumNameConverter<PinnedChatType>(PinnedChatType.values);
 }
 
 class PinnedChat extends DataClass implements Insertable<PinnedChat> {
@@ -1076,12 +1095,14 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
   final int? orderIndex;
   final int chatId;
   final DateTime pinnedAt;
+  final PinnedChatType type;
   const PinnedChat({
     required this.id,
     required this.folderId,
     this.orderIndex,
     required this.chatId,
     required this.pinnedAt,
+    required this.type,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1093,6 +1114,11 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
     }
     map['chat_id'] = Variable<int>(chatId);
     map['pinned_at'] = Variable<DateTime>(pinnedAt);
+    {
+      map['type'] = Variable<String>(
+        $PinnedChatsTable.$convertertype.toSql(type),
+      );
+    }
     return map;
   }
 
@@ -1105,6 +1131,7 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           : Value(orderIndex),
       chatId: Value(chatId),
       pinnedAt: Value(pinnedAt),
+      type: Value(type),
     );
   }
 
@@ -1119,6 +1146,9 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
       orderIndex: serializer.fromJson<int?>(json['orderIndex']),
       chatId: serializer.fromJson<int>(json['chatId']),
       pinnedAt: serializer.fromJson<DateTime>(json['pinnedAt']),
+      type: $PinnedChatsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
     );
   }
   @override
@@ -1130,6 +1160,9 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
       'orderIndex': serializer.toJson<int?>(orderIndex),
       'chatId': serializer.toJson<int>(chatId),
       'pinnedAt': serializer.toJson<DateTime>(pinnedAt),
+      'type': serializer.toJson<String>(
+        $PinnedChatsTable.$convertertype.toJson(type),
+      ),
     };
   }
 
@@ -1139,12 +1172,14 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
     Value<int?> orderIndex = const Value.absent(),
     int? chatId,
     DateTime? pinnedAt,
+    PinnedChatType? type,
   }) => PinnedChat(
     id: id ?? this.id,
     folderId: folderId ?? this.folderId,
     orderIndex: orderIndex.present ? orderIndex.value : this.orderIndex,
     chatId: chatId ?? this.chatId,
     pinnedAt: pinnedAt ?? this.pinnedAt,
+    type: type ?? this.type,
   );
   PinnedChat copyWithCompanion(PinnedChatsCompanion data) {
     return PinnedChat(
@@ -1155,6 +1190,7 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           : this.orderIndex,
       chatId: data.chatId.present ? data.chatId.value : this.chatId,
       pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
+      type: data.type.present ? data.type.value : this.type,
     );
   }
 
@@ -1165,13 +1201,15 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           ..write('folderId: $folderId, ')
           ..write('orderIndex: $orderIndex, ')
           ..write('chatId: $chatId, ')
-          ..write('pinnedAt: $pinnedAt')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('type: $type')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, folderId, orderIndex, chatId, pinnedAt);
+  int get hashCode =>
+      Object.hash(id, folderId, orderIndex, chatId, pinnedAt, type);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1180,7 +1218,8 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           other.folderId == this.folderId &&
           other.orderIndex == this.orderIndex &&
           other.chatId == this.chatId &&
-          other.pinnedAt == this.pinnedAt);
+          other.pinnedAt == this.pinnedAt &&
+          other.type == this.type);
 }
 
 class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
@@ -1189,12 +1228,14 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
   final Value<int?> orderIndex;
   final Value<int> chatId;
   final Value<DateTime> pinnedAt;
+  final Value<PinnedChatType> type;
   const PinnedChatsCompanion({
     this.id = const Value.absent(),
     this.folderId = const Value.absent(),
     this.orderIndex = const Value.absent(),
     this.chatId = const Value.absent(),
     this.pinnedAt = const Value.absent(),
+    this.type = const Value.absent(),
   });
   PinnedChatsCompanion.insert({
     this.id = const Value.absent(),
@@ -1202,14 +1243,17 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     this.orderIndex = const Value.absent(),
     required int chatId,
     this.pinnedAt = const Value.absent(),
+    required PinnedChatType type,
   }) : folderId = Value(folderId),
-       chatId = Value(chatId);
+       chatId = Value(chatId),
+       type = Value(type);
   static Insertable<PinnedChat> custom({
     Expression<int>? id,
     Expression<int>? folderId,
     Expression<int>? orderIndex,
     Expression<int>? chatId,
     Expression<DateTime>? pinnedAt,
+    Expression<String>? type,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1217,6 +1261,7 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
       if (orderIndex != null) 'order_index': orderIndex,
       if (chatId != null) 'chat_id': chatId,
       if (pinnedAt != null) 'pinned_at': pinnedAt,
+      if (type != null) 'type': type,
     });
   }
 
@@ -1226,6 +1271,7 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     Value<int?>? orderIndex,
     Value<int>? chatId,
     Value<DateTime>? pinnedAt,
+    Value<PinnedChatType>? type,
   }) {
     return PinnedChatsCompanion(
       id: id ?? this.id,
@@ -1233,6 +1279,7 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
       orderIndex: orderIndex ?? this.orderIndex,
       chatId: chatId ?? this.chatId,
       pinnedAt: pinnedAt ?? this.pinnedAt,
+      type: type ?? this.type,
     );
   }
 
@@ -1254,6 +1301,11 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     if (pinnedAt.present) {
       map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
     }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $PinnedChatsTable.$convertertype.toSql(type.value),
+      );
+    }
     return map;
   }
 
@@ -1264,7 +1316,8 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
           ..write('folderId: $folderId, ')
           ..write('orderIndex: $orderIndex, ')
           ..write('chatId: $chatId, ')
-          ..write('pinnedAt: $pinnedAt')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('type: $type')
           ..write(')'))
         .toString();
   }
@@ -1811,6 +1864,7 @@ typedef $$PinnedChatsTableCreateCompanionBuilder =
       Value<int?> orderIndex,
       required int chatId,
       Value<DateTime> pinnedAt,
+      required PinnedChatType type,
     });
 typedef $$PinnedChatsTableUpdateCompanionBuilder =
     PinnedChatsCompanion Function({
@@ -1819,6 +1873,7 @@ typedef $$PinnedChatsTableUpdateCompanionBuilder =
       Value<int?> orderIndex,
       Value<int> chatId,
       Value<DateTime> pinnedAt,
+      Value<PinnedChatType> type,
     });
 
 class $$PinnedChatsTableFilterComposer
@@ -1853,6 +1908,12 @@ class $$PinnedChatsTableFilterComposer
   ColumnFilters<DateTime> get pinnedAt => $composableBuilder(
     column: $table.pinnedAt,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<PinnedChatType, PinnedChatType, String>
+  get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 }
 
@@ -1889,6 +1950,11 @@ class $$PinnedChatsTableOrderingComposer
     column: $table.pinnedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PinnedChatsTableAnnotationComposer
@@ -1916,6 +1982,9 @@ class $$PinnedChatsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get pinnedAt =>
       $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PinnedChatType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
 }
 
 class $$PinnedChatsTableTableManager
@@ -1954,12 +2023,14 @@ class $$PinnedChatsTableTableManager
                 Value<int?> orderIndex = const Value.absent(),
                 Value<int> chatId = const Value.absent(),
                 Value<DateTime> pinnedAt = const Value.absent(),
+                Value<PinnedChatType> type = const Value.absent(),
               }) => PinnedChatsCompanion(
                 id: id,
                 folderId: folderId,
                 orderIndex: orderIndex,
                 chatId: chatId,
                 pinnedAt: pinnedAt,
+                type: type,
               ),
           createCompanionCallback:
               ({
@@ -1968,12 +2039,14 @@ class $$PinnedChatsTableTableManager
                 Value<int?> orderIndex = const Value.absent(),
                 required int chatId,
                 Value<DateTime> pinnedAt = const Value.absent(),
+                required PinnedChatType type,
               }) => PinnedChatsCompanion.insert(
                 id: id,
                 folderId: folderId,
                 orderIndex: orderIndex,
                 chatId: chatId,
                 pinnedAt: pinnedAt,
+                type: type,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
