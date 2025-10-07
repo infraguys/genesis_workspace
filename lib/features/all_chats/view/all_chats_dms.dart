@@ -70,13 +70,11 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     }
   }
 
-  List<DmUserEntity> filterUsers(DirectMessagesState directMessagesState) {
+  List<DmUserEntity> filterUsers(List<DmUserEntity> usersList) {
     final List<DmUserEntity> baseList =
         (widget.filteredDms == null || widget.selectedFolder.id == 0)
-        ? directMessagesState.filteredRecentDmsUsers
-        : directMessagesState.filteredRecentDmsUsers
-              .where((user) => widget.filteredDms!.contains(user.userId))
-              .toList();
+        ? usersList
+        : usersList.where((user) => widget.filteredDms!.contains(user.userId)).toList();
 
     final List<PinnedChatEntity> pinnedChats = widget.selectedFolder.pinnedChats
         .where((chat) => chat.type == PinnedChatType.dm)
@@ -138,7 +136,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
       buildWhen: (_, _) => !isReorderingInProgress,
       builder: (context, directMessagesState) {
-        final List<DmUserEntity> filtered = filterUsers(directMessagesState);
+        final List<DmUserEntity> filtered = filterUsers(directMessagesState.filteredRecentDmsUsers);
         final List<DmUserEntity> users = optimisticUsers ?? filtered;
 
         if (users.isEmpty) {
