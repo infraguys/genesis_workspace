@@ -9,6 +9,7 @@ import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart'
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
+import 'package:genesis_workspace/features/chats/common/widgets/dm_search_field.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -38,6 +39,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
   bool isExpanded = true;
   List<DmUserEntity>? optimisticUsers;
   bool isReorderingInProgress = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -57,6 +59,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
 
   @override
   void dispose() {
+    _searchController.dispose();
     expandController.dispose();
     super.dispose();
   }
@@ -136,12 +139,11 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
       buildWhen: (_, _) => !isReorderingInProgress,
       builder: (context, directMessagesState) {
-        final List<DmUserEntity> filtered = filterUsers(directMessagesState.filteredRecentDmsUsers);
+        final List<DmUserEntity> baseFiltered = directMessagesState.showAllUsers
+            ? directMessagesState.filteredUsers
+            : directMessagesState.filteredRecentDmsUsers;
+        final List<DmUserEntity> filtered = filterUsers(baseFiltered);
         final List<DmUserEntity> users = optimisticUsers ?? filtered;
-
-        if (users.isEmpty) {
-          return const SizedBox.shrink();
-        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,6 +157,18 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                       context.t.navBar.directMessages,
                       style: Theme.of(context).textTheme.titleMedium,
                       overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Tooltip(
+                    message: directMessagesState.showAllUsers
+                        ? 'Показать недавние диалоги'
+                        : 'Показать всех пользователей',
+                    child: IconButton(
+                      splashRadius: 22,
+                      onPressed: context.read<DirectMessagesCubit>().toggleShowAllUsers,
+                      icon: Icon(
+                        directMessagesState.showAllUsers ? Icons.history : Icons.groups,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -175,18 +189,27 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                 axisAlignment: -1.0,
                 child: FadeTransition(
                   opacity: expandAnimation,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 500),
-                    child: widget.isEditPinning
-                        ? ReorderableListView.builder(
-                            buildDefaultDragHandles: false,
-                            shrinkWrap: true,
-                            physics: widget.embeddedInParentScroll
-                                ? const NeverScrollableScrollPhysics()
-                                : const AlwaysScrollableScrollPhysics(),
-                            itemCount: users.length,
-                            onReorder: (int oldIndex, int newIndex) async {
-                              if (newIndex > oldIndex) newIndex -= 1;
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: DmSearchField(
+                          searchController: _searchController,
+                          searchUsers: context.read<DirectMessagesCubit>().searchUsers,
+                        ),
+                      ),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 500),
+                        child: widget.isEditPinning
+                            ? ReorderableListView.builder(
+                                buildDefaultDragHandles: false,
+                                shrinkWrap: true,
+                                physics: widget.embeddedInParentScroll
+                                    ? const NeverScrollableScrollPhysics()
+                                    : const AlwaysScrollableScrollPhysics(),
+                                itemCount: users.length,
+                                onReorder: (int oldIndex, int newIndex) async {
+                                  if (newIndex > oldIndex) newIndex -= 1;
 
                               final List<DmUserEntity> local = List<DmUserEntity>.from(
                                 optimisticUsers ?? users,
@@ -367,6 +390,8 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                               );
                             },
                           ),
+                      ),
+                    ],
                   ),
                 ),
               ),
