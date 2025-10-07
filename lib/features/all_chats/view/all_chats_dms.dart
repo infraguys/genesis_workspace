@@ -161,8 +161,8 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                   ),
                   Tooltip(
                     message: directMessagesState.showAllUsers
-                        ? 'Показать недавние диалоги'
-                        : 'Показать всех пользователей',
+                        ? context.t.showRecentDialogs
+                        : context.t.showAllUsers,
                     child: IconButton(
                       splashRadius: 22,
                       onPressed: context.read<DirectMessagesCubit>().toggleShowAllUsers,

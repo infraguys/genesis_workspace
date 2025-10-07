@@ -48,13 +48,13 @@ class FolderPill extends StatelessWidget {
           ),
           onTap: onTap,
           onSecondaryTapDown: (details) {
-            if (folder.systemType != null) return;
+            // if (folder.systemType != null) return;
             final box = context.findRenderObject() as RenderBox?;
             final pos = box?.localToGlobal(Offset.zero) ?? Offset.zero;
             _showContextMenu(context, pos);
           },
           onLongPress: () {
-            if (folder.systemType != null) return;
+            // if (folder.systemType != null) return;
             final box = context.findRenderObject() as RenderBox?;
             final pos = box?.localToGlobal(Offset.zero) ?? Offset.zero;
             _showContextMenu(context, pos);

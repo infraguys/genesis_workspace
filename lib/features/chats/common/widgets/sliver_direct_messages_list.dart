@@ -128,8 +128,8 @@ class _ShowAllUsersToggleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String tooltipText = showAllUsers
-        ? 'Показать недавние диалоги'
-        : 'Показать всех пользователей';
+        ? context.t.showRecentDialogs
+        : context.t.showAllUsers;
 
     return Tooltip(
       message: tooltipText,
