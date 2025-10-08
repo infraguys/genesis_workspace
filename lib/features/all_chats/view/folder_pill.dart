@@ -9,6 +9,8 @@ class FolderPill extends StatelessWidget {
   final void Function()? onEdit;
   final void Function()? onEditPinning;
   final void Function()? onDelete;
+  // When provided, overrides folder.unreadCount for display
+  final int? unreadCount;
   const FolderPill({
     super.key,
     required this.isSelected,
@@ -17,6 +19,7 @@ class FolderPill extends StatelessWidget {
     this.onEdit,
     this.onEditPinning,
     this.onDelete,
+    this.unreadCount,
   });
 
   @override
@@ -67,7 +70,7 @@ class FolderPill extends StatelessWidget {
                 Icon(folder.iconData, size: 18, color: folder.backgroundColor),
                 const SizedBox(width: 8),
                 Text(folder.displayTitle(context), style: TextStyle(color: foregroundColor)),
-                if (folder.unreadCount > 0) ...[
+                if ((unreadCount ?? folder.unreadCount) > 0) ...[
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -76,7 +79,7 @@ class FolderPill extends StatelessWidget {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      folder.unreadCount.toString(),
+                      (unreadCount ?? folder.unreadCount).toString(),
                       style: TextStyle(
                         color: isSelected ? schema.onPrimary : schema.onSecondary,
                         fontSize: 12,
