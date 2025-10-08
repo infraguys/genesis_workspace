@@ -219,7 +219,13 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     updatedFolders.removeAt(index);
     final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById);
     updatedMap.remove(folder.id!);
-    emit(state.copyWith(folders: updatedFolders, folderMembersById: updatedMap));
+    emit(
+      state.copyWith(
+        folders: updatedFolders,
+        folderMembersById: updatedMap,
+        selectedFolderIndex: 0,
+      ),
+    );
   }
 
   Future<void> setFoldersForDm(int userId, List<int> folderIds) async {

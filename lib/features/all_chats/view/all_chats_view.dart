@@ -54,10 +54,9 @@ class _AllChatsViewState extends State<AllChatsView> {
     // "All" folder aggregates all
     if (folder.id == 0 || folder.systemType == SystemFolderType.all) {
       final int dmUnread = dmsState.users.fold(0, (sum, u) => sum + u.unreadMessages.length);
-      final int chUnread = channelsState.channels.fold(
-        0,
-        (sum, c) => sum + c.unreadMessages.length,
-      );
+      final int chUnread = channelsState.channels
+          .where((c) => !c.isMuted)
+          .fold(0, (sum, c) => sum + c.unreadMessages.length);
       return dmUnread + chUnread;
     }
 
@@ -71,7 +70,7 @@ class _AllChatsViewState extends State<AllChatsView> {
         .where((u) => dmIds.contains(u.userId))
         .fold(0, (sum, u) => sum + u.unreadMessages.length);
     final int chUnread = channelsState.channels
-        .where((c) => chIds.contains(c.streamId))
+        .where((c) => chIds.contains(c.streamId) && !c.isMuted)
         .fold(0, (sum, c) => sum + c.unreadMessages.length);
     return dmUnread + chUnread;
   }
