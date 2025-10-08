@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -72,20 +73,7 @@ class FolderPill extends StatelessWidget {
                 Text(folder.displayTitle(context), style: TextStyle(color: foregroundColor)),
                 if ((unreadCount ?? folder.unreadCount) > 0) ...[
                   const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: schema.secondary,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      (unreadCount ?? folder.unreadCount).toString(),
-                      style: TextStyle(
-                        color: isSelected ? schema.onPrimary : schema.onSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                  UnreadBadge(count: (unreadCount ?? folder.unreadCount)),
                 ],
               ],
             ),
