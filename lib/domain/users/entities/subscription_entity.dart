@@ -6,6 +6,7 @@ class SubscriptionEntity {
   final int streamId;
   final String description;
   final String color;
+  final bool isMuted;
 
   SubscriptionEntity({
     required this.name,
@@ -13,6 +14,7 @@ class SubscriptionEntity {
     required this.streamId,
     required this.description,
     required this.color,
+    required this.isMuted,
   });
 
   ChannelEntity toChannelEntity() => ChannelEntity(
@@ -23,5 +25,6 @@ class SubscriptionEntity {
     color: color,
     topics: [],
     unreadMessages: {},
+    isMuted: isMuted,
   );
 }

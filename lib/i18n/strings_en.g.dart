@@ -121,6 +121,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get cancel_editing => 'Cancel editing';
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn._(_root);
+	late final TranslationsChannelEn channel = TranslationsChannelEn._(_root);
+	late final TranslationsChatEn chat = TranslationsChatEn._(_root);
 
 	/// en: 'Nothing found'
 	String get nothing_found => 'Nothing found';
@@ -268,6 +270,9 @@ class TranslationsSettingsEn {
 
 	/// en: 'Logout'
 	String get logout => 'Logout';
+
+	/// en: 'App version'
+	String get appVersion => 'App version';
 }
 
 // Path: date_labels
@@ -452,6 +457,9 @@ class TranslationsFoldersEn {
 	/// en: 'Edit folder'
 	String get edit => 'Edit folder';
 
+	/// en: 'Order pinning'
+	String get orderPinning => 'Order pinning';
+
 	/// en: 'Delete'
 	String get delete => 'Delete';
 
@@ -463,6 +471,36 @@ class TranslationsFoldersEn {
 
 	/// en: 'Folder is empty'
 	String get folder_is_empty => 'Folder is empty';
+}
+
+// Path: channel
+class TranslationsChannelEn {
+	TranslationsChannelEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Mute channel'
+	String get muteChannel => 'Mute channel';
+
+	/// en: 'Unmute channel'
+	String get unmuteChannel => 'Unmute channel';
+}
+
+// Path: chat
+class TranslationsChatEn {
+	TranslationsChatEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Pin chat'
+	String get pinChat => 'Pin chat';
+
+	/// en: 'Unpin chat'
+	String get unpinChat => 'Unpin chat';
 }
 
 /// Flat map(s) containing all translations.
@@ -525,6 +563,7 @@ extension on Translations {
 			case 'search': return 'Search';
 			case 'settings.language': return 'Language';
 			case 'settings.logout': return 'Logout';
+			case 'settings.appVersion': return 'App version';
 			case 'date_labels.today': return 'Today';
 			case 'date_labels.yesterday': return 'Yesterday';
 			case 'inbox.title': return 'Inbox';
@@ -567,10 +606,15 @@ extension on Translations {
 			case 'folders.selectFolders': return 'Select folders';
 			case 'folders.save': return 'Save';
 			case 'folders.edit': return 'Edit folder';
+			case 'folders.orderPinning': return 'Order pinning';
 			case 'folders.delete': return 'Delete';
 			case 'folders.deleteConfirmTitle': return 'Delete folder?';
 			case 'folders.deleteConfirmText': return 'Are you sure you want to delete "{folderName}"?';
 			case 'folders.folder_is_empty': return 'Folder is empty';
+			case 'channel.muteChannel': return 'Mute channel';
+			case 'channel.unmuteChannel': return 'Unmute channel';
+			case 'chat.pinChat': return 'Pin chat';
+			case 'chat.unpinChat': return 'Unpin chat';
 			case 'nothing_found': return 'Nothing found';
 			default: return null;
 		}

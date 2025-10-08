@@ -8,6 +8,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/subscription_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
@@ -61,6 +62,11 @@ class RealTimeService {
   Stream<UpdateMessageEventEntity> get updateMessageEventsStream =>
       _updateMessageEventsController.stream;
 
+  StreamController<SubscriptionEventEntity> _subscriptionEventsController =
+      StreamController<SubscriptionEventEntity>.broadcast();
+  Stream<SubscriptionEventEntity> get subscriptionEventsStream =>
+      _subscriptionEventsController.stream;
+
   Future<RegisterQueueEntity> registerQueue() async {
     try {
       final RegisterQueueEntity response = await _registerQueueUseCase.call(
@@ -99,6 +105,8 @@ class RealTimeService {
             _deleteMessageEventsController.add(event as DeleteMessageEventEntity);
           case EventType.updateMessage:
             _updateMessageEventsController.add(event as UpdateMessageEventEntity);
+          case EventType.subscription:
+            _subscriptionEventsController.add(event as SubscriptionEventEntity);
           default:
             break;
         }
@@ -137,6 +145,9 @@ class RealTimeService {
     }
     if (_updateMessageEventsController.isClosed) {
       _updateMessageEventsController = StreamController<UpdateMessageEventEntity>.broadcast();
+    }
+    if (_subscriptionEventsController.isClosed) {
+      _subscriptionEventsController = StreamController<SubscriptionEventEntity>.broadcast();
     }
     if (_isPolling) return;
     try {

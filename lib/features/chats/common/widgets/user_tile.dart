@@ -7,25 +7,57 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class UserTile extends StatelessWidget {
   final DmUserEntity user;
+  final bool isPinned;
+  final bool isEditPinning;
   final void Function() onTap;
-  const UserTile({super.key, required this.user, required this.onTap});
+
+  /// Если задан, будет использован вместо дефолтного trailing.
+  final Widget? trailingOverride;
+
+  const UserTile({
+    super.key,
+    required this.user,
+    required this.onTap,
+    required this.isPinned,
+    this.isEditPinning = false,
+    this.trailingOverride,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     final lastSeen = DateTime.fromMillisecondsSinceEpoch((user.presenceTimestamp * 1000).toInt());
-    final timeAgo = timeAgoText(context, lastSeen);
+
+    final Widget trailing =
+        trailingOverride ??
+        (isEditPinning
+            ? Icon(
+                Icons.drag_handle_rounded,
+                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+              )
+            : UnreadBadge(count: user.unreadMessages.length));
 
     return ListTile(
       onTap: onTap,
-      title: Text(user.fullName, overflow: TextOverflow.ellipsis),
-      subtitle: Text(
-        isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
-        style: theme.textTheme.labelSmall,
-      ),
       leading: UserAvatar(avatarUrl: user.avatarUrl),
-      trailing: UnreadBadge(count: user.unreadMessages.length),
+      title: Row(
+        children: [
+          Text(user.fullName, overflow: TextOverflow.ellipsis),
+          if (!isEditPinning && isPinned)
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Icon(Icons.push_pin, size: 12, color: theme.colorScheme.outlineVariant),
+            ),
+        ],
+      ),
+      subtitle: Text(
+        isJustNow(lastSeen)
+            ? context.t.wasOnlineJustNow
+            : context.t.wasOnline(time: timeAgoText(context, lastSeen)),
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
+      trailing: trailing,
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
     );
   }

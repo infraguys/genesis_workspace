@@ -70,6 +70,8 @@ class TranslationsRu implements Translations {
 	@override String get drop_files_to_upload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancel_editing => 'Отменить редактирование';
 	@override late final _TranslationsFoldersRu folders = _TranslationsFoldersRu._(_root);
+	@override late final _TranslationsChannelRu channel = _TranslationsChannelRu._(_root);
+	@override late final _TranslationsChatRu chat = _TranslationsChatRu._(_root);
 	@override String get nothing_found => 'Ничего не нашли';
 }
 
@@ -155,6 +157,7 @@ class _TranslationsSettingsRu implements TranslationsSettingsEn {
 	// Translations
 	@override String get language => 'Язык';
 	@override String get logout => 'Выйти';
+	@override String get appVersion => 'Версия приложения';
 }
 
 // Path: date_labels
@@ -270,10 +273,33 @@ class _TranslationsFoldersRu implements TranslationsFoldersEn {
 	@override String get selectFolders => 'Выберите папки';
 	@override String get save => 'Сохранить';
 	@override String get edit => 'Редактировать папку';
+	@override String get orderPinning => 'Порядок закрепления';
 	@override String get delete => 'Удалить';
 	@override String get deleteConfirmTitle => 'Удалить папку?';
 	@override String get deleteConfirmText => 'Вы уверены, что хотите удалить "{folderName}"?';
 	@override String get folder_is_empty => 'Папка пустая';
+}
+
+// Path: channel
+class _TranslationsChannelRu implements TranslationsChannelEn {
+	_TranslationsChannelRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get muteChannel => 'Заглушить канал';
+	@override String get unmuteChannel => 'Включить уведомления канала';
+}
+
+// Path: chat
+class _TranslationsChatRu implements TranslationsChatEn {
+	_TranslationsChatRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get pinChat => 'Закрепить чат';
+	@override String get unpinChat => 'Открепить чат';
 }
 
 /// Flat map(s) containing all translations.
@@ -342,6 +368,7 @@ extension on TranslationsRu {
 			case 'search': return 'Поиск';
 			case 'settings.language': return 'Язык';
 			case 'settings.logout': return 'Выйти';
+			case 'settings.appVersion': return 'Версия приложения';
 			case 'date_labels.today': return 'Сегодня';
 			case 'date_labels.yesterday': return 'Вчера';
 			case 'inbox.title': return 'Входящие';
@@ -384,10 +411,15 @@ extension on TranslationsRu {
 			case 'folders.selectFolders': return 'Выберите папки';
 			case 'folders.save': return 'Сохранить';
 			case 'folders.edit': return 'Редактировать папку';
+			case 'folders.orderPinning': return 'Порядок закрепления';
 			case 'folders.delete': return 'Удалить';
 			case 'folders.deleteConfirmTitle': return 'Удалить папку?';
 			case 'folders.deleteConfirmText': return 'Вы уверены, что хотите удалить "{folderName}"?';
 			case 'folders.folder_is_empty': return 'Папка пустая';
+			case 'channel.muteChannel': return 'Заглушить канал';
+			case 'channel.unmuteChannel': return 'Включить уведомления канала';
+			case 'chat.pinChat': return 'Закрепить чат';
+			case 'chat.unpinChat': return 'Открепить чат';
 			case 'nothing_found': return 'Ничего не нашли';
 			default: return null;
 		}

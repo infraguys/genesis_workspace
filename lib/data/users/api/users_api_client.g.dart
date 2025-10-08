@@ -249,6 +249,40 @@ class _UsersApiClient implements UsersApiClient {
   }
 
   @override
+  Future<UpdateSubscriptionSettingsResponseDto> updateSubscriptionSettings(
+    String subscriptionData,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = {'subscription_data': subscriptionData};
+    final _options = _setStreamType<UpdateSubscriptionSettingsResponseDto>(
+      Options(
+            method: 'POST',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'application/x-www-form-urlencoded',
+          )
+          .compose(
+            _dio.options,
+            '/users/me/subscriptions/properties',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UpdateSubscriptionSettingsResponseDto _value;
+    try {
+      _value = UpdateSubscriptionSettingsResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<ChannelMembersResponseDto> getChannelMembers(int streamId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};

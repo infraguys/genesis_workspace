@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -23,6 +24,20 @@ class SettingsView extends StatelessWidget {
       ),
       body: ListView(
         children: [
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox.shrink();
+              final info = snapshot.data!;
+              final String versionText = '${info.version}+${info.buildNumber}';
+              return ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text(context.t.settings.appVersion),
+                subtitle: Text(versionText),
+              );
+            },
+          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(context.t.settings.language),

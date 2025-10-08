@@ -26,6 +26,9 @@ enum EventType {
   @JsonValue('update_message')
   updateMessage,
 
+  @JsonValue('subscription')
+  subscription,
+
   unsupported,
 }
 
@@ -48,6 +51,8 @@ extension EventTypeX on EventType {
         return 'delete_message';
       case EventType.updateMessage:
         return 'update_message';
+      case EventType.subscription:
+        return 'subscription';
       default:
         return 'unsupported';
     }
@@ -71,6 +76,8 @@ extension EventTypeX on EventType {
         return EventType.deleteMessage;
       case 'update_message':
         return EventType.updateMessage;
+      case 'subscription':
+        return EventType.subscription;
       default:
         return EventType.unsupported;
     }

@@ -61,7 +61,8 @@
   "search": "Search",
   "settings": {
     "language": "Language",
-    "logout": "Logout"
+    "logout": "Logout",
+    "appVersion": "App version"
   },
   "date_labels": {
     "today": "Today",
@@ -122,10 +123,20 @@
     "selectFolders": "Select folders",
     "save": "Save",
     "edit": "Edit folder",
+    "orderPinning": "Order pinning",
     "delete": "Delete",
     "deleteConfirmTitle": "Delete folder?",
     "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?",
     "folder_is_empty": "Folder is empty"
+
+  },
+  "channel": {
+    "muteChannel": "Mute channel",
+    "unmuteChannel": "Unmute channel"
+  },
+  "chat": {
+    "pinChat": "Pin chat",
+    "unpinChat": "Unpin chat"
   },
   "nothing_found": "Nothing found"
 }

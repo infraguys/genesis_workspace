@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
@@ -12,6 +10,7 @@ class FolderLocalDataSource {
 
   Future<void> add(FolderItemEntity entity) async {
     await _dao.insertFolder(
+      id: entity.id,
       title: entity.title ?? '',
       iconCodePoint: entity.iconData.codePoint,
       backgroundColorValue: entity.backgroundColor?.value,
@@ -19,19 +18,9 @@ class FolderLocalDataSource {
     );
   }
 
-  Future<List<FolderItemEntity>> getAll() async {
+  Future<List<Folder>> getAll() async {
     final List<Folder> rows = await _dao.getAll();
-    return rows.map(_mapDbToEntity).toList(growable: false);
-  }
-
-  FolderItemEntity _mapDbToEntity(Folder row) {
-    return FolderItemEntity(
-      id: row.id,
-      title: row.title,
-      iconData: FolderIconsConstants.resolve(row.iconCodePoint),
-      backgroundColor: row.backgroundColorValue != null ? Color(row.backgroundColorValue!) : null,
-      unreadCount: row.unreadCount,
-    );
+    return rows;
   }
 
   Future<void> update(FolderItemEntity folder) async {

@@ -93,6 +93,7 @@ class SliverDirectMessagesList extends StatelessWidget {
                   final DmUserEntity userEntity = displayedUsers[userIndex];
                   return UserTile(
                     user: userEntity,
+                    isPinned: false,
                     onTap: () {
                       if (currentSize(context) > ScreenSize.lTablet) {
                         context.read<DirectMessagesCubit>().selectUserChat(
@@ -127,8 +128,8 @@ class _ShowAllUsersToggleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String tooltipText = showAllUsers
-        ? 'Показать недавние диалоги'
-        : 'Показать всех пользователей';
+        ? context.t.showRecentDialogs
+        : context.t.showAllUsers;
 
     return Tooltip(
       message: tooltipText,

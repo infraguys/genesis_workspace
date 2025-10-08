@@ -12,8 +12,5 @@ class FolderItems extends Table {
   TextColumn get topicName => text().nullable()();
 
   @override
-  List<String> get customConstraints => [
-        'UNIQUE(folder_id, item_type, target_id, topic_name)'
-      ];
+  List<String> get customConstraints => ['UNIQUE(folder_id, item_type, target_id, topic_name)'];
 }
-

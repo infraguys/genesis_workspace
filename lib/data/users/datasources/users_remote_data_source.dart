@@ -12,6 +12,7 @@ import 'package:genesis_workspace/data/users/dto/topics_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/typing_request_dto.dart';
 import 'package:genesis_workspace/data/users/dto/update_presence_request_dto.dart';
 import 'package:genesis_workspace/data/users/dto/update_presence_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_presence_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
@@ -31,4 +32,7 @@ abstract class UsersRemoteDataSource {
   Future<UpdatePresenceResponseDto> updatePresence(UpdatePresenceRequestDto body);
   Future<ChannelByIdResponseDto> getChannelById(ChannelByIdRequestDto body);
   Future<ChannelMembersResponseDto> getChannelMembers(ChannelMembersRequestDto body);
+  Future<UpdateSubscriptionSettingsResponseDto> updateSubscriptionSettings(
+    UpdateSubscriptionSettingsRequestDto body,
+  );
 }

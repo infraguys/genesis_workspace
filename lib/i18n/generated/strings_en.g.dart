@@ -116,6 +116,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get cancelEditing => 'Cancel editing';
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
+	late final TranslationsChannelEn channel = TranslationsChannelEn.internal(_root);
+	late final TranslationsChatEn chat = TranslationsChatEn.internal(_root);
 
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
@@ -263,6 +265,9 @@ class TranslationsSettingsEn {
 
 	/// en: 'Logout'
 	String get logout => 'Logout';
+
+	/// en: 'App version'
+	String get appVersion => 'App version';
 }
 
 // Path: dateLabels
@@ -447,6 +452,9 @@ class TranslationsFoldersEn {
 	/// en: 'Edit folder'
 	String get edit => 'Edit folder';
 
+	/// en: 'Order pinning'
+	String get orderPinning => 'Order pinning';
+
 	/// en: 'Delete'
 	String get delete => 'Delete';
 
@@ -458,4 +466,34 @@ class TranslationsFoldersEn {
 
 	/// en: 'Folder is empty'
 	String get folderIsEmpty => 'Folder is empty';
+}
+
+// Path: channel
+class TranslationsChannelEn {
+	TranslationsChannelEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Mute channel'
+	String get muteChannel => 'Mute channel';
+
+	/// en: 'Unmute channel'
+	String get unmuteChannel => 'Unmute channel';
+}
+
+// Path: chat
+class TranslationsChatEn {
+	TranslationsChatEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Pin chat'
+	String get pinChat => 'Pin chat';
+
+	/// en: 'Unpin chat'
+	String get unpinChat => 'Unpin chat';
 }
