@@ -8,6 +8,8 @@ class AllChatsState {
   final int selectedFolderIndex;
   Set<int>? filterDmUserIds;
   Set<int>? filterChannelIds;
+  // Cached members per folder for unread aggregation
+  final Map<int, FolderMembers> folderMembersById;
 
   bool get isEmptyFolder =>
       ((filterChannelIds?.isEmpty ?? false) && (filterDmUserIds?.isEmpty ?? false)) &&
@@ -21,6 +23,7 @@ class AllChatsState {
     required this.selectedFolderIndex,
     this.filterDmUserIds,
     this.filterChannelIds,
+    required this.folderMembersById,
   });
 
   AllChatsState copyWith({
@@ -36,6 +39,7 @@ class AllChatsState {
     // Object? filterChannelIds,
     Set<int>? filterDmUserIds,
     Set<int>? filterChannelIds,
+    Map<int, FolderMembers>? folderMembersById,
   }) {
     return AllChatsState(
       // selectedDmChat: identical(selectedDmChat, _noChange)
@@ -60,6 +64,7 @@ class AllChatsState {
       //     : filterChannelIds as Set<int>?,
       filterDmUserIds: filterDmUserIds ?? this.filterDmUserIds,
       filterChannelIds: filterChannelIds ?? this.filterChannelIds,
+      folderMembersById: folderMembersById ?? this.folderMembersById,
     );
   }
 
