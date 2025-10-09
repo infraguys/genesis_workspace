@@ -203,7 +203,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     if (folder.systemType != null || folder.id == null) return;
     final updatedFolders = [...state.folders];
     final index = updatedFolders.indexWhere((element) => element.id == folder.id);
-    await _updateFolderUseCase(folder);
+    await _updateFolderUseCase.call(folder);
     updatedFolders[index] = folder;
     emit(state.copyWith(folders: updatedFolders));
     await _refreshMembersForFolders([folder.id!]);
