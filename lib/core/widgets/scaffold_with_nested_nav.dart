@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
@@ -24,6 +28,7 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation>
     with WidgetsBindingObserver {
   late final Future _future;
+  final GlobalKey _islandSourceKey = GlobalKey();
 
   void _goBranch(int index) {
     widget.navigationShell.goBranch(
@@ -70,19 +75,21 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   @override
   void initState() {
     _initIdleDetector();
+    WidgetsBinding.instance.addObserver(this);
+    if (kIsWeb) BrowserContextMenu.disableContextMenu();
     _future = Future.wait([
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
       context.read<MessagesCubit>().getLastMessages(),
     ]);
-    // _realTimeCubit = context.read<RealTimeCubit>();
     super.initState();
   }
 
   @override
   void dispose() {
     _pauseIdleDetector();
-    // _realTimeCubit.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    if (kIsWeb) BrowserContextMenu.enableContextMenu();
     super.dispose();
   }
 

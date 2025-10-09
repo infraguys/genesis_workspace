@@ -14,6 +14,7 @@ import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_
 import 'package:genesis_workspace/core/utils/message_input_intents/mention_navigation_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
+import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
@@ -65,7 +66,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
       unreadMessagesCount: widget.unreadMessagesCount,
       myUserId: _myUser.userId,
     );
-    messageController = TextEditingController();
+    messageController = ChatTextEditingController();
     messageController
       ..addListener(onTextChanged)
       ..addListener(mentionListener);

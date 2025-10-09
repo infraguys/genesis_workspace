@@ -272,17 +272,16 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
+    if (message.senderId == state.selfUser!.userId) return;
     state.allMessages.add(event.message);
 
-    if (message.senderId != state.selfUser!.userId) {
-      final sender = state.users.firstWhere((user) => user.userId == message.senderId);
-      final indexOfSender = state.users.indexOf(sender);
-      if (message.hasUnreadMessages && message.type == MessageType.private) {
-        sender.unreadMessages.add(message.id);
-      }
-      state.users[indexOfSender] = sender;
-      _sortUsers();
+    final sender = state.users.firstWhere((user) => user.userId == message.senderId);
+    final indexOfSender = state.users.indexOf(sender);
+    if (message.hasUnreadMessages && message.type == MessageType.private) {
+      sender.unreadMessages.add(message.id);
     }
+    state.users[indexOfSender] = sender;
+    _sortUsers();
     getRecentDms();
   }
 

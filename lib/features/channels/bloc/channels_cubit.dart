@@ -233,9 +233,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
-    if (message.senderId == state.selfUser?.userId) {
-      return;
-    }
+    if (message.senderId == state.selfUser?.userId) return;
     final channels = [...state.channels];
     final unreadMessages = [...state.unreadMessages];
     if (message.type == MessageType.stream && message.hasUnreadMessages) {

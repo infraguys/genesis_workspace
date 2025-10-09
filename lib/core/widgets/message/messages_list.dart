@@ -63,7 +63,6 @@ class _MessagesListState extends State<MessagesList> {
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) BrowserContextMenu.disableContextMenu();
     _reversed = widget.messages.reversed.toList(growable: false);
 
     _autoScrollController = AutoScrollController(axis: Axis.vertical);
