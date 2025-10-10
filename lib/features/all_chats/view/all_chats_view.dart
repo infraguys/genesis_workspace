@@ -52,7 +52,7 @@ class _AllChatsViewState extends State<AllChatsView> {
     required int selectedIndex,
     required List<FolderItemEntity> folders,
   }) {
-    if (folders.isNotEmpty) {
+    if (folders.isNotEmpty && selectedIndex != 0) {
       if (folders[selectedIndex].backgroundColor == null) {
         return Theme.of(context).colorScheme.surface.withValues(alpha: 0.10);
       }

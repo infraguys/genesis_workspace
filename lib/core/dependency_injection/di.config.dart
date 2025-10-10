@@ -195,6 +195,8 @@ import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart'
     as _i155;
 import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart'
     as _i1068;
+import 'package:genesis_workspace/navigation/app_shell_controller.dart'
+    as _i188;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart'
@@ -221,6 +223,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
+    gh.lazySingleton<_i188.AppShellController>(
+      () => coreModule.provideAppShellController(),
+    );
     gh.lazySingleton<_i606.AppDatabase>(
       () => coreModule.appDatabase(),
       dispose: (i) => i.dispose(),
