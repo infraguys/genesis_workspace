@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -12,6 +13,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
+import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -119,8 +121,10 @@ class MessageHtml extends StatelessWidget {
                                   onTap: () {
                                     context.pop();
                                     if (currentSize(context) > ScreenSize.lTablet) {
+                                      appShellController.goToBranch(0);
+                                      context.read<AllChatsCubit>().selectDmChat(user);
                                     } else {
-                                      context.pushReplacementNamed(
+                                      context.pushNamed(
                                         Routes.chat,
                                         pathParameters: {'userId': user.userId.toString()},
                                         extra: {'unreadMessagesCount': user.unreadMessages.length},

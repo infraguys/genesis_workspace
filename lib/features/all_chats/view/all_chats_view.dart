@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/all_chats_channels.dart';
@@ -105,6 +106,12 @@ class _AllChatsViewState extends State<AllChatsView> {
     setState(() {
       _isEditPinning = false;
     });
+  }
+
+  void selectChat({DmUserEntity? user, int? streamId}) {
+    if (user != null) {
+      context.read<AllChatsCubit>().selectDmChat(user);
+    }
   }
 
   @override
