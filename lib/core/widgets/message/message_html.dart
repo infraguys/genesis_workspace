@@ -21,6 +21,8 @@ import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+class WorkspaceHtmlFactory extends WidgetFactory {}
+
 class MessageHtml extends StatelessWidget {
   final String content;
   MessageHtml({super.key, required this.content});
@@ -42,6 +44,7 @@ class MessageHtml extends StatelessWidget {
       customStylesBuilder: (element) {
         return null;
       },
+      factoryBuilder: () => WorkspaceHtmlFactory(),
       customWidgetBuilder: (element) {
         if (element.attributes.containsValue('image/png') ||
             element.attributes.containsValue('image/jpeg')) {
