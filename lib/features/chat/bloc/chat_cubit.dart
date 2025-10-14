@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -318,8 +319,12 @@ class ChatCubit extends Cubit<ChatState>
 
   void _onMessageEvents(MessageEventEntity event) {
     bool isThisChatMessage =
-        event.message.displayRecipient.any((recipient) => recipient.userId == state.myUserId) &&
-        event.message.displayRecipient.any((recipient) => recipient.userId == state.chatId);
+        event.message.displayRecipient.recipients.any(
+          (recipient) => recipient.userId == state.myUserId,
+        ) &&
+        event.message.displayRecipient.recipients.any(
+          (recipient) => recipient.userId == state.chatId,
+        );
     if (isThisChatMessage) {
       state.messages = [...state.messages, event.message];
       emit(state.copyWith(messages: state.messages));

@@ -1,6 +1,7 @@
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/data/messages/dto/reaction_dto.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/recipient_dto.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -9,27 +10,39 @@ part 'message_dto.g.dart';
 @JsonSerializable()
 class MessageDto {
   final int id;
-  @JsonKey(name: "is_me_message")
+
+  @JsonKey(name: 'is_me_message')
   final bool isMeMessage;
-  @JsonKey(name: "avatar_url")
+
+  @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
+
   final String content;
-  @JsonKey(name: "sender_id")
+
+  @JsonKey(name: 'sender_id')
   final int senderId;
-  @JsonKey(name: "sender_full_name")
+
+  @JsonKey(name: 'sender_full_name')
   final String senderFullName;
+
   @JsonKey(
-    name: "display_recipient",
+    name: 'display_recipient',
     fromJson: _displayRecipientFromJson,
     toJson: _displayRecipientToJson,
   )
-  final dynamic displayRecipient;
+  final DisplayRecipient displayRecipient;
+
   final List<String>? flags;
+
   final MessageType type;
-  @JsonKey(name: "stream_id")
+
+  @JsonKey(name: 'stream_id')
   final int? streamId;
+
   final String subject;
+
   final int timestamp;
+
   final List<ReactionDto> reactions;
 
   MessageDto({
@@ -59,27 +72,44 @@ class MessageDto {
     content: content,
     senderId: senderId,
     senderFullName: senderFullName,
-    displayRecipient: displayRecipient is List
-        ? displayRecipient.map((e) => e.toEntity()).toList()
-        : displayRecipient,
+    displayRecipient: displayRecipient,
     flags: flags,
     type: type,
     streamId: streamId,
     subject: subject,
     timestamp: timestamp,
-    reactions: reactions.map((e) => e.toEntity()).toList(),
+    reactions: reactions.map((reaction) => reaction.toEntity()).toList(),
   );
 
-  static dynamic _displayRecipientFromJson(dynamic json) {
+  // ====== Конвертеры display_recipient ======
+
+  static DisplayRecipient _displayRecipientFromJson(dynamic json) {
     if (json is String) {
-      return json;
-    } else if (json is List) {
-      return json.map((e) => RecipientDto.fromJson(e as Map<String, dynamic>)).toList();
+      return StreamDisplayRecipient(json);
     }
-    return [];
+    if (json is List) {
+      final recipients = json
+          .cast<Map<String, dynamic>>()
+          .map((map) => RecipientDto.fromJson(map).toEntity())
+          .toList();
+      return DirectMessageRecipients(recipients);
+    }
+    throw FormatException('Unsupported display_recipient format: ${json.runtimeType}');
   }
 
-  static dynamic _displayRecipientToJson(List<RecipientDto>? recipients) {
-    return recipients?.map((e) => e.toJson()).toList();
+  static dynamic _displayRecipientToJson(DisplayRecipient value) {
+    if (value is StreamDisplayRecipient) {
+      return value.streamName;
+    }
+    if (value is DirectMessageRecipients) {
+      return value.recipients.map((recipient) {
+        return <String, dynamic>{
+          'email': recipient.email,
+          'id': recipient.userId,
+          'full_name': recipient.fullName,
+        };
+      }).toList();
+    }
+    throw ArgumentError('Unknown DisplayRecipient implementation: $value');
   }
 }

@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -19,6 +20,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/group_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
@@ -49,6 +51,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           allMessages: [],
           selectedUserId: null,
           showAllUsers: false,
+          groupChats: [],
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -182,12 +185,12 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final Map<int, int> lastTimestampBySenderId = {};
 
       for (final message in candidateMessages) {
-        final recipients = message.displayRecipient;
+        final recipients = message.displayRecipient.recipients;
         final senderId = message.senderId == selfUserId
             ? recipients
                   .firstWhere(
                     (recipient) => recipient.userId != selfUserId,
-                    orElse: () => RecipientEntity(userId: -1, email: ''),
+                    orElse: () => RecipientEntity(userId: -1, email: '', fullName: ''),
                   )
                   .userId
             : message.senderId;
@@ -225,6 +228,19 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+
+      final messages = response.messages;
+
+      final groupChats = <GroupChatEntity>[];
+
+      for (var message in messages) {
+        if (message.isGroupChatMessage) {
+          final members = message.displayRecipient.recipients;
+          final groupChat = GroupChatEntity(members: members);
+          groupChats.add(groupChat);
+        }
+      }
+
       final unreadMessages = response.messages
           .where((message) => message.hasUnreadMessages)
           .toList();
@@ -236,7 +252,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
                   (message.senderId == user.userId) &&
                   (message.type == MessageType.private) &&
                   message.senderId != state.selfUser?.userId &&
-                  message.displayRecipient.length == 2,
+                  message.displayRecipient.recipients.length == 2,
             )
             .map((message) => message.id)
             .toSet();
@@ -246,6 +262,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           unreadMessages: unreadMessages,
           users: users,
           allMessages: response.messages,
+          groupChats: groupChats,
         ),
       );
     } catch (e) {
@@ -273,7 +290,9 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
-    if (message.senderId == state.selfUser!.userId || message.displayRecipient.length != 2) return;
+    if (message.senderId == state.selfUser!.userId ||
+        message.displayRecipient.recipients.length != 2)
+      return;
     state.allMessages.add(event.message);
 
     final sender = state.users.firstWhere((user) => user.userId == message.senderId);
