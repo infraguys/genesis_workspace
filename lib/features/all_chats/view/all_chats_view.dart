@@ -396,7 +396,6 @@ class _FoldersList extends StatelessWidget {
     required DirectMessagesState dmsState,
     required Map<int, FolderMembers> folderMembers,
   }) {
-    // "All" folder aggregates all
     if (folder.id == 0 || folder.systemType == SystemFolderType.all) {
       final int dmUnread = dmsState.users.fold(0, (sum, u) => sum + u.unreadMessages.length);
       final int chUnread = channelsState.channels

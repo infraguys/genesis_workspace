@@ -8,7 +8,6 @@ class AllChatsState {
   final int selectedFolderIndex;
   Set<int>? filterDmUserIds;
   Set<int>? filterChannelIds;
-  // Cached members per folder for unread aggregation
   final Map<int, FolderMembers> folderMembersById;
 
   bool get isEmptyFolder =>

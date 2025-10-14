@@ -235,7 +235,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
               (message) =>
                   (message.senderId == user.userId) &&
                   (message.type == MessageType.private) &&
-                  message.senderId != state.selfUser?.userId,
+                  message.senderId != state.selfUser?.userId &&
+                  message.displayRecipient.length == 2,
             )
             .map((message) => message.id)
             .toSet();
@@ -272,7 +273,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
-    if (message.senderId == state.selfUser!.userId) return;
+    if (message.senderId == state.selfUser!.userId || message.displayRecipient.length != 2) return;
     state.allMessages.add(event.message);
 
     final sender = state.users.firstWhere((user) => user.userId == message.senderId);
