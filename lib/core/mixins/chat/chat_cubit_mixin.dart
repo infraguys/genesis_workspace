@@ -24,6 +24,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/reactio
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
@@ -494,14 +495,15 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   }
 
   Future<void> getMentionSuggestions({String? query}) async {
-    final chatMembers = getChannelMembers(state).toList();
+    final chatMembers = getChannelMembers(state);
     if (getShowMentionPopup(state)) {
       emit(copyWithCommon(isSuggestionsPending: true));
       List<UserEntity> users = getSuggestedMentions(state);
       List<UserEntity> filteredUsers = [];
       try {
         if (users.isEmpty) {
-          final response = await getUsersUseCase.call();
+          final UsersRequestEntity body = UsersRequestEntity();
+          final response = await getUsersUseCase.call(body);
           users = response;
           emit(copyWithCommon(suggestedMentions: response));
         }
@@ -520,8 +522,8 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
         }
 
         filteredUsers.sort((a, b) {
-          final indexA = chatMembers.indexOf(a.userId);
-          final indexB = chatMembers.indexOf(b.userId);
+          final indexA = chatMembers.toList().indexOf(a.userId);
+          final indexB = chatMembers.toList().indexOf(b.userId);
 
           if (indexA == -1 && indexB == -1) return 0;
           if (indexA == -1) return 1;

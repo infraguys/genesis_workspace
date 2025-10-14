@@ -1,7 +1,11 @@
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
 
-class GroupChatEntity {
-  List<RecipientEntity> members;
+class GroupChatEntity extends Equatable {
+  final List<RecipientEntity> members;
 
-  GroupChatEntity({required this.members});
+  const GroupChatEntity({required this.members});
+
+  @override
+  List<Object?> get props => [members];
 }

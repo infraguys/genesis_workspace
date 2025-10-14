@@ -62,6 +62,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
           folders: [],
           selectedFolderIndex: 0,
           folderMembersById: const {},
+          selectedGroupChat: null,
         ),
       );
 
@@ -250,12 +251,28 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     return await _getFolderIdsForTargetUseCase.call(FolderTarget.channel(streamId));
   }
 
-  void selectDmChat(DmUserEntity? dmUserEntity) async {
+  void selectDmChat(DmUserEntity? dmChats) async {
+    state.selectedTopic = null;
+    state.selectedChannel = null;
+    state.selectedGroupChat = null;
+
+    emit(
+      state.copyWith(
+        selectedDmChat: dmChats,
+        selectedTopic: state.selectedTopic,
+        selectedChannel: state.selectedChannel,
+        selectedGroupChat: state.selectedGroupChat,
+      ),
+    );
+  }
+
+  void selectGroupChat(Set<int>? ids) {
+    state.selectedDmChat = null;
     state.selectedTopic = null;
     state.selectedChannel = null;
     emit(
       state.copyWith(
-        selectedDmChat: dmUserEntity,
+        selectedGroupChat: ids,
         selectedTopic: state.selectedTopic,
         selectedChannel: state.selectedChannel,
       ),
@@ -264,11 +281,13 @@ class AllChatsCubit extends Cubit<AllChatsState> {
 
   void selectChannel({ChannelEntity? channel, TopicEntity? topic}) async {
     state.selectedDmChat = null;
+    state.selectedGroupChat = null;
     emit(
       state.copyWith(
         selectedChannel: channel,
         selectedTopic: topic,
         selectedDmChat: state.selectedDmChat,
+        selectedGroupChat: state.selectedGroupChat,
       ),
     );
   }

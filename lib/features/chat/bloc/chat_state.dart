@@ -2,7 +2,7 @@ part of 'chat_cubit.dart';
 
 class ChatState {
   List<MessageEntity> messages;
-  int? chatId;
+  Set<int>? chatIds;
   int? typingId;
   int? myUserId;
   int? lastMessageId;
@@ -12,6 +12,7 @@ class ChatState {
   TypingEventOp selfTypingOp;
   Set<int> pendingToMarkAsRead;
   DmUserEntity? userEntity;
+  List<DmUserEntity>? groupUsers;
   List<UploadFileEntity> uploadedFiles;
   String uploadedFilesString;
   String? uploadFileError;
@@ -27,7 +28,7 @@ class ChatState {
 
   ChatState({
     required this.messages,
-    this.chatId,
+    this.chatIds,
     this.typingId,
     this.myUserId,
     this.lastMessageId,
@@ -49,11 +50,12 @@ class ChatState {
     required this.suggestedMentions,
     required this.isSuggestionsPending,
     required this.filteredSuggestedMentions,
+    this.groupUsers,
   });
 
   ChatState copyWith({
     List<MessageEntity>? messages,
-    int? chatId,
+    Set<int>? chatIds,
     int? typingId,
     int? myUserId,
     int? lastMessageId,
@@ -75,10 +77,11 @@ class ChatState {
     List<UserEntity>? suggestedMentions,
     List<UserEntity>? filteredSuggestedMentions,
     bool? isSuggestionsPending,
+    List<DmUserEntity>? groupUsers,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
-      chatId: chatId ?? this.chatId,
+      chatIds: chatIds ?? this.chatIds,
       typingId: typingId ?? this.typingId,
       myUserId: myUserId ?? this.myUserId,
       lastMessageId: lastMessageId ?? this.lastMessageId,
@@ -100,6 +103,7 @@ class ChatState {
       suggestedMentions: suggestedMentions ?? this.suggestedMentions,
       isSuggestionsPending: isSuggestionsPending ?? this.isSuggestionsPending,
       filteredSuggestedMentions: filteredSuggestedMentions ?? this.filteredSuggestedMentions,
+      groupUsers: groupUsers ?? this.groupUsers,
     );
   }
 }

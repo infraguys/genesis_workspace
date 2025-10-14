@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -414,7 +415,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    bool isThisChatMessage = event.message.displayRecipient == state.channel!.name;
+    bool isThisChatMessage = event.message.displayRecipient.streamName == state.channel!.name;
     String messageSubject = event.message.subject;
     if (isThisChatMessage) {
       if (state.topic == null) {

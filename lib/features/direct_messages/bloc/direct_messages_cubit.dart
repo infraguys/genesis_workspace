@@ -22,6 +22,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/recipient_ent
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/group_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
@@ -51,7 +52,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           allMessages: [],
           selectedUserId: null,
           showAllUsers: false,
-          groupChats: [],
+          groupChats: {},
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -88,7 +89,8 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   Future<void> getUsers() async {
     try {
-      final response = await _getUsersUseCase.call();
+      final body = UsersRequestEntity();
+      final response = await _getUsersUseCase.call(body);
       final List<UserEntity> users = response;
       final mappedUsers = users.map((user) => user.toDmUser()).toList();
 
@@ -231,7 +233,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
       final messages = response.messages;
 
-      final groupChats = <GroupChatEntity>[];
+      final Set<GroupChatEntity> groupChats = {};
 
       for (var message in messages) {
         if (message.isGroupChatMessage) {

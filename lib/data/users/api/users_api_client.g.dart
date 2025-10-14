@@ -21,12 +21,15 @@ class _UsersApiClient implements UsersApiClient {
   Future<UsersResponseDto> getUsers(
     bool clientGravatar,
     bool includeCustomProfileFields,
+    String? userIds,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'client_gravatar': clientGravatar,
       r'include_custom_profile_fields': includeCustomProfileFields,
+      r'user_ids': userIds,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<UsersResponseDto>(

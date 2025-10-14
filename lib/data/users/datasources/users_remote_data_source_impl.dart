@@ -14,11 +14,11 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   }
 
   @override
-  Future<UsersResponseDto> getUsers() async {
+  Future<UsersResponseDto> getUsers(UsersRequestDto body) async {
     try {
       final bool clientGravatar = false;
       final bool includeCustomProfileFields = true;
-      return apiClient.getUsers(clientGravatar, includeCustomProfileFields);
+      return apiClient.getUsers(clientGravatar, includeCustomProfileFields, body.userIdsString);
     } catch (e) {
       rethrow;
     }

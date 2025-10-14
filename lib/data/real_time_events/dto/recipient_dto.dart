@@ -7,7 +7,8 @@ part 'recipient_dto.g.dart';
 class RecipientDto {
   final String email;
   final int userId;
-  final String fullName;
+  @JsonKey(name: 'full_name')
+  final String? fullName;
 
   RecipientDto({required this.email, required this.userId, required this.fullName});
 
@@ -18,5 +19,6 @@ class RecipientDto {
 
   Map<String, dynamic> toJson() => _$RecipientDtoToJson(this);
 
-  RecipientEntity toEntity() => RecipientEntity(email: email, userId: userId, fullName: fullName);
+  RecipientEntity toEntity() =>
+      RecipientEntity(email: email, userId: userId, fullName: fullName ?? '');
 }

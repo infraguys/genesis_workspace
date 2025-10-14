@@ -8,6 +8,7 @@ import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart'
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/all_chats_channels.dart';
 import 'package:genesis_workspace/features/all_chats/view/all_chats_dms.dart';
+import 'package:genesis_workspace/features/all_chats/view/all_group_chats.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/all_chats/view/folder_pill.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -270,17 +271,19 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                                     children: [
                                                       AllChatsDms(
-                                                        key: const ValueKey('dms-list-desktop'),
+                                                        key: const ValueKey('dms-chats'),
                                                         filteredDms: state.filterDmUserIds,
                                                         selectedFolder: state
                                                             .folders[state.selectedFolderIndex],
                                                         isEditPinning: _isEditPinning,
                                                       ),
                                                       const Divider(height: 1),
+                                                      const AllGroupChats(
+                                                        key: const ValueKey('group-chats'),
+                                                      ),
+                                                      const Divider(height: 1),
                                                       AllChatsChannels(
-                                                        key: const ValueKey(
-                                                          'channels-list-desktop',
-                                                        ),
+                                                        key: const ValueKey('channels-chats'),
                                                         filterChannelIds: state.filterChannelIds,
                                                         selectedFolder: state
                                                             .folders[state.selectedFolderIndex],
@@ -307,15 +310,16 @@ class _AllChatsViewState extends State<AllChatsView> {
                                     buildWhen: (prev, current) =>
                                         prev.selectedDmChat != current.selectedDmChat ||
                                         prev.selectedChannel != current.selectedChannel ||
-                                        prev.selectedTopic != current.selectedTopic,
+                                        prev.selectedTopic != current.selectedTopic ||
+                                        prev.selectedGroupChat != current.selectedGroupChat,
                                     builder: (context, selectedChatState) {
                                       if (selectedChatState.selectedDmChat != null) {
                                         return Chat(
                                           key: ObjectKey(selectedChatState.selectedDmChat!.userId),
-                                          userId: selectedChatState.selectedDmChat!.userId,
+                                          userIds: [selectedChatState.selectedDmChat!.userId],
                                           unreadMessagesCount: selectedChatState
-                                              .selectedDmChat
-                                              ?.unreadMessages
+                                              .selectedDmChat!
+                                              .unreadMessages
                                               .length,
                                         );
                                       }
@@ -326,6 +330,14 @@ class _AllChatsViewState extends State<AllChatsView> {
                                           ),
                                           channelId: selectedChatState.selectedChannel!.streamId,
                                           topicName: selectedChatState.selectedTopic?.name,
+                                        );
+                                      }
+                                      if (selectedChatState.selectedGroupChat != null) {
+                                        return Chat(
+                                          key: ObjectKey(
+                                            selectedChatState.selectedGroupChat.hashCode,
+                                          ),
+                                          userIds: selectedChatState.selectedGroupChat!.toList(),
                                         );
                                       }
                                       return Center(child: Text(context.t.selectAnyChat));

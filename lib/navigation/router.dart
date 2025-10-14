@@ -106,7 +106,7 @@ final router = GoRouter(
                   if (currentSize(context) > ScreenSize.lTablet) {
                     return DirectMessages(initialUserId: userId);
                   } else {
-                    return Chat(userId: userId, unreadMessagesCount: unread);
+                    return Chat(userIds: [userId], unreadMessagesCount: unread);
                   }
                 },
               ),
@@ -229,7 +229,7 @@ final router = GoRouter(
             // На десктопе в идеале сюда не приходим, но на всякий случай
             return SizedBox.shrink();
           } else {
-            return Chat(userId: userId, unreadMessagesCount: unread);
+            return Chat(userIds: [userId], unreadMessagesCount: unread);
           }
         },
       ),

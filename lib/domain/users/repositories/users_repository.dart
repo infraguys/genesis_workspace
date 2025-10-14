@@ -9,10 +9,11 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_response
 import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_presence_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 
 abstract class UsersRepository {
   Future<List<SubscriptionEntity>> getSubscribedChannels(bool includeSubscribers);
-  Future<List<UserEntity>> getUsers();
+  Future<List<UserEntity>> getUsers(UsersRequestEntity body);
   Future<UserEntity> getOwnUser();
   Future<void> setTyping(TypingRequestEntity body);
   Future<List<TopicEntity>> getChannelTopics(int streamId);

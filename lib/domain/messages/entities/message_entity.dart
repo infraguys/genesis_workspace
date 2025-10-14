@@ -33,7 +33,7 @@ class MessageEntity {
     required this.reactions,
   });
 
-  bool get hasUnreadMessages => flags != null && !flags!.contains('read');
+  bool get hasUnreadMessages => flags != null ? !flags!.contains('read') : true;
 
   bool get isGroupChatMessage =>
       displayRecipient is DirectMessageRecipients &&
