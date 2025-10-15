@@ -6,6 +6,7 @@ import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -196,7 +197,6 @@ class ChatCubit extends Cubit<ChatState>
     required int myUserId,
     int? unreadMessagesCount,
   }) async {
-    inspect(myUserId);
     state.chatIds = userIds.toSet();
 
     if (userIds.length == 1) {
@@ -340,13 +340,20 @@ class ChatCubit extends Cubit<ChatState>
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    bool isThisChatMessage =
-        event.message.displayRecipient.recipients.any(
-          (recipient) => recipient.userId == state.myUserId,
-        ) &&
-        event.message.displayRecipient.recipients.any(
-          (recipient) => (state.chatIds?.any((id) => id == recipient.userId) ?? false),
-        );
+    bool isThisChatMessage = false;
+    if (event.message.isGroupChatMessage) {
+      final chatIds = state.chatIds?.toList();
+      final messageRecipients = event.message.displayRecipient.recipients
+          .map((recipient) => recipient.userId)
+          .toList();
+      isThisChatMessage = unorderedEquals(chatIds ?? [], messageRecipients);
+    } else {
+      final chatIds = [state.myUserId, ...state.chatIds!];
+      final messageRecipients = event.message.displayRecipient.recipients
+          .map((recipient) => recipient.userId)
+          .toList();
+      isThisChatMessage = unorderedEquals(chatIds, messageRecipients);
+    }
     if (isThisChatMessage) {
       state.messages = [...state.messages, event.message];
       emit(state.copyWith(messages: state.messages));
