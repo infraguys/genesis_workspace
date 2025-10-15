@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -52,7 +53,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           allMessages: [],
           selectedUserId: null,
           showAllUsers: false,
-          groupChats: {},
+          groupChats: [],
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -233,13 +234,15 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
       final messages = response.messages;
 
-      final Set<GroupChatEntity> groupChats = {};
+      final List<GroupChatEntity> groupChats = [];
 
       for (var message in messages) {
         if (message.isGroupChatMessage) {
           final members = message.displayRecipient.recipients;
-          final groupChat = GroupChatEntity(members: members);
-          groupChats.add(groupChat);
+          GroupChatEntity groupChat = GroupChatEntity(members: members, unreadMessagesCount: 0);
+          if (!groupChats.contains(groupChat)) {
+            groupChats.add(groupChat);
+          }
         }
       }
 
@@ -292,19 +295,39 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final message = event.message;
-    if (message.senderId == state.selfUser!.userId ||
-        message.displayRecipient.recipients.length != 2)
-      return;
+    if (message.senderId == state.selfUser!.userId) return;
     state.allMessages.add(event.message);
 
-    final sender = state.users.firstWhere((user) => user.userId == message.senderId);
-    final indexOfSender = state.users.indexOf(sender);
-    if (message.hasUnreadMessages && message.type == MessageType.private) {
-      sender.unreadMessages.add(message.id);
+    if (message.displayRecipient.recipients.length == 2) {
+      final sender = state.users.firstWhere((user) => user.userId == message.senderId);
+      final indexOfSender = state.users.indexOf(sender);
+      if (message.hasUnreadMessages && message.type == MessageType.private) {
+        sender.unreadMessages.add(message.id);
+      }
+      state.users[indexOfSender] = sender;
+      _sortUsers();
+      getRecentDms();
+    } else {
+      final groupChats = state.groupChats;
+      GroupChatEntity? selectedChat;
+      for (var chat in groupChats) {
+        final List<int> members = chat.members.map((member) => member.userId).toList();
+        final List<int> messageRecipients = message.displayRecipient.recipients
+            .map((recipient) => recipient.userId)
+            .toList();
+        if (unorderedEquals<int>(members, messageRecipients)) {
+          selectedChat = chat;
+          break;
+        }
+      }
+      if (selectedChat != null) {
+        groupChats.remove(selectedChat);
+        groupChats.add(
+          selectedChat.copyWith(unreadMessagesCount: selectedChat.unreadMessagesCount + 1),
+        );
+        emit(state.copyWith(groupChats: groupChats));
+      }
     }
-    state.users[indexOfSender] = sender;
-    _sortUsers();
-    getRecentDms();
   }
 
   void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {

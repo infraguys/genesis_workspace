@@ -102,6 +102,7 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
                         return GroupChatTile(
                           key: ValueKey('group-${index}-${group.members.length}'),
                           members: group.members,
+                          unreadCount: group.unreadMessagesCount,
                           onTap: () {
                             if (isDesktop) {
                               context.read<AllChatsCubit>().selectGroupChat(

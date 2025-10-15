@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 
-class MessageEntity {
+class MessageEntity extends Equatable {
   final int id;
   final bool isMeMessage;
   final String? avatarUrl;
@@ -106,4 +107,8 @@ class MessageEntity {
     timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     reactions: const [],
   );
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [displayRecipient, id];
 }

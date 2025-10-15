@@ -1,17 +1,25 @@
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
 
-sealed class DisplayRecipient {
+sealed class DisplayRecipient extends Equatable {
   const DisplayRecipient();
 }
 
 class StreamDisplayRecipient extends DisplayRecipient {
   final String streamName;
   const StreamDisplayRecipient(this.streamName);
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [streamName];
 }
 
 class DirectMessageRecipients extends DisplayRecipient {
   final List<RecipientEntity> recipients;
   const DirectMessageRecipients(this.recipients);
+  @override
+  // TODO: implement props
+  List<Object?> get props => [recipients];
 }
 
 extension DisplayRecipientX on DisplayRecipient {

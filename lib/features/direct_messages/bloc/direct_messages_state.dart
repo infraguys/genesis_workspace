@@ -13,7 +13,7 @@ class DirectMessagesState {
   int? selectedUserId;
   int? selectedUnreadMessagesCount;
   bool showAllUsers;
-  Set<GroupChatEntity> groupChats;
+  List<GroupChatEntity> groupChats;
 
   DirectMessagesState({
     required this.users,
@@ -44,7 +44,7 @@ class DirectMessagesState {
     int? selectedUserId,
     int? selectedUnreadMessagesCount,
     bool? showAllUsers,
-    Set<GroupChatEntity>? groupChats,
+    List<GroupChatEntity>? groupChats,
   }) {
     return DirectMessagesState(
       users: users ?? this.users,
