@@ -1,12 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/mixins/chat/dm_chat_mixin.dart';
 import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
+import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/dm_search_field.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
@@ -33,7 +37,7 @@ class AllChatsDms extends StatefulWidget {
   State<AllChatsDms> createState() => _AllChatsDmsState();
 }
 
-class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin {
+class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin, DmChatMixin {
   late final AnimationController expandController;
   late final Animation<double> expandAnimation;
   bool isExpanded = true;
@@ -137,7 +141,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     final isDesktop = currentSize(context) > ScreenSize.lTablet;
 
     return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
-      buildWhen: (_, _) => !isReorderingInProgress,
+      buildWhen: (prev, current) => !isReorderingInProgress && !current.createGroupChatOpened,
       builder: (context, directMessagesState) {
         final List<DmUserEntity> baseFiltered = directMessagesState.showAllUsers
             ? directMessagesState.filteredUsers
@@ -158,6 +162,36 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                       style: Theme.of(context).textTheme.titleMedium,
                       overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      context.read<DirectMessagesCubit>().setCreateGroupChatOpened(true);
+                      try {
+                        await showDialog(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            return BlocProvider.value(
+                              value: context.read<DirectMessagesCubit>(),
+                              child: CreateGroupChatDialog(
+                                onCreate: (membersIds) {
+                                  Navigator.of(dialogContext).pop();
+                                  openChat(context, {
+                                    ...membersIds,
+                                    directMessagesState.selfUser!.userId,
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      } catch (e) {
+                        inspect(e);
+                      } finally {
+                        context.read<DirectMessagesCubit>().setCreateGroupChatOpened(false);
+                      }
+                    },
+                    icon: const Icon(Icons.add),
+                    tooltip: context.t.groupChat.createTooltip,
                   ),
                   Tooltip(
                     message: directMessagesState.showAllUsers

@@ -184,7 +184,6 @@ class MessageItem extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     inspect(message.content);
-                    // inspect(messageContent);
                   },
                   onSecondaryTap: () {
                     actionsPopupKey.currentState?.show();

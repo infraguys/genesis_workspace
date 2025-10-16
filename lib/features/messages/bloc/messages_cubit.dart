@@ -147,7 +147,7 @@ class MessagesCubit extends Cubit<MessagesState> {
 
   _onMessageEvents(MessageEventEntity event) {
     final messages = [...state.messages];
-    messages.add(event.message);
+    messages.add(event.message.copyWith(flags: event.flags));
     emit(state.copyWith(messages: messages));
   }
 

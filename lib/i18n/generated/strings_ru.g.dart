@@ -69,6 +69,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsChannelRu channel = TranslationsChannelRu._(_root);
 	@override late final TranslationsChatRu chat = TranslationsChatRu._(_root);
 	@override late final TranslationsGroupRu group = TranslationsGroupRu._(_root);
+	@override late final TranslationsGroupChatRu groupChat = TranslationsGroupChatRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
 }
 
@@ -308,4 +309,29 @@ class TranslationsGroupRu extends TranslationsGroupEn {
 
 	// Translations
 	@override String membersCount({required Object count}) => 'Участников: ${count}';
+}
+
+// Path: groupChat
+class TranslationsGroupChatRu extends TranslationsGroupChatEn {
+	TranslationsGroupChatRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get createTooltip => 'Создать групповой чат';
+	@override late final TranslationsGroupChatCreateDialogRu createDialog = TranslationsGroupChatCreateDialogRu._(_root);
+}
+
+// Path: groupChat.createDialog
+class TranslationsGroupChatCreateDialogRu extends TranslationsGroupChatCreateDialogEn {
+	TranslationsGroupChatCreateDialogRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Новый групповой чат';
+	@override String get searchHint => 'Поиск пользователей';
+	@override String get noUsers => 'Пользователи не найдены';
+	@override String get cancel => 'Отмена';
+	@override String get create => 'Создать';
 }

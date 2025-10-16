@@ -146,5 +146,15 @@
   "group": {
     "members_count": "Участников: {count}"
   },
+  "group_chat": {
+    "create_tooltip": "Создать групповой чат",
+    "create_dialog": {
+      "title": "Новый групповой чат",
+      "search_hint": "Поиск пользователей",
+      "no_users": "Пользователи не найдены",
+      "cancel": "Отмена",
+      "create": "Создать"
+    }
+  },
   "nothing_found": "Ничего не нашли"
 }

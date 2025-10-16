@@ -55,6 +55,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
           selectedUserId: null,
           showAllUsers: false,
           groupChats: [],
+          createGroupChatOpened: false,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -92,8 +93,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
       final unreadIncrement = message.hasUnreadMessages ? 1 : 0;
       if (current == null) {
-        final members = recipients.toList()
-          ..sort((a, b) => a.fullName.compareTo(b.fullName));
+        final members = recipients.toList()..sort((a, b) => a.fullName.compareTo(b.fullName));
         aggregated[key] = GroupChatEntity(
           id: GroupChatUtils.computeGroupIdFromRecipients(recipients),
           members: members,
@@ -142,6 +142,13 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       user.unreadMessages = Set<int>.from(unread);
       return user;
     }).toList();
+  }
+
+  void setCreateGroupChatOpened(bool opened) {
+    if (opened == false) {
+      searchUsers('');
+    }
+    emit(state.copyWith(createGroupChatOpened: opened));
   }
 
   void setSelfUser(UserEntity? user) {
@@ -335,7 +342,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    final message = event.message;
+    final message = event.message.copyWith(flags: event.flags);
     final bool isSelfMessage = message.senderId == state.selfUser?.userId;
     final updatedAllMessages = [...state.allMessages, message];
     final updatedUnreadMessages = [...state.unreadMessages];

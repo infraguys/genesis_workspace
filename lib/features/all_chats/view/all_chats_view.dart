@@ -277,7 +277,6 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                             .folders[state.selectedFolderIndex],
                                                         isEditPinning: _isEditPinning,
                                                       ),
-                                                      const Divider(height: 1),
                                                       AllGroupChats(
                                                         key: const ValueKey('group-chats'),
                                                         filteredGroupChatIds:
