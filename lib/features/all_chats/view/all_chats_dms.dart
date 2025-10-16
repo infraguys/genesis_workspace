@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/mixins/chat/dm_chat_mixin.dart';
 import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
@@ -34,7 +37,7 @@ class AllChatsDms extends StatefulWidget {
   State<AllChatsDms> createState() => _AllChatsDmsState();
 }
 
-class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin {
+class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin, DmChatMixin {
   late final AnimationController expandController;
   late final Animation<double> expandAnimation;
   bool isExpanded = true;
@@ -133,22 +136,6 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     return baseList;
   }
 
-  void openChat(BuildContext context, Set<int> membersIds, {int? unreadMessagesCount}) {
-    final isDesktop = currentSize(context) > ScreenSize.lTablet;
-
-    if (isDesktop) {
-      context.read<AllChatsCubit>().selectGroupChat(membersIds);
-    } else {
-      final userIds = membersIds.toList();
-      final userIdsString = userIds.join(',');
-      context.pushNamed(
-        Routes.groupChat,
-        pathParameters: {'userIds': userIdsString},
-        extra: {'unreadMessagesCount': unreadMessagesCount},
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDesktop = currentSize(context) > ScreenSize.lTablet;
@@ -179,24 +166,29 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                   IconButton(
                     onPressed: () async {
                       context.read<DirectMessagesCubit>().setCreateGroupChatOpened(true);
-                      await showDialog(
-                        context: context,
-                        builder: (BuildContext dialogContext) {
-                          return BlocProvider.value(
-                            value: context.read<DirectMessagesCubit>(),
-                            child: CreateGroupChatDialog(
-                              onCreate: (membersIds) {
-                                Navigator.of(dialogContext).pop();
-                                openChat(context, {
-                                  ...membersIds,
-                                  directMessagesState.selfUser!.userId,
-                                });
-                              },
-                            ),
-                          );
-                        },
-                      );
-                      context.read<DirectMessagesCubit>().setCreateGroupChatOpened(false);
+                      try {
+                        await showDialog(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            return BlocProvider.value(
+                              value: context.read<DirectMessagesCubit>(),
+                              child: CreateGroupChatDialog(
+                                onCreate: (membersIds) {
+                                  Navigator.of(dialogContext).pop();
+                                  openChat(context, {
+                                    ...membersIds,
+                                    directMessagesState.selfUser!.userId,
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      } catch (e) {
+                        inspect(e);
+                      } finally {
+                        context.read<DirectMessagesCubit>().setCreateGroupChatOpened(false);
+                      }
                     },
                     icon: const Icon(Icons.add),
                     tooltip: context.t.groupChat.createTooltip,

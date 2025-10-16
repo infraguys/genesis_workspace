@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/mixins/chat/dm_chat_mixin.dart';
 import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
@@ -11,7 +12,6 @@ import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.
 import 'package:genesis_workspace/features/chats/common/widgets/group_chat_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
 class AllGroupChats extends StatefulWidget {
@@ -32,7 +32,7 @@ class AllGroupChats extends StatefulWidget {
   State<AllGroupChats> createState() => _AllGroupChatsState();
 }
 
-class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateMixin {
+class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateMixin, DmChatMixin {
   late final AnimationController expandController;
   late final Animation<double> expandAnimation;
   bool isExpanded = true;
@@ -68,22 +68,6 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
       expandController.forward();
     } else {
       expandController.reverse();
-    }
-  }
-
-  void openChat(BuildContext context, Set<int> membersIds, {int? unreadMessagesCount}) {
-    final isDesktop = currentSize(context) > ScreenSize.lTablet;
-
-    if (isDesktop) {
-      context.read<AllChatsCubit>().selectGroupChat(membersIds);
-    } else {
-      final userIds = membersIds.toList();
-      final userIdsString = userIds.join(',');
-      context.pushNamed(
-        Routes.groupChat,
-        pathParameters: {'userIds': userIdsString},
-        extra: {'unreadMessagesCount': unreadMessagesCount},
-      );
     }
   }
 
