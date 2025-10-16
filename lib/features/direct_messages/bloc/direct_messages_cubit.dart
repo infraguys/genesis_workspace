@@ -145,6 +145,9 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   }
 
   void setCreateGroupChatOpened(bool opened) {
+    if (opened == false) {
+      searchUsers('');
+    }
     emit(state.copyWith(createGroupChatOpened: opened));
   }
 
