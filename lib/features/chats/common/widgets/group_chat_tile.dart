@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/recipient_entity.dart';
 
 class GroupChatTile extends StatelessWidget {
@@ -49,7 +50,7 @@ class GroupChatTile extends StatelessWidget {
         ],
       ),
       subtitle: Text(
-        'Участников: $count',
+        context.t.group.membersCount(count: count),
         style: Theme.of(context).textTheme.labelSmall,
         overflow: TextOverflow.ellipsis,
       ),

@@ -150,7 +150,7 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
                 children: [
                   Expanded(
                     child: Text(
-                      'Групповые чаты',
+                      context.t.navBar.groupChats,
                       style: Theme.of(context).textTheme.titleMedium,
                       overflow: TextOverflow.ellipsis,
                     ),

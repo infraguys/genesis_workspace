@@ -118,6 +118,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
 	late final TranslationsChannelEn channel = TranslationsChannelEn.internal(_root);
 	late final TranslationsChatEn chat = TranslationsChatEn.internal(_root);
+	late final TranslationsGroupEn group = TranslationsGroupEn.internal(_root);
 
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
@@ -220,6 +221,9 @@ class TranslationsNavBarEn {
 
 	/// en: 'Channels'
 	String get channels => 'Channels';
+
+	/// en: 'Group chats'
+	String get groupChats => 'Group chats';
 }
 
 // Path: timeAgo
@@ -496,4 +500,16 @@ class TranslationsChatEn {
 
 	/// en: 'Unpin chat'
 	String get unpinChat => 'Unpin chat';
+}
+
+// Path: group
+class TranslationsGroupEn {
+	TranslationsGroupEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Members: {count}'
+	String membersCount({required Object count}) => 'Members: ${count}';
 }
