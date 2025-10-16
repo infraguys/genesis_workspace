@@ -5,7 +5,7 @@ import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
-mixin DmChatMixin {
+mixin OpenDmChatMixin {
   void openChat(BuildContext context, Set<int> membersIds, {int? unreadMessagesCount}) {
     final isDesktop = currentSize(context) > ScreenSize.lTablet;
 
