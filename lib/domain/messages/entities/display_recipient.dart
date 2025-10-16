@@ -10,7 +10,6 @@ class StreamDisplayRecipient extends DisplayRecipient {
   const StreamDisplayRecipient(this.streamName);
 
   @override
-  // TODO: implement props
   List<Object?> get props => [streamName];
 }
 
@@ -18,7 +17,6 @@ class DirectMessageRecipients extends DisplayRecipient {
   final List<RecipientEntity> recipients;
   const DirectMessageRecipients(this.recipients);
   @override
-  // TODO: implement props
   List<Object?> get props => [recipients];
 }
 

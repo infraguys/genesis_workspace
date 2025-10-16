@@ -495,7 +495,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   }
 
   Future<void> getMentionSuggestions({String? query}) async {
-    final chatMembers = getChannelMembers(state);
+    final chatMembers = getChannelMembers(state).toList();
     if (getShowMentionPopup(state)) {
       emit(copyWithCommon(isSuggestionsPending: true));
       List<UserEntity> users = getSuggestedMentions(state);
@@ -522,8 +522,8 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
         }
 
         filteredUsers.sort((a, b) {
-          final indexA = chatMembers.toList().indexOf(a.userId);
-          final indexB = chatMembers.toList().indexOf(b.userId);
+          final indexA = chatMembers.indexOf(a.userId);
+          final indexB = chatMembers.indexOf(b.userId);
 
           if (indexA == -1 && indexB == -1) return 0;
           if (indexA == -1) return 1;

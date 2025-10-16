@@ -89,7 +89,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   @override
   void dispose() {
     appShellController.detach();
-    super.dispose();
     _pauseIdleDetector();
     WidgetsBinding.instance.removeObserver(this);
     if (kIsWeb) BrowserContextMenu.enableContextMenu();
