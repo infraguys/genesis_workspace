@@ -37,6 +37,7 @@ class Routes {
   static const String pasteToken = '/paste-token';
   static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
+  static const String groupChat = '/group-chat';
   static const String channels = '/channels';
   static const String settings = '/settings';
   static const String feed = '/feed';
@@ -106,7 +107,7 @@ final router = GoRouter(
                   if (currentSize(context) > ScreenSize.lTablet) {
                     return DirectMessages(initialUserId: userId);
                   } else {
-                    return Chat(userId: userId, unreadMessagesCount: unread);
+                    return Chat(userIds: [userId], unreadMessagesCount: unread);
                   }
                 },
               ),
@@ -229,7 +230,25 @@ final router = GoRouter(
             // На десктопе в идеале сюда не приходим, но на всякий случай
             return SizedBox.shrink();
           } else {
-            return Chat(userId: userId, unreadMessagesCount: unread);
+            return Chat(userIds: [userId], unreadMessagesCount: unread);
+          }
+        },
+      ),
+      GoRoute(
+        path: '${Routes.groupChat}/:userIds',
+        name: Routes.groupChat,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final List<int> userIds =
+              state.pathParameters['userIds']?.split(',').map(int.parse).toList() ?? [];
+          final extra = state.extra as Map<String, dynamic>?;
+          final unread = extra?['unreadMessagesCount'] ?? 0;
+
+          if (currentSize(context) > ScreenSize.lTablet) {
+            // На десктопе в идеале сюда не приходим, но на всякий случай
+            return SizedBox.shrink();
+          } else {
+            return Chat(userIds: userIds, unreadMessagesCount: unread);
           }
         },
       ),

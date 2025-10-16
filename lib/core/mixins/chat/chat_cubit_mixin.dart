@@ -24,6 +24,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/reactio
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
@@ -501,7 +502,8 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
       List<UserEntity> filteredUsers = [];
       try {
         if (users.isEmpty) {
-          final response = await getUsersUseCase.call();
+          final UsersRequestEntity body = UsersRequestEntity();
+          final response = await getUsersUseCase.call(body);
           users = response;
           emit(copyWithCommon(suggestedMentions: response));
         }

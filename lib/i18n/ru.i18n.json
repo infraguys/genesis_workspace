@@ -33,7 +33,8 @@
     "direct_messages": "Личные сообщения",
     "settings": "Настройки",
     "menu": "Меню",
-    "channels": "Каналы"
+    "channels": "Каналы",
+    "group_chats": "Групповые чаты"
   },
   "feed": "Лента",
   "select_any_channel": "Выберите любой канал",
@@ -141,6 +142,9 @@
   "chat": {
     "pinChat": "Закрепить чат",
     "unpinChat": "Открепить чат"
+  },
+  "group": {
+    "members_count": "Участников: {count}"
   },
   "nothing_found": "Ничего не нашли"
 }

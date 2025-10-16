@@ -6,7 +6,9 @@ import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -26,6 +28,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/update_
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
@@ -53,7 +56,7 @@ class ChatCubit extends Cubit<ChatState>
   ) : super(
         ChatState(
           messages: [],
-          chatId: null,
+          chatIds: null,
           typingId: null,
           myUserId: null,
           isMessagePending: false,
@@ -74,6 +77,7 @@ class ChatCubit extends Cubit<ChatState>
           suggestedMentions: [],
           isSuggestionsPending: false,
           filteredSuggestedMentions: [],
+          groupUsers: null,
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
@@ -157,7 +161,7 @@ class ChatCubit extends Cubit<ChatState>
   List<UserEntity> getFilteredSuggestedMentions(ChatState s) => s.filteredSuggestedMentions;
 
   @override
-  getChannelMembers(ChatState s) => s.chatId != null ? {s.chatId!} : {};
+  getChannelMembers(ChatState s) => s.chatIds != null ? s.chatIds! : {};
 
   @override
   ChatState copyWithCommon({
@@ -189,22 +193,39 @@ class ChatCubit extends Cubit<ChatState>
   }
 
   Future<void> getInitialData({
-    required int userId,
+    required List<int> userIds,
     required int myUserId,
     int? unreadMessagesCount,
   }) async {
-    state.chatId = userId;
-    try {
-      final UserEntity user = await _getUserByIdUseCase.call(userId);
-      final presence = await _getUserPresenceUseCase.call(userId);
-      final DmUserEntity dmUser = user.toDmUser();
-      dmUser.presenceStatus = presence.userPresence.aggregated!.status;
-      dmUser.presenceTimestamp = presence.userPresence.aggregated!.timestamp;
-      emit(state.copyWith(userEntity: dmUser));
-      await getMessages(myUserId: myUserId, unreadMessagesCount: unreadMessagesCount);
-    } catch (e) {
-      inspect(e);
+    state.chatIds = userIds.toSet();
+
+    if (userIds.length == 1) {
+      final userId = userIds.first;
+      try {
+        final UserEntity user = await _getUserByIdUseCase.call(userId);
+        final DmUserEntity dmUser = user.toDmUser();
+
+        if (!user.isBot) {
+          final presence = await _getUserPresenceUseCase.call(userId);
+          dmUser.presenceStatus = presence.userPresence.aggregated!.status;
+          dmUser.presenceTimestamp = presence.userPresence.aggregated!.timestamp;
+        }
+
+        emit(state.copyWith(userEntity: dmUser));
+      } catch (e) {
+        inspect(e);
+      }
+    } else {
+      try {
+        final ids = [...userIds, myUserId];
+        final body = UsersRequestEntity(userIds: ids);
+        final List<UserEntity> users = await _getUsersUseCase.call(body);
+        emit(state.copyWith(groupUsers: users.map((user) => user.toDmUser()).toList()));
+      } catch (e) {
+        inspect(e);
+      }
     }
+    await getMessages(myUserId: myUserId, unreadMessagesCount: unreadMessagesCount);
   }
 
   Future<void> getMessages({required int myUserId, int? unreadMessagesCount}) async {
@@ -215,11 +236,10 @@ class ChatCubit extends Cubit<ChatState>
     }
 
     try {
+      final operand = state.chatIds!.toList();
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
-        narrow: [
-          MessageNarrowEntity(operator: NarrowOperator.dm, operand: [state.userEntity!.userId]),
-        ],
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
         numBefore: numBefore,
         numAfter: 0,
       );
@@ -239,11 +259,10 @@ class ChatCubit extends Cubit<ChatState>
       state.isLoadingMore = true;
       emit(state.copyWith(isLoadingMore: state.isLoadingMore));
       try {
+        final operand = state.chatIds!.toList();
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
-          narrow: [
-            MessageNarrowEntity(operator: NarrowOperator.dm, operand: [state.chatId ?? 0]),
-          ],
+          narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
           numBefore: 25,
           numAfter: 0,
         );
@@ -271,7 +290,7 @@ class ChatCubit extends Cubit<ChatState>
       state.selfTypingOp = op;
       try {
         await _setTypingUseCase.call(
-          TypingRequestEntity(type: SendMessageType.direct, op: op, to: [state.userEntity!.userId]),
+          TypingRequestEntity(type: SendMessageType.direct, op: op, to: state.chatIds!.toList()),
         );
       } catch (e) {
         inspect(e);
@@ -284,13 +303,13 @@ class ChatCubit extends Cubit<ChatState>
     emit(state.copyWith(isMessagePending: value));
   }
 
-  Future<void> sendMessage({required int chatId, required String content}) async {
+  Future<void> sendMessage({required String content}) async {
     emit(state.copyWith(isMessagePending: true));
     final String composed = buildMessageContent(content: content);
 
     final body = SendMessageRequestEntity(
       type: SendMessageType.direct,
-      to: [chatId],
+      to: state.chatIds!.toList(),
       content: composed,
     );
 
@@ -306,7 +325,8 @@ class ChatCubit extends Cubit<ChatState>
 
   void _onTypingEvents(TypingEventEntity event) {
     final senderId = event.sender.userId;
-    final isWriting = event.op == TypingEventOp.start && senderId == state.chatId;
+    final isWriting =
+        event.op == TypingEventOp.start && (state.chatIds?.any((id) => id == senderId) ?? false);
 
     if (isWriting) {
       state.typingId = senderId;
@@ -317,9 +337,20 @@ class ChatCubit extends Cubit<ChatState>
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    bool isThisChatMessage =
-        event.message.displayRecipient.any((recipient) => recipient.userId == state.myUserId) &&
-        event.message.displayRecipient.any((recipient) => recipient.userId == state.chatId);
+    bool isThisChatMessage = false;
+    if (event.message.isGroupChatMessage) {
+      final chatIds = state.chatIds?.toList();
+      final messageRecipients = event.message.displayRecipient.recipients
+          .map((recipient) => recipient.userId)
+          .toList();
+      isThisChatMessage = unorderedEquals(chatIds ?? [], messageRecipients);
+    } else {
+      final chatIds = [state.myUserId, ...state.chatIds!];
+      final messageRecipients = event.message.displayRecipient.recipients
+          .map((recipient) => recipient.userId)
+          .toList();
+      isThisChatMessage = unorderedEquals(chatIds, messageRecipients);
+    }
     if (isThisChatMessage) {
       state.messages = [...state.messages, event.message];
       emit(state.copyWith(messages: state.messages));

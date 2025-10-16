@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-enum PinnedChatType { dm, channel }
+enum PinnedChatType { dm, channel, group }
 
 class PinnedChats extends Table {
   IntColumn get id => integer().autoIncrement()();

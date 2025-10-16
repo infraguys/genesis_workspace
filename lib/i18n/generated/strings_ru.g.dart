@@ -68,6 +68,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsFoldersRu folders = TranslationsFoldersRu._(_root);
 	@override late final TranslationsChannelRu channel = TranslationsChannelRu._(_root);
 	@override late final TranslationsChatRu chat = TranslationsChatRu._(_root);
+	@override late final TranslationsGroupRu group = TranslationsGroupRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
 }
 
@@ -114,6 +115,7 @@ class TranslationsNavBarRu extends TranslationsNavBarEn {
 	@override String get settings => 'Настройки';
 	@override String get menu => 'Меню';
 	@override String get channels => 'Каналы';
+	@override String get groupChats => 'Групповые чаты';
 }
 
 // Path: timeAgo
@@ -296,4 +298,14 @@ class TranslationsChatRu extends TranslationsChatEn {
 	// Translations
 	@override String get pinChat => 'Закрепить чат';
 	@override String get unpinChat => 'Открепить чат';
+}
+
+// Path: group
+class TranslationsGroupRu extends TranslationsGroupEn {
+	TranslationsGroupRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String membersCount({required Object count}) => 'Участников: ${count}';
 }

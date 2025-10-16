@@ -15,6 +15,8 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
         return 'dm';
       case FolderTargetType.channel:
         return 'channel';
+      case FolderTargetType.group:
+        return 'group';
     }
   }
 
@@ -45,10 +47,12 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
     final rows = await _localDataSource.getItemsForFolder(folderId);
     final dm = <int>[];
     final channels = <int>[];
+    final groups = <int>[];
     for (final r in rows) {
       if (r.itemType == 'dm') dm.add(r.targetId);
       if (r.itemType == 'channel') channels.add(r.targetId);
+      if (r.itemType == 'group') groups.add(r.targetId);
     }
-    return FolderMembers(dmUserIds: dm, channelIds: channels);
+    return FolderMembers(dmUserIds: dm, channelIds: channels, groupChatIds: groups);
   }
 }

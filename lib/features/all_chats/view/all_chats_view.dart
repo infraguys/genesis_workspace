@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/all_chats_channels.dart';
 import 'package:genesis_workspace/features/all_chats/view/all_chats_dms.dart';
+import 'package:genesis_workspace/features/all_chats/view/all_group_chats.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/all_chats/view/folder_pill.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -44,12 +46,14 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   final ScrollController _foldersScrollController = ScrollController();
 
+  // Folder members are now provided by AllChatsCubit state
+
   Color _currentFolderBackground(
     BuildContext context, {
     required int selectedIndex,
     required List<FolderItemEntity> folders,
   }) {
-    if (folders.isNotEmpty) {
+    if (folders.isNotEmpty && selectedIndex != 0) {
       if (folders[selectedIndex].backgroundColor == null) {
         return Theme.of(context).colorScheme.surface.withValues(alpha: 0.10);
       }
@@ -229,70 +233,11 @@ class _AllChatsViewState extends State<AllChatsView> {
                                     ),
                                   ),
                                 ],
-                                SizedBox(
-                                  height: 46,
-                                  child: ScrollConfiguration(
-                                    behavior: ScrollConfiguration.of(
-                                      context,
-                                    ).copyWith(scrollbars: false),
-                                    child: ListView.builder(
-                                      controller: _foldersScrollController,
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: state.folders.length,
-                                      itemBuilder: (context, index) {
-                                        final FolderItemEntity folder = state.folders[index];
-                                        final bool isSelected = state.selectedFolderIndex == index;
-                                        return FolderPill(
-                                          isSelected: isSelected,
-                                          folder: index == 0
-                                              ? folder.copyWith(title: context.t.folders.all)
-                                              : folder,
-                                          onTap: () =>
-                                              context.read<AllChatsCubit>().selectFolder(index),
-                                          onEdit: (folder.systemType == null)
-                                              ? () => editFolder(context, folder)
-                                              : null,
-                                          onEditPinning: () => editPinning(),
-                                          onDelete: (folder.systemType == null)
-                                              ? () async {
-                                                  final confirmed = await showDialog<bool>(
-                                                    context: context,
-                                                    builder: (dialogContext) => AlertDialog(
-                                                      title: Text(
-                                                        context.t.folders.deleteConfirmTitle,
-                                                      ),
-                                                      content: Text(
-                                                        context.t.folders.deleteConfirmText(
-                                                          folderName: folder.title ?? '',
-                                                        ),
-                                                      ),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () => Navigator.of(
-                                                            dialogContext,
-                                                          ).pop(false),
-                                                          child: Text(context.t.folders.cancel),
-                                                        ),
-                                                        FilledButton(
-                                                          onPressed: () =>
-                                                              Navigator.of(dialogContext).pop(true),
-                                                          child: Text(context.t.folders.delete),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  );
-                                                  if (confirmed == true) {
-                                                    await context
-                                                        .read<AllChatsCubit>()
-                                                        .deleteFolder(folder);
-                                                  }
-                                                }
-                                              : null,
-                                        );
-                                      },
-                                    ),
-                                  ),
+                                _FoldersList(
+                                  foldersScrollController: _foldersScrollController,
+                                  state: state,
+                                  editFolder: editFolder,
+                                  editPinning: editPinning,
                                 ),
                                 Expanded(
                                   child: TweenAnimationBuilder<Color?>(
@@ -326,17 +271,24 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                                     children: [
                                                       AllChatsDms(
-                                                        key: const ValueKey('dms-list-desktop'),
+                                                        key: const ValueKey('dms-chats'),
                                                         filteredDms: state.filterDmUserIds,
                                                         selectedFolder: state
                                                             .folders[state.selectedFolderIndex],
                                                         isEditPinning: _isEditPinning,
                                                       ),
                                                       const Divider(height: 1),
+                                                      AllGroupChats(
+                                                        key: const ValueKey('group-chats'),
+                                                        filteredGroupChatIds:
+                                                            state.filterGroupChatIds,
+                                                        selectedFolder: state
+                                                            .folders[state.selectedFolderIndex],
+                                                        isEditPinning: _isEditPinning,
+                                                      ),
+                                                      const Divider(height: 1),
                                                       AllChatsChannels(
-                                                        key: const ValueKey(
-                                                          'channels-list-desktop',
-                                                        ),
+                                                        key: const ValueKey('channels-chats'),
                                                         filterChannelIds: state.filterChannelIds,
                                                         selectedFolder: state
                                                             .folders[state.selectedFolderIndex],
@@ -363,15 +315,16 @@ class _AllChatsViewState extends State<AllChatsView> {
                                     buildWhen: (prev, current) =>
                                         prev.selectedDmChat != current.selectedDmChat ||
                                         prev.selectedChannel != current.selectedChannel ||
-                                        prev.selectedTopic != current.selectedTopic,
+                                        prev.selectedTopic != current.selectedTopic ||
+                                        prev.selectedGroupChat != current.selectedGroupChat,
                                     builder: (context, selectedChatState) {
                                       if (selectedChatState.selectedDmChat != null) {
                                         return Chat(
                                           key: ObjectKey(selectedChatState.selectedDmChat!.userId),
-                                          userId: selectedChatState.selectedDmChat!.userId,
+                                          userIds: [selectedChatState.selectedDmChat!.userId],
                                           unreadMessagesCount: selectedChatState
-                                              .selectedDmChat
-                                              ?.unreadMessages
+                                              .selectedDmChat!
+                                              .unreadMessages
                                               .length,
                                         );
                                       }
@@ -382,6 +335,14 @@ class _AllChatsViewState extends State<AllChatsView> {
                                           ),
                                           channelId: selectedChatState.selectedChannel!.streamId,
                                           topicName: selectedChatState.selectedTopic?.name,
+                                        );
+                                      }
+                                      if (selectedChatState.selectedGroupChat != null) {
+                                        return Chat(
+                                          key: ObjectKey(
+                                            selectedChatState.selectedGroupChat.hashCode,
+                                          ),
+                                          userIds: selectedChatState.selectedGroupChat!.toList(),
                                         );
                                       }
                                       return Center(child: Text(context.t.selectAnyChat));
@@ -426,6 +387,125 @@ class _AllChatsViewState extends State<AllChatsView> {
               },
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _FoldersList extends StatelessWidget {
+  final ScrollController foldersScrollController;
+  final AllChatsState state;
+  final Function editFolder;
+  final Function editPinning;
+
+  const _FoldersList({
+    super.key,
+    required this.foldersScrollController,
+    required this.state,
+    required this.editFolder,
+    required this.editPinning,
+  });
+
+  int _computeUnreadForFolder({
+    required FolderItemEntity folder,
+    required ChannelsState channelsState,
+    required DirectMessagesState dmsState,
+    required Map<int, FolderMembers> folderMembers,
+  }) {
+    if (folder.id == 0 || folder.systemType == SystemFolderType.all) {
+      final int dmUnread = dmsState.users.fold(0, (sum, u) => sum + u.unreadMessages.length);
+      final int chUnread = channelsState.channels
+          .where((c) => !c.isMuted)
+          .fold(0, (sum, c) => sum + c.unreadMessages.length);
+      final int groupUnread = dmsState.groupChats.fold(0, (sum, g) => sum + g.unreadMessagesCount);
+      return dmUnread + chUnread + groupUnread;
+    }
+
+    final int? fid = folder.id;
+    if (fid == null) return 0;
+    final FolderMembers? members = folderMembers[fid];
+    if (members == null) return 0;
+    final Set<int> dmIds = members.dmUserIds.toSet();
+    final Set<int> chIds = members.channelIds.toSet();
+    final Set<int> groupIds = members.groupChatIds.toSet();
+    final int dmUnread = dmsState.users
+        .where((u) => dmIds.contains(u.userId))
+        .fold(0, (sum, u) => sum + u.unreadMessages.length);
+    final int chUnread = channelsState.channels
+        .where((c) => chIds.contains(c.streamId) && !c.isMuted)
+        .fold(0, (sum, c) => sum + c.unreadMessages.length);
+    final int groupUnread = dmsState.groupChats
+        .where((group) => groupIds.contains(group.id))
+        .fold(0, (sum, group) => sum + group.unreadMessagesCount);
+    return dmUnread + chUnread + groupUnread;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 46,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: BlocBuilder<ChannelsCubit, ChannelsState>(
+          builder: (context, channelsState) =>
+              BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
+                builder: (context, dmsState) => ListView.builder(
+                  controller: foldersScrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: state.folders.length,
+                  itemBuilder: (context, index) {
+                    final FolderItemEntity folder = state.folders[index];
+                    final bool isSelected = state.selectedFolderIndex == index;
+                    final int unread = _computeUnreadForFolder(
+                      folder: folder,
+                      channelsState: channelsState,
+                      dmsState: dmsState,
+                      folderMembers: state.folderMembersById,
+                    );
+
+                    return FolderPill(
+                      isSelected: isSelected,
+                      folder: index == 0 ? folder.copyWith(title: context.t.folders.all) : folder,
+                      unreadCount: unread,
+                      onTap: () => context.read<AllChatsCubit>().selectFolder(index),
+                      onEdit: (folder.systemType == null)
+                          ? () => editFolder(context, folder)
+                          : null,
+                      onEditPinning: () => editPinning(),
+                      onDelete: (folder.systemType == null)
+                          ? () async {
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (dialogContext) => AlertDialog(
+                                  title: Text(context.t.folders.deleteConfirmTitle),
+                                  content: Text(
+                                    context.t.folders.deleteConfirmText(
+                                      folderName: folder.title ?? '',
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                                      child: Text(context.t.folders.cancel),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                                      child: Text(context.t.folders.delete),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirmed == true) {
+                                await context.read<AllChatsCubit>().deleteFolder(folder);
+                              }
+                            }
+                          : null,
+                    );
+                  },
+                ),
+              ),
         ),
       ),
     );

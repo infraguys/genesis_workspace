@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -65,7 +66,7 @@ class InboxCubit extends Cubit<InboxState> {
       }
 
       for (var msg in channelMessages) {
-        final channel = msg.displayRecipient ?? 'Unknown';
+        final channel = msg.displayRecipient.streamName ?? 'Unknown';
         final topic = msg.subject.isEmpty ? '' : msg.subject;
         state.channelMessages.putIfAbsent(channel, () => {});
         state.channelMessages[channel]!.putIfAbsent(topic, () => []).add(msg);
@@ -113,7 +114,7 @@ class InboxCubit extends Cubit<InboxState> {
       final senderFullName = message.senderFullName;
       state.dmMessages.putIfAbsent(senderFullName, () => []).add(message);
     } else {
-      state.channelMessages.putIfAbsent(message.displayRecipient ?? 'Unknown', () => {});
+      state.channelMessages.putIfAbsent(message.displayRecipient.streamName ?? 'Unknown', () => {});
       state.channelMessages[message.displayRecipient]!
           .putIfAbsent(message.subject, () => [])
           .add(message);

@@ -47,7 +47,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
       title: titleController.text.trim(),
       iconData: selectedIconData!,
       backgroundColor: selectedColor,
-      pinnedChats: [],
+      pinnedChats: widget.initial?.pinnedChats ?? [],
     );
     return folder;
   }

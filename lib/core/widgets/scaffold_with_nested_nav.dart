@@ -1,6 +1,11 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
@@ -9,6 +14,7 @@ import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_idle_detector/in_app_idle_detector.dart';
 
@@ -24,12 +30,10 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation>
     with WidgetsBindingObserver {
   late final Future _future;
+  late final AppShellController appShellController;
 
   void _goBranch(int index) {
-    widget.navigationShell.goBranch(
-      index,
-      initialLocation: index == widget.navigationShell.currentIndex,
-    );
+    appShellController.goToBranch(index);
   }
 
   Future<void> setIdleStatus() async {
@@ -69,20 +73,25 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   @override
   void initState() {
+    appShellController = getIt<AppShellController>();
+    appShellController.attach(widget.navigationShell);
     _initIdleDetector();
+    WidgetsBinding.instance.addObserver(this);
+    if (kIsWeb) BrowserContextMenu.disableContextMenu();
     _future = Future.wait([
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
       context.read<MessagesCubit>().getLastMessages(),
     ]);
-    // _realTimeCubit = context.read<RealTimeCubit>();
     super.initState();
   }
 
   @override
   void dispose() {
+    appShellController.detach();
     _pauseIdleDetector();
-    // _realTimeCubit.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    if (kIsWeb) BrowserContextMenu.enableContextMenu();
     super.dispose();
   }
 
