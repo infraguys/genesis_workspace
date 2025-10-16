@@ -7,6 +7,7 @@ import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.d
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
+import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/dm_search_field.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
@@ -132,12 +133,28 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
     return baseList;
   }
 
+  void openChat(BuildContext context, Set<int> membersIds, {int? unreadMessagesCount}) {
+    final isDesktop = currentSize(context) > ScreenSize.lTablet;
+
+    if (isDesktop) {
+      context.read<AllChatsCubit>().selectGroupChat(membersIds);
+    } else {
+      final userIds = membersIds.toList();
+      final userIdsString = userIds.join(',');
+      context.pushNamed(
+        Routes.groupChat,
+        pathParameters: {'userIds': userIdsString},
+        extra: {'unreadMessagesCount': unreadMessagesCount},
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = currentSize(context) > ScreenSize.lTablet;
 
     return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
-      buildWhen: (_, _) => !isReorderingInProgress,
+      buildWhen: (prev, current) => !isReorderingInProgress && !current.createGroupChatOpened,
       builder: (context, directMessagesState) {
         final List<DmUserEntity> baseFiltered = directMessagesState.showAllUsers
             ? directMessagesState.filteredUsers
@@ -158,6 +175,31 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                       style: Theme.of(context).textTheme.titleMedium,
                       overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      context.read<DirectMessagesCubit>().setCreateGroupChatOpened(true);
+                      await showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return BlocProvider.value(
+                            value: context.read<DirectMessagesCubit>(),
+                            child: CreateGroupChatDialog(
+                              onCreate: (membersIds) {
+                                Navigator.of(dialogContext).pop();
+                                openChat(context, {
+                                  ...membersIds,
+                                  directMessagesState.selfUser!.userId,
+                                });
+                              },
+                            ),
+                          );
+                        },
+                      );
+                      context.read<DirectMessagesCubit>().setCreateGroupChatOpened(false);
+                    },
+                    icon: const Icon(Icons.add),
+                    tooltip: context.t.groupChat.createTooltip,
                   ),
                   Tooltip(
                     message: directMessagesState.showAllUsers

@@ -415,14 +415,15 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   }
 
   void _onMessageEvents(MessageEventEntity event) {
-    bool isThisChatMessage = event.message.displayRecipient.streamName == state.channel!.name;
-    String messageSubject = event.message.subject;
+    final message = event.message.copyWith(flags: event.flags);
+    bool isThisChatMessage = message.displayRecipient.streamName == state.channel!.name;
+    String messageSubject = message.subject;
     if (isThisChatMessage) {
       if (state.topic == null) {
-        state.messages = [...state.messages, event.message];
+        state.messages = [...state.messages, message];
         emit(state.copyWith(messages: state.messages));
       } else if (state.topic!.name == messageSubject) {
-        state.messages = [...state.messages, event.message];
+        state.messages = [...state.messages, message];
         emit(state.copyWith(messages: state.messages));
       }
     }

@@ -71,6 +71,22 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
     }
   }
 
+  void openChat(BuildContext context, Set<int> membersIds, {int? unreadMessagesCount}) {
+    final isDesktop = currentSize(context) > ScreenSize.lTablet;
+
+    if (isDesktop) {
+      context.read<AllChatsCubit>().selectGroupChat(membersIds);
+    } else {
+      final userIds = membersIds.toList();
+      final userIdsString = userIds.join(',');
+      context.pushNamed(
+        Routes.groupChat,
+        pathParameters: {'userIds': userIdsString},
+        extra: {'unreadMessagesCount': unreadMessagesCount},
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = currentSize(context) > ScreenSize.lTablet;
@@ -144,15 +160,21 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      context.t.navBar.groupChats,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      overflow: TextOverflow.ellipsis,
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          context.t.navBar.groupChats,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
@@ -354,21 +376,11 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
                                     unreadCount: group.unreadMessagesCount,
                                     isPinned: isPinned,
                                     onTap: () {
-                                      if (isDesktop) {
-                                        context.read<AllChatsCubit>().selectGroupChat(
-                                          group.members.map((member) => member.userId).toSet(),
-                                        );
-                                      } else {
-                                        final userIds = group.members
-                                            .map((member) => member.userId)
-                                            .toList();
-                                        final userIdsString = userIds.join(',');
-                                        context.pushNamed(
-                                          Routes.groupChat,
-                                          pathParameters: {'userIds': userIdsString},
-                                          extra: {'unreadMessagesCount': group.unreadMessagesCount},
-                                        );
-                                      }
+                                      openChat(
+                                        context,
+                                        group.members.map((member) => member.userId).toSet(),
+                                        unreadMessagesCount: group.unreadMessagesCount,
+                                      );
                                     },
                                   ),
                                 ),

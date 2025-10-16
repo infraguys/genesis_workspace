@@ -142,5 +142,15 @@
   "group": {
     "members_count": "Members: {count}"
   },
+  "group_chat": {
+    "create_tooltip": "Create new group chat",
+    "create_dialog": {
+      "title": "New group chat",
+      "search_hint": "Search users",
+      "no_users": "No users found",
+      "cancel": "Cancel",
+      "create": "Create"
+    }
+  },
   "nothing_found": "Nothing found"
 }

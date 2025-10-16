@@ -119,6 +119,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsChannelEn channel = TranslationsChannelEn.internal(_root);
 	late final TranslationsChatEn chat = TranslationsChatEn.internal(_root);
 	late final TranslationsGroupEn group = TranslationsGroupEn.internal(_root);
+	late final TranslationsGroupChatEn groupChat = TranslationsGroupChatEn.internal(_root);
 
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
@@ -512,4 +513,42 @@ class TranslationsGroupEn {
 
 	/// en: 'Members: {count}'
 	String membersCount({required Object count}) => 'Members: ${count}';
+}
+
+// Path: groupChat
+class TranslationsGroupChatEn {
+	TranslationsGroupChatEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Create new group chat'
+	String get createTooltip => 'Create new group chat';
+
+	late final TranslationsGroupChatCreateDialogEn createDialog = TranslationsGroupChatCreateDialogEn.internal(_root);
+}
+
+// Path: groupChat.createDialog
+class TranslationsGroupChatCreateDialogEn {
+	TranslationsGroupChatCreateDialogEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'New group chat'
+	String get title => 'New group chat';
+
+	/// en: 'Search users'
+	String get searchHint => 'Search users';
+
+	/// en: 'No users found'
+	String get noUsers => 'No users found';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
+
+	/// en: 'Create'
+	String get create => 'Create';
 }
