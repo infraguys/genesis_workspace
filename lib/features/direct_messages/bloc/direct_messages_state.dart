@@ -13,6 +13,7 @@ class DirectMessagesState {
   int? selectedUserId;
   int? selectedUnreadMessagesCount;
   bool showAllUsers;
+  List<GroupChatEntity> groupChats;
 
   DirectMessagesState({
     required this.users,
@@ -27,6 +28,7 @@ class DirectMessagesState {
     this.selectedUserId,
     this.selectedUnreadMessagesCount,
     required this.showAllUsers,
+    required this.groupChats,
   });
 
   DirectMessagesState copyWith({
@@ -42,6 +44,7 @@ class DirectMessagesState {
     int? selectedUserId,
     int? selectedUnreadMessagesCount,
     bool? showAllUsers,
+    List<GroupChatEntity>? groupChats,
   }) {
     return DirectMessagesState(
       users: users ?? this.users,
@@ -56,6 +59,7 @@ class DirectMessagesState {
       selectedUserId: selectedUserId ?? this.selectedUserId,
       selectedUnreadMessagesCount: selectedUnreadMessagesCount ?? this.selectedUnreadMessagesCount,
       showAllUsers: showAllUsers ?? this.showAllUsers,
+      groupChats: groupChats ?? this.groupChats,
     );
   }
 }

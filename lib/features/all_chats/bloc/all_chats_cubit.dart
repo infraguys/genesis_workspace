@@ -62,6 +62,8 @@ class AllChatsCubit extends Cubit<AllChatsState> {
           folders: [],
           selectedFolderIndex: 0,
           folderMembersById: const {},
+          selectedGroupChat: null,
+          filterGroupChatIds: null,
         ),
       );
 
@@ -242,6 +244,12 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     await _refreshAllFolderMembers();
   }
 
+  Future<void> setFoldersForGroupChat(int groupChatId, List<int> folderIds) async {
+    await _setFoldersForTargetUseCase.call(FolderTarget.group(groupChatId), folderIds);
+    await _applyFolderFilter();
+    await _refreshAllFolderMembers();
+  }
+
   Future<List<int>> getFolderIdsForDm(int userId) async {
     return await _getFolderIdsForTargetUseCase.call(FolderTarget.dm(userId));
   }
@@ -250,12 +258,32 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     return await _getFolderIdsForTargetUseCase.call(FolderTarget.channel(streamId));
   }
 
-  void selectDmChat(DmUserEntity? dmUserEntity) async {
+  Future<List<int>> getFolderIdsForGroupChat(int groupChatId) async {
+    return await _getFolderIdsForTargetUseCase.call(FolderTarget.group(groupChatId));
+  }
+
+  void selectDmChat(DmUserEntity? dmChats) async {
+    state.selectedTopic = null;
+    state.selectedChannel = null;
+    state.selectedGroupChat = null;
+
+    emit(
+      state.copyWith(
+        selectedDmChat: dmChats,
+        selectedTopic: state.selectedTopic,
+        selectedChannel: state.selectedChannel,
+        selectedGroupChat: state.selectedGroupChat,
+      ),
+    );
+  }
+
+  void selectGroupChat(Set<int>? ids) {
+    state.selectedDmChat = null;
     state.selectedTopic = null;
     state.selectedChannel = null;
     emit(
       state.copyWith(
-        selectedDmChat: dmUserEntity,
+        selectedGroupChat: ids,
         selectedTopic: state.selectedTopic,
         selectedChannel: state.selectedChannel,
       ),
@@ -264,11 +292,13 @@ class AllChatsCubit extends Cubit<AllChatsState> {
 
   void selectChannel({ChannelEntity? channel, TopicEntity? topic}) async {
     state.selectedDmChat = null;
+    state.selectedGroupChat = null;
     emit(
       state.copyWith(
         selectedChannel: channel,
         selectedTopic: topic,
         selectedDmChat: state.selectedDmChat,
+        selectedGroupChat: state.selectedGroupChat,
       ),
     );
   }
@@ -280,10 +310,12 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     if (folder.id == null) {
       state.filterChannelIds = null;
       state.filterDmUserIds = null;
+      state.filterGroupChatIds = null;
       emit(
         state.copyWith(
           filterDmUserIds: state.filterDmUserIds,
           filterChannelIds: state.filterChannelIds,
+          filterGroupChatIds: state.filterGroupChatIds,
         ),
       );
       return;
@@ -293,6 +325,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
       state.copyWith(
         filterDmUserIds: members.dmUserIds.toSet(),
         filterChannelIds: members.channelIds.toSet(),
+        filterGroupChatIds: members.groupChatIds.toSet(),
       ),
     );
   }
@@ -302,10 +335,12 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     if (idx <= 0 || idx >= state.folders.length) {
       state.filterChannelIds = null;
       state.filterDmUserIds = null;
+      state.filterGroupChatIds = null;
       emit(
         state.copyWith(
           filterDmUserIds: state.filterDmUserIds,
           filterChannelIds: state.filterChannelIds,
+          filterGroupChatIds: state.filterGroupChatIds,
         ),
       );
       return;
@@ -315,10 +350,12 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     if (folder.id == null) {
       state.filterChannelIds = null;
       state.filterDmUserIds = null;
+      state.filterGroupChatIds = null;
       emit(
         state.copyWith(
           filterDmUserIds: state.filterDmUserIds,
           filterChannelIds: state.filterChannelIds,
+          filterGroupChatIds: state.filterGroupChatIds,
         ),
       );
       return;
@@ -329,6 +366,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
       state.copyWith(
         filterDmUserIds: members.dmUserIds.toSet(),
         filterChannelIds: members.channelIds.toSet(),
+        filterGroupChatIds: members.groupChatIds.toSet(),
       ),
     );
   }

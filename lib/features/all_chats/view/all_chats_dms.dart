@@ -8,8 +8,8 @@ import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
-import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/dm_search_field.dart';
+import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -166,9 +166,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                     child: IconButton(
                       splashRadius: 22,
                       onPressed: context.read<DirectMessagesCubit>().toggleShowAllUsers,
-                      icon: Icon(
-                        directMessagesState.showAllUsers ? Icons.history : Icons.groups,
-                      ),
+                      icon: Icon(directMessagesState.showAllUsers ? Icons.history : Icons.groups),
                     ),
                   ),
                   IconButton(
@@ -211,185 +209,186 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                 onReorder: (int oldIndex, int newIndex) async {
                                   if (newIndex > oldIndex) newIndex -= 1;
 
-                              final List<DmUserEntity> local = List<DmUserEntity>.from(
-                                optimisticUsers ?? users,
-                              );
-                              final DmUserEntity moved = local.removeAt(oldIndex);
-                              local.insert(newIndex, moved);
+                                  final List<DmUserEntity> local = List<DmUserEntity>.from(
+                                    optimisticUsers ?? users,
+                                  );
+                                  final DmUserEntity moved = local.removeAt(oldIndex);
+                                  local.insert(newIndex, moved);
 
-                              setState(() {
-                                isReorderingInProgress = true;
-                                optimisticUsers = local;
-                              });
-
-                              final int movedChatId = moved.userId;
-                              final int? previousChatId = (newIndex - 1) >= 0
-                                  ? local[newIndex - 1].userId
-                                  : null;
-                              final int? nextChatId = (newIndex + 1) < local.length
-                                  ? local[newIndex + 1].userId
-                                  : null;
-
-                              try {
-                                await context.read<AllChatsCubit>().reorderPinnedChats(
-                                  folderId: widget.selectedFolder.id ?? 0,
-                                  movedChatId: movedChatId,
-                                  previousChatId: previousChatId,
-                                  nextChatId: nextChatId,
-                                );
-                              } finally {
-                                if (mounted) {
                                   setState(() {
-                                    isReorderingInProgress = false;
-                                    optimisticUsers = null;
+                                    isReorderingInProgress = true;
+                                    optimisticUsers = local;
                                   });
-                                }
-                              }
-                            },
-                            proxyDecorator: (child, index, animation) {
-                              return Material(elevation: 3, child: child);
-                            },
-                            itemBuilder: (BuildContext context, int index) {
-                              final DmUserEntity user = users[index];
-                              return KeyedSubtree(
-                                key: ValueKey<int>(user.userId),
-                                child: UserTile(
-                                  key: ValueKey('pinned-${user.userId}'),
-                                  user: user,
-                                  isPinned: true,
-                                  isEditPinning: true,
-                                  trailingOverride: ReorderableDragStartListener(
-                                    index: index,
-                                    child: Icon(
-                                      Icons.drag_handle_rounded,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                                    ),
-                                  ),
-                                  onTap: () {},
-                                ),
-                              );
-                            },
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: widget.embeddedInParentScroll
-                                ? const NeverScrollableScrollPhysics()
-                                : const AlwaysScrollableScrollPhysics(),
-                            itemCount: users.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final DmUserEntity user = users[index];
-                              final GlobalKey<CustomPopupState> popupKey =
-                                  GlobalKey<CustomPopupState>();
-                              final bool isPinned = widget.selectedFolder.pinnedChats.any(
-                                (chat) => chat.chatId == user.userId,
-                              );
 
-                              return CustomPopup(
-                                key: popupKey,
-                                position: PopupPosition.auto,
-                                contentPadding: EdgeInsets.zero,
-                                isLongPress: true,
-                                content: Container(
-                                  width: 240,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.outlineVariant.withOpacity(0.5),
-                                    ),
-                                    boxShadow: kElevationToShadow[3],
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        isPinned
-                                            ? ListTile(
-                                                leading: const Icon(Icons.push_pin_outlined),
-                                                title: Text(context.t.chat.unpinChat),
-                                                onTap: () async {
-                                                  context.pop();
-                                                  final pinnedChatId = widget
-                                                      .selectedFolder
-                                                      .pinnedChats
-                                                      .firstWhere(
-                                                        (chat) => chat.chatId == user.userId,
-                                                      )
-                                                      .id;
-                                                  await context.read<AllChatsCubit>().unpinChat(
-                                                    pinnedChatId,
-                                                  );
-                                                },
-                                              )
-                                            : ListTile(
-                                                leading: const Icon(Icons.push_pin),
-                                                title: Text(context.t.chat.pinChat),
-                                                onTap: () async {
-                                                  context.pop();
-                                                  await context.read<AllChatsCubit>().pinChat(
-                                                    chatId: user.userId,
-                                                    type: PinnedChatType.dm,
-                                                  );
-                                                },
-                                              ),
-                                        ListTile(
-                                          leading: const Icon(Icons.folder_open),
-                                          title: Text(context.t.folders.addToFolder),
-                                          onTap: () async {
-                                            context.pop();
-                                            await context.read<AllChatsCubit>().loadFolders();
-                                            await showDialog(
-                                              context: context,
-                                              builder: (_) => SelectFoldersDialog(
-                                                loadSelectedFolderIds: () => context
-                                                    .read<AllChatsCubit>()
-                                                    .getFolderIdsForDm(user.userId),
-                                                onSave: (selectedFolderIds) =>
-                                                    context.read<AllChatsCubit>().setFoldersForDm(
-                                                      user.userId,
-                                                      selectedFolderIds,
-                                                    ),
-                                                folders: context
-                                                    .read<AllChatsCubit>()
-                                                    .state
-                                                    .folders,
-                                              ),
-                                            );
-                                          },
+                                  final int movedChatId = moved.userId;
+                                  final int? previousChatId = (newIndex - 1) >= 0
+                                      ? local[newIndex - 1].userId
+                                      : null;
+                                  final int? nextChatId = (newIndex + 1) < local.length
+                                      ? local[newIndex + 1].userId
+                                      : null;
+
+                                  try {
+                                    await context.read<AllChatsCubit>().reorderPinnedChats(
+                                      folderId: widget.selectedFolder.id ?? 0,
+                                      movedChatId: movedChatId,
+                                      previousChatId: previousChatId,
+                                      nextChatId: nextChatId,
+                                    );
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() {
+                                        isReorderingInProgress = false;
+                                        optimisticUsers = null;
+                                      });
+                                    }
+                                  }
+                                },
+                                proxyDecorator: (child, index, animation) {
+                                  return Material(elevation: 3, child: child);
+                                },
+                                itemBuilder: (BuildContext context, int index) {
+                                  final DmUserEntity user = users[index];
+                                  return KeyedSubtree(
+                                    key: ValueKey<int>(user.userId),
+                                    child: UserTile(
+                                      key: ValueKey('pinned-${user.userId}'),
+                                      user: user,
+                                      isPinned: true,
+                                      isEditPinning: true,
+                                      trailingOverride: ReorderableDragStartListener(
+                                        index: index,
+                                        child: Icon(
+                                          Icons.drag_handle_rounded,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                         ),
-                                      ],
+                                      ),
+                                      onTap: () {},
                                     ),
-                                  ),
-                                ),
-                                child: GestureDetector(
-                                  onSecondaryTap: () => popupKey.currentState?.show(),
-                                  child: UserTile(
-                                    key: ValueKey(user.userId),
-                                    isPinned: isPinned,
-                                    user: user,
-                                    onTap: () {
-                                      if (isDesktop) {
-                                        context.read<AllChatsCubit>().selectDmChat(user);
-                                      } else {
-                                        context.pushNamed(
-                                          Routes.chat,
-                                          pathParameters: {'userId': user.userId.toString()},
-                                          extra: {
-                                            'unreadMessagesCount': user.unreadMessages.length,
-                                          },
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                                  );
+                                },
+                              )
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                physics: widget.embeddedInParentScroll
+                                    ? const NeverScrollableScrollPhysics()
+                                    : const AlwaysScrollableScrollPhysics(),
+                                itemCount: users.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final DmUserEntity user = users[index];
+                                  final GlobalKey<CustomPopupState> popupKey =
+                                      GlobalKey<CustomPopupState>();
+                                  final bool isPinned = widget.selectedFolder.pinnedChats.any(
+                                    (chat) => chat.chatId == user.userId,
+                                  );
+
+                                  return CustomPopup(
+                                    key: popupKey,
+                                    position: PopupPosition.auto,
+                                    contentPadding: EdgeInsets.zero,
+                                    isLongPress: true,
+                                    content: Container(
+                                      width: 240,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.outlineVariant.withOpacity(0.5),
+                                        ),
+                                        boxShadow: kElevationToShadow[3],
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            isPinned
+                                                ? ListTile(
+                                                    leading: const Icon(Icons.push_pin_outlined),
+                                                    title: Text(context.t.chat.unpinChat),
+                                                    onTap: () async {
+                                                      context.pop();
+                                                      final pinnedChatId = widget
+                                                          .selectedFolder
+                                                          .pinnedChats
+                                                          .firstWhere(
+                                                            (chat) => chat.chatId == user.userId,
+                                                          )
+                                                          .id;
+                                                      await context.read<AllChatsCubit>().unpinChat(
+                                                        pinnedChatId,
+                                                      );
+                                                    },
+                                                  )
+                                                : ListTile(
+                                                    leading: const Icon(Icons.push_pin),
+                                                    title: Text(context.t.chat.pinChat),
+                                                    onTap: () async {
+                                                      context.pop();
+                                                      await context.read<AllChatsCubit>().pinChat(
+                                                        chatId: user.userId,
+                                                        type: PinnedChatType.dm,
+                                                      );
+                                                    },
+                                                  ),
+                                            ListTile(
+                                              leading: const Icon(Icons.folder_open),
+                                              title: Text(context.t.folders.addToFolder),
+                                              onTap: () async {
+                                                context.pop();
+                                                await context.read<AllChatsCubit>().loadFolders();
+                                                await showDialog(
+                                                  context: context,
+                                                  builder: (_) => SelectFoldersDialog(
+                                                    loadSelectedFolderIds: () => context
+                                                        .read<AllChatsCubit>()
+                                                        .getFolderIdsForDm(user.userId),
+                                                    onSave: (selectedFolderIds) => context
+                                                        .read<AllChatsCubit>()
+                                                        .setFoldersForDm(
+                                                          user.userId,
+                                                          selectedFolderIds,
+                                                        ),
+                                                    folders: context
+                                                        .read<AllChatsCubit>()
+                                                        .state
+                                                        .folders,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    child: GestureDetector(
+                                      onSecondaryTap: () => popupKey.currentState?.show(),
+                                      child: UserTile(
+                                        key: ValueKey(user.userId),
+                                        isPinned: isPinned,
+                                        user: user,
+                                        onTap: () {
+                                          if (isDesktop) {
+                                            context.read<AllChatsCubit>().selectDmChat(user);
+                                          } else {
+                                            context.pushNamed(
+                                              Routes.chat,
+                                              pathParameters: {'userId': user.userId.toString()},
+                                              extra: {
+                                                'unreadMessagesCount': user.unreadMessages.length,
+                                              },
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
                     ],
                   ),

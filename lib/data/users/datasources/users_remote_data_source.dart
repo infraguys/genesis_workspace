@@ -15,14 +15,14 @@ import 'package:genesis_workspace/data/users/dto/update_presence_response_dto.da
 import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_presence_dto.dart';
-import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:injectable/injectable.dart';
 
 part 'users_remote_data_source_impl.dart';
 
 abstract class UsersRemoteDataSource {
   Future<SubscriptionsResponseDto> getSubscribedChannels(bool includeSubscribers);
-  Future<UsersResponseDto> getUsers();
+  Future<UsersResponseDto> getUsers(UsersRequestDto body);
   Future<OwnUserResponseDto> getOwnUser();
   Future<void> setTyping(TypingRequestDto body);
   Future<TopicsResponseDto> getChannelTopics(int streamId);

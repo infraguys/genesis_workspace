@@ -1,4 +1,4 @@
-enum FolderTargetType { dm, channel }
+enum FolderTargetType { dm, channel, group }
 
 class FolderTarget {
   final FolderTargetType type;
@@ -11,5 +11,8 @@ class FolderTarget {
 
   const FolderTarget.channel(this.targetId, {this.topicName})
       : type = FolderTargetType.channel;
-}
 
+  const FolderTarget.group(this.targetId)
+      : type = FolderTargetType.group,
+        topicName = null;
+}

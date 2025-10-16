@@ -1,4 +1,5 @@
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart';
 import 'package:injectable/injectable.dart';
 
@@ -8,9 +9,9 @@ class GetUsersUseCase {
 
   GetUsersUseCase(this._repository);
 
-  Future<List<UserEntity>> call() async {
+  Future<List<UserEntity>> call(UsersRequestEntity body) async {
     try {
-      return await _repository.getUsers();
+      return await _repository.getUsers(body);
     } catch (e) {
       rethrow;
     }

@@ -123,7 +123,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     );
   }
 
-  setSelfUser(UserEntity? user) {
+  void setSelfUser(UserEntity? user) {
     if (state.selfUser == null) {
       state.selfUser = user;
       emit(state.copyWith(selfUser: state.selfUser));

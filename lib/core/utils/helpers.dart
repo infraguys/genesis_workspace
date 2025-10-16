@@ -262,3 +262,18 @@ String extractMessageText(String content) {
   final String cleaned = content.replaceAll(pattern, '').trim();
   return cleaned.replaceAll(RegExp(r'\n{2,}'), '\n').trim();
 }
+
+bool unorderedEquals<T>(List<T> a, List<T> b) {
+  if (a.length != b.length) return false;
+  final counts = <T, int>{};
+  for (final item in a) {
+    counts[item] = (counts[item] ?? 0) + 1;
+  }
+  for (final item in b) {
+    if (!counts.containsKey(item) || counts[item]! == 0) {
+      return false;
+    }
+    counts[item] = counts[item]! - 1;
+  }
+  return true;
+}

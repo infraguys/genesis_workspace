@@ -12,7 +12,7 @@ import 'package:genesis_workspace/data/users/dto/update_presence_response_dto.da
 import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_presence_dto.dart';
-import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'users_api_client.g.dart';
@@ -25,6 +25,7 @@ abstract class UsersApiClient {
   Future<UsersResponseDto> getUsers(
     @Query('client_gravatar') bool clientGravatar,
     @Query('include_custom_profile_fields') bool includeCustomProfileFields,
+    @Query('user_ids') String? userIds,
   );
 
   @GET('/users/{user_id}')

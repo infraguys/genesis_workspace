@@ -34,7 +34,8 @@
     "direct_messages": "Direct Messages",
     "settings": "Settings",
     "menu": "Menu",
-    "channels": "Channels"
+    "channels": "Channels",
+    "group_chats": "Group chats"
   },
   "feed": "Feed",
   "select_any_channel": "Select any channel",
@@ -137,6 +138,9 @@
   "chat": {
     "pinChat": "Pin chat",
     "unpinChat": "Unpin chat"
+  },
+  "group": {
+    "members_count": "Members: {count}"
   },
   "nothing_found": "Nothing found"
 }

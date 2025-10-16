@@ -71,7 +71,8 @@ class MessagesCubit extends Cubit<MessagesState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      emit(state.copyWith(messages: response.messages));
+      final messages = response.messages;
+      emit(state.copyWith(messages: messages));
     } catch (e) {
       inspect(e);
     }

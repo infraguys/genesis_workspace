@@ -5,7 +5,7 @@ class MessagesState {
 
   MessagesState({required this.messages});
 
-  MessagesState copyWith({List<MessageEntity>? messages, List<MessageEntity>? unreadMessages}) {
+  MessagesState copyWith({List<MessageEntity>? messages}) {
     return MessagesState(messages: messages ?? this.messages);
   }
 }

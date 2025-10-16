@@ -35,10 +35,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChatView extends StatefulWidget {
-  final int userId;
+  final List<int> userIds;
   final int? unreadMessagesCount;
 
-  const ChatView({super.key, required this.userId, this.unreadMessagesCount = 0});
+  const ChatView({super.key, required this.userIds, this.unreadMessagesCount = 0});
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -57,7 +57,7 @@ class _ChatViewState extends State<ChatView>
     _myUser = context.read<ProfileCubit>().state.user!;
 
     _future = context.read<ChatCubit>().getInitialData(
-      userId: widget.userId,
+      userIds: widget.userIds,
       myUserId: _myUser.userId,
       unreadMessagesCount: widget.unreadMessagesCount,
     );
@@ -164,7 +164,7 @@ class _ChatViewState extends State<ChatView>
         }
       },
       builder: (context, state) {
-        final isLoading = state.userEntity == null;
+        final isLoading = state.userEntity == null && state.groupUsers == null;
 
         return Scaffold(
           resizeToAvoidBottomInset: false,
@@ -190,40 +190,67 @@ class _ChatViewState extends State<ChatView>
                   );
                 }
 
-                final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-                  (state.userEntity!.presenceTimestamp * 1000).toInt(),
-                );
-                final timeAgo = timeAgoText(context, lastSeen);
+                if (state.userEntity != null) {
+                  final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
 
-                Widget userStatus;
-                if (state.userEntity!.presenceStatus == PresenceStatus.active) {
-                  userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
-                } else {
-                  userStatus = Text(
-                    isJustNow(lastSeen)
-                        ? context.t.wasOnlineJustNow
-                        : context.t.wasOnline(time: timeAgo),
-                    style: theme.textTheme.labelSmall,
+                  final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+                    (userEntity.presenceTimestamp * 1000).toInt(),
+                  );
+                  final timeAgo = timeAgoText(context, lastSeen);
+
+                  Widget userStatus;
+                  if (userEntity.presenceStatus == PresenceStatus.active) {
+                    userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
+                  } else {
+                    userStatus = Text(
+                      isJustNow(lastSeen)
+                          ? context.t.wasOnlineJustNow
+                          : context.t.wasOnline(time: timeAgo),
+                      style: theme.textTheme.labelSmall,
+                    );
+                  }
+                  if (state.typingId == userEntity.userId) {
+                    userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
+                  }
+
+                  return Row(
+                    spacing: 8,
+                    children: [
+                      UserAvatar(avatarUrl: userEntity.avatarUrl),
+                      BlocBuilder<ChatCubit, ChatState>(
+                        builder: (context, state) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [Text(userEntity.fullName), userStatus],
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                } else if (state.groupUsers != null) {
+                  final users = state.groupUsers!;
+                  final names = users.map((u) => u.fullName).join(', ');
+
+                  return Row(
+                    spacing: 8,
+                    children: [
+                      const CircleAvatar(child: Icon(Icons.groups)),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.55,
+                            ),
+                            child: Text(names, overflow: TextOverflow.ellipsis, maxLines: 1),
+                          ),
+                          Text('members: ${users.length}', style: theme.textTheme.labelSmall),
+                        ],
+                      ),
+                    ],
                   );
                 }
-                if (state.typingId == state.userEntity!.userId) {
-                  userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
-                }
-
-                return Row(
-                  spacing: 8,
-                  children: [
-                    UserAvatar(avatarUrl: state.userEntity!.avatarUrl),
-                    BlocBuilder<ChatCubit, ChatState>(
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [Text(state.userEntity!.fullName), userStatus],
-                        );
-                      },
-                    ),
-                  ],
-                );
+                return SizedBox.shrink();
               },
             ),
           ),
@@ -483,7 +510,6 @@ class _ChatViewState extends State<ChatView>
                                           messageController.clear();
                                           try {
                                             await context.read<ChatCubit>().sendMessage(
-                                              chatId: state.userEntity!.userId,
                                               content: content,
                                             );
                                           } catch (e) {

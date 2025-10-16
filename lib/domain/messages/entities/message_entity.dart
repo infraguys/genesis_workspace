@@ -1,20 +1,23 @@
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 
-class MessageEntity {
+class MessageEntity extends Equatable {
   final int id;
   final bool isMeMessage;
   final String? avatarUrl;
   final String content;
   final int senderId;
-  final dynamic displayRecipient;
   final String senderFullName;
-  List<String>? flags;
+  final DisplayRecipient displayRecipient;
+  final List<String>? flags;
   final MessageType type;
   final int? streamId;
   final String subject;
   final int timestamp;
   final List<ReactionEntity> reactions;
+
   MessageEntity({
     required this.id,
     required this.isMeMessage,
@@ -23,33 +26,38 @@ class MessageEntity {
     required this.senderId,
     required this.senderFullName,
     required this.displayRecipient,
+    required this.flags,
     required this.type,
-    this.flags,
     this.streamId,
     required this.subject,
     required this.timestamp,
     required this.reactions,
   });
 
-  bool get hasUnreadMessages => flags == null || (flags != null && !flags!.contains('read'));
+  bool get hasUnreadMessages => flags != null ? !flags!.contains('read') : true;
+
+  bool get isGroupChatMessage =>
+      displayRecipient is DirectMessageRecipients &&
+      (displayRecipient as DirectMessageRecipients).recipients.length > 2;
 
   Map<String, ReactionDetails> get aggregatedReactions {
-    final Map<String, ReactionDetails> reactionMap = {};
-
+    final Map<String, ReactionDetails> map = {};
     for (final reaction in reactions) {
-      if (reactionMap.containsKey(reaction.emojiName)) {
-        reactionMap[reaction.emojiName]!.count++;
-        reactionMap[reaction.emojiName]!.userIds.add(reaction.userId);
-      } else {
-        reactionMap[reaction.emojiName] = ReactionDetails(
+      final key = reaction.emojiName;
+      map.update(
+        key,
+        (value) => value
+          ..count = value.count + 1
+          ..userIds.add(reaction.userId),
+        ifAbsent: () => ReactionDetails(
           count: 1,
           userIds: [reaction.userId],
           emojiName: reaction.emojiName,
           emojiCode: reaction.emojiCode,
-        );
-      }
+        ),
+      );
     }
-    return reactionMap;
+    return map;
   }
 
   MessageEntity copyWith({
@@ -59,14 +67,13 @@ class MessageEntity {
     String? content,
     int? senderId,
     String? senderFullName,
-    dynamic displayRecipient,
+    DisplayRecipient? displayRecipient,
     List<String>? flags,
     MessageType? type,
     int? streamId,
     String? subject,
     int? timestamp,
     List<ReactionEntity>? reactions,
-    String? rawContent,
   }) {
     return MessageEntity(
       id: id ?? this.id,
@@ -85,22 +92,36 @@ class MessageEntity {
     );
   }
 
-  /// ✅ Fake factory for skeleton/loading state
-  factory MessageEntity.fake({bool isMe = false}) {
-    return MessageEntity(
-      id: -1,
-      isMeMessage: isMe,
-      avatarUrl: null,
-      content: 'Loading message content...', // Placeholder text
-      senderId: isMe ? 999 : 123,
-      senderFullName: isMe ? 'You' : 'Sender Name',
-      displayRecipient: null,
-      flags: [],
-      type: MessageType.stream,
-      streamId: null,
-      subject: 'Loading...',
-      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).toInt(),
-      reactions: [],
-    );
-  }
+  factory MessageEntity.fake({bool isMe = false}) => MessageEntity(
+    id: -1,
+    isMeMessage: isMe,
+    avatarUrl: null,
+    content: 'Loading...',
+    senderId: isMe ? 999 : 123,
+    senderFullName: isMe ? 'You' : 'Sender',
+    displayRecipient: StreamDisplayRecipient('General'),
+    flags: const [],
+    type: MessageType.stream,
+    streamId: null,
+    subject: 'Loading...',
+    timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    reactions: const [],
+  );
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [
+    id,
+    isMeMessage,
+    avatarUrl,
+    content,
+    displayRecipient,
+    senderId,
+    timestamp,
+    flags,
+    type,
+    streamId,
+    subject,
+    reactions,
+  ];
 }

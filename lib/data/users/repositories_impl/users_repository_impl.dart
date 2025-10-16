@@ -1,6 +1,6 @@
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
-import 'package:genesis_workspace/data/users/dto/users_response_dto.dart';
+import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_members_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
@@ -12,6 +12,7 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_response
 import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_presence_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart';
 import 'package:injectable/injectable.dart';
 
@@ -35,9 +36,9 @@ class UsersRepositoryImpl implements UsersRepository {
   }
 
   @override
-  Future<List<UserEntity>> getUsers() async {
+  Future<List<UserEntity>> getUsers(UsersRequestEntity body) async {
     try {
-      final UsersResponseDto dto = await usersRemoteDataSource.getUsers();
+      final UsersResponseDto dto = await usersRemoteDataSource.getUsers(body.toDto());
       List<UserEntity> result = dto.members.map((user) => user.toEntity()).toList();
       return result;
     } catch (e) {
