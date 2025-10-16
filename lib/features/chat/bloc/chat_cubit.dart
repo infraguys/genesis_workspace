@@ -290,11 +290,7 @@ class ChatCubit extends Cubit<ChatState>
       state.selfTypingOp = op;
       try {
         await _setTypingUseCase.call(
-          TypingRequestEntity(
-            type: SendMessageType.direct,
-            op: op,
-            to: [state.userEntity?.userId ?? -1],
-          ),
+          TypingRequestEntity(type: SendMessageType.direct, op: op, to: state.chatIds!.toList()),
         );
       } catch (e) {
         inspect(e);

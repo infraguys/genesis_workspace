@@ -278,8 +278,13 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                         isEditPinning: _isEditPinning,
                                                       ),
                                                       const Divider(height: 1),
-                                                      const AllGroupChats(
+                                                      AllGroupChats(
                                                         key: const ValueKey('group-chats'),
+                                                        filteredGroupChatIds:
+                                                            state.filterGroupChatIds,
+                                                        selectedFolder: state
+                                                            .folders[state.selectedFolderIndex],
+                                                        isEditPinning: _isEditPinning,
                                                       ),
                                                       const Divider(height: 1),
                                                       AllChatsChannels(
@@ -413,7 +418,8 @@ class _FoldersList extends StatelessWidget {
       final int chUnread = channelsState.channels
           .where((c) => !c.isMuted)
           .fold(0, (sum, c) => sum + c.unreadMessages.length);
-      return dmUnread + chUnread;
+      final int groupUnread = dmsState.groupChats.fold(0, (sum, g) => sum + g.unreadMessagesCount);
+      return dmUnread + chUnread + groupUnread;
     }
 
     final int? fid = folder.id;
@@ -422,13 +428,17 @@ class _FoldersList extends StatelessWidget {
     if (members == null) return 0;
     final Set<int> dmIds = members.dmUserIds.toSet();
     final Set<int> chIds = members.channelIds.toSet();
+    final Set<int> groupIds = members.groupChatIds.toSet();
     final int dmUnread = dmsState.users
         .where((u) => dmIds.contains(u.userId))
         .fold(0, (sum, u) => sum + u.unreadMessages.length);
     final int chUnread = channelsState.channels
         .where((c) => chIds.contains(c.streamId) && !c.isMuted)
         .fold(0, (sum, c) => sum + c.unreadMessages.length);
-    return dmUnread + chUnread;
+    final int groupUnread = dmsState.groupChats
+        .where((group) => groupIds.contains(group.id))
+        .fold(0, (sum, group) => sum + group.unreadMessagesCount);
+    return dmUnread + chUnread + groupUnread;
   }
 
   @override

@@ -9,10 +9,13 @@ class AllChatsState {
   final int selectedFolderIndex;
   Set<int>? filterDmUserIds;
   Set<int>? filterChannelIds;
+  Set<int>? filterGroupChatIds;
   final Map<int, FolderMembers> folderMembersById;
 
   bool get isEmptyFolder =>
-      ((filterChannelIds?.isEmpty ?? false) && (filterDmUserIds?.isEmpty ?? false)) &&
+      ((filterChannelIds?.isEmpty ?? false) &&
+          (filterDmUserIds?.isEmpty ?? false) &&
+          (filterGroupChatIds?.isEmpty ?? false)) &&
       selectedFolderIndex != 0;
 
   AllChatsState({
@@ -24,6 +27,7 @@ class AllChatsState {
     required this.selectedFolderIndex,
     this.filterDmUserIds,
     this.filterChannelIds,
+    this.filterGroupChatIds,
     required this.folderMembersById,
   });
 
@@ -36,6 +40,7 @@ class AllChatsState {
     int? selectedFolderIndex,
     Set<int>? filterDmUserIds,
     Set<int>? filterChannelIds,
+    Set<int>? filterGroupChatIds,
     Map<int, FolderMembers>? folderMembersById,
   }) {
     return AllChatsState(
@@ -46,6 +51,7 @@ class AllChatsState {
       selectedFolderIndex: selectedFolderIndex ?? this.selectedFolderIndex,
       filterDmUserIds: filterDmUserIds ?? this.filterDmUserIds,
       filterChannelIds: filterChannelIds ?? this.filterChannelIds,
+      filterGroupChatIds: filterGroupChatIds ?? this.filterGroupChatIds,
       folderMembersById: folderMembersById ?? this.folderMembersById,
       selectedGroupChat: selectedGroupChat ?? this.selectedGroupChat,
     );

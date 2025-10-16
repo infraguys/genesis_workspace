@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/core/utils/group_chat_utils.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -81,23 +82,21 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
   late final StreamSubscription<UpdateMessageEventEntity> _updateMessageEventsSubscription;
 
-  String _groupChatKey(Iterable<RecipientEntity> recipients) {
-    final ids = recipients.map((recipient) => recipient.userId).toList()..sort();
-    return ids.join('_');
-  }
-
   List<GroupChatEntity> _buildGroupChatsFromMessages(Iterable<MessageEntity> messages) {
     final Map<String, GroupChatEntity> aggregated = {};
     for (final message in messages) {
       if (!message.isGroupChatMessage) continue;
-      final recipients = message.displayRecipient.recipients;
-      final key = _groupChatKey(recipients);
+      final recipients = (message.displayRecipient as DirectMessageRecipients).recipients;
+      final key = GroupChatUtils.buildMembershipKeyFromRecipients(recipients);
       final current = aggregated[key];
 
       final unreadIncrement = message.hasUnreadMessages ? 1 : 0;
       if (current == null) {
+        final members = recipients.toList()
+          ..sort((a, b) => a.fullName.compareTo(b.fullName));
         aggregated[key] = GroupChatEntity(
-          members: recipients,
+          id: GroupChatUtils.computeGroupIdFromRecipients(recipients),
+          members: members,
           unreadMessagesCount: unreadIncrement,
         );
       } else {
