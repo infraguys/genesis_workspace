@@ -15,5 +15,5 @@ class GroupChatEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [members];
+  List<Object?> get props => [members, unreadMessagesCount];
 }

@@ -103,11 +103,11 @@ class MessageDto {
     }
     if (value is DirectMessageRecipients) {
       return value.recipients.map((recipient) {
-        return <String, dynamic>{
-          'email': recipient.email,
-          'id': recipient.userId,
-          'full_name': recipient.fullName,
-        };
+        return RecipientDto(
+          email: recipient.email,
+          userId: recipient.userId,
+          fullName: recipient.fullName,
+        ).toJson();
       }).toList();
     }
     throw ArgumentError('Unknown DisplayRecipient implementation: $value');

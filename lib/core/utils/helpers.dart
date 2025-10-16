@@ -265,10 +265,15 @@ String extractMessageText(String content) {
 
 bool unorderedEquals<T>(List<T> a, List<T> b) {
   if (a.length != b.length) return false;
-  final listA = [...a]..sort();
-  final listB = [...b]..sort();
-  for (int i = 0; i < listA.length; i++) {
-    if (listA[i] != listB[i]) return false;
+  final counts = <T, int>{};
+  for (final item in a) {
+    counts[item] = (counts[item] ?? 0) + 1;
+  }
+  for (final item in b) {
+    if (!counts.containsKey(item) || counts[item]! == 0) {
+      return false;
+    }
+    counts[item] = counts[item]! - 1;
   }
   return true;
 }

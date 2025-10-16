@@ -4,6 +4,8 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/group_chat_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class AllGroupChats extends StatefulWidget {
   const AllGroupChats({super.key});
@@ -109,13 +111,13 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
                                 group.members.map((member) => member.userId).toSet(),
                               );
                             } else {
-                              // context.pushNamed(
-                              //   Routes.chat,
-                              //   pathParameters: {'userId': user.userId.toString()},
-                              //   extra: {
-                              //     'unreadMessagesCount': user.unreadMessages.length,
-                              //   },
-                              // );
+                              final userIds = group.members.map((member) => member.userId).toList();
+                              final userIdsString = userIds.join(',');
+                              context.pushNamed(
+                                Routes.groupChat,
+                                pathParameters: {'userIds': userIdsString},
+                                extra: {'unreadMessagesCount': group.unreadMessagesCount},
+                              );
                             }
                           },
                         );

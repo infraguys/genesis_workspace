@@ -259,9 +259,10 @@ class ChatCubit extends Cubit<ChatState>
       state.isLoadingMore = true;
       emit(state.copyWith(isLoadingMore: state.isLoadingMore));
       try {
+        final operand = state.chatIds!.toList();
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
-          narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: state.chatIds ?? -1)],
+          narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
           numBefore: 25,
           numAfter: 0,
         );

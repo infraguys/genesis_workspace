@@ -110,5 +110,18 @@ class MessageEntity extends Equatable {
 
   @override
   // TODO: implement props
-  List<Object?> get props => [displayRecipient, id];
+  List<Object?> get props => [
+    id,
+    isMeMessage,
+    avatarUrl,
+    content,
+    displayRecipient,
+    senderId,
+    timestamp,
+    flags,
+    type,
+    streamId,
+    subject,
+    reactions,
+  ];
 }
