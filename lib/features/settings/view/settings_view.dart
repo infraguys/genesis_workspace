@@ -130,6 +130,14 @@ class _SettingsViewState extends State<SettingsView> {
               ],
             ),
           ),
+
+          // const Divider(),
+          // ElevatedButton(
+          //   onPressed: () {
+          //     context.pushNamed(Routes.forceUpdate);
+          //   },
+          //   child: Text("force update"),
+          // ),
           const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
