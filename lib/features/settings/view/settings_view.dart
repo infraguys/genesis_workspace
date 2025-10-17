@@ -1,16 +1,57 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SettingsView extends StatelessWidget {
+class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
+
+  @override
+  State<SettingsView> createState() => _SettingsViewState();
+}
+
+class _SettingsViewState extends State<SettingsView> {
+  String _selectedSound = AssetsConstants.audioPop;
+  SharedPreferences? _prefs;
+  late final AudioPlayer _player;
+
+  @override
+  void initState() {
+    super.initState();
+    _player = AudioPlayer();
+    _loadPrefs();
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(SharedPrefsKeys.notificationSound);
+    setState(() {
+      _prefs = prefs;
+      _selectedSound = saved ?? AssetsConstants.audioPop;
+    });
+  }
+
+  Future<void> _playSelected() async {
+    try {
+      await _player.stop();
+      await _player.play(AssetSource(_selectedSound));
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +79,39 @@ class SettingsView extends StatelessWidget {
             },
           ),
           const Divider(),
+          if (_prefs != null)
+            ListTile(
+              leading: const Icon(Icons.notifications_active_outlined),
+              title: Text(context.t.settings.notificationSound),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButton<String>(
+                    value: _selectedSound,
+                    onChanged: (value) async {
+                      if (value == null) return;
+                      await _prefs!.setString(SharedPrefsKeys.notificationSound, value);
+                      setState(() {
+                        _selectedSound = value;
+                      });
+                      _playSelected();
+                    },
+                    items: const [
+                      DropdownMenuItem(value: AssetsConstants.audioPop, child: Text('Pop')),
+                      DropdownMenuItem(value: AssetsConstants.audioWhoop, child: Text('Whoop')),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    tooltip: 'Play',
+                    icon: const Icon(Icons.play_arrow),
+                    onPressed: _playSelected,
+                  ),
+                ],
+              ),
+            ),
+          if (_prefs == null) const SizedBox.shrink(),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(context.t.settings.language),
@@ -56,6 +130,14 @@ class SettingsView extends StatelessWidget {
               ],
             ),
           ),
+
+          // const Divider(),
+          // ElevatedButton(
+          //   onPressed: () {
+          //     context.pushNamed(Routes.forceUpdate);
+          //   },
+          //   child: Text("force update"),
+          // ),
           const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

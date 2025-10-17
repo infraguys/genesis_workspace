@@ -68,7 +68,8 @@
   "settings": {
     "language": "Язык",
     "logout": "Выйти",
-    "appVersion": "Версия приложения"
+    "app_version": "Версия приложения",
+    "notification_sound": "Звук уведомлений"
   },
   "date_labels": {
     "today": "Сегодня",
@@ -156,5 +157,13 @@
       "create": "Создать"
     }
   },
-  "nothing_found": "Ничего не нашли"
+  "nothing_found": "Ничего не нашли",
+  "update_force": {
+    "title": "Требуется обновление",
+    "description": "Текущая версия приложения — {current}. Актуальная — {latest}.",
+    "loading": "Загрузка…",
+    "update": "Обновить",
+    "unsupported_platform": "Обновления на этой платформе пока не поддержаны.",
+    "failed_to_start": "Не удалось запустить обновление: {error}"
+  }
 }

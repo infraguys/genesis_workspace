@@ -71,6 +71,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsGroupRu group = TranslationsGroupRu._(_root);
 	@override late final TranslationsGroupChatRu groupChat = TranslationsGroupChatRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
+	@override late final TranslationsUpdateForceRu updateForce = TranslationsUpdateForceRu._(_root);
 }
 
 // Path: auth
@@ -157,6 +158,7 @@ class TranslationsSettingsRu extends TranslationsSettingsEn {
 	@override String get language => 'Язык';
 	@override String get logout => 'Выйти';
 	@override String get appVersion => 'Версия приложения';
+	@override String get notificationSound => 'Звук уведомлений';
 }
 
 // Path: dateLabels
@@ -320,6 +322,21 @@ class TranslationsGroupChatRu extends TranslationsGroupChatEn {
 	// Translations
 	@override String get createTooltip => 'Создать групповой чат';
 	@override late final TranslationsGroupChatCreateDialogRu createDialog = TranslationsGroupChatCreateDialogRu._(_root);
+}
+
+// Path: updateForce
+class TranslationsUpdateForceRu extends TranslationsUpdateForceEn {
+	TranslationsUpdateForceRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Требуется обновление';
+	@override String description({required Object current, required Object latest}) => 'Текущая версия приложения — ${current}. Актуальная — ${latest}.';
+	@override String get loading => 'Загрузка…';
+	@override String get update => 'Обновить';
+	@override String get unsupportedPlatform => 'Обновления на этой платформе пока не поддержаны.';
+	@override String failedToStart({required Object error}) => 'Не удалось запустить обновление: ${error}';
 }
 
 // Path: groupChat.createDialog
