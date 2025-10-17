@@ -68,7 +68,8 @@
   "settings": {
     "language": "Язык",
     "logout": "Выйти",
-    "appVersion": "Версия приложения"
+    "app_version": "Версия приложения",
+    "notification_sound": "Звук уведомлений"
   },
   "date_labels": {
     "today": "Сегодня",

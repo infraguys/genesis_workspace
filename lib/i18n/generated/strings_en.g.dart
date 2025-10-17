@@ -273,6 +273,9 @@ class TranslationsSettingsEn {
 
 	/// en: 'App version'
 	String get appVersion => 'App version';
+
+	/// en: 'Notification sound'
+	String get notificationSound => 'Notification sound';
 }
 
 // Path: dateLabels

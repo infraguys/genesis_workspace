@@ -63,7 +63,8 @@
   "settings": {
     "language": "Language",
     "logout": "Logout",
-    "appVersion": "App version"
+    "app_version": "App version",
+    "notification_sound": "Notification sound"
   },
   "date_labels": {
     "today": "Today",

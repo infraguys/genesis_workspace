@@ -157,6 +157,7 @@ class TranslationsSettingsRu extends TranslationsSettingsEn {
 	@override String get language => 'Язык';
 	@override String get logout => 'Выйти';
 	@override String get appVersion => 'Версия приложения';
+	@override String get notificationSound => 'Звук уведомлений';
 }
 
 // Path: dateLabels

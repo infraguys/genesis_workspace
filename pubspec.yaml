@@ -108,6 +108,7 @@ flutter:
   assets:
     - assets/images/
     - assets/audio/pop.wav
+    - assets/audio/whoop.wav
 #    - assets/sqlite3.wasm
 #    - assets/drift_worker.dart.js
 

@@ -80,10 +80,12 @@ class SharedPrefsKeys {
   static const String locale = 'locale';
   static const String isWebAuth = 'isWebAuth';
   static const String baseUrl = 'baseUrl';
+  static const String notificationSound = 'notificationSound';
 }
 
 class AssetsConstants {
   static const String audioPop = 'audio/pop.wav';
+  static const String audioWhoop = 'audio/whoop.wav';
 }
 
 class FolderIconsConstants {

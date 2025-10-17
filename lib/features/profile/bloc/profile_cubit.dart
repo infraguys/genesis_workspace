@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
@@ -54,9 +55,12 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  _onMessageEvents(MessageEventEntity event) {
+  _onMessageEvents(MessageEventEntity event) async {
     if (event.message.senderId != state.user?.userId) {
-      player.play(AssetSource(AssetsConstants.audioPop));
+      final prefs = await SharedPreferences.getInstance();
+      final selected =
+          prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
+      player.play(AssetSource(selected));
     }
   }
 
