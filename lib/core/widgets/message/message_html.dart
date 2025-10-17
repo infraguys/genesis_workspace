@@ -76,8 +76,30 @@ class MessageHtml extends StatelessWidget {
             );
           }
           if (element.classes.contains('user-mention')) {
-            final mention = element.nodes[0].text;
-            final userId = int.parse(element.attributes['data-user-id'] ?? '-1');
+            final mention = element.nodes[0].text ?? '';
+            final mentionChip = Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+              ),
+              child: Text(
+                mention,
+                style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
+              ),
+            );
+
+            if (element.classes.contains('channel-wildcard-mention')) {
+              return InlineCustomWidget(child: mentionChip);
+            }
+
+            final userIdAttr = element.attributes['data-user-id'];
+            final userId = int.tryParse(userIdAttr ?? '');
+
+            if (userId == null) {
+              return InlineCustomWidget(child: mentionChip);
+            }
 
             return InlineCustomWidget(
               child: MouseRegion(
@@ -177,21 +199,7 @@ class MessageHtml extends StatelessWidget {
                       },
                     ),
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      mention ?? '',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
+                  child: mentionChip,
                 ),
               ),
             );
