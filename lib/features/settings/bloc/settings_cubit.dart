@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart';
 import 'package:injectable/injectable.dart';
-import 'package:path_provider/path_provider.dart';
 
 part 'settings_state.dart';
 
@@ -34,7 +33,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<String> createHelloWorldFile() async {
     try {
       // Получаем директорию приложения (application documents directory)
-      final appDir = await getApplicationDocumentsDirectory();
+      final appDir = Directory.current;
 
       // Создаем путь к файлу hello.txt в корне директории приложения
       final File file = File('${appDir.path}/hello.txt');
@@ -46,13 +45,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     } catch (error, stackTrace) {
       print('Ошибка при создании файла: $error');
       print(stackTrace);
-      throw(Exception('Ошибка при создании файла: $error'));
+      throw (Exception('Ошибка при создании файла: $error'));
     }
   }
 
   Future<String> deleteHelloWorldFile() async {
     try {
-      final Directory appDir = await getApplicationDocumentsDirectory();
+      final Directory appDir = Directory.current;
       final File file = File('${appDir.path}/hello.txt');
 
       if (await file.exists()) {
@@ -61,12 +60,12 @@ class SettingsCubit extends Cubit<SettingsState> {
         return 'Файл успешно удалён: ${file.path}';
       } else {
         print('Файл не найден: ${file.path}');
-        throw(Exception('Файл не найден: ${file.path}'));
+        throw (Exception('Файл не найден: ${file.path}'));
       }
     } catch (error, stackTrace) {
       print('Ошибка при удалении файла: $error');
       print(stackTrace);
-      throw(Exception('Ошибка при удалении файла: $error'));
+      throw (Exception('Ошибка при удалении файла: $error'));
     }
   }
 }
