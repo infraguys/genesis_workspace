@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
@@ -131,6 +132,13 @@ class _SettingsViewState extends State<SettingsView> {
             ),
           ),
           const Divider(),
+          ElevatedButton(
+            onPressed: () async {
+              await context.read<SettingsCubit>().createHelloWorldFile();
+            },
+            child: Text("Create file"),
+          ),
+          ElevatedButton(onPressed: () {}, child: Text("Delete file")),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ElevatedButton.icon(
