@@ -31,7 +31,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
-  Future<void> createHelloWorldFile() async {
+  Future<String> createHelloWorldFile() async {
     try {
       // Получаем директорию приложения (application documents directory)
       final appDir = await getApplicationDocumentsDirectory();
@@ -42,14 +42,15 @@ class SettingsCubit extends Cubit<SettingsState> {
       // Записываем текст в файл
       await file.writeAsString('Hello world!');
 
-      print('Файл успешно создан: ${file.path}');
+      return 'Файл успешно создан: ${file.path}';
     } catch (error, stackTrace) {
       print('Ошибка при создании файла: $error');
       print(stackTrace);
+      throw(Exception('Ошибка при создании файла: $error'));
     }
   }
 
-  Future<void> deleteHelloWorldFile() async {
+  Future<String> deleteHelloWorldFile() async {
     try {
       final Directory appDir = await getApplicationDocumentsDirectory();
       final File file = File('${appDir.path}/hello.txt');
@@ -57,12 +58,15 @@ class SettingsCubit extends Cubit<SettingsState> {
       if (await file.exists()) {
         await file.delete();
         print('Файл успешно удалён: ${file.path}');
+        return 'Файл успешно удалён: ${file.path}';
       } else {
         print('Файл не найден: ${file.path}');
+        throw(Exception('Файл не найден: ${file.path}'));
       }
     } catch (error, stackTrace) {
       print('Ошибка при удалении файла: $error');
       print(stackTrace);
+      throw(Exception('Ошибка при удалении файла: $error'));
     }
   }
 }

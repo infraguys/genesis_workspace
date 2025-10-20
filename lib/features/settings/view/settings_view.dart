@@ -91,15 +91,24 @@ class _SettingsViewState extends State<SettingsView> {
                     value: _selectedSound,
                     onChanged: (value) async {
                       if (value == null) return;
-                      await _prefs!.setString(SharedPrefsKeys.notificationSound, value);
+                      await _prefs!.setString(
+                        SharedPrefsKeys.notificationSound,
+                        value,
+                      );
                       setState(() {
                         _selectedSound = value;
                       });
                       _playSelected();
                     },
                     items: const [
-                      DropdownMenuItem(value: AssetsConstants.audioPop, child: Text('Pop')),
-                      DropdownMenuItem(value: AssetsConstants.audioWhoop, child: Text('Whoop')),
+                      DropdownMenuItem(
+                        value: AssetsConstants.audioPop,
+                        child: Text('Pop'),
+                      ),
+                      DropdownMenuItem(
+                        value: AssetsConstants.audioWhoop,
+                        child: Text('Whoop'),
+                      ),
                     ],
                   ),
                   const SizedBox(width: 8),
@@ -121,24 +130,59 @@ class _SettingsViewState extends State<SettingsView> {
               onChanged: (locale) {
                 if (locale != null) {
                   localizationService.setLocale(
-                    AppLocale.values.firstWhere((l) => l.languageCode == locale.languageCode),
+                    AppLocale.values.firstWhere(
+                      (l) => l.languageCode == locale.languageCode,
+                    ),
                   );
                 }
               },
               items: [
-                DropdownMenuItem(value: const Locale('en'), child: Text('English')),
-                DropdownMenuItem(value: const Locale('ru'), child: Text('Русский')),
+                DropdownMenuItem(
+                  value: const Locale('en'),
+                  child: Text('English'),
+                ),
+                DropdownMenuItem(
+                  value: const Locale('ru'),
+                  child: Text('Русский'),
+                ),
               ],
             ),
           ),
           const Divider(),
           ElevatedButton(
             onPressed: () async {
-              await context.read<SettingsCubit>().createHelloWorldFile();
+              try {
+                final path = await context
+                    .read<SettingsCubit>()
+                    .createHelloWorldFile();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(path), backgroundColor: Colors.green),
+                );
+              } on Exception catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+                );
+              }
             },
             child: Text("Create file"),
           ),
-          ElevatedButton(onPressed: () {}, child: Text("Delete file")),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final path = await context
+                    .read<SettingsCubit>()
+                    .deleteHelloWorldFile();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(path), backgroundColor: Colors.orange),
+                );
+              } on Exception catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+                );
+              }
+            },
+            child: Text("Delete file"),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ElevatedButton.icon(
@@ -146,7 +190,9 @@ class _SettingsViewState extends State<SettingsView> {
                 backgroundColor: theme.colorScheme.error,
                 foregroundColor: theme.colorScheme.onError,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () async {
                 await context.read<AuthCubit>().logout();
@@ -170,7 +216,9 @@ class _SettingsViewState extends State<SettingsView> {
                   backgroundColor: theme.colorScheme.error,
                   foregroundColor: theme.colorScheme.onError,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: () async {
                   await context.read<AuthCubit>().devLogout();
