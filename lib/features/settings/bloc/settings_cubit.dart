@@ -1,6 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart';
 import 'package:injectable/injectable.dart';
@@ -13,6 +16,8 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   final AddRecentDmUseCase _addRecentDmUseCase;
   final GetRecentDmsUseCase _getRecentDmsUseCase;
+
+  final Dio _dio = Dio();
 
   Future<void> addRecentDm(int userId) async {
     try {
@@ -66,6 +71,15 @@ class SettingsCubit extends Cubit<SettingsState> {
       print('Ошибка при удалении файла: $error');
       print(stackTrace);
       throw (Exception('Ошибка при удалении файла: $error'));
+    }
+  }
+
+  Future<void> getVersionConfig() async {
+    try {
+      final response = await _dio.get(AppConstants.versionConfigUrl);
+      inspect(response);
+    } catch (e) {
+      inspect(e);
     }
   }
 }
