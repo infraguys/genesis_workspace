@@ -197,8 +197,8 @@ import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart'
     as _i155;
 import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart'
     as _i1068;
-import 'package:genesis_workspace/features/update_force/bloc/update_cubit.dart'
-    as _i1;
+import 'package:genesis_workspace/features/update/bloc/update_cubit.dart'
+    as _i326;
 import 'package:genesis_workspace/navigation/app_shell_controller.dart'
     as _i188;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
@@ -227,6 +227,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
+    gh.factory<_i397.GetVersionConfigUseCase>(
+      () => _i397.GetVersionConfigUseCase(),
+    );
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
     );
@@ -283,8 +286,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i435.DeleteQueueUseCase>(
       () => _i435.DeleteQueueUseCase(gh<_i703.RealTimeEventsRepository>()),
     );
-    gh.factory<_i1.UpdateCubit>(
-      () => _i1.UpdateCubit(gh<_i397.GetVersionConfigUseCase>()),
+    gh.lazySingleton<_i326.UpdateCubit>(
+      () => _i326.UpdateCubit(gh<_i397.GetVersionConfigUseCase>()),
+      dispose: _i326.disposeUpdateCubit,
     );
     gh.factory<_i207.GetMessagesUseCase>(
       () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),

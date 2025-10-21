@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/common/dto/version_config_dto.dart';
 import 'package:genesis_workspace/domain/common/entities/version_config_entity.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class GetVersionConfigUseCase {
   final Dio _dio = Dio();
 
@@ -13,6 +17,7 @@ class GetVersionConfigUseCase {
       final entity = dto.toEntity();
       return entity;
     } catch (e) {
+      inspect(e);
       rethrow;
     }
   }

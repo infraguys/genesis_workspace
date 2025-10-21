@@ -20,7 +20,7 @@ import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
-import 'package:genesis_workspace/features/update_force/update_force.dart';
+import 'package:genesis_workspace/features/update/update.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/authentication/presentation/auth.dart';

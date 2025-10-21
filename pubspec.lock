@@ -369,6 +369,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.11"
+  desktop_updater:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "fix/no-cryptography-plus"
+      resolved-ref: "3d072f39e9c30f5b28564b2f6e8150a7a79f7b0f"
+      url: "https://github.com/infraguys/flutter_desktop_updater.git"
+    source: git
+    version: "1.4.0"
   device_info_plus:
     dependency: transitive
     description:
