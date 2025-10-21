@@ -9,12 +9,13 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
-import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
+import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_idle_detector/in_app_idle_detector.dart';
 
@@ -79,6 +80,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     WidgetsBinding.instance.addObserver(this);
     if (kIsWeb) BrowserContextMenu.disableContextMenu();
     _future = Future.wait([
+      context.read<UpdateCubit>().checkUpdateNeed(),
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
       context.read<MessagesCubit>().getLastMessages(),
@@ -107,13 +109,11 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
+    return BlocListener<UpdateCubit, UpdateState>(
       listener: (context, state) {
-        // if (state.isAuthorized) {
-        //   context.goNamed(Routes.directMessages);
-        // } else {
-        //   context.goNamed(Routes.auth);
-        // }
+        if (state.isUpdateRequired) {
+          context.goNamed(Routes.forceUpdate);
+        }
       },
       child: FutureBuilder(
         future: _future,

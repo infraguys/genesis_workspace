@@ -80,6 +80,8 @@ import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_ca
     as _i7;
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart'
     as _i1057;
+import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart'
+    as _i397;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
     as _i857;
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
@@ -195,6 +197,8 @@ import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart'
     as _i155;
 import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart'
     as _i1068;
+import 'package:genesis_workspace/features/update/bloc/update_cubit.dart'
+    as _i326;
 import 'package:genesis_workspace/navigation/app_shell_controller.dart'
     as _i188;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
@@ -217,6 +221,9 @@ extension GetItInjectableX on _i174.GetIt {
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
+    gh.factory<_i397.GetVersionConfigUseCase>(
+      () => _i397.GetVersionConfigUseCase(),
+    );
     gh.factory<_i1039.GetEventsByQueueIdUseCase>(
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
@@ -278,6 +285,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i435.DeleteQueueUseCase>(
       () => _i435.DeleteQueueUseCase(gh<_i703.RealTimeEventsRepository>()),
+    );
+    gh.lazySingleton<_i326.UpdateCubit>(
+      () => _i326.UpdateCubit(gh<_i397.GetVersionConfigUseCase>()),
+      dispose: _i326.disposeUpdateCubit,
     );
     gh.factory<_i1005.UpdateMessageUseCase>(
       () => _i1005.UpdateMessageUseCase(gh<_i857.MessagesRepository>()),

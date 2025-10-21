@@ -45,6 +45,10 @@ ci_stage_apk:
 build-macos:
 	flutter build macos --flavor prod -t lib/prod.dart --dart-define-from-file=env.json
 
+build-linux:
+	dart run desktop_updater:release linux
+	dart run desktop_updater:archive linux
+
 ci_prod_linux:
 	make clean
 	make generate
