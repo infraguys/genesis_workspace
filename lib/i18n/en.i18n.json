@@ -153,5 +153,13 @@
       "create": "Create"
     }
   },
-  "nothing_found": "Nothing found"
+  "nothing_found": "Nothing found",
+  "update_force": {
+    "title": "Update required",
+    "description": "Current app version is {current}. Latest is {latest}.",
+    "loading": "Loading…",
+    "update": "Update",
+    "unsupported_platform": "Updates are not supported on this platform yet.",
+    "failed_to_start": "Failed to start update: {error}"
+  }
 }
