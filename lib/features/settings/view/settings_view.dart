@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
-import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
@@ -131,51 +130,7 @@ class _SettingsViewState extends State<SettingsView> {
               ],
             ),
           ),
-
-          // const Divider(),
-          // ElevatedButton(
-          //   onPressed: () {
-          //     context.pushNamed(Routes.forceUpdate);
-          //   },
-          //   child: Text("force update"),
-          // ),
           const Divider(),
-          ElevatedButton(
-            onPressed: () async {
-              await context.read<SettingsCubit>().getVersionConfig();
-            },
-            child: Text("Get json"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                final path = await context.read<SettingsCubit>().createHelloWorldFile();
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(path), backgroundColor: Colors.green));
-              } on Exception catch (e) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
-              }
-            },
-            child: Text("Create file"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                final path = await context.read<SettingsCubit>().deleteHelloWorldFile();
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(path), backgroundColor: Colors.orange));
-              } on Exception catch (e) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
-              }
-            },
-            child: Text("Delete file"),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ElevatedButton.icon(
