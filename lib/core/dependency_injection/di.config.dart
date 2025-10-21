@@ -221,14 +221,24 @@ extension GetItInjectableX on _i174.GetIt {
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
-    gh.factory<_i440.DioFactory>(() => _i440.DioFactory());
-    gh.factory<_i350.GetSessionIdUseCase>(() => _i350.GetSessionIdUseCase());
+    gh.factory<_i397.GetVersionConfigUseCase>(
+      () => _i397.GetVersionConfigUseCase(),
+    );
     gh.factory<_i1039.GetEventsByQueueIdUseCase>(
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
-    gh.factory<_i397.GetVersionConfigUseCase>(
-      () => _i397.GetVersionConfigUseCase(),
+    gh.factory<_i350.GetSessionIdUseCase>(() => _i350.GetSessionIdUseCase());
+    gh.factory<_i440.DioFactory>(() => _i440.DioFactory());
+    gh.lazySingleton<_i144.EmojiKeyboardCubit>(
+      () => _i144.EmojiKeyboardCubit(),
+    );
+    gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
+    gh.lazySingleton<_i113.PasteCaptureService>(
+      () => _i113.PasteCaptureService(),
+    );
+    gh.lazySingleton<_i435.LocalizationService>(
+      () => _i435.LocalizationService(),
     );
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
@@ -243,16 +253,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
-    );
-    gh.lazySingleton<_i573.RealTimeCubit>(() => _i573.RealTimeCubit());
-    gh.lazySingleton<_i144.EmojiKeyboardCubit>(
-      () => _i144.EmojiKeyboardCubit(),
-    );
-    gh.lazySingleton<_i113.PasteCaptureService>(
-      () => _i113.PasteCaptureService(),
-    );
-    gh.lazySingleton<_i435.LocalizationService>(
-      () => _i435.LocalizationService(),
     );
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
@@ -290,11 +290,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i326.UpdateCubit(gh<_i397.GetVersionConfigUseCase>()),
       dispose: _i326.disposeUpdateCubit,
     );
-    gh.factory<_i207.GetMessagesUseCase>(
-      () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
-    );
     gh.factory<_i1005.UpdateMessageUseCase>(
       () => _i1005.UpdateMessageUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i116.SendMessageUseCase>(
+      () => _i116.SendMessageUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i513.RemoveEmojiReactionUseCase>(
       () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
@@ -302,17 +302,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
     );
-    gh.factory<_i116.SendMessageUseCase>(
-      () => _i116.SendMessageUseCase(gh<_i857.MessagesRepository>()),
+    gh.factory<_i207.GetMessagesUseCase>(
+      () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
     );
-    gh.factory<_i276.AddEmojiReactionUseCase>(
-      () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
+    gh.factory<_i699.GetMessageByIdUseCase>(
+      () => _i699.GetMessageByIdUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i455.DeleteMessageUseCase>(
       () => _i455.DeleteMessageUseCase(gh<_i857.MessagesRepository>()),
     );
-    gh.factory<_i699.GetMessageByIdUseCase>(
-      () => _i699.GetMessageByIdUseCase(gh<_i857.MessagesRepository>()),
+    gh.factory<_i276.AddEmojiReactionUseCase>(
+      () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i42.UploadFileUseCase>(
       () => _i42.UploadFileUseCase(gh<_i857.MessagesRepository>()),
@@ -333,54 +333,54 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i75.GetTokenUseCase>(
       () => _i75.GetTokenUseCase(gh<_i958.TokenStorage>()),
     );
-    gh.factory<_i656.ReactionsCubit>(
-      () => _i656.ReactionsCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-      ),
-    );
     gh.factory<_i1068.StarredCubit>(
       () => _i1068.StarredCubit(
         gh<_i82.RealTimeService>(),
         gh<_i207.GetMessagesUseCase>(),
       ),
     );
-    gh.factory<_i771.GetChannelMembersUseCase>(
-      () => _i771.GetChannelMembersUseCase(gh<_i125.UsersRepository>()),
+    gh.factory<_i656.ReactionsCubit>(
+      () => _i656.ReactionsCubit(
+        gh<_i82.RealTimeService>(),
+        gh<_i207.GetMessagesUseCase>(),
+      ),
     );
-    gh.factory<_i394.GetUserPresenceUseCase>(
-      () => _i394.GetUserPresenceUseCase(gh<_i125.UsersRepository>()),
+    gh.factory<_i837.GetAllPresencesUseCase>(
+      () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i194.GetUsersUseCase>(
+      () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i541.UpdateSubscriptionSettingsUseCase>(
       () =>
           _i541.UpdateSubscriptionSettingsUseCase(gh<_i125.UsersRepository>()),
     );
-    gh.factory<_i487.SetTypingUseCase>(
-      () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i547.GetOwnUserUseCase>(
-      () => _i547.GetOwnUserUseCase(gh<_i125.UsersRepository>()),
+    gh.factory<_i771.GetChannelMembersUseCase>(
+      () => _i771.GetChannelMembersUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i699.GetTopicsUseCase>(
       () => _i699.GetTopicsUseCase(gh<_i125.UsersRepository>()),
     );
-    gh.factory<_i773.GetUserByIdUseCase>(
-      () => _i773.GetUserByIdUseCase(gh<_i125.UsersRepository>()),
-    );
     gh.factory<_i720.GetChannelByIdUseCase>(
       () => _i720.GetChannelByIdUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i194.GetUsersUseCase>(
-      () => _i194.GetUsersUseCase(gh<_i125.UsersRepository>()),
-    );
-    gh.factory<_i832.UpdatePresenceUseCase>(
-      () => _i832.UpdatePresenceUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i988.GetSubscribedChannelsUseCase>(
       () => _i988.GetSubscribedChannelsUseCase(gh<_i125.UsersRepository>()),
     );
-    gh.factory<_i837.GetAllPresencesUseCase>(
-      () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
+    gh.factory<_i394.GetUserPresenceUseCase>(
+      () => _i394.GetUserPresenceUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i547.GetOwnUserUseCase>(
+      () => _i547.GetOwnUserUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i773.GetUserByIdUseCase>(
+      () => _i773.GetUserByIdUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i487.SetTypingUseCase>(
+      () => _i487.SetTypingUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i832.UpdatePresenceUseCase>(
+      () => _i832.UpdatePresenceUseCase(gh<_i125.UsersRepository>()),
     );
     gh.lazySingleton<_i361.Dio>(
       () => coreModule.dio(
@@ -469,20 +469,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
     );
+    gh.factory<_i812.AddRecentDmUseCase>(
+      () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
+    );
     gh.factory<_i445.GetRecentDmsUseCase>(
       () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
     );
-    gh.factory<_i812.AddRecentDmUseCase>(
-      () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
+    gh.factory<_i125.AddFolderUseCase>(
+      () => _i125.AddFolderUseCase(gh<_i48.FolderRepository>()),
     );
     gh.factory<_i849.DeleteFolderUseCase>(
       () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
     gh.factory<_i7.UpdateFolderUseCase>(
       () => _i7.UpdateFolderUseCase(gh<_i48.FolderRepository>()),
-    );
-    gh.factory<_i125.AddFolderUseCase>(
-      () => _i125.AddFolderUseCase(gh<_i48.FolderRepository>()),
     );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
@@ -509,39 +509,39 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
-    gh.factory<_i438.GetMembersForFolderUseCase>(
-      () => _i438.GetMembersForFolderUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
     gh.factory<_i714.GetFolderIdsForTargetUseCase>(
       () => _i714.GetFolderIdsForTargetUseCase(
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
-    gh.factory<_i433.DeleteTokenUseCase>(
-      () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
-    );
-    gh.factory<_i799.FetchApiKeyUseCase>(
-      () => _i799.FetchApiKeyUseCase(gh<_i1022.AuthRepository>()),
+    gh.factory<_i438.GetMembersForFolderUseCase>(
+      () => _i438.GetMembersForFolderUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
-    gh.factory<_i721.SaveSessionIdUseCase>(
-      () => _i721.SaveSessionIdUseCase(gh<_i1022.AuthRepository>()),
+    gh.factory<_i799.FetchApiKeyUseCase>(
+      () => _i799.FetchApiKeyUseCase(gh<_i1022.AuthRepository>()),
     );
-    gh.factory<_i361.DeleteSessionIdUseCase>(
-      () => _i361.DeleteSessionIdUseCase(gh<_i1022.AuthRepository>()),
+    gh.factory<_i433.DeleteTokenUseCase>(
+      () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
     gh.factory<_i848.GetServerSettingsUseCase>(
       () => _i848.GetServerSettingsUseCase(gh<_i1022.AuthRepository>()),
     );
-    gh.factory<_i352.SaveCsrftokenUseCase>(
-      () => _i352.SaveCsrftokenUseCase(gh<_i1022.AuthRepository>()),
+    gh.factory<_i721.SaveSessionIdUseCase>(
+      () => _i721.SaveSessionIdUseCase(gh<_i1022.AuthRepository>()),
     );
     gh.factory<_i819.DeleteCsrftokenUseCase>(
       () => _i819.DeleteCsrftokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i352.SaveCsrftokenUseCase>(
+      () => _i352.SaveCsrftokenUseCase(gh<_i1022.AuthRepository>()),
+    );
+    gh.factory<_i361.DeleteSessionIdUseCase>(
+      () => _i361.DeleteSessionIdUseCase(gh<_i1022.AuthRepository>()),
     );
     gh.lazySingleton<_i725.PinnedChatsRepository>(
       () => _i835.PinnedChatsRepositoryImpl(
@@ -581,19 +581,19 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: _i862.disposeAuthCubit,
     );
-    gh.factory<_i631.UnpinChatUseCase>(
-      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    gh.factory<_i1012.PinChatUseCase>(
+      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i126.GetPinnedChatsUseCase>(
+      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
     );
     gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
       () => _i1057.UpdatePinnedChatOrderUseCase(
         gh<_i725.PinnedChatsRepository>(),
       ),
     );
-    gh.factory<_i1012.PinChatUseCase>(
-      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i126.GetPinnedChatsUseCase>(
-      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
+    gh.factory<_i631.UnpinChatUseCase>(
+      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
     );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(

@@ -108,6 +108,15 @@ flutter_gen:
     exclude:
       - assets/audio/pop.wav
 
+desktop_updater:
+  build_args:
+    all:
+      - --release
+    linux:
+      - -t
+      - lib/prod.dart
+      - --dart-define-from-file=env.json
+
 flutter:
   uses-material-design: true
   default-flavor: stage

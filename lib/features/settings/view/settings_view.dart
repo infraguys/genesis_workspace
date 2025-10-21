@@ -131,6 +131,9 @@ class _SettingsViewState extends State<SettingsView> {
             ),
           ),
           const Divider(),
+          ElevatedButton(onPressed: () {
+            context.goNamed(Routes.forceUpdate);
+          }, child: Text("go to update")),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ElevatedButton.icon(

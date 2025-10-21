@@ -1,4 +1,4 @@
-import 'dart:developer';
+ import 'dart:developer';
 
 import 'package:desktop_updater/updater_controller.dart';
 import 'package:desktop_updater/widget/update_widget.dart';
@@ -22,9 +22,8 @@ class _UpdateViewState extends State<UpdateView> {
     super.initState();
     final appArchive = context.read<UpdateCubit>().state.appArchiveJson;
     _desktopUpdaterController = DesktopUpdaterController(
-      appArchiveUrl: Uri.dataFromString(appArchive!),
+      appArchiveUrl: Uri.parse('http://repository.genesis-core.tech:8081/genesis_workspace/app-archive.json'),
     );
-    // _desktopUpdaterController.init(Uri.dataFromString(appArchive ?? ''));
     _desktopUpdaterController.addListener(updateListener);
   }
 

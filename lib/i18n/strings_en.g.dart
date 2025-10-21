@@ -128,6 +128,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Nothing found'
 	String get nothing_found => 'Nothing found';
+
+	late final TranslationsUpdateForceEn update_force = TranslationsUpdateForceEn._(_root);
 }
 
 // Path: auth
@@ -537,6 +539,33 @@ class TranslationsGroupChatEn {
 	late final TranslationsGroupChatCreateDialogEn create_dialog = TranslationsGroupChatCreateDialogEn._(_root);
 }
 
+// Path: update_force
+class TranslationsUpdateForceEn {
+	TranslationsUpdateForceEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update required'
+	String get title => 'Update required';
+
+	/// en: 'Current app version is {current}. Latest is {latest}.'
+	String get description => 'Current app version is {current}. Latest is {latest}.';
+
+	/// en: 'Loading…'
+	String get loading => 'Loading…';
+
+	/// en: 'Update'
+	String get update => 'Update';
+
+	/// en: 'Updates are not supported on this platform yet.'
+	String get unsupported_platform => 'Updates are not supported on this platform yet.';
+
+	/// en: 'Failed to start update: {error}'
+	String get failed_to_start => 'Failed to start update: {error}';
+}
+
 // Path: group_chat.create_dialog
 class TranslationsGroupChatCreateDialogEn {
 	TranslationsGroupChatCreateDialogEn._(this._root);
@@ -683,6 +712,12 @@ extension on Translations {
 			case 'group_chat.create_dialog.cancel': return 'Cancel';
 			case 'group_chat.create_dialog.create': return 'Create';
 			case 'nothing_found': return 'Nothing found';
+			case 'update_force.title': return 'Update required';
+			case 'update_force.description': return 'Current app version is {current}. Latest is {latest}.';
+			case 'update_force.loading': return 'Loading…';
+			case 'update_force.update': return 'Update';
+			case 'update_force.unsupported_platform': return 'Updates are not supported on this platform yet.';
+			case 'update_force.failed_to_start': return 'Failed to start update: {error}';
 			default: return null;
 		}
 	}

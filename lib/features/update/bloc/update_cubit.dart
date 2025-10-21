@@ -27,6 +27,7 @@ class UpdateCubit extends Cubit<UpdateState> {
           : packageInfo.version;
 
       final response = await _getVersionConfigUseCase.call();
+      inspect(response);
       final releaseChannel = Flavor.isStage ? response.latest.dev : response.latest.stable;
       final minSupportedShortVersion = Flavor.isStage
           ? response.policy.update.minVersion.minShortDev
@@ -39,6 +40,7 @@ class UpdateCubit extends Cubit<UpdateState> {
 
       final actualVersionString = releaseChannel.version;
       final linuxUpdateUrl = releaseChannel.linux.url;
+      print(linuxUpdateUrl);
 
       final archiveJson = _buildAppArchiveJson(
         packageInfo: packageInfo,
@@ -50,8 +52,8 @@ class UpdateCubit extends Cubit<UpdateState> {
       emit(
         state.copyWith(
           status: UpdateStatus.success,
-          isNewUpdateAvailable: isNewUpdateAvailable,
-          isUpdateRequired: isUpdateRequired,
+          // isNewUpdateAvailable: isNewUpdateAvailable,
+          // isUpdateRequired: isUpdateRequired,
           currentVersion: currentVersion,
           actualVersion: actualVersionString,
           linuxUpdateUrl: linuxUpdateUrl,

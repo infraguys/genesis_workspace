@@ -75,6 +75,7 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsGroupRu group = _TranslationsGroupRu._(_root);
 	@override late final _TranslationsGroupChatRu group_chat = _TranslationsGroupChatRu._(_root);
 	@override String get nothing_found => 'Ничего не нашли';
+	@override late final _TranslationsUpdateForceRu update_force = _TranslationsUpdateForceRu._(_root);
 }
 
 // Path: auth
@@ -327,6 +328,21 @@ class _TranslationsGroupChatRu implements TranslationsGroupChatEn {
 	@override late final _TranslationsGroupChatCreateDialogRu create_dialog = _TranslationsGroupChatCreateDialogRu._(_root);
 }
 
+// Path: update_force
+class _TranslationsUpdateForceRu implements TranslationsUpdateForceEn {
+	_TranslationsUpdateForceRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Требуется обновление';
+	@override String get description => 'Текущая версия приложения — {current}. Актуальная — {latest}.';
+	@override String get loading => 'Загрузка…';
+	@override String get update => 'Обновить';
+	@override String get unsupported_platform => 'Обновления на этой платформе пока не поддержаны.';
+	@override String get failed_to_start => 'Не удалось запустить обновление: {error}';
+}
+
 // Path: group_chat.create_dialog
 class _TranslationsGroupChatCreateDialogRu implements TranslationsGroupChatCreateDialogEn {
 	_TranslationsGroupChatCreateDialogRu._(this._root);
@@ -469,6 +485,12 @@ extension on TranslationsRu {
 			case 'group_chat.create_dialog.cancel': return 'Отмена';
 			case 'group_chat.create_dialog.create': return 'Создать';
 			case 'nothing_found': return 'Ничего не нашли';
+			case 'update_force.title': return 'Требуется обновление';
+			case 'update_force.description': return 'Текущая версия приложения — {current}. Актуальная — {latest}.';
+			case 'update_force.loading': return 'Загрузка…';
+			case 'update_force.update': return 'Обновить';
+			case 'update_force.unsupported_platform': return 'Обновления на этой платформе пока не поддержаны.';
+			case 'update_force.failed_to_start': return 'Не удалось запустить обновление: {error}';
 			default: return null;
 		}
 	}
