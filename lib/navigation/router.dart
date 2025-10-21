@@ -20,6 +20,7 @@ import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
+import 'package:genesis_workspace/features/update_force/update_force.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/authentication/presentation/auth.dart';
@@ -50,6 +51,7 @@ class Routes {
   static const String starred = '/starred';
   static const String imageFullScreen = '/image-full-screen';
   static const String pasteBaseUrl = '/paste-base-url';
+  static const String forceUpdate = '/force-update';
 }
 
 final router = GoRouter(
@@ -365,6 +367,11 @@ final router = GoRouter(
           },
         );
       },
+    ),
+    GoRoute(
+      path: Routes.forceUpdate,
+      name: Routes.forceUpdate,
+      builder: (context, state) => const UpdateForce(),
     ),
   ],
 );

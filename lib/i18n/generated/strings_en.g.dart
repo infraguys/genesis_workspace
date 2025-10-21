@@ -123,6 +123,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
+
+	late final TranslationsUpdateForceEn updateForce = TranslationsUpdateForceEn.internal(_root);
 }
 
 // Path: auth
@@ -530,6 +532,33 @@ class TranslationsGroupChatEn {
 	String get createTooltip => 'Create new group chat';
 
 	late final TranslationsGroupChatCreateDialogEn createDialog = TranslationsGroupChatCreateDialogEn.internal(_root);
+}
+
+// Path: updateForce
+class TranslationsUpdateForceEn {
+	TranslationsUpdateForceEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update required'
+	String get title => 'Update required';
+
+	/// en: 'Current app version is {current}. Latest is {latest}.'
+	String description({required Object current, required Object latest}) => 'Current app version is ${current}. Latest is ${latest}.';
+
+	/// en: 'Loading…'
+	String get loading => 'Loading…';
+
+	/// en: 'Update'
+	String get update => 'Update';
+
+	/// en: 'Updates are not supported on this platform yet.'
+	String get unsupportedPlatform => 'Updates are not supported on this platform yet.';
+
+	/// en: 'Failed to start update: {error}'
+	String failedToStart({required Object error}) => 'Failed to start update: ${error}';
 }
 
 // Path: groupChat.createDialog
