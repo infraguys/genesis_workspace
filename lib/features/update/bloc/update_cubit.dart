@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -130,11 +129,7 @@ class UpdateCubit extends Cubit<UpdateState> {
     try {
       await _downloadBundle(url, archiveFile);
 
-      emit(
-        state.copyWith(
-          operationStatus: UpdateOperationStatus.installing,
-        ),
-      );
+      emit(state.copyWith(operationStatus: UpdateOperationStatus.installing));
 
       await extractDir.create(recursive: true);
       await _extractArchive(archiveFile, extractDir);
@@ -207,12 +202,7 @@ class UpdateCubit extends Cubit<UpdateState> {
       options: Options(responseType: ResponseType.stream),
       onReceiveProgress: (received, total) {
         final normalizedTotal = total < 0 ? 0 : total;
-        emit(
-          state.copyWith(
-            downloadedBytes: received,
-            totalBytes: normalizedTotal,
-          ),
-        );
+        emit(state.copyWith(downloadedBytes: received, totalBytes: normalizedTotal));
       },
     );
   }

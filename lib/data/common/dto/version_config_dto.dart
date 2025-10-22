@@ -21,11 +21,11 @@ class VersionConfigDto {
   Map<String, dynamic> toJson() => _$VersionConfigDtoToJson(this);
 
   VersionConfigEntity toEntity() => VersionConfigEntity(
-        spec: spec.toEntity(),
-        policy: policy.toEntity(),
-        latest: latest.toEntity(),
-        versions: versions.toEntity(),
-      );
+    spec: spec.toEntity(),
+    policy: policy.toEntity(),
+    latest: latest.toEntity(),
+    versions: versions.toEntity(),
+  );
 }
 
 @JsonSerializable()
@@ -91,11 +91,11 @@ class MinVersionDto {
   Map<String, dynamic> toJson() => _$MinVersionDtoToJson(this);
 
   MinVersionEntity toEntity() => MinVersionEntity(
-        minStable: minStable,
-        minShortStable: minShortStable,
-        minDev: minDev,
-        minShortDev: minShortDev,
-      );
+    minStable: minStable,
+    minShortStable: minShortStable,
+    minDev: minDev,
+    minShortDev: minShortDev,
+  );
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -108,10 +108,7 @@ class LatestDto {
   factory LatestDto.fromJson(Map<String, dynamic> json) => _$LatestDtoFromJson(json);
   Map<String, dynamic> toJson() => _$LatestDtoToJson(this);
 
-  LatestEntity toEntity() => LatestEntity(
-        stable: stable.toEntity(),
-        dev: dev.toEntity(),
-      );
+  LatestEntity toEntity() => LatestEntity(stable: stable.toEntity(), dev: dev.toEntity());
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -125,9 +122,9 @@ class VersionsDto {
   Map<String, dynamic> toJson() => _$VersionsDtoToJson(this);
 
   VersionsEntity toEntity() => VersionsEntity(
-        stable: stable.map((e) => e.toEntity()).toList(),
-        dev: dev.map((e) => e.toEntity()).toList(),
-      );
+    stable: stable.map((e) => e.toEntity()).toList(),
+    dev: dev.map((e) => e.toEntity()).toList(),
+  );
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -145,14 +142,11 @@ class ReleaseChannelDto {
       _$ReleaseChannelDtoFromJson(json);
   Map<String, dynamic> toJson() => _$ReleaseChannelDtoToJson(this);
 
-  ReleaseChannelEntity toEntity() => ReleaseChannelEntity(
-        version: version,
-        shortVersion: shortVersion,
-        linux: linux.toEntity(),
-      );
+  ReleaseChannelEntity toEntity() =>
+      ReleaseChannelEntity(version: version, shortVersion: shortVersion, linux: linux.toEntity());
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class VersionEntryDto {
   final String version;
 
@@ -166,14 +160,11 @@ class VersionEntryDto {
   factory VersionEntryDto.fromJson(Map<String, dynamic> json) => _$VersionEntryDtoFromJson(json);
   Map<String, dynamic> toJson() => _$VersionEntryDtoToJson(this);
 
-  VersionEntryEntity toEntity() => VersionEntryEntity(
-        version: version,
-        shortVersion: shortVersion,
-        linux: linux.toEntity(),
-      );
+  VersionEntryEntity toEntity() =>
+      VersionEntryEntity(version: version, shortVersion: shortVersion, linux: linux.toEntity());
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PlatformDto {
   final String url;
 
