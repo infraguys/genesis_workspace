@@ -111,6 +111,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Error'
 	String get error => 'Error';
 
+	late final TranslationsGeneralEn general = TranslationsGeneralEn._(_root);
 	late final TranslationsMessageActionsEn message_actions = TranslationsMessageActionsEn._(_root);
 	late final TranslationsAttachmentButtonEn attachment_button = TranslationsAttachmentButtonEn._(_root);
 
@@ -383,6 +384,21 @@ class TranslationsUnreadMarkerEn {
 
 	/// en: 'Unread messages marker'
 	String get a11y_label => 'Unread messages marker';
+}
+
+// Path: general
+class TranslationsGeneralEn {
+	TranslationsGeneralEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Something went wrong'
+	String get something_went_wrong => 'Something went wrong';
+
+	/// en: 'Nothing here yet'
+	String get nothing_here_yet => 'Nothing here yet';
 }
 
 // Path: message_actions
@@ -708,6 +724,8 @@ extension on Translations {
 			case 'show_recent_dialogs': return 'Show recent dialogs';
 			case 'no_recent_dialogs': return 'No recent dialogs';
 			case 'error': return 'Error';
+			case 'general.something_went_wrong': return 'Something went wrong';
+			case 'general.nothing_here_yet': return 'Nothing here yet';
 			case 'message_actions.quote': return 'Quote this message';
 			case 'message_actions.delete': return 'Delete this message';
 			case 'message_actions.star': return 'Star this message';

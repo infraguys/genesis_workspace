@@ -65,6 +65,7 @@ class TranslationsRu implements Translations {
 	@override String get show_recent_dialogs => 'Показать недавние чаты';
 	@override String get no_recent_dialogs => 'Нет недавних чатов';
 	@override String get error => 'Ошибка';
+	@override late final _TranslationsGeneralRu general = _TranslationsGeneralRu._(_root);
 	@override late final _TranslationsMessageActionsRu message_actions = _TranslationsMessageActionsRu._(_root);
 	@override late final _TranslationsAttachmentButtonRu attachment_button = _TranslationsAttachmentButtonRu._(_root);
 	@override String get drop_files_to_upload => 'Отпустите файлы, чтобы загрузить';
@@ -233,6 +234,17 @@ class _TranslationsUnreadMarkerRu implements TranslationsUnreadMarkerEn {
 	@override String get label => 'Непрочитанные сообщения';
 	@override String get label_with_count => 'Непрочитанные сообщения • {count}';
 	@override String get a11y_label => 'Маркер непрочитанных сообщений';
+}
+
+// Path: general
+class _TranslationsGeneralRu implements TranslationsGeneralEn {
+	_TranslationsGeneralRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get something_went_wrong => 'Что-то пошло не так';
+	@override String get nothing_here_yet => 'Здесь пока ничего нет';
 }
 
 // Path: message_actions
@@ -465,6 +477,8 @@ extension on TranslationsRu {
 			case 'show_recent_dialogs': return 'Показать недавние чаты';
 			case 'no_recent_dialogs': return 'Нет недавних чатов';
 			case 'error': return 'Ошибка';
+			case 'general.something_went_wrong': return 'Что-то пошло не так';
+			case 'general.nothing_here_yet': return 'Здесь пока ничего нет';
 			case 'message_actions.quote': return 'Цитировать это сообщение';
 			case 'message_actions.delete': return 'Удалить это сообщение';
 			case 'message_actions.star': return 'Отметить это сообщение';
