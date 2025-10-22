@@ -154,6 +154,16 @@
     }
   },
   "nothing_found": "Nothing found",
+  "update_widget": {
+    "update_available": "Update available",
+    "new_version_available": "{version} is available",
+    "new_version_long": "New version is ready to download, click the button below to start downloading. This will download {size} MB of data.",
+    "restart": "Restart to update",
+    "warning_title": "Are you sure?",
+    "restart_warning": "A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?",
+    "warning_cancel": "Not now",
+    "warning_confirm": "Restart"
+  },
   "update_force": {
     "title": "Update required",
     "description": "Current app version is {current}. Latest is {latest}.",

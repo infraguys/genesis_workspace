@@ -34,15 +34,18 @@ class UpdateCubit extends Cubit<UpdateState> {
 
       final actualVersionString = releaseChannel.version;
       final linuxUpdateUrl = releaseChannel.linux.url;
+      final appArchiveUrl =
+          'http://repository.genesis-core.tech:8081/genesis_workspace/app-archive.json';
 
       emit(
         state.copyWith(
           status: UpdateStatus.success,
           isNewUpdateAvailable: isNewUpdateAvailable,
-          // isUpdateRequired: isUpdateRequired,
+          isUpdateRequired: isUpdateRequired,
           currentVersion: currentVersion,
           actualVersion: actualVersionString,
           linuxUpdateUrl: linuxUpdateUrl,
+          appArchiveUrl: appArchiveUrl,
         ),
       );
     } catch (error, stackTrace) {

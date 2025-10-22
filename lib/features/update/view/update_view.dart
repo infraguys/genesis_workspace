@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:desktop_updater/desktop_updater.dart';
 import 'package:desktop_updater/updater_controller.dart';
 import 'package:desktop_updater/widget/update_widget.dart';
 import 'package:flutter/material.dart';
@@ -20,11 +21,8 @@ class _UpdateViewState extends State<UpdateView> {
   @override
   void initState() {
     super.initState();
-    _desktopUpdaterController = DesktopUpdaterController(
-      appArchiveUrl: Uri.parse(
-        'http://repository.genesis-core.tech:8081/genesis_workspace/app-archive.json',
-      ),
-    );
+    final appArchiveUrl = context.read<UpdateCubit>().state.appArchiveUrl;
+    _desktopUpdaterController = DesktopUpdaterController(appArchiveUrl: Uri.parse(appArchiveUrl));
   }
 
   @override
@@ -36,6 +34,21 @@ class _UpdateViewState extends State<UpdateView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final updateWidgetTexts = context.t.updateWidget;
+    _desktopUpdaterController.localization = DesktopUpdateLocalization(
+      updateAvailableText: updateWidgetTexts.updateAvailable,
+      newVersionAvailableText: updateWidgetTexts.newVersionAvailable(
+        version: _desktopUpdaterController.appVersion.toString(),
+      ),
+      newVersionLongText: updateWidgetTexts.newVersionLong(
+        size: _desktopUpdaterController.downloadSize.toString(),
+      ),
+      restartText: updateWidgetTexts.restart,
+      warningTitleText: updateWidgetTexts.warningTitle,
+      restartWarningText: updateWidgetTexts.restartWarning,
+      warningCancelText: updateWidgetTexts.warningCancel,
+      warningConfirmText: updateWidgetTexts.warningConfirm,
+    );
 
     return BlocBuilder<UpdateCubit, UpdateState>(
       builder: (context, state) {

@@ -71,6 +71,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsGroupRu group = TranslationsGroupRu._(_root);
 	@override late final TranslationsGroupChatRu groupChat = TranslationsGroupChatRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
+	@override late final TranslationsUpdateWidgetRu updateWidget = TranslationsUpdateWidgetRu._(_root);
 	@override late final TranslationsUpdateForceRu updateForce = TranslationsUpdateForceRu._(_root);
 }
 
@@ -322,6 +323,23 @@ class TranslationsGroupChatRu extends TranslationsGroupChatEn {
 	// Translations
 	@override String get createTooltip => 'Создать групповой чат';
 	@override late final TranslationsGroupChatCreateDialogRu createDialog = TranslationsGroupChatCreateDialogRu._(_root);
+}
+
+// Path: updateWidget
+class TranslationsUpdateWidgetRu extends TranslationsUpdateWidgetEn {
+	TranslationsUpdateWidgetRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get updateAvailable => 'Доступно обновление';
+	@override String newVersionAvailable({required Object version}) => 'Доступна ${version}';
+	@override String newVersionLong({required Object size}) => 'Новая версия готова к загрузке, нажмите кнопку ниже, чтобы начать загрузку. Это загрузит ${size} МБ данных.';
+	@override String get restart => 'Перезапустить для обновления';
+	@override String get warningTitle => 'Вы уверены?';
+	@override String get restartWarning => 'Для завершения установки обновления требуется перезапуск.\nВсе несохраненные изменения будут потеряны. Перезапустить сейчас?';
+	@override String get warningCancel => 'Не сейчас';
+	@override String get warningConfirm => 'Перезапустить';
 }
 
 // Path: updateForce

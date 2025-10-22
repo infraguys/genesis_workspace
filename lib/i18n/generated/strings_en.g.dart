@@ -124,6 +124,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
 
+	late final TranslationsUpdateWidgetEn updateWidget = TranslationsUpdateWidgetEn.internal(_root);
 	late final TranslationsUpdateForceEn updateForce = TranslationsUpdateForceEn.internal(_root);
 }
 
@@ -532,6 +533,39 @@ class TranslationsGroupChatEn {
 	String get createTooltip => 'Create new group chat';
 
 	late final TranslationsGroupChatCreateDialogEn createDialog = TranslationsGroupChatCreateDialogEn.internal(_root);
+}
+
+// Path: updateWidget
+class TranslationsUpdateWidgetEn {
+	TranslationsUpdateWidgetEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update available'
+	String get updateAvailable => 'Update available';
+
+	/// en: '{version} is available'
+	String newVersionAvailable({required Object version}) => '${version} is available';
+
+	/// en: 'New version is ready to download, click the button below to start downloading. This will download {size} MB of data.'
+	String newVersionLong({required Object size}) => 'New version is ready to download, click the button below to start downloading. This will download ${size} MB of data.';
+
+	/// en: 'Restart to update'
+	String get restart => 'Restart to update';
+
+	/// en: 'Are you sure?'
+	String get warningTitle => 'Are you sure?';
+
+	/// en: 'A restart is required to complete the update installation. Any unsaved changes will be lost. Would you like to restart now?'
+	String get restartWarning => 'A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?';
+
+	/// en: 'Not now'
+	String get warningCancel => 'Not now';
+
+	/// en: 'Restart'
+	String get warningConfirm => 'Restart';
 }
 
 // Path: updateForce
