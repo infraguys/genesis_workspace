@@ -549,8 +549,8 @@ class TranslationsUpdateWidgetEn {
 	/// en: '{version} is available'
 	String newVersionAvailable({required Object version}) => '${version} is available';
 
-	/// en: 'New version is ready to download, click the button below to start downloading. This will download {size} MB of data.'
-	String newVersionLong({required Object size}) => 'New version is ready to download, click the button below to start downloading. This will download ${size} MB of data.';
+	/// en: 'New version is ready to download, click the button below to start downloading. This will download {size} of data.'
+	String newVersionLong({required Object size}) => 'New version is ready to download, click the button below to start downloading. This will download ${size} of data.';
 
 	/// en: 'Restart to update'
 	String get restart => 'Restart to update';

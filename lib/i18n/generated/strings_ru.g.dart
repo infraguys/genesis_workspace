@@ -334,7 +334,7 @@ class TranslationsUpdateWidgetRu extends TranslationsUpdateWidgetEn {
 	// Translations
 	@override String get updateAvailable => 'Доступно обновление';
 	@override String newVersionAvailable({required Object version}) => 'Доступна ${version}';
-	@override String newVersionLong({required Object size}) => 'Новая версия готова к загрузке, нажмите кнопку ниже, чтобы начать загрузку. Это загрузит ${size} МБ данных.';
+	@override String newVersionLong({required Object size}) => 'Новая версия готова к загрузке, нажмите кнопку ниже, чтобы начать загрузку. Это загрузит ${size} данных.';
 	@override String get restart => 'Перезапустить для обновления';
 	@override String get warningTitle => 'Вы уверены?';
 	@override String get restartWarning => 'Для завершения установки обновления требуется перезапуск.\nВсе несохраненные изменения будут потеряны. Перезапустить сейчас?';
