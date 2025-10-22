@@ -71,12 +71,13 @@ dependencies:
   path: ^1.9.1
   cross_file: ^0.3.4+2
   super_clipboard: ^0.9.1
+  tar: ^2.0.1
 
   #utils
-  desktop_updater:
-    git:
-      url: https://github.com/infraguys/flutter_desktop_updater.git
-      ref: fix/no-cryptography-plus
+#  desktop_updater:
+#    git:
+#      url: https://github.com/infraguys/flutter_desktop_updater.git
+#      ref: fix/no-cryptography-plus
 
 dev_dependencies:
   flutter_test:

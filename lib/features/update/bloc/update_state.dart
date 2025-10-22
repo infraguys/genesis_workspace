@@ -2,14 +2,13 @@ part of 'update_cubit.dart';
 
 class UpdateState {
   const UpdateState({
-    this.status = UpdateStatus.initial,
-    this.isUpdateRequired = false,
-    this.isNewUpdateAvailable = false,
-    this.currentVersion = '',
-    this.actualVersion = '',
-    this.linuxUpdateUrl = '',
+    required this.status,
+    required this.isUpdateRequired,
+    required this.isNewUpdateAvailable,
+    required this.currentVersion,
+    required this.actualVersion,
     this.errorMessage,
-    this.appArchiveUrl = '',
+    this.versionConfigEntity,
   });
 
   final UpdateStatus status;
@@ -17,9 +16,8 @@ class UpdateState {
   final bool isNewUpdateAvailable;
   final String currentVersion;
   final String actualVersion;
-  final String linuxUpdateUrl;
   final String? errorMessage;
-  final String appArchiveUrl;
+  final VersionConfigEntity? versionConfigEntity;
 
   UpdateState copyWith({
     UpdateStatus? status,
@@ -27,9 +25,8 @@ class UpdateState {
     bool? isNewUpdateAvailable,
     String? currentVersion,
     String? actualVersion,
-    String? linuxUpdateUrl,
     String? errorMessage,
-    String? appArchiveUrl,
+    VersionConfigEntity? versionConfigEntity,
   }) {
     return UpdateState(
       status: status ?? this.status,
@@ -37,9 +34,8 @@ class UpdateState {
       isNewUpdateAvailable: isNewUpdateAvailable ?? this.isNewUpdateAvailable,
       currentVersion: currentVersion ?? this.currentVersion,
       actualVersion: actualVersion ?? this.actualVersion,
-      linuxUpdateUrl: linuxUpdateUrl ?? this.linuxUpdateUrl,
       errorMessage: errorMessage ?? this.errorMessage,
-      appArchiveUrl: appArchiveUrl ?? this.appArchiveUrl,
+      versionConfigEntity: versionConfigEntity ?? this.versionConfigEntity,
     );
   }
 }

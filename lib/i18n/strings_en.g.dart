@@ -129,6 +129,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Nothing found'
 	String get nothing_found => 'Nothing found';
 
+	late final TranslationsUpdateWidgetEn update_widget = TranslationsUpdateWidgetEn._(_root);
 	late final TranslationsUpdateForceEn update_force = TranslationsUpdateForceEn._(_root);
 }
 
@@ -539,6 +540,39 @@ class TranslationsGroupChatEn {
 	late final TranslationsGroupChatCreateDialogEn create_dialog = TranslationsGroupChatCreateDialogEn._(_root);
 }
 
+// Path: update_widget
+class TranslationsUpdateWidgetEn {
+	TranslationsUpdateWidgetEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update available'
+	String get update_available => 'Update available';
+
+	/// en: '{version} is available'
+	String get new_version_available => '{version} is available';
+
+	/// en: 'New version is ready to download, click the button below to start downloading. This will download {size} of data.'
+	String get new_version_long => 'New version is ready to download, click the button below to start downloading. This will download {size} of data.';
+
+	/// en: 'Restart to update'
+	String get restart => 'Restart to update';
+
+	/// en: 'Are you sure?'
+	String get warning_title => 'Are you sure?';
+
+	/// en: 'A restart is required to complete the update installation. Any unsaved changes will be lost. Would you like to restart now?'
+	String get restart_warning => 'A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?';
+
+	/// en: 'Not now'
+	String get warning_cancel => 'Not now';
+
+	/// en: 'Restart'
+	String get warning_confirm => 'Restart';
+}
+
 // Path: update_force
 class TranslationsUpdateForceEn {
 	TranslationsUpdateForceEn._(this._root);
@@ -712,6 +746,14 @@ extension on Translations {
 			case 'group_chat.create_dialog.cancel': return 'Cancel';
 			case 'group_chat.create_dialog.create': return 'Create';
 			case 'nothing_found': return 'Nothing found';
+			case 'update_widget.update_available': return 'Update available';
+			case 'update_widget.new_version_available': return '{version} is available';
+			case 'update_widget.new_version_long': return 'New version is ready to download, click the button below to start downloading. This will download {size} of data.';
+			case 'update_widget.restart': return 'Restart to update';
+			case 'update_widget.warning_title': return 'Are you sure?';
+			case 'update_widget.restart_warning': return 'A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?';
+			case 'update_widget.warning_cancel': return 'Not now';
+			case 'update_widget.warning_confirm': return 'Restart';
 			case 'update_force.title': return 'Update required';
 			case 'update_force.description': return 'Current app version is {current}. Latest is {latest}.';
 			case 'update_force.loading': return 'Loading…';

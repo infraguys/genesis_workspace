@@ -99,6 +99,10 @@
   "show_recent_dialogs": "Show recent dialogs",
   "no_recent_dialogs": "No recent dialogs",
   "error": "Error",
+  "general": {
+    "something_went_wrong": "Something went wrong",
+    "nothing_here_yet": "Nothing here yet"
+  },
   "message_actions": {
     "quote": "Quote this message",
     "delete": "Delete this message",

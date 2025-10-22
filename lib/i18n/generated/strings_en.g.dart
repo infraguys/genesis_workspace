@@ -106,6 +106,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Error'
 	String get error => 'Error';
 
+	late final TranslationsGeneralEn general = TranslationsGeneralEn.internal(_root);
 	late final TranslationsMessageActionsEn messageActions = TranslationsMessageActionsEn.internal(_root);
 	late final TranslationsAttachmentButtonEn attachmentButton = TranslationsAttachmentButtonEn.internal(_root);
 
@@ -378,6 +379,21 @@ class TranslationsUnreadMarkerEn {
 
 	/// en: 'Unread messages marker'
 	String get a11yLabel => 'Unread messages marker';
+}
+
+// Path: general
+class TranslationsGeneralEn {
+	TranslationsGeneralEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Something went wrong'
+	String get somethingWentWrong => 'Something went wrong';
+
+	/// en: 'Nothing here yet'
+	String get nothingHereYet => 'Nothing here yet';
 }
 
 // Path: messageActions

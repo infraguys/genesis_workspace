@@ -1,6 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:desktop_updater/desktop_updater.dart';
-import 'package:desktop_updater/updater_controller.dart';
+// import 'package:desktop_updater/desktop_updater.dart';
+// import 'package:desktop_updater/updater_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,13 +25,10 @@ class _SettingsViewState extends State<SettingsView> {
   String _selectedSound = AssetsConstants.audioPop;
   SharedPreferences? _prefs;
   late final AudioPlayer _player;
-  late final DesktopUpdaterController _desktopUpdaterController;
 
   @override
   void initState() {
     super.initState();
-    final appArchiveUrl = context.read<UpdateCubit>().state.appArchiveUrl;
-    _desktopUpdaterController = DesktopUpdaterController(appArchiveUrl: Uri.parse(appArchiveUrl));
     _player = AudioPlayer();
     _loadPrefs();
   }
@@ -55,7 +52,7 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   void dispose() {
     _player.dispose();
-    _desktopUpdaterController.dispose();
+    // _desktopUpdaterController.dispose();
     super.dispose();
   }
 
@@ -63,22 +60,6 @@ class _SettingsViewState extends State<SettingsView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final localizationService = getIt<LocalizationService>();
-    final updateWidgetTexts = context.t.updateWidget;
-
-    _desktopUpdaterController.localization = DesktopUpdateLocalization(
-      updateAvailableText: updateWidgetTexts.updateAvailable,
-      newVersionAvailableText: updateWidgetTexts.newVersionAvailable(
-        version: _desktopUpdaterController.appVersion.toString(),
-      ),
-      newVersionLongText: updateWidgetTexts.newVersionLong(
-        size: _desktopUpdaterController.downloadSize.toString(),
-      ),
-      restartText: updateWidgetTexts.restart,
-      warningTitleText: updateWidgetTexts.warningTitle,
-      restartWarningText: updateWidgetTexts.restartWarning,
-      warningCancelText: updateWidgetTexts.warningCancel,
-      warningConfirmText: updateWidgetTexts.warningConfirm,
-    );
 
     return Scaffold(
       appBar: AppBar(
@@ -96,9 +77,11 @@ class _SettingsViewState extends State<SettingsView> {
                     title: Text(context.t.settings.appVersion),
                     subtitle: Text(state.currentVersion),
                   ),
-                  DesktopUpdateDirectCard(
-                    controller: _desktopUpdaterController,
-                    child: SizedBox.shrink(),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.pushNamed(Routes.forceUpdate);
+                    },
+                    child: Text("Choose version"),
                   ),
                 ],
               );
