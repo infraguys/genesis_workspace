@@ -7,6 +7,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
+import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 
@@ -19,6 +20,7 @@ class WorkspaceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (_) => getIt<UpdateCubit>()),
         BlocProvider(create: (_) => getIt<AuthCubit>()..checkToken()),
         BlocProvider(create: (_) => getIt<RealTimeCubit>()),
         BlocProvider(create: (_) => getIt<ProfileCubit>()),

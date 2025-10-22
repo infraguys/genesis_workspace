@@ -16,6 +16,7 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  late final Future _future;
 
   final Duration _splashDuration = const Duration(seconds: 3);
 
@@ -38,7 +39,7 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
       end: 1.0,
     ).animate(CurvedAnimation(parent: _animationController, curve: Curves.elasticOut));
 
-    _startSplash();
+    _future = _startSplash();
   }
 
   Future<void> _startSplash() async {
@@ -57,25 +58,30 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Center(
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Text(
-              "Workspace",
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: 1.5,
+    return FutureBuilder(
+      future: _future,
+      builder: (BuildContext context, snapshot) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          body: Center(
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Text(
+                  "Workspace",
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    letterSpacing: 1.5,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -111,6 +111,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Error'
 	String get error => 'Error';
 
+	late final TranslationsGeneralEn general = TranslationsGeneralEn._(_root);
 	late final TranslationsMessageActionsEn message_actions = TranslationsMessageActionsEn._(_root);
 	late final TranslationsAttachmentButtonEn attachment_button = TranslationsAttachmentButtonEn._(_root);
 
@@ -128,6 +129,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Nothing found'
 	String get nothing_found => 'Nothing found';
+
+	late final TranslationsUpdateWidgetEn update_widget = TranslationsUpdateWidgetEn._(_root);
+	late final TranslationsUpdateForceEn update_force = TranslationsUpdateForceEn._(_root);
 }
 
 // Path: auth
@@ -382,6 +386,21 @@ class TranslationsUnreadMarkerEn {
 	String get a11y_label => 'Unread messages marker';
 }
 
+// Path: general
+class TranslationsGeneralEn {
+	TranslationsGeneralEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Something went wrong'
+	String get something_went_wrong => 'Something went wrong';
+
+	/// en: 'Nothing here yet'
+	String get nothing_here_yet => 'Nothing here yet';
+}
+
 // Path: message_actions
 class TranslationsMessageActionsEn {
 	TranslationsMessageActionsEn._(this._root);
@@ -537,6 +556,66 @@ class TranslationsGroupChatEn {
 	late final TranslationsGroupChatCreateDialogEn create_dialog = TranslationsGroupChatCreateDialogEn._(_root);
 }
 
+// Path: update_widget
+class TranslationsUpdateWidgetEn {
+	TranslationsUpdateWidgetEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update available'
+	String get update_available => 'Update available';
+
+	/// en: '{version} is available'
+	String get new_version_available => '{version} is available';
+
+	/// en: 'New version is ready to download, click the button below to start downloading. This will download {size} of data.'
+	String get new_version_long => 'New version is ready to download, click the button below to start downloading. This will download {size} of data.';
+
+	/// en: 'Restart to update'
+	String get restart => 'Restart to update';
+
+	/// en: 'Are you sure?'
+	String get warning_title => 'Are you sure?';
+
+	/// en: 'A restart is required to complete the update installation. Any unsaved changes will be lost. Would you like to restart now?'
+	String get restart_warning => 'A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?';
+
+	/// en: 'Not now'
+	String get warning_cancel => 'Not now';
+
+	/// en: 'Restart'
+	String get warning_confirm => 'Restart';
+}
+
+// Path: update_force
+class TranslationsUpdateForceEn {
+	TranslationsUpdateForceEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update required'
+	String get title => 'Update required';
+
+	/// en: 'Current app version is {current}. Latest is {latest}.'
+	String get description => 'Current app version is {current}. Latest is {latest}.';
+
+	/// en: 'Loading…'
+	String get loading => 'Loading…';
+
+	/// en: 'Update'
+	String get update => 'Update';
+
+	/// en: 'Updates are not supported on this platform yet.'
+	String get unsupported_platform => 'Updates are not supported on this platform yet.';
+
+	/// en: 'Failed to start update: {error}'
+	String get failed_to_start => 'Failed to start update: {error}';
+}
+
 // Path: group_chat.create_dialog
 class TranslationsGroupChatCreateDialogEn {
 	TranslationsGroupChatCreateDialogEn._(this._root);
@@ -645,6 +724,8 @@ extension on Translations {
 			case 'show_recent_dialogs': return 'Show recent dialogs';
 			case 'no_recent_dialogs': return 'No recent dialogs';
 			case 'error': return 'Error';
+			case 'general.something_went_wrong': return 'Something went wrong';
+			case 'general.nothing_here_yet': return 'Nothing here yet';
 			case 'message_actions.quote': return 'Quote this message';
 			case 'message_actions.delete': return 'Delete this message';
 			case 'message_actions.star': return 'Star this message';
@@ -683,6 +764,20 @@ extension on Translations {
 			case 'group_chat.create_dialog.cancel': return 'Cancel';
 			case 'group_chat.create_dialog.create': return 'Create';
 			case 'nothing_found': return 'Nothing found';
+			case 'update_widget.update_available': return 'Update available';
+			case 'update_widget.new_version_available': return '{version} is available';
+			case 'update_widget.new_version_long': return 'New version is ready to download, click the button below to start downloading. This will download {size} of data.';
+			case 'update_widget.restart': return 'Restart to update';
+			case 'update_widget.warning_title': return 'Are you sure?';
+			case 'update_widget.restart_warning': return 'A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?';
+			case 'update_widget.warning_cancel': return 'Not now';
+			case 'update_widget.warning_confirm': return 'Restart';
+			case 'update_force.title': return 'Update required';
+			case 'update_force.description': return 'Current app version is {current}. Latest is {latest}.';
+			case 'update_force.loading': return 'Loading…';
+			case 'update_force.update': return 'Update';
+			case 'update_force.unsupported_platform': return 'Updates are not supported on this platform yet.';
+			case 'update_force.failed_to_start': return 'Failed to start update: {error}';
 			default: return null;
 		}
 	}

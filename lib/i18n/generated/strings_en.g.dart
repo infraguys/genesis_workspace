@@ -106,6 +106,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Error'
 	String get error => 'Error';
 
+	late final TranslationsGeneralEn general = TranslationsGeneralEn.internal(_root);
 	late final TranslationsMessageActionsEn messageActions = TranslationsMessageActionsEn.internal(_root);
 	late final TranslationsAttachmentButtonEn attachmentButton = TranslationsAttachmentButtonEn.internal(_root);
 
@@ -123,6 +124,10 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
+
+	late final TranslationsUpdateViewEn updateView = TranslationsUpdateViewEn.internal(_root);
+	late final TranslationsUpdateWidgetEn updateWidget = TranslationsUpdateWidgetEn.internal(_root);
+	late final TranslationsUpdateForceEn updateForce = TranslationsUpdateForceEn.internal(_root);
 }
 
 // Path: auth
@@ -377,6 +382,21 @@ class TranslationsUnreadMarkerEn {
 	String get a11yLabel => 'Unread messages marker';
 }
 
+// Path: general
+class TranslationsGeneralEn {
+	TranslationsGeneralEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Something went wrong'
+	String get somethingWentWrong => 'Something went wrong';
+
+	/// en: 'Nothing here yet'
+	String get nothingHereYet => 'Nothing here yet';
+}
+
 // Path: messageActions
 class TranslationsMessageActionsEn {
 	TranslationsMessageActionsEn.internal(this._root);
@@ -530,6 +550,108 @@ class TranslationsGroupChatEn {
 	String get createTooltip => 'Create new group chat';
 
 	late final TranslationsGroupChatCreateDialogEn createDialog = TranslationsGroupChatCreateDialogEn.internal(_root);
+}
+
+// Path: updateView
+class TranslationsUpdateViewEn {
+	TranslationsUpdateViewEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Choose version'
+	String get title => 'Choose version';
+
+	/// en: 'Downloading update...'
+	String get downloading => 'Downloading update...';
+
+	/// en: 'Installing update...'
+	String get installing => 'Installing update...';
+
+	/// en: '{size} downloaded'
+	String downloadedBytes({required Object size}) => '${size} downloaded';
+
+	/// en: '{downloaded} / {total}'
+	String progressWithTotal({required Object downloaded, required Object total}) => '${downloaded} / ${total}';
+
+	/// en: 'Update installed'
+	String get installed => 'Update installed';
+
+	/// en: 'Version {version} is ready to use.'
+	String installedMessage({required Object version}) => 'Version ${version} is ready to use.';
+
+	/// en: 'Browse builds'
+	String get openSelectorCta => 'Browse builds';
+
+	/// en: 'Pick a version to install or downgrade.'
+	String get openSelectorSubtitle => 'Pick a version to install or downgrade.';
+
+	/// en: 'Latest'
+	String get latestBadge => 'Latest';
+
+	/// en: 'Recommended build'
+	String get latestHint => 'Recommended build';
+}
+
+// Path: updateWidget
+class TranslationsUpdateWidgetEn {
+	TranslationsUpdateWidgetEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update available'
+	String get updateAvailable => 'Update available';
+
+	/// en: '{version} is available'
+	String newVersionAvailable({required Object version}) => '${version} is available';
+
+	/// en: 'New version is ready to download, click the button below to start downloading. This will download {size} of data.'
+	String newVersionLong({required Object size}) => 'New version is ready to download, click the button below to start downloading. This will download ${size} of data.';
+
+	/// en: 'Restart to update'
+	String get restart => 'Restart to update';
+
+	/// en: 'Are you sure?'
+	String get warningTitle => 'Are you sure?';
+
+	/// en: 'A restart is required to complete the update installation. Any unsaved changes will be lost. Would you like to restart now?'
+	String get restartWarning => 'A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?';
+
+	/// en: 'Not now'
+	String get warningCancel => 'Not now';
+
+	/// en: 'Restart'
+	String get warningConfirm => 'Restart';
+}
+
+// Path: updateForce
+class TranslationsUpdateForceEn {
+	TranslationsUpdateForceEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Update required'
+	String get title => 'Update required';
+
+	/// en: 'Current app version is {current}. Latest is {latest}.'
+	String description({required Object current, required Object latest}) => 'Current app version is ${current}. Latest is ${latest}.';
+
+	/// en: 'Loading…'
+	String get loading => 'Loading…';
+
+	/// en: 'Update'
+	String get update => 'Update';
+
+	/// en: 'Updates are not supported on this platform yet.'
+	String get unsupportedPlatform => 'Updates are not supported on this platform yet.';
+
+	/// en: 'Failed to start update: {error}'
+	String failedToStart({required Object error}) => 'Failed to start update: ${error}';
 }
 
 // Path: groupChat.createDialog
