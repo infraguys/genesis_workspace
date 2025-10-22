@@ -277,3 +277,24 @@ bool unorderedEquals<T>(List<T> a, List<T> b) {
   }
   return true;
 }
+
+/// Возвращает:
+///  - 1, если [versionA] > [versionB]
+///  - -1, если [versionA] < [versionB]
+///  - 0, если версии равны
+int compareVersions(String versionA, String versionB) {
+  final List<int> partsA = versionA.split('.').map(int.parse).toList();
+  final List<int> partsB = versionB.split('.').map(int.parse).toList();
+
+  final int maxLength = partsA.length > partsB.length ? partsA.length : partsB.length;
+
+  for (int i = 0; i < maxLength; i++) {
+    final int a = i < partsA.length ? partsA[i] : 0;
+    final int b = i < partsB.length ? partsB[i] : 0;
+
+    if (a > b) return 1;
+    if (a < b) return -1;
+  }
+
+  return 0;
+}

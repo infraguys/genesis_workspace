@@ -1,15 +1,17 @@
 import 'package:audioplayers/audioplayers.dart';
+// import 'package:desktop_updater/desktop_updater.dart';
+// import 'package:desktop_updater/updater_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsView extends StatefulWidget {
@@ -50,6 +52,7 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   void dispose() {
     _player.dispose();
+    // _desktopUpdaterController.dispose();
     super.dispose();
   }
 
@@ -65,16 +68,71 @@ class _SettingsViewState extends State<SettingsView> {
       ),
       body: ListView(
         children: [
-          FutureBuilder<PackageInfo>(
-            future: PackageInfo.fromPlatform(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const SizedBox.shrink();
-              final info = snapshot.data!;
-              final String versionText = '${info.version}+${info.buildNumber}';
-              return ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text(context.t.settings.appVersion),
-                subtitle: Text(versionText),
+          BlocBuilder<UpdateCubit, UpdateState>(
+            builder: (context, state) {
+              return Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: Text(context.t.settings.appVersion),
+                    subtitle: Text(state.currentVersion),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: InkWell(
+                      onTap: () => context.pushNamed(Routes.forceUpdate),
+                      borderRadius: BorderRadius.circular(18),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.4)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                          child: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                padding: const EdgeInsets.all(12),
+                                child: Icon(
+                                  Icons.system_update_alt_rounded,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.t.updateView.openSelectorCta,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.t.updateView.openSelectorSubtitle,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSecondaryContainer.withOpacity(0.8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(Icons.arrow_forward_ios_rounded,
+                                  size: 16, color: theme.colorScheme.onSecondaryContainer),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
