@@ -1,4 +1,4 @@
- import 'dart:developer';
+import 'dart:developer';
 
 import 'package:desktop_updater/updater_controller.dart';
 import 'package:desktop_updater/widget/update_widget.dart';
@@ -20,17 +20,17 @@ class _UpdateViewState extends State<UpdateView> {
   @override
   void initState() {
     super.initState();
-    final appArchive = context.read<UpdateCubit>().state.appArchiveJson;
     _desktopUpdaterController = DesktopUpdaterController(
-      appArchiveUrl: Uri.parse('http://repository.genesis-core.tech:8081/genesis_workspace/app-archive.json'),
+      appArchiveUrl: Uri.parse(
+        'http://repository.genesis-core.tech:8081/genesis_workspace/app-archive.json',
+      ),
     );
-    _desktopUpdaterController.addListener(updateListener);
   }
 
-  updateListener() {
-    print(
-      'progress ${_desktopUpdaterController.downloadProgress} | current: ${_desktopUpdaterController.downloadedSize} |size ${_desktopUpdaterController.downloadSize}',
-    );
+  @override
+  void dispose() {
+    _desktopUpdaterController.dispose();
+    super.dispose();
   }
 
   @override

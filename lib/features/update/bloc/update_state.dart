@@ -8,7 +8,6 @@ class UpdateState {
     this.currentVersion = '',
     this.actualVersion = '',
     this.linuxUpdateUrl = '',
-    this.appArchiveJson,
     this.errorMessage,
   });
 
@@ -18,7 +17,6 @@ class UpdateState {
   final String currentVersion;
   final String actualVersion;
   final String linuxUpdateUrl;
-  final String? appArchiveJson;
   final String? errorMessage;
 
   UpdateState copyWith({
@@ -28,7 +26,6 @@ class UpdateState {
     String? currentVersion,
     String? actualVersion,
     String? linuxUpdateUrl,
-    String? appArchiveJson,
     String? errorMessage,
   }) {
     return UpdateState(
@@ -38,7 +35,6 @@ class UpdateState {
       currentVersion: currentVersion ?? this.currentVersion,
       actualVersion: actualVersion ?? this.actualVersion,
       linuxUpdateUrl: linuxUpdateUrl ?? this.linuxUpdateUrl,
-      appArchiveJson: appArchiveJson ?? this.appArchiveJson,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
