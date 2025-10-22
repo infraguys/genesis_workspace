@@ -125,6 +125,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Nothing found'
 	String get nothingFound => 'Nothing found';
 
+	late final TranslationsUpdateViewEn updateView = TranslationsUpdateViewEn.internal(_root);
 	late final TranslationsUpdateWidgetEn updateWidget = TranslationsUpdateWidgetEn.internal(_root);
 	late final TranslationsUpdateForceEn updateForce = TranslationsUpdateForceEn.internal(_root);
 }
@@ -549,6 +550,48 @@ class TranslationsGroupChatEn {
 	String get createTooltip => 'Create new group chat';
 
 	late final TranslationsGroupChatCreateDialogEn createDialog = TranslationsGroupChatCreateDialogEn.internal(_root);
+}
+
+// Path: updateView
+class TranslationsUpdateViewEn {
+	TranslationsUpdateViewEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Choose version'
+	String get title => 'Choose version';
+
+	/// en: 'Downloading update...'
+	String get downloading => 'Downloading update...';
+
+	/// en: 'Installing update...'
+	String get installing => 'Installing update...';
+
+	/// en: '{size} downloaded'
+	String downloadedBytes({required Object size}) => '${size} downloaded';
+
+	/// en: '{downloaded} / {total}'
+	String progressWithTotal({required Object downloaded, required Object total}) => '${downloaded} / ${total}';
+
+	/// en: 'Update installed'
+	String get installed => 'Update installed';
+
+	/// en: 'Version {version} is ready to use.'
+	String installedMessage({required Object version}) => 'Version ${version} is ready to use.';
+
+	/// en: 'Browse builds'
+	String get openSelectorCta => 'Browse builds';
+
+	/// en: 'Pick a version to install or downgrade.'
+	String get openSelectorSubtitle => 'Pick a version to install or downgrade.';
+
+	/// en: 'Latest'
+	String get latestBadge => 'Latest';
+
+	/// en: 'Recommended build'
+	String get latestHint => 'Recommended build';
 }
 
 // Path: updateWidget

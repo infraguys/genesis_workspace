@@ -162,6 +162,19 @@
     }
   },
   "nothing_found": "Ничего не нашли",
+  "update_view": {
+    "title": "Выберите версию",
+    "downloading": "Загрузка обновления...",
+    "installing": "Установка обновления...",
+    "downloaded_bytes": "{size} загружено",
+    "progress_with_total": "{downloaded} / {total}",
+    "installed": "Обновление установлено",
+    "installed_message": "Версия {version} готова к использованию.",
+    "open_selector_cta": "Выбрать сборку",
+    "open_selector_subtitle": "Выберите версию для установки или отката.",
+    "latest_badge": "Актуальная",
+    "latest_hint": "Рекомендуемая сборка"
+  },
   "update_widget": {
     "update_available": "Доступно обновление",
     "new_version_available": "Доступна {version}",

@@ -14,28 +14,13 @@ class UpdateView extends StatefulWidget {
 }
 
 class _UpdateViewState extends State<UpdateView> {
-  String appVersion = '';
-  String downloadSize = '';
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    // _desktopUpdaterController.removeListener(updaterListener);
-    // _desktopUpdaterController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return BlocBuilder<UpdateCubit, UpdateState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: 'Choose version'),
+          appBar: WorkspaceAppBar(title: context.t.updateView.title),
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -94,6 +79,39 @@ class _UpdateViewState extends State<UpdateView> {
             itemBuilder: (context, index) {
               final version = versionEntries[index];
               final isSelected = state.selectedVersion?.version == version.version;
+              final isLatest = version.version == state.actualVersion ||
+                  version.shortVersion == state.actualVersion;
+              final subtitleChildren = <Widget>[];
+              if (version.shortVersion != version.version) {
+                subtitleChildren.add(
+                  Text(
+                    version.shortVersion,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                );
+              }
+              if (isLatest) {
+                if (subtitleChildren.isNotEmpty) {
+                  subtitleChildren.add(const SizedBox(height: 4));
+                }
+                subtitleChildren.add(
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.workspace_premium, size: 16, color: theme.colorScheme.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        context.t.updateView.latestHint,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
               final trailing = isSelected && isBusy
                   ? const SizedBox(
                       height: 20,
@@ -105,10 +123,29 @@ class _UpdateViewState extends State<UpdateView> {
                   : null;
 
               return ListTile(
-                title: Text(version.version),
-                subtitle: version.shortVersion != version.version
-                    ? Text(version.shortVersion)
-                    : null,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        version.version,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: isLatest ? FontWeight.bold : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (isLatest) ...[
+                      const SizedBox(width: 8),
+                      _LatestBadge(label: context.t.updateView.latestBadge),
+                    ],
+                  ],
+                ),
+                subtitle: subtitleChildren.isEmpty
+                    ? null
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: subtitleChildren,
+                      ),
                 trailing: trailing,
                 enabled: !isBusy,
                 onTap: isBusy ? null : () => context.read<UpdateCubit>().installVersion(version),
@@ -128,9 +165,13 @@ class _UpdateViewState extends State<UpdateView> {
     final total = state.totalBytes;
     final downloaded = state.downloadedBytes;
     final progressValue = total > 0 ? downloaded / total : null;
+    final formattedDownloaded = formatFileSize(downloaded);
     final progressText = total > 0
-        ? '${formatFileSize(downloaded)} / ${formatFileSize(total)}'
-        : formatFileSize(downloaded);
+        ? context.t.updateView.progressWithTotal(
+            downloaded: formattedDownloaded,
+            total: formatFileSize(total),
+          )
+        : context.t.updateView.downloadedBytes(size: formattedDownloaded);
 
     return Center(
       child: ConstrainedBox(
@@ -140,7 +181,7 @@ class _UpdateViewState extends State<UpdateView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              isDownloading ? 'Downloading update...' : 'Installing update...',
+              isDownloading ? context.t.updateView.downloading : context.t.updateView.installing,
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -152,10 +193,7 @@ class _UpdateViewState extends State<UpdateView> {
             if (isDownloading) ...[
               LinearProgressIndicator(value: progressValue),
               const SizedBox(height: 12),
-              Text(
-                progressValue != null ? progressText : '$progressText downloaded',
-                textAlign: TextAlign.center,
-              ),
+              Text(progressText, textAlign: TextAlign.center),
             ] else ...[
               const Center(child: CircularProgressIndicator()),
             ],
@@ -178,13 +216,16 @@ class _UpdateViewState extends State<UpdateView> {
             Icon(Icons.check_circle, size: 48, color: theme.colorScheme.primary),
             const SizedBox(height: 16),
             Text(
-              'Update installed',
+              context.t.updateView.installed,
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             if (versionLabel.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text('Version $versionLabel is ready to use.', textAlign: TextAlign.center),
+              Text(
+                context.t.updateView.installedMessage(version: versionLabel),
+                textAlign: TextAlign.center,
+              ),
             ],
             const SizedBox(height: 24),
             ElevatedButton(
@@ -217,6 +258,39 @@ class _ErrorBanner extends StatelessWidget {
       child: Text(
         message,
         style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
+      ),
+    );
+  }
+}
+
+class _LatestBadge extends StatelessWidget {
+  const _LatestBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.flash_on, size: 16, color: theme.colorScheme.primary),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+            ),
+          ),
+        ],
       ),
     );
   }

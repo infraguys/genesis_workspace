@@ -77,11 +77,60 @@ class _SettingsViewState extends State<SettingsView> {
                     title: Text(context.t.settings.appVersion),
                     subtitle: Text(state.currentVersion),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.pushNamed(Routes.forceUpdate);
-                    },
-                    child: Text("Choose version"),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: InkWell(
+                      onTap: () => context.pushNamed(Routes.forceUpdate),
+                      borderRadius: BorderRadius.circular(18),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.4)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                          child: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                padding: const EdgeInsets.all(12),
+                                child: Icon(
+                                  Icons.system_update_alt_rounded,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.t.updateView.openSelectorCta,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.t.updateView.openSelectorSubtitle,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSecondaryContainer.withOpacity(0.8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(Icons.arrow_forward_ios_rounded,
+                                  size: 16, color: theme.colorScheme.onSecondaryContainer),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               );

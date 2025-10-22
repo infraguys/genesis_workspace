@@ -72,6 +72,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsGroupRu group = TranslationsGroupRu._(_root);
 	@override late final TranslationsGroupChatRu groupChat = TranslationsGroupChatRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
+	@override late final TranslationsUpdateViewRu updateView = TranslationsUpdateViewRu._(_root);
 	@override late final TranslationsUpdateWidgetRu updateWidget = TranslationsUpdateWidgetRu._(_root);
 	@override late final TranslationsUpdateForceRu updateForce = TranslationsUpdateForceRu._(_root);
 }
@@ -335,6 +336,26 @@ class TranslationsGroupChatRu extends TranslationsGroupChatEn {
 	// Translations
 	@override String get createTooltip => 'Создать групповой чат';
 	@override late final TranslationsGroupChatCreateDialogRu createDialog = TranslationsGroupChatCreateDialogRu._(_root);
+}
+
+// Path: updateView
+class TranslationsUpdateViewRu extends TranslationsUpdateViewEn {
+	TranslationsUpdateViewRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Выберите версию';
+	@override String get downloading => 'Загрузка обновления...';
+	@override String get installing => 'Установка обновления...';
+	@override String downloadedBytes({required Object size}) => '${size} загружено';
+	@override String progressWithTotal({required Object downloaded, required Object total}) => '${downloaded} / ${total}';
+	@override String get installed => 'Обновление установлено';
+	@override String installedMessage({required Object version}) => 'Версия ${version} готова к использованию.';
+	@override String get openSelectorCta => 'Выбрать сборку';
+	@override String get openSelectorSubtitle => 'Выберите версию для установки или отката.';
+	@override String get latestBadge => 'Актуальная';
+	@override String get latestHint => 'Рекомендуемая сборка';
 }
 
 // Path: updateWidget

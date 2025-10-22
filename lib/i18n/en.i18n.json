@@ -158,6 +158,19 @@
     }
   },
   "nothing_found": "Nothing found",
+  "update_view": {
+    "title": "Choose version",
+    "downloading": "Downloading update...",
+    "installing": "Installing update...",
+    "downloaded_bytes": "{size} downloaded",
+    "progress_with_total": "{downloaded} / {total}",
+    "installed": "Update installed",
+    "installed_message": "Version {version} is ready to use.",
+    "open_selector_cta": "Browse builds",
+    "open_selector_subtitle": "Pick a version to install or downgrade.",
+    "latest_badge": "Latest",
+    "latest_hint": "Recommended build"
+  },
   "update_widget": {
     "update_available": "Update available",
     "new_version_available": "{version} is available",
