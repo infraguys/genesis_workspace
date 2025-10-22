@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:desktop_updater/desktop_updater.dart';
 import 'package:desktop_updater/updater_controller.dart';
+import 'package:desktop_updater/widget/update_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,13 +77,18 @@ class _SettingsViewState extends State<SettingsView> {
         children: [
           BlocBuilder<UpdateCubit, UpdateState>(
             builder: (context, state) {
-              return DesktopUpdateDirectCard(
-                controller: _desktopUpdaterController,
-                child: ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: Text(context.t.settings.appVersion),
-                  subtitle: Text(state.currentVersion),
-                ),
+              return Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: Text(context.t.settings.appVersion),
+                    subtitle: Text(state.currentVersion),
+                  ),
+                  DesktopUpdateDirectCard(
+                    controller: _desktopUpdaterController,
+                    child: SizedBox.shrink()
+                  ),
+                ],
               );
             },
           ),
