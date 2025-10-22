@@ -99,6 +99,10 @@
   "show_recent_dialogs": "Show recent dialogs",
   "no_recent_dialogs": "No recent dialogs",
   "error": "Error",
+  "general": {
+    "something_went_wrong": "Something went wrong",
+    "nothing_here_yet": "Nothing here yet"
+  },
   "message_actions": {
     "quote": "Quote this message",
     "delete": "Delete this message",
@@ -154,6 +158,29 @@
     }
   },
   "nothing_found": "Nothing found",
+  "update_view": {
+    "title": "Choose version",
+    "downloading": "Downloading update...",
+    "installing": "Installing update...",
+    "downloaded_bytes": "{size} downloaded",
+    "progress_with_total": "{downloaded} / {total}",
+    "installed": "Update installed",
+    "installed_message": "Version {version} is ready to use.",
+    "open_selector_cta": "Browse builds",
+    "open_selector_subtitle": "Pick a version to install or downgrade.",
+    "latest_badge": "Latest",
+    "latest_hint": "Recommended build"
+  },
+  "update_widget": {
+    "update_available": "Update available",
+    "new_version_available": "{version} is available",
+    "new_version_long": "New version is ready to download, click the button below to start downloading. This will download {size} of data.",
+    "restart": "Restart to update",
+    "warning_title": "Are you sure?",
+    "restart_warning": "A restart is required to complete the update installation.\nAny unsaved changes will be lost. Would you like to restart now?",
+    "warning_cancel": "Not now",
+    "warning_confirm": "Restart"
+  },
   "update_force": {
     "title": "Update required",
     "description": "Current app version is {current}. Latest is {latest}.",

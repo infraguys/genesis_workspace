@@ -11,6 +11,9 @@ class AppConstants {
 
   static late String baseUrl;
 
+  static const String versionConfigUrl =
+      'http://repository.genesis-core.tech:8081/genesis_workspace/workspace-index.json';
+
   static final popularEmojis = [
     UnicodeEmojiDisplay(emojiName: ":thumbs_up:", emojiUnicode: "1F44D"),
     UnicodeEmojiDisplay(emojiName: ":heart:", emojiUnicode: "2764"),

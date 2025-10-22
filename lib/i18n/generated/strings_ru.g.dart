@@ -61,6 +61,7 @@ class TranslationsRu extends Translations {
 	@override String get showRecentDialogs => 'Показать недавние чаты';
 	@override String get noRecentDialogs => 'Нет недавних чатов';
 	@override String get error => 'Ошибка';
+	@override late final TranslationsGeneralRu general = TranslationsGeneralRu._(_root);
 	@override late final TranslationsMessageActionsRu messageActions = TranslationsMessageActionsRu._(_root);
 	@override late final TranslationsAttachmentButtonRu attachmentButton = TranslationsAttachmentButtonRu._(_root);
 	@override String get dropFilesToUpload => 'Отпустите файлы, чтобы загрузить';
@@ -71,6 +72,8 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsGroupRu group = TranslationsGroupRu._(_root);
 	@override late final TranslationsGroupChatRu groupChat = TranslationsGroupChatRu._(_root);
 	@override String get nothingFound => 'Ничего не нашли';
+	@override late final TranslationsUpdateViewRu updateView = TranslationsUpdateViewRu._(_root);
+	@override late final TranslationsUpdateWidgetRu updateWidget = TranslationsUpdateWidgetRu._(_root);
 	@override late final TranslationsUpdateForceRu updateForce = TranslationsUpdateForceRu._(_root);
 }
 
@@ -230,6 +233,17 @@ class TranslationsUnreadMarkerRu extends TranslationsUnreadMarkerEn {
 	@override String get a11yLabel => 'Маркер непрочитанных сообщений';
 }
 
+// Path: general
+class TranslationsGeneralRu extends TranslationsGeneralEn {
+	TranslationsGeneralRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get somethingWentWrong => 'Что-то пошло не так';
+	@override String get nothingHereYet => 'Здесь пока ничего нет';
+}
+
 // Path: messageActions
 class TranslationsMessageActionsRu extends TranslationsMessageActionsEn {
 	TranslationsMessageActionsRu._(TranslationsRu root) : this._root = root, super.internal(root);
@@ -322,6 +336,43 @@ class TranslationsGroupChatRu extends TranslationsGroupChatEn {
 	// Translations
 	@override String get createTooltip => 'Создать групповой чат';
 	@override late final TranslationsGroupChatCreateDialogRu createDialog = TranslationsGroupChatCreateDialogRu._(_root);
+}
+
+// Path: updateView
+class TranslationsUpdateViewRu extends TranslationsUpdateViewEn {
+	TranslationsUpdateViewRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Выберите версию';
+	@override String get downloading => 'Загрузка обновления...';
+	@override String get installing => 'Установка обновления...';
+	@override String downloadedBytes({required Object size}) => '${size} загружено';
+	@override String progressWithTotal({required Object downloaded, required Object total}) => '${downloaded} / ${total}';
+	@override String get installed => 'Обновление установлено';
+	@override String installedMessage({required Object version}) => 'Версия ${version} готова к использованию.';
+	@override String get openSelectorCta => 'Выбрать сборку';
+	@override String get openSelectorSubtitle => 'Выберите версию для установки или отката.';
+	@override String get latestBadge => 'Актуальная';
+	@override String get latestHint => 'Рекомендуемая сборка';
+}
+
+// Path: updateWidget
+class TranslationsUpdateWidgetRu extends TranslationsUpdateWidgetEn {
+	TranslationsUpdateWidgetRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get updateAvailable => 'Доступно обновление';
+	@override String newVersionAvailable({required Object version}) => 'Доступна ${version}';
+	@override String newVersionLong({required Object size}) => 'Новая версия готова к загрузке, нажмите кнопку ниже, чтобы начать загрузку. Это загрузит ${size} данных.';
+	@override String get restart => 'Перезапустить для обновления';
+	@override String get warningTitle => 'Вы уверены?';
+	@override String get restartWarning => 'Для завершения установки обновления требуется перезапуск.\nВсе несохраненные изменения будут потеряны. Перезапустить сейчас?';
+	@override String get warningCancel => 'Не сейчас';
+	@override String get warningConfirm => 'Перезапустить';
 }
 
 // Path: updateForce
