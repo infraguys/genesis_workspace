@@ -113,7 +113,7 @@ Map<String, dynamic> _$VersionEntryDtoToJson(VersionEntryDto instance) =>
     <String, dynamic>{
       'version': instance.version,
       'short_version': instance.shortVersion,
-      'linux': instance.linux,
+      'linux': instance.linux.toJson(),
     };
 
 PlatformDto _$PlatformDtoFromJson(Map<String, dynamic> json) =>

@@ -130,6 +130,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	/// en: 'Nothing found'
 	String get nothing_found => 'Nothing found';
 
+	late final TranslationsUpdateViewEn update_view = TranslationsUpdateViewEn._(_root);
 	late final TranslationsUpdateWidgetEn update_widget = TranslationsUpdateWidgetEn._(_root);
 	late final TranslationsUpdateForceEn update_force = TranslationsUpdateForceEn._(_root);
 }
@@ -556,6 +557,48 @@ class TranslationsGroupChatEn {
 	late final TranslationsGroupChatCreateDialogEn create_dialog = TranslationsGroupChatCreateDialogEn._(_root);
 }
 
+// Path: update_view
+class TranslationsUpdateViewEn {
+	TranslationsUpdateViewEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Choose version'
+	String get title => 'Choose version';
+
+	/// en: 'Downloading update...'
+	String get downloading => 'Downloading update...';
+
+	/// en: 'Installing update...'
+	String get installing => 'Installing update...';
+
+	/// en: '{size} downloaded'
+	String get downloaded_bytes => '{size} downloaded';
+
+	/// en: '{downloaded} / {total}'
+	String get progress_with_total => '{downloaded} / {total}';
+
+	/// en: 'Update installed'
+	String get installed => 'Update installed';
+
+	/// en: 'Version {version} is ready to use.'
+	String get installed_message => 'Version {version} is ready to use.';
+
+	/// en: 'Browse builds'
+	String get open_selector_cta => 'Browse builds';
+
+	/// en: 'Pick a version to install or downgrade.'
+	String get open_selector_subtitle => 'Pick a version to install or downgrade.';
+
+	/// en: 'Latest'
+	String get latest_badge => 'Latest';
+
+	/// en: 'Recommended build'
+	String get latest_hint => 'Recommended build';
+}
+
 // Path: update_widget
 class TranslationsUpdateWidgetEn {
 	TranslationsUpdateWidgetEn._(this._root);
@@ -764,6 +807,17 @@ extension on Translations {
 			case 'group_chat.create_dialog.cancel': return 'Cancel';
 			case 'group_chat.create_dialog.create': return 'Create';
 			case 'nothing_found': return 'Nothing found';
+			case 'update_view.title': return 'Choose version';
+			case 'update_view.downloading': return 'Downloading update...';
+			case 'update_view.installing': return 'Installing update...';
+			case 'update_view.downloaded_bytes': return '{size} downloaded';
+			case 'update_view.progress_with_total': return '{downloaded} / {total}';
+			case 'update_view.installed': return 'Update installed';
+			case 'update_view.installed_message': return 'Version {version} is ready to use.';
+			case 'update_view.open_selector_cta': return 'Browse builds';
+			case 'update_view.open_selector_subtitle': return 'Pick a version to install or downgrade.';
+			case 'update_view.latest_badge': return 'Latest';
+			case 'update_view.latest_hint': return 'Recommended build';
 			case 'update_widget.update_available': return 'Update available';
 			case 'update_widget.new_version_available': return '{version} is available';
 			case 'update_widget.new_version_long': return 'New version is ready to download, click the button below to start downloading. This will download {size} of data.';

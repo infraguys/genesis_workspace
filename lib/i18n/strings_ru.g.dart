@@ -76,6 +76,7 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsGroupRu group = _TranslationsGroupRu._(_root);
 	@override late final _TranslationsGroupChatRu group_chat = _TranslationsGroupChatRu._(_root);
 	@override String get nothing_found => 'Ничего не нашли';
+	@override late final _TranslationsUpdateViewRu update_view = _TranslationsUpdateViewRu._(_root);
 	@override late final _TranslationsUpdateWidgetRu update_widget = _TranslationsUpdateWidgetRu._(_root);
 	@override late final _TranslationsUpdateForceRu update_force = _TranslationsUpdateForceRu._(_root);
 }
@@ -341,6 +342,26 @@ class _TranslationsGroupChatRu implements TranslationsGroupChatEn {
 	@override late final _TranslationsGroupChatCreateDialogRu create_dialog = _TranslationsGroupChatCreateDialogRu._(_root);
 }
 
+// Path: update_view
+class _TranslationsUpdateViewRu implements TranslationsUpdateViewEn {
+	_TranslationsUpdateViewRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Выберите версию';
+	@override String get downloading => 'Загрузка обновления...';
+	@override String get installing => 'Установка обновления...';
+	@override String get downloaded_bytes => '{size} загружено';
+	@override String get progress_with_total => '{downloaded} / {total}';
+	@override String get installed => 'Обновление установлено';
+	@override String get installed_message => 'Версия {version} готова к использованию.';
+	@override String get open_selector_cta => 'Выбрать сборку';
+	@override String get open_selector_subtitle => 'Выберите версию для установки или отката.';
+	@override String get latest_badge => 'Актуальная';
+	@override String get latest_hint => 'Рекомендуемая сборка';
+}
+
 // Path: update_widget
 class _TranslationsUpdateWidgetRu implements TranslationsUpdateWidgetEn {
 	_TranslationsUpdateWidgetRu._(this._root);
@@ -517,6 +538,17 @@ extension on TranslationsRu {
 			case 'group_chat.create_dialog.cancel': return 'Отмена';
 			case 'group_chat.create_dialog.create': return 'Создать';
 			case 'nothing_found': return 'Ничего не нашли';
+			case 'update_view.title': return 'Выберите версию';
+			case 'update_view.downloading': return 'Загрузка обновления...';
+			case 'update_view.installing': return 'Установка обновления...';
+			case 'update_view.downloaded_bytes': return '{size} загружено';
+			case 'update_view.progress_with_total': return '{downloaded} / {total}';
+			case 'update_view.installed': return 'Обновление установлено';
+			case 'update_view.installed_message': return 'Версия {version} готова к использованию.';
+			case 'update_view.open_selector_cta': return 'Выбрать сборку';
+			case 'update_view.open_selector_subtitle': return 'Выберите версию для установки или отката.';
+			case 'update_view.latest_badge': return 'Актуальная';
+			case 'update_view.latest_hint': return 'Рекомендуемая сборка';
 			case 'update_widget.update_available': return 'Доступно обновление';
 			case 'update_widget.new_version_available': return 'Доступна {version}';
 			case 'update_widget.new_version_long': return 'Новая версия готова к загрузке, нажмите кнопку ниже, чтобы начать загрузку. Это загрузит {size} данных.';

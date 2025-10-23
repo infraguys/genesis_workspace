@@ -14,6 +14,9 @@ class FontFamily {
   /// Font family: AppleEmoji
   static const String appleEmoji = 'AppleEmoji';
 
+  /// Font family: Montserrat
+  static const String montserrat = 'Montserrat';
+
   /// Font family: NotoColorEmoji
   static const String notoColorEmoji = 'NotoColorEmoji';
 }

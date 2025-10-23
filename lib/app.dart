@@ -32,7 +32,7 @@ class WorkspaceApp extends StatelessWidget {
         locale: TranslationProvider.of(context).flutterLocale,
         title: 'Workspace',
         routerConfig: router,
-        theme: theme,
+        theme: darkTheme,
       ),
     );
   }
