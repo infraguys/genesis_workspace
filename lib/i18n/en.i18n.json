@@ -101,7 +101,8 @@
   "error": "Error",
   "general": {
     "something_went_wrong": "Something went wrong",
-    "nothing_here_yet": "Nothing here yet"
+    "nothing_here_yet": "Nothing here yet",
+    "find": "Find"
   },
   "message_actions": {
     "quote": "Quote this message",

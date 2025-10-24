@@ -15,7 +15,7 @@ class Splash extends StatelessWidget {
         return SplashView(
           onInitializationComplete: () {
             if (state.hasBaseUrl) {
-              state.isAuthorized ? context.go(Routes.allChats) : context.go(Routes.auth);
+              state.isAuthorized ? context.go(Routes.messenger) : context.go(Routes.auth);
             } else {
               context.go(Routes.pasteBaseUrl);
             }

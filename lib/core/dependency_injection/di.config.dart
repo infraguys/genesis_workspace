@@ -187,6 +187,8 @@ import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
     as _i758;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart'
+    as _i49;
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
     as _i766;
 import 'package:genesis_workspace/features/reactions/bloc/reactions_cubit.dart'
@@ -597,6 +599,22 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+        gh<_i7.UpdateFolderUseCase>(),
+        gh<_i849.DeleteFolderUseCase>(),
+        gh<_i395.SetFoldersForTargetUseCase>(),
+        gh<_i714.GetFolderIdsForTargetUseCase>(),
+        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
+        gh<_i438.GetMembersForFolderUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
+        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+      ),
+    );
+    gh.factory<_i49.MessengerCubit>(
+      () => _i49.MessengerCubit(
         gh<_i125.AddFolderUseCase>(),
         gh<_i815.GetFoldersUseCase>(),
         gh<_i7.UpdateFolderUseCase>(),

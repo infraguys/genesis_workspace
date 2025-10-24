@@ -30,8 +30,31 @@ class $AssetsIconsGen {
   /// File path: assets/icons/add.svg
   SvgGenImage get add => const SvgGenImage('assets/icons/add.svg');
 
+  /// File path: assets/icons/all_chats.svg
+  SvgGenImage get allChats => const SvgGenImage('assets/icons/all_chats.svg');
+
+  /// File path: assets/icons/arrow_down.svg
+  SvgGenImage get arrowDown => const SvgGenImage('assets/icons/arrow_down.svg');
+
+  /// File path: assets/icons/folder.svg
+  SvgGenImage get folder => const SvgGenImage('assets/icons/folder.svg');
+
+  /// File path: assets/icons/folder_open.svg
+  SvgGenImage get folderOpen =>
+      const SvgGenImage('assets/icons/folder_open.svg');
+
+  /// File path: assets/icons/search.svg
+  SvgGenImage get search => const SvgGenImage('assets/icons/search.svg');
+
   /// List of all assets
-  List<SvgGenImage> get values => [add];
+  List<SvgGenImage> get values => [
+    add,
+    allChats,
+    arrowDown,
+    folder,
+    folderOpen,
+    search,
+  ];
 }
 
 class $AssetsImagesGen {

@@ -106,7 +106,8 @@
   "error": "Ошибка",
   "general": {
     "something_went_wrong": "Что-то пошло не так",
-    "nothing_here_yet": "Здесь пока ничего нет"
+    "nothing_here_yet": "Здесь пока ничего нет",
+    "find": "Найти"
   },
   "message_actions": {
     "quote": "Цитировать это сообщение",

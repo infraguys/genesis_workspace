@@ -395,6 +395,9 @@ class TranslationsGeneralEn {
 
 	/// en: 'Nothing here yet'
 	String get nothingHereYet => 'Nothing here yet';
+
+	/// en: 'Find'
+	String get find => 'Find';
 }
 
 // Path: messageActions

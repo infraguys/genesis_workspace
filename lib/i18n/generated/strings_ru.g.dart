@@ -242,6 +242,7 @@ class TranslationsGeneralRu extends TranslationsGeneralEn {
 	// Translations
 	@override String get somethingWentWrong => 'Что-то пошло не так';
 	@override String get nothingHereYet => 'Здесь пока ничего нет';
+	@override String get find => 'Найти';
 }
 
 // Path: messageActions

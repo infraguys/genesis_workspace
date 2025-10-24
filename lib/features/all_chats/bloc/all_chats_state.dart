@@ -7,10 +7,10 @@ class AllChatsState {
   Set<int>? selectedGroupChat;
   final List<FolderItemEntity> folders;
   final int selectedFolderIndex;
+  final Map<int, FolderMembers> folderMembersById;
   Set<int>? filterDmUserIds;
   Set<int>? filterChannelIds;
   Set<int>? filterGroupChatIds;
-  final Map<int, FolderMembers> folderMembersById;
 
   bool get isEmptyFolder =>
       ((filterChannelIds?.isEmpty ?? false) &&

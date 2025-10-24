@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 
 class UnreadBadge extends StatelessWidget {
   final int count;
@@ -15,17 +16,18 @@ class UnreadBadge extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextStyle textStyle = Theme.of(
       context,
-    ).textTheme.labelSmall!.copyWith(color: colorScheme.onPrimary);
+    ).textTheme.labelSmall!.copyWith(color: AppColors.onBadge, fontSize: 12);
 
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        color: isMuted ? colorScheme.outlineVariant : colorScheme.primary,
-        borderRadius: BorderRadius.circular(999),
+    return IntrinsicWidth(
+      child: Container(
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 6, vertical: 1),
+        decoration: BoxDecoration(
+          color: isMuted ? colorScheme.outlineVariant : AppColors.counterBadge,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        alignment: Alignment.center,
+        child: Text(_formatCount(count), style: textStyle),
       ),
-      alignment: Alignment.center,
-      child: Text(_formatCount(count), style: textStyle),
     );
   }
 }
