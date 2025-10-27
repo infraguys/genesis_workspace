@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/desktop_app_bar/view/branch_item.dart';
 import 'package:genesis_workspace/features/desktop_app_bar/view/organization_item.dart';
+import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -51,25 +53,31 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             spacing: 16,
                             children: [
-                              SizedBox(
-                                height: 40,
-                                child: ListView.separated(
-                                  itemCount: 4,
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  separatorBuilder: (_, _) {
-                                    return SizedBox(width: 16);
-                                  },
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return OrganizationItem(
-                                      unreadCount: 1,
-                                      imagePath: Assets.images.genesisLogoPng.path,
-                                      isSelected: index == 0,
-                                      onTap: () {},
-                                    );
-                                  },
-                                ),
+                              BlocBuilder<OrganizationsCubit, OrganizationsState>(
+                                builder: (context, state) {
+                                  final organizations = state.organizations;
+                                  return SizedBox(
+                                    height: 40,
+                                    child: ListView.separated(
+                                      itemCount: organizations.length,
+                                      scrollDirection: Axis.horizontal,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true,
+                                      separatorBuilder: (_, _) {
+                                        return SizedBox(width: 16);
+                                      },
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final organization = organizations[index];
+                                        return OrganizationItem(
+                                          unreadCount: organization.unreadCount,
+                                          imagePath: organization.imageUrl,
+                                          isSelected: index == 0,
+                                          onTap: () {},
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
                               ),
                               Material(
                                 color: Colors.transparent,
