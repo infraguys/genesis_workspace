@@ -185,8 +185,20 @@ class $OrganizationsTable extends Organizations
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _unreadCountMeta = const VerificationMeta(
+    'unreadCount',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, icon, baseUrl];
+  late final GeneratedColumn<int> unreadCount = GeneratedColumn<int>(
+    'unread_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, icon, baseUrl, unreadCount];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -226,6 +238,15 @@ class $OrganizationsTable extends Organizations
     } else if (isInserting) {
       context.missing(_baseUrlMeta);
     }
+    if (data.containsKey('unread_count')) {
+      context.handle(
+        _unreadCountMeta,
+        unreadCount.isAcceptableOrUnknown(
+          data['unread_count']!,
+          _unreadCountMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -256,6 +277,10 @@ class $OrganizationsTable extends Organizations
         DriftSqlType.string,
         data['${effectivePrefix}base_url'],
       )!,
+      unreadCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}unread_count'],
+      )!,
     );
   }
 
@@ -270,11 +295,13 @@ class Organization extends DataClass implements Insertable<Organization> {
   final String name;
   final String icon;
   final String baseUrl;
+  final int unreadCount;
   const Organization({
     required this.id,
     required this.name,
     required this.icon,
     required this.baseUrl,
+    required this.unreadCount,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -283,6 +310,7 @@ class Organization extends DataClass implements Insertable<Organization> {
     map['name'] = Variable<String>(name);
     map['icon'] = Variable<String>(icon);
     map['base_url'] = Variable<String>(baseUrl);
+    map['unread_count'] = Variable<int>(unreadCount);
     return map;
   }
 
@@ -292,6 +320,7 @@ class Organization extends DataClass implements Insertable<Organization> {
       name: Value(name),
       icon: Value(icon),
       baseUrl: Value(baseUrl),
+      unreadCount: Value(unreadCount),
     );
   }
 
@@ -305,6 +334,7 @@ class Organization extends DataClass implements Insertable<Organization> {
       name: serializer.fromJson<String>(json['name']),
       icon: serializer.fromJson<String>(json['icon']),
       baseUrl: serializer.fromJson<String>(json['baseUrl']),
+      unreadCount: serializer.fromJson<int>(json['unreadCount']),
     );
   }
   @override
@@ -315,6 +345,7 @@ class Organization extends DataClass implements Insertable<Organization> {
       'name': serializer.toJson<String>(name),
       'icon': serializer.toJson<String>(icon),
       'baseUrl': serializer.toJson<String>(baseUrl),
+      'unreadCount': serializer.toJson<int>(unreadCount),
     };
   }
 
@@ -323,11 +354,13 @@ class Organization extends DataClass implements Insertable<Organization> {
     String? name,
     String? icon,
     String? baseUrl,
+    int? unreadCount,
   }) => Organization(
     id: id ?? this.id,
     name: name ?? this.name,
     icon: icon ?? this.icon,
     baseUrl: baseUrl ?? this.baseUrl,
+    unreadCount: unreadCount ?? this.unreadCount,
   );
   Organization copyWithCompanion(OrganizationsCompanion data) {
     return Organization(
@@ -335,6 +368,9 @@ class Organization extends DataClass implements Insertable<Organization> {
       name: data.name.present ? data.name.value : this.name,
       icon: data.icon.present ? data.icon.value : this.icon,
       baseUrl: data.baseUrl.present ? data.baseUrl.value : this.baseUrl,
+      unreadCount: data.unreadCount.present
+          ? data.unreadCount.value
+          : this.unreadCount,
     );
   }
 
@@ -344,13 +380,14 @@ class Organization extends DataClass implements Insertable<Organization> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('icon: $icon, ')
-          ..write('baseUrl: $baseUrl')
+          ..write('baseUrl: $baseUrl, ')
+          ..write('unreadCount: $unreadCount')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, icon, baseUrl);
+  int get hashCode => Object.hash(id, name, icon, baseUrl, unreadCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -358,7 +395,8 @@ class Organization extends DataClass implements Insertable<Organization> {
           other.id == this.id &&
           other.name == this.name &&
           other.icon == this.icon &&
-          other.baseUrl == this.baseUrl);
+          other.baseUrl == this.baseUrl &&
+          other.unreadCount == this.unreadCount);
 }
 
 class OrganizationsCompanion extends UpdateCompanion<Organization> {
@@ -366,17 +404,20 @@ class OrganizationsCompanion extends UpdateCompanion<Organization> {
   final Value<String> name;
   final Value<String> icon;
   final Value<String> baseUrl;
+  final Value<int> unreadCount;
   const OrganizationsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.icon = const Value.absent(),
     this.baseUrl = const Value.absent(),
+    this.unreadCount = const Value.absent(),
   });
   OrganizationsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String icon,
     required String baseUrl,
+    this.unreadCount = const Value.absent(),
   }) : name = Value(name),
        icon = Value(icon),
        baseUrl = Value(baseUrl);
@@ -385,12 +426,14 @@ class OrganizationsCompanion extends UpdateCompanion<Organization> {
     Expression<String>? name,
     Expression<String>? icon,
     Expression<String>? baseUrl,
+    Expression<int>? unreadCount,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (icon != null) 'icon': icon,
       if (baseUrl != null) 'base_url': baseUrl,
+      if (unreadCount != null) 'unread_count': unreadCount,
     });
   }
 
@@ -399,12 +442,14 @@ class OrganizationsCompanion extends UpdateCompanion<Organization> {
     Value<String>? name,
     Value<String>? icon,
     Value<String>? baseUrl,
+    Value<int>? unreadCount,
   }) {
     return OrganizationsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       icon: icon ?? this.icon,
       baseUrl: baseUrl ?? this.baseUrl,
+      unreadCount: unreadCount ?? this.unreadCount,
     );
   }
 
@@ -423,6 +468,9 @@ class OrganizationsCompanion extends UpdateCompanion<Organization> {
     if (baseUrl.present) {
       map['base_url'] = Variable<String>(baseUrl.value);
     }
+    if (unreadCount.present) {
+      map['unread_count'] = Variable<int>(unreadCount.value);
+    }
     return map;
   }
 
@@ -432,7 +480,8 @@ class OrganizationsCompanion extends UpdateCompanion<Organization> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('icon: $icon, ')
-          ..write('baseUrl: $baseUrl')
+          ..write('baseUrl: $baseUrl, ')
+          ..write('unreadCount: $unreadCount')
           ..write(')'))
         .toString();
   }
@@ -1977,6 +2026,7 @@ typedef $$OrganizationsTableCreateCompanionBuilder =
       required String name,
       required String icon,
       required String baseUrl,
+      Value<int> unreadCount,
     });
 typedef $$OrganizationsTableUpdateCompanionBuilder =
     OrganizationsCompanion Function({
@@ -1984,6 +2034,7 @@ typedef $$OrganizationsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> icon,
       Value<String> baseUrl,
+      Value<int> unreadCount,
     });
 
 final class $$OrganizationsTableReferences
@@ -2327,11 +2378,13 @@ class $$OrganizationsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> icon = const Value.absent(),
                 Value<String> baseUrl = const Value.absent(),
+                Value<int> unreadCount = const Value.absent(),
               }) => OrganizationsCompanion(
                 id: id,
                 name: name,
                 icon: icon,
                 baseUrl: baseUrl,
+                unreadCount: unreadCount,
               ),
           createCompanionCallback:
               ({
@@ -2339,11 +2392,13 @@ class $$OrganizationsTableTableManager
                 required String name,
                 required String icon,
                 required String baseUrl,
+                Value<int> unreadCount = const Value.absent(),
               }) => OrganizationsCompanion.insert(
                 id: id,
                 name: name,
                 icon: icon,
                 baseUrl: baseUrl,
+                unreadCount: unreadCount,
               ),
           withReferenceMapper: (p0) => p0
               .map(

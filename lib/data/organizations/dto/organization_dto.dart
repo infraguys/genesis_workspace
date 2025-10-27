@@ -4,8 +4,14 @@ class OrganizationRequestDto {
   final String name;
   final String icon;
   final String baseUrl;
+  final int unreadCount;
 
-  OrganizationRequestDto({required this.name, required this.icon, required this.baseUrl});
+  OrganizationRequestDto({
+    required this.name,
+    required this.icon,
+    required this.baseUrl,
+    required this.unreadCount,
+  });
 }
 
 class OrganizationDto {
@@ -13,14 +19,21 @@ class OrganizationDto {
   final String name;
   final String icon;
   final String baseUrl;
+  final int unreadCount;
 
   OrganizationDto({
     required this.id,
     required this.name,
     required this.icon,
     required this.baseUrl,
+    required this.unreadCount,
   });
 
-  OrganizationEntity toEntity() =>
-      OrganizationEntity(id: id, name: name, icon: icon, baseUrl: baseUrl);
+  OrganizationEntity toEntity() => OrganizationEntity(
+        id: id,
+        name: name,
+        icon: icon,
+        baseUrl: baseUrl,
+        unreadCount: unreadCount,
+      );
 }

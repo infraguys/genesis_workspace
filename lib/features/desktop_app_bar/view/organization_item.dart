@@ -28,7 +28,7 @@ class OrganizationItem extends StatelessWidget {
           decoration: BoxDecoration(
             border: isSelected ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
             borderRadius: BorderRadius.circular(8),
-            image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.fill),
+            image: DecorationImage(image: NetworkImage(imagePath), fit: BoxFit.fill),
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(8),

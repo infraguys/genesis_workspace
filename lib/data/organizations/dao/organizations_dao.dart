@@ -14,6 +14,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required String name,
     required String icon,
     required String baseUrl,
+    required int unreadCount,
   }) {
     return transaction(() async {
       final existing = await (select(organizations)..where((t) => t.baseUrl.equals(baseUrl)))
@@ -24,13 +25,19 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
             name: Value(name),
             icon: Value(icon),
             baseUrl: Value(baseUrl),
+            unreadCount: Value(unreadCount),
           ),
         );
         return existing.id;
       }
 
       return into(organizations).insert(
-        OrganizationsCompanion.insert(name: name, icon: icon, baseUrl: baseUrl),
+        OrganizationsCompanion.insert(
+          name: name,
+          icon: icon,
+          baseUrl: baseUrl,
+          unreadCount: Value(unreadCount),
+        ),
         mode: InsertMode.insert,
       );
     });

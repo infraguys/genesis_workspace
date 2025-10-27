@@ -8,4 +8,6 @@ abstract class OrganizationsRepository {
   Future<List<OrganizationEntity>> getAllOrganizations();
 
   Future<OrganizationEntity> getOrganizationById(int id);
+
+  Stream<List<OrganizationEntity>> watchOrganizations();
 }

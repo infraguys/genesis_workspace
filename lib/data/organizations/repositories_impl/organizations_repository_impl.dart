@@ -30,4 +30,11 @@ class OrganizationsRepositoryImpl implements OrganizationsRepository {
     final response = await _localDataSource.getOrganizationById(id);
     return response.toEntity();
   }
+
+  @override
+  Stream<List<OrganizationEntity>> watchOrganizations() {
+    return _localDataSource.watchOrganizations().map(
+          (organizations) => organizations.map((org) => org.toEntity()).toList(),
+        );
+  }
 }

@@ -5,6 +5,7 @@ class OrganizationEntity {
   final String name;
   final String icon;
   final String baseUrl;
+  final int unreadCount;
 
   String get imageUrl => '$baseUrl$icon';
 
@@ -13,6 +14,7 @@ class OrganizationEntity {
     required this.name,
     required this.icon,
     required this.baseUrl,
+    required this.unreadCount,
   });
 }
 
@@ -20,9 +22,19 @@ class OrganizationRequestEntity {
   final String name;
   final String icon;
   final String baseUrl;
+  final int unreadCount;
 
-  OrganizationRequestEntity({required this.name, required this.icon, required this.baseUrl});
+  OrganizationRequestEntity({
+    required this.name,
+    required this.icon,
+    required this.baseUrl,
+    required this.unreadCount,
+  });
 
-  OrganizationRequestDto toDto() =>
-      OrganizationRequestDto(name: name, icon: icon, baseUrl: baseUrl);
+  OrganizationRequestDto toDto() => OrganizationRequestDto(
+        name: name,
+        icon: icon,
+        baseUrl: baseUrl,
+        unreadCount: unreadCount,
+      );
 }

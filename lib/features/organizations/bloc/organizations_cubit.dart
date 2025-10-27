@@ -34,21 +34,6 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     emit(state.copyWith(organizations: organizations));
   }
 
-  Future<void> addOrganization(String baseUrl) async {
-    try {
-      final serverSettings = await _getServerSettingsUseCase.call(serverUrl: baseUrl);
-      final organizationRequest = OrganizationRequestEntity(
-        name: serverSettings.realmName,
-        icon: serverSettings.realmIcon,
-        baseUrl: baseUrl,
-        unreadCount: 0,
-      );
-      final id = await _addOrganizationUseCase.call(organizationRequest);
-    } catch (e) {
-      inspect(e);
-    }
-  }
-
   @override
   Future<void> close() {
     _organizationsSubscription.cancel();

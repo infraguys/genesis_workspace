@@ -118,6 +118,8 @@ import 'package:genesis_workspace/domain/organizations/usecases/get_organization
     as _i401;
 import 'package:genesis_workspace/domain/organizations/usecases/remove_organization_use_case.dart'
     as _i240;
+import 'package:genesis_workspace/domain/organizations/usecases/watch_organizations_use_case.dart'
+    as _i724;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
     as _i703;
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart'
@@ -205,6 +207,8 @@ import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart'
     as _i49;
+import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart'
+    as _i214;
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
     as _i766;
 import 'package:genesis_workspace/features/reactions/bloc/reactions_cubit.dart'
@@ -519,6 +523,10 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i401.GetOrganizationByIdUseCase(gh<_i654.OrganizationsRepository>()),
     );
+    gh.factory<_i724.WatchOrganizationsUseCase>(
+      () =>
+          _i724.WatchOrganizationsUseCase(gh<_i654.OrganizationsRepository>()),
+    );
     gh.factory<_i849.DeleteFolderUseCase>(
       () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
@@ -626,6 +634,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i401.GetOrganizationByIdUseCase>(),
       ),
       dispose: _i862.disposeAuthCubit,
+    );
+    gh.factory<_i214.OrganizationsCubit>(
+      () => _i214.OrganizationsCubit(
+        gh<_i724.WatchOrganizationsUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
+        gh<_i848.GetServerSettingsUseCase>(),
+      ),
     );
     gh.factory<_i631.UnpinChatUseCase>(
       () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),

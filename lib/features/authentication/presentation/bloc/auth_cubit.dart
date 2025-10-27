@@ -386,6 +386,7 @@ class AuthCubit extends Cubit<AuthState> {
           name: serverSettings.realmName,
           icon: serverSettings.realmIcon,
           baseUrl: normalizedBaseUrl,
+          unreadCount: 0,
         ),
       );
 
