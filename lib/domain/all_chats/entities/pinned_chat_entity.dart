@@ -7,6 +7,7 @@ class PinnedChatEntity {
   final int? orderIndex;
   final DateTime pinnedAt;
   final PinnedChatType type;
+  final int organizationId;
 
   PinnedChatEntity({
     required this.id,
@@ -15,5 +16,6 @@ class PinnedChatEntity {
     required this.pinnedAt,
     this.orderIndex,
     required this.type,
+    required this.organizationId,
   });
 }

@@ -16,17 +16,29 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
 
   // ---------- Queries ----------
 
-  Future<List<PinnedChat>> getPinnedChats(int folderId) {
+  Future<List<PinnedChat>> getPinnedChats(int folderId, int organizationId) {
     return (select(pinnedChats)
-          ..where((t) => t.folderId.equals(folderId))
+          ..where(
+            (t) => t.folderId.equals(folderId) & t.organizationId.equals(organizationId),
+          )
           ..orderBy([(t) => OrderingTerm.asc(t.orderIndex)]))
         .get();
   }
 
-  Future<PinnedChat?> getPinnedChatByIds({required int folderId, required int chatId}) {
+  Future<PinnedChat?> getPinnedChatByIds({
+    required int folderId,
+    required int chatId,
+    required int organizationId,
+  }) {
     return (select(
       pinnedChats,
-    )..where((t) => t.folderId.equals(folderId) & t.chatId.equals(chatId))).getSingleOrNull();
+    )..where(
+            (t) =>
+                t.folderId.equals(folderId) &
+                t.chatId.equals(chatId) &
+                t.organizationId.equals(organizationId),
+          ))
+        .getSingleOrNull();
   }
 
   // ---------- Pin / Unpin ----------
@@ -36,17 +48,25 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
     required int folderId,
     required int chatId,
     required PinnedChatType type,
+    required int organizationId,
   }) async {
     return transaction(() async {
       // уникальность: если уже пиннут — просто вернуть id
-      final existing = await getPinnedChatByIds(folderId: folderId, chatId: chatId);
+      final existing = await getPinnedChatByIds(
+        folderId: folderId,
+        chatId: chatId,
+        organizationId: organizationId,
+      );
       if (existing != null) return existing.id;
 
       final maxExpr = pinnedChats.orderIndex.max();
       final maxRow =
           await (selectOnly(pinnedChats)
                 ..addColumns([maxExpr])
-                ..where(pinnedChats.folderId.equals(folderId)))
+                ..where(
+                  pinnedChats.folderId.equals(folderId) &
+                      pinnedChats.organizationId.equals(organizationId),
+                ))
               .getSingle();
 
       final int maxIndex = maxRow.read(maxExpr) ?? 0;
@@ -58,24 +78,45 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
           chatId: chatId,
           orderIndex: Value(newIndex),
           type: type,
+          organizationId: organizationId,
         ),
         mode: InsertMode.insert,
       );
     });
   }
 
-  Future<void> pinChat({required int folderId, required int chatId, required PinnedChatType type}) {
-    return pinToEnd(folderId: folderId, chatId: chatId, type: type);
+  Future<void> pinChat({
+    required int folderId,
+    required int chatId,
+    required PinnedChatType type,
+    required int organizationId,
+  }) {
+    return pinToEnd(
+      folderId: folderId,
+      chatId: chatId,
+      type: type,
+      organizationId: organizationId,
+    );
   }
 
   Future<void> unpinById(int pinnedChatId) {
     return (delete(pinnedChats)..where((t) => t.id.equals(pinnedChatId))).go();
   }
 
-  Future<void> unpinByIds({required int folderId, required int chatId}) {
+  Future<void> unpinByIds({
+    required int folderId,
+    required int chatId,
+    required int organizationId,
+  }) {
     return (delete(
       pinnedChats,
-    )..where((t) => t.folderId.equals(folderId) & t.chatId.equals(chatId))).go();
+    )..where(
+            (t) =>
+                t.folderId.equals(folderId) &
+                t.chatId.equals(chatId) &
+                t.organizationId.equals(organizationId),
+          ))
+        .go();
   }
 
   // ---------- Reorder ----------
@@ -86,12 +127,19 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
     required int movedChatId,
     int? previousChatId,
     int? nextChatId,
+    required int organizationId,
   }) async {
     await transaction(() async {
       Future<int?> indexOf(int chatId) async {
         final row = await (select(
           pinnedChats,
-        )..where((t) => t.folderId.equals(folderId) & t.chatId.equals(chatId))).getSingleOrNull();
+        )..where(
+                (t) =>
+                    t.folderId.equals(folderId) &
+                    t.chatId.equals(chatId) &
+                    t.organizationId.equals(organizationId),
+              ))
+            .getSingleOrNull();
         return row?.orderIndex;
       }
 
@@ -116,7 +164,7 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
 
       // Если “зазора” нет — перенумеруем и попробуем ещё раз
       if (newIndex == null || newIndex <= 0) {
-        await resequenceFolder(folderId);
+        await resequenceFolder(folderId, organizationId);
 
         final int? prev2 = previousChatId == null ? null : await indexOf(previousChatId);
         final int? next2 = nextChatId == null ? null : await indexOf(nextChatId);
@@ -133,7 +181,12 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
       }
 
       await (update(pinnedChats)
-            ..where((t) => t.folderId.equals(folderId) & t.chatId.equals(movedChatId)))
+            ..where(
+              (t) =>
+                  t.folderId.equals(folderId) &
+                  t.chatId.equals(movedChatId) &
+                  t.organizationId.equals(organizationId),
+            ))
           .write(PinnedChatsCompanion(orderIndex: Value(newIndex!)));
     });
   }
@@ -147,8 +200,8 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
   }
 
   /// Редко вызываемая операция: равномерно расставляет индексы с шагом.
-  Future<void> resequenceFolder(int folderId) async {
-    final rows = await getPinnedChats(folderId);
+  Future<void> resequenceFolder(int folderId, int organizationId) async {
+    final rows = await getPinnedChats(folderId, organizationId);
     int position = 1;
     for (final row in rows) {
       final int newIndex = position * kOrderStep;

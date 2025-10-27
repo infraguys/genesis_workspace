@@ -15,11 +15,12 @@ class FolderLocalDataSource {
       iconCodePoint: entity.iconData.codePoint,
       backgroundColorValue: entity.backgroundColor?.value,
       unreadCount: entity.unreadCount,
+      organizationId: entity.organizationId,
     );
   }
 
-  Future<List<Folder>> getAll() async {
-    final List<Folder> rows = await _dao.getAll();
+  Future<List<Folder>> getAll(int organizationId) async {
+    final List<Folder> rows = await _dao.getAll(organizationId);
     return rows;
   }
 

@@ -7,7 +7,13 @@ class GetPinnedChatsUseCase {
   final PinnedChatsRepository _repository;
   GetPinnedChatsUseCase(this._repository);
 
-  Future<List<PinnedChatEntity>> call(int folderId) async {
-    return await _repository.getPinnedChats(folderId);
+  Future<List<PinnedChatEntity>> call({
+    required int folderId,
+    required int organizationId,
+  }) async {
+    return await _repository.getPinnedChats(
+      folderId: folderId,
+      organizationId: organizationId,
+    );
   }
 }

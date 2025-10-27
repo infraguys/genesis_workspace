@@ -12,12 +12,14 @@ class FolderMembershipLocalDataSource {
     required int targetId,
     required List<int> folderIds,
     String? topicName,
+    required int organizationId,
   }) async {
     await _dao.setItemFolders(
       itemType: itemType,
       targetId: targetId,
       folderIds: folderIds,
       topicName: topicName,
+      organizationId: organizationId,
     );
   }
 
@@ -25,9 +27,18 @@ class FolderMembershipLocalDataSource {
     required String itemType,
     required int targetId,
     String? topicName,
-  }) => _dao.getFolderIdsForItem(itemType: itemType, targetId: targetId, topicName: topicName);
+    required int organizationId,
+  }) =>
+      _dao.getFolderIdsForItem(
+        itemType: itemType,
+        targetId: targetId,
+        topicName: topicName,
+        organizationId: organizationId,
+      );
 
-  Future<void> deleteByFolderId(int folderId) => _dao.deleteByFolderId(folderId);
+  Future<void> deleteByFolderId(int folderId, int organizationId) =>
+      _dao.deleteByFolderId(folderId, organizationId);
 
-  Future<List<FolderItem>> getItemsForFolder(int folderId) => _dao.getItemsForFolder(folderId);
+  Future<List<FolderItem>> getItemsForFolder(int folderId, int organizationId) =>
+      _dao.getItemsForFolder(folderId, organizationId);
 }

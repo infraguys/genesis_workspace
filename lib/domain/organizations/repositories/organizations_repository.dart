@@ -6,4 +6,6 @@ abstract class OrganizationsRepository {
   Future<void> removeOrganization(int id);
 
   Future<List<OrganizationEntity>> getAllOrganizations();
+
+  Future<OrganizationEntity> getOrganizationById(int id);
 }

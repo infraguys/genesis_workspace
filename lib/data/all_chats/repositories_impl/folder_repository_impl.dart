@@ -15,8 +15,8 @@ class FolderRepositoryImpl implements FolderRepository {
   }
 
   @override
-  Future<List<Folder>> getFolders() async {
-    return _localDataSource.getAll();
+  Future<List<Folder>> getFolders(int organizationId) async {
+    return _localDataSource.getAll(organizationId);
   }
 
   @override

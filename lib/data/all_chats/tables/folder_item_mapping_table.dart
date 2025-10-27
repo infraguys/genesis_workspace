@@ -1,8 +1,13 @@
 import 'package:drift/drift.dart';
+import 'package:genesis_workspace/data/all_chats/tables/folder_table.dart';
+import 'package:genesis_workspace/data/organizations/tables/organization_table.dart';
 
 class FolderItems extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get folderId => integer()();
+  IntColumn get folderId =>
+      integer().references(Folders, #id, onDelete: KeyAction.cascade)();
+  IntColumn get organizationId =>
+      integer().references(Organizations, #id, onDelete: KeyAction.cascade)();
 
   // 'dm' or 'channel' for now
   TextColumn get itemType => text()();

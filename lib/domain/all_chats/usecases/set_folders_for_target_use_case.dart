@@ -7,8 +7,15 @@ class SetFoldersForTargetUseCase {
   final FolderMembershipRepository _repository;
   SetFoldersForTargetUseCase(this._repository);
 
-  Future<void> call(FolderTarget target, List<int> folderIds) async {
-    await _repository.setFoldersForTarget(target, folderIds);
+  Future<void> call(
+    FolderTarget target,
+    List<int> folderIds, {
+    required int organizationId,
+  }) async {
+    await _repository.setFoldersForTarget(
+      target,
+      folderIds,
+      organizationId: organizationId,
+    );
   }
 }
-

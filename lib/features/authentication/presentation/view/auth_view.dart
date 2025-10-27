@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
-import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -144,8 +143,16 @@ class _AuthViewState extends State<AuthView> {
                                           ),
                                       ],
                                     ),
-                                    const GenesisLogo(size: 90),
-                                    if (state.currentBaseUrl != null) ...[
+                                    // const GenesisLogo(size: 90),
+                                    SizedBox(
+                                      height: 90,
+                                      width: 90,
+                                      child: Image.network(
+                                        state.selectedOrganization!.imageUrl,
+                                        fit: BoxFit.fitHeight,
+                                      ),
+                                    ),
+                                    if (state.selectedOrganization != null) ...[
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
@@ -156,7 +163,7 @@ class _AuthViewState extends State<AuthView> {
                                             ),
                                           ),
                                           Text(
-                                            state.currentBaseUrl!,
+                                            state.selectedOrganization!.baseUrl,
                                             style: theme.textTheme.bodySmall?.copyWith(
                                               color: theme
                                                   .colorScheme

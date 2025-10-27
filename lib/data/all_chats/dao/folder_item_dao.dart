@@ -15,12 +15,14 @@ class FolderItemDao extends DatabaseAccessor<AppDatabase> with _$FolderItemDaoMi
     required int targetId,
     required List<int> folderIds,
     String? topicName,
+    required int organizationId,
   }) async {
     await transaction(() async {
       await (delete(folderItems)..where(
             (t) =>
                 t.itemType.equals(itemType) &
                 t.targetId.equals(targetId) &
+                t.organizationId.equals(organizationId) &
                 (topicName == null ? t.topicName.isNull() : t.topicName.equals(topicName)),
           ))
           .go();
@@ -33,6 +35,7 @@ class FolderItemDao extends DatabaseAccessor<AppDatabase> with _$FolderItemDaoMi
               itemType: itemType,
               targetId: targetId,
               topicName: Value(topicName),
+              organizationId: organizationId,
             ),
           )
           .toList(growable: false);
@@ -44,9 +47,15 @@ class FolderItemDao extends DatabaseAccessor<AppDatabase> with _$FolderItemDaoMi
     required String itemType,
     required int targetId,
     String? topicName,
+    required int organizationId,
   }) async {
     final query = select(folderItems)
-      ..where((t) => t.itemType.equals(itemType) & t.targetId.equals(targetId));
+      ..where(
+        (t) =>
+            t.itemType.equals(itemType) &
+            t.targetId.equals(targetId) &
+            t.organizationId.equals(organizationId),
+      );
     if (topicName == null) {
       query.where((t) => t.topicName.isNull());
     } else {
@@ -56,12 +65,19 @@ class FolderItemDao extends DatabaseAccessor<AppDatabase> with _$FolderItemDaoMi
     return rows.map((r) => r.folderId).toList(growable: false);
   }
 
-  Future<void> deleteByFolderId(int folderId) async {
-    await (delete(folderItems)..where((t) => t.folderId.equals(folderId))).go();
+  Future<void> deleteByFolderId(int folderId, int organizationId) async {
+    await (delete(folderItems)
+          ..where(
+            (t) => t.folderId.equals(folderId) & t.organizationId.equals(organizationId),
+          ))
+        .go();
   }
 
-  Future<List<FolderItem>> getItemsForFolder(int folderId) async {
-    final query = select(folderItems)..where((t) => t.folderId.equals(folderId));
+  Future<List<FolderItem>> getItemsForFolder(int folderId, int organizationId) async {
+    final query = select(folderItems)
+      ..where(
+        (t) => t.folderId.equals(folderId) & t.organizationId.equals(organizationId),
+      );
     return query.get();
   }
 }

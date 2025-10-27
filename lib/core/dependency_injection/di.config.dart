@@ -114,6 +114,8 @@ import 'package:genesis_workspace/domain/organizations/usecases/add_organization
     as _i183;
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart'
     as _i535;
+import 'package:genesis_workspace/domain/organizations/usecases/get_organization_by_id_use_case.dart'
+    as _i401;
 import 'package:genesis_workspace/domain/organizations/usecases/remove_organization_use_case.dart'
     as _i240;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
@@ -513,6 +515,10 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i240.RemoveOrganizationUseCase(gh<_i654.OrganizationsRepository>()),
     );
+    gh.factory<_i401.GetOrganizationByIdUseCase>(
+      () =>
+          _i401.GetOrganizationByIdUseCase(gh<_i654.OrganizationsRepository>()),
+    );
     gh.factory<_i849.DeleteFolderUseCase>(
       () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
@@ -598,20 +604,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i725.PinnedChatsRepository>(),
       ),
     );
-    gh.factory<_i631.UnpinChatUseCase>(
-      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
-      () => _i1057.UpdatePinnedChatOrderUseCase(
-        gh<_i725.PinnedChatsRepository>(),
-      ),
-    );
-    gh.factory<_i1012.PinChatUseCase>(
-      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i126.GetPinnedChatsUseCase>(
-      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
     gh.lazySingleton<_i862.AuthCubit>(
       () => _i862.AuthCubit(
         gh<_i460.SharedPreferences>(),
@@ -631,8 +623,23 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i350.GetSessionIdUseCase>(),
         gh<_i819.DeleteCsrftokenUseCase>(),
         gh<_i183.AddOrganizationUseCase>(),
+        gh<_i401.GetOrganizationByIdUseCase>(),
       ),
       dispose: _i862.disposeAuthCubit,
+    );
+    gh.factory<_i631.UnpinChatUseCase>(
+      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
+      () => _i1057.UpdatePinnedChatOrderUseCase(
+        gh<_i725.PinnedChatsRepository>(),
+      ),
+    );
+    gh.factory<_i1012.PinChatUseCase>(
+      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i126.GetPinnedChatsUseCase>(
+      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
     );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(

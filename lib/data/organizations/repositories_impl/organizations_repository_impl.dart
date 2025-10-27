@@ -24,4 +24,10 @@ class OrganizationsRepositoryImpl implements OrganizationsRepository {
     final response = await _localDataSource.getAllOrganizations();
     return response.map((org) => org.toEntity()).toList();
   }
+
+  @override
+  Future<OrganizationEntity> getOrganizationById(int id) async {
+    final response = await _localDataSource.getOrganizationById(id);
+    return response.toEntity();
+  }
 }

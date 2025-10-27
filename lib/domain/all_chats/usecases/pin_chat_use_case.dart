@@ -12,12 +12,14 @@ class PinChatUseCase {
     required int chatId,
     required int orderIndex,
     required PinnedChatType type,
+    required int organizationId,
   }) async {
     return await _repository.pinChat(
       folderId: folderId,
       chatId: chatId,
       orderIndex: orderIndex,
       type: type,
+      organizationId: organizationId,
     );
   }
 }

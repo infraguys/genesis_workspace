@@ -16,6 +16,7 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
     required int iconCodePoint,
     int? backgroundColorValue,
     int unreadCount = 0,
+    required int organizationId,
   }) {
     return into(folders).insert(
       FoldersCompanion.insert(
@@ -24,13 +25,17 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
         iconCodePoint: iconCodePoint,
         backgroundColorValue: Value(backgroundColorValue),
         unreadCount: Value(unreadCount),
+        organizationId: organizationId,
       ),
       mode: InsertMode.insert,
     );
   }
 
-  Future<List<Folder>> getAll() {
-    return (select(folders)..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+  Future<List<Folder>> getAll(int organizationId) {
+    return (select(folders)
+          ..where((tbl) => tbl.organizationId.equals(organizationId))
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get();
   }
 
   Future<void> deleteById(int id) async {

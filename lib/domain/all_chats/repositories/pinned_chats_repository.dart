@@ -7,13 +7,18 @@ abstract class PinnedChatsRepository {
     required int chatId,
     required int orderIndex,
     required PinnedChatType type,
+    required int organizationId,
   });
   Future<void> unpinChat(int id);
-  Future<List<PinnedChatEntity>> getPinnedChats(int folderId);
+  Future<List<PinnedChatEntity>> getPinnedChats({
+    required int folderId,
+    required int organizationId,
+  });
   Future<void> updatePinnedChatOrder({
     required int folderId,
     required int movedChatId,
     int? previousChatId,
     int? nextChatId,
+    required int organizationId,
   });
 }

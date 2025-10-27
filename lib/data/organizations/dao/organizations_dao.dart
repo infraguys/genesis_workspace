@@ -15,9 +15,25 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required String icon,
     required String baseUrl,
   }) {
-    return into(organizations).insertOnConflictUpdate(
-      OrganizationsCompanion.insert(name: name, icon: icon, baseUrl: baseUrl),
-    );
+    return transaction(() async {
+      final existing = await (select(organizations)..where((t) => t.baseUrl.equals(baseUrl)))
+          .getSingleOrNull();
+      if (existing != null) {
+        await (update(organizations)..where((t) => t.id.equals(existing.id))).write(
+          OrganizationsCompanion(
+            name: Value(name),
+            icon: Value(icon),
+            baseUrl: Value(baseUrl),
+          ),
+        );
+        return existing.id;
+      }
+
+      return into(organizations).insert(
+        OrganizationsCompanion.insert(name: name, icon: icon, baseUrl: baseUrl),
+        mode: InsertMode.insert,
+      );
+    });
   }
 
   Future<int> deleteOrganizationById(int id) {
@@ -30,5 +46,9 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
 
   Stream<List<Organization>> watchAllOrganizations() {
     return select(organizations).watch();
+  }
+
+  Future<Organization?> getOrganizationById(int id) {
+    return (select(organizations)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 }

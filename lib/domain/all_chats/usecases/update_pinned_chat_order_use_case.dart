@@ -10,12 +10,14 @@ class UpdatePinnedChatOrderUseCase {
     required int movedChatId,
     int? previousChatId,
     int? nextChatId,
+    required int organizationId,
   }) async {
     return await _repository.updatePinnedChatOrder(
       folderId: folderId,
       movedChatId: movedChatId,
       previousChatId: previousChatId,
       nextChatId: nextChatId,
+      organizationId: organizationId,
     );
   }
 }

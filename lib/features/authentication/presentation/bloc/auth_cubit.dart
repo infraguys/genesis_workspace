@@ -13,6 +13,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/add_organization_use_case.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/get_organization_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
@@ -51,6 +52,7 @@ class AuthCubit extends Cubit<AuthState> {
   final GetSessionIdUseCase _getSessionIdUseCase;
   final DeleteCsrftokenUseCase _deleteCsrftokenUseCase;
   final AddOrganizationUseCase _addOrganizationUseCase;
+  final GetOrganizationByIdUseCase _getOrganizationByIdUseCase;
 
   AuthCubit(
     this._sharedPreferences,
@@ -70,6 +72,7 @@ class AuthCubit extends Cubit<AuthState> {
     this._getSessionIdUseCase,
     this._deleteCsrftokenUseCase,
     this._addOrganizationUseCase,
+    this._getOrganizationByIdUseCase,
   ) : super(
         const AuthState(
           isPending: false,
@@ -83,7 +86,7 @@ class AuthCubit extends Cubit<AuthState> {
           hasBaseUrl: false,
           pasteBaseUrlPending: false,
           serverSettingsPending: false,
-          currentBaseUrl: null,
+          selectedOrganization: null,
         ),
       );
 
@@ -119,17 +122,18 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> getServerSettings() async {
     emit(state.copyWith(serverSettingsPending: true));
-    // try {
-    //   await _deleteSessionIdUseCase.call();
-    //   final response = await _getServerSettingsUseCase.call();
-    //
-    //
-    //   emit(state.copyWith(serverSettings: response));
-    // } catch (e) {
-    //   inspect(e);
-    // } finally {
-    //   emit(state.copyWith(serverSettingsPending: false));
-    // }
+    try {
+      await _deleteSessionIdUseCase.call();
+      if (state.serverSettings == null) {
+        final response = await _getServerSettingsUseCase.call();
+
+        emit(state.copyWith(serverSettings: response));
+      }
+    } catch (e) {
+      inspect(e);
+    } finally {
+      emit(state.copyWith(serverSettingsPending: false));
+    }
     final dio = getIt<Dio>();
     final cookieResponse = await dio.get('${AppConstants.baseUrl}/accounts/login/');
     final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
@@ -324,9 +328,16 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> checkToken() async {
     emit(state.copyWith(isPending: true, errorMessage: null));
     bool isAuthorized = false;
-    final String? baseUrl = _sharedPreferences.getString(SharedPrefsKeys.baseUrl);
-    if (baseUrl != null) {
-      emit(state.copyWith(hasBaseUrl: true, currentBaseUrl: baseUrl));
+    final int? selectedOrganizationId = _sharedPreferences.getInt(
+      SharedPrefsKeys.selectedOrganizationId,
+    );
+    try {
+      final OrganizationEntity organization = await _getOrganizationByIdUseCase.call(
+        selectedOrganizationId ?? -1,
+      );
+      AppConstants.setBaseUrl(organization.baseUrl);
+      AppConstants.setSelectedOrganizationId(organization.id);
+      emit(state.copyWith(hasBaseUrl: true, selectedOrganization: organization));
       final String? token = await _getTokenUseCase.call();
 
       if (token != null) {
@@ -353,7 +364,8 @@ class AuthCubit extends Cubit<AuthState> {
           emit(state.copyWith(isPending: false, isAuthorized: isAuthorized));
         }
       }
-    } else {
+    } catch (e) {
+      AppConstants.setSelectedOrganizationId(null);
       emit(state.copyWith(hasBaseUrl: false, isPending: false));
     }
   }
@@ -361,32 +373,41 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> saveBaseUrl({required String baseUrl}) async {
     emit(state.copyWith(pasteBaseUrlPending: true));
     try {
-      final String normalized = baseUrl.trim();
-      await _sharedPreferences.setString(SharedPrefsKeys.baseUrl, normalized);
-      AppConstants.setBaseUrl(normalized);
+      final String normalizedBaseUrl = baseUrl.trim();
+      AppConstants.setBaseUrl(normalizedBaseUrl);
 
       final dio = getIt<Dio>();
-      dio.options.baseUrl = normalized;
+      dio.options.baseUrl = normalizedBaseUrl;
 
-      emit(state.copyWith(hasBaseUrl: true, currentBaseUrl: normalized));
-    } catch (e) {
-      inspect(e);
-      emit(state.copyWith(hasBaseUrl: false, currentBaseUrl: null));
-    }
+      final ServerSettingsEntity serverSettings = await _getServerSettingsUseCase.call();
 
-    try {
-      final organizationResponse = await _getServerSettingsUseCase.call();
-      inspect(organizationResponse);
-      final OrganizationRequestEntity organization = OrganizationRequestEntity(
-        name: organizationResponse.realmName,
-        icon: organizationResponse.realmIcon,
-        baseUrl: AppConstants.baseUrl,
+      final int organizationId = await _addOrganizationUseCase.call(
+        OrganizationRequestEntity(
+          name: serverSettings.realmName,
+          icon: serverSettings.realmIcon,
+          baseUrl: normalizedBaseUrl,
+        ),
       );
 
-      final response = await _addOrganizationUseCase.call(organization);
-      inspect(response);
-    } catch (e) {
+      final OrganizationEntity organization = await _getOrganizationByIdUseCase.call(
+        organizationId,
+      );
+
+      await _sharedPreferences.setString(SharedPrefsKeys.baseUrl, organization.baseUrl);
+      await _sharedPreferences.setInt(SharedPrefsKeys.selectedOrganizationId, organization.id);
+      AppConstants.setSelectedOrganizationId(organization.id);
+
+      emit(
+        state.copyWith(
+          hasBaseUrl: true,
+          selectedOrganization: organization,
+          serverSettings: serverSettings,
+        ),
+      );
+    } catch (e, stackTrace) {
       inspect(e);
+      AppConstants.setSelectedOrganizationId(null);
+      emit(state.copyWith(hasBaseUrl: false, selectedOrganization: null));
     } finally {
       emit(state.copyWith(pasteBaseUrlPending: false));
     }
@@ -394,9 +415,10 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> clearBaseUrl() async {
     try {
-      await _sharedPreferences.remove(SharedPrefsKeys.baseUrl);
+      await _sharedPreferences.remove(SharedPrefsKeys.selectedOrganizationId);
       await _sharedPreferences.remove(SharedPrefsKeys.isWebAuth);
       AppConstants.setBaseUrl("");
+      AppConstants.setSelectedOrganizationId(null);
     } catch (e) {
       inspect(e);
     } finally {
@@ -405,7 +427,7 @@ class AuthCubit extends Cubit<AuthState> {
           pasteBaseUrlPending: false,
           hasBaseUrl: false,
           serverSettings: null,
-          currentBaseUrl: null,
+          selectedOrganization: null,
         ),
       );
     }
@@ -426,7 +448,7 @@ class AuthState {
   final bool hasBaseUrl;
   final bool pasteBaseUrlPending;
   final bool serverSettingsPending;
-  final String? currentBaseUrl;
+  final OrganizationEntity? selectedOrganization;
 
   const AuthState({
     required this.isPending,
@@ -440,7 +462,7 @@ class AuthState {
     required this.hasBaseUrl,
     required this.pasteBaseUrlPending,
     required this.serverSettingsPending,
-    this.currentBaseUrl,
+    this.selectedOrganization,
   });
 
   AuthState copyWith({
@@ -455,7 +477,7 @@ class AuthState {
     bool? hasBaseUrl,
     bool? pasteBaseUrlPending,
     bool? serverSettingsPending,
-    String? currentBaseUrl,
+    OrganizationEntity? selectedOrganization,
   }) {
     return AuthState(
       isPending: isPending ?? this.isPending,
@@ -469,7 +491,7 @@ class AuthState {
       hasBaseUrl: hasBaseUrl ?? this.hasBaseUrl,
       pasteBaseUrlPending: pasteBaseUrlPending ?? this.pasteBaseUrlPending,
       serverSettingsPending: serverSettingsPending ?? this.serverSettingsPending,
-      currentBaseUrl: currentBaseUrl ?? this.currentBaseUrl,
+      selectedOrganization: selectedOrganization ?? this.selectedOrganization,
     );
   }
 }

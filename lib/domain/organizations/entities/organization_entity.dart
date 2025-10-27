@@ -6,6 +6,8 @@ class OrganizationEntity {
   final String icon;
   final String baseUrl;
 
+  String get imageUrl => '$baseUrl$icon';
+
   OrganizationEntity({
     required this.id,
     required this.name,

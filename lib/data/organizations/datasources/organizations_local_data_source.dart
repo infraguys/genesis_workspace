@@ -33,4 +33,21 @@ class OrganizationsLocalDataSource {
       rethrow;
     }
   }
+
+  Future<OrganizationDto> getOrganizationById(int id) async {
+    try {
+      final response = await _dao.getOrganizationById(id);
+      if (response == null) {
+        throw Exception('Organization not found');
+      }
+      return OrganizationDto(
+        id: response.id,
+        name: response.name,
+        icon: response.icon,
+        baseUrl: response.baseUrl,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

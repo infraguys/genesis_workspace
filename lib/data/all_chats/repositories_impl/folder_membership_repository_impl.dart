@@ -21,30 +21,40 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
   }
 
   @override
-  Future<void> setFoldersForTarget(FolderTarget target, List<int> folderIds) async {
+  Future<void> setFoldersForTarget(
+    FolderTarget target,
+    List<int> folderIds, {
+    required int organizationId,
+  }) async {
     await _localDataSource.setItemFolders(
       itemType: _typeToString(target.type),
       targetId: target.targetId,
       folderIds: folderIds,
       topicName: target.topicName,
+      organizationId: organizationId,
     );
   }
 
   @override
-  Future<List<int>> getFolderIdsForTarget(FolderTarget target) async {
+  Future<List<int>> getFolderIdsForTarget(
+    FolderTarget target, {
+    required int organizationId,
+  }) async {
     return _localDataSource.getFolderIdsForItem(
       itemType: _typeToString(target.type),
       targetId: target.targetId,
       topicName: target.topicName,
+      organizationId: organizationId,
     );
   }
 
   @override
-  Future<void> removeAllForFolder(int folderId) => _localDataSource.deleteByFolderId(folderId);
+  Future<void> removeAllForFolder(int folderId, {required int organizationId}) =>
+      _localDataSource.deleteByFolderId(folderId, organizationId);
 
   @override
-  Future<FolderMembers> getMembersForFolder(int folderId) async {
-    final rows = await _localDataSource.getItemsForFolder(folderId);
+  Future<FolderMembers> getMembersForFolder(int folderId, {required int organizationId}) async {
+    final rows = await _localDataSource.getItemsForFolder(folderId, organizationId);
     final dm = <int>[];
     final channels = <int>[];
     final groups = <int>[];

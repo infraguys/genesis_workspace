@@ -7,8 +7,13 @@ class GetFolderIdsForTargetUseCase {
   final FolderMembershipRepository _repository;
   GetFolderIdsForTargetUseCase(this._repository);
 
-  Future<List<int>> call(FolderTarget target) async {
-    return _repository.getFolderIdsForTarget(target);
+  Future<List<int>> call(
+    FolderTarget target, {
+    required int organizationId,
+  }) async {
+    return _repository.getFolderIdsForTarget(
+      target,
+      organizationId: organizationId,
+    );
   }
 }
-

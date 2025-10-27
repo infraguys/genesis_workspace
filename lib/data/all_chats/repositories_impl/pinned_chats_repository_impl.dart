@@ -11,8 +11,14 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
   PinnedChatsRepositoryImpl(this._localDataSource);
 
   @override
-  Future<List<PinnedChatEntity>> getPinnedChats(int folderId) async {
-    final pinnedChats = await _localDataSource.getPinnedChats(folderId);
+  Future<List<PinnedChatEntity>> getPinnedChats({
+    required int folderId,
+    required int organizationId,
+  }) async {
+    final pinnedChats = await _localDataSource.getPinnedChats(
+      folderId: folderId,
+      organizationId: organizationId,
+    );
     final result = pinnedChats
         .map(
           (chat) => PinnedChatEntity(
@@ -22,6 +28,7 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
             pinnedAt: chat.pinnedAt,
             orderIndex: chat.orderIndex,
             type: chat.type,
+            organizationId: chat.organizationId,
           ),
         )
         .toList();
@@ -34,12 +41,14 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
     required int chatId,
     required int orderIndex,
     required PinnedChatType type,
+    required int organizationId,
   }) async {
     return await _localDataSource.pinChat(
       folderId: folderId,
       chatId: chatId,
       orderIndex: orderIndex,
       type: type,
+      organizationId: organizationId,
     );
   }
 
@@ -54,12 +63,14 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
     required int movedChatId,
     int? previousChatId,
     int? nextChatId,
+    required int organizationId,
   }) async {
     return await _localDataSource.updatePinnedChatOrder(
       folderId: folderId,
       movedChatId: movedChatId,
       previousChatId: previousChatId,
       nextChatId: nextChatId,
+      organizationId: organizationId,
     );
   }
 }
