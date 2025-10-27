@@ -6,6 +6,8 @@ import 'package:genesis_workspace/data/all_chats/dao/pinned_chats_dao.dart';
 import 'package:genesis_workspace/data/all_chats/tables/folder_item_mapping_table.dart';
 import 'package:genesis_workspace/data/all_chats/tables/folder_table.dart';
 import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
+import 'package:genesis_workspace/data/organizations/dao/organizations_dao.dart';
+import 'package:genesis_workspace/data/organizations/tables/organization_table.dart';
 import 'package:genesis_workspace/data/users/dao/recent_dm_dao.dart';
 import 'package:genesis_workspace/data/users/tables/recent_dm_table.dart';
 import 'package:injectable/injectable.dart';
@@ -14,8 +16,8 @@ import 'package:path_provider/path_provider.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [RecentDms, Folders, FolderItems, PinnedChats],
-  daos: [RecentDmDao, FolderDao, FolderItemDao, PinnedChatsDao],
+  tables: [RecentDms, Folders, FolderItems, PinnedChats, Organizations],
+  daos: [RecentDmDao, FolderDao, FolderItemDao, PinnedChatsDao, OrganizationsDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());

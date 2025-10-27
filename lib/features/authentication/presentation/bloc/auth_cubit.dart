@@ -11,6 +11,8 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/add_organization_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
@@ -48,6 +50,7 @@ class AuthCubit extends Cubit<AuthState> {
   final GetCsrftokenUseCase _getCsrftokenUseCase;
   final GetSessionIdUseCase _getSessionIdUseCase;
   final DeleteCsrftokenUseCase _deleteCsrftokenUseCase;
+  final AddOrganizationUseCase _addOrganizationUseCase;
 
   AuthCubit(
     this._sharedPreferences,
@@ -66,6 +69,7 @@ class AuthCubit extends Cubit<AuthState> {
     this._getCsrftokenUseCase,
     this._getSessionIdUseCase,
     this._deleteCsrftokenUseCase,
+    this._addOrganizationUseCase,
   ) : super(
         const AuthState(
           isPending: false,
@@ -115,16 +119,17 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> getServerSettings() async {
     emit(state.copyWith(serverSettingsPending: true));
-    try {
-      await _deleteSessionIdUseCase.call();
-      final response = await _getServerSettingsUseCase.call();
-
-      emit(state.copyWith(serverSettings: response));
-    } catch (e) {
-      inspect(e);
-    } finally {
-      emit(state.copyWith(serverSettingsPending: false));
-    }
+    // try {
+    //   await _deleteSessionIdUseCase.call();
+    //   final response = await _getServerSettingsUseCase.call();
+    //
+    //
+    //   emit(state.copyWith(serverSettings: response));
+    // } catch (e) {
+    //   inspect(e);
+    // } finally {
+    //   emit(state.copyWith(serverSettingsPending: false));
+    // }
     final dio = getIt<Dio>();
     final cookieResponse = await dio.get('${AppConstants.baseUrl}/accounts/login/');
     final csrf = _getCookieFromDio(cookieResponse.headers['set-cookie'], "__Host-csrftoken");
@@ -362,10 +367,26 @@ class AuthCubit extends Cubit<AuthState> {
 
       final dio = getIt<Dio>();
       dio.options.baseUrl = normalized;
+
       emit(state.copyWith(hasBaseUrl: true, currentBaseUrl: normalized));
     } catch (e) {
       inspect(e);
       emit(state.copyWith(hasBaseUrl: false, currentBaseUrl: null));
+    }
+
+    try {
+      final organizationResponse = await _getServerSettingsUseCase.call();
+      inspect(organizationResponse);
+      final OrganizationRequestEntity organization = OrganizationRequestEntity(
+        name: organizationResponse.realmName,
+        icon: organizationResponse.realmIcon,
+        baseUrl: AppConstants.baseUrl,
+      );
+
+      final response = await _addOrganizationUseCase.call(organization);
+      inspect(response);
+    } catch (e) {
+      inspect(e);
     } finally {
       emit(state.copyWith(pasteBaseUrlPending: false));
     }

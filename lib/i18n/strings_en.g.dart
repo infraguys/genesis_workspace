@@ -400,6 +400,9 @@ class TranslationsGeneralEn {
 
 	/// en: 'Nothing here yet'
 	String get nothing_here_yet => 'Nothing here yet';
+
+	/// en: 'Find'
+	String get find => 'Find';
 }
 
 // Path: message_actions
@@ -769,6 +772,7 @@ extension on Translations {
 			case 'error': return 'Error';
 			case 'general.something_went_wrong': return 'Something went wrong';
 			case 'general.nothing_here_yet': return 'Nothing here yet';
+			case 'general.find': return 'Find';
 			case 'message_actions.quote': return 'Quote this message';
 			case 'message_actions.delete': return 'Delete this message';
 			case 'message_actions.star': return 'Star this message';

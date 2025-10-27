@@ -45,6 +45,9 @@ class MessageDto {
 
   final List<ReactionDto> reactions;
 
+  @JsonKey(name: 'recipient_id')
+  final int recipientId;
+
   MessageDto({
     required this.id,
     required this.isMeMessage,
@@ -59,6 +62,7 @@ class MessageDto {
     required this.subject,
     required this.timestamp,
     required this.reactions,
+    required this.recipientId,
   });
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => _$MessageDtoFromJson(json);

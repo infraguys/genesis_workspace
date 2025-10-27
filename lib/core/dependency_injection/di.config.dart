@@ -37,6 +37,12 @@ import 'package:genesis_workspace/data/messages/datasources/messages_data_source
     as _i695;
 import 'package:genesis_workspace/data/messages/repositories_impl/messages_repository_impl.dart'
     as _i971;
+import 'package:genesis_workspace/data/organizations/dao/organizations_dao.dart'
+    as _i500;
+import 'package:genesis_workspace/data/organizations/datasources/organizations_local_data_source.dart'
+    as _i294;
+import 'package:genesis_workspace/data/organizations/repositories_impl/organizations_repository_impl.dart'
+    as _i1065;
 import 'package:genesis_workspace/data/real_time_events/datasources/real_time_events_data_soure.dart'
     as _i735;
 import 'package:genesis_workspace/data/real_time_events/repositories_impl/real_time_events_repository_impl.dart'
@@ -102,6 +108,14 @@ import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags
     as _i664;
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart'
     as _i42;
+import 'package:genesis_workspace/domain/organizations/repositories/organizations_repository.dart'
+    as _i654;
+import 'package:genesis_workspace/domain/organizations/usecases/add_organization_use_case.dart'
+    as _i183;
+import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart'
+    as _i535;
+import 'package:genesis_workspace/domain/organizations/usecases/remove_organization_use_case.dart'
+    as _i240;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
     as _i703;
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart'
@@ -326,8 +340,19 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i909.FolderItemDao(gh<_i606.AppDatabase>()),
     );
     gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
+    gh.factory<_i500.OrganizationsDao>(
+      () => _i500.OrganizationsDao(gh<_i606.AppDatabase>()),
+    );
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
+    );
+    gh.factory<_i294.OrganizationsLocalDataSource>(
+      () => _i294.OrganizationsLocalDataSource(gh<_i500.OrganizationsDao>()),
+    );
+    gh.factory<_i654.OrganizationsRepository>(
+      () => _i1065.OrganizationsRepositoryImpl(
+        gh<_i294.OrganizationsLocalDataSource>(),
+      ),
     );
     gh.factory<_i277.FolderLocalDataSource>(
       () => _i277.FolderLocalDataSource(gh<_i483.FolderDao>()),
@@ -477,6 +502,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i812.AddRecentDmUseCase>(
       () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
     );
+    gh.factory<_i183.AddOrganizationUseCase>(
+      () => _i183.AddOrganizationUseCase(gh<_i654.OrganizationsRepository>()),
+    );
+    gh.factory<_i535.GetAllOrganizationsUseCase>(
+      () =>
+          _i535.GetAllOrganizationsUseCase(gh<_i654.OrganizationsRepository>()),
+    );
+    gh.factory<_i240.RemoveOrganizationUseCase>(
+      () =>
+          _i240.RemoveOrganizationUseCase(gh<_i654.OrganizationsRepository>()),
+    );
     gh.factory<_i849.DeleteFolderUseCase>(
       () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
@@ -562,6 +598,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i725.PinnedChatsRepository>(),
       ),
     );
+    gh.factory<_i631.UnpinChatUseCase>(
+      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
+      () => _i1057.UpdatePinnedChatOrderUseCase(
+        gh<_i725.PinnedChatsRepository>(),
+      ),
+    );
+    gh.factory<_i1012.PinChatUseCase>(
+      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i126.GetPinnedChatsUseCase>(
+      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
     gh.lazySingleton<_i862.AuthCubit>(
       () => _i862.AuthCubit(
         gh<_i460.SharedPreferences>(),
@@ -580,22 +630,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i862.GetCsrftokenUseCase>(),
         gh<_i350.GetSessionIdUseCase>(),
         gh<_i819.DeleteCsrftokenUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
       ),
       dispose: _i862.disposeAuthCubit,
-    );
-    gh.factory<_i631.UnpinChatUseCase>(
-      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
-      () => _i1057.UpdatePinnedChatOrderUseCase(
-        gh<_i725.PinnedChatsRepository>(),
-      ),
-    );
-    gh.factory<_i1012.PinChatUseCase>(
-      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i126.GetPinnedChatsUseCase>(
-      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
     );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(

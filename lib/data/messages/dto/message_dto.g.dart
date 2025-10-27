@@ -24,6 +24,7 @@ MessageDto _$MessageDtoFromJson(Map<String, dynamic> json) => MessageDto(
   reactions: (json['reactions'] as List<dynamic>)
       .map((e) => ReactionDto.fromJson(e as Map<String, dynamic>))
       .toList(),
+  recipientId: (json['recipient_id'] as num).toInt(),
 );
 
 Map<String, dynamic> _$MessageDtoToJson(MessageDto instance) =>
@@ -43,6 +44,7 @@ Map<String, dynamic> _$MessageDtoToJson(MessageDto instance) =>
       'subject': instance.subject,
       'timestamp': instance.timestamp,
       'reactions': instance.reactions,
+      'recipient_id': instance.recipientId,
     };
 
 const _$MessageTypeEnumMap = {

@@ -246,6 +246,7 @@ class _TranslationsGeneralRu implements TranslationsGeneralEn {
 	// Translations
 	@override String get something_went_wrong => 'Что-то пошло не так';
 	@override String get nothing_here_yet => 'Здесь пока ничего нет';
+	@override String get find => 'Найти';
 }
 
 // Path: message_actions
@@ -500,6 +501,7 @@ extension on TranslationsRu {
 			case 'error': return 'Ошибка';
 			case 'general.something_went_wrong': return 'Что-то пошло не так';
 			case 'general.nothing_here_yet': return 'Здесь пока ничего нет';
+			case 'general.find': return 'Найти';
 			case 'message_actions.quote': return 'Цитировать это сообщение';
 			case 'message_actions.delete': return 'Удалить это сообщение';
 			case 'message_actions.star': return 'Отметить это сообщение';
