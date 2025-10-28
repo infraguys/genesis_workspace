@@ -7,7 +7,7 @@ class DeleteTokenUseCase {
 
   DeleteTokenUseCase(this.repository);
 
-  Future<void> call() async {
-    await repository.deleteToken();
+  Future<void> call({required String baseUrl}) async {
+    await repository.deleteToken(baseUrl: baseUrl);
   }
 }

@@ -310,6 +310,7 @@ class _TranslationsOrganizationsRu implements TranslationsOrganizationsEn {
 
 	// Translations
 	@override late final _TranslationsOrganizationsAddDialogRu addDialog = _TranslationsOrganizationsAddDialogRu._(_root);
+	@override String get delete_organization => 'Удалить организацию';
 }
 
 // Path: channel
@@ -564,6 +565,7 @@ extension on TranslationsRu {
 			case 'organizations.addDialog.urlRequired': return 'Введите ссылку на организацию';
 			case 'organizations.addDialog.urlInvalid': return 'Некорректная ссылка';
 			case 'organizations.addDialog.submit': return 'Добавить';
+			case 'organizations.delete_organization': return 'Удалить организацию';
 			case 'channel.muteChannel': return 'Заглушить канал';
 			case 'channel.unmuteChannel': return 'Включить уведомления канала';
 			case 'chat.pinChat': return 'Закрепить чат';

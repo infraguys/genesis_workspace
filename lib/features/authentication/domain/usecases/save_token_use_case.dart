@@ -7,7 +7,11 @@ class SaveTokenUseCase {
 
   SaveTokenUseCase(this.repository);
 
-  Future<void> call({required String email, required String token}) async {
-    await repository.saveToken(token: token, email: email);
+  Future<void> call({
+    required String baseUrl,
+    required String email,
+    required String token,
+  }) async {
+    await repository.saveToken(baseUrl: baseUrl, token: token, email: email);
   }
 }

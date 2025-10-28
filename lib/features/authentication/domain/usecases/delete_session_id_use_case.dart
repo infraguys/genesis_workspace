@@ -7,7 +7,7 @@ class DeleteSessionIdUseCase {
 
   DeleteSessionIdUseCase(this._repository);
 
-  Future<void> call() async {
-    await _repository.deleteSessionId();
+  Future<void> call({required String baseUrl}) async {
+    await _repository.deleteSessionId(baseUrl: baseUrl);
   }
 }

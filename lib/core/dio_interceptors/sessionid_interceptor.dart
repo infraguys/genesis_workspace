@@ -11,7 +11,7 @@ class SessionidInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final sessionId = await _tokenStorage.getSessionId(); // __Host-sessionid
+      final sessionId = await _tokenStorage.getSessionId(AppConstants.baseUrl); // __Host-sessionid
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
       final existingCookie = (options.headers['Cookie'] as String?)?.trim();

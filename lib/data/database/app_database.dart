@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart';
 import 'package:genesis_workspace/data/all_chats/dao/folder_item_dao.dart';
 import 'package:genesis_workspace/data/all_chats/dao/pinned_chats_dao.dart';
@@ -23,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -82,6 +83,56 @@ class AppDatabase extends _$AppDatabase {
           ),
         );
       }
+      if (from < 12) {
+        int? defaultOrganizationId = AppConstants.selectedOrganizationId;
+        if (defaultOrganizationId == null) {
+          final existingOrganizations = await customSelect(
+            'SELECT id FROM organizations ORDER BY id LIMIT 1',
+            readsFrom: {organizations},
+          ).get();
+          if (existingOrganizations.isNotEmpty) {
+            defaultOrganizationId = existingOrganizations.first.data['id'] as int;
+          }
+        }
+
+        await transaction(() async {
+          await customStatement('ALTER TABLE folders RENAME TO folders_old;');
+          await migrator.createTable(folders);
+          if (defaultOrganizationId != null) {
+            await customStatement(
+              'INSERT INTO folders '
+              '(id, title, icon_code_point, background_color_value, unread_count, system_type, organization_id) '
+              'SELECT id, title, icon_code_point, background_color_value, unread_count, system_type, $defaultOrganizationId '
+              'FROM folders_old;',
+            );
+          }
+          await customStatement('DROP TABLE folders_old;');
+
+          await customStatement('ALTER TABLE folder_items RENAME TO folder_items_old;');
+          await migrator.createTable(folderItems);
+          if (defaultOrganizationId != null) {
+            await customStatement(
+              'INSERT INTO folder_items '
+              '(id, folder_id, organization_id, item_type, target_id, topic_name) '
+              'SELECT id, folder_id, $defaultOrganizationId, item_type, target_id, topic_name '
+              'FROM folder_items_old;',
+            );
+          }
+          await customStatement('DROP TABLE folder_items_old;');
+
+          await customStatement('ALTER TABLE pinned_chats RENAME TO pinned_chats_old;');
+          await migrator.createTable(pinnedChats);
+          if (defaultOrganizationId != null) {
+            await customStatement(
+              'INSERT INTO pinned_chats '
+              '(id, folder_id, order_index, chat_id, pinned_at, type, organization_id) '
+              'SELECT id, folder_id, order_index, chat_id, pinned_at, type, $defaultOrganizationId '
+              'FROM pinned_chats_old;',
+            );
+          }
+          await customStatement('DROP TABLE pinned_chats_old;');
+        });
+      }
     },
   );
 
@@ -98,4 +149,16 @@ class AppDatabase extends _$AppDatabase {
 
   @disposeMethod
   Future<void> dispose() => close();
+
+  Future<void> clearAllData() async {
+    await transaction(() async {
+      await batch((batch) {
+        batch.deleteAll(folderItems);
+        batch.deleteAll(pinnedChats);
+        batch.deleteAll(folders);
+        batch.deleteAll(recentDms);
+        batch.deleteAll(organizations);
+      });
+    });
+  }
 }

@@ -7,7 +7,7 @@ class DeleteCsrftokenUseCase {
 
   DeleteCsrftokenUseCase(this._repository);
 
-  Future<void> call() async {
-    await _repository.deleteCsrfToken();
+  Future<void> call({required String baseUrl}) async {
+    await _repository.deleteCsrfToken(baseUrl: baseUrl);
   }
 }

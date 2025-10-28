@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -163,7 +165,14 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                     },
                   ),
                   const SizedBox(height: 16),
-
+                  if (kDebugMode)
+                    TextButton(
+                      onPressed: () {
+                        context.read<SettingsCubit>().clearLocalDatabase();
+                        context.read<SettingsCubit>().clearSharedPreferences();
+                      },
+                      child: Text("clear data"),
+                    ),
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,
                     builder: (context, value, _) {

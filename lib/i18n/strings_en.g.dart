@@ -516,6 +516,9 @@ class TranslationsOrganizationsEn {
 
 	// Translations
 	late final TranslationsOrganizationsAddDialogEn addDialog = TranslationsOrganizationsAddDialogEn._(_root);
+
+	/// en: 'Delete organization'
+	String get delete_organization => 'Delete organization';
 }
 
 // Path: channel
@@ -851,6 +854,7 @@ extension on Translations {
 			case 'organizations.addDialog.urlRequired': return 'Enter the organization link';
 			case 'organizations.addDialog.urlInvalid': return 'Link is not valid';
 			case 'organizations.addDialog.submit': return 'Add';
+			case 'organizations.delete_organization': return 'Delete organization';
 			case 'channel.muteChannel': return 'Mute channel';
 			case 'channel.unmuteChannel': return 'Unmute channel';
 			case 'chat.pinChat': return 'Pin chat';

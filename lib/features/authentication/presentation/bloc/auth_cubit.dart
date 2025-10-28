@@ -94,11 +94,17 @@ class AuthCubit extends Cubit<AuthState> {
   final DioFactory _dioFactory;
   String? _csrfToken;
 
+  String get _baseUrl => AppConstants.baseUrl.trim();
+
   Future<void> login(String username, String password) async {
     emit(state.copyWith(isPending: true, errorMessage: null));
     try {
       final ApiKeyEntity response = await _fetchApiKeyUseCase.call(username, password);
-      await _saveTokenUseCase.call(email: response.email, token: response.apiKey);
+      await _saveTokenUseCase.call(
+        baseUrl: _baseUrl,
+        email: response.email,
+        token: response.apiKey,
+      );
 
       emit(state.copyWith(isAuthorized: true, errorMessage: null));
     } on DioException catch (e, st) {
@@ -123,7 +129,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> getServerSettings() async {
     emit(state.copyWith(serverSettingsPending: true));
     try {
-      await _deleteSessionIdUseCase.call();
+      await _deleteSessionIdUseCase.call(baseUrl: _baseUrl);
       if (state.serverSettings == null) {
         final response = await _getServerSettingsUseCase.call();
 
@@ -205,7 +211,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       if (match != null) {
         final csrfToken0 = match.group(1);
-        await _saveCsrftokenUseCase.call(csrftoken: csrfToken0 ?? '');
+        await _saveCsrftokenUseCase.call(baseUrl: _baseUrl, csrftoken: csrfToken0 ?? '');
       } else {
         print('CSRF token not found');
       }
@@ -227,8 +233,8 @@ class AuthCubit extends Cubit<AuthState> {
             }
           }
 
-          await _saveCsrftokenUseCase.call(csrftoken: csrfToken ?? '');
-          await _saveSessionIdUseCase.call(sessionId: sessionId ?? '');
+          await _saveCsrftokenUseCase.call(baseUrl: _baseUrl, csrftoken: csrfToken ?? '');
+          await _saveSessionIdUseCase.call(baseUrl: _baseUrl, sessionId: sessionId ?? '');
         }
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       }
@@ -287,16 +293,16 @@ class AuthCubit extends Cubit<AuthState> {
       await Future.wait(futures);
       await _realTimeService.stopPolling();
       await Future.wait([
-        _deleteTokenUseCase.call(),
-        _deleteSessionIdUseCase.call(),
-        _deleteCsrftokenUseCase.call(),
+        _deleteTokenUseCase.call(baseUrl: _baseUrl),
+        _deleteSessionIdUseCase.call(baseUrl: _baseUrl),
+        _deleteCsrftokenUseCase.call(baseUrl: _baseUrl),
       ]);
     } catch (e, st) {
       inspect(e);
       await Future.wait([
-        _deleteTokenUseCase.call(),
-        _deleteSessionIdUseCase.call(),
-        _deleteCsrftokenUseCase.call(),
+        _deleteTokenUseCase.call(baseUrl: _baseUrl),
+        _deleteSessionIdUseCase.call(baseUrl: _baseUrl),
+        _deleteCsrftokenUseCase.call(baseUrl: _baseUrl),
       ]);
     } finally {
       if (kIsWeb) {
@@ -310,9 +316,9 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(isPending: true));
     try {
       await Future.wait([
-        _deleteTokenUseCase.call(),
-        _deleteSessionIdUseCase.call(),
-        _deleteCsrftokenUseCase.call(),
+        _deleteTokenUseCase.call(baseUrl: _baseUrl),
+        _deleteSessionIdUseCase.call(baseUrl: _baseUrl),
+        _deleteCsrftokenUseCase.call(baseUrl: _baseUrl),
       ]);
       emit(state.copyWith(isPending: false, isAuthorized: false, errorMessage: null));
     } catch (e, st) {
@@ -338,7 +344,7 @@ class AuthCubit extends Cubit<AuthState> {
       AppConstants.setBaseUrl(organization.baseUrl);
       AppConstants.setSelectedOrganizationId(organization.id);
       emit(state.copyWith(hasBaseUrl: true, selectedOrganization: organization));
-      final String? token = await _getTokenUseCase.call();
+      final String? token = await _getTokenUseCase.call(_baseUrl);
 
       if (token != null) {
         isAuthorized = true;
@@ -350,8 +356,8 @@ class AuthCubit extends Cubit<AuthState> {
           return;
         }
         try {
-          final String? csrf = await _getCsrftokenUseCase.call();
-          final String? sessionId = await _getSessionIdUseCase.call();
+          final String? csrf = await _getCsrftokenUseCase.call(_baseUrl);
+          final String? sessionId = await _getSessionIdUseCase.call(_baseUrl);
 
           if (csrf != null && sessionId != null) {
             isAuthorized = true;

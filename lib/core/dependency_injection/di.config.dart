@@ -229,6 +229,8 @@ import 'package:genesis_workspace/navigation/app_shell_controller.dart'
     as _i188;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
+import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart'
+    as _i377;
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart'
     as _i113;
 import 'package:genesis_workspace/services/real_time/real_time_service.dart'
@@ -248,7 +250,9 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final coreModule = _$CoreModule();
     gh.factory<_i440.DioFactory>(() => _i440.DioFactory());
-    gh.factory<_i350.GetSessionIdUseCase>(() => _i350.GetSessionIdUseCase());
+    gh.factory<_i419.OrganizationsDataSource>(
+      () => _i419.OrganizationsDataSource(),
+    );
     gh.factory<_i397.GetVersionConfigUseCase>(
       () => _i397.GetVersionConfigUseCase(),
     );
@@ -256,9 +260,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1039.GetEventsByQueueIdUseCase(),
     );
     gh.factory<_i477.RegisterQueueUseCase>(() => _i477.RegisterQueueUseCase());
-    gh.factory<_i419.OrganizationsDataSource>(
-      () => _i419.OrganizationsDataSource(),
-    );
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
     );
@@ -359,8 +360,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
     );
+    gh.factory<_i350.GetSessionIdUseCase>(
+      () => _i350.GetSessionIdUseCase(gh<_i958.TokenStorage>()),
+    );
     gh.factory<_i294.OrganizationsLocalDataSource>(
       () => _i294.OrganizationsLocalDataSource(gh<_i500.OrganizationsDao>()),
+    );
+    gh.lazySingleton<_i377.OrganizationSwitcherService>(
+      () => _i377.OrganizationSwitcherService(
+        gh<_i460.SharedPreferences>(),
+        gh<_i958.TokenStorage>(),
+        gh<_i440.DioFactory>(),
+      ),
     );
     gh.factory<_i277.FolderLocalDataSource>(
       () => _i277.FolderLocalDataSource(gh<_i483.FolderDao>()),
@@ -516,12 +527,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i812.AddRecentDmUseCase>(
       () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
     );
+    gh.factory<_i286.GetOrganizationSettingsUseCase>(
+      () => _i286.GetOrganizationSettingsUseCase(
+        gh<_i654.OrganizationsRepository>(),
+      ),
+    );
     gh.factory<_i183.AddOrganizationUseCase>(
       () => _i183.AddOrganizationUseCase(gh<_i654.OrganizationsRepository>()),
     );
     gh.factory<_i535.GetAllOrganizationsUseCase>(
       () =>
           _i535.GetAllOrganizationsUseCase(gh<_i654.OrganizationsRepository>()),
+    );
+    gh.factory<_i724.WatchOrganizationsUseCase>(
+      () =>
+          _i724.WatchOrganizationsUseCase(gh<_i654.OrganizationsRepository>()),
     );
     gh.factory<_i240.RemoveOrganizationUseCase>(
       () =>
@@ -531,15 +551,6 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i401.GetOrganizationByIdUseCase(gh<_i654.OrganizationsRepository>()),
     );
-    gh.factory<_i724.WatchOrganizationsUseCase>(
-      () =>
-          _i724.WatchOrganizationsUseCase(gh<_i654.OrganizationsRepository>()),
-    );
-    gh.factory<_i286.GetOrganizationSettingsUseCase>(
-      () => _i286.GetOrganizationSettingsUseCase(
-        gh<_i654.OrganizationsRepository>(),
-      ),
-    );
     gh.factory<_i849.DeleteFolderUseCase>(
       () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
@@ -548,6 +559,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i125.AddFolderUseCase>(
       () => _i125.AddFolderUseCase(gh<_i48.FolderRepository>()),
+    );
+    gh.factory<_i155.SettingsCubit>(
+      () => _i155.SettingsCubit(
+        gh<_i812.AddRecentDmUseCase>(),
+        gh<_i445.GetRecentDmsUseCase>(),
+        gh<_i606.AppDatabase>(),
+        gh<_i460.SharedPreferences>(),
+      ),
     );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
@@ -593,6 +612,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
     );
+    gh.factory<_i214.OrganizationsCubit>(
+      () => _i214.OrganizationsCubit(
+        gh<_i724.WatchOrganizationsUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
+        gh<_i286.GetOrganizationSettingsUseCase>(),
+        gh<_i240.RemoveOrganizationUseCase>(),
+        gh<_i377.OrganizationSwitcherService>(),
+      ),
+    );
     gh.factory<_i721.SaveSessionIdUseCase>(
       () => _i721.SaveSessionIdUseCase(gh<_i1022.AuthRepository>()),
     );
@@ -611,20 +639,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i725.PinnedChatsRepository>(
       () => _i835.PinnedChatsRepositoryImpl(
         gh<_i796.PinnedChatsLocalDataSource>(),
-      ),
-    );
-    gh.factory<_i214.OrganizationsCubit>(
-      () => _i214.OrganizationsCubit(
-        gh<_i724.WatchOrganizationsUseCase>(),
-        gh<_i183.AddOrganizationUseCase>(),
-        gh<_i286.GetOrganizationSettingsUseCase>(),
-        gh<_i240.RemoveOrganizationUseCase>(),
-      ),
-    );
-    gh.factory<_i155.SettingsCubit>(
-      () => _i155.SettingsCubit(
-        gh<_i812.AddRecentDmUseCase>(),
-        gh<_i445.GetRecentDmsUseCase>(),
       ),
     );
     gh.factory<_i815.GetFoldersUseCase>(

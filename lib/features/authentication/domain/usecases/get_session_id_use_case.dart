@@ -3,11 +3,11 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class GetSessionIdUseCase {
-  final _tokenStorage = TokenStorageFactory.create();
+  final TokenStorage _tokenStorage;
 
-  GetSessionIdUseCase();
+  GetSessionIdUseCase(this._tokenStorage);
 
-  Future<String?> call() async {
-    return _tokenStorage.getSessionId();
+  Future<String?> call(String baseUrl) async {
+    return _tokenStorage.getSessionId(baseUrl);
   }
 }

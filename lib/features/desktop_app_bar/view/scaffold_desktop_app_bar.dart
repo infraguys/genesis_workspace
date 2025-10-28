@@ -57,6 +57,7 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                               BlocBuilder<OrganizationsCubit, OrganizationsState>(
                                 builder: (context, state) {
                                   final organizations = state.organizations;
+                                  final selectedId = state.selectedOrganizationId;
                                   return SizedBox(
                                     height: 40,
                                     child: ListView.separated(
@@ -72,8 +73,12 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                                         return OrganizationItem(
                                           unreadCount: organization.unreadCount,
                                           imagePath: organization.imageUrl,
-                                          isSelected: index == 0,
-                                          onTap: () {},
+                                          isSelected: organization.id == selectedId,
+                                          onTap: () {
+                                            context
+                                                .read<OrganizationsCubit>()
+                                                .selectOrganization(organization);
+                                          },
                                           onDelete: () async {
                                             await context
                                                 .read<OrganizationsCubit>()
