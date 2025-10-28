@@ -67,6 +67,7 @@ class TranslationsRu extends Translations {
 	@override String get dropFilesToUpload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancelEditing => 'Отменить редактирование';
 	@override late final TranslationsFoldersRu folders = TranslationsFoldersRu._(_root);
+	@override late final TranslationsOrganizationsRu organizations = TranslationsOrganizationsRu._(_root);
 	@override late final TranslationsChannelRu channel = TranslationsChannelRu._(_root);
 	@override late final TranslationsChatRu chat = TranslationsChatRu._(_root);
 	@override late final TranslationsGroupRu group = TranslationsGroupRu._(_root);
@@ -243,6 +244,7 @@ class TranslationsGeneralRu extends TranslationsGeneralEn {
 	@override String get somethingWentWrong => 'Что-то пошло не так';
 	@override String get nothingHereYet => 'Здесь пока ничего нет';
 	@override String get find => 'Найти';
+	@override String get close => 'Закрыть';
 }
 
 // Path: messageActions
@@ -294,6 +296,17 @@ class TranslationsFoldersRu extends TranslationsFoldersEn {
 	@override String get deleteConfirmTitle => 'Удалить папку?';
 	@override String deleteConfirmText({required Object folderName}) => 'Вы уверены, что хотите удалить "${folderName}"?';
 	@override String get folderIsEmpty => 'Папка пустая';
+}
+
+// Path: organizations
+class TranslationsOrganizationsRu extends TranslationsOrganizationsEn {
+	TranslationsOrganizationsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override late final TranslationsOrganizationsAddDialogRu addDialog = TranslationsOrganizationsAddDialogRu._(_root);
+	@override String get deleteOrganization => 'Удалить организацию';
 }
 
 // Path: channel
@@ -389,6 +402,22 @@ class TranslationsUpdateForceRu extends TranslationsUpdateForceEn {
 	@override String get update => 'Обновить';
 	@override String get unsupportedPlatform => 'Обновления на этой платформе пока не поддержаны.';
 	@override String failedToStart({required Object error}) => 'Не удалось запустить обновление: ${error}';
+}
+
+// Path: organizations.addDialog
+class TranslationsOrganizationsAddDialogRu extends TranslationsOrganizationsAddDialogEn {
+	TranslationsOrganizationsAddDialogRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Добавить организацию';
+	@override String get description => 'Укажите ссылку на организацию, чтобы добавить её в список.';
+	@override String get urlLabel => 'Ссылка на организацию';
+	@override String get urlHint => 'https://example.com';
+	@override String get urlRequired => 'Введите ссылку на организацию';
+	@override String get urlInvalid => 'Некорректная ссылка';
+	@override String get submit => 'Добавить';
 }
 
 // Path: groupChat.createDialog

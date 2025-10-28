@@ -97,117 +97,98 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
       builder: (context, state) {
         final bool isPending = state.pasteBaseUrlPending;
 
-        return Scaffold(
-          appBar: AppBar(title: Text(t.auth.pasteBaseUrlHere)),
-          body: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 520),
-                  child: Card(
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(t.auth.enterOrPasteBaseUrlTitle, style: theme.textTheme.titleLarge),
-                          const SizedBox(height: 8),
-                          Text(
-                            t.auth.baseUrlUsageHint,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ValueListenableBuilder<TextEditingValue>(
-                            valueListenable: _controller,
-                            builder: (context, value, _) {
-                              final bool hasText = value.text.trim().isNotEmpty;
-
-                              return TextField(
-                                controller: _controller,
-                                focusNode: _focusNode,
-                                autofocus: true,
-                                keyboardType: TextInputType.url,
-                                textInputAction: TextInputAction.done,
-                                onSubmitted: (_) => _submit(),
-                                onChanged: _validate,
-                                decoration: InputDecoration(
-                                  labelText: t.auth.baseUrlLabel, // добавьте ключ
-                                  hintText: t.auth.baseUrlHint,
-                                  errorText: _validationError,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: theme.colorScheme.primary),
-                                  ),
-                                  suffixIconConstraints: const BoxConstraints(
-                                    minHeight: 0,
-                                    minWidth: 0,
-                                  ),
-                                  suffixIcon: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        tooltip: t.auth.paste,
-                                        icon: const Icon(Icons.content_paste_rounded),
-                                        onPressed: _pasteFromClipboard,
-                                      ),
-                                      if (hasText)
-                                        IconButton(
-                                          tooltip: t.auth.clear,
-                                          icon: const Icon(Icons.clear_rounded),
-                                          onPressed: () {
-                                            setState(_controller.clear);
-                                            _validate('');
-                                          },
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          ValueListenableBuilder<TextEditingValue>(
-                            valueListenable: _controller,
-                            builder: (context, value, _) {
-                              final bool enabled =
-                                  value.text.trim().isNotEmpty &&
-                                  _validationError == null &&
-                                  !_submitting;
-
-                              return SizedBox(
-                                height: 48,
-                                child: ElevatedButton(
-                                  onPressed: enabled ? _submit : null,
-                                  style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: (_submitting || isPending)
-                                      ? const SizedBox(
-                                          height: 22,
-                                          width: 22,
-                                          child: CircularProgressIndicator(strokeWidth: 2),
-                                        )
-                                      : Text(t.auth.saveAndContinue),
-                                ).pending(isPending),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(t.auth.enterOrPasteBaseUrlTitle, style: theme.textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text(
+                    t.auth.baseUrlUsageHint,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, _) {
+                      final bool hasText = value.text.trim().isNotEmpty;
+
+                      return TextField(
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        autofocus: true,
+                        keyboardType: TextInputType.url,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _submit(),
+                        onChanged: _validate,
+                        decoration: InputDecoration(
+                          labelText: t.auth.baseUrlLabel, // добавьте ключ
+                          hintText: t.auth.baseUrlHint,
+                          errorText: _validationError,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: theme.colorScheme.primary),
+                          ),
+                          suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: t.auth.paste,
+                                icon: const Icon(Icons.content_paste_rounded),
+                                onPressed: _pasteFromClipboard,
+                              ),
+                              if (hasText)
+                                IconButton(
+                                  tooltip: t.auth.clear,
+                                  icon: const Icon(Icons.clear_rounded),
+                                  onPressed: () {
+                                    setState(_controller.clear);
+                                    _validate('');
+                                  },
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, _) {
+                      final bool enabled =
+                          value.text.trim().isNotEmpty && _validationError == null && !_submitting;
+
+                      return SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: enabled ? _submit : null,
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: (_submitting || isPending)
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(t.auth.saveAndContinue),
+                        ).pending(isPending),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),

@@ -7,7 +7,7 @@ class AddOrganizationUseCase {
   final OrganizationsRepository _repository;
   AddOrganizationUseCase(this._repository);
 
-  Future<int> call(OrganizationRequestEntity body) async {
+  Future<OrganizationEntity> call(OrganizationRequestEntity body) async {
     return await _repository.addOrganization(body);
   }
 }

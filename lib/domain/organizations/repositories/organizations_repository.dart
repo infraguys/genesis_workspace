@@ -1,7 +1,8 @@
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
+import 'package:genesis_workspace/features/authentication/domain/entities/server_settings_entity.dart';
 
 abstract class OrganizationsRepository {
-  Future<int> addOrganization(OrganizationRequestEntity body);
+  Future<OrganizationEntity> addOrganization(OrganizationRequestEntity body);
 
   Future<void> removeOrganization(int id);
 
@@ -10,4 +11,6 @@ abstract class OrganizationsRepository {
   Future<OrganizationEntity> getOrganizationById(int id);
 
   Stream<List<OrganizationEntity>> watchOrganizations();
+
+  Future<ServerSettingsEntity> getOrganizationSettings(String url);
 }

@@ -71,6 +71,7 @@ class TranslationsRu implements Translations {
 	@override String get drop_files_to_upload => 'Отпустите файлы, чтобы загрузить';
 	@override String get cancel_editing => 'Отменить редактирование';
 	@override late final _TranslationsFoldersRu folders = _TranslationsFoldersRu._(_root);
+	@override late final _TranslationsOrganizationsRu organizations = _TranslationsOrganizationsRu._(_root);
 	@override late final _TranslationsChannelRu channel = _TranslationsChannelRu._(_root);
 	@override late final _TranslationsChatRu chat = _TranslationsChatRu._(_root);
 	@override late final _TranslationsGroupRu group = _TranslationsGroupRu._(_root);
@@ -247,6 +248,7 @@ class _TranslationsGeneralRu implements TranslationsGeneralEn {
 	@override String get something_went_wrong => 'Что-то пошло не так';
 	@override String get nothing_here_yet => 'Здесь пока ничего нет';
 	@override String get find => 'Найти';
+	@override String get close => 'Закрыть';
 }
 
 // Path: message_actions
@@ -298,6 +300,16 @@ class _TranslationsFoldersRu implements TranslationsFoldersEn {
 	@override String get deleteConfirmTitle => 'Удалить папку?';
 	@override String get deleteConfirmText => 'Вы уверены, что хотите удалить "{folderName}"?';
 	@override String get folder_is_empty => 'Папка пустая';
+}
+
+// Path: organizations
+class _TranslationsOrganizationsRu implements TranslationsOrganizationsEn {
+	_TranslationsOrganizationsRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override late final _TranslationsOrganizationsAddDialogRu addDialog = _TranslationsOrganizationsAddDialogRu._(_root);
 }
 
 // Path: channel
@@ -393,6 +405,22 @@ class _TranslationsUpdateForceRu implements TranslationsUpdateForceEn {
 	@override String get update => 'Обновить';
 	@override String get unsupported_platform => 'Обновления на этой платформе пока не поддержаны.';
 	@override String get failed_to_start => 'Не удалось запустить обновление: {error}';
+}
+
+// Path: organizations.addDialog
+class _TranslationsOrganizationsAddDialogRu implements TranslationsOrganizationsAddDialogEn {
+	_TranslationsOrganizationsAddDialogRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Добавить организацию';
+	@override String get description => 'Укажите ссылку на организацию, чтобы добавить её в список.';
+	@override String get urlLabel => 'Ссылка на организацию';
+	@override String get urlHint => 'https://example.com';
+	@override String get urlRequired => 'Введите ссылку на организацию';
+	@override String get urlInvalid => 'Некорректная ссылка';
+	@override String get submit => 'Добавить';
 }
 
 // Path: group_chat.create_dialog
@@ -502,6 +530,7 @@ extension on TranslationsRu {
 			case 'general.something_went_wrong': return 'Что-то пошло не так';
 			case 'general.nothing_here_yet': return 'Здесь пока ничего нет';
 			case 'general.find': return 'Найти';
+			case 'general.close': return 'Закрыть';
 			case 'message_actions.quote': return 'Цитировать это сообщение';
 			case 'message_actions.delete': return 'Удалить это сообщение';
 			case 'message_actions.star': return 'Отметить это сообщение';
@@ -528,6 +557,13 @@ extension on TranslationsRu {
 			case 'folders.deleteConfirmTitle': return 'Удалить папку?';
 			case 'folders.deleteConfirmText': return 'Вы уверены, что хотите удалить "{folderName}"?';
 			case 'folders.folder_is_empty': return 'Папка пустая';
+			case 'organizations.addDialog.title': return 'Добавить организацию';
+			case 'organizations.addDialog.description': return 'Укажите ссылку на организацию, чтобы добавить её в список.';
+			case 'organizations.addDialog.urlLabel': return 'Ссылка на организацию';
+			case 'organizations.addDialog.urlHint': return 'https://example.com';
+			case 'organizations.addDialog.urlRequired': return 'Введите ссылку на организацию';
+			case 'organizations.addDialog.urlInvalid': return 'Некорректная ссылка';
+			case 'organizations.addDialog.submit': return 'Добавить';
 			case 'channel.muteChannel': return 'Заглушить канал';
 			case 'channel.unmuteChannel': return 'Включить уведомления канала';
 			case 'chat.pinChat': return 'Закрепить чат';

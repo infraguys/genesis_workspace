@@ -7,7 +7,7 @@ class OrganizationEntity {
   final String baseUrl;
   final int unreadCount;
 
-  String get imageUrl => '$baseUrl$icon';
+  String get imageUrl => icon.contains('https://') ? icon : '$baseUrl$icon';
 
   OrganizationEntity({
     required this.id,
@@ -31,10 +31,6 @@ class OrganizationRequestEntity {
     required this.unreadCount,
   });
 
-  OrganizationRequestDto toDto() => OrganizationRequestDto(
-        name: name,
-        icon: icon,
-        baseUrl: baseUrl,
-        unreadCount: unreadCount,
-      );
+  OrganizationRequestDto toDto() =>
+      OrganizationRequestDto(name: name, icon: icon, baseUrl: baseUrl, unreadCount: unreadCount);
 }

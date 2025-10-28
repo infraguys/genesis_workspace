@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/desktop_app_bar/view/branch_item.dart';
 import 'package:genesis_workspace/features/desktop_app_bar/view/organization_item.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
+import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -73,6 +74,11 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                                           imagePath: organization.imageUrl,
                                           isSelected: index == 0,
                                           onTap: () {},
+                                          onDelete: () async {
+                                            await context
+                                                .read<OrganizationsCubit>()
+                                                .removeOrganization(organization.id);
+                                          },
                                         );
                                       },
                                     ),
@@ -86,7 +92,18 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                                   height: 40,
                                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                                   child: InkWell(
-                                    onTap: () {},
+                                    onTap: () async {
+                                      final url = await showDialog<String>(
+                                        context: context,
+                                        builder: (BuildContext dialogContext) =>
+                                            const AddOrganizationDialog(),
+                                      );
+                                      if (url != null && context.mounted) {
+                                        await context.read<OrganizationsCubit>().addOrganization(
+                                          url,
+                                        );
+                                      }
+                                    },
                                     borderRadius: BorderRadius.circular(8),
                                     mouseCursor: SystemMouseCursors.click,
                                     overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {

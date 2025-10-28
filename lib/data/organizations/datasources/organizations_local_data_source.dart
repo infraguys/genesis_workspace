@@ -10,8 +10,15 @@ class OrganizationsLocalDataSource {
 
   OrganizationsLocalDataSource(this._dao);
 
-  Future<int> addOrganization(OrganizationRequestDto body) async {
-    return _dao.insertOrganization(
+  Future<OrganizationDto> addOrganization(OrganizationRequestDto body) async {
+    final int id = await _dao.insertOrganization(
+      name: body.name,
+      icon: body.icon,
+      baseUrl: body.baseUrl,
+      unreadCount: body.unreadCount,
+    );
+    return OrganizationDto(
+      id: id,
       name: body.name,
       icon: body.icon,
       baseUrl: body.baseUrl,
@@ -29,18 +36,18 @@ class OrganizationsLocalDataSource {
 
   Stream<List<OrganizationDto>> watchOrganizations() {
     return _dao.watchAllOrganizations().map(
-          (organizations) => organizations
-              .map(
-                (org) => OrganizationDto(
-                  id: org.id,
-                  name: org.name,
-                  icon: org.icon,
-                  baseUrl: org.baseUrl,
-                  unreadCount: org.unreadCount,
-                ),
-              )
-              .toList(),
-        );
+      (organizations) => organizations
+          .map(
+            (org) => OrganizationDto(
+              id: org.id,
+              name: org.name,
+              icon: org.icon,
+              baseUrl: org.baseUrl,
+              unreadCount: org.unreadCount,
+            ),
+          )
+          .toList(),
+    );
   }
 
   Future<List<OrganizationDto>> getAllOrganizations() async {

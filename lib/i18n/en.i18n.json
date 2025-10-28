@@ -102,7 +102,8 @@
   "general": {
     "something_went_wrong": "Something went wrong",
     "nothing_here_yet": "Nothing here yet",
-    "find": "Find"
+    "find": "Find",
+    "close": "Close"
   },
   "message_actions": {
     "quote": "Quote this message",
@@ -136,6 +137,18 @@
     "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?",
     "folder_is_empty": "Folder is empty"
 
+  },
+  "organizations": {
+    "addDialog": {
+      "title": "Add organization",
+      "description": "Provide the organization link to add it to the list.",
+      "urlLabel": "Organization link",
+      "urlHint": "https://example.com",
+      "urlRequired": "Enter the organization link",
+      "urlInvalid": "Link is not valid",
+      "submit": "Add"
+    },
+    "delete_organization": "Delete organization"
   },
   "channel": {
     "muteChannel": "Mute channel",

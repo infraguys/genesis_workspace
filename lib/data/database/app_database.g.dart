@@ -2139,6 +2139,11 @@ class $$OrganizationsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get unreadCount => $composableBuilder(
+    column: $table.unreadCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> foldersRefs(
     Expression<bool> Function($$FoldersTableFilterComposer f) f,
   ) {
@@ -2243,6 +2248,11 @@ class $$OrganizationsTableOrderingComposer
     column: $table.baseUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get unreadCount => $composableBuilder(
+    column: $table.unreadCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrganizationsTableAnnotationComposer
@@ -2265,6 +2275,11 @@ class $$OrganizationsTableAnnotationComposer
 
   GeneratedColumn<String> get baseUrl =>
       $composableBuilder(column: $table.baseUrl, builder: (column) => column);
+
+  GeneratedColumn<int> get unreadCount => $composableBuilder(
+    column: $table.unreadCount,
+    builder: (column) => column,
+  );
 
   Expression<T> foldersRefs<T extends Object>(
     Expression<T> Function($$FoldersTableAnnotationComposer a) f,

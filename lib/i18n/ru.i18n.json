@@ -107,7 +107,8 @@
   "general": {
     "something_went_wrong": "Что-то пошло не так",
     "nothing_here_yet": "Здесь пока ничего нет",
-    "find": "Найти"
+    "find": "Найти",
+    "close": "Закрыть"
   },
   "message_actions": {
     "quote": "Цитировать это сообщение",
@@ -140,6 +141,19 @@
     "deleteConfirmTitle": "Удалить папку?",
     "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
    "folder_is_empty": "Папка пустая"
+  },
+  "organizations": {
+    "addDialog": {
+      "title": "Добавить организацию",
+      "description": "Укажите ссылку на организацию, чтобы добавить её в список.",
+      "urlLabel": "Ссылка на организацию",
+      "urlHint": "https://example.com",
+      "urlRequired": "Введите ссылку на организацию",
+      "urlInvalid": "Некорректная ссылка",
+      "submit": "Добавить"
+    },
+    "delete_organization": "Удалить организацию"
+
   },
   "channel": {
     "muteChannel": "Заглушить канал",

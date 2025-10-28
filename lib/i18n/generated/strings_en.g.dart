@@ -117,6 +117,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get cancelEditing => 'Cancel editing';
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn.internal(_root);
+	late final TranslationsOrganizationsEn organizations = TranslationsOrganizationsEn.internal(_root);
 	late final TranslationsChannelEn channel = TranslationsChannelEn.internal(_root);
 	late final TranslationsChatEn chat = TranslationsChatEn.internal(_root);
 	late final TranslationsGroupEn group = TranslationsGroupEn.internal(_root);
@@ -398,6 +399,9 @@ class TranslationsGeneralEn {
 
 	/// en: 'Find'
 	String get find => 'Find';
+
+	/// en: 'Close'
+	String get close => 'Close';
 }
 
 // Path: messageActions
@@ -497,6 +501,19 @@ class TranslationsFoldersEn {
 
 	/// en: 'Folder is empty'
 	String get folderIsEmpty => 'Folder is empty';
+}
+
+// Path: organizations
+class TranslationsOrganizationsEn {
+	TranslationsOrganizationsEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final TranslationsOrganizationsAddDialogEn addDialog = TranslationsOrganizationsAddDialogEn.internal(_root);
+
+	/// en: 'Delete organization'
+	String get deleteOrganization => 'Delete organization';
 }
 
 // Path: channel
@@ -655,6 +672,36 @@ class TranslationsUpdateForceEn {
 
 	/// en: 'Failed to start update: {error}'
 	String failedToStart({required Object error}) => 'Failed to start update: ${error}';
+}
+
+// Path: organizations.addDialog
+class TranslationsOrganizationsAddDialogEn {
+	TranslationsOrganizationsAddDialogEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Add organization'
+	String get title => 'Add organization';
+
+	/// en: 'Provide the organization link to add it to the list.'
+	String get description => 'Provide the organization link to add it to the list.';
+
+	/// en: 'Organization link'
+	String get urlLabel => 'Organization link';
+
+	/// en: 'https://example.com'
+	String get urlHint => 'https://example.com';
+
+	/// en: 'Enter the organization link'
+	String get urlRequired => 'Enter the organization link';
+
+	/// en: 'Link is not valid'
+	String get urlInvalid => 'Link is not valid';
+
+	/// en: 'Add'
+	String get submit => 'Add';
 }
 
 // Path: groupChat.createDialog

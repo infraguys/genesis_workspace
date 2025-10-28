@@ -30,10 +30,10 @@ class OrganizationDto {
   });
 
   OrganizationEntity toEntity() => OrganizationEntity(
-        id: id,
-        name: name,
-        icon: icon,
-        baseUrl: baseUrl,
-        unreadCount: unreadCount,
-      );
+    id: id,
+    name: name,
+    icon: icon,
+    baseUrl: baseUrl,
+    unreadCount: unreadCount,
+  );
 }

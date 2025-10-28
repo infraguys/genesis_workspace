@@ -381,17 +381,13 @@ class AuthCubit extends Cubit<AuthState> {
 
       final ServerSettingsEntity serverSettings = await _getServerSettingsUseCase.call();
 
-      final int organizationId = await _addOrganizationUseCase.call(
+      final organization = await _addOrganizationUseCase.call(
         OrganizationRequestEntity(
           name: serverSettings.realmName,
           icon: serverSettings.realmIcon,
           baseUrl: normalizedBaseUrl,
           unreadCount: 0,
         ),
-      );
-
-      final OrganizationEntity organization = await _getOrganizationByIdUseCase.call(
-        organizationId,
       );
 
       await _sharedPreferences.setString(SharedPrefsKeys.baseUrl, organization.baseUrl);

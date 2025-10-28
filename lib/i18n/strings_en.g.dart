@@ -122,6 +122,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get cancel_editing => 'Cancel editing';
 
 	late final TranslationsFoldersEn folders = TranslationsFoldersEn._(_root);
+	late final TranslationsOrganizationsEn organizations = TranslationsOrganizationsEn._(_root);
 	late final TranslationsChannelEn channel = TranslationsChannelEn._(_root);
 	late final TranslationsChatEn chat = TranslationsChatEn._(_root);
 	late final TranslationsGroupEn group = TranslationsGroupEn._(_root);
@@ -403,6 +404,9 @@ class TranslationsGeneralEn {
 
 	/// en: 'Find'
 	String get find => 'Find';
+
+	/// en: 'Close'
+	String get close => 'Close';
 }
 
 // Path: message_actions
@@ -502,6 +506,16 @@ class TranslationsFoldersEn {
 
 	/// en: 'Folder is empty'
 	String get folder_is_empty => 'Folder is empty';
+}
+
+// Path: organizations
+class TranslationsOrganizationsEn {
+	TranslationsOrganizationsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final TranslationsOrganizationsAddDialogEn addDialog = TranslationsOrganizationsAddDialogEn._(_root);
 }
 
 // Path: channel
@@ -662,6 +676,36 @@ class TranslationsUpdateForceEn {
 	String get failed_to_start => 'Failed to start update: {error}';
 }
 
+// Path: organizations.addDialog
+class TranslationsOrganizationsAddDialogEn {
+	TranslationsOrganizationsAddDialogEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Add organization'
+	String get title => 'Add organization';
+
+	/// en: 'Provide the organization link to add it to the list.'
+	String get description => 'Provide the organization link to add it to the list.';
+
+	/// en: 'Organization link'
+	String get urlLabel => 'Organization link';
+
+	/// en: 'https://example.com'
+	String get urlHint => 'https://example.com';
+
+	/// en: 'Enter the organization link'
+	String get urlRequired => 'Enter the organization link';
+
+	/// en: 'Link is not valid'
+	String get urlInvalid => 'Link is not valid';
+
+	/// en: 'Add'
+	String get submit => 'Add';
+}
+
 // Path: group_chat.create_dialog
 class TranslationsGroupChatCreateDialogEn {
 	TranslationsGroupChatCreateDialogEn._(this._root);
@@ -773,6 +817,7 @@ extension on Translations {
 			case 'general.something_went_wrong': return 'Something went wrong';
 			case 'general.nothing_here_yet': return 'Nothing here yet';
 			case 'general.find': return 'Find';
+			case 'general.close': return 'Close';
 			case 'message_actions.quote': return 'Quote this message';
 			case 'message_actions.delete': return 'Delete this message';
 			case 'message_actions.star': return 'Star this message';
@@ -799,6 +844,13 @@ extension on Translations {
 			case 'folders.deleteConfirmTitle': return 'Delete folder?';
 			case 'folders.deleteConfirmText': return 'Are you sure you want to delete "{folderName}"?';
 			case 'folders.folder_is_empty': return 'Folder is empty';
+			case 'organizations.addDialog.title': return 'Add organization';
+			case 'organizations.addDialog.description': return 'Provide the organization link to add it to the list.';
+			case 'organizations.addDialog.urlLabel': return 'Organization link';
+			case 'organizations.addDialog.urlHint': return 'https://example.com';
+			case 'organizations.addDialog.urlRequired': return 'Enter the organization link';
+			case 'organizations.addDialog.urlInvalid': return 'Link is not valid';
+			case 'organizations.addDialog.submit': return 'Add';
 			case 'channel.muteChannel': return 'Mute channel';
 			case 'channel.unmuteChannel': return 'Unmute channel';
 			case 'chat.pinChat': return 'Pin chat';
