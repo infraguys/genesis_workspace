@@ -14,6 +14,7 @@ import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/add_organization_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_by_id_use_case.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/get_organization_settings_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
@@ -45,6 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
   final RealTimeService _realTimeService;
   final UpdatePresenceUseCase _updatePresenceUseCase;
   final GetServerSettingsUseCase _getServerSettingsUseCase;
+  final GetOrganizationSettingsUseCase _getOrganizationSettingsUseCase;
   final SaveSessionIdUseCase _saveSessionIdUseCase;
   final DeleteSessionIdUseCase _deleteSessionIdUseCase;
   final SaveCsrftokenUseCase _saveCsrftokenUseCase;
@@ -65,6 +67,7 @@ class AuthCubit extends Cubit<AuthState> {
     this._realTimeService,
     this._updatePresenceUseCase,
     this._getServerSettingsUseCase,
+    this._getOrganizationSettingsUseCase,
     this._saveSessionIdUseCase,
     this._deleteSessionIdUseCase,
     this._saveCsrftokenUseCase,
@@ -95,6 +98,35 @@ class AuthCubit extends Cubit<AuthState> {
   String? _csrfToken;
 
   String get _baseUrl => AppConstants.baseUrl.trim();
+
+  Future<void> refreshAuthorizationForCurrentOrganization() async {
+    final String baseUrl = _baseUrl;
+    if (baseUrl.isEmpty) {
+      emit(state.copyWith(isAuthorized: false));
+      return;
+    }
+
+    final String? token = await _getTokenUseCase.call(baseUrl);
+    final String? sessionId = await _getSessionIdUseCase.call(baseUrl);
+    final String? csrfToken = await _getCsrftokenUseCase.call(baseUrl);
+
+    final bool hasCredentials =
+        (token != null && token.isNotEmpty) ||
+        ((sessionId != null && sessionId.isNotEmpty) &&
+            (csrfToken != null && csrfToken.isNotEmpty));
+
+    final int? selectedOrganizationId = _sharedPreferences.getInt(
+      SharedPrefsKeys.selectedOrganizationId,
+    );
+
+    final organization = await _getOrganizationByIdUseCase.call(selectedOrganizationId ?? -1);
+
+    emit(state.copyWith(isAuthorized: hasCredentials, selectedOrganization: organization));
+
+    if (!hasCredentials) {
+      await getServerSettings();
+    }
+  }
 
   Future<void> login(String username, String password) async {
     emit(state.copyWith(isPending: true, errorMessage: null));
@@ -129,7 +161,6 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> getServerSettings() async {
     emit(state.copyWith(serverSettingsPending: true));
     try {
-      await _deleteSessionIdUseCase.call(baseUrl: _baseUrl);
       if (state.serverSettings == null) {
         final response = await _getServerSettingsUseCase.call();
 
@@ -385,7 +416,9 @@ class AuthCubit extends Cubit<AuthState> {
       final dio = getIt<Dio>();
       dio.options.baseUrl = normalizedBaseUrl;
 
-      final ServerSettingsEntity serverSettings = await _getServerSettingsUseCase.call();
+      final ServerSettingsEntity serverSettings = await _getOrganizationSettingsUseCase.call(
+        baseUrl,
+      );
 
       final organization = await _addOrganizationUseCase.call(
         OrganizationRequestEntity(

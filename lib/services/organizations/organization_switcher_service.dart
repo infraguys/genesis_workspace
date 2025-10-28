@@ -6,6 +6,7 @@ import 'package:genesis_workspace/domain/organizations/entities/organization_ent
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 
 @lazySingleton
 class OrganizationSwitcherService {
@@ -13,11 +14,13 @@ class OrganizationSwitcherService {
     this._sharedPreferences,
     this._tokenStorage,
     this._dioFactory,
+    this._authCubit,
   );
 
   final SharedPreferences _sharedPreferences;
   final TokenStorage _tokenStorage;
   final DioFactory _dioFactory;
+  final AuthCubit _authCubit;
 
   Future<void> selectOrganization(OrganizationEntity organization) async {
     final String normalizedBaseUrl = organization.baseUrl.trim();
@@ -38,5 +41,7 @@ class OrganizationSwitcherService {
       instance: dio,
       disposingFunction: (previous) => previous.close(force: true),
     );
+
+    await _authCubit.refreshAuthorizationForCurrentOrganization();
   }
 }

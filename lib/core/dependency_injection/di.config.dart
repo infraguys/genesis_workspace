@@ -371,6 +371,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
         gh<_i958.TokenStorage>(),
         gh<_i440.DioFactory>(),
+        gh<_i862.AuthCubit>(),
       ),
     );
     gh.factory<_i277.FolderLocalDataSource>(
@@ -641,12 +642,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i796.PinnedChatsLocalDataSource>(),
       ),
     );
-    gh.factory<_i815.GetFoldersUseCase>(
-      () => _i815.GetFoldersUseCase(
-        gh<_i48.FolderRepository>(),
-        gh<_i725.PinnedChatsRepository>(),
-      ),
-    );
     gh.lazySingleton<_i862.AuthCubit>(
       () => _i862.AuthCubit(
         gh<_i460.SharedPreferences>(),
@@ -659,6 +654,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i82.RealTimeService>(),
         gh<_i832.UpdatePresenceUseCase>(),
         gh<_i848.GetServerSettingsUseCase>(),
+        gh<_i286.GetOrganizationSettingsUseCase>(),
         gh<_i721.SaveSessionIdUseCase>(),
         gh<_i361.DeleteSessionIdUseCase>(),
         gh<_i352.SaveCsrftokenUseCase>(),
@@ -669,6 +665,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i401.GetOrganizationByIdUseCase>(),
       ),
       dispose: _i862.disposeAuthCubit,
+    );
+    gh.factory<_i815.GetFoldersUseCase>(
+      () => _i815.GetFoldersUseCase(
+        gh<_i48.FolderRepository>(),
+        gh<_i725.PinnedChatsRepository>(),
+      ),
     );
     gh.factory<_i631.UnpinChatUseCase>(
       () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),

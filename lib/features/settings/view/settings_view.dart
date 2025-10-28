@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -86,7 +87,9 @@ class _SettingsViewState extends State<SettingsView> {
                         decoration: BoxDecoration(
                           color: theme.colorScheme.secondaryContainer,
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.4)),
+                          border: Border.all(
+                            color: theme.colorScheme.outlineVariant.withOpacity(0.4),
+                          ),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -118,14 +121,19 @@ class _SettingsViewState extends State<SettingsView> {
                                     Text(
                                       context.t.updateView.openSelectorSubtitle,
                                       style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSecondaryContainer.withOpacity(0.8),
+                                        color: theme.colorScheme.onSecondaryContainer.withOpacity(
+                                          0.8,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              Icon(Icons.arrow_forward_ios_rounded,
-                                  size: 16, color: theme.colorScheme.onSecondaryContainer),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 16,
+                                color: theme.colorScheme.onSecondaryContainer,
+                              ),
                             ],
                           ),
                         ),
@@ -220,7 +228,13 @@ class _SettingsViewState extends State<SettingsView> {
               ),
             ),
           ),
-          if (kDebugMode)
+          if (kDebugMode) ...[
+            ElevatedButton(
+              onPressed: () {
+                context.read<SettingsCubit>().clearLocalDatabase();
+              },
+              child: Text("Clear db"),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: ElevatedButton.icon(
@@ -244,6 +258,7 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               ),
             ),
+          ],
         ],
       ),
     );

@@ -11,6 +11,7 @@ class AllChatsState {
   Set<int>? filterDmUserIds;
   Set<int>? filterChannelIds;
   Set<int>? filterGroupChatIds;
+  final bool isInitialDataPending;
 
   bool get isEmptyFolder =>
       ((filterChannelIds?.isEmpty ?? false) &&
@@ -29,6 +30,7 @@ class AllChatsState {
     this.filterChannelIds,
     this.filterGroupChatIds,
     required this.folderMembersById,
+    required this.isInitialDataPending,
   });
 
   AllChatsState copyWith({
@@ -42,6 +44,7 @@ class AllChatsState {
     Set<int>? filterChannelIds,
     Set<int>? filterGroupChatIds,
     Map<int, FolderMembers>? folderMembersById,
+    bool? isInitialDataPending,
   }) {
     return AllChatsState(
       selectedDmChat: selectedDmChat ?? this.selectedDmChat,
@@ -54,6 +57,7 @@ class AllChatsState {
       filterGroupChatIds: filterGroupChatIds ?? this.filterGroupChatIds,
       folderMembersById: folderMembersById ?? this.folderMembersById,
       selectedGroupChat: selectedGroupChat ?? this.selectedGroupChat,
+      isInitialDataPending: isInitialDataPending ?? this.isInitialDataPending,
     );
   }
 

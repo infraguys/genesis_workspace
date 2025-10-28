@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_target.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
@@ -65,6 +65,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
           folderMembersById: const {},
           selectedGroupChat: null,
           filterGroupChatIds: null,
+          isInitialDataPending: false,
         ),
       );
 
@@ -202,10 +203,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     if (organizationId == null) return;
     final foldersToRefresh = state.folders.where((f) => f.id != null && f.id != 0);
     final futures = foldersToRefresh.map((f) async {
-      final members = await _getMembersForFolderUseCase.call(
-        f.id!,
-        organizationId: organizationId,
-      );
+      final members = await _getMembersForFolderUseCase.call(f.id!, organizationId: organizationId);
       return MapEntry(f.id!, members);
     });
     final entries = await Future.wait(futures);
@@ -219,10 +217,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     if (idsToRefresh.isEmpty) return;
 
     final futures = idsToRefresh.map((id) async {
-      final members = await _getMembersForFolderUseCase.call(
-        id,
-        organizationId: organizationId,
-      );
+      final members = await _getMembersForFolderUseCase.call(id, organizationId: organizationId);
       return MapEntry(id, members);
     });
 
@@ -258,10 +253,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     if (organizationId == null) return;
     final updatedFolders = [...state.folders];
     final index = updatedFolders.indexWhere((element) => element.id == folder.id);
-    await _removeAllMembershipsForFolderUseCase.call(
-      folder.id!,
-      organizationId: organizationId,
-    );
+    await _removeAllMembershipsForFolderUseCase.call(folder.id!, organizationId: organizationId);
     await _deleteFolderUseCase.call(folder.id!);
     updatedFolders.removeAt(index);
     final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById);

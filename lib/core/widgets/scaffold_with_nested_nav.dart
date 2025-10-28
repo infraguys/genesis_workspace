@@ -8,6 +8,8 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
+import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
+import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/desktop_app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -126,7 +128,12 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   onSelectBranch: _goBranch,
                   selectedIndex: widget.navigationShell.currentIndex,
                 ),
-                Expanded(child: widget.navigationShell),
+                BlocBuilder<AuthCubit, AuthState>(
+                  buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                  builder: (context, state) {
+                    return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
+                  },
+                ),
               ],
             ),
           );
