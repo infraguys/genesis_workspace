@@ -46,12 +46,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
       nextSelection = organizations.isNotEmpty ? organizations.first.id : null;
     }
 
-    emit(
-      state.copyWith(
-        organizations: organizations,
-        selectedOrganizationId: nextSelection,
-      ),
-    );
+    emit(state.copyWith(organizations: organizations, selectedOrganizationId: nextSelection));
   }
 
   Future<void> addOrganization(String baseUrl) async {

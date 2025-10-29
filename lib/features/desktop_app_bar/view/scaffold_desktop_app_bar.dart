@@ -8,6 +8,7 @@ import 'package:genesis_workspace/features/organizations/bloc/organizations_cubi
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 
 class ScaffoldDesktopAppBar extends StatelessWidget {
   final Function(int index) onSelectBranch;
@@ -75,11 +76,12 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                                           imagePath: organization.imageUrl,
                                           isSelected: organization.id == selectedId,
                                           onTap: () {
-                                            context
-                                                .read<OrganizationsCubit>()
-                                                .selectOrganization(organization);
+                                            context.read<OrganizationsCubit>().selectOrganization(
+                                              organization,
+                                            );
                                           },
                                           onDelete: () async {
+                                            context.pop();
                                             await context
                                                 .read<OrganizationsCubit>()
                                                 .removeOrganization(organization.id);

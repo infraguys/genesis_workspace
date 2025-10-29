@@ -13,6 +13,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/add_organization_use_case.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_settings_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
@@ -55,6 +56,7 @@ class AuthCubit extends Cubit<AuthState> {
   final DeleteCsrftokenUseCase _deleteCsrftokenUseCase;
   final AddOrganizationUseCase _addOrganizationUseCase;
   final GetOrganizationByIdUseCase _getOrganizationByIdUseCase;
+  final GetAllOrganizationsUseCase _getAllOrganizationsUseCase;
 
   AuthCubit(
     this._sharedPreferences,
@@ -76,6 +78,7 @@ class AuthCubit extends Cubit<AuthState> {
     this._deleteCsrftokenUseCase,
     this._addOrganizationUseCase,
     this._getOrganizationByIdUseCase,
+    this._getAllOrganizationsUseCase,
   ) : super(
         const AuthState(
           isPending: false,
@@ -365,17 +368,30 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> checkToken() async {
     emit(state.copyWith(isPending: true, errorMessage: null));
     bool isAuthorized = false;
+    List<OrganizationEntity> allOrganizations = await _getAllOrganizationsUseCase.call();
+    if (allOrganizations.isEmpty) {
+      emit(state.copyWith(isAuthorized: false, hasBaseUrl: false, isPending: false));
+      return;
+    }
     final int? selectedOrganizationId = _sharedPreferences.getInt(
       SharedPrefsKeys.selectedOrganizationId,
     );
     try {
       final OrganizationEntity organization = await _getOrganizationByIdUseCase.call(
-        selectedOrganizationId ?? -1,
+        selectedOrganizationId ?? allOrganizations[0].id,
       );
       AppConstants.setBaseUrl(organization.baseUrl);
       AppConstants.setSelectedOrganizationId(organization.id);
       emit(state.copyWith(hasBaseUrl: true, selectedOrganization: organization));
-      final String? token = await _getTokenUseCase.call(_baseUrl);
+
+      String? token;
+
+      for (OrganizationEntity organization in allOrganizations) {
+        if (token == null) {
+          final tokenResponse = await _getTokenUseCase.call(organization.baseUrl);
+          token = tokenResponse;
+        }
+      }
 
       if (token != null) {
         isAuthorized = true;

@@ -73,7 +73,7 @@ final router = GoRouter(
               name: Routes.messenger,
               redirect: (BuildContext context, GoRouterState state) {
                 if (!context.read<AuthCubit>().state.isAuthorized) {
-                  return Routes.auth;
+                  // return Routes.auth;
                 }
                 return null;
               },
@@ -349,7 +349,7 @@ final router = GoRouter(
       name: Routes.auth,
       redirect: (BuildContext context, GoRouterState state) {
         if (context.read<AuthCubit>().state.isAuthorized) {
-          return Routes.allChats;
+          return Routes.messenger;
         }
         return null;
       },

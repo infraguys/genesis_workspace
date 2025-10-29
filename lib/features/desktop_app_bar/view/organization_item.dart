@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:go_router/go_router.dart';
 
 class OrganizationItem extends StatelessWidget {
   final int unreadCount;
@@ -37,10 +36,7 @@ class OrganizationItem extends StatelessWidget {
           spacing: 4,
           children: [
             TextButton(
-              onPressed: () {
-                context.pop(context);
-                onDelete();
-              },
+              onPressed: onDelete,
               style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
               child: Text(context.t.organizations.deleteOrganization),
             ),
