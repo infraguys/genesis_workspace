@@ -6,6 +6,7 @@ class SubscriptionEventEntity extends EventEntity {
   SubscriptionEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.op,
     required this.streamId,
     required this.property,

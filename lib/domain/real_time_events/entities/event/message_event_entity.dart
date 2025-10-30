@@ -8,6 +8,7 @@ class MessageEventEntity extends EventEntity {
   MessageEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.message,
     required this.flags,
   });

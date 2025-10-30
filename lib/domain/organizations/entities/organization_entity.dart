@@ -16,6 +16,16 @@ class OrganizationEntity {
     required this.baseUrl,
     required this.unreadCount,
   });
+
+  OrganizationEntity copyWith({int? unreadCount}) {
+    return OrganizationEntity(
+      id: id,
+      name: name,
+      icon: icon,
+      baseUrl: baseUrl,
+      unreadCount: unreadCount ?? this.unreadCount,
+    );
+  }
 }
 
 class OrganizationRequestEntity {

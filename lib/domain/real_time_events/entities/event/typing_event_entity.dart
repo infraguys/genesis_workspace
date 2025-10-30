@@ -15,6 +15,7 @@ class TypingEventEntity extends EventEntity {
   TypingEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.messageType,
     required this.op,
     required this.sender,

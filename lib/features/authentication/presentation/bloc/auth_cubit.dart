@@ -32,6 +32,7 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/get_to
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_csrftoken_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_session_id_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart';
+import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,6 +58,7 @@ class AuthCubit extends Cubit<AuthState> {
   final AddOrganizationUseCase _addOrganizationUseCase;
   final GetOrganizationByIdUseCase _getOrganizationByIdUseCase;
   final GetAllOrganizationsUseCase _getAllOrganizationsUseCase;
+  final OrganizationSwitcherService _organizationSwitcherService;
 
   AuthCubit(
     this._sharedPreferences,
@@ -79,6 +81,7 @@ class AuthCubit extends Cubit<AuthState> {
     this._addOrganizationUseCase,
     this._getOrganizationByIdUseCase,
     this._getAllOrganizationsUseCase,
+    this._organizationSwitcherService,
   ) : super(
         const AuthState(
           isPending: false,
@@ -123,6 +126,7 @@ class AuthCubit extends Cubit<AuthState> {
     );
 
     final organization = await _getOrganizationByIdUseCase.call(selectedOrganizationId ?? -1);
+    await _organizationSwitcherService.selectOrganization(organization);
 
     emit(state.copyWith(isAuthorized: hasCredentials, selectedOrganization: organization));
 
