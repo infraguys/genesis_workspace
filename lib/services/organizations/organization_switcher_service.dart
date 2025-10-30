@@ -14,13 +14,11 @@ class OrganizationSwitcherService {
     this._sharedPreferences,
     this._tokenStorage,
     this._dioFactory,
-    this._authCubit,
   );
 
   final SharedPreferences _sharedPreferences;
   final TokenStorage _tokenStorage;
   final DioFactory _dioFactory;
-  final AuthCubit _authCubit;
 
   Future<void> selectOrganization(OrganizationEntity organization) async {
     final String normalizedBaseUrl = organization.baseUrl.trim();
@@ -42,6 +40,7 @@ class OrganizationSwitcherService {
       disposingFunction: (previous) => previous.close(force: true),
     );
 
-    await _authCubit.refreshAuthorizationForCurrentOrganization();
+    final AuthCubit authCubit = getIt<AuthCubit>();
+    await authCubit.refreshAuthorizationForCurrentOrganization();
   }
 }

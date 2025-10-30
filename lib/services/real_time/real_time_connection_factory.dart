@@ -38,11 +38,14 @@ abstract class RealTimeConnectionFactory {
 
 @LazySingleton(as: RealTimeConnectionFactory)
 class RealTimeConnectionFactoryImpl implements RealTimeConnectionFactory {
-  RealTimeConnectionFactoryImpl(this.tokenStorage, RealTimeRepositoryFactory repositoryFactory)
-    : _repositoryFactory = repositoryFactory;
+  RealTimeConnectionFactoryImpl(
+    this.tokenStorage,
+    this._dioFactory,
+    RealTimeRepositoryFactory repositoryFactory,
+  ) : _repositoryFactory = repositoryFactory;
 
   final TokenStorage tokenStorage;
-  final PerOrganizationDioFactory _dioFactory = const PerOrganizationDioFactory();
+  final PerOrganizationDioFactory _dioFactory;
   final RealTimeRepositoryFactory _repositoryFactory;
 
   final Map<String, RealTimeEventsRepository> _repositoryByBaseUrl =
