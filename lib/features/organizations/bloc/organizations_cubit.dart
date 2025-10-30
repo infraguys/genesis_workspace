@@ -8,8 +8,10 @@ import 'package:genesis_workspace/domain/organizations/usecases/add_organization
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_settings_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/remove_organization_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/watch_organizations_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/server_settings_entity.dart';
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
 part 'organizations_state.dart';
@@ -22,11 +24,13 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     this._getOrganizationSettingsUseCase,
     this._removeOrganizationUseCase,
     this._organizationSwitcherService,
+    this._multiPollingService,
   ) : super(const OrganizationsState.initial()) {
     _organizationsSubscription = _watchOrganizationsUseCase().listen(
       _onOrganizationsUpdated,
       onError: (error, _) => inspect(error),
     );
+    _messagesEventsSubscription = _multiPollingService.messageEventsStream.listen(_onMessageEvents);
   }
 
   final WatchOrganizationsUseCase _watchOrganizationsUseCase;
@@ -34,8 +38,11 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   final GetOrganizationSettingsUseCase _getOrganizationSettingsUseCase;
   final RemoveOrganizationUseCase _removeOrganizationUseCase;
   final OrganizationSwitcherService _organizationSwitcherService;
+  final MultiPollingService _multiPollingService;
 
   late final StreamSubscription<List<OrganizationEntity>> _organizationsSubscription;
+
+  late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
 
   void _onOrganizationsUpdated(List<OrganizationEntity> organizations) {
     final int? persistedSelection =
@@ -46,12 +53,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
       nextSelection = organizations.isNotEmpty ? organizations.first.id : null;
     }
 
-    emit(
-      state.copyWith(
-        organizations: organizations,
-        selectedOrganizationId: nextSelection,
-      ),
-    );
+    emit(state.copyWith(organizations: organizations, selectedOrganizationId: nextSelection));
   }
 
   Future<void> addOrganization(String baseUrl) async {
@@ -65,7 +67,8 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
         baseUrl: baseUrl,
         unreadCount: 0,
       );
-      await _addOrganizationUseCase.call(body);
+      final organization = await _addOrganizationUseCase.call(body);
+      await _multiPollingService.addConnection(organization.id, organization.baseUrl);
     } catch (e) {
       inspect(e);
     }
@@ -74,6 +77,11 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   Future<void> removeOrganization(int id) async {
     try {
       await _removeOrganizationUseCase.call(id);
+      await _multiPollingService.closeConnection(id);
+      if (state.organizations.isNotEmpty) {
+        final organization = state.organizations.first;
+        await selectOrganization(organization);
+      }
     } catch (e) {
       inspect(e);
     }
@@ -91,8 +99,18 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     }
   }
 
+  void _onMessageEvents(MessageEventEntity event) {
+    final orgId = event.organizationId;
+    List<OrganizationEntity> updatedOrganizations = [...state.organizations];
+    final org = updatedOrganizations.firstWhere((element) => element.id == orgId);
+    final index = updatedOrganizations.indexOf(org);
+    updatedOrganizations[index] = org.copyWith(unreadCount: org.unreadCount + 1);
+    emit(state.copyWith(organizations: updatedOrganizations));
+  }
+
   @override
   Future<void> close() {
+    _messagesEventsSubscription.cancel();
     _organizationsSubscription.cancel();
     return super.close();
   }

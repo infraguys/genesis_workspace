@@ -53,7 +53,6 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   void dispose() {
     _player.dispose();
-    // _desktopUpdaterController.dispose();
     super.dispose();
   }
 
