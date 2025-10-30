@@ -1,6 +1,5 @@
 part of 'real_time_events_data_soure.dart';
 
-@Injectable(as: RealTimeEventsDataSource)
 class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
   final RealTimeEventsApiClient _apiClient;
 

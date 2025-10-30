@@ -10,6 +10,7 @@ import 'package:genesis_workspace/domain/organizations/usecases/remove_organizat
 import 'package:genesis_workspace/domain/organizations/usecases/watch_organizations_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/server_settings_entity.dart';
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
 part 'organizations_state.dart';
@@ -22,6 +23,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     this._getOrganizationSettingsUseCase,
     this._removeOrganizationUseCase,
     this._organizationSwitcherService,
+    this._multiPollingService,
   ) : super(const OrganizationsState.initial()) {
     _organizationsSubscription = _watchOrganizationsUseCase().listen(
       _onOrganizationsUpdated,
@@ -34,6 +36,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   final GetOrganizationSettingsUseCase _getOrganizationSettingsUseCase;
   final RemoveOrganizationUseCase _removeOrganizationUseCase;
   final OrganizationSwitcherService _organizationSwitcherService;
+  final MultiPollingService _multiPollingService;
 
   late final StreamSubscription<List<OrganizationEntity>> _organizationsSubscription;
 
@@ -60,7 +63,8 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
         baseUrl: baseUrl,
         unreadCount: 0,
       );
-      await _addOrganizationUseCase.call(body);
+      final organization = await _addOrganizationUseCase.call(body);
+      await _multiPollingService.addConnection(organization.id, organization.baseUrl);
     } catch (e) {
       inspect(e);
     }
@@ -69,6 +73,11 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   Future<void> removeOrganization(int id) async {
     try {
       await _removeOrganizationUseCase.call(id);
+      await _multiPollingService.closeConnection(id);
+      if (state.organizations.isNotEmpty) {
+        final organization = state.organizations.first;
+        await selectOrganization(organization);
+      }
     } catch (e) {
       inspect(e);
     }

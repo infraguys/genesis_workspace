@@ -4,9 +4,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/events_by_que
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart';
-import 'package:injectable/injectable.dart';
 
-@Injectable(as: RealTimeEventsRepository)
 class RealTimeEventsRepositoryImpl implements RealTimeEventsRepository {
   final RealTimeEventsDataSource _dataSource;
 

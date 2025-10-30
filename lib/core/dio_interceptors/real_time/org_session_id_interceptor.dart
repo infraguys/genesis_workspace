@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 
 class OrgSessionIdInterceptor extends Interceptor {
@@ -20,8 +19,6 @@ class OrgSessionIdInterceptor extends Interceptor {
   }
 
   String _withBasePath(String currentBaseUrl, String basePath) {
-    // Простой резолвер: заменяет хвост после хоста на basePath.
-    // Пример: https://example.com/api/v1 -> https://example.com/json
     final Uri uri = Uri.parse(currentBaseUrl);
     return uri.replace(path: basePath).toString();
   }
@@ -41,12 +38,8 @@ class OrgSessionIdInterceptor extends Interceptor {
       if (sessionId != null && sessionId.isNotEmpty) {
         cookieParts.add('__Host-sessionid=$sessionId');
 
-        // Если в Web используем cookie-auth — удобнее бить в /json
-        if (kIsWeb) {
-          // не трогаем схему/хост, только basePath
-          if (!options.baseUrl.endsWith('/json')) {
-            options.baseUrl = _withBasePath(options.baseUrl, '/json');
-          }
+        if (!options.baseUrl.endsWith('/json')) {
+          options.baseUrl = _withBasePath(options.baseUrl, '/json');
         }
       }
 

@@ -16,6 +16,7 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/get_cs
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_session_id_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_token_use_case.dart';
 import 'package:genesis_workspace/services/real_time/real_time_connection.dart';
+import 'package:genesis_workspace/services/real_time/real_time_connection_factory.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton

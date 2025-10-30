@@ -19,18 +19,6 @@ import 'package:genesis_workspace/domain/real_time_events/entities/register_queu
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 
-abstract class RealTimeConnectionFactory {
-  RegisterQueueUseCase createRegisterQueueUseCase({
-    required int organizationId,
-    required String baseUrl,
-  });
-
-  GetEventsByQueueIdUseCase createGetEventsByQueueIdUseCase({
-    required int organizationId,
-    required String baseUrl,
-  });
-}
-
 class RealTimeConnection {
   final int organizationId;
   final String baseUrl;

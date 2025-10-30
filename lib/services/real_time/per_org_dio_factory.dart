@@ -12,8 +12,6 @@ class PerOrganizationDioFactory {
     required String originBaseUrl,
     required TokenStorage tokenStorage,
     bool? isWebAuthOverride,
-    Duration connectTimeout = const Duration(seconds: 20),
-    Duration receiveTimeout = const Duration(seconds: 65),
   }) {
     final BasePathMode basePathMode = _resolveBasePathMode(
       originBaseUrl: originBaseUrl,
@@ -28,8 +26,6 @@ class PerOrganizationDioFactory {
 
     final BaseOptions baseOptions = BaseOptions(
       baseUrl: resolvedBaseUrl,
-      connectTimeout: connectTimeout,
-      receiveTimeout: receiveTimeout,
       validateStatus: (int? statusCode) =>
           statusCode != null && statusCode >= 200 && statusCode < 600,
     );

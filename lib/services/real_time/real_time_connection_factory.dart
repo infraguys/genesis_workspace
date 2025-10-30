@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:genesis_workspace/data/real_time_events/repositories_impl/real_time_events_repository_impl.dart';
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 import 'package:genesis_workspace/services/real_time/per_org_dio_factory.dart';
+import 'package:genesis_workspace/services/real_time/real_time_module.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
 
@@ -38,16 +38,12 @@ abstract class RealTimeConnectionFactory {
 
 @LazySingleton(as: RealTimeConnectionFactory)
 class RealTimeConnectionFactoryImpl implements RealTimeConnectionFactory {
-  RealTimeConnectionFactoryImpl(
-    this.tokenStorage, {
-    PerOrganizationDioFactory? dioFactory,
-    OrganizationAuthResolver? authResolver,
-  }) : _dioFactory = dioFactory ?? const PerOrganizationDioFactory(),
-       _authResolver = authResolver ?? OrganizationAuthResolver(tokenStorage);
+  RealTimeConnectionFactoryImpl(this.tokenStorage, RealTimeRepositoryFactory repositoryFactory)
+    : _repositoryFactory = repositoryFactory;
 
   final TokenStorage tokenStorage;
-  final PerOrganizationDioFactory _dioFactory;
-  final OrganizationAuthResolver _authResolver;
+  final PerOrganizationDioFactory _dioFactory = const PerOrganizationDioFactory();
+  final RealTimeRepositoryFactory _repositoryFactory;
 
   final Map<String, RealTimeEventsRepository> _repositoryByBaseUrl =
       <String, RealTimeEventsRepository>{};
@@ -76,6 +72,6 @@ class RealTimeConnectionFactoryImpl implements RealTimeConnectionFactory {
 
   RealTimeEventsRepository _buildRepository(String baseUrl) {
     final Dio dio = _dioFactory.build(originBaseUrl: baseUrl, tokenStorage: tokenStorage);
-    return RealTimeEventsRepositoryImpl(dio);
+    return _repositoryFactory.create(dio);
   }
 }
