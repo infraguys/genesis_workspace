@@ -41,7 +41,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
     super.initState();
     _dio = Dio();
     _dio.interceptors
-      ..add(SessionidInterceptor(getIt<TokenStorage>()))
+      ..add(SessionIdInterceptor(getIt<TokenStorage>()))
       ..add(CsrfCookieInterceptor(getIt<TokenStorage>()))
       ..add(TokenInterceptor(getIt<TokenStorage>()));
     _loadImage();

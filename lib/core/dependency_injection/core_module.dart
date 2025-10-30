@@ -82,7 +82,7 @@ class DioFactory {
     dio.interceptors
       ..add(BaseUrlInterceptor(sharedPreferences))
       ..add(TokenInterceptor(tokenStorage))
-      ..add(SessionidInterceptor(tokenStorage))
+      ..add(SessionIdInterceptor(tokenStorage))
       ..add(CsrfCookieInterceptor(tokenStorage))
       ..add(EnumInterceptor());
 

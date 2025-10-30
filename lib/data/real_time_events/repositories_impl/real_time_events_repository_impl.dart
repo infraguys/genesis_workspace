@@ -1,4 +1,3 @@
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/real_time_events/datasources/real_time_events_data_soure.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
@@ -9,12 +8,14 @@ import 'package:injectable/injectable.dart';
 
 @Injectable(as: RealTimeEventsRepository)
 class RealTimeEventsRepositoryImpl implements RealTimeEventsRepository {
-  final RealTimeEventsDataSource dataSource = getIt<RealTimeEventsDataSource>();
+  final RealTimeEventsDataSource _dataSource;
+
+  RealTimeEventsRepositoryImpl(this._dataSource);
 
   @override
   Future<RegisterQueueEntity> registerQueue(RegisterQueueRequestBodyEntity request) async {
     try {
-      final dto = await dataSource.registerQueue(request.toDto());
+      final dto = await _dataSource.registerQueue(request.toDto());
       return dto.toEntity();
     } catch (e) {
       rethrow;
@@ -27,7 +28,7 @@ class RealTimeEventsRepositoryImpl implements RealTimeEventsRepository {
   ) async {
     try {
       final dto = body.toDto();
-      final responseDto = await dataSource.getEventsByQueueId(dto);
+      final responseDto = await _dataSource.getEventsByQueueId(dto);
       return responseDto.toEntity();
     } catch (e) {
       rethrow;
@@ -37,7 +38,7 @@ class RealTimeEventsRepositoryImpl implements RealTimeEventsRepository {
   @override
   Future<void> deleteQueue(String queueId) async {
     try {
-      await dataSource.deleteQueue(queueId);
+      await _dataSource.deleteQueue(queueId);
     } catch (e) {
       rethrow;
     }
