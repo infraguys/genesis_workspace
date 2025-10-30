@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/reaction_event_entity.dart';
@@ -153,7 +154,8 @@ class RealTimeConnection {
 
     if (response.events.isEmpty) return;
 
-    for (final dynamic event in response.events) {
+    for (final EventEntity event in response.events) {
+      event.organizationId = organizationId;
       switch (event.type) {
         case EventType.typing:
           _typingEventsController.add(event as TypingEventEntity);

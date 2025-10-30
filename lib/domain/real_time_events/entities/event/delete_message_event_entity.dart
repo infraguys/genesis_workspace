@@ -5,6 +5,7 @@ class DeleteMessageEventEntity extends EventEntity {
   DeleteMessageEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.messageId,
     required this.messageType,
     this.streamId,

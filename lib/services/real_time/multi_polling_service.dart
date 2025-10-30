@@ -109,7 +109,6 @@ class MultiPollingService {
       getEventsByQueueIdUseCase: getEventsByQueueIdUseCase,
     );
 
-    // Подписываемся и форвардим события в агрегированные контроллеры
     connection.typingEventsStream.listen(_typingEventsController.add, onError: (_) {});
     connection.messageEventsStream.listen(_messageEventsController.add, onError: (_) {});
     connection.messageFlagsEventsStream.listen(_messageFlagsEventsController.add, onError: (_) {});

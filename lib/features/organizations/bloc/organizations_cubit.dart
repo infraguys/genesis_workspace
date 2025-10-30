@@ -8,6 +8,7 @@ import 'package:genesis_workspace/domain/organizations/usecases/add_organization
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_settings_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/remove_organization_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/watch_organizations_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/server_settings_entity.dart';
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
@@ -29,6 +30,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
       _onOrganizationsUpdated,
       onError: (error, _) => inspect(error),
     );
+    _messagesEventsSubscription = _multiPollingService.messageEventsStream.listen(_onMessageEvents);
   }
 
   final WatchOrganizationsUseCase _watchOrganizationsUseCase;
@@ -39,6 +41,8 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   final MultiPollingService _multiPollingService;
 
   late final StreamSubscription<List<OrganizationEntity>> _organizationsSubscription;
+
+  late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
 
   void _onOrganizationsUpdated(List<OrganizationEntity> organizations) {
     final int? persistedSelection =
@@ -95,8 +99,18 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     }
   }
 
+  void _onMessageEvents(MessageEventEntity event) {
+    final orgId = event.organizationId;
+    List<OrganizationEntity> updatedOrganizations = [...state.organizations];
+    final org = updatedOrganizations.firstWhere((element) => element.id == orgId);
+    final index = updatedOrganizations.indexOf(org);
+    updatedOrganizations[index] = org.copyWith(unreadCount: org.unreadCount + 1);
+    emit(state.copyWith(organizations: updatedOrganizations));
+  }
+
   @override
   Future<void> close() {
+    _messagesEventsSubscription.cancel();
     _organizationsSubscription.cancel();
     return super.close();
   }
