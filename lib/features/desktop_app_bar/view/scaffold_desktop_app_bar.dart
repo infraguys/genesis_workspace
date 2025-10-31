@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
@@ -6,6 +9,7 @@ import 'package:genesis_workspace/features/desktop_app_bar/view/branch_item.dart
 import 'package:genesis_workspace/features/desktop_app_bar/view/organization_item.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -79,6 +83,7 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                                             context.read<OrganizationsCubit>().selectOrganization(
                                               organization,
                                             );
+                                            unawaited(context.read<ProfileCubit>().getOwnUser());
                                           },
                                           onDelete: () async {
                                             context.pop();
@@ -92,44 +97,49 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                                   );
                                 },
                               ),
-                              Material(
-                                color: Colors.transparent,
-                                child: Ink(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                                  child: InkWell(
-                                    onTap: () async {
-                                      final url = await showDialog<String>(
-                                        context: context,
-                                        builder: (BuildContext dialogContext) =>
-                                            const AddOrganizationDialog(),
-                                      );
-                                      if (url != null && context.mounted) {
-                                        await context.read<OrganizationsCubit>().addOrganization(
-                                          url,
+                              if (!kIsWeb)
+                                Material(
+                                  color: Colors.transparent,
+                                  child: Ink(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: InkWell(
+                                      onTap: () async {
+                                        final url = await showDialog<String>(
+                                          context: context,
+                                          builder: (BuildContext dialogContext) =>
+                                              const AddOrganizationDialog(),
                                         );
-                                      }
-                                    },
-                                    borderRadius: BorderRadius.circular(8),
-                                    mouseCursor: SystemMouseCursors.click,
-                                    overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
-                                      final Color primary = Theme.of(context).colorScheme.primary;
-                                      if (states.contains(WidgetState.pressed)) {
-                                        return primary.withValues(alpha: 0.16);
-                                      }
-                                      if (states.contains(WidgetState.hovered)) {
-                                        return primary.withValues(alpha: 0.08);
-                                      }
-                                      return null;
-                                    }),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Center(child: Assets.icons.add.svg()),
+                                        if (url != null && context.mounted) {
+                                          await context.read<OrganizationsCubit>().addOrganization(
+                                            url,
+                                          );
+                                        }
+                                      },
+                                      borderRadius: BorderRadius.circular(8),
+                                      mouseCursor: SystemMouseCursors.click,
+                                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                                        states,
+                                      ) {
+                                        final Color primary = Theme.of(context).colorScheme.primary;
+                                        if (states.contains(WidgetState.pressed)) {
+                                          return primary.withValues(alpha: 0.16);
+                                        }
+                                        if (states.contains(WidgetState.hovered)) {
+                                          return primary.withValues(alpha: 0.08);
+                                        }
+                                        return null;
+                                      }),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Center(child: Assets.icons.add.svg()),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
                             ],
                           ),
                         ),

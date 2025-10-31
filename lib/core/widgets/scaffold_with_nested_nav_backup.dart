@@ -138,8 +138,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             icon: Badge(
                               isLabelVisible: state.messages.any(
                                 (message) =>
-                                    (message.type == MessageType.private &&
-                                    message.hasUnreadMessages),
+                                    (message.type == MessageType.private && message.isUnread),
                               ),
                               child: Icon(Icons.people),
                             ),
@@ -149,8 +148,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             icon: Badge(
                               isLabelVisible: state.messages.any(
                                 (message) =>
-                                    (message.type == MessageType.stream &&
-                                    message.hasUnreadMessages),
+                                    (message.type == MessageType.stream && message.isUnread),
                               ),
                               child: Icon(Icons.chat),
                             ),

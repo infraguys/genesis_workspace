@@ -14,6 +14,8 @@ MessagesRequestDto _$MessagesRequestDtoFromJson(Map<String, dynamic> json) =>
           .toList(),
       numBefore: (json['numBefore'] as num?)?.toInt(),
       numAfter: (json['numAfter'] as num?)?.toInt(),
+      applyMarkdown: json['applyMarkdown'] as bool? ?? true,
+      clientGravatar: json['clientGravatar'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$MessagesRequestDtoToJson(MessagesRequestDto instance) =>
@@ -22,4 +24,6 @@ Map<String, dynamic> _$MessagesRequestDtoToJson(MessagesRequestDto instance) =>
       'narrow': instance.narrow,
       'numBefore': instance.numBefore,
       'numAfter': instance.numAfter,
+      'applyMarkdown': instance.applyMarkdown,
+      'clientGravatar': instance.clientGravatar,
     };

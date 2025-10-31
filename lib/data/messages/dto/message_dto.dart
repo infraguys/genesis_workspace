@@ -83,6 +83,7 @@ class MessageDto {
     subject: subject,
     timestamp: timestamp,
     reactions: reactions.map((reaction) => reaction.toEntity()).toList(),
+    recipientId: recipientId,
   );
 
   // ====== Конвертеры display_recipient ======

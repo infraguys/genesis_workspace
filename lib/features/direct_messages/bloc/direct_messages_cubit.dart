@@ -91,7 +91,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final key = GroupChatUtils.buildMembershipKeyFromRecipients(recipients);
       final current = aggregated[key];
 
-      final unreadIncrement = message.hasUnreadMessages ? 1 : 0;
+      final unreadIncrement = message.isUnread ? 1 : 0;
       if (current == null) {
         final members = recipients.toList()..sort((a, b) => a.fullName.compareTo(b.fullName));
         aggregated[key] = GroupChatEntity(
@@ -127,7 +127,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     final int? selfUserId = state.selfUser?.userId;
 
     for (final message in allMessages) {
-      if (!message.hasUnreadMessages) continue;
+      if (!message.isUnread) continue;
       if (message.type != MessageType.private) continue;
 
       final recipients = message.displayRecipient.recipients;
@@ -307,7 +307,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final response = await _getMessagesUseCase.call(messagesBody);
 
       final messages = response.messages;
-      final unreadMessages = messages.where((message) => message.hasUnreadMessages).toList();
+      final unreadMessages = messages.where((message) => message.isUnread).toList();
       final groupChats = _buildGroupChatsFromMessages(messages);
       final users = _mapUnreadToUsers(users: [...state.users], allMessages: messages);
       emit(
@@ -347,7 +347,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     final updatedAllMessages = [...state.allMessages, message];
     final updatedUnreadMessages = [...state.unreadMessages];
 
-    if (!isSelfMessage && message.hasUnreadMessages) {
+    if (!isSelfMessage && message.isUnread) {
       updatedUnreadMessages.add(message);
     }
 
@@ -406,9 +406,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       return message.copyWith(flags: updatedFlags);
     }).toList();
 
-    final updatedUnreadMessages = updatedAllMessages
-        .where((message) => message.hasUnreadMessages)
-        .toList();
+    final updatedUnreadMessages = updatedAllMessages.where((message) => message.isUnread).toList();
     final updatedUsers = _mapUnreadToUsers(
       users: [...state.users],
       allMessages: updatedAllMessages,
@@ -446,9 +444,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
     final updatedMessages = state.allMessages
         .where((message) => message.id != event.messageId)
         .toList();
-    final updatedUnreadMessages = updatedMessages
-        .where((message) => message.hasUnreadMessages)
-        .toList();
+    final updatedUnreadMessages = updatedMessages.where((message) => message.isUnread).toList();
     final updatedUsers = _mapUnreadToUsers(users: [...state.users], allMessages: updatedMessages);
     final updatedGroupChats = _buildGroupChatsFromMessages(updatedMessages);
 
@@ -471,9 +467,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       return message.copyWith(content: event.content);
     }).toList();
     if (!hasChanges) return;
-    final updatedUnreadMessages = updatedAllMessages
-        .where((message) => message.hasUnreadMessages)
-        .toList();
+    final updatedUnreadMessages = updatedAllMessages.where((message) => message.isUnread).toList();
     final updatedGroupChats = _buildGroupChatsFromMessages(updatedAllMessages);
 
     emit(

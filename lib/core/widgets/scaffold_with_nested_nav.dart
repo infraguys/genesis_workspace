@@ -11,7 +11,6 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_request_
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/desktop_app_bar/view/scaffold_desktop_app_bar.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -84,7 +83,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       context.read<UpdateCubit>().checkUpdateNeed(),
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
-      context.read<MessagesCubit>().getLastMessages(),
+      // context.read<MessagesCubit>().getLastMessages(),
     ]);
     super.initState();
   }

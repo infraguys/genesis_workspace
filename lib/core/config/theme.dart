@@ -9,7 +9,7 @@ final darkTheme = ThemeData(
   fontFamily: FontFamily.montserrat,
   scaffoldBackgroundColor: AppColors.background,
   inputDecorationTheme: _darkInputDecorationTheme,
-  extensions: [AppColors.darkTextColors],
+  extensions: [AppColors.darkTextColors, AppColors.cardColors],
 );
 
 final darkColorScheme = ColorScheme.dark(primary: AppColors.primary, surface: AppColors.surface);

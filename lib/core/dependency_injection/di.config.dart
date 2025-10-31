@@ -754,14 +754,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i815.GetFoldersUseCase>(),
         gh<_i7.UpdateFolderUseCase>(),
         gh<_i849.DeleteFolderUseCase>(),
-        gh<_i395.SetFoldersForTargetUseCase>(),
-        gh<_i714.GetFolderIdsForTargetUseCase>(),
         gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
         gh<_i438.GetMembersForFolderUseCase>(),
-        gh<_i126.GetPinnedChatsUseCase>(),
-        gh<_i1012.PinChatUseCase>(),
-        gh<_i631.UnpinChatUseCase>(),
-        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
       ),
     );
     return this;

@@ -3,9 +3,17 @@ import 'package:equatable/equatable.dart';
 class TopicEntity extends Equatable {
   final int maxId;
   final String name;
+  final String lastMessageSenderName;
+  final String lastMessagePreview;
   Set<int> unreadMessages;
 
-  TopicEntity({required this.maxId, required this.name, required this.unreadMessages});
+  TopicEntity({
+    required this.maxId,
+    required this.name,
+    required this.unreadMessages,
+    this.lastMessageSenderName = '',
+    this.lastMessagePreview = '',
+  });
 
   @override
   List<Object> get props => [name];

@@ -31,8 +31,8 @@ class MessagesDataSourceImpl implements MessagesDataSource {
     try {
       final anchor = body.anchor;
       final narrowString = jsonEncode(body.narrow?.map((e) => e.toJson()).toList());
-      final bool applyMarkdown = true;
-      final bool clientGravatar = false;
+      final bool applyMarkdown = body.applyMarkdown;
+      final bool clientGravatar = body.clientGravatar;
 
       return await apiClient.getMessages(
         anchor,

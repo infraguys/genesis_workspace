@@ -157,7 +157,7 @@ class MessagesCubit extends Cubit<MessagesState> {
       for (var messageId in event.messages) {
         newMessages.removeWhere((message) => message.id == messageId);
       }
-      newMessages.removeWhere((message) => message.hasUnreadMessages);
+      newMessages.removeWhere((message) => message.isUnread);
     }
     emit(state.copyWith(messages: newMessages));
   }

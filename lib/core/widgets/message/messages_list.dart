@@ -200,7 +200,7 @@ class _MessagesListState extends State<MessagesList> {
                   if (_firstUnreadIndexInReversed != null &&
                       index == _firstUnreadIndexInReversed!) {
                     return UnreadMessagesMarker(
-                      unreadCount: _reversed.where((message) => message.hasUnreadMessages).length,
+                      unreadCount: _reversed.where((message) => message.isUnread).length,
                     );
                   }
 

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
@@ -16,7 +17,6 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
-import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 enum MessageUIOrder { first, last, middle, single, lastSingle }
@@ -46,11 +46,6 @@ class MessageItem extends StatelessWidget {
   });
 
   final actionsPopupKey = GlobalKey<CustomPopupState>();
-
-  String _formatTime(int timestamp) {
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    return DateFormat('HH:mm').format(date);
-  }
 
   final parser = EmojiParser();
 
@@ -98,7 +93,7 @@ class MessageItem extends StatelessWidget {
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
         : Text(
-            _formatTime(message.timestamp),
+            formatTime(message.timestamp),
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               fontSize: 10,
