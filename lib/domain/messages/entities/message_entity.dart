@@ -40,7 +40,7 @@ class MessageEntity extends Equatable {
 
   bool get isDirectMessage =>
       displayRecipient is DirectMessageRecipients &&
-      (displayRecipient as DirectMessageRecipients).recipients.length == 2;
+      (displayRecipient as DirectMessageRecipients).recipients.length <= 2;
 
   bool get isGroupChatMessage =>
       displayRecipient is DirectMessageRecipients &&

@@ -61,7 +61,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         narrow: [
           // MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: "dm"),
         ],
-        numBefore: 1000,
+        numBefore: 5000,
         numAfter: 0,
         applyMarkdown: false,
         clientGravatar: false,

@@ -71,7 +71,7 @@ class ChatEntity {
       isMuted: false,
       lastMessageSenderName: message.senderFullName,
       streamId: message.streamId,
-      dmIds: message.isDirectMessage
+      dmIds: message.isDirectMessage || message.isGroupChatMessage
           ? message.displayRecipient.recipients.map((recipient) => recipient.userId).toList()
           : null,
     );
