@@ -50,6 +50,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           folderMembersById: const {},
           messages: [],
           chats: [],
+          selectedChat: null,
         ),
       );
 
@@ -90,6 +91,15 @@ class MessengerCubit extends Cubit<MessengerState> {
     } catch (e) {
       inspect(e);
     }
+  }
+
+  void selectChat(ChatEntity chat, {String? selectedTopic}) {
+    if (selectedTopic == null) {
+      state.selectedTopic = null;
+    } else {
+      state.selectedTopic = selectedTopic;
+    }
+    emit(state.copyWith(selectedChat: chat, selectedTopic: state.selectedTopic));
   }
 
   Future<void> addFolder(FolderItemEntity folder) async {

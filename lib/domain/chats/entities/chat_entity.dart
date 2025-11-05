@@ -1,4 +1,5 @@
 import 'package:genesis_workspace/core/enums/chat_type.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 
@@ -16,6 +17,7 @@ class ChatEntity {
   final bool isMuted;
   final List<TopicEntity>? topics;
   final int? streamId;
+  final List<int>? dmIds;
 
   bool get isTopicsLoading => topics == null;
 
@@ -24,7 +26,6 @@ class ChatEntity {
     final messageDate = message.messageDate;
     final messageId = message.id;
     final messagePreview = message.content;
-    final messageTopic = message.subject;
     if (!isMyMessage) {
       updatedChat = copyWith(
         displayTitle: message.displayTitle,
@@ -58,16 +59,19 @@ class ChatEntity {
     return ChatEntity(
       id: message.recipientId,
       type: type,
-      displayTitle: isMyMessage ? '' : message.displayTitle,
+      displayTitle: message.displayTitle,
       lastMessageId: message.id,
       lastMessagePreview: message.content,
       lastMessageDate: message.messageDate,
       unreadCount: message.isUnread ? 1 : 0,
-      avatarUrl: (isMyMessage || !message.isDirectMessage) ? null : message.avatarUrl,
+      avatarUrl: (!message.isDirectMessage) ? null : message.avatarUrl,
       isPinned: false,
       isMuted: false,
       lastMessageSenderName: message.senderFullName,
       streamId: message.streamId,
+      dmIds: message.isDirectMessage
+          ? message.displayRecipient.recipients.map((recipient) => recipient.userId).toList()
+          : null,
     );
   }
 
@@ -85,6 +89,7 @@ class ChatEntity {
     this.lastMessageSenderName,
     this.topics,
     this.streamId,
+    this.dmIds,
   });
 
   ChatEntity copyWith({
@@ -101,6 +106,7 @@ class ChatEntity {
     String? lastMessageSenderName,
     List<TopicEntity>? topics,
     int? streamId,
+    List<int>? dmIds,
   }) {
     return ChatEntity(
       id: id ?? this.id,
@@ -116,6 +122,7 @@ class ChatEntity {
       lastMessageSenderName: lastMessageSenderName ?? this.lastMessageSenderName,
       topics: topics ?? this.topics,
       streamId: streamId ?? this.streamId,
+      dmIds: dmIds ?? this.dmIds,
     );
   }
 }

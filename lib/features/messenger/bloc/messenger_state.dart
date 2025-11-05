@@ -7,6 +7,8 @@ class MessengerState {
   final Map<int, FolderMembers> folderMembersById;
   final List<MessageEntity> messages;
   final List<ChatEntity> chats;
+  final ChatEntity? selectedChat;
+  String? selectedTopic;
 
   MessengerState({
     this.selfUser,
@@ -15,6 +17,8 @@ class MessengerState {
     required this.folderMembersById,
     required this.messages,
     required this.chats,
+    this.selectedChat,
+    this.selectedTopic,
   });
 
   MessengerState copyWith({
@@ -24,6 +28,8 @@ class MessengerState {
     Map<int, FolderMembers>? folderMembersById,
     List<MessageEntity>? messages,
     List<ChatEntity>? chats,
+    ChatEntity? selectedChat,
+    String? selectedTopic,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -32,6 +38,8 @@ class MessengerState {
       folderMembersById: folderMembersById ?? this.folderMembersById,
       messages: messages ?? this.messages,
       chats: chats ?? this.chats,
+      selectedChat: selectedChat ?? this.selectedChat,
+      selectedTopic: selectedTopic ?? this.selectedTopic,
     );
   }
 }

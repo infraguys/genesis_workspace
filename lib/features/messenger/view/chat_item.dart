@@ -143,65 +143,73 @@ class _ChatItemState extends State<ChatItem> {
                       itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
                       itemBuilder: (BuildContext context, int index) {
                         final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
-                        return Container(
-                          height: 76,
-                          padding: EdgeInsetsGeometry.only(left: 38),
-                          decoration: BoxDecoration(
-                            color: cardColors.base,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 3,
-                                height: 47,
-                                decoration: BoxDecoration(
-                                  color: Colors.yellow,
-                                  borderRadius: BorderRadiusGeometry.circular(4),
+                        return InkWell(
+                          onTap: () {
+                            context.read<MessengerCubit>().selectChat(
+                              widget.chat,
+                              selectedTopic: topic.name,
+                            );
+                          },
+                          child: Container(
+                            height: 76,
+                            padding: EdgeInsetsGeometry.only(left: 38),
+                            decoration: BoxDecoration(
+                              color: cardColors.base,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 3,
+                                  height: 47,
+                                  decoration: BoxDecoration(
+                                    color: Colors.yellow,
+                                    borderRadius: BorderRadiusGeometry.circular(4),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 12,
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Tooltip(
-                                    message: topic.name,
-                                    child: SizedBox(
-                                      width: 240,
-                                      child: Text(
-                                        "# ${topic.name}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.labelMedium?.copyWith(
-                                          fontSize: 14,
-                                          color: textColors.text100,
+                                SizedBox(
+                                  width: 12,
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Tooltip(
+                                      message: topic.name,
+                                      child: SizedBox(
+                                        width: 240,
+                                        child: Text(
+                                          "# ${topic.name}",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelMedium?.copyWith(
+                                            fontSize: 14,
+                                            color: textColors.text100,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Text(
-                                    topic.lastMessageSenderName,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 200,
-                                    child: Text(
-                                      topic.lastMessagePreview,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                    Text(
+                                      topic.lastMessageSenderName,
                                       style: theme.textTheme.bodySmall?.copyWith(
-                                        color: textColors.text50,
+                                        color: theme.colorScheme.primary,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    SizedBox(
+                                      width: 200,
+                                      child: Text(
+                                        topic.lastMessagePreview,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: textColors.text50,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },

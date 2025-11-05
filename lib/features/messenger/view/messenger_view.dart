@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
+import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
+import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_item.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
@@ -197,59 +199,78 @@ class _MessengerViewState extends State<MessengerView> {
                     ),
                     Container(
                       constraints: BoxConstraints(maxWidth: 315),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20,
-                        horizontal: 8,
-                      ).copyWith(bottom: 0),
+                      clipBehavior: Clip.hardEdge,
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Чаты и каналы',
-                            style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
-                          ),
-                          SizedBox(height: 4),
-                          Padding(
-                            padding: EdgeInsetsGeometry.symmetric(vertical: 12),
-                            child: Row(
-                              spacing: 8,
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    style: TextStyle(fontSize: 14),
-                                    decoration: InputDecoration(
-                                      hintText: context.t.general.find,
-                                      constraints: BoxConstraints(maxHeight: 32),
-                                      suffixIcon: Align(
-                                        widthFactor: 1.0,
-                                        heightFactor: 1.0,
-                                        child: Assets.icons.search.svg(width: 20, height: 20),
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverAppBar(
+                              automaticallyImplyLeading: false,
+                              backgroundColor: theme.colorScheme.surface,
+                              elevation: 0,
+                              scrolledUnderElevation: 0,
+                              titleSpacing: 0,
+                              // toolbarHeight: 24,
+                              centerTitle: false,
+                              floating: true,
+                              snap: true,
+                              pinned: true,
+                              title: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 20,
+                                ).copyWith(bottom: 0),
+                                child: Text(
+                                  'Чаты и каналы',
+                                  style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
+                                ),
+                              ),
+                              bottom: PreferredSize(
+                                preferredSize: Size.fromHeight(56),
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12),
+                                  child: Row(
+                                    spacing: 8,
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          style: TextStyle(fontSize: 14),
+                                          decoration: InputDecoration(
+                                            hintText: context.t.general.find,
+                                            constraints: BoxConstraints(maxHeight: 32),
+                                            suffixIcon: Align(
+                                              widthFactor: 1.0,
+                                              heightFactor: 1.0,
+                                              child: Assets.icons.search.svg(
+                                                width: 20,
+                                                height: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      SizedBox(
+                                        height: 32,
+                                        width: 32,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            unawaited(createNewFolder(context));
+                                          },
+                                          icon: Assets.icons.add.svg(),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(
-                                  height: 32,
-                                  width: 32,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      unawaited(createNewFolder(context));
-                                    },
-                                    icon: Assets.icons.add.svg(),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            child: ScrollConfiguration(
-                              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                              child: ListView.separated(
-                                padding: EdgeInsets.zero,
+                            SliverPadding(
+                              padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
+                              sliver: SliverList.separated(
                                 itemCount: state.chats.length,
                                 separatorBuilder: (_, _) => SizedBox(height: 4),
                                 itemBuilder: (BuildContext context, int index) {
@@ -257,14 +278,38 @@ class _MessengerViewState extends State<MessengerView> {
                                   return ChatItem(
                                     chat: chat,
                                     onTap: () {
-                                      print('tap');
+                                      context.read<MessengerCubit>().selectChat(chat);
                                     },
                                   );
                                 },
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Builder(
+                        builder: (context) {
+                          if (state.selectedChat?.dmIds != null) {
+                            return Chat(
+                              key: ObjectKey(
+                                state.selectedChat!.id,
+                              ),
+                              userIds: state.selectedChat!.dmIds!,
+                            );
+                          }
+                          if (state.selectedChat?.streamId != null) {
+                            return ChannelChat(
+                              key: ObjectKey(
+                                state.selectedChat!.id,
+                              ),
+                              channelId: state.selectedChat!.streamId!,
+                              topicName: state.selectedTopic,
+                            );
+                          }
+                          return Center(child: Text(context.t.selectAnyChat));
+                        },
                       ),
                     ),
                   ],
