@@ -575,8 +575,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.GetEventsByQueueIdUseCase>(),
       ),
     );
-    gh.lazySingleton<_i570.RealTimeService>(
-      () => _i570.RealTimeService(
+    gh.lazySingleton<_i570.RealTimeServiceBackup>(
+      () => _i570.RealTimeServiceBackup(
         gh<_i477.RegisterQueueUseCase>(),
         gh<_i1039.GetEventsByQueueIdUseCase>(),
       ),

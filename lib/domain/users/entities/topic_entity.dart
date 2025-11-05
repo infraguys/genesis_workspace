@@ -15,6 +15,22 @@ class TopicEntity extends Equatable {
     this.lastMessagePreview = '',
   });
 
+  TopicEntity copyWith({
+    int? maxId,
+    String? name,
+    Set<int>? unreadMessages,
+    String? lastMessageSenderName,
+    String? lastMessagePreview,
+  }) {
+    return TopicEntity(
+      maxId: maxId ?? this.maxId,
+      name: name ?? this.name,
+      unreadMessages: unreadMessages ?? Set<int>.from(this.unreadMessages),
+      lastMessageSenderName: lastMessageSenderName ?? this.lastMessageSenderName,
+      lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
+    );
+  }
+
   @override
   List<Object> get props => [name];
 

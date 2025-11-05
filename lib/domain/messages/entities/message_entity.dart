@@ -110,11 +110,11 @@ class MessageEntity extends Equatable {
     );
   }
 
-  factory MessageEntity.fake({bool isMe = false}) => MessageEntity(
+  factory MessageEntity.fake({bool isMe = false, String? content}) => MessageEntity(
     id: -1,
     isMeMessage: isMe,
     avatarUrl: null,
-    content: 'Loading...',
+    content: content ?? 'Loading...',
     senderId: isMe ? 999 : 123,
     senderFullName: isMe ? 'You' : 'Sender',
     displayRecipient: StreamDisplayRecipient('General'),

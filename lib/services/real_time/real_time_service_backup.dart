@@ -21,8 +21,8 @@ import 'package:genesis_workspace/domain/real_time_events/usecases/register_queu
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
-class RealTimeService {
-  RealTimeService(this._registerQueueUseCase, this._getEventsByQueueIdUseCase);
+class RealTimeServiceBackup {
+  RealTimeServiceBackup(this._registerQueueUseCase, this._getEventsByQueueIdUseCase);
   final RegisterQueueUseCase _registerQueueUseCase;
   final GetEventsByQueueIdUseCase _getEventsByQueueIdUseCase;
 

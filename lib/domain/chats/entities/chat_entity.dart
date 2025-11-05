@@ -42,8 +42,8 @@ class ChatEntity {
     return updatedChat;
   }
 
-  void setChatPreview({String? avatarUrl, required String displayTitle}) {
-    copyWith(avatarUrl: avatarUrl, displayTitle: displayTitle);
+  ChatEntity setChatPreview({String? avatarUrl, required String displayTitle}) {
+    return copyWith(avatarUrl: avatarUrl, displayTitle: displayTitle);
   }
 
   factory ChatEntity.createChatFromMessage(MessageEntity message, {bool isMyMessage = false}) {

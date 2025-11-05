@@ -15,6 +15,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
 import 'package:injectable/injectable.dart';
@@ -84,6 +85,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           chats.add(chat);
         }
       }
+      inspect(chats);
       emit(state.copyWith(messages: messages, chats: chats));
     } catch (e) {
       inspect(e);
@@ -224,11 +226,24 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> getChannelTopics(int streamId) async {
     try {
-      final response = await _getTopicsUseCase.call(streamId);
+      final topics = await _getTopicsUseCase.call(streamId);
+      for (TopicEntity topic in topics) {
+        final lastMessageId = topic.maxId;
+        final indexOfTopic = topics.indexOf(topic);
+        final message = state.messages.firstWhere(
+          (message) => message.id == lastMessageId,
+          orElse: () => MessageEntity.fake(content: 'Last message not found...'),
+        );
+        final updatedTopic = topic.copyWith(
+          lastMessageSenderName: message.senderFullName,
+          lastMessagePreview: message.content,
+        );
+        topics[indexOfTopic] = updatedTopic;
+      }
       List<ChatEntity> updatedChats = [...state.chats];
       ChatEntity chat = updatedChats.firstWhere((chat) => chat.streamId == streamId);
       int indexOfChat = updatedChats.indexOf(chat);
-      chat = chat.copyWith(topics: response);
+      chat = chat.copyWith(topics: topics);
       updatedChats[indexOfChat] = chat;
       emit(state.copyWith(chats: updatedChats));
     } catch (e) {

@@ -10,6 +10,7 @@ final darkTheme = ThemeData(
   scaffoldBackgroundColor: AppColors.background,
   inputDecorationTheme: _darkInputDecorationTheme,
   extensions: [AppColors.darkTextColors, AppColors.cardColors],
+  cardTheme: CardThemeData(),
 );
 
 final darkColorScheme = ColorScheme.dark(primary: AppColors.primary, surface: AppColors.surface);

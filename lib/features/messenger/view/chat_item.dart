@@ -167,15 +167,23 @@ class _ChatItemState extends State<ChatItem> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "# ${topic.name}",
-                                    style: theme.textTheme.labelMedium?.copyWith(
-                                      fontSize: 14,
-                                      color: textColors.text100,
+                                  Tooltip(
+                                    message: topic.name,
+                                    child: SizedBox(
+                                      width: 240,
+                                      child: Text(
+                                        "# ${topic.name}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.labelMedium?.copyWith(
+                                          fontSize: 14,
+                                          color: textColors.text100,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   Text(
-                                    widget.chat.lastMessageSenderName!,
+                                    topic.lastMessageSenderName,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.primary,
                                     ),
@@ -183,7 +191,7 @@ class _ChatItemState extends State<ChatItem> {
                                   SizedBox(
                                     width: 200,
                                     child: Text(
-                                      widget.chat.lastMessagePreview,
+                                      topic.lastMessagePreview,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: theme.textTheme.bodySmall?.copyWith(
