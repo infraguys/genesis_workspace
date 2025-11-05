@@ -86,7 +86,6 @@ class MessengerCubit extends Cubit<MessengerState> {
           chats.add(chat);
         }
       }
-      inspect(chats);
       emit(state.copyWith(messages: messages, chats: chats));
     } catch (e) {
       inspect(e);

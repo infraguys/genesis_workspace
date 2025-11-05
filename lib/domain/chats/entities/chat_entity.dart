@@ -26,6 +26,7 @@ class ChatEntity {
     final messageDate = message.messageDate;
     final messageId = message.id;
     final messagePreview = message.content;
+    final messageSenderName = message.senderFullName;
     if (!isMyMessage) {
       updatedChat = copyWith(
         displayTitle: message.displayTitle,
@@ -38,6 +39,7 @@ class ChatEntity {
         lastMessageId: messageId,
         lastMessageDate: messageDate,
         lastMessagePreview: messagePreview,
+        lastMessageSenderName: messageSenderName,
       );
     }
     return updatedChat;
