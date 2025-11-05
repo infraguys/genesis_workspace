@@ -9,20 +9,38 @@ class AppColors {
 
   static final darkTextColors = TextColors(
     text100: Color(0xFFFFFFFF),
+    text50: Color(0xFFFFFFFF).withValues(alpha: 0.5),
     text30: Color(0xFFFFFFFF).withValues(alpha: 0.3),
+  );
+  static final cardColors = CardColors(
+    base: Color(0xFFFFFFFF).withValues(alpha: 0.02),
+    active: Color(0xFFFFFFFF).withValues(alpha: 0.1),
   );
 }
 
 @immutable
 class TextColors extends ThemeExtension<TextColors> {
   final Color text100;
+  final Color text50;
   final Color text30;
 
-  const TextColors({required this.text100, required this.text30});
+  const TextColors({
+    required this.text100,
+    required this.text50,
+    required this.text30,
+  });
 
   @override
-  TextColors copyWith({Color? text100, Color? text30}) {
-    return TextColors(text100: text100 ?? this.text100, text30: text30 ?? this.text30);
+  TextColors copyWith({
+    Color? text100,
+    Color? text50,
+    Color? text30,
+  }) {
+    return TextColors(
+      text100: text100 ?? this.text100,
+      text50: text50 ?? this.text50,
+      text30: text30 ?? this.text30,
+    );
   }
 
   @override
@@ -30,7 +48,30 @@ class TextColors extends ThemeExtension<TextColors> {
     if (other is! TextColors) return this;
     return TextColors(
       text100: Color.lerp(text100, other.text100, t)!,
+      text50: Color.lerp(text50, other.text50, t)!,
       text30: Color.lerp(text30, other.text30, t)!,
+    );
+  }
+}
+
+@immutable
+class CardColors extends ThemeExtension<CardColors> {
+  final Color base;
+  final Color active;
+
+  const CardColors({required this.base, required this.active});
+
+  @override
+  CardColors copyWith({Color? base, Color? active}) {
+    return CardColors(base: base ?? this.base, active: active ?? this.active);
+  }
+
+  @override
+  CardColors lerp(ThemeExtension<CardColors>? other, double t) {
+    if (other is! CardColors) return this;
+    return CardColors(
+      base: Color.lerp(base, other.base, t)!,
+      active: Color.lerp(active, other.active, t)!,
     );
   }
 }

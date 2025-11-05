@@ -173,7 +173,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
 
       channel.topics = response;
       for (var message in state.unreadMessages) {
-        if (message.type == MessageType.stream && message.hasUnreadMessages) {
+        if (message.type == MessageType.stream && message.isUnread) {
           final TopicEntity? topic = channel.topics
               .where((topic) => topic.name == message.subject)
               .firstOrNull;
@@ -192,7 +192,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   void setUnreadMessages(List<MessageEntity> unreadMessages) {
     final channels = [...state.channels];
     for (var message in unreadMessages) {
-      if (message.type == MessageType.stream && message.hasUnreadMessages) {
+      if (message.type == MessageType.stream && message.isUnread) {
         final channel = channels.firstWhere((channel) => channel.streamId == message.streamId);
         channel.unreadMessages.add(message.id);
       }
@@ -236,7 +236,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
     if (message.senderId == state.selfUser?.userId) return;
     final channels = [...state.channels];
     final unreadMessages = [...state.unreadMessages];
-    if (message.type == MessageType.stream && message.hasUnreadMessages) {
+    if (message.type == MessageType.stream && message.isUnread) {
       unreadMessages.add(message);
       final channel = channels.firstWhere((channel) => channel.streamId == message.streamId);
       final indexOfChannel = channels.indexOf(channel);

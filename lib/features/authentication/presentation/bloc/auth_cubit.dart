@@ -126,7 +126,7 @@ class AuthCubit extends Cubit<AuthState> {
     );
 
     final organization = await _getOrganizationByIdUseCase.call(selectedOrganizationId ?? -1);
-    await _organizationSwitcherService.selectOrganization(organization);
+    // await _organizationSwitcherService.selectOrganization(organization);
 
     emit(state.copyWith(isAuthorized: hasCredentials, selectedOrganization: organization));
 

@@ -10,6 +10,7 @@ import 'package:genesis_workspace/core/utils/url_updater_stub.dart'
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
@@ -297,4 +298,9 @@ int compareVersions(String versionA, String versionB) {
   }
 
   return 0;
+}
+
+String formatTime(int timestamp) {
+  final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+  return DateFormat('HH:mm').format(date);
 }
