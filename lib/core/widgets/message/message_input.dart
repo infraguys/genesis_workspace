@@ -2,6 +2,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -12,6 +13,7 @@ import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.d
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 
@@ -128,6 +130,7 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
       builder: (context, emojiState) {
         return Column(
@@ -229,43 +232,79 @@ class _MessageInputState extends State<MessageInput> {
                 ),
               ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4).copyWith(bottom: 20),
-              decoration: BoxDecoration(color: theme.colorScheme.surface),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Row(
                 spacing: 8,
                 children: [
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: CustomPopup(
-                      key: attachmentsKey,
-                      showArrow: false,
-                      content: ConstrainedBox(
-                        constraints: const BoxConstraints(minWidth: 220, maxWidth: 280),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            AttachmentAction(
-                              iconData: Icons.insert_drive_file_rounded,
-                              label: context.t.attachmentButton.file,
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                widget.onUploadFile();
-                              },
+                  Material(
+                    child: Column(
+                      spacing: 12,
+                      children: [
+                        InkWell(
+                          onTap: () {},
+                          borderRadius: BorderRadius.circular(32),
+                          child: Ink(
+                            width: 32,
+                            height: 32,
+                            child: Assets.icons.moreVert.svg(
+                              colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
                             ),
-                            const SizedBox(height: 4),
-                            AttachmentAction(
-                              iconData: Icons.image_outlined,
-                              label: context.t.attachmentButton.image,
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                widget.onUploadImage();
-                              },
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                      child: const Icon(Icons.attach_file),
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: CustomPopup(
+                            key: attachmentsKey,
+                            showArrow: false,
+                            contentPadding: EdgeInsets.zero,
+                            contentRadius: 12,
+                            backgroundColor: theme.colorScheme.surface,
+                            content: Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              constraints: const BoxConstraints(minWidth: 220, maxWidth: 280),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  AttachmentAction(
+                                    iconData: Icons.insert_drive_file_rounded,
+                                    label: context.t.attachmentButton.file,
+                                    onTap: () {
+                                      Navigator.of(context).pop();
+                                      widget.onUploadFile();
+                                    },
+                                  ),
+                                  const SizedBox(height: 4),
+                                  AttachmentAction(
+                                    iconData: Icons.image_outlined,
+                                    label: context.t.attachmentButton.image,
+                                    onTap: () {
+                                      Navigator.of(context).pop();
+                                      widget.onUploadImage();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            child: Assets.icons.attachFile.svg(
+                              width: 32,
+                              height: 32,
+                              colorFilter: ColorFilter.mode(
+                                textColors.text30,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Expanded(

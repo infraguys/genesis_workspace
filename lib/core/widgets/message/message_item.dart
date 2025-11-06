@@ -13,6 +13,7 @@ import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.d
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
+import 'package:genesis_workspace/core/widgets/message/message_time.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -141,7 +142,9 @@ class MessageItem extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           rootNavigator: true,
           isLongPress: true,
-          contentDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+          contentRadius: 12,
+          arrowColor: theme.colorScheme.surface,
+          backgroundColor: theme.colorScheme.surface,
           content: ActionsContextMenu(
             messageId: message.id,
             isMyMessage: isMyMessage,
@@ -249,26 +252,34 @@ class MessageItem extends StatelessWidget {
                               actionsPopupKey: actionsPopupKey,
                               maxMessageWidth: maxMessageWidth,
                             ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(
-                                  width: 12,
-                                ),
-                                messageTime,
-                                if (!isMyMessage && !isRead && !isSkeleton) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
-                                ],
-                              ],
-                            ),
+                            if (message.aggregatedReactions.isEmpty)
+                              MessageTime(
+                                messageTime: messageTime,
+                                isMyMessage: isMyMessage,
+                                isRead: isRead,
+                                isSkeleton: isSkeleton,
+                              ),
                           ],
                         ),
                         if (message.aggregatedReactions.isNotEmpty)
-                          MessageReactionsList(
-                            message: message,
-                            myUserId: myUserId,
-                            maxWidth: maxMessageWidth,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: maxMessageWidth),
+                                child: MessageReactionsList(
+                                  message: message,
+                                  myUserId: myUserId,
+                                  maxWidth: maxMessageWidth,
+                                ),
+                              ),
+                              MessageTime(
+                                messageTime: messageTime,
+                                isMyMessage: isMyMessage,
+                                isRead: isRead,
+                                isSkeleton: isSkeleton,
+                              ),
+                            ],
                           ),
                       ],
                     ),

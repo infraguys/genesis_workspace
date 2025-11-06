@@ -36,6 +36,10 @@ class $AssetsIconsGen {
   /// File path: assets/icons/arrow_down.svg
   SvgGenImage get arrowDown => const SvgGenImage('assets/icons/arrow_down.svg');
 
+  /// File path: assets/icons/attach_file.svg
+  SvgGenImage get attachFile =>
+      const SvgGenImage('assets/icons/attach_file.svg');
+
   /// File path: assets/icons/call.svg
   SvgGenImage get call => const SvgGenImage('assets/icons/call.svg');
 
@@ -63,6 +67,7 @@ class $AssetsIconsGen {
     add,
     allChats,
     arrowDown,
+    attachFile,
     call,
     folder,
     folderOpen,

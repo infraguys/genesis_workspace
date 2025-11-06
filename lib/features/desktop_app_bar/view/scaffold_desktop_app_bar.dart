@@ -33,14 +33,14 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
         Container(
           width: MediaQuery.of(context).size.width,
           height: 12,
-          decoration: BoxDecoration(color: AppColors.surface),
+          decoration: BoxDecoration(color: theme.colorScheme.surface),
         ),
         Stack(
           children: [
             Container(
               width: MediaQuery.of(context).size.width,
               height: 8,
-              decoration: BoxDecoration(color: AppColors.surface),
+              decoration: BoxDecoration(color: theme.colorScheme.surface),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +49,7 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15).copyWith(top: 24),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
                     ),
                     child: Row(
@@ -150,7 +150,7 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12, bottom: 0),
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: theme.colorScheme.background,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
                   ),
                   child: SizedBox(
@@ -173,7 +173,7 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15).copyWith(top: 24),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
                     ),
                     child: Row(
@@ -223,6 +223,9 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
               ],
             ),
           ],
+        ),
+        SizedBox(
+          height: 4,
         ),
       ],
     );
