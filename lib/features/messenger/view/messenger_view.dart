@@ -290,6 +290,7 @@ class _MessengerViewState extends State<MessengerView> {
                         ),
                       ),
                     ),
+                    SizedBox(width: 4),
                     Expanded(
                       child: Builder(
                         builder: (context) {

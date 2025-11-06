@@ -164,7 +164,7 @@
     "unpinChat": "Открепить чат"
   },
   "group": {
-    "members_count": "Участников: {count}"
+    "members_count": "{count} участников"
   },
   "group_chat": {
     "create_tooltip": "Создать групповой чат",

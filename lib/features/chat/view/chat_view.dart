@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
@@ -125,6 +126,7 @@ class _ChatViewState extends State<ChatView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
     return BlocConsumer<ChatCubit, ChatState>(
       listenWhen: (prev, current) =>
           prev.uploadFileError != current.uploadFileError ||
@@ -169,6 +171,11 @@ class _ChatViewState extends State<ChatView>
         return Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
+            primary: false,
+            backgroundColor: AppColors.surface,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
+            clipBehavior: Clip.hardEdge,
             title: Builder(
               builder: (context) {
                 if (isLoading) {
@@ -200,7 +207,12 @@ class _ChatViewState extends State<ChatView>
 
                   Widget userStatus;
                   if (userEntity.presenceStatus == PresenceStatus.active) {
-                    userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
+                    userStatus = Text(
+                      context.t.online,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: textColors.text30,
+                      ),
+                    );
                   } else {
                     userStatus = Text(
                       isJustNow(lastSeen)
@@ -221,7 +233,15 @@ class _ChatViewState extends State<ChatView>
                         builder: (context, state) {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [Text(userEntity.fullName), userStatus],
+                            children: [
+                              Text(
+                                userEntity.fullName,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontSize: 16,
+                                ),
+                              ),
+                              userStatus,
+                            ],
                           );
                         },
                       ),

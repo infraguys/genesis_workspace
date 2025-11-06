@@ -338,7 +338,7 @@ class TranslationsGroupRu extends TranslationsGroupEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
-	@override String membersCount({required Object count}) => 'Участников: ${count}';
+	@override String membersCount({required Object count}) => '${count} участников';
 }
 
 // Path: groupChat

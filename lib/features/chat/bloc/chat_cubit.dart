@@ -199,8 +199,8 @@ class ChatCubit extends Cubit<ChatState>
   }) async {
     state.chatIds = userIds.toSet();
 
-    if (userIds.length == 1) {
-      final userId = userIds.first;
+    if (userIds.length <= 2) {
+      final userId = userIds.firstWhere((userId) => userId != myUserId);
       try {
         final UserEntity user = await _getUserByIdUseCase.call(userId);
         final DmUserEntity dmUser = user.toDmUser();

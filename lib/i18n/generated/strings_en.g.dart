@@ -554,8 +554,8 @@ class TranslationsGroupEn {
 
 	// Translations
 
-	/// en: 'Members: {count}'
-	String membersCount({required Object count}) => 'Members: ${count}';
+	/// en: '{count} members'
+	String membersCount({required Object count}) => '${count} members';
 }
 
 // Path: groupChat
