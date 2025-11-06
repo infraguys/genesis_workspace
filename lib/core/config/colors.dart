@@ -6,6 +6,7 @@ class AppColors {
   static const Color primary = Color(0xffFF8438);
   static const Color surface = Color(0xff333333);
   static const Color background = Color(0xff1B1B1D);
+  static const Color callGreen = Color(0xff26C038);
 
   static final darkTextColors = TextColors(
     text100: Color(0xFFFFFFFF),

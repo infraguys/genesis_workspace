@@ -36,6 +36,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/arrow_down.svg
   SvgGenImage get arrowDown => const SvgGenImage('assets/icons/arrow_down.svg');
 
+  /// File path: assets/icons/call.svg
+  SvgGenImage get call => const SvgGenImage('assets/icons/call.svg');
+
   /// File path: assets/icons/folder.svg
   SvgGenImage get folder => const SvgGenImage('assets/icons/folder.svg');
 
@@ -43,17 +46,30 @@ class $AssetsIconsGen {
   SvgGenImage get folderOpen =>
       const SvgGenImage('assets/icons/folder_open.svg');
 
+  /// File path: assets/icons/join_call.svg
+  SvgGenImage get joinCall => const SvgGenImage('assets/icons/join_call.svg');
+
+  /// File path: assets/icons/more_vert.svg
+  SvgGenImage get moreVert => const SvgGenImage('assets/icons/more_vert.svg');
+
   /// File path: assets/icons/search.svg
   SvgGenImage get search => const SvgGenImage('assets/icons/search.svg');
+
+  /// File path: assets/icons/videocam.svg
+  SvgGenImage get videocam => const SvgGenImage('assets/icons/videocam.svg');
 
   /// List of all assets
   List<SvgGenImage> get values => [
     add,
     allChats,
     arrowDown,
+    call,
     folder,
     folderOpen,
+    joinCall,
+    moreVert,
     search,
+    videocam,
   ];
 }
 

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -27,6 +28,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -154,6 +156,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
     return BlocConsumer<ChannelChatCubit, ChannelChatState>(
       listenWhen: (prev, current) =>
           prev.uploadFileError != current.uploadFileError ||
@@ -193,24 +197,92 @@ class _ChannelChatViewState extends State<ChannelChatView>
         }
       },
       builder: (context, state) {
+        final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
+          fontSize: 16,
+        );
+        final topicTextStyle = theme.textTheme.bodyLarge?.copyWith(
+          color: textColors.text30,
+        );
+        final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
+          color: textColors.text30,
+        );
         return Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
+            primary: false,
+            backgroundColor: AppColors.surface,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
+            clipBehavior: Clip.hardEdge,
             centerTitle: false,
+            actionsPadding: EdgeInsetsGeometry.symmetric(
+              horizontal: 20,
+            ),
+            leading: IconButton(
+              onPressed: () {},
+              icon: Assets.icons.moreVert.svg(
+                colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+              ),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {},
+                icon: Assets.icons.joinCall.svg(
+                  colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Assets.icons.call.svg(
+                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Assets.icons.videocam.svg(
+                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                ),
+              ),
+            ],
             title: Skeletonizer(
               enabled: state.channel == null,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    state.channel?.name ?? 'Channel Name',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.channel?.name ?? 'Channel Name',
+                        style: titleTextStyle,
+                      ),
+                      SizedBox(
+                        width: 12,
+                      ),
+                      if (widget.topicName != null) ...[
+                        Container(
+                          height: 16,
+                          width: 3,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadiusGeometry.circular(16),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          '# ${widget.topicName!}',
+                          style: topicTextStyle,
+                        ),
+                      ],
+                    ],
                   ),
-                  if (widget.topicName != null)
-                    Text(
-                      widget.topicName!,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
-                    ),
+                  Text(
+                    context.t.group.membersCount(count: state.channel?.subscriberCount ?? 0),
+                    style: subtitleTextStyle,
+                  ),
                 ],
               ),
             ),

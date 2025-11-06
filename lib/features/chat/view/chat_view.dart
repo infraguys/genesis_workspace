@@ -30,6 +30,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -176,8 +177,44 @@ class _ChatViewState extends State<ChatView>
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
             clipBehavior: Clip.hardEdge,
+            centerTitle: false,
+            actionsPadding: EdgeInsetsGeometry.symmetric(
+              horizontal: 20,
+            ),
+            leading: IconButton(
+              onPressed: () {},
+              icon: Assets.icons.moreVert.svg(
+                colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+              ),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {},
+                icon: Assets.icons.joinCall.svg(
+                  colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Assets.icons.call.svg(
+                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Assets.icons.videocam.svg(
+                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                ),
+              ),
+            ],
             title: Builder(
               builder: (context) {
+                final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
+                  fontSize: 16,
+                );
+                final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
+                  color: textColors.text30,
+                );
                 if (isLoading) {
                   return Skeletonizer(
                     child: Row(
@@ -188,7 +225,16 @@ class _ChatViewState extends State<ChatView>
                           builder: (context, state) {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [Text("User Userov"), Text(context.t.online)],
+                              children: [
+                                Text(
+                                  "User Userov",
+                                  style: titleTextStyle,
+                                ),
+                                Text(
+                                  context.t.online,
+                                  style: subtitleTextStyle,
+                                ),
+                              ],
                             );
                           },
                         ),
@@ -209,20 +255,18 @@ class _ChatViewState extends State<ChatView>
                   if (userEntity.presenceStatus == PresenceStatus.active) {
                     userStatus = Text(
                       context.t.online,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: textColors.text30,
-                      ),
+                      style: subtitleTextStyle,
                     );
                   } else {
                     userStatus = Text(
                       isJustNow(lastSeen)
                           ? context.t.wasOnlineJustNow
                           : context.t.wasOnline(time: timeAgo),
-                      style: theme.textTheme.labelSmall,
+                      style: subtitleTextStyle,
                     );
                   }
                   if (state.typingId == userEntity.userId) {
-                    userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
+                    userStatus = Text(context.t.typing, style: subtitleTextStyle);
                   }
 
                   return Row(
@@ -236,9 +280,7 @@ class _ChatViewState extends State<ChatView>
                             children: [
                               Text(
                                 userEntity.fullName,
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  fontSize: 16,
-                                ),
+                                style: titleTextStyle,
                               ),
                               userStatus,
                             ],
@@ -262,9 +304,17 @@ class _ChatViewState extends State<ChatView>
                             constraints: BoxConstraints(
                               maxWidth: MediaQuery.of(context).size.width * 0.55,
                             ),
-                            child: Text(names, overflow: TextOverflow.ellipsis, maxLines: 1),
+                            child: Text(
+                              names,
+                              style: titleTextStyle,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
-                          Text('members: ${users.length}', style: theme.textTheme.labelSmall),
+                          Text(
+                            context.t.group.membersCount(count: users.length),
+                            style: subtitleTextStyle,
+                          ),
                         ],
                       ),
                     ],

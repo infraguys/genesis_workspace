@@ -9,9 +9,11 @@ part of 'stream_dto.dart';
 StreamDto _$StreamDtoFromJson(Map<String, dynamic> json) => StreamDto(
   streamId: (json['stream_id'] as num).toInt(),
   name: json['name'] as String,
+  subscriberCount: (json['subscriber_count'] as num).toInt(),
 );
 
 Map<String, dynamic> _$StreamDtoToJson(StreamDto instance) => <String, dynamic>{
   'stream_id': instance.streamId,
   'name': instance.name,
+  'subscriber_count': instance.subscriberCount,
 };
