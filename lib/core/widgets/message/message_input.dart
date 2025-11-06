@@ -139,7 +139,6 @@ class _MessageInputState extends State<MessageInput> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 12),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               switchInCurve: Curves.easeOut,
@@ -510,8 +509,16 @@ class _MessageInputState extends State<MessageInput> {
                             child: FadeTransition(opacity: animation, child: child),
                           ),
                           child: emojiState.showEmojiKeyboard
-                              ? const Icon(Icons.keyboard, key: ValueKey('keyboard'))
-                              : const Icon(CupertinoIcons.smiley, key: ValueKey('emoji')),
+                              ? Icon(
+                                  Icons.keyboard,
+                                  color: textColors.text30,
+                                  key: ValueKey('keyboard'),
+                                )
+                              : Icon(
+                                  CupertinoIcons.smiley,
+                                  color: textColors.text30,
+                                  key: ValueKey('emoji'),
+                                ),
                         ),
                       ),
                     ],
