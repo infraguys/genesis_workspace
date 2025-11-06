@@ -210,7 +210,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             primary: false,
-            backgroundColor: AppColors.surface,
+            backgroundColor: theme.colorScheme.surface,
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
             clipBehavior: Clip.hardEdge,

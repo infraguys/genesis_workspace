@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
-import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -27,6 +27,8 @@ class MessageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final messageColors = Theme.of(context).extension<MessageColors>()!;
+    final textColors = Theme.of(context).extension<TextColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -44,27 +46,47 @@ class MessageBody extends StatelessWidget {
                           width: 80,
                           color: theme.colorScheme.surfaceContainerHighest,
                         )
-                      : Text(message.senderFullName, style: theme.textTheme.titleSmall),
+                      : Text(
+                          message.senderFullName,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: messageColors.senderNameColor,
+                          ),
+                        ),
                   if (showTopic && message.subject.isNotEmpty)
                     Skeleton.ignore(
                       child: Row(
                         children: [
-                          const SizedBox(width: 2),
-                          const Icon(Icons.arrow_right, size: 16),
-                          Text(message.subject, style: theme.textTheme.labelSmall),
+                          const SizedBox(width: 12),
+                          Container(
+                            width: 3,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadiusGeometry.circular(14),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 4,
+                          ),
+                          Text(
+                            '# ${message.subject}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: textColors.text30,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                 ],
               ),
-              if (currentSize(context) > ScreenSize.tablet) ...[
-                SizedBox(width: 4),
-                _MessageActions(
-                  isStarred: isStarred,
-                  messageId: message.id,
-                  actionsPopupKey: actionsPopupKey,
-                ),
-              ],
+              // if (currentSize(context) > ScreenSize.tablet) ...[
+              //   SizedBox(width: 4),
+              //   _MessageActions(
+              //     isStarred: isStarred,
+              //     messageId: message.id,
+              //     actionsPopupKey: actionsPopupKey,
+              //   ),
+              // ],
             ],
           ),
         const SizedBox(height: 2),
@@ -84,12 +106,12 @@ class MessageBody extends StatelessWidget {
                     : MessageHtml(content: message.content),
               ),
             ),
-            if (currentSize(context) > ScreenSize.tablet && !showSenderName)
-              _MessageActions(
-                isStarred: isStarred,
-                messageId: message.id,
-                actionsPopupKey: actionsPopupKey,
-              ),
+            // if (currentSize(context) > ScreenSize.tablet && !showSenderName)
+            //   _MessageActions(
+            //     isStarred: isStarred,
+            //     messageId: message.id,
+            //     actionsPopupKey: actionsPopupKey,
+            //   ),
           ],
         ),
       ],

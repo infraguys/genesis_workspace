@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_popup/flutter_popup.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
@@ -52,15 +53,19 @@ class MessageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
+    final messageColors = Theme.of(context).extension<MessageColors>()!;
     final isRead = message.flags?.contains('read') ?? false;
     final GlobalObjectKey messageKey = GlobalObjectKey(message);
 
     final avatar = isSkeleton
         ? const CircleAvatar(radius: 20)
-        : UserAvatar(avatarUrl: message.avatarUrl);
+        : UserAvatar(
+            avatarUrl: message.avatarUrl,
+            size: 30,
+          );
 
     final MessagesCubit messagesCubit = context.read<MessagesCubit>();
-    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(context);
 
     Future<void> handleEmojiSelected(String emojiName) async {
       try {
@@ -94,9 +99,8 @@ class MessageItem extends StatelessWidget {
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
         : Text(
             formatTime(message.timestamp),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 10,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: messageColors.timeColor,
             ),
           );
 
@@ -174,7 +178,7 @@ class MessageItem extends StatelessWidget {
               mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (showAvatar) ...[avatar, const SizedBox(width: 4)],
+                if (showAvatar) ...[avatar, const SizedBox(width: 12)],
                 if (!showAvatar && !isMyMessage) const SizedBox(width: 44),
                 GestureDetector(
                   onTap: () {
@@ -213,7 +217,7 @@ class MessageItem extends StatelessWidget {
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding: const EdgeInsets.all(12),
                     constraints: (showAvatar)
                         ? BoxConstraints(
                             minHeight: 40,
@@ -222,54 +226,50 @@ class MessageItem extends StatelessWidget {
                           )
                         : null,
                     decoration: BoxDecoration(
-                      color: isMyMessage
-                          ? theme.colorScheme.secondaryContainer.withAlpha(128)
-                          : theme.colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(14).copyWith(
-                        bottomRight: isMyMessage ? Radius.zero : null,
-                        bottomLeft: !isMyMessage ? Radius.zero : null,
+                      color: isMyMessage ? messageColors.ownBackground : messageColors.background,
+                      borderRadius: BorderRadius.circular(8).copyWith(
+                        bottomRight: (isMyMessage && showAvatar) ? Radius.zero : null,
+                        bottomLeft: (!isMyMessage && showAvatar) ? Radius.zero : null,
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            MessageBody(
+                              showSenderName: showSenderName,
+                              isSkeleton: isSkeleton,
+                              message: message,
+                              showTopic: showTopic,
+                              isStarred: isStarred,
+                              actionsPopupKey: actionsPopupKey,
+                              maxMessageWidth: maxMessageWidth,
+                            ),
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                MessageBody(
-                                  showSenderName: showSenderName,
-                                  isSkeleton: isSkeleton,
-                                  message: message,
-                                  showTopic: showTopic,
-                                  isStarred: isStarred,
-                                  actionsPopupKey: actionsPopupKey,
-                                  maxMessageWidth: maxMessageWidth,
+                                SizedBox(
+                                  width: 12,
                                 ),
+                                messageTime,
+                                if (!isMyMessage && !isRead && !isSkeleton) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
+                                ],
                               ],
                             ),
-                            if (message.aggregatedReactions.isNotEmpty)
-                              MessageReactionsList(
-                                message: message,
-                                myUserId: myUserId,
-                                maxWidth: maxMessageWidth,
-                              ),
                           ],
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            messageTime,
-                            if (!isMyMessage && !isRead && !isSkeleton) ...[
-                              const SizedBox(width: 4),
-                              Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
-                            ],
-                          ],
-                        ),
+                        if (message.aggregatedReactions.isNotEmpty)
+                          MessageReactionsList(
+                            message: message,
+                            myUserId: myUserId,
+                            maxWidth: maxMessageWidth,
+                          ),
                       ],
                     ),
                   ),

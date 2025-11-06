@@ -7,13 +7,20 @@ final darkTheme = ThemeData(
   colorScheme: darkColorScheme,
   badgeTheme: _badgeTheme,
   fontFamily: FontFamily.montserrat,
-  scaffoldBackgroundColor: AppColors.background,
+  scaffoldBackgroundColor: const Color(0xff1B1B1D),
   inputDecorationTheme: _darkInputDecorationTheme,
-  extensions: [AppColors.darkTextColors, AppColors.cardColors],
+  extensions: [AppColors.darkTextColors, AppColors.darkCardColors, AppColors.darkMessageColors],
   cardTheme: CardThemeData(),
+  progressIndicatorTheme: ProgressIndicatorThemeData(
+    linearTrackColor: const Color(0xff333333),
+    stopIndicatorRadius: 12,
+  ),
 );
 
-final darkColorScheme = ColorScheme.dark(primary: AppColors.primary, surface: AppColors.surface);
+final darkColorScheme = ColorScheme.dark(
+  primary: AppColors.primary,
+  surface: const Color(0xff333333),
+);
 
 final _badgeTheme = BadgeThemeData(
   backgroundColor: AppColors.counterBadge,
