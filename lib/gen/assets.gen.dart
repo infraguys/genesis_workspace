@@ -59,6 +59,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/search.svg
   SvgGenImage get search => const SvgGenImage('assets/icons/search.svg');
 
+  /// File path: assets/icons/send.svg
+  SvgGenImage get send => const SvgGenImage('assets/icons/send.svg');
+
   /// File path: assets/icons/videocam.svg
   SvgGenImage get videocam => const SvgGenImage('assets/icons/videocam.svg');
 
@@ -74,6 +77,7 @@ class $AssetsIconsGen {
     joinCall,
     moreVert,
     search,
+    send,
     videocam,
   ];
 }

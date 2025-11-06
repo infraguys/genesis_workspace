@@ -1,4 +1,5 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -131,6 +132,7 @@ class _MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final themeColors = Theme.of(context).extension<ThemeColors>()!;
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
       builder: (context, emojiState) {
         return Column(
@@ -259,6 +261,7 @@ class _MessageInputState extends State<MessageInput> {
                           cursor: SystemMouseCursors.click,
                           child: CustomPopup(
                             key: attachmentsKey,
+                            isLongPress: true,
                             showArrow: false,
                             contentPadding: EdgeInsets.zero,
                             contentRadius: 12,
@@ -294,12 +297,20 @@ class _MessageInputState extends State<MessageInput> {
                                 ],
                               ),
                             ),
-                            child: Assets.icons.attachFile.svg(
-                              width: 32,
-                              height: 32,
-                              colorFilter: ColorFilter.mode(
-                                textColors.text30,
-                                BlendMode.srcIn,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(32),
+                              onTap: () => attachmentsKey.currentState?.show(),
+                              child: Ink(
+                                width: 32,
+                                height: 32,
+                                child: Assets.icons.attachFile.svg(
+                                  width: 32,
+                                  height: 32,
+                                  colorFilter: ColorFilter.mode(
+                                    textColors.text30,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -308,136 +319,203 @@ class _MessageInputState extends State<MessageInput> {
                     ),
                   ),
                   Expanded(
-                    child: Stack(
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(24),
-                            border: widget.isDropOver
-                                ? Border.all(color: theme.colorScheme.primary, width: 2)
-                                : Border.all(color: Colors.transparent, width: 2),
-                          ),
-                          child: TextField(
-                            controller: widget.controller,
-                            focusNode: widget.focusNode,
-                            minLines: 1,
-                            maxLines: 4,
-                            autofocus: platformInfo.isDesktop,
-                            onTap: () {
-                              if (currentSize(context) < ScreenSize.lTablet) {
-                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
-                              }
-                            },
-                            textInputAction: TextInputAction.send,
-                            onSubmitted: (value) {
-                              // Allow caller to intercept Enter (e.g., when mention popup is open)
-                              if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
-                                if (platformInfo.isDesktop) {
-                                  widget.focusNode.requestFocus();
-                                }
-                                return;
-                              }
-                              if (widget.isEdit) {
-                                if (widget.onEdit != null) {
-                                  widget.onEdit!();
-                                }
-                              } else {
-                                if (widget.onSend != null) {
-                                  widget.onSend!();
-                                }
-                              }
-                              if (platformInfo.isDesktop) {
-                                widget.focusNode.requestFocus();
-                              }
-                            },
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: widget.isDropOver ? "" : "Message",
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              suffixIcon: IconButton(
-                                onPressed: () {
-                                  if (currentSize(context) >= ScreenSize.lTablet) {
-                                    if (emojiState.showEmojiKeyboard) {
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                        false,
-                                        closeKeyboard: true,
-                                      );
-                                    } else {
-                                      context.read<EmojiKeyboardCubit>().setHeight(300);
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
-                                    }
-                                  } else {
-                                    if (emojiState.showEmojiKeyboard) {
-                                      FocusScope.of(context).requestFocus(widget.focusNode);
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                        false,
-                                      );
-                                    } else {
-                                      FocusScope.of(context).unfocus();
-                                      if (emojiState.keyboardHeight == 0) {
-                                        context.read<EmojiKeyboardCubit>().setHeight(300);
-                                      }
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
-                                    }
-                                  }
-                                },
-                                icon: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  transitionBuilder: (child, animation) => RotationTransition(
-                                    turns: child.key == const ValueKey('emoji')
-                                        ? Tween<double>(begin: 0.75, end: 1.0).animate(animation)
-                                        : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
-                                    child: FadeTransition(opacity: animation, child: child),
+                    child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: 88,
+                      ),
+                      decoration: BoxDecoration(
+                        color: themeColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                            child: Row(
+                              spacing: 8,
+                              children: [
+                                Container(
+                                  height: 16,
+                                  width: 3,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-                                  child: emojiState.showEmojiKeyboard
-                                      ? const Icon(Icons.keyboard, key: ValueKey('keyboard'))
-                                      : const Icon(Icons.emoji_emotions, key: ValueKey('emoji')),
                                 ),
-                              ),
+                                Text(
+                                  "# Тема 2",
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: textColors.text30,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-
-                        // Оверлей при перетаскивании
-                        if (widget.isDropOver)
-                          Positioned.fill(
-                            child: IgnorePointer(
-                              child: AnimatedOpacity(
-                                duration: const Duration(milliseconds: 120),
-                                opacity: 1.0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.primary.withOpacity(0.06),
-                                    borderRadius: BorderRadius.circular(24),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    context.t.dropFilesToUpload,
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w600,
+                          Stack(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                clipBehavior: Clip.hardEdge,
+                                decoration: BoxDecoration(
+                                  color: themeColors.background,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: TextField(
+                                  controller: widget.controller,
+                                  focusNode: widget.focusNode,
+                                  minLines: 1,
+                                  maxLines: 4,
+                                  autofocus: platformInfo.isDesktop,
+                                  clipBehavior: Clip.none,
+                                  onTap: () {
+                                    if (currentSize(context) < ScreenSize.lTablet) {
+                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                        false,
+                                      );
+                                    }
+                                  },
+                                  textInputAction: TextInputAction.send,
+                                  onSubmitted: (value) {
+                                    if (widget.onSubmitIntercept != null &&
+                                        widget.onSubmitIntercept!()) {
+                                      if (platformInfo.isDesktop) {
+                                        widget.focusNode.requestFocus();
+                                      }
+                                      return;
+                                    }
+                                    if (widget.isEdit) {
+                                      if (widget.onEdit != null) {
+                                        widget.onEdit!();
+                                      }
+                                    } else {
+                                      if (widget.onSend != null) {
+                                        widget.onSend!();
+                                      }
+                                    }
+                                    if (platformInfo.isDesktop) {
+                                      widget.focusNode.requestFocus();
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    filled: true,
+                                    fillColor: themeColors.background,
+                                    focusColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
+                                    focusedBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    hintText: widget.isDropOver ? "" : "Message",
+                                    hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                      color: textColors.text30,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 12,
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
+
+                              // Оверлей при перетаскивании
+                              if (widget.isDropOver)
+                                Positioned.fill(
+                                  child: IgnorePointer(
+                                    child: AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 120),
+                                      opacity: 1.0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary.withOpacity(0.06),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          context.t.dropFilesToUpload,
+                                          textAlign: TextAlign.center,
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-
-                  ElevatedButton(
-                    onPressed: widget.isEdit ? widget.onEdit : widget.onSend,
-                    child: widget.isEdit
-                        ? const Icon(Icons.check)
-                        : const Icon(Icons.send_outlined),
-                  ).pending(widget.isMessagePending),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 12,
+                    children: [
+                      IconButton.filled(
+                        onPressed: widget.isEdit ? widget.onEdit : widget.onSend,
+                        style: IconButton.styleFrom(
+                          fixedSize: const Size(46, 46),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: widget.isEdit
+                            ? Icon(
+                                Icons.check,
+                                color: themeColors.onPrimary,
+                              )
+                            : Assets.icons.send.svg(
+                                width: 23,
+                                height: 20,
+                                colorFilter: ColorFilter.mode(
+                                  themeColors.onPrimary,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                      ).pending(widget.isMessagePending),
+                      IconButton(
+                        onPressed: () {
+                          if (currentSize(context) >= ScreenSize.lTablet) {
+                            if (emojiState.showEmojiKeyboard) {
+                              context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                false,
+                                closeKeyboard: true,
+                              );
+                            } else {
+                              context.read<EmojiKeyboardCubit>().setHeight(300);
+                              context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
+                            }
+                          } else {
+                            if (emojiState.showEmojiKeyboard) {
+                              FocusScope.of(context).requestFocus(widget.focusNode);
+                              context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                false,
+                              );
+                            } else {
+                              FocusScope.of(context).unfocus();
+                              if (emojiState.keyboardHeight == 0) {
+                                context.read<EmojiKeyboardCubit>().setHeight(300);
+                              }
+                              context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
+                            }
+                          }
+                        },
+                        icon: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder: (child, animation) => RotationTransition(
+                            turns: child.key == const ValueKey('emoji')
+                                ? Tween<double>(begin: 0.75, end: 1.0).animate(animation)
+                                : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
+                            child: FadeTransition(opacity: animation, child: child),
+                          ),
+                          child: emojiState.showEmojiKeyboard
+                              ? const Icon(Icons.keyboard, key: ValueKey('keyboard'))
+                              : const Icon(CupertinoIcons.smiley, key: ValueKey('emoji')),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

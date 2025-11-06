@@ -231,7 +231,7 @@ class MessageItem extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isMyMessage ? messageColors.ownBackground : messageColors.background,
                       borderRadius: BorderRadius.circular(8).copyWith(
-                        bottomRight: (isMyMessage && showAvatar) ? Radius.zero : null,
+                        bottomRight: (isMyMessage) ? Radius.zero : null,
                         bottomLeft: (!isMyMessage && showAvatar) ? Radius.zero : null,
                       ),
                     ),

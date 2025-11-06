@@ -6,6 +6,11 @@ class AppColors {
   static const Color primary = Color(0xffFF8438);
   static const Color callGreen = Color(0xff26C038);
 
+  static final darkThemeColors = ThemeColors(
+    onPrimary: Color(0xff1B1B1D),
+    background: Color(0xff1B1B1D),
+  );
+
   static final darkTextColors = TextColors(
     text100: Color(0xFFFFFFFF),
     text50: Color(0xFFFFFFFF).withValues(alpha: 0.5),
@@ -21,6 +26,37 @@ class AppColors {
     base: Color(0xFFFFFFFF).withValues(alpha: 0.02),
     active: Color(0xFFFFFFFF).withValues(alpha: 0.1),
   );
+}
+
+@immutable
+class ThemeColors extends ThemeExtension<ThemeColors> {
+  final Color onPrimary;
+  final Color background;
+
+  const ThemeColors({
+    required this.onPrimary,
+    required this.background,
+  });
+
+  @override
+  ThemeColors copyWith({
+    Color? onPrimary,
+    Color? background,
+  }) {
+    return ThemeColors(
+      onPrimary: onPrimary ?? this.onPrimary,
+      background: background ?? this.background,
+    );
+  }
+
+  @override
+  ThemeColors lerp(ThemeExtension<ThemeColors>? other, double t) {
+    if (other is! ThemeColors) return this;
+    return ThemeColors(
+      onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
+      background: Color.lerp(background, other.background, t)!,
+    );
+  }
 }
 
 @immutable

@@ -538,7 +538,7 @@ class _ChatViewState extends State<ChatView>
                                   onInvoke: (intent) {
                                     if (state.showMentionPopup &&
                                         state.filteredSuggestedMentions.isNotEmpty) {
-                                      final st = _mentionKey.currentState as dynamic?;
+                                      final st = _mentionKey.currentState as dynamic;
                                       if (intent.direction == TraversalDirection.down) {
                                         st?.moveNext();
                                       } else {
@@ -552,7 +552,7 @@ class _ChatViewState extends State<ChatView>
                                   onInvoke: (intent) {
                                     if (state.showMentionPopup &&
                                         state.filteredSuggestedMentions.isNotEmpty) {
-                                      final st = _mentionKey.currentState as dynamic?;
+                                      final st = _mentionKey.currentState as dynamic;
                                       st?.selectFocused();
                                     }
                                     return null;
@@ -568,7 +568,7 @@ class _ChatViewState extends State<ChatView>
                                   onSubmitIntercept: () {
                                     if (state.showMentionPopup &&
                                         state.filteredSuggestedMentions.isNotEmpty) {
-                                      final st = _mentionKey.currentState as dynamic?;
+                                      final st = _mentionKey.currentState as dynamic;
                                       st?.selectFocused();
                                       return true;
                                     }
