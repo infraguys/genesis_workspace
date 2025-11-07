@@ -80,6 +80,7 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsUpdateViewRu update_view = _TranslationsUpdateViewRu._(_root);
 	@override late final _TranslationsUpdateWidgetRu update_widget = _TranslationsUpdateWidgetRu._(_root);
 	@override late final _TranslationsUpdateForceRu update_force = _TranslationsUpdateForceRu._(_root);
+	@override late final _TranslationsEmojiRu emoji = _TranslationsEmojiRu._(_root);
 }
 
 // Path: auth
@@ -408,6 +409,16 @@ class _TranslationsUpdateForceRu implements TranslationsUpdateForceEn {
 	@override String get failed_to_start => 'Не удалось запустить обновление: {error}';
 }
 
+// Path: emoji
+class _TranslationsEmojiRu implements TranslationsEmojiEn {
+	_TranslationsEmojiRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get no_recent => 'Нет недавних эмоджи';
+}
+
 // Path: organizations.addDialog
 class _TranslationsOrganizationsAddDialogRu implements TranslationsOrganizationsAddDialogEn {
 	_TranslationsOrganizationsAddDialogRu._(this._root);
@@ -603,6 +614,7 @@ extension on TranslationsRu {
 			case 'update_force.update': return 'Обновить';
 			case 'update_force.unsupported_platform': return 'Обновления на этой платформе пока не поддержаны.';
 			case 'update_force.failed_to_start': return 'Не удалось запустить обновление: {error}';
+			case 'emoji.no_recent': return 'Нет недавних эмоджи';
 			default: return null;
 		}
 	}

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -14,10 +15,12 @@ import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
 part 'messenger_state.dart';
@@ -33,6 +36,10 @@ class MessengerCubit extends Cubit<MessengerState> {
   final GetMessagesUseCase _getMessagesUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
 
+  final MultiPollingService _realTimeService;
+
+  late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
+
   MessengerCubit(
     this._addFolderUseCase,
     this._getFoldersUseCase,
@@ -42,6 +49,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getMembersForFolderUseCase,
     this._getMessagesUseCase,
     this._getTopicsUseCase,
+    this._realTimeService,
   ) : super(
         MessengerState(
           selfUser: null,
@@ -52,7 +60,9 @@ class MessengerCubit extends Cubit<MessengerState> {
           chats: [],
           selectedChat: null,
         ),
-      );
+      ) {
+    _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
+  }
 
   Future<void> getMessages() async {
     try {
@@ -270,5 +280,30 @@ class MessengerCubit extends Cubit<MessengerState> {
         chats: [],
       ),
     );
+  }
+
+  void _onMessageEvents(MessageEventEntity event) {
+    final message = event.message;
+
+    final chatId = message.recipientId;
+    final updatedMessages = [...state.messages, message];
+    List<ChatEntity> updatedChats = [...state.chats];
+
+    if (state.chats.any((chat) => chat.id == chatId)) {
+      if (message.isUnread) {
+        final chat = state.chats.firstWhere((chat) => chat.id == chatId);
+        final indexOfChat = state.chats.indexOf(chat);
+        final updatedChat = chat.copyWith(unreadCount: chat.unreadCount + 1);
+        updatedChats[indexOfChat] = updatedChat;
+      }
+    }
+
+    emit(state.copyWith(messages: updatedMessages, chats: updatedChats));
+  }
+
+  @override
+  Future<void> close() {
+    _messagesEventsSubscription.cancel();
+    return super.close();
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -279,7 +278,6 @@ class _MessengerViewState extends State<MessengerView> {
                                   return ChatItem(
                                     chat: chat,
                                     onTap: () {
-                                      inspect(chat);
                                       context.read<MessengerCubit>().selectChat(chat);
                                     },
                                   );
