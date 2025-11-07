@@ -327,7 +327,6 @@ class _ChatViewState extends State<ChatView>
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
-              inspect(snapshot);
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error"));

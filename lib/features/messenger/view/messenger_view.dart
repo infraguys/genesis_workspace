@@ -298,6 +298,7 @@ class _MessengerViewState extends State<MessengerView> {
                                 state.selectedChat!.id,
                               ),
                               userIds: state.selectedChat!.dmIds!,
+                              unreadMessagesCount: state.selectedChat?.unreadMessages.length,
                             );
                           }
                           if (state.selectedChat?.streamId != null) {
@@ -307,6 +308,7 @@ class _MessengerViewState extends State<MessengerView> {
                               ),
                               channelId: state.selectedChat!.streamId!,
                               topicName: state.selectedTopic,
+                              unreadMessagesCount: state.selectedChat?.unreadMessages.length,
                             );
                           }
                           return Center(child: Text(context.t.selectAnyChat));

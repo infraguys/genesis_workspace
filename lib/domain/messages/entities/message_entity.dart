@@ -49,8 +49,17 @@ class MessageEntity extends Equatable {
   bool get isChannelMessage => displayRecipient is StreamDisplayRecipient;
   bool get isTopicMessage => isChannelMessage && subject.isNotEmpty;
 
-  String get displayTitle =>
-      isChannelMessage ? (displayRecipient as StreamDisplayRecipient).streamName : senderFullName;
+  String get displayTitle {
+    if (isChannelMessage) {
+      return (displayRecipient as StreamDisplayRecipient).streamName;
+    } else if (isGroupChatMessage) {
+      return (displayRecipient as DirectMessageRecipients).recipients
+          .map((user) => user.fullName)
+          .join(', ');
+    } else {
+      return senderFullName;
+    }
+  }
 
   DateTime get messageDate => DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
 

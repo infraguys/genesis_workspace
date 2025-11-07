@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/enums/message_flag.dart';
+import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
@@ -16,6 +18,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
@@ -39,6 +42,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   final MultiPollingService _realTimeService;
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsEventsSubscription;
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -57,11 +61,15 @@ class MessengerCubit extends Cubit<MessengerState> {
           selectedFolderIndex: 0,
           folderMembersById: const {},
           messages: [],
+          unreadMessages: [],
           chats: [],
           selectedChat: null,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
+    _messageFlagsEventsSubscription = _realTimeService.messageFlagsEventsStream.listen(
+      _onMessageFlagsEvents,
+    );
   }
 
   Future<void> getMessages() async {
@@ -73,16 +81,19 @@ class MessengerCubit extends Cubit<MessengerState> {
         ],
         numBefore: 5000,
         numAfter: 0,
-        applyMarkdown: false,
         clientGravatar: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       final messages = response.messages;
+      final unreadMessages = [...state.unreadMessages];
       final chats = [...state.chats];
       for (var message in messages.reversed) {
         final recipientId = message.recipientId;
         final isMyMessage = message.isMyMessage(state.selfUser?.userId);
         final bool isChatExist = chats.any((chat) => chat.id == message.recipientId);
+        if (message.isUnread) {
+          unreadMessages.add(message);
+        }
         if (isChatExist) {
           ChatEntity chat = chats.firstWhere((chat) => chat.id == recipientId);
           final indexOfChat = chats.indexOf(chat);
@@ -96,7 +107,13 @@ class MessengerCubit extends Cubit<MessengerState> {
           chats.add(chat);
         }
       }
-      emit(state.copyWith(messages: messages, chats: chats));
+      emit(
+        state.copyWith(
+          messages: messages,
+          chats: _sortChatsByLastMessageDate(chats),
+          unreadMessages: unreadMessages,
+        ),
+      );
     } catch (e) {
       inspect(e);
     }
@@ -259,12 +276,22 @@ class MessengerCubit extends Cubit<MessengerState> {
         );
         topics[indexOfTopic] = updatedTopic;
       }
+
+      for (final message in state.unreadMessages) {
+        if (message.streamId == streamId) {
+          TopicEntity topic = topics.firstWhere((topic) => topic.name == message.subject);
+          final indexOfTopic = topics.indexOf(topic);
+          topic = topic.copyWith(unreadMessages: {...topic.unreadMessages, message.id});
+          topics[indexOfTopic] = topic;
+        }
+      }
+
       List<ChatEntity> updatedChats = [...state.chats];
       ChatEntity chat = updatedChats.firstWhere((chat) => chat.streamId == streamId);
       int indexOfChat = updatedChats.indexOf(chat);
       chat = chat.copyWith(topics: topics);
       updatedChats[indexOfChat] = chat;
-      emit(state.copyWith(chats: updatedChats));
+      emit(state.copyWith(chats: _sortChatsByLastMessageDate(updatedChats)));
     } catch (e) {
       inspect(e);
     }
@@ -283,27 +310,80 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   void _onMessageEvents(MessageEventEntity event) {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != event.organizationId) return;
     final message = event.message;
 
     final chatId = message.recipientId;
+    final isMyMessage = message.isMyMessage(state.selfUser?.userId);
+
     final updatedMessages = [...state.messages, message];
     List<ChatEntity> updatedChats = [...state.chats];
 
     if (state.chats.any((chat) => chat.id == chatId)) {
-      if (message.isUnread) {
-        final chat = state.chats.firstWhere((chat) => chat.id == chatId);
-        final indexOfChat = state.chats.indexOf(chat);
-        final updatedChat = chat.copyWith(unreadCount: chat.unreadCount + 1);
+      final chat = state.chats.firstWhere((chat) => chat.id == chatId);
+      final indexOfChat = state.chats.indexOf(chat);
+      ChatEntity updatedChat = chat;
+      final messageSenderName = message.senderFullName;
+      final messagePreview = message.content;
+      final messageDate = message.messageDate;
+
+      updatedChat = updatedChat.copyWith(
+        lastMessageId: message.id,
+        lastMessageSenderName: messageSenderName,
+        lastMessagePreview: messagePreview,
+        lastMessageDate: messageDate,
+      );
+      if (message.isUnread && !isMyMessage) {
+        updatedChat = updatedChat.copyWith(
+          unreadMessages: {...updatedChat.unreadMessages, message.id},
+        );
+      }
+      updatedChats[indexOfChat] = updatedChat;
+    } else {
+      final chat = ChatEntity.createChatFromMessage(
+        message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),
+        isMyMessage: isMyMessage,
+      );
+      updatedChats.add(chat);
+    }
+    final sortedChats = _sortChatsByLastMessageDate(updatedChats);
+    emit(state.copyWith(messages: updatedMessages, chats: sortedChats));
+  }
+
+  void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != event.organizationId) return;
+    List<ChatEntity> updatedChats = [...state.chats];
+    List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
+    if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
+      for (final messageId in event.messages) {
+        updatedUnreadMessages.removeWhere((message) => message.id == messageId);
+        final message = state.messages.firstWhere((message) => message.id == messageId);
+        ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
+        final indexOfChat = state.chats.indexOf(updatedChat);
+        updatedChat.unreadMessages.remove(messageId);
         updatedChats[indexOfChat] = updatedChat;
       }
     }
-
-    emit(state.copyWith(messages: updatedMessages, chats: updatedChats));
+    emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
   }
 
   @override
   Future<void> close() {
     _messagesEventsSubscription.cancel();
     return super.close();
+  }
+
+  List<ChatEntity> _sortChatsByLastMessageDate(List<ChatEntity> chats) {
+    final sortedChats = [...chats];
+    sortedChats.sort((a, b) {
+      final aHasUnread = a.unreadMessages.isNotEmpty;
+      final bHasUnread = b.unreadMessages.isNotEmpty;
+      if (aHasUnread && !bHasUnread) return -1;
+      if (bHasUnread && !aHasUnread) return 1;
+      return b.lastMessageDate.compareTo(a.lastMessageDate);
+    });
+    return sortedChats;
   }
 }
