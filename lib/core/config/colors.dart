@@ -108,7 +108,7 @@ class MessageColors extends ThemeExtension<MessageColors> {
   }) {
     return MessageColors(
       background: background ?? this.background,
-      ownBackground: background ?? this.ownBackground,
+      ownBackground: ownBackground ?? this.ownBackground,
       timeColor: timeColor ?? this.timeColor,
       senderNameColor: senderNameColor ?? this.senderNameColor,
     );
