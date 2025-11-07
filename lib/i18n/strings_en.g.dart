@@ -559,8 +559,8 @@ class TranslationsGroupEn {
 
 	// Translations
 
-	/// en: 'Members: {count}'
-	String get members_count => 'Members: {count}';
+	/// en: '{count} members'
+	String get members_count => '{count} members';
 }
 
 // Path: group_chat
@@ -859,7 +859,7 @@ extension on Translations {
 			case 'channel.unmuteChannel': return 'Unmute channel';
 			case 'chat.pinChat': return 'Pin chat';
 			case 'chat.unpinChat': return 'Unpin chat';
-			case 'group.members_count': return 'Members: {count}';
+			case 'group.members_count': return '{count} members';
 			case 'group_chat.create_tooltip': return 'Create new group chat';
 			case 'group_chat.create_dialog.title': return 'New group chat';
 			case 'group_chat.create_dialog.search_hint': return 'Search users';

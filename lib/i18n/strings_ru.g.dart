@@ -342,7 +342,7 @@ class _TranslationsGroupRu implements TranslationsGroupEn {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
-	@override String get members_count => 'Участников: {count}';
+	@override String get members_count => '{count} участников';
 }
 
 // Path: group_chat
@@ -570,7 +570,7 @@ extension on TranslationsRu {
 			case 'channel.unmuteChannel': return 'Включить уведомления канала';
 			case 'chat.pinChat': return 'Закрепить чат';
 			case 'chat.unpinChat': return 'Открепить чат';
-			case 'group.members_count': return 'Участников: {count}';
+			case 'group.members_count': return '{count} участников';
 			case 'group_chat.create_tooltip': return 'Создать групповой чат';
 			case 'group_chat.create_dialog.title': return 'Новый групповой чат';
 			case 'group_chat.create_dialog.search_hint': return 'Поиск пользователей';

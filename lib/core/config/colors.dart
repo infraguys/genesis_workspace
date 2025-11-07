@@ -4,15 +4,24 @@ class AppColors {
   static const Color counterBadge = Color(0xffFF0000);
   static const Color onBadge = Color(0xffFFFFFF);
   static const Color primary = Color(0xffFF8438);
-  static const Color surface = Color(0xff333333);
-  static const Color background = Color(0xff1B1B1D);
+  static const Color callGreen = Color(0xff26C038);
+
+  static const Color darkOnPrimary = Color(0xff1B1B1D);
+  static const Color darkBackground = Color(0xff1B1B1D);
+  static const Color darkSurface = Color(0xff333333);
 
   static final darkTextColors = TextColors(
     text100: Color(0xFFFFFFFF),
     text50: Color(0xFFFFFFFF).withValues(alpha: 0.5),
     text30: Color(0xFFFFFFFF).withValues(alpha: 0.3),
   );
-  static final cardColors = CardColors(
+  static final darkMessageColors = MessageColors(
+    background: Color(0xff333333),
+    ownBackground: Color(0xff47382B),
+    timeColor: Color(0xffFFFFFF).withValues(alpha: 0.5),
+    senderNameColor: primary,
+  );
+  static final darkCardColors = CardColors(
     base: Color(0xFFFFFFFF).withValues(alpha: 0.02),
     active: Color(0xFFFFFFFF).withValues(alpha: 0.1),
   );
@@ -72,6 +81,47 @@ class CardColors extends ThemeExtension<CardColors> {
     return CardColors(
       base: Color.lerp(base, other.base, t)!,
       active: Color.lerp(active, other.active, t)!,
+    );
+  }
+}
+
+@immutable
+class MessageColors extends ThemeExtension<MessageColors> {
+  final Color background;
+  final Color ownBackground;
+  final Color timeColor;
+  final Color senderNameColor;
+
+  const MessageColors({
+    required this.background,
+    required this.ownBackground,
+    required this.timeColor,
+    required this.senderNameColor,
+  });
+
+  @override
+  MessageColors copyWith({
+    Color? background,
+    Color? ownBackground,
+    Color? timeColor,
+    Color? senderNameColor,
+  }) {
+    return MessageColors(
+      background: background ?? this.background,
+      ownBackground: ownBackground ?? this.ownBackground,
+      timeColor: timeColor ?? this.timeColor,
+      senderNameColor: senderNameColor ?? this.senderNameColor,
+    );
+  }
+
+  @override
+  MessageColors lerp(ThemeExtension<MessageColors>? other, double t) {
+    if (other is! MessageColors) return this;
+    return MessageColors(
+      background: Color.lerp(background, other.background, t)!,
+      ownBackground: Color.lerp(ownBackground, other.ownBackground, t)!,
+      timeColor: Color.lerp(timeColor, other.timeColor, t)!,
+      senderNameColor: Color.lerp(senderNameColor, other.senderNameColor, t)!,
     );
   }
 }

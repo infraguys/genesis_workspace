@@ -177,7 +177,11 @@ class _MessagesListState extends State<MessagesList> {
 
     return Column(
       children: [
-        if (widget.isLoadingMore) const LinearProgressIndicator(),
+        if (widget.isLoadingMore)
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
+            child: const LinearProgressIndicator(),
+          ),
         Expanded(
           child: Stack(
             children: [
@@ -208,7 +212,7 @@ class _MessagesListState extends State<MessagesList> {
                     return MessageDayLabel(label: _getDayLabel(context, messageDate));
                   }
                   final isNewUser = message.senderId != nextMessage.senderId;
-                  return SizedBox(height: isNewUser ? 12 : 2);
+                  return SizedBox(height: isNewUser ? 12 : 4);
                 },
                 itemBuilder: (BuildContext context, int index) {
                   final message = _reversed[index];

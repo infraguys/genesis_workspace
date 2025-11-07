@@ -158,7 +158,7 @@
     "unpinChat": "Unpin chat"
   },
   "group": {
-    "members_count": "Members: {count}"
+    "members_count": "{count} members"
   },
   "group_chat": {
     "create_tooltip": "Create new group chat",
@@ -201,5 +201,8 @@
     "update": "Update",
     "unsupported_platform": "Updates are not supported on this platform yet.",
     "failed_to_start": "Failed to start update: {error}"
+  },
+  "emoji": {
+    "no_recent": "No recent emoji"
   }
 }

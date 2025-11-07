@@ -7,13 +7,26 @@ final darkTheme = ThemeData(
   colorScheme: darkColorScheme,
   badgeTheme: _badgeTheme,
   fontFamily: FontFamily.montserrat,
-  scaffoldBackgroundColor: AppColors.background,
+  scaffoldBackgroundColor: const Color(0xff1B1B1D),
   inputDecorationTheme: _darkInputDecorationTheme,
-  extensions: [AppColors.darkTextColors, AppColors.cardColors],
+  extensions: [
+    AppColors.darkTextColors,
+    AppColors.darkCardColors,
+    AppColors.darkMessageColors,
+  ],
   cardTheme: CardThemeData(),
+  progressIndicatorTheme: ProgressIndicatorThemeData(
+    linearTrackColor: const Color(0xff333333),
+    stopIndicatorRadius: 12,
+  ),
+  elevatedButtonTheme: _darkElevatedButtonTheme,
 );
 
-final darkColorScheme = ColorScheme.dark(primary: AppColors.primary, surface: AppColors.surface);
+final darkColorScheme = ColorScheme.dark(
+  primary: AppColors.primary,
+  surface: AppColors.darkSurface,
+  background: AppColors.darkBackground,
+);
 
 final _badgeTheme = BadgeThemeData(
   backgroundColor: AppColors.counterBadge,
@@ -36,4 +49,11 @@ final _darkInputDecorationTheme = InputDecorationTheme(
   ),
   hintStyle: const TextStyle(color: Color(0x99FFFFFF)),
   labelStyle: const TextStyle(color: Color(0xCCFFFFFF)),
+);
+
+final _darkElevatedButtonTheme = ElevatedButtonThemeData(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: AppColors.primary,
+    foregroundColor: AppColors.darkOnPrimary,
+  ),
 );

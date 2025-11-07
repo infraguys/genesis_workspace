@@ -164,7 +164,7 @@
     "unpinChat": "Открепить чат"
   },
   "group": {
-    "members_count": "Участников: {count}"
+    "members_count": "{count} участников"
   },
   "group_chat": {
     "create_tooltip": "Создать групповой чат",
@@ -207,5 +207,8 @@
     "update": "Обновить",
     "unsupported_platform": "Обновления на этой платформе пока не поддержаны.",
     "failed_to_start": "Не удалось запустить обновление: {error}"
+  },
+  "emoji": {
+    "no_recent": "Нет недавних эмоджи"
   }
 }
