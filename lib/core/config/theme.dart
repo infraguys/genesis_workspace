@@ -13,7 +13,6 @@ final darkTheme = ThemeData(
     AppColors.darkTextColors,
     AppColors.darkCardColors,
     AppColors.darkMessageColors,
-    AppColors.darkThemeColors,
   ],
   cardTheme: CardThemeData(),
   progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -25,7 +24,8 @@ final darkTheme = ThemeData(
 
 final darkColorScheme = ColorScheme.dark(
   primary: AppColors.primary,
-  surface: const Color(0xff333333),
+  surface: AppColors.darkSurface,
+  background: AppColors.darkBackground,
 );
 
 final _badgeTheme = BadgeThemeData(
@@ -54,6 +54,6 @@ final _darkInputDecorationTheme = InputDecorationTheme(
 final _darkElevatedButtonTheme = ElevatedButtonThemeData(
   style: ElevatedButton.styleFrom(
     backgroundColor: AppColors.primary,
-    foregroundColor: AppColors.darkThemeColors.onPrimary,
+    foregroundColor: AppColors.darkOnPrimary,
   ),
 );

@@ -76,6 +76,7 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsUpdateViewRu updateView = TranslationsUpdateViewRu._(_root);
 	@override late final TranslationsUpdateWidgetRu updateWidget = TranslationsUpdateWidgetRu._(_root);
 	@override late final TranslationsUpdateForceRu updateForce = TranslationsUpdateForceRu._(_root);
+	@override late final TranslationsEmojiRu emoji = TranslationsEmojiRu._(_root);
 }
 
 // Path: auth
@@ -402,6 +403,16 @@ class TranslationsUpdateForceRu extends TranslationsUpdateForceEn {
 	@override String get update => 'Обновить';
 	@override String get unsupportedPlatform => 'Обновления на этой платформе пока не поддержаны.';
 	@override String failedToStart({required Object error}) => 'Не удалось запустить обновление: ${error}';
+}
+
+// Path: emoji
+class TranslationsEmojiRu extends TranslationsEmojiEn {
+	TranslationsEmojiRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get noRecent => 'Нет недавних эмоджи';
 }
 
 // Path: organizations.addDialog

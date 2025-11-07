@@ -602,6 +602,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                       attachment,
                                     );
                                   },
+                                  inputTitle: widget.topicName ?? state.channel?.name,
                                 ),
                               ),
                             ),

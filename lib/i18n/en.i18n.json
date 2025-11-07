@@ -201,5 +201,8 @@
     "update": "Update",
     "unsupported_platform": "Updates are not supported on this platform yet.",
     "failed_to_start": "Failed to start update: {error}"
+  },
+  "emoji": {
+    "no_recent": "No recent emoji"
   }
 }

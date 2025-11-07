@@ -129,6 +129,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsUpdateViewEn updateView = TranslationsUpdateViewEn.internal(_root);
 	late final TranslationsUpdateWidgetEn updateWidget = TranslationsUpdateWidgetEn.internal(_root);
 	late final TranslationsUpdateForceEn updateForce = TranslationsUpdateForceEn.internal(_root);
+	late final TranslationsEmojiEn emoji = TranslationsEmojiEn.internal(_root);
 }
 
 // Path: auth
@@ -672,6 +673,18 @@ class TranslationsUpdateForceEn {
 
 	/// en: 'Failed to start update: {error}'
 	String failedToStart({required Object error}) => 'Failed to start update: ${error}';
+}
+
+// Path: emoji
+class TranslationsEmojiEn {
+	TranslationsEmojiEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'No recent emoji'
+	String get noRecent => 'No recent emoji';
 }
 
 // Path: organizations.addDialog

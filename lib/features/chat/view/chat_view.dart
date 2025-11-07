@@ -627,6 +627,7 @@ class _ChatViewState extends State<ChatView>
                                   onRemoveEditingAttachment: (attachment) {
                                     context.read<ChatCubit>().removeEditingAttachment(attachment);
                                   },
+                                  inputTitle: state.userEntity?.fullName,
                                 ),
                               ),
                             ),
