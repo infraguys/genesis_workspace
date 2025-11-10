@@ -135,6 +135,12 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsUpdateWidgetEn update_widget = TranslationsUpdateWidgetEn._(_root);
 	late final TranslationsUpdateForceEn update_force = TranslationsUpdateForceEn._(_root);
 	late final TranslationsEmojiEn emoji = TranslationsEmojiEn._(_root);
+
+	/// en: 'Messenger'
+	String get messenger => 'Messenger';
+
+	/// en: 'Notifications'
+	String get notifications => 'Notifications';
 }
 
 // Path: auth
@@ -906,6 +912,8 @@ extension on Translations {
 			case 'update_force.unsupported_platform': return 'Updates are not supported on this platform yet.';
 			case 'update_force.failed_to_start': return 'Failed to start update: {error}';
 			case 'emoji.no_recent': return 'No recent emoji';
+			case 'messenger': return 'Messenger';
+			case 'notifications': return 'Notifications';
 			default: return null;
 		}
 	}

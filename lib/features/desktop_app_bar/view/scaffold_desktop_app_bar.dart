@@ -38,7 +38,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
         Container(
           height: 40.0,
           width: double.infinity,
-          color: AppColors.surface,
+          color: theme.colorScheme.surface,
           child: Center(
             child: ValueListenableBuilder(
               valueListenable: mainTitleNotifier,
@@ -52,7 +52,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
           ),
         ),
         Container(
-          color: AppColors.surface,
+          color: theme.colorScheme.surface,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8.0, left: 16, right: 16),
             child: SizedBox(
