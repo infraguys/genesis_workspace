@@ -12,7 +12,7 @@ class ChatEntity {
   final String lastMessagePreview;
   final String? lastMessageSenderName;
   final DateTime lastMessageDate;
-  final int unreadCount;
+  final Set<int> unreadMessages;
   final bool isPinned;
   final bool isMuted;
   final List<TopicEntity>? topics;
@@ -22,7 +22,7 @@ class ChatEntity {
   bool get isTopicsLoading => topics == null;
 
   ChatEntity updateLastMessage(MessageEntity message, {bool isMyMessage = false}) {
-    ChatEntity updatedChat = copyWith();
+    ChatEntity updatedChat = this;
     final messageDate = message.messageDate;
     final messageId = message.id;
     final messagePreview = message.content;
@@ -31,8 +31,10 @@ class ChatEntity {
       updatedChat = copyWith(
         displayTitle: message.displayTitle,
         avatarUrl: message.isDirectMessage ? message.avatarUrl : null,
-        unreadCount: updatedChat.unreadCount + (message.isUnread ? 1 : 0),
       );
+      if (message.isUnread) {
+        updatedChat = copyWith(unreadMessages: {...updatedChat.unreadMessages, messageId});
+      }
     }
     if (messageDate.isAfter(lastMessageDate)) {
       updatedChat = copyWith(
@@ -65,7 +67,7 @@ class ChatEntity {
       lastMessageId: message.id,
       lastMessagePreview: message.content,
       lastMessageDate: message.messageDate,
-      unreadCount: message.isUnread ? 1 : 0,
+      unreadMessages: message.isUnread ? {message.id} : {},
       avatarUrl: (!message.isDirectMessage) ? null : message.avatarUrl,
       isPinned: false,
       isMuted: false,
@@ -85,7 +87,7 @@ class ChatEntity {
     required this.lastMessageId,
     required this.lastMessagePreview,
     required this.lastMessageDate,
-    required this.unreadCount,
+    required this.unreadMessages,
     required this.isPinned,
     required this.isMuted,
     this.lastMessageSenderName,
@@ -102,7 +104,7 @@ class ChatEntity {
     int? lastMessageId,
     String? lastMessagePreview,
     DateTime? lastMessageDate,
-    int? unreadCount,
+    Set<int>? unreadMessages,
     bool? isPinned,
     bool? isMuted,
     String? lastMessageSenderName,
@@ -118,7 +120,7 @@ class ChatEntity {
       lastMessageId: lastMessageId ?? this.lastMessageId,
       lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
       lastMessageDate: lastMessageDate ?? this.lastMessageDate,
-      unreadCount: unreadCount ?? this.unreadCount,
+      unreadMessages: unreadMessages ?? this.unreadMessages,
       isPinned: isPinned ?? this.isPinned,
       isMuted: isMuted ?? this.isMuted,
       lastMessageSenderName: lastMessageSenderName ?? this.lastMessageSenderName,

@@ -642,6 +642,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i725.PinnedChatsRepository>(),
       ),
     );
+    gh.factory<_i739.ChannelChatCubit>(
+      () => _i739.ChannelChatCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i720.GetChannelByIdUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+        gh<_i771.GetChannelMembersUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i573.RealTimeCubit>(
       () => _i573.RealTimeCubit(gh<_i823.MultiPollingService>()),
     );
@@ -657,21 +672,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
       ),
     );
-    gh.factory<_i739.ChannelChatCubit>(
-      () => _i739.ChannelChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i720.GetChannelByIdUseCase>(),
-        gh<_i699.GetTopicsUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-        gh<_i1005.UpdateMessageUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-        gh<_i771.GetChannelMembersUseCase>(),
-      ),
-    );
     gh.factory<_i631.UnpinChatUseCase>(
       () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
     );
@@ -685,20 +685,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i126.GetPinnedChatsUseCase>(
       () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i277.ChatCubit>(
-      () => _i277.ChatCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i773.GetUserByIdUseCase>(),
-        gh<_i394.GetUserPresenceUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-        gh<_i1005.UpdateMessageUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-      ),
     );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(
@@ -721,6 +707,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i240.RemoveOrganizationUseCase>(),
         gh<_i377.OrganizationSwitcherService>(),
         gh<_i823.MultiPollingService>(),
+      ),
+    );
+    gh.factory<_i277.ChatCubit>(
+      () => _i277.ChatCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i773.GetUserByIdUseCase>(),
+        gh<_i394.GetUserPresenceUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
       ),
     );
     gh.factory<_i201.ChannelsCubit>(
@@ -758,6 +758,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i438.GetMembersForFolderUseCase>(),
         gh<_i207.GetMessagesUseCase>(),
         gh<_i699.GetTopicsUseCase>(),
+        gh<_i823.MultiPollingService>(),
       ),
     );
     return this;

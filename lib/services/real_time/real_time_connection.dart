@@ -124,9 +124,8 @@ class RealTimeConnection {
     while (_isActive) {
       try {
         await _fetchAndDispatch();
-        retryDelay = _initialRetryDelay; // успешный проход — сбрасываем backoff
+        retryDelay = _initialRetryDelay;
       } on DioException catch (error) {
-        // 400 BAD_EVENT_QUEUE_ID — регистрируемся заново и бежим дальше
         final bool isBadQueueId =
             error.response?.statusCode == 400 &&
             error.response?.data?['code'] == 'BAD_EVENT_QUEUE_ID';

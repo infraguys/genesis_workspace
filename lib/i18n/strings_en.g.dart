@@ -134,6 +134,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsUpdateViewEn update_view = TranslationsUpdateViewEn._(_root);
 	late final TranslationsUpdateWidgetEn update_widget = TranslationsUpdateWidgetEn._(_root);
 	late final TranslationsUpdateForceEn update_force = TranslationsUpdateForceEn._(_root);
+	late final TranslationsEmojiEn emoji = TranslationsEmojiEn._(_root);
 }
 
 // Path: auth
@@ -679,6 +680,18 @@ class TranslationsUpdateForceEn {
 	String get failed_to_start => 'Failed to start update: {error}';
 }
 
+// Path: emoji
+class TranslationsEmojiEn {
+	TranslationsEmojiEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'No recent emoji'
+	String get no_recent => 'No recent emoji';
+}
+
 // Path: organizations.addDialog
 class TranslationsOrganizationsAddDialogEn {
 	TranslationsOrganizationsAddDialogEn._(this._root);
@@ -892,6 +905,7 @@ extension on Translations {
 			case 'update_force.update': return 'Update';
 			case 'update_force.unsupported_platform': return 'Updates are not supported on this platform yet.';
 			case 'update_force.failed_to_start': return 'Failed to start update: {error}';
+			case 'emoji.no_recent': return 'No recent emoji';
 			default: return null;
 		}
 	}

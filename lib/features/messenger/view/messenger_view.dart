@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -277,9 +276,9 @@ class _MessengerViewState extends State<MessengerView> {
                                 itemBuilder: (BuildContext context, int index) {
                                   final chat = state.chats[index];
                                   return ChatItem(
+                                    key: ValueKey(chat.id),
                                     chat: chat,
                                     onTap: () {
-                                      inspect(chat);
                                       context.read<MessengerCubit>().selectChat(chat);
                                     },
                                   );
@@ -300,6 +299,7 @@ class _MessengerViewState extends State<MessengerView> {
                                 state.selectedChat!.id,
                               ),
                               userIds: state.selectedChat!.dmIds!,
+                              unreadMessagesCount: state.selectedChat?.unreadMessages.length,
                             );
                           }
                           if (state.selectedChat?.streamId != null) {
@@ -309,6 +309,7 @@ class _MessengerViewState extends State<MessengerView> {
                               ),
                               channelId: state.selectedChat!.streamId!,
                               topicName: state.selectedTopic,
+                              unreadMessagesCount: state.selectedChat?.unreadMessages.length,
                             );
                           }
                           return Center(child: Text(context.t.selectAnyChat));
