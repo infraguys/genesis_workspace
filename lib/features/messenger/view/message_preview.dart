@@ -25,6 +25,12 @@ class MessagePreview extends StatelessWidget {
           maxHeight: double.infinity,
           child: HtmlWidget(
             messagePreview,
+            customStylesBuilder: (element) {
+              return {
+                "max-width": "200px",
+                "text-overflow": "ellipsis",
+              };
+            },
             textStyle: theme.textTheme.bodySmall?.copyWith(color: textColors.text50),
             customWidgetBuilder: (element) {
               final messagePreviewStyle = theme.textTheme.bodySmall?.copyWith(
