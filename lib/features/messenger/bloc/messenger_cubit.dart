@@ -380,6 +380,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   @override
   Future<void> close() {
     _messagesEventsSubscription.cancel();
+    _messageFlagsEventsSubscription.cancel();
     return super.close();
   }
 
