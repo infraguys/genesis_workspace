@@ -204,5 +204,7 @@
   },
   "emoji": {
     "no_recent": "No recent emoji"
-  }
+  },
+  "messenger": "Messenger",
+  "notifications": "Notifications"
 }

@@ -77,6 +77,8 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsUpdateWidgetRu updateWidget = TranslationsUpdateWidgetRu._(_root);
 	@override late final TranslationsUpdateForceRu updateForce = TranslationsUpdateForceRu._(_root);
 	@override late final TranslationsEmojiRu emoji = TranslationsEmojiRu._(_root);
+	@override String get messenger => 'Мессенджер';
+	@override String get notifications => 'Уведомления';
 }
 
 // Path: auth

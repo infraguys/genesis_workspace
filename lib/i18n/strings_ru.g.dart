@@ -81,6 +81,8 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsUpdateWidgetRu update_widget = _TranslationsUpdateWidgetRu._(_root);
 	@override late final _TranslationsUpdateForceRu update_force = _TranslationsUpdateForceRu._(_root);
 	@override late final _TranslationsEmojiRu emoji = _TranslationsEmojiRu._(_root);
+	@override String get messenger => 'Мессенджер';
+	@override String get notifications => 'Уведомления';
 }
 
 // Path: auth
@@ -615,6 +617,8 @@ extension on TranslationsRu {
 			case 'update_force.unsupported_platform': return 'Обновления на этой платформе пока не поддержаны.';
 			case 'update_force.failed_to_start': return 'Не удалось запустить обновление: {error}';
 			case 'emoji.no_recent': return 'Нет недавних эмоджи';
+			case 'messenger': return 'Мессенджер';
+			case 'notifications': return 'Уведомления';
 			default: return null;
 		}
 	}

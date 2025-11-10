@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class BranchItem extends StatelessWidget {
   const BranchItem({
     super.key,
     required this.isSelected,
     required this.onPressed,
-    this.icon = Icons.chat_bubble_outline,
+    required this.icon,
     this.size = 64,
     this.borderRadius = 12,
   });
 
   final bool isSelected;
   final VoidCallback onPressed;
-  final IconData icon;
+  final SvgPicture icon;
   final double size;
   final double borderRadius;
 
@@ -22,8 +23,12 @@ class BranchItem extends StatelessWidget {
     final Color baseOverlay = theme.colorScheme.onSurface;
 
     return Material(
-      color: isSelected ? theme.colorScheme.onSurface.withOpacity(0.05) : Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
+      color: isSelected
+          ? theme.colorScheme.onSurface.withOpacity(0.05)
+          : Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
@@ -41,15 +46,15 @@ class BranchItem extends StatelessWidget {
           }
           return null;
         }),
-        child: SizedBox(
-          height: size,
-          width: size,
+        child: SizedBox.square(
+          dimension: size,
           child: Center(
-            child: Icon(
-              icon,
-              // Чуть ярче при выборе, иначе — приглушённо.
-              color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
-            ),
+            child: icon,
+            // child: SvgPicture.asset(
+            //   Assets.icons.calendarMonth.path,
+            //   // Чуть ярче при выборе, иначе — приглушённо.
+            //   color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+            // ),
           ),
         ),
       ),
