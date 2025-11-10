@@ -130,6 +130,12 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsUpdateWidgetEn updateWidget = TranslationsUpdateWidgetEn.internal(_root);
 	late final TranslationsUpdateForceEn updateForce = TranslationsUpdateForceEn.internal(_root);
 	late final TranslationsEmojiEn emoji = TranslationsEmojiEn.internal(_root);
+
+	/// en: 'Messenger'
+	String get messenger => 'Messenger';
+
+	/// en: 'Notifications'
+	String get notifications => 'Notifications';
 }
 
 // Path: auth

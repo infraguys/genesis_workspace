@@ -1,4 +1,4 @@
-// dart format width=80
+// dart format width=120
 
 /// GENERATED CODE - DO NOT MODIFY BY HAND
 /// *****************************************************
@@ -37,27 +37,37 @@ class $AssetsIconsGen {
   SvgGenImage get arrowDown => const SvgGenImage('assets/icons/arrow_down.svg');
 
   /// File path: assets/icons/attach_file.svg
-  SvgGenImage get attachFile =>
-      const SvgGenImage('assets/icons/attach_file.svg');
+  SvgGenImage get attachFile => const SvgGenImage('assets/icons/attach_file.svg');
+
+  /// File path: assets/icons/calendar_month.svg
+  SvgGenImage get calendarMonth => const SvgGenImage('assets/icons/calendar_month.svg');
 
   /// File path: assets/icons/call.svg
   SvgGenImage get call => const SvgGenImage('assets/icons/call.svg');
+
+  /// File path: assets/icons/chat_bubble.svg
+  SvgGenImage get chatBubble => const SvgGenImage('assets/icons/chat_bubble.svg');
 
   /// File path: assets/icons/folder.svg
   SvgGenImage get folder => const SvgGenImage('assets/icons/folder.svg');
 
   /// File path: assets/icons/folder_open.svg
-  SvgGenImage get folderOpen =>
-      const SvgGenImage('assets/icons/folder_open.svg');
+  SvgGenImage get folderOpen => const SvgGenImage('assets/icons/folder_open.svg');
+
+  /// File path: assets/icons/group.svg
+  SvgGenImage get group => const SvgGenImage('assets/icons/group.svg');
 
   /// File path: assets/icons/join_call.svg
   SvgGenImage get joinCall => const SvgGenImage('assets/icons/join_call.svg');
 
+  /// File path: assets/icons/mail.svg
+  SvgGenImage get mail => const SvgGenImage('assets/icons/mail.svg');
+
   /// File path: assets/icons/more_vert.svg
   SvgGenImage get moreVert => const SvgGenImage('assets/icons/more_vert.svg');
 
-  /// File path: assets/icons/pinned.svg
-  SvgGenImage get pinned => const SvgGenImage('assets/icons/pinned.svg');
+  /// File path: assets/icons/notif.svg
+  SvgGenImage get notif => const SvgGenImage('assets/icons/notif.svg');
 
   /// File path: assets/icons/search.svg
   SvgGenImage get search => const SvgGenImage('assets/icons/search.svg');
@@ -74,12 +84,16 @@ class $AssetsIconsGen {
     allChats,
     arrowDown,
     attachFile,
+    calendarMonth,
     call,
+    chatBubble,
     folder,
     folderOpen,
+    group,
     joinCall,
+    mail,
     moreVert,
-    pinned,
+    notif,
     search,
     send,
     videocam,
@@ -90,12 +104,10 @@ class $AssetsImagesGen {
   const $AssetsImagesGen();
 
   /// File path: assets/images/genesis_logo.svg
-  SvgGenImage get genesisLogo =>
-      const SvgGenImage('assets/images/genesis_logo.svg');
+  SvgGenImage get genesisLogo => const SvgGenImage('assets/images/genesis_logo.svg');
 
   /// File path: assets/images/genesis_logo_png.png
-  AssetGenImage get genesisLogoPng =>
-      const AssetGenImage('assets/images/genesis_logo_png.png');
+  AssetGenImage get genesisLogoPng => const AssetGenImage('assets/images/genesis_logo_png.png');
 
   /// List of all assets
   List<dynamic> get values => [genesisLogo, genesisLogoPng];
@@ -110,12 +122,7 @@ class Assets {
 }
 
 class AssetGenImage {
-  const AssetGenImage(
-    this._assetName, {
-    this.size,
-    this.flavors = const {},
-    this.animation,
-  });
+  const AssetGenImage(this._assetName, {this.size, this.flavors = const {}, this.animation});
 
   final String _assetName;
 
@@ -186,11 +193,7 @@ class AssetGenImage {
 }
 
 class AssetGenImageAnimation {
-  const AssetGenImageAnimation({
-    required this.isAnimation,
-    required this.duration,
-    required this.frames,
-  });
+  const AssetGenImageAnimation({required this.isAnimation, required this.duration, required this.frames});
 
   final bool isAnimation;
   final Duration duration;
@@ -198,11 +201,9 @@ class AssetGenImageAnimation {
 }
 
 class SvgGenImage {
-  const SvgGenImage(this._assetName, {this.size, this.flavors = const {}})
-    : _isVecFormat = false;
+  const SvgGenImage(this._assetName, {this.size, this.flavors = const {}}) : _isVecFormat = false;
 
-  const SvgGenImage.vec(this._assetName, {this.size, this.flavors = const {}})
-    : _isVecFormat = true;
+  const SvgGenImage.vec(this._assetName, {this.size, this.flavors = const {}}) : _isVecFormat = true;
 
   final String _assetName;
   final Size? size;
@@ -232,11 +233,7 @@ class SvgGenImage {
   }) {
     final _svg.BytesLoader loader;
     if (_isVecFormat) {
-      loader = _vg.AssetBytesLoader(
-        _assetName,
-        assetBundle: bundle,
-        packageName: package,
-      );
+      loader = _vg.AssetBytesLoader(_assetName, assetBundle: bundle, packageName: package);
     } else {
       loader = _svg.SvgAssetLoader(
         _assetName,
@@ -258,9 +255,7 @@ class SvgGenImage {
       placeholderBuilder: placeholderBuilder,
       semanticsLabel: semanticsLabel,
       excludeFromSemantics: excludeFromSemantics,
-      colorFilter:
-          colorFilter ??
-          (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
+      colorFilter: colorFilter ?? (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
     );
