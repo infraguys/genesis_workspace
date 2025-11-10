@@ -8,7 +8,6 @@ import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.d
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/group_chat_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
-import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/group_chat_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -329,24 +328,24 @@ class _AllGroupChatsState extends State<AllGroupChats>
                                             context.pop();
 
                                             await context.read<AllChatsCubit>().loadFolders();
-                                            await showDialog(
-                                              context: context,
-                                              builder: (_) => SelectFoldersDialog(
-                                                loadSelectedFolderIds: () => context
-                                                    .read<AllChatsCubit>()
-                                                    .getFolderIdsForGroupChat(group.id),
-                                                onSave: (selectedFolderIds) => context
-                                                    .read<AllChatsCubit>()
-                                                    .setFoldersForGroupChat(
-                                                      group.id,
-                                                      selectedFolderIds,
-                                                    ),
-                                                folders: context
-                                                    .read<AllChatsCubit>()
-                                                    .state
-                                                    .folders,
-                                              ),
-                                            );
+                                            // await showDialog(
+                                            //   context: context,
+                                            //   builder: (_) => SelectFoldersDialog(
+                                            //     loadSelectedFolderIds: () => context
+                                            //         .read<AllChatsCubit>()
+                                            //         .getFolderIdsForGroupChat(group.id),
+                                            //     onSave: (selectedFolderIds) => context
+                                            //         .read<AllChatsCubit>()
+                                            //         .setFoldersForGroupChat(
+                                            //           group.id,
+                                            //           selectedFolderIds,
+                                            //         ),
+                                            //     folders: context
+                                            //         .read<AllChatsCubit>()
+                                            //         .state
+                                            //         .folders,
+                                            //   ),
+                                            // );
                                           },
                                         ),
                                       ],

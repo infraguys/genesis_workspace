@@ -9,6 +9,7 @@ import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
+import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -85,7 +86,17 @@ class _ChatItemState extends State<ChatItem> {
           spacing: 4,
           children: [
             TextButton(
-              onPressed: () {},
+              onPressed: () async {
+                context.pop();
+                await context.read<MessengerCubit>().loadFolders();
+                await showDialog(
+                  context: context,
+                  builder: (_) => SelectFoldersDialog(
+                    onSave: (selectedFolderIds) async {},
+                    folders: context.read<MessengerCubit>().state.folders,
+                  ),
+                );
+              },
               child: Text(context.t.folders.addToFolder),
             ),
             TextButton(

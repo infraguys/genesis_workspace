@@ -75,6 +75,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           chats: [],
           selectedChat: null,
           pinnedChats: [],
+          filteredChatIds: {},
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -201,6 +202,9 @@ class MessengerCubit extends Cubit<MessengerState> {
   void selectFolder(int newIndex) async {
     if (state.selectedFolderIndex == newIndex) return;
     emit(state.copyWith(selectedFolderIndex: newIndex));
+    final folder = state.folders[newIndex];
+    inspect(folder);
+
     // FolderItemEntity folder = state.folders[newIndex];
     // if (folder.id == null) {
     //   state.filterChannelIds = null;
