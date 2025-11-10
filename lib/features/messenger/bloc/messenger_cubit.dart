@@ -335,6 +335,11 @@ class MessengerCubit extends Cubit<MessengerState> {
         lastMessageDate: messageDate,
       );
       if (message.isUnread && !isMyMessage) {
+        if (updatedChat.topics?.any((topic) => topic.name == message.subject) ?? false) {
+          final topic = updatedChat.topics!.firstWhere((topic) => topic.name == message.subject);
+          final indexOfTopic = updatedChat.topics!.indexOf(topic);
+          updatedChat.topics![indexOfTopic].unreadMessages.add(message.id);
+        }
         updatedChat = updatedChat.copyWith(
           unreadMessages: {...updatedChat.unreadMessages, message.id},
         );
@@ -363,6 +368,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
         final indexOfChat = state.chats.indexOf(updatedChat);
         updatedChat.unreadMessages.remove(messageId);
+        updatedChat.topics?.forEach((topic) {
+          topic.unreadMessages.remove(messageId);
+        });
         updatedChats[indexOfChat] = updatedChat;
       }
     }

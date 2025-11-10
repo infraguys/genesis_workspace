@@ -110,7 +110,8 @@ class _ChatItemState extends State<ChatItem> {
                       SizedBox(
                         height: rightContainerHeight,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           spacing: 12,
                           children: [
                             widget.chat.type == ChatType.channel
@@ -156,57 +157,66 @@ class _ChatItemState extends State<ChatItem> {
                           },
                           child: Container(
                             height: 76,
-                            padding: EdgeInsetsGeometry.only(left: 38),
+                            padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
                             decoration: BoxDecoration(
                               color: cardColors.base,
                             ),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      width: 3,
-                                      height: 47,
-                                      decoration: BoxDecoration(
-                                        color: Colors.yellow,
-                                        borderRadius: BorderRadiusGeometry.circular(4),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 3,
+                                        height: 47,
+                                        decoration: BoxDecoration(
+                                          color: Colors.yellow,
+                                          borderRadius: BorderRadiusGeometry.circular(4),
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 12,
-                                    ),
-                                    Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Tooltip(
-                                          message: topic.name,
-                                          child: SizedBox(
-                                            width: 240,
-                                            child: Text(
-                                              "# ${topic.name}",
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: theme.textTheme.labelMedium?.copyWith(
-                                                fontSize: 14,
-                                                color: textColors.text100,
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Tooltip(
+                                              message: topic.name,
+                                              child: Text(
+                                                "# ${topic.name}",
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: theme.textTheme.labelMedium?.copyWith(
+                                                  fontSize: 14,
+                                                  color: textColors.text100,
+                                                ),
                                               ),
                                             ),
-                                          ),
+                                            Text(
+                                              topic.lastMessageSenderName,
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                color: theme.colorScheme.primary,
+                                              ),
+                                            ),
+                                            MessagePreview(
+                                              messagePreview: topic.lastMessagePreview,
+                                            ),
+                                          ],
                                         ),
-                                        Text(
-                                          topic.lastMessageSenderName,
-                                          style: theme.textTheme.bodySmall?.copyWith(
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                        MessagePreview(messagePreview: topic.lastMessagePreview),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                UnreadBadge(count: topic.unreadMessages.length),
+                                Skeleton.ignore(
+                                  child: SizedBox(
+                                    height: 21,
+                                    child: UnreadBadge(count: topic.unreadMessages.length),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

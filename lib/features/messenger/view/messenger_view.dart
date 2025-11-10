@@ -276,6 +276,7 @@ class _MessengerViewState extends State<MessengerView> {
                                 itemBuilder: (BuildContext context, int index) {
                                   final chat = state.chats[index];
                                   return ChatItem(
+                                    key: ValueKey(chat.id),
                                     chat: chat,
                                     onTap: () {
                                       context.read<MessengerCubit>().selectChat(chat);
