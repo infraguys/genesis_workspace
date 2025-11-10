@@ -43,6 +43,17 @@ class $AssetsIconsGen {
   /// File path: assets/icons/call.svg
   SvgGenImage get call => const SvgGenImage('assets/icons/call.svg');
 
+  /// File path: assets/icons/calendar_month.svg
+  SvgGenImage get calendarMonth =>
+      const SvgGenImage('assets/icons/calendar_month.svg');
+
+  /// File path: assets/icons/call.svg
+  SvgGenImage get call => const SvgGenImage('assets/icons/call.svg');
+
+  /// File path: assets/icons/chat_bubble.svg
+  SvgGenImage get chatBubble =>
+      const SvgGenImage('assets/icons/chat_bubble.svg');
+
   /// File path: assets/icons/folder.svg
   SvgGenImage get folder => const SvgGenImage('assets/icons/folder.svg');
 
@@ -55,6 +66,15 @@ class $AssetsIconsGen {
 
   /// File path: assets/icons/more_vert.svg
   SvgGenImage get moreVert => const SvgGenImage('assets/icons/more_vert.svg');
+
+  /// File path: assets/icons/group.svg
+  SvgGenImage get group => const SvgGenImage('assets/icons/group.svg');
+
+  /// File path: assets/icons/mail.svg
+  SvgGenImage get mail => const SvgGenImage('assets/icons/mail.svg');
+
+  /// File path: assets/icons/notif.svg
+  SvgGenImage get notif => const SvgGenImage('assets/icons/notif.svg');
 
   /// File path: assets/icons/search.svg
   SvgGenImage get search => const SvgGenImage('assets/icons/search.svg');
@@ -70,12 +90,18 @@ class $AssetsIconsGen {
     add,
     allChats,
     arrowDown,
+    calendarMonth,
+    call,
+    chatBubble,
     attachFile,
     call,
     folder,
     folderOpen,
     joinCall,
     moreVert,
+    group,
+    mail,
+    notif,
     search,
     send,
     videocam,

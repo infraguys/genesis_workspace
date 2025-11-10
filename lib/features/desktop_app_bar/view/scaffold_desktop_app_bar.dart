@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +12,7 @@ import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
-class ScaffoldDesktopAppBar extends StatelessWidget {
+class ScaffoldDesktopAppBar extends StatefulWidget {
   final Function(int index) onSelectBranch;
   final int selectedIndex;
   const ScaffoldDesktopAppBar({
@@ -24,163 +22,165 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
   });
 
   @override
+  State<ScaffoldDesktopAppBar> createState() => _ScaffoldDesktopAppBarState();
+}
+
+class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
+  final mainTitleNotifier = ValueNotifier<String>('Messenger');
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     final textColors = Theme.of(context).extension<TextColors>()!;
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: MediaQuery.of(context).size.width,
-          height: 12,
-          decoration: BoxDecoration(color: theme.colorScheme.surface),
-        ),
-        Stack(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: 8,
-              decoration: BoxDecoration(color: theme.colorScheme.surface),
+          height: 40.0,
+          width: double.infinity,
+          color: AppColors.surface,
+          child: Center(
+            child: ValueListenableBuilder(
+              valueListenable: mainTitleNotifier,
+              builder: (context, value, _) {
+                return Text(
+                  value,
+                  style: theme.textTheme.bodyMedium,
+                );
+              },
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15).copyWith(top: 24),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
-                    ),
+          ),
+        ),
+        Container(
+          color: AppColors.surface,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8.0, left: 16, right: 16),
+            child: SizedBox(
+              height: 64.0,
+              child: Row(
+                spacing: 16,
+                // delegate: AppbarMultiChildLayoutDelegate(),
+                children: [
+                  Expanded(
                     child: Row(
+                      spacing: 16.0,
                       children: [
-                        Expanded(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 16,
-                            children: [
-                              BlocBuilder<OrganizationsCubit, OrganizationsState>(
-                                builder: (context, state) {
-                                  final organizations = state.organizations;
-                                  final selectedId = state.selectedOrganizationId;
-                                  return SizedBox(
-                                    height: 40,
-                                    child: ListView.separated(
-                                      itemCount: organizations.length,
-                                      scrollDirection: Axis.horizontal,
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      shrinkWrap: true,
-                                      separatorBuilder: (_, _) {
-                                        return SizedBox(width: 16);
-                                      },
-                                      itemBuilder: (BuildContext context, int index) {
-                                        final organization = organizations[index];
-                                        return OrganizationItem(
-                                          unreadCount: organization.unreadCount,
-                                          imagePath: organization.imageUrl,
-                                          isSelected: organization.id == selectedId,
-                                          onTap: () {
-                                            context.read<OrganizationsCubit>().selectOrganization(
-                                              organization,
-                                            );
-                                            unawaited(context.read<ProfileCubit>().getOwnUser());
-                                          },
-                                          onDelete: () async {
-                                            context.pop();
-                                            await context
-                                                .read<OrganizationsCubit>()
-                                                .removeOrganization(organization.id);
-                                          },
-                                        );
-                                      },
-                                    ),
+                        BlocBuilder<OrganizationsCubit, OrganizationsState>(
+                          builder: (context, state) {
+                            final organizations = state.organizations;
+                            final selectedId = state.selectedOrganizationId;
+                            return SizedBox(
+                              height: 40,
+                              child: ListView.separated(
+                                itemCount: organizations.length,
+                                scrollDirection: Axis.horizontal,
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                separatorBuilder: (_, _) => SizedBox(width: 16),
+                                itemBuilder: (BuildContext context, int index) {
+                                  final organization = organizations[index];
+                                  return OrganizationItem(
+                                    unreadCount: organization.unreadCount,
+                                    imagePath: organization.imageUrl,
+                                    isSelected: organization.id == selectedId,
+                                    onTap: () {
+                                      final profileCubit = context.read<ProfileCubit>();
+                                      final organizationsCubit = context.read<OrganizationsCubit>();
+
+                                      organizationsCubit.selectOrganization(organization);
+                                      profileCubit.getOwnUser();
+                                    },
+                                    onDelete: () async {
+                                      context.pop();
+                                      await context.read<OrganizationsCubit>().removeOrganization(
+                                        organization.id,
+                                      );
+                                    },
                                   );
                                 },
                               ),
-                              if (!kIsWeb)
-                                Material(
-                                  color: Colors.transparent,
-                                  child: Ink(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: InkWell(
-                                      onTap: () async {
-                                        final url = await showDialog<String>(
-                                          context: context,
-                                          builder: (BuildContext dialogContext) =>
-                                              const AddOrganizationDialog(),
-                                        );
-                                        if (url != null && context.mounted) {
-                                          await context.read<OrganizationsCubit>().addOrganization(
-                                            url,
-                                          );
-                                        }
-                                      },
-                                      borderRadius: BorderRadius.circular(8),
-                                      mouseCursor: SystemMouseCursors.click,
-                                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
-                                        states,
-                                      ) {
-                                        final Color primary = Theme.of(context).colorScheme.primary;
-                                        if (states.contains(WidgetState.pressed)) {
-                                          return primary.withValues(alpha: 0.16);
-                                        }
-                                        if (states.contains(WidgetState.hovered)) {
-                                          return primary.withValues(alpha: 0.08);
-                                        }
-                                        return null;
-                                      }),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10),
-                                        child: Center(child: Assets.icons.add.svg()),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
+                        if (!kIsWeb)
+                          Material(
+                            color: Colors.transparent,
+                            child: Ink(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: InkWell(
+                                onTap: () async {
+                                  final url = await showDialog<String>(
+                                    context: context,
+                                    builder: (BuildContext dialogContext) => const AddOrganizationDialog(),
+                                  );
+                                  if (url != null && context.mounted) {
+                                    await context.read<OrganizationsCubit>().addOrganization(url);
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(8),
+                                mouseCursor: SystemMouseCursors.click,
+                                overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                                  states,
+                                ) {
+                                  final Color primary = Theme.of(
+                                    context,
+                                  ).colorScheme.primary;
+                                  if (states.contains(
+                                    WidgetState.pressed,
+                                  )) {
+                                    return primary.withValues(
+                                      alpha: 0.16,
+                                    );
+                                  }
+                                  if (states.contains(
+                                    WidgetState.hovered,
+                                  )) {
+                                    return primary.withValues(
+                                      alpha: 0.08,
+                                    );
+                                  }
+                                  return null;
+                                }),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Center(child: Assets.icons.add.svg()),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12, bottom: 0),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.background,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                  ),
-                  child: SizedBox(
-                    height: 64,
+                  Center(
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 6,
+                      itemCount: branchModels.length,
                       shrinkWrap: true,
                       separatorBuilder: (_, _) => SizedBox(width: 2),
                       itemBuilder: (BuildContext context, int index) {
                         return BranchItem(
-                          isSelected: index == selectedIndex,
-                          onPressed: () => onSelectBranch(index),
+                          icon: branchModels[index].icon,
+                          isSelected: index == widget.selectedIndex,
+                          onPressed: () {
+                            mainTitleNotifier.value = branchModels[index].title;
+                            widget.onSelectBranch(index);
+                          },
                         );
                       },
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15).copyWith(top: 24),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
-                    ),
+                  Expanded(
                     child: Row(
+                      spacing: 16.0,
+                      mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      spacing: 24,
                       children: [
-                        Expanded(
+                        Flexible(
+                          fit: FlexFit.loose,
                           child: TextField(
                             decoration: InputDecoration(
                               hintText: context.t.general.find,
@@ -193,12 +193,12 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                           ),
                         ),
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          spacing: 12,
+                          spacing: 12.0,
                           children: [
                             UserAvatar(),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   'Исакова Дарья',
@@ -219,15 +219,60 @@ class ScaffoldDesktopAppBar extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
-        SizedBox(
-          height: 4,
+          ),
         ),
       ],
     );
   }
+}
+
+final branchModels = [
+  (icon: Assets.icons.notif.svg(), title: 'Notifications'),
+  (icon: Assets.icons.chatBubble.svg(), title: 'Chats'),
+  (icon: Assets.icons.calendarMonth.svg(), title: 'Calendar'),
+  (icon: Assets.icons.mail.svg(), title: 'Mail'),
+  (icon: Assets.icons.group.svg(), title: 'Groups'),
+  (icon: Assets.icons.call.svg(), title: 'Calls'),
+];
+
+final class AppbarMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
+  static const String leftSection = 'leftSection';
+  static const String centerSection = 'centerSection';
+  static const String searchSection = 'searchSection';
+  static const String rightSection = 'rightSection';
+
+  @override
+  void performLayout(Size size) {
+    final centerX = size.width / 2;
+
+    final leftSize = layoutChild(leftSection, BoxConstraints.loose(size));
+    positionChild(leftSection, Offset(16, size.height - leftSize.height) / 2);
+
+    final centerSectionSize = layoutChild(centerSection, BoxConstraints.loose(size));
+    // final halfCenterSectionWidth = centerSectionSize.width / 2;
+
+    final centerSectionStartX = (size.width - centerSectionSize.width) / 2;
+    final centerSectionEndX = centerSectionStartX + centerSectionSize.width;
+    positionChild(centerSection, Offset(centerSectionStartX, 0));
+
+    final searchSize = layoutChild(searchSection, BoxConstraints.loose(Size(250, 40)));
+
+    double searchStartX = centerSectionEndX + 20;
+    // if (centerSectionEndX + 20 + searchSize.width < size.width) {
+    //   searchStartX = centerSectionEndX + 20;
+    // }
+    positionChild(searchSection, Offset(searchStartX, (size.height - searchSize.height) / 2));
+
+    final rightSize = layoutChild(rightSection, BoxConstraints.loose(size));
+    positionChild(
+      rightSection,
+      Offset(size.width - rightSize.width, (size.height - rightSize.height) / 2),
+    );
+  }
+
+  @override
+  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) => false;
 }

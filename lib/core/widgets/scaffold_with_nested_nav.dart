@@ -122,6 +122,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
         builder: (context, asyncSnapshot) {
           return Scaffold(
             body: Column(
+              spacing: 4.0,
               children: [
                 ScaffoldDesktopAppBar(
                   onSelectBranch: _goBranch,
