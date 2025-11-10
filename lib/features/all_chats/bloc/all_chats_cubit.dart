@@ -5,17 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
-import 'package:genesis_workspace/domain/all_chats/entities/folder_target.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
-import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_target_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart';
-import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
@@ -33,8 +32,8 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   final GetFoldersUseCase _getFoldersUseCase;
   final UpdateFolderUseCase _updateFolderUseCase;
   final DeleteFolderUseCase _deleteFolderUseCase;
-  final SetFoldersForTargetUseCase _setFoldersForTargetUseCase;
-  final GetFolderIdsForTargetUseCase _getFolderIdsForTargetUseCase;
+  final SetFoldersForChatUseCase _setFoldersForChatUseCase;
+  final GetFolderIdsForChatUseCase _getFolderIdsForChatUseCase;
   final RemoveAllMembershipsForFolderUseCase _removeAllMembershipsForFolderUseCase;
   final GetMembersForFolderUseCase _getMembersForFolderUseCase;
   final GetPinnedChatsUseCase _getPinnedChatsUseCase;
@@ -47,8 +46,8 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     this._getFoldersUseCase,
     this._updateFolderUseCase,
     this._deleteFolderUseCase,
-    this._setFoldersForTargetUseCase,
-    this._getFolderIdsForTargetUseCase,
+    this._setFoldersForChatUseCase,
+    this._getFolderIdsForChatUseCase,
     this._removeAllMembershipsForFolderUseCase,
     this._getMembersForFolderUseCase,
     this._getPinnedChatsUseCase,
@@ -64,7 +63,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
           selectedFolderIndex: 0,
           folderMembersById: const {},
           selectedGroupChat: null,
-          filterGroupChatIds: null,
+          filterChatIds: null,
           isInitialDataPending: false,
         ),
       );
@@ -231,7 +230,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<FolderMembers> membersForFolder(int folderId) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) {
-      return Future.value(const FolderMembers(dmUserIds: [], channelIds: [], groupChatIds: []));
+      return Future.value(const FolderMembers(chatIds: []));
     }
     return _getMembersForFolderUseCase.call(folderId, organizationId: organizationId);
   }
@@ -270,11 +269,11 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<void> setFoldersForDm(int userId, List<int> folderIds) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) return;
-    await _setFoldersForTargetUseCase.call(
-      FolderTarget.dm(userId),
-      folderIds,
-      organizationId: organizationId,
-    );
+      await _setFoldersForChatUseCase.call(
+        userId,
+        folderIds,
+        organizationId: organizationId,
+      );
     await _applyFolderFilter();
     // Membership changed: refresh all folders
     await _refreshAllFolderMembers();
@@ -283,11 +282,11 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<void> setFoldersForChannel(int streamId, List<int> folderIds) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) return;
-    await _setFoldersForTargetUseCase.call(
-      FolderTarget.channel(streamId),
-      folderIds,
-      organizationId: organizationId,
-    );
+      await _setFoldersForChatUseCase.call(
+        streamId,
+        folderIds,
+        organizationId: organizationId,
+      );
     await _applyFolderFilter();
     // Membership changed: refresh all folders
     await _refreshAllFolderMembers();
@@ -296,11 +295,11 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<void> setFoldersForGroupChat(int groupChatId, List<int> folderIds) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) return;
-    await _setFoldersForTargetUseCase.call(
-      FolderTarget.group(groupChatId),
-      folderIds,
-      organizationId: organizationId,
-    );
+      await _setFoldersForChatUseCase.call(
+        groupChatId,
+        folderIds,
+        organizationId: organizationId,
+      );
     await _applyFolderFilter();
     await _refreshAllFolderMembers();
   }
@@ -308,8 +307,8 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<List<int>> getFolderIdsForDm(int userId) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) return [];
-    return await _getFolderIdsForTargetUseCase.call(
-      FolderTarget.dm(userId),
+    return await _getFolderIdsForChatUseCase.call(
+      userId,
       organizationId: organizationId,
     );
   }
@@ -317,8 +316,8 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<List<int>> getFolderIdsForChannel(int streamId) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) return [];
-    return await _getFolderIdsForTargetUseCase.call(
-      FolderTarget.channel(streamId),
+    return await _getFolderIdsForChatUseCase.call(
+      streamId,
       organizationId: organizationId,
     );
   }
@@ -326,8 +325,8 @@ class AllChatsCubit extends Cubit<AllChatsState> {
   Future<List<int>> getFolderIdsForGroupChat(int groupChatId) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) return [];
-    return await _getFolderIdsForTargetUseCase.call(
-      FolderTarget.group(groupChatId),
+    return await _getFolderIdsForChatUseCase.call(
+      groupChatId,
       organizationId: organizationId,
     );
   }
@@ -378,16 +377,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     emit(state.copyWith(selectedFolderIndex: newIndex));
     FolderItemEntity folder = state.folders[newIndex];
     if (folder.id == null) {
-      state.filterChannelIds = null;
-      state.filterDmUserIds = null;
-      state.filterGroupChatIds = null;
-      emit(
-        state.copyWith(
-          filterDmUserIds: state.filterDmUserIds,
-          filterChannelIds: state.filterChannelIds,
-          filterGroupChatIds: state.filterGroupChatIds,
-        ),
-      );
+      emit(state.copyWith(filterChatIds: null));
       return;
     }
     final int? organizationId = AppConstants.selectedOrganizationId;
@@ -398,70 +388,31 @@ class AllChatsCubit extends Cubit<AllChatsState> {
       folder.id!,
       organizationId: organizationId,
     );
-    emit(
-      state.copyWith(
-        filterDmUserIds: members.dmUserIds.toSet(),
-        filterChannelIds: members.channelIds.toSet(),
-        filterGroupChatIds: members.groupChatIds.toSet(),
-      ),
-    );
+    emit(state.copyWith(filterChatIds: members.chatIds.toSet()));
   }
 
   Future<void> _applyFolderFilter() async {
     final int idx = state.selectedFolderIndex;
     if (idx <= 0 || idx >= state.folders.length) {
-      state.filterChannelIds = null;
-      state.filterDmUserIds = null;
-      state.filterGroupChatIds = null;
-      emit(
-        state.copyWith(
-          filterDmUserIds: state.filterDmUserIds,
-          filterChannelIds: state.filterChannelIds,
-          filterGroupChatIds: state.filterGroupChatIds,
-        ),
-      );
+      emit(state.copyWith(filterChatIds: null));
       return;
     }
     FolderItemEntity folder = state.folders[idx];
 
     if (folder.id == null) {
-      state.filterChannelIds = null;
-      state.filterDmUserIds = null;
-      state.filterGroupChatIds = null;
-      emit(
-        state.copyWith(
-          filterDmUserIds: state.filterDmUserIds,
-          filterChannelIds: state.filterChannelIds,
-          filterGroupChatIds: state.filterGroupChatIds,
-        ),
-      );
+      emit(state.copyWith(filterChatIds: null));
       return;
     }
 
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) {
-      state.filterChannelIds = null;
-      state.filterDmUserIds = null;
-      state.filterGroupChatIds = null;
-      emit(
-        state.copyWith(
-          filterDmUserIds: state.filterDmUserIds,
-          filterChannelIds: state.filterChannelIds,
-          filterGroupChatIds: state.filterGroupChatIds,
-        ),
-      );
+      emit(state.copyWith(filterChatIds: null));
       return;
     }
     final members = await _getMembersForFolderUseCase.call(
       folder.id!,
       organizationId: organizationId,
     );
-    emit(
-      state.copyWith(
-        filterDmUserIds: members.dmUserIds.toSet(),
-        filterChannelIds: members.channelIds.toSet(),
-        filterGroupChatIds: members.groupChatIds.toSet(),
-      ),
-    );
+    emit(state.copyWith(filterChatIds: members.chatIds.toSet()));
   }
 }

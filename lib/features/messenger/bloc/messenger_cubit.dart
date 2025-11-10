@@ -15,6 +15,7 @@ import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_fold
 import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
@@ -45,6 +46,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   final PinChatUseCase _pinChatUseCase;
   final UnpinChatUseCase _unpinChatUseCase;
   final GetPinnedChatsUseCase _getPinnedChatsUseCase;
+  final SetFoldersForChatUseCase _setFoldersForChatUseCase;
 
   final MultiPollingService _realTimeService;
 
@@ -64,6 +66,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._pinChatUseCase,
     this._unpinChatUseCase,
     this._getPinnedChatsUseCase,
+    this._setFoldersForChatUseCase,
   ) : super(
         MessengerState(
           selfUser: null,
@@ -75,7 +78,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           chats: [],
           selectedChat: null,
           pinnedChats: [],
-          filteredChatIds: {},
+          filteredChatIds: null,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -202,31 +205,55 @@ class MessengerCubit extends Cubit<MessengerState> {
   void selectFolder(int newIndex) async {
     if (state.selectedFolderIndex == newIndex) return;
     emit(state.copyWith(selectedFolderIndex: newIndex));
-    final folder = state.folders[newIndex];
-    inspect(folder);
+    await _applyFilterForSelectedFolder();
+  }
 
-    // FolderItemEntity folder = state.folders[newIndex];
-    // if (folder.id == null) {
-    //   state.filterChannelIds = null;
-    //   state.filterDmUserIds = null;
-    //   state.filterGroupChatIds = null;
-    //   emit(
-    //     state.copyWith(
-    //       filterDmUserIds: state.filterDmUserIds,
-    //       filterChannelIds: state.filterChannelIds,
-    //       filterGroupChatIds: state.filterGroupChatIds,
-    //     ),
-    //   );
-    //   return;
-    // }
-    // final members = await _getMembersForFolderUseCase.call(folder.id!);
-    // emit(
-    // state.copyWith(
-    // filterDmUserIds: members.dmUserIds.toSet(),
-    // filterChannelIds: members.channelIds.toSet(),
-    // filterGroupChatIds: members.groupChatIds.toSet(),
-    // ),
-    // );
+  Future<void> _applyFilterForSelectedFolder() async {
+    if (state.folders.isEmpty) {
+      emit(state.copyWith(filteredChatIds: null));
+      return;
+    }
+    final int currentIndex = state.selectedFolderIndex;
+    if (currentIndex < 0 || currentIndex >= state.folders.length) {
+      emit(state.copyWith(filteredChatIds: null));
+      return;
+    }
+    final folder = state.folders[currentIndex];
+    if (folder.id == null || folder.id == 0) {
+      emit(state.copyWith(filteredChatIds: null));
+      return;
+    }
+
+    final int folderId = folder.id!;
+    FolderMembers? members = state.folderMembersById[folderId];
+    if (members == null) {
+      final int? organizationId = AppConstants.selectedOrganizationId;
+      if (organizationId == null) {
+        emit(state.copyWith(filteredChatIds: null));
+        return;
+      }
+      members = await _getMembersForFolderUseCase.call(folderId, organizationId: organizationId);
+      final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById)..[folderId] = members;
+      emit(state.copyWith(folderMembersById: updatedMap));
+    }
+
+    emit(state.copyWith(filteredChatIds: members!.chatIds.toSet()));
+  }
+
+  Future<void> setFoldersForChat(List<int> foldersIds, int chatId) async {
+    try {
+      final int? organizationId = AppConstants.selectedOrganizationId;
+      if (organizationId == null) return;
+
+      await _setFoldersForChatUseCase.call(
+        chatId,
+        foldersIds,
+        organizationId: organizationId,
+      );
+      await _refreshAllFolderMembers();
+    } catch (e) {
+      inspect(e);
+    }
   }
 
   Future<void> updateFolder(FolderItemEntity folder) async {
@@ -258,12 +285,13 @@ class MessengerCubit extends Cubit<MessengerState> {
         selectedFolderIndex: 0,
       ),
     );
+    await _applyFilterForSelectedFolder();
   }
 
   Future<void> _refreshMembersForFolders(Iterable<int> folderIds) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId == null) return;
-    final idsToRefresh = folderIds.where((id) => id != 0);
+    final idsToRefresh = folderIds.where((id) => id != 0).toSet();
     if (idsToRefresh.isEmpty) return;
 
     final futures = idsToRefresh.map((id) async {
@@ -272,10 +300,14 @@ class MessengerCubit extends Cubit<MessengerState> {
     });
 
     final newEntries = await Future.wait(futures);
-    final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById)
-      ..addEntries(newEntries);
+    final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById)..addEntries(newEntries);
 
     emit(state.copyWith(folderMembersById: updatedMap));
+
+    final int? selectedFolderId = state.folders[state.selectedFolderIndex].id;
+    if (selectedFolderId != null && idsToRefresh.contains(selectedFolderId)) {
+      await _applyFilterForSelectedFolder();
+    }
   }
 
   Future<void> _refreshAllFolderMembers() async {
@@ -288,6 +320,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     });
     final entries = await Future.wait(futures);
     emit(state.copyWith(folderMembersById: Map.fromEntries(entries)));
+    await _applyFilterForSelectedFolder();
   }
 
   void setSelfUser(UserEntity user) {
@@ -365,9 +398,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (organizationId == null) return;
 
       final int folderId = state.folders[state.selectedFolderIndex].id!;
-      final int pinnedChatId = state.pinnedChats
-          .firstWhere((pinnedChat) => pinnedChat.chatId == chatId)
-          .id;
+      final int pinnedChatId = state.pinnedChats.firstWhere((pinnedChat) => pinnedChat.chatId == chatId).id;
       await _unpinChatUseCase.call(pinnedChatId);
       List<FolderItemEntity> updatedFolders = [...state.folders];
       FolderItemEntity folder = updatedFolders.firstWhere((folder) => folder.id == folderId);
@@ -393,6 +424,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         folderMembersById: const {},
         messages: [],
         chats: [],
+        filteredChatIds: null,
       ),
     );
   }

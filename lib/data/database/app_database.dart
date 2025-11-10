@@ -24,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -113,8 +113,8 @@ class AppDatabase extends _$AppDatabase {
           if (defaultOrganizationId != null) {
             await customStatement(
               'INSERT INTO folder_items '
-              '(id, folder_id, organization_id, item_type, target_id, topic_name) '
-              'SELECT id, folder_id, $defaultOrganizationId, item_type, target_id, topic_name '
+              '(id, folder_id, organization_id, chat_id) '
+              'SELECT id, folder_id, $defaultOrganizationId, target_id '
               'FROM folder_items_old;',
             );
           }
@@ -144,6 +144,19 @@ class AppDatabase extends _$AppDatabase {
             'FROM pinned_chats_old;',
           );
           await customStatement('DROP TABLE pinned_chats_old;');
+        });
+      }
+      if (from < 14) {
+        await transaction(() async {
+          await customStatement('ALTER TABLE folder_items RENAME TO folder_items_old;');
+          await migrator.createTable(folderItems);
+          await customStatement(
+            'INSERT INTO folder_items '
+            '(id, folder_id, organization_id, chat_id) '
+            'SELECT id, folder_id, organization_id, target_id '
+            'FROM folder_items_old;',
+          );
+          await customStatement('DROP TABLE folder_items_old;');
         });
       }
     },

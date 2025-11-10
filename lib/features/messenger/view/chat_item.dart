@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -92,7 +90,12 @@ class _ChatItemState extends State<ChatItem> {
                 await showDialog(
                   context: context,
                   builder: (_) => SelectFoldersDialog(
-                    onSave: (selectedFolderIds) async {},
+                    onSave: (selectedFolderIds) async {
+                      await context.read<MessengerCubit>().setFoldersForChat(
+                        selectedFolderIds,
+                        widget.chat.id,
+                      );
+                    },
                     folders: context.read<MessengerCubit>().state.folders,
                   ),
                 );
@@ -102,9 +105,6 @@ class _ChatItemState extends State<ChatItem> {
             TextButton(
               onPressed: () async {
                 if (widget.chat.isPinned) {
-                  final state = context.read<MessengerCubit>().state;
-                  inspect(state.pinnedChats);
-                  inspect(widget.chat);
                   await context.read<MessengerCubit>().unpinChat(widget.chat.id);
                 } else {
                   await context.read<MessengerCubit>().pinChat(chatId: widget.chat.id);

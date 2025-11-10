@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -81,8 +82,7 @@ class _MessengerViewState extends State<MessengerView> {
     final cardColors = Theme.of(context).extension<CardColors>()!;
 
     return BlocListener<OrganizationsCubit, OrganizationsState>(
-      listenWhen: (previous, current) =>
-          previous.selectedOrganizationId != current.selectedOrganizationId,
+      listenWhen: (previous, current) => previous.selectedOrganizationId != current.selectedOrganizationId,
       listener: (context, state) {
         context.read<MessengerCubit>().resetState();
         setState(() {
@@ -104,6 +104,9 @@ class _MessengerViewState extends State<MessengerView> {
             }
             return BlocBuilder<MessengerCubit, MessengerState>(
               builder: (context, state) {
+                final List<ChatEntity> visibleChats = state.filteredChatIds == null
+                    ? state.chats
+                    : state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -120,9 +123,7 @@ class _MessengerViewState extends State<MessengerView> {
                                 final FolderItemEntity folder = state.folders[index];
                                 final bool isSelected = state.selectedFolderIndex == index;
                                 Widget icon;
-                                final String title = index == 0
-                                    ? context.t.folders.all
-                                    : folder.title!;
+                                final String title = index == 0 ? context.t.folders.all : folder.title!;
                                 if (index == 0) {
                                   icon = Assets.icons.allChats.svg(
                                     colorFilter: isSelected
@@ -142,9 +143,7 @@ class _MessengerViewState extends State<MessengerView> {
                                   onTap: () {
                                     context.read<MessengerCubit>().selectFolder(index);
                                   },
-                                  onEdit: (folder.systemType == null)
-                                      ? () => editFolder(context, folder)
-                                      : null,
+                                  onEdit: (folder.systemType == null) ? () => editFolder(context, folder) : null,
                                   onOrderPinning: () {
                                     context.pop();
                                     editPinning();
@@ -163,13 +162,11 @@ class _MessengerViewState extends State<MessengerView> {
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.of(dialogContext).pop(false),
+                                                  onPressed: () => Navigator.of(dialogContext).pop(false),
                                                   child: Text(context.t.folders.cancel),
                                                 ),
                                                 FilledButton(
-                                                  onPressed: () =>
-                                                      Navigator.of(dialogContext).pop(true),
+                                                  onPressed: () => Navigator.of(dialogContext).pop(true),
                                                   child: Text(context.t.folders.delete),
                                                 ),
                                               ],
@@ -269,13 +266,19 @@ class _MessengerViewState extends State<MessengerView> {
                                 ),
                               ),
                             ),
+                            if (visibleChats.isEmpty)
+                              SliverToBoxAdapter(
+                                child: Center(
+                                  child: Text(context.t.folders.folderIsEmpty),
+                                ),
+                              ),
                             SliverPadding(
                               padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
                               sliver: SliverList.separated(
-                                itemCount: state.chats.length,
+                                itemCount: visibleChats.length,
                                 separatorBuilder: (_, _) => SizedBox(height: 4),
                                 itemBuilder: (BuildContext context, int index) {
-                                  final chat = state.chats[index];
+                                  final chat = visibleChats[index];
                                   return ChatItem(
                                     key: ValueKey(chat.id),
                                     chat: chat,

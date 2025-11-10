@@ -1,19 +1,18 @@
-import 'package:injectable/injectable.dart';
-import 'package:genesis_workspace/domain/all_chats/entities/folder_target.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_membership_repository.dart';
+import 'package:injectable/injectable.dart';
 
 @injectable
-class SetFoldersForTargetUseCase {
+class SetFoldersForChatUseCase {
   final FolderMembershipRepository _repository;
-  SetFoldersForTargetUseCase(this._repository);
+  SetFoldersForChatUseCase(this._repository);
 
   Future<void> call(
-    FolderTarget target,
+    int chatId,
     List<int> folderIds, {
     required int organizationId,
   }) async {
-    await _repository.setFoldersForTarget(
-      target,
+    await _repository.setFoldersForChat(
+      chatId,
       folderIds,
       organizationId: organizationId,
     );

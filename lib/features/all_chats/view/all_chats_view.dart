@@ -284,15 +284,14 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                       children: [
                                                         AllChatsDms(
                                                           key: const ValueKey('dms-chats'),
-                                                          filteredDms: state.filterDmUserIds,
+                                                      filteredDms: state.filterChatIds,
                                                           selectedFolder: state
                                                               .folders[state.selectedFolderIndex],
                                                           isEditPinning: _isEditPinning,
                                                         ),
                                                         AllGroupChats(
                                                           key: const ValueKey('group-chats'),
-                                                          filteredGroupChatIds:
-                                                              state.filterGroupChatIds,
+                                                          filteredGroupChatIds: state.filterChatIds,
                                                           selectedFolder: state
                                                               .folders[state.selectedFolderIndex],
                                                           isEditPinning: _isEditPinning,
@@ -300,7 +299,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                         const Divider(height: 1),
                                                         AllChatsChannels(
                                                           key: const ValueKey('channels-chats'),
-                                                          filterChannelIds: state.filterChannelIds,
+                                                      filterChannelIds: state.filterChatIds,
                                                           selectedFolder: state
                                                               .folders[state.selectedFolderIndex],
                                                           isEditPinning: _isEditPinning,
@@ -440,17 +439,15 @@ class _FoldersList extends StatelessWidget {
     if (fid == null) return 0;
     final FolderMembers? members = folderMembers[fid];
     if (members == null) return 0;
-    final Set<int> dmIds = members.dmUserIds.toSet();
-    final Set<int> chIds = members.channelIds.toSet();
-    final Set<int> groupIds = members.groupChatIds.toSet();
+    final Set<int> chatIds = members.chatIds.toSet();
     final int dmUnread = dmsState.users
-        .where((u) => dmIds.contains(u.userId))
+        .where((u) => chatIds.contains(u.userId))
         .fold(0, (sum, u) => sum + u.unreadMessages.length);
     final int chUnread = channelsState.channels
-        .where((c) => chIds.contains(c.streamId) && !c.isMuted)
+        .where((c) => chatIds.contains(c.streamId) && !c.isMuted)
         .fold(0, (sum, c) => sum + c.unreadMessages.length);
     final int groupUnread = dmsState.groupChats
-        .where((group) => groupIds.contains(group.id))
+        .where((group) => chatIds.contains(group.id))
         .fold(0, (sum, group) => sum + group.unreadMessagesCount);
     return dmUnread + chUnread + groupUnread;
   }

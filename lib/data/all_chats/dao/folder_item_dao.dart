@@ -10,20 +10,15 @@ part 'folder_item_dao.g.dart';
 class FolderItemDao extends DatabaseAccessor<AppDatabase> with _$FolderItemDaoMixin {
   FolderItemDao(AppDatabase db) : super(db);
 
-  Future<void> setItemFolders({
-    required String itemType,
-    required int targetId,
+  Future<void> setChatFolders({
+    required int chatId,
     required List<int> folderIds,
-    String? topicName,
     required int organizationId,
   }) async {
     await transaction(() async {
       await (delete(folderItems)..where(
             (t) =>
-                t.itemType.equals(itemType) &
-                t.targetId.equals(targetId) &
-                t.organizationId.equals(organizationId) &
-                (topicName == null ? t.topicName.isNull() : t.topicName.equals(topicName)),
+                t.chatId.equals(chatId) & t.organizationId.equals(organizationId),
           ))
           .go();
 
@@ -31,10 +26,8 @@ class FolderItemDao extends DatabaseAccessor<AppDatabase> with _$FolderItemDaoMi
       final rows = folderIds
           .map(
             (fid) => FolderItemsCompanion.insert(
-              folderId: Value(fid).value,
-              itemType: itemType,
-              targetId: targetId,
-              topicName: Value(topicName),
+              folderId: fid,
+              chatId: chatId,
               organizationId: organizationId,
             ),
           )
@@ -43,24 +36,15 @@ class FolderItemDao extends DatabaseAccessor<AppDatabase> with _$FolderItemDaoMi
     });
   }
 
-  Future<List<int>> getFolderIdsForItem({
-    required String itemType,
-    required int targetId,
-    String? topicName,
+  Future<List<int>> getFolderIdsForChat({
+    required int chatId,
     required int organizationId,
   }) async {
     final query = select(folderItems)
       ..where(
         (t) =>
-            t.itemType.equals(itemType) &
-            t.targetId.equals(targetId) &
-            t.organizationId.equals(organizationId),
+            t.chatId.equals(chatId) & t.organizationId.equals(organizationId),
       );
-    if (topicName == null) {
-      query.where((t) => t.topicName.isNull());
-    } else {
-      query.where((t) => t.topicName.equals(topicName));
-    }
     final rows = await query.get();
     return rows.map((r) => r.folderId).toList(growable: false);
   }
