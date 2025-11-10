@@ -87,7 +87,7 @@ class _AllGroupChatsState extends State<AllGroupChats>
               ].where((group) => widget.filteredGroupChatIds!.contains(group.id)).toList();
 
         final List<PinnedChatEntity> pinnedChats = widget.selectedFolder.pinnedChats
-            .where((chat) => chat.type == PinnedChatType.group)
+            // .where((chat) => chat.type == PinnedChatType.group)
             .toList();
         final Map<int, PinnedChatEntity> pinnedByChatId = {
           for (final pinned in pinnedChats) pinned.chatId: pinned,

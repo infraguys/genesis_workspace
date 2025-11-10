@@ -64,6 +64,7 @@ class _MessengerViewState extends State<MessengerView> {
     await Future.wait([
       context.read<MessengerCubit>().loadFolders(),
       context.read<MessengerCubit>().getMessages(),
+      // context.read<MessengerCubit>().getPinnedChats(),
     ]);
   }
 

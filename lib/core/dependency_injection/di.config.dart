@@ -759,6 +759,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
         gh<_i699.GetTopicsUseCase>(),
         gh<_i823.MultiPollingService>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
       ),
     );
     return this;

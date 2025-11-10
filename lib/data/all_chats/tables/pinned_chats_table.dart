@@ -6,12 +6,11 @@ enum PinnedChatType { dm, channel, group }
 
 class PinnedChats extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get folderId =>
-      integer().references(Folders, #id, onDelete: KeyAction.cascade)();
+  IntColumn get folderId => integer().references(Folders, #id, onDelete: KeyAction.cascade)();
   IntColumn get orderIndex => integer().nullable()();
   IntColumn get chatId => integer()();
   DateTimeColumn get pinnedAt => dateTime().withDefault(currentDateAndTime)();
-  TextColumn get type => textEnum<PinnedChatType>()();
+  // TextColumn get type => textEnum<PinnedChatType>()();
   IntColumn get organizationId =>
       integer().references(Organizations, #id, onDelete: KeyAction.cascade)();
 

@@ -84,7 +84,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
         : usersList.where((user) => widget.filteredDms!.contains(user.userId)).toList();
 
     final List<PinnedChatEntity> pinnedChats = widget.selectedFolder.pinnedChats
-        .where((chat) => chat.type == PinnedChatType.dm)
+        // .where((chat) => chat.type == PinnedChatType.dm)
         .toList();
     final Map<int, PinnedChatEntity> pinnedByChatId = {
       for (final pinned in pinnedChats) pinned.chatId: pinned,

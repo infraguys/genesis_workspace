@@ -122,7 +122,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         folderId: folderId,
         chatId: chatId,
         orderIndex: folder.pinnedChats.length,
-        type: type,
+        // type: type,
         organizationId: organizationId,
       );
       final int indexOfFolder = updatedFolders.indexOf(folder);

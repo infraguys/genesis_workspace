@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
@@ -9,12 +12,15 @@ import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatItem extends StatefulWidget {
   final ChatEntity chat;
   final VoidCallback onTap;
+
   const ChatItem({super.key, required this.chat, required this.onTap});
 
   @override
@@ -26,6 +32,8 @@ class _ChatItemState extends State<ChatItem> {
 
   static const Duration _animationDuration = Duration(milliseconds: 220);
   static const Curve _animationCurve = Curves.easeInOut;
+
+  final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
 
   onTap() async {
     if (widget.chat.type == ChatType.channel) {
@@ -55,178 +63,229 @@ class _ChatItemState extends State<ChatItem> {
         rightContainerHeight = 49;
         break;
     }
-    return Material(
-      child: Column(
-        children: [
-          InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(8),
-            overlayColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.hovered) ? cardColors.active : null,
+    return CustomPopup(
+      key: popupKey,
+      backgroundColor: theme.colorScheme.surfaceDim,
+      arrowColor: theme.colorScheme.surface,
+      rootNavigator: true,
+      contentDecoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceDim,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: kElevationToShadow[3],
+      ),
+      content: Container(
+        width: 240,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 4,
+          children: [
+            TextButton(
+              onPressed: () {},
+              child: Text(context.t.folders.addToFolder),
             ),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 65,
+            TextButton(
+              onPressed: () async {
+                if (widget.chat.isPinned) {
+                  final state = context.read<MessengerCubit>().state;
+                  inspect(state.pinnedChats);
+                  inspect(widget.chat);
+                  await context.read<MessengerCubit>().unpinChat(widget.chat.id);
+                } else {
+                  await context.read<MessengerCubit>().pinChat(chatId: widget.chat.id);
+                }
+                if (mounted) {
+                  context.pop();
+                }
+              },
+              child: Text(widget.chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat),
+            ),
+          ],
+        ),
+      ),
+      child: Material(
+        child: Column(
+          children: [
+            InkWell(
+              onTap: onTap,
+              onSecondaryTap: () => popupKey.currentState?.show(),
+              borderRadius: BorderRadius.circular(8),
+              overlayColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.hovered) ? cardColors.active : null,
               ),
-              child: Ink(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8).copyWith(
-                    bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
-                    bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
-                  ),
-                  color: cardColors.base,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 65,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      UserAvatar(avatarUrl: widget.chat.avatarUrl, size: 30),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.chat.displayTitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: textColors.text100,
-                              ),
-                            ),
-                            if (widget.chat.type == ChatType.channel)
+                child: Ink(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8).copyWith(
+                      bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
+                      bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
+                    ),
+                    color: cardColors.base,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        UserAvatar(avatarUrl: widget.chat.avatarUrl, size: 30),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
-                                widget.chat.lastMessageSenderName!,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
+                                widget.chat.displayTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: textColors.text100,
                                 ),
                               ),
-                            MessagePreview(messagePreview: widget.chat.lastMessagePreview),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: rightContainerHeight,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 12,
-                          children: [
-                            widget.chat.type == ChatType.channel
-                                ? AnimatedRotation(
-                                    duration: const Duration(milliseconds: 200),
-                                    turns: _isExpanded ? 0.5 : 0.0,
-                                    child: Assets.icons.arrowDown.svg(),
-                                  )
-                                : Text(
-                                    DateFormat('HH:mm').format(widget.chat.lastMessageDate),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: textColors.text50,
-                                    ),
+                              if (widget.chat.type == ChatType.channel)
+                                Text(
+                                  widget.chat.lastMessageSenderName!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.primary,
                                   ),
-                            UnreadBadge(count: widget.chat.unreadMessages.length),
-                          ],
+                                ),
+                              MessagePreview(messagePreview: widget.chat.lastMessagePreview),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          height: rightContainerHeight,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            spacing: 12,
+                            children: [
+                              Row(
+                                children: [
+                                  if (widget.chat.isPinned) Assets.icons.pinned.svg(),
+                                  widget.chat.type == ChatType.channel
+                                      ? AnimatedRotation(
+                                          duration: const Duration(milliseconds: 200),
+                                          turns: _isExpanded ? 0.5 : 0.0,
+                                          child: Assets.icons.arrowDown.svg(),
+                                        )
+                                      : Text(
+                                          DateFormat('HH:mm').format(widget.chat.lastMessageDate),
+                                          style: theme.textTheme.bodySmall?.copyWith(
+                                            color: textColors.text50,
+                                          ),
+                                        ),
+                                ],
+                              ),
+                              UnreadBadge(count: widget.chat.unreadMessages.length),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          AnimatedSize(
-            duration: _animationDuration,
-            curve: _animationCurve,
-            child: _isExpanded
-                ? Skeletonizer(
-                    enabled: widget.chat.isTopicsLoading,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
-                        return InkWell(
-                          onTap: () {
-                            context.read<MessengerCubit>().selectChat(
-                              widget.chat,
-                              selectedTopic: topic.name,
-                            );
-                          },
-                          child: Container(
-                            height: 76,
-                            padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
-                            decoration: BoxDecoration(
-                              color: cardColors.base,
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: 3,
-                                        height: 47,
-                                        decoration: BoxDecoration(
-                                          color: Colors.yellow,
-                                          borderRadius: BorderRadiusGeometry.circular(4),
+            AnimatedSize(
+              duration: _animationDuration,
+              curve: _animationCurve,
+              child: _isExpanded
+                  ? Skeletonizer(
+                      enabled: widget.chat.isTopicsLoading,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
+                          return InkWell(
+                            onTap: () {
+                              context.read<MessengerCubit>().selectChat(
+                                widget.chat,
+                                selectedTopic: topic.name,
+                              );
+                            },
+                            child: Container(
+                              height: 76,
+                              padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
+                              decoration: BoxDecoration(
+                                color: cardColors.base,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: 3,
+                                          height: 47,
+                                          decoration: BoxDecoration(
+                                            color: Colors.yellow,
+                                            borderRadius: BorderRadiusGeometry.circular(4),
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        width: 12,
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Tooltip(
-                                              message: topic.name,
-                                              child: Text(
-                                                "# ${topic.name}",
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: theme.textTheme.labelMedium?.copyWith(
-                                                  fontSize: 14,
-                                                  color: textColors.text100,
+                                        SizedBox(
+                                          width: 12,
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Tooltip(
+                                                message: topic.name,
+                                                child: Text(
+                                                  "# ${topic.name}",
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: theme.textTheme.labelMedium?.copyWith(
+                                                    fontSize: 14,
+                                                    color: textColors.text100,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            Text(
-                                              topic.lastMessageSenderName,
-                                              style: theme.textTheme.bodySmall?.copyWith(
-                                                color: theme.colorScheme.primary,
+                                              Text(
+                                                topic.lastMessageSenderName,
+                                                style: theme.textTheme.bodySmall?.copyWith(
+                                                  color: theme.colorScheme.primary,
+                                                ),
                                               ),
-                                            ),
-                                            MessagePreview(
-                                              messagePreview: topic.lastMessagePreview,
-                                            ),
-                                          ],
+                                              MessagePreview(
+                                                messagePreview: topic.lastMessagePreview,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Skeleton.ignore(
-                                  child: SizedBox(
-                                    height: 21,
-                                    child: UnreadBadge(count: topic.unreadMessages.length),
+                                  Skeleton.ignore(
+                                    child: SizedBox(
+                                      height: 21,
+                                      child: UnreadBadge(count: topic.unreadMessages.length),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
+                          );
+                        },
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
     );
   }

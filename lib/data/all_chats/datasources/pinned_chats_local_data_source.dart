@@ -1,5 +1,4 @@
 import 'package:genesis_workspace/data/all_chats/dao/pinned_chats_dao.dart';
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:injectable/injectable.dart';
 
@@ -12,13 +11,13 @@ class PinnedChatsLocalDataSource {
     required int folderId,
     required int chatId,
     required int orderIndex,
-    required PinnedChatType type,
+    // required PinnedChatType type,
     required int organizationId,
   }) async {
     return await _dao.pinChat(
       folderId: folderId,
       chatId: chatId,
-      type: type,
+      // type: type,
       organizationId: organizationId,
     );
   }

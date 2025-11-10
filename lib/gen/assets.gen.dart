@@ -56,6 +56,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/more_vert.svg
   SvgGenImage get moreVert => const SvgGenImage('assets/icons/more_vert.svg');
 
+  /// File path: assets/icons/pinned.svg
+  SvgGenImage get pinned => const SvgGenImage('assets/icons/pinned.svg');
+
   /// File path: assets/icons/search.svg
   SvgGenImage get search => const SvgGenImage('assets/icons/search.svg');
 
@@ -76,6 +79,7 @@ class $AssetsIconsGen {
     folderOpen,
     joinCall,
     moreVert,
+    pinned,
     search,
     send,
     videocam,
