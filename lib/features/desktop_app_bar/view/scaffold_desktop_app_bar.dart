@@ -30,11 +30,6 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
   final mainTitleNotifier = ValueNotifier<String>('');
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     mainTitleNotifier.value = context.t.messenger;
     super.didChangeDependencies();
