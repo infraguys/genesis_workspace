@@ -18,6 +18,7 @@ import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_membershi
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -48,6 +49,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   final GetPinnedChatsUseCase _getPinnedChatsUseCase;
   final SetFoldersForChatUseCase _setFoldersForChatUseCase;
   final GetFolderIdsForChatUseCase _getFolderIdsForChatUseCase;
+  final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
 
   final MultiPollingService _realTimeService;
 
@@ -69,6 +71,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getPinnedChatsUseCase,
     this._setFoldersForChatUseCase,
     this._getFolderIdsForChatUseCase,
+    this._updatePinnedChatOrderUseCase,
   ) : super(
         MessengerState(
           selfUser: null,
@@ -347,6 +350,44 @@ class MessengerCubit extends Cubit<MessengerState> {
       _sortChats();
     } catch (e) {
       inspect(e);
+    }
+  }
+
+  Future<void> reorderPinnedChats({
+    required int folderId,
+    required int movedChatId,
+    int? previousChatId,
+    int? nextChatId,
+  }) async {
+    try {
+      final int? organizationId = AppConstants.selectedOrganizationId;
+      if (organizationId == null) return;
+      await _updatePinnedChatOrderUseCase.call(
+        folderId: folderId,
+        movedChatId: movedChatId,
+        previousChatId: previousChatId,
+        nextChatId: nextChatId,
+        organizationId: organizationId,
+      );
+
+      // перезагрузим пины для этой папки и переиздадим state
+      final List<PinnedChatEntity> refreshedPins = await _getPinnedChatsUseCase.call(
+        folderId: folderId,
+        organizationId: organizationId,
+      );
+
+      final List<FolderItemEntity> updatedFolders = [...state.folders];
+      final int folderIndex = updatedFolders.indexWhere((f) => f.id == folderId);
+      if (folderIndex != -1) {
+        final FolderItemEntity updatedFolder = updatedFolders[folderIndex].copyWith(
+          pinnedChats: refreshedPins,
+        );
+        updatedFolders[folderIndex] = updatedFolder;
+        emit(state.copyWith(folders: updatedFolders, pinnedChats: refreshedPins));
+        _sortChats();
+      }
+    } catch (e, s) {
+      // обработка/логирование
     }
   }
 

@@ -209,13 +209,12 @@ class _MessengerViewState extends State<MessengerView> {
                               automaticallyImplyLeading: false,
                               backgroundColor: theme.colorScheme.surface,
                               elevation: 0,
-                              scrolledUnderElevation: 0,
+                              scrolledUnderElevation: 10,
                               titleSpacing: 0,
-                              // toolbarHeight: 24,
                               centerTitle: false,
                               floating: true,
                               snap: true,
-                              pinned: true,
+                              pinned: false,
                               title: Padding(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -229,7 +228,7 @@ class _MessengerViewState extends State<MessengerView> {
                                 ),
                               ),
                               bottom: PreferredSize(
-                                preferredSize: Size.fromHeight(56),
+                                preferredSize: Size.fromHeight(48),
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12),
                                   child: Row(

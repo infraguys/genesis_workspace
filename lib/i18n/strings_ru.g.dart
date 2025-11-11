@@ -88,6 +88,7 @@ class TranslationsRu implements Translations {
 	@override String get email => 'Почта';
 	@override String get groups => 'Группы';
 	@override String get calls => 'Звонки';
+	@override late final _TranslationsMessengerViewRu messenger_view = _TranslationsMessengerViewRu._(_root);
 }
 
 // Path: auth
@@ -426,6 +427,16 @@ class _TranslationsEmojiRu implements TranslationsEmojiEn {
 	@override String get no_recent => 'Нет недавних эмоджи';
 }
 
+// Path: messenger_view
+class _TranslationsMessengerViewRu implements TranslationsMessengerViewEn {
+	_TranslationsMessengerViewRu._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get chats_and_channels => 'Чаты и каналы';
+}
+
 // Path: organizations.addDialog
 class _TranslationsOrganizationsAddDialogRu implements TranslationsOrganizationsAddDialogEn {
 	_TranslationsOrganizationsAddDialogRu._(this._root);
@@ -629,6 +640,7 @@ extension on TranslationsRu {
 			case 'email': return 'Почта';
 			case 'groups': return 'Группы';
 			case 'calls': return 'Звонки';
+			case 'messenger_view.chats_and_channels': return 'Чаты и каналы';
 			default: return null;
 		}
 	}
