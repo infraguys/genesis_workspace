@@ -86,7 +86,7 @@ class _ChatItemState extends State<ChatItem> {
             TextButton(
               onPressed: () async {
                 context.pop();
-                await context.read<MessengerCubit>().loadFolders();
+                // await context.read<MessengerCubit>().loadFolders();
                 await showDialog(
                   context: context,
                   builder: (_) => SelectFoldersDialog(
@@ -97,6 +97,9 @@ class _ChatItemState extends State<ChatItem> {
                       );
                     },
                     folders: context.read<MessengerCubit>().state.folders,
+                    loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
+                      widget.chat.id,
+                    ),
                   ),
                 );
               },

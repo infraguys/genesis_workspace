@@ -11,13 +11,11 @@ class PinnedChatsLocalDataSource {
     required int folderId,
     required int chatId,
     required int orderIndex,
-    // required PinnedChatType type,
     required int organizationId,
   }) async {
     return await _dao.pinChat(
       folderId: folderId,
       chatId: chatId,
-      // type: type,
       organizationId: organizationId,
     );
   }

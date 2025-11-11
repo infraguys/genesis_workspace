@@ -221,8 +221,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     });
 
     final newEntries = await Future.wait(futures);
-    final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById)
-      ..addEntries(newEntries);
+    final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById)..addEntries(newEntries);
 
     emit(state.copyWith(folderMembersById: updatedMap));
   }
@@ -264,44 +263,6 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         selectedFolderIndex: 0,
       ),
     );
-  }
-
-  Future<void> setFoldersForDm(int userId, List<int> folderIds) async {
-    final int? organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId == null) return;
-      await _setFoldersForChatUseCase.call(
-        userId,
-        folderIds,
-        organizationId: organizationId,
-      );
-    await _applyFolderFilter();
-    // Membership changed: refresh all folders
-    await _refreshAllFolderMembers();
-  }
-
-  Future<void> setFoldersForChannel(int streamId, List<int> folderIds) async {
-    final int? organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId == null) return;
-      await _setFoldersForChatUseCase.call(
-        streamId,
-        folderIds,
-        organizationId: organizationId,
-      );
-    await _applyFolderFilter();
-    // Membership changed: refresh all folders
-    await _refreshAllFolderMembers();
-  }
-
-  Future<void> setFoldersForGroupChat(int groupChatId, List<int> folderIds) async {
-    final int? organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId == null) return;
-      await _setFoldersForChatUseCase.call(
-        groupChatId,
-        folderIds,
-        organizationId: organizationId,
-      );
-    await _applyFolderFilter();
-    await _refreshAllFolderMembers();
   }
 
   Future<List<int>> getFolderIdsForDm(int userId) async {

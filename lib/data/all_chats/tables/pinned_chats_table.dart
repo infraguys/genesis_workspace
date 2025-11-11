@@ -10,9 +10,7 @@ class PinnedChats extends Table {
   IntColumn get orderIndex => integer().nullable()();
   IntColumn get chatId => integer()();
   DateTimeColumn get pinnedAt => dateTime().withDefault(currentDateAndTime)();
-  // TextColumn get type => textEnum<PinnedChatType>()();
-  IntColumn get organizationId =>
-      integer().references(Organizations, #id, onDelete: KeyAction.cascade)();
+  IntColumn get organizationId => integer().references(Organizations, #id, onDelete: KeyAction.cascade)();
 
   @override
   List<Set<Column>> get uniqueKeys => [
