@@ -84,6 +84,7 @@ class TranslationsRu extends Translations {
 	@override String get email => 'Почта';
 	@override String get groups => 'Группы';
 	@override String get calls => 'Звонки';
+	@override late final TranslationsMessengerViewRu messengerView = TranslationsMessengerViewRu._(_root);
 }
 
 // Path: auth
@@ -420,6 +421,16 @@ class TranslationsEmojiRu extends TranslationsEmojiEn {
 
 	// Translations
 	@override String get noRecent => 'Нет недавних эмоджи';
+}
+
+// Path: messengerView
+class TranslationsMessengerViewRu extends TranslationsMessengerViewEn {
+	TranslationsMessengerViewRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get chatsAndChannels => 'Чаты и каналы';
 }
 
 // Path: organizations.addDialog

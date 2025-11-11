@@ -140,7 +140,7 @@
     "delete": "Удалить",
     "deleteConfirmTitle": "Удалить папку?",
     "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
-   "folder_is_empty": "Папка пустая"
+    "folder_is_empty": "Папка пустая"
   },
   "organizations": {
     "addDialog": {
@@ -153,7 +153,6 @@
       "submit": "Добавить"
     },
     "delete_organization": "Удалить организацию"
-
   },
   "channel": {
     "muteChannel": "Заглушить канал",
@@ -217,5 +216,8 @@
   "calendar": "Календарь",
   "email": "Почта",
   "groups": "Группы",
-  "calls": "Звонки"
+  "calls": "Звонки",
+  "messenger_view": {
+    "chats_and_channels": "Чаты и каналы"
+  }
 }

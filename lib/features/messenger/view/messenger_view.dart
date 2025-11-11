@@ -65,7 +65,6 @@ class _MessengerViewState extends State<MessengerView> {
     await Future.wait([
       context.read<MessengerCubit>().loadFolders(),
       context.read<MessengerCubit>().getMessages(),
-      // context.read<MessengerCubit>().getPinnedChats(),
     ]);
   }
 
@@ -223,7 +222,9 @@ class _MessengerViewState extends State<MessengerView> {
                                   vertical: 20,
                                 ).copyWith(bottom: 0),
                                 child: Text(
-                                  'Чаты и каналы',
+                                  state.selectedFolderIndex != 0
+                                      ? state.folders[state.selectedFolderIndex].title!
+                                      : context.t.messengerView.chatsAndChannels,
                                   style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
                                 ),
                               ),
