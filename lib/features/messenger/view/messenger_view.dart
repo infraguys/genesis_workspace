@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
@@ -10,6 +11,7 @@ import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_item.dart';
+import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -28,6 +30,8 @@ class _MessengerViewState extends State<MessengerView> {
   Future<void>? _future;
 
   bool _isEditPinning = false;
+  List<ChatEntity>? _optimisticPinnedChats;
+  bool _isPinnedReorderInProgress = false;
 
   Future<void> createNewFolder(BuildContext context) {
     return showDialog(
@@ -106,6 +110,8 @@ class _MessengerViewState extends State<MessengerView> {
                 final List<ChatEntity> visibleChats = state.filteredChatIds == null
                     ? state.chats
                     : state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
+                final List<ChatEntity> pinnedChatsForEdit =
+                    _optimisticPinnedChats ?? _pinnedChatsForEdit(visibleChats, state.pinnedChats);
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -145,6 +151,7 @@ class _MessengerViewState extends State<MessengerView> {
                                   onEdit: (folder.systemType == null) ? () => editFolder(context, folder) : null,
                                   onOrderPinning: () {
                                     context.pop();
+                                    context.read<MessengerCubit>().selectFolder(index);
                                     editPinning();
                                   },
                                   onDelete: (folder.systemType == null)
@@ -227,6 +234,20 @@ class _MessengerViewState extends State<MessengerView> {
                                   style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
                                 ),
                               ),
+                              actions: [
+                                if (_isEditPinning)
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _isEditPinning = false;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.check,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                              ],
                               bottom: PreferredSize(
                                 preferredSize: Size.fromHeight(48),
                                 child: Padding(
@@ -274,20 +295,52 @@ class _MessengerViewState extends State<MessengerView> {
                               ),
                             SliverPadding(
                               padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
-                              sliver: SliverList.separated(
-                                itemCount: visibleChats.length,
-                                separatorBuilder: (_, _) => SizedBox(height: 4),
-                                itemBuilder: (BuildContext context, int index) {
-                                  final chat = visibleChats[index];
-                                  return ChatItem(
-                                    key: ValueKey(chat.id),
-                                    chat: chat,
-                                    onTap: () {
-                                      context.read<MessengerCubit>().selectChat(chat);
-                                    },
-                                  );
-                                },
-                              ),
+                              sliver: _isEditPinning
+                                  ? SliverReorderableList(
+                                      itemCount: pinnedChatsForEdit.length,
+                                      itemBuilder: (context, index) {
+                                        final chat = pinnedChatsForEdit[index];
+                                        return KeyedSubtree(
+                                          key: ValueKey('pinned-chat-${chat.id}'),
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: index == pinnedChatsForEdit.length - 1 ? 0 : 4,
+                                            ),
+                                            child: ChatReorderItem(
+                                              chat: chat,
+                                              index: index,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      onReorder: (oldIndex, newIndex) => _handlePinnedChatReorder(
+                                        currentState: state,
+                                        pinnedChats: pinnedChatsForEdit,
+                                        oldIndex: oldIndex,
+                                        newIndex: newIndex,
+                                      ),
+                                      proxyDecorator: (child, index, animation) {
+                                        return Material(
+                                          elevation: 4,
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: child,
+                                        );
+                                      },
+                                    )
+                                  : SliverList.separated(
+                                      itemCount: visibleChats.length,
+                                      separatorBuilder: (_, _) => SizedBox(height: 4),
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final chat = visibleChats[index];
+                                        return ChatItem(
+                                          key: ValueKey(chat.id),
+                                          chat: chat,
+                                          onTap: () {
+                                            context.read<MessengerCubit>().selectChat(chat);
+                                          },
+                                        );
+                                      },
+                                    ),
                             ),
                           ],
                         ),
@@ -328,5 +381,93 @@ class _MessengerViewState extends State<MessengerView> {
         ),
       ),
     );
+  }
+
+  List<ChatEntity> _pinnedChatsForEdit(List<ChatEntity> chats, List<PinnedChatEntity> pinnedMeta) {
+    if (pinnedMeta.isEmpty) {
+      return chats.where((chat) => chat.isPinned).toList();
+    }
+    final Map<int, PinnedChatEntity> pinnedByChatId = {
+      for (final pinned in pinnedMeta) pinned.chatId: pinned,
+    };
+
+    int comparePinnedMeta(PinnedChatEntity? a, PinnedChatEntity? b) {
+      final bool aPinned = a != null;
+      final bool bPinned = b != null;
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      if (!aPinned && !bPinned) return 0;
+
+      final int? aOrder = a!.orderIndex;
+      final int? bOrder = b!.orderIndex;
+
+      if (aOrder != null && bOrder != null && aOrder != bOrder) {
+        return aOrder.compareTo(bOrder);
+      }
+      if (aOrder != null && bOrder == null) return -1;
+      if (aOrder == null && bOrder != null) return 1;
+
+      return b!.pinnedAt.compareTo(a.pinnedAt);
+    }
+
+    final List<ChatEntity> pinnedChats = chats.where((chat) => pinnedByChatId.containsKey(chat.id)).toList()
+      ..sort((a, b) => comparePinnedMeta(pinnedByChatId[a.id], pinnedByChatId[b.id]));
+    return pinnedChats;
+  }
+
+  Future<void> _handlePinnedChatReorder({
+    required MessengerState currentState,
+    required List<ChatEntity> pinnedChats,
+    required int oldIndex,
+    required int newIndex,
+  }) async {
+    if (_isPinnedReorderInProgress) return;
+    int adjustedNewIndex = newIndex;
+    if (adjustedNewIndex > oldIndex) adjustedNewIndex -= 1;
+    final List<ChatEntity> local = List<ChatEntity>.from(pinnedChats);
+    final ChatEntity moved = local.removeAt(oldIndex);
+    local.insert(adjustedNewIndex, moved);
+
+    setState(() {
+      _isPinnedReorderInProgress = true;
+      _optimisticPinnedChats = local;
+    });
+
+    if (currentState.folders.isEmpty || currentState.selectedFolderIndex >= currentState.folders.length) {
+      if (!mounted) return;
+      setState(() {
+        _isPinnedReorderInProgress = false;
+        _optimisticPinnedChats = null;
+      });
+      return;
+    }
+    final int? folderId = currentState.folders[currentState.selectedFolderIndex].id;
+    if (folderId == null) {
+      if (!mounted) return;
+      setState(() {
+        _isPinnedReorderInProgress = false;
+        _optimisticPinnedChats = null;
+      });
+      return;
+    }
+
+    final int movedChatId = moved.id;
+    final int? previousChatId = adjustedNewIndex > 0 ? local[adjustedNewIndex - 1].id : null;
+    final int? nextChatId = (adjustedNewIndex + 1) < local.length ? local[adjustedNewIndex + 1].id : null;
+
+    try {
+      await context.read<MessengerCubit>().reorderPinnedChats(
+        folderId: folderId,
+        movedChatId: movedChatId,
+        previousChatId: previousChatId,
+        nextChatId: nextChatId,
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isPinnedReorderInProgress = false;
+        _optimisticPinnedChats = null;
+      });
+    }
   }
 }
