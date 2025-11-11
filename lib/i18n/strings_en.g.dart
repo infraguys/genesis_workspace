@@ -141,6 +141,21 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Notifications'
 	String get notifications => 'Notifications';
+
+	/// en: 'Chats'
+	String get chats => 'Chats';
+
+	/// en: 'Calendar'
+	String get calendar => 'Calendar';
+
+	/// en: 'Email'
+	String get email => 'Email';
+
+	/// en: 'Groups'
+	String get groups => 'Groups';
+
+	/// en: 'Calls'
+	String get calls => 'Calls';
 }
 
 // Path: auth
@@ -914,6 +929,11 @@ extension on Translations {
 			case 'emoji.no_recent': return 'No recent emoji';
 			case 'messenger': return 'Messenger';
 			case 'notifications': return 'Notifications';
+			case 'chats': return 'Chats';
+			case 'calendar': return 'Calendar';
+			case 'email': return 'Email';
+			case 'groups': return 'Groups';
+			case 'calls': return 'Calls';
 			default: return null;
 		}
 	}

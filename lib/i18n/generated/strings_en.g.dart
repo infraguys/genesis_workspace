@@ -136,6 +136,21 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Notifications'
 	String get notifications => 'Notifications';
+
+	/// en: 'Chats'
+	String get chats => 'Chats';
+
+	/// en: 'Calendar'
+	String get calendar => 'Calendar';
+
+	/// en: 'Email'
+	String get email => 'Email';
+
+	/// en: 'Groups'
+	String get groups => 'Groups';
+
+	/// en: 'Calls'
+	String get calls => 'Calls';
 }
 
 // Path: auth

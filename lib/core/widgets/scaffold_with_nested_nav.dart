@@ -129,7 +129,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                 ),
                 BlocBuilder<AuthCubit, AuthState>(
                   buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                  builder: (context, state) {
+                  builder: (_, state) {
                     return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
                   },
                 ),

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 
 class UserAvatar extends StatelessWidget {
+  const UserAvatar({super.key, this.avatarUrl, this.size});
+
   final String? avatarUrl;
   final double? size;
-
-  const UserAvatar({super.key, this.avatarUrl, this.size});
 
   @override
   Widget build(BuildContext context) {
