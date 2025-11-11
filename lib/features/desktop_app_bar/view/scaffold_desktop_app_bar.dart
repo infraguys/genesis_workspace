@@ -190,13 +190,13 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                             ),
                           ),
                         ),
-                        Row(
-                          spacing: 12.0,
-                          children: [
-                            UserAvatar(),
-                            BlocBuilder<ProfileCubit, ProfileState>(
-                              builder: (context, state) {
-                                return Column(
+                        BlocBuilder<ProfileCubit, ProfileState>(
+                          builder: (context, state) {
+                            return Row(
+                              spacing: 12.0,
+                              children: [
+                                UserAvatar(avatarUrl: state.user?.avatarUrl ?? ''),
+                                Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -212,11 +212,12 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                       ),
                                     ),
                                   ],
-                                );
-                              },
-                            ),
-                            IconButton(onPressed: () {}, icon: Assets.icons.arrowDown.svg()),
-                          ],
+                                ),
+
+                                IconButton(onPressed: () {}, icon: Assets.icons.arrowDown.svg()),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -239,7 +240,6 @@ final branchModels = [
   (icon: Assets.icons.group.svg(), title: (BuildContext context) => context.t.groups),
   (icon: Assets.icons.call.svg(), title: (BuildContext context) => context.t.calls),
 ];
-
 
 //TODO(Koretsky): В будущем попробовать перевести все на CustomMultiChildLayout
 // final class AppbarMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
