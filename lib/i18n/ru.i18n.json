@@ -212,5 +212,10 @@
     "no_recent": "Нет недавних эмоджи"
   },
   "messenger": "Мессенджер",
-  "notifications": "Уведомления"
+  "notifications": "Уведомления",
+  "chats": "Чаты",
+  "calendar": "Календарь",
+  "email": "Почта",
+  "groups": "Группы",
+  "calls": "Звонки"
 }

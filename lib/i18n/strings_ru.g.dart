@@ -83,6 +83,11 @@ class TranslationsRu implements Translations {
 	@override late final _TranslationsEmojiRu emoji = _TranslationsEmojiRu._(_root);
 	@override String get messenger => 'Мессенджер';
 	@override String get notifications => 'Уведомления';
+	@override String get chats => 'Чаты';
+	@override String get calendar => 'Календарь';
+	@override String get email => 'Почта';
+	@override String get groups => 'Группы';
+	@override String get calls => 'Звонки';
 }
 
 // Path: auth
@@ -619,6 +624,11 @@ extension on TranslationsRu {
 			case 'emoji.no_recent': return 'Нет недавних эмоджи';
 			case 'messenger': return 'Мессенджер';
 			case 'notifications': return 'Уведомления';
+			case 'chats': return 'Чаты';
+			case 'calendar': return 'Календарь';
+			case 'email': return 'Почта';
+			case 'groups': return 'Группы';
+			case 'calls': return 'Звонки';
 			default: return null;
 		}
 	}
