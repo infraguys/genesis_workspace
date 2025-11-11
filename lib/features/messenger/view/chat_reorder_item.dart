@@ -9,7 +9,6 @@ class ChatReorderItem extends StatelessWidget {
   final ChatEntity chat;
   final int index;
   const ChatReorderItem({super.key, required this.chat, required this.index});
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -67,7 +66,7 @@ class ChatReorderItem extends StatelessWidget {
                           Icons.drag_handle_rounded,
                           color: Theme.of(
                             context,
-                          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                         ),
                       ),
                     ),
