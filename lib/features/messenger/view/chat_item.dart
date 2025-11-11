@@ -179,21 +179,24 @@ class _ChatItemState extends State<ChatItem> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.end,
-                            spacing: 12,
+                            // spacing: 10,
                             children: [
                               Row(
                                 children: [
-                                  if (widget.chat.isPinned) Assets.icons.pinned.svg(),
+                                  if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
                                   widget.chat.type == ChatType.channel
                                       ? AnimatedRotation(
                                           duration: const Duration(milliseconds: 200),
                                           turns: _isExpanded ? 0.5 : 0.0,
                                           child: Assets.icons.arrowDown.svg(),
                                         )
-                                      : Text(
-                                          DateFormat('HH:mm').format(widget.chat.lastMessageDate),
-                                          style: theme.textTheme.bodySmall?.copyWith(
-                                            color: textColors.text50,
+                                      : SizedBox(
+                                          height: 20,
+                                          child: Text(
+                                            DateFormat('HH:mm').format(widget.chat.lastMessageDate),
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: textColors.text50,
+                                            ),
                                           ),
                                         ),
                                 ],

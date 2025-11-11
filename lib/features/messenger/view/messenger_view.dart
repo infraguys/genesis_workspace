@@ -104,7 +104,7 @@ class _MessengerViewState extends State<MessengerView> {
             }
             return BlocBuilder<MessengerCubit, MessengerState>(
               builder: (context, state) {
-                final List<ChatEntity> visibleChats = (state.filteredChatIds?.isEmpty ?? true)
+                final List<ChatEntity> visibleChats = state.filteredChatIds == null
                     ? state.chats
                     : state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
                 return Row(
