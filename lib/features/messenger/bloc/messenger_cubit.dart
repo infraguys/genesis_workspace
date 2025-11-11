@@ -143,9 +143,11 @@ class MessengerCubit extends Cubit<MessengerState> {
     );
     final updatedChats = [...state.chats];
     response.forEach((pinnedChat) {
-      if (state.chats.any((chat) => chat.id == pinnedChat.chatId)) {
-        final chat = state.chats.firstWhere((chat) => chat.id == pinnedChat.chatId);
-        final indexOfChat = state.chats.indexOf(chat);
+      if (updatedChats.any(
+        (chat) => chat.id == pinnedChat.chatId && state.folders[state.selectedFolderIndex].id == pinnedChat.folderId,
+      )) {
+        final chat = updatedChats.firstWhere((chat) => chat.id == pinnedChat.chatId);
+        final indexOfChat = updatedChats.indexOf(chat);
         final updatedChat = chat.copyWith(isPinned: true);
         updatedChats[indexOfChat] = updatedChat;
       }
@@ -206,6 +208,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (state.selectedFolderIndex == newIndex) return;
     emit(state.copyWith(selectedFolderIndex: newIndex));
     await _applyFilterForSelectedFolder();
+    await getPinnedChats();
+    _sortChats(state.chats);
   }
 
   Future<void> _applyFilterForSelectedFolder() async {
@@ -237,7 +241,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       emit(state.copyWith(folderMembersById: updatedMap));
     }
 
-    emit(state.copyWith(filteredChatIds: members!.chatIds.toSet()));
+    emit(state.copyWith(filteredChatIds: members.chatIds.toSet()));
   }
 
   Future<void> setFoldersForChat(List<int> foldersIds, int chatId) async {
