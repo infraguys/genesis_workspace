@@ -79,6 +79,11 @@ class TranslationsRu extends Translations {
 	@override late final TranslationsEmojiRu emoji = TranslationsEmojiRu._(_root);
 	@override String get messenger => 'Мессенджер';
 	@override String get notifications => 'Уведомления';
+	@override String get chats => 'Чаты';
+	@override String get calendar => 'Календарь';
+	@override String get email => 'Почта';
+	@override String get groups => 'Группы';
+	@override String get calls => 'Звонки';
 }
 
 // Path: auth

@@ -206,5 +206,10 @@
     "no_recent": "No recent emoji"
   },
   "messenger": "Messenger",
-  "notifications": "Notifications"
+  "notifications": "Notifications",
+  "chats": "Chats",
+  "calendar": "Calendar",
+  "email": "Email",
+  "groups": "Groups",
+  "calls": "Calls"
 }

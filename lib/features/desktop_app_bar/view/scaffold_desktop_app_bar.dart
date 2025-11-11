@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 class ScaffoldDesktopAppBar extends StatefulWidget {
   final Function(int index) onSelectBranch;
   final int selectedIndex;
+
   const ScaffoldDesktopAppBar({
     super.key,
     required this.onSelectBranch,
@@ -26,7 +27,18 @@ class ScaffoldDesktopAppBar extends StatefulWidget {
 }
 
 class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
-  final mainTitleNotifier = ValueNotifier<String>('Messenger');
+  final mainTitleNotifier = ValueNotifier<String>('');
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    mainTitleNotifier.value = context.t.messenger;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +54,10 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
           child: Center(
             child: ValueListenableBuilder(
               valueListenable: mainTitleNotifier,
-              builder: (context, value, _) {
-                return Text(
-                  value,
-                  style: theme.textTheme.bodyMedium,
-                );
-              },
+              builder: (_, value, _) => Text(
+                value,
+                style: theme.textTheme.bodyMedium,
+              ),
             ),
           ),
         ),
@@ -59,14 +69,13 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
               height: 64.0,
               child: Row(
                 spacing: 16,
-                // delegate: AppbarMultiChildLayoutDelegate(),
                 children: [
                   Expanded(
                     child: Row(
                       spacing: 16.0,
                       children: [
                         BlocBuilder<OrganizationsCubit, OrganizationsState>(
-                          builder: (context, state) {
+                          builder: (_, state) {
                             final organizations = state.organizations;
                             final selectedId = state.selectedOrganizationId;
                             return SizedBox(
@@ -77,7 +86,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
                                 separatorBuilder: (_, _) => SizedBox(width: 16),
-                                itemBuilder: (BuildContext context, int index) {
+                                itemBuilder: (context, index) {
                                   final organization = organizations[index];
                                   return OrganizationItem(
                                     unreadCount: organization.unreadCount,
@@ -123,25 +132,13 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                 },
                                 borderRadius: BorderRadius.circular(8),
                                 mouseCursor: SystemMouseCursors.click,
-                                overlayColor: WidgetStateProperty.resolveWith<Color?>((
-                                  states,
-                                ) {
-                                  final Color primary = Theme.of(
-                                    context,
-                                  ).colorScheme.primary;
-                                  if (states.contains(
-                                    WidgetState.pressed,
-                                  )) {
-                                    return primary.withValues(
-                                      alpha: 0.16,
-                                    );
+                                overlayColor: WidgetStateProperty.resolveWith((states) {
+                                  final Color primary = Theme.of(context).colorScheme.primary;
+                                  if (states.contains(WidgetState.pressed)) {
+                                    return primary.withValues(alpha: 0.16);
                                   }
-                                  if (states.contains(
-                                    WidgetState.hovered,
-                                  )) {
-                                    return primary.withValues(
-                                      alpha: 0.08,
-                                    );
+                                  if (states.contains(WidgetState.hovered)) {
+                                    return primary.withValues(alpha: 0.08);
                                   }
                                   return null;
                                 }),
@@ -162,11 +159,12 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                       shrinkWrap: true,
                       separatorBuilder: (_, _) => SizedBox(width: 2),
                       itemBuilder: (BuildContext context, int index) {
+                        final model = branchModels[index];
                         return BranchItem(
-                          icon: branchModels[index].icon,
+                          icon: model.icon,
                           isSelected: index == widget.selectedIndex,
                           onPressed: () {
-                            mainTitleNotifier.value = branchModels[index].title;
+                            mainTitleNotifier.value = model.title(context);
                             widget.onSelectBranch(index);
                           },
                         );
@@ -196,22 +194,26 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                           spacing: 12.0,
                           children: [
                             UserAvatar(),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Исакова Дарья',
-                                  style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
-                                ),
-                                Text(
-                                  'Администратор',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: textColors.text30,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
+                            BlocBuilder<ProfileCubit, ProfileState>(
+                              builder: (context, state) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      state.user?.fullName ?? '',
+                                      style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
+                                    ),
+                                    Text(
+                                      'Администратор',
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        color: textColors.text30,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                             IconButton(onPressed: () {}, icon: Assets.icons.arrowDown.svg()),
                           ],
@@ -230,49 +232,51 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
 }
 
 final branchModels = [
-  (icon: Assets.icons.notif.svg(), title: 'Notifications'),
-  (icon: Assets.icons.chatBubble.svg(), title: 'Chats'),
-  (icon: Assets.icons.calendarMonth.svg(), title: 'Calendar'),
-  (icon: Assets.icons.mail.svg(), title: 'Mail'),
-  (icon: Assets.icons.group.svg(), title: 'Groups'),
-  (icon: Assets.icons.call.svg(), title: 'Calls'),
+  (icon: Assets.icons.notif.svg(), title: (BuildContext context) => context.t.notifications),
+  (icon: Assets.icons.chatBubble.svg(), title: (BuildContext context) => context.t.chats),
+  (icon: Assets.icons.calendarMonth.svg(), title: (BuildContext context) => context.t.calendar),
+  (icon: Assets.icons.mail.svg(), title: (BuildContext context) => context.t.email),
+  (icon: Assets.icons.group.svg(), title: (BuildContext context) => context.t.groups),
+  (icon: Assets.icons.call.svg(), title: (BuildContext context) => context.t.calls),
 ];
 
-final class AppbarMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
-  static const String leftSection = 'leftSection';
-  static const String centerSection = 'centerSection';
-  static const String searchSection = 'searchSection';
-  static const String rightSection = 'rightSection';
 
-  @override
-  void performLayout(Size size) {
-    final centerX = size.width / 2;
-
-    final leftSize = layoutChild(leftSection, BoxConstraints.loose(size));
-    positionChild(leftSection, Offset(16, size.height - leftSize.height) / 2);
-
-    final centerSectionSize = layoutChild(centerSection, BoxConstraints.loose(size));
-    // final halfCenterSectionWidth = centerSectionSize.width / 2;
-
-    final centerSectionStartX = (size.width - centerSectionSize.width) / 2;
-    final centerSectionEndX = centerSectionStartX + centerSectionSize.width;
-    positionChild(centerSection, Offset(centerSectionStartX, 0));
-
-    final searchSize = layoutChild(searchSection, BoxConstraints.loose(Size(250, 40)));
-
-    double searchStartX = centerSectionEndX + 20;
-    // if (centerSectionEndX + 20 + searchSize.width < size.width) {
-    //   searchStartX = centerSectionEndX + 20;
-    // }
-    positionChild(searchSection, Offset(searchStartX, (size.height - searchSize.height) / 2));
-
-    final rightSize = layoutChild(rightSection, BoxConstraints.loose(size));
-    positionChild(
-      rightSection,
-      Offset(size.width - rightSize.width, (size.height - rightSize.height) / 2),
-    );
-  }
-
-  @override
-  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) => false;
-}
+//TODO(Koretsky): В будущем попробовать перевести все на CustomMultiChildLayout
+// final class AppbarMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
+//   static const String leftSection = 'leftSection';
+//   static const String centerSection = 'centerSection';
+//   static const String searchSection = 'searchSection';
+//   static const String rightSection = 'rightSection';
+//
+//   @override
+//   void performLayout(Size size) {
+//     final centerX = size.width / 2;
+//
+//     final leftSize = layoutChild(leftSection, BoxConstraints.loose(size));
+//     positionChild(leftSection, Offset(16, size.height - leftSize.height) / 2);
+//
+//     final centerSectionSize = layoutChild(centerSection, BoxConstraints.loose(size));
+//     // final halfCenterSectionWidth = centerSectionSize.width / 2;
+//
+//     final centerSectionStartX = (size.width - centerSectionSize.width) / 2;
+//     final centerSectionEndX = centerSectionStartX + centerSectionSize.width;
+//     positionChild(centerSection, Offset(centerSectionStartX, 0));
+//
+//     final searchSize = layoutChild(searchSection, BoxConstraints.loose(Size(250, 40)));
+//
+//     double searchStartX = centerSectionEndX + 20;
+//     // if (centerSectionEndX + 20 + searchSize.width < size.width) {
+//     //   searchStartX = centerSectionEndX + 20;
+//     // }
+//     positionChild(searchSection, Offset(searchStartX, (size.height - searchSize.height) / 2));
+//
+//     final rightSize = layoutChild(rightSection, BoxConstraints.loose(size));
+//     positionChild(
+//       rightSection,
+//       Offset(size.width - rightSize.width, (size.height - rightSize.height) / 2),
+//     );
+//   }
+//
+//   @override
+//   bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) => false;
+// }
