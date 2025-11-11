@@ -78,7 +78,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           chats: [],
           selectedChat: null,
           pinnedChats: [],
-          filteredChatIds: null,
+          filteredChatIds: {},
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -214,17 +214,17 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> _applyFilterForSelectedFolder() async {
     if (state.folders.isEmpty) {
-      emit(state.copyWith(filteredChatIds: null));
+      emit(state.copyWith(filteredChatIds: {}));
       return;
     }
     final int currentIndex = state.selectedFolderIndex;
     if (currentIndex < 0 || currentIndex >= state.folders.length) {
-      emit(state.copyWith(filteredChatIds: null));
+      emit(state.copyWith(filteredChatIds: {}));
       return;
     }
     final folder = state.folders[currentIndex];
     if (folder.id == null || folder.id == 0) {
-      emit(state.copyWith(filteredChatIds: null));
+      emit(state.copyWith(filteredChatIds: {}));
       return;
     }
 
@@ -233,7 +233,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (members == null) {
       final int? organizationId = AppConstants.selectedOrganizationId;
       if (organizationId == null) {
-        emit(state.copyWith(filteredChatIds: null));
+        emit(state.copyWith(filteredChatIds: {}));
         return;
       }
       members = await _getMembersForFolderUseCase.call(folderId, organizationId: organizationId);
@@ -362,7 +362,8 @@ class MessengerCubit extends Cubit<MessengerState> {
       int indexOfChat = updatedChats.indexOf(chat);
       chat = chat.copyWith(topics: topics);
       updatedChats[indexOfChat] = chat;
-      _sortChats(updatedChats);
+      emit(state.copyWith(chats: updatedChats));
+      // _sortChats(updatedChats);
     } catch (e) {
       inspect(e);
     }
@@ -428,7 +429,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         folderMembersById: const {},
         messages: [],
         chats: [],
-        filteredChatIds: null,
+        filteredChatIds: {},
       ),
     );
   }
@@ -459,10 +460,16 @@ class MessengerCubit extends Cubit<MessengerState> {
         lastMessageDate: messageDate,
       );
       if (message.isUnread && !isMyMessage) {
+        //if message is unread and send in topic
         if (updatedChat.topics?.any((topic) => topic.name == message.subject) ?? false) {
           final topic = updatedChat.topics!.firstWhere((topic) => topic.name == message.subject);
           final indexOfTopic = updatedChat.topics!.indexOf(topic);
           updatedChat.topics![indexOfTopic].unreadMessages.add(message.id);
+          final updatedTopic = updatedChat.topics![indexOfTopic].copyWith(
+            lastMessageSenderName: messageSenderName,
+            lastMessagePreview: messagePreview,
+          );
+          updatedChat.topics![indexOfTopic] = updatedTopic;
         }
         updatedChat = updatedChat.copyWith(
           unreadMessages: {...updatedChat.unreadMessages, message.id},
@@ -559,7 +566,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (bHasUnread && !aHasUnread) return 1;
       return b.lastMessageDate.compareTo(a.lastMessageDate);
     });
-
     final result = [...pinnedChats, ...regularChats];
     emit(state.copyWith(chats: result));
   }

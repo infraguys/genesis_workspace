@@ -11,7 +11,7 @@ class MessengerState {
   final ChatEntity? selectedChat;
   String? selectedTopic;
   final List<PinnedChatEntity> pinnedChats;
-  final Set<int>? filteredChatIds;
+  final Set<int> filteredChatIds;
 
   MessengerState({
     this.selfUser,
@@ -24,7 +24,7 @@ class MessengerState {
     this.selectedChat,
     this.selectedTopic,
     required this.pinnedChats,
-    this.filteredChatIds,
+    required this.filteredChatIds,
   });
 
   MessengerState copyWith({
@@ -38,7 +38,7 @@ class MessengerState {
     ChatEntity? selectedChat,
     String? selectedTopic,
     List<PinnedChatEntity>? pinnedChats,
-    Object? filteredChatIds = _noChange,
+    Set<int>? filteredChatIds,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -51,11 +51,7 @@ class MessengerState {
       selectedChat: selectedChat ?? this.selectedChat,
       selectedTopic: selectedTopic ?? this.selectedTopic,
       pinnedChats: pinnedChats ?? this.pinnedChats,
-      filteredChatIds: identical(filteredChatIds, _noChange)
-          ? this.filteredChatIds
-          : filteredChatIds as Set<int>?,
+      filteredChatIds: filteredChatIds ?? this.filteredChatIds,
     );
   }
-
-  static const Object _noChange = Object();
 }
