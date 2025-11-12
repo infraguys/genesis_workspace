@@ -82,7 +82,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       context.read<UpdateCubit>().checkUpdateNeed(),
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
-      // context.read<MessagesCubit>().getLastMessages(),
     ]);
     super.initState();
   }
