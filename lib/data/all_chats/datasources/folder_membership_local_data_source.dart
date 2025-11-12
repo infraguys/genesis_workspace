@@ -7,32 +7,24 @@ class FolderMembershipLocalDataSource {
   final FolderItemDao _dao;
   FolderMembershipLocalDataSource(this._dao);
 
-  Future<void> setItemFolders({
-    required String itemType,
-    required int targetId,
+  Future<void> setChatFolders({
+    required int chatId,
     required List<int> folderIds,
-    String? topicName,
     required int organizationId,
   }) async {
-    await _dao.setItemFolders(
-      itemType: itemType,
-      targetId: targetId,
+    await _dao.setChatFolders(
+      chatId: chatId,
       folderIds: folderIds,
-      topicName: topicName,
       organizationId: organizationId,
     );
   }
 
-  Future<List<int>> getFolderIdsForItem({
-    required String itemType,
-    required int targetId,
-    String? topicName,
+  Future<List<int>> getFolderIdsForChat({
+    required int chatId,
     required int organizationId,
   }) =>
-      _dao.getFolderIdsForItem(
-        itemType: itemType,
-        targetId: targetId,
-        topicName: topicName,
+      _dao.getFolderIdsForChat(
+        chatId: chatId,
         organizationId: organizationId,
       );
 

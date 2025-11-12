@@ -31,13 +31,13 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
     required int organizationId,
   }) {
     return (select(
-      pinnedChats,
-    )..where(
-            (t) =>
-                t.folderId.equals(folderId) &
-                t.chatId.equals(chatId) &
-                t.organizationId.equals(organizationId),
-          ))
+          pinnedChats,
+        )..where(
+          (t) =>
+              t.folderId.equals(folderId) &
+              t.chatId.equals(chatId) &
+              t.organizationId.equals(organizationId),
+        ))
         .getSingleOrNull();
   }
 
@@ -47,7 +47,7 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
   Future<int> pinToEnd({
     required int folderId,
     required int chatId,
-    required PinnedChatType type,
+    // required PinnedChatType type,
     required int organizationId,
   }) async {
     return transaction(() async {
@@ -77,7 +77,7 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
           folderId: folderId,
           chatId: chatId,
           orderIndex: Value(newIndex),
-          type: type,
+          // type: type,
           organizationId: organizationId,
         ),
         mode: InsertMode.insert,
@@ -88,13 +88,13 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
   Future<void> pinChat({
     required int folderId,
     required int chatId,
-    required PinnedChatType type,
+    // required PinnedChatType type,
     required int organizationId,
   }) {
     return pinToEnd(
       folderId: folderId,
       chatId: chatId,
-      type: type,
+      // type: type,
       organizationId: organizationId,
     );
   }
@@ -109,13 +109,13 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
     required int organizationId,
   }) {
     return (delete(
-      pinnedChats,
-    )..where(
-            (t) =>
-                t.folderId.equals(folderId) &
-                t.chatId.equals(chatId) &
-                t.organizationId.equals(organizationId),
-          ))
+          pinnedChats,
+        )..where(
+          (t) =>
+              t.folderId.equals(folderId) &
+              t.chatId.equals(chatId) &
+              t.organizationId.equals(organizationId),
+        ))
         .go();
   }
 
@@ -131,15 +131,16 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
   }) async {
     await transaction(() async {
       Future<int?> indexOf(int chatId) async {
-        final row = await (select(
-          pinnedChats,
-        )..where(
-                (t) =>
-                    t.folderId.equals(folderId) &
-                    t.chatId.equals(chatId) &
-                    t.organizationId.equals(organizationId),
-              ))
-            .getSingleOrNull();
+        final row =
+            await (select(
+                  pinnedChats,
+                )..where(
+                  (t) =>
+                      t.folderId.equals(folderId) &
+                      t.chatId.equals(chatId) &
+                      t.organizationId.equals(organizationId),
+                ))
+                .getSingleOrNull();
         return row?.orderIndex;
       }
 
@@ -180,13 +181,12 @@ class PinnedChatsDao extends DatabaseAccessor<AppDatabase> with _$PinnedChatsDao
         }
       }
 
-      await (update(pinnedChats)
-            ..where(
-              (t) =>
-                  t.folderId.equals(folderId) &
-                  t.chatId.equals(movedChatId) &
-                  t.organizationId.equals(organizationId),
-            ))
+      await (update(pinnedChats)..where(
+            (t) =>
+                t.folderId.equals(folderId) &
+                t.chatId.equals(movedChatId) &
+                t.organizationId.equals(organizationId),
+          ))
           .write(PinnedChatsCompanion(orderIndex: Value(newIndex!)));
     });
   }

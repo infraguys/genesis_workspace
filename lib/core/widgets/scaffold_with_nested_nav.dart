@@ -28,8 +28,7 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
   State<ScaffoldWithNestedNavigation> createState() => _ScaffoldWithNestedNavigationState();
 }
 
-class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation>
-    with WidgetsBindingObserver {
+class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> with WidgetsBindingObserver {
   late final Future _future;
   late final AppShellController appShellController;
 

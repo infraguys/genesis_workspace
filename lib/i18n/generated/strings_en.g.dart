@@ -151,6 +151,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Calls'
 	String get calls => 'Calls';
+
+	late final TranslationsMessengerViewEn messengerView = TranslationsMessengerViewEn.internal(_root);
 }
 
 // Path: auth
@@ -706,6 +708,18 @@ class TranslationsEmojiEn {
 
 	/// en: 'No recent emoji'
 	String get noRecent => 'No recent emoji';
+}
+
+// Path: messengerView
+class TranslationsMessengerViewEn {
+	TranslationsMessengerViewEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Chats and channels'
+	String get chatsAndChannels => 'Chats and channels';
 }
 
 // Path: organizations.addDialog

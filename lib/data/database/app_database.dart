@@ -24,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,8 +56,8 @@ class AppDatabase extends _$AppDatabase {
         await migrator.alterTable(
           TableMigration(
             pinnedChats,
-            newColumns: [pinnedChats.type],
-            columnTransformer: {pinnedChats.type: const Constant('dm')},
+            // newColumns: [pinnedChats.type],
+            // columnTransformer: {pinnedChats.type: const Constant('dm')},
           ),
         );
       }
@@ -113,8 +113,8 @@ class AppDatabase extends _$AppDatabase {
           if (defaultOrganizationId != null) {
             await customStatement(
               'INSERT INTO folder_items '
-              '(id, folder_id, organization_id, item_type, target_id, topic_name) '
-              'SELECT id, folder_id, $defaultOrganizationId, item_type, target_id, topic_name '
+              '(id, folder_id, organization_id, chat_id) '
+              'SELECT id, folder_id, $defaultOrganizationId, target_id '
               'FROM folder_items_old;',
             );
           }
@@ -125,12 +125,38 @@ class AppDatabase extends _$AppDatabase {
           if (defaultOrganizationId != null) {
             await customStatement(
               'INSERT INTO pinned_chats '
-              '(id, folder_id, order_index, chat_id, pinned_at, type, organization_id) '
-              'SELECT id, folder_id, order_index, chat_id, pinned_at, type, $defaultOrganizationId '
+              '(id, folder_id, order_index, chat_id, pinned_at, organization_id) '
+              'SELECT id, folder_id, order_index, chat_id, pinned_at, $defaultOrganizationId '
               'FROM pinned_chats_old;',
             );
           }
           await customStatement('DROP TABLE pinned_chats_old;');
+        });
+      }
+      if (from < 13) {
+        await transaction(() async {
+          await customStatement('ALTER TABLE pinned_chats RENAME TO pinned_chats_old;');
+          await migrator.createTable(pinnedChats);
+          await customStatement(
+            'INSERT INTO pinned_chats '
+            '(id, folder_id, order_index, chat_id, pinned_at, organization_id) '
+            'SELECT id, folder_id, order_index, chat_id, pinned_at, organization_id '
+            'FROM pinned_chats_old;',
+          );
+          await customStatement('DROP TABLE pinned_chats_old;');
+        });
+      }
+      if (from < 14) {
+        await transaction(() async {
+          await customStatement('ALTER TABLE folder_items RENAME TO folder_items_old;');
+          await migrator.createTable(folderItems);
+          await customStatement(
+            'INSERT INTO folder_items '
+            '(id, folder_id, organization_id, chat_id) '
+            'SELECT id, folder_id, organization_id, target_id '
+            'FROM folder_items_old;',
+          );
+          await customStatement('DROP TABLE folder_items_old;');
         });
       }
     },

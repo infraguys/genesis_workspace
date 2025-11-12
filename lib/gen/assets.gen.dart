@@ -69,6 +69,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/notif.svg
   SvgGenImage get notif => const SvgGenImage('assets/icons/notif.svg');
 
+  /// File path: assets/icons/pinned.svg
+  SvgGenImage get pinned => const SvgGenImage('assets/icons/pinned.svg');
+
   /// File path: assets/icons/search.svg
   SvgGenImage get search => const SvgGenImage('assets/icons/search.svg');
 
@@ -94,6 +97,7 @@ class $AssetsIconsGen {
     mail,
     moreVert,
     notif,
+    pinned,
     search,
     send,
     videocam,

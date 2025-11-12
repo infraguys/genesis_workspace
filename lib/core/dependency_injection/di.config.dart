@@ -64,8 +64,8 @@ import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.
     as _i125;
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart'
     as _i849;
-import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_target_use_case.dart'
-    as _i714;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_chat_use_case.dart'
+    as _i247;
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart'
     as _i815;
 import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart'
@@ -76,8 +76,8 @@ import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.da
     as _i1012;
 import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart'
     as _i744;
-import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_target_use_case.dart'
-    as _i395;
+import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart'
+    as _i1004;
 import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart'
     as _i631;
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart'
@@ -280,17 +280,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
     );
-    gh.lazySingleton<_i733.RealTimeRepositoryFactory>(
-      () => realTimeModule.realTimeRepositoryFactory(),
-    );
-    gh.lazySingleton<_i215.PerOrganizationDioFactory>(
-      () => realTimeModule.perOrganizationDioFactory(),
-    );
     gh.lazySingleton<_i113.PasteCaptureService>(
       () => _i113.PasteCaptureService(),
     );
     gh.lazySingleton<_i435.LocalizationService>(
       () => _i435.LocalizationService(),
+    );
+    gh.lazySingleton<_i733.RealTimeRepositoryFactory>(
+      () => realTimeModule.realTimeRepositoryFactory(),
+    );
+    gh.lazySingleton<_i215.PerOrganizationDioFactory>(
+      () => realTimeModule.perOrganizationDioFactory(),
     );
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
@@ -530,18 +530,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
-    gh.factory<_i395.SetFoldersForTargetUseCase>(
-      () => _i395.SetFoldersForTargetUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
     gh.factory<_i438.GetMembersForFolderUseCase>(
       () => _i438.GetMembersForFolderUseCase(
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
-    gh.factory<_i714.GetFolderIdsForTargetUseCase>(
-      () => _i714.GetFolderIdsForTargetUseCase(
+    gh.factory<_i247.GetFolderIdsForChatUseCase>(
+      () => _i247.GetFolderIdsForChatUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i1004.SetFoldersForChatUseCase>(
+      () => _i1004.SetFoldersForChatUseCase(
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
@@ -723,6 +723,25 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i194.GetUsersUseCase>(),
       ),
     );
+    gh.factory<_i49.MessengerCubit>(
+      () => _i49.MessengerCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+        gh<_i7.UpdateFolderUseCase>(),
+        gh<_i849.DeleteFolderUseCase>(),
+        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
+        gh<_i438.GetMembersForFolderUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
+        gh<_i1004.SetFoldersForChatUseCase>(),
+        gh<_i247.GetFolderIdsForChatUseCase>(),
+        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+      ),
+    );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
         gh<_i82.RealTimeService>(),
@@ -738,27 +757,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i815.GetFoldersUseCase>(),
         gh<_i7.UpdateFolderUseCase>(),
         gh<_i849.DeleteFolderUseCase>(),
-        gh<_i395.SetFoldersForTargetUseCase>(),
-        gh<_i714.GetFolderIdsForTargetUseCase>(),
+        gh<_i1004.SetFoldersForChatUseCase>(),
+        gh<_i247.GetFolderIdsForChatUseCase>(),
         gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
         gh<_i438.GetMembersForFolderUseCase>(),
         gh<_i126.GetPinnedChatsUseCase>(),
         gh<_i1012.PinChatUseCase>(),
         gh<_i631.UnpinChatUseCase>(),
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
-      ),
-    );
-    gh.factory<_i49.MessengerCubit>(
-      () => _i49.MessengerCubit(
-        gh<_i125.AddFolderUseCase>(),
-        gh<_i815.GetFoldersUseCase>(),
-        gh<_i7.UpdateFolderUseCase>(),
-        gh<_i849.DeleteFolderUseCase>(),
-        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
-        gh<_i438.GetMembersForFolderUseCase>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i699.GetTopicsUseCase>(),
-        gh<_i823.MultiPollingService>(),
       ),
     );
     return this;

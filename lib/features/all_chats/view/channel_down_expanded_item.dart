@@ -7,7 +7,6 @@ import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart'
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
-import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -255,19 +254,19 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                     Navigator.of(context).pop();
                     await context.read<AllChatsCubit>().loadFolders();
                     if (context.mounted) {
-                      await showDialog(
-                        context: context,
-                        builder: (_) => SelectFoldersDialog(
-                          loadSelectedFolderIds: () => context
-                              .read<AllChatsCubit>()
-                              .getFolderIdsForChannel(widget.channel.streamId),
-                          onSave: (ids) => context.read<AllChatsCubit>().setFoldersForChannel(
-                            widget.channel.streamId,
-                            ids,
-                          ),
-                          folders: context.read<AllChatsCubit>().state.folders,
-                        ),
-                      );
+                      // await showDialog(
+                      //   context: context,
+                      //   builder: (_) => SelectFoldersDialog(
+                      //     loadSelectedFolderIds: () => context
+                      //         .read<AllChatsCubit>()
+                      //         .getFolderIdsForChannel(widget.channel.streamId),
+                      //     onSave: (ids) => context.read<AllChatsCubit>().setFoldersForChannel(
+                      //       widget.channel.streamId,
+                      //       ids,
+                      //     ),
+                      //     folders: context.read<AllChatsCubit>().state.folders,
+                      //   ),
+                      // );
                     }
                   },
                 ),

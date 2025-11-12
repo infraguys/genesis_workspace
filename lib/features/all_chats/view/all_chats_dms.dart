@@ -11,7 +11,6 @@ import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
-import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/dm_search_field.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
@@ -84,7 +83,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
         : usersList.where((user) => widget.filteredDms!.contains(user.userId)).toList();
 
     final List<PinnedChatEntity> pinnedChats = widget.selectedFolder.pinnedChats
-        .where((chat) => chat.type == PinnedChatType.dm)
+        // .where((chat) => chat.type == PinnedChatType.dm)
         .toList();
     final Map<int, PinnedChatEntity> pinnedByChatId = {
       for (final pinned in pinnedChats) pinned.chatId: pinned,
@@ -375,24 +374,24 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                               onTap: () async {
                                                 context.pop();
                                                 await context.read<AllChatsCubit>().loadFolders();
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (_) => SelectFoldersDialog(
-                                                    loadSelectedFolderIds: () => context
-                                                        .read<AllChatsCubit>()
-                                                        .getFolderIdsForDm(user.userId),
-                                                    onSave: (selectedFolderIds) => context
-                                                        .read<AllChatsCubit>()
-                                                        .setFoldersForDm(
-                                                          user.userId,
-                                                          selectedFolderIds,
-                                                        ),
-                                                    folders: context
-                                                        .read<AllChatsCubit>()
-                                                        .state
-                                                        .folders,
-                                                  ),
-                                                );
+                                                // await showDialog(
+                                                //   context: context,
+                                                //   builder: (_) => SelectFoldersDialog(
+                                                //     loadSelectedFolderIds: () => context
+                                                //         .read<AllChatsCubit>()
+                                                //         .getFolderIdsForDm(user.userId),
+                                                //     onSave: (selectedFolderIds) => context
+                                                //         .read<AllChatsCubit>()
+                                                //         .setFoldersForDm(
+                                                //           user.userId,
+                                                //           selectedFolderIds,
+                                                //         ),
+                                                //     folders: context
+                                                //         .read<AllChatsCubit>()
+                                                //         .state
+                                                //         .folders,
+                                                //   ),
+                                                // );
                                               },
                                             ),
                                           ],

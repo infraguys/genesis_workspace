@@ -211,5 +211,8 @@
   "calendar": "Calendar",
   "email": "Email",
   "groups": "Groups",
-  "calls": "Calls"
+  "calls": "Calls",
+  "messenger_view": {
+    "chats_and_channels": "Chats and channels"
+  }
 }

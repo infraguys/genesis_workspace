@@ -1014,48 +1014,17 @@ class $FolderItemsTable extends FolderItems
       'REFERENCES organizations (id) ON DELETE CASCADE',
     ),
   );
-  static const VerificationMeta _itemTypeMeta = const VerificationMeta(
-    'itemType',
-  );
+  static const VerificationMeta _chatIdMeta = const VerificationMeta('chatId');
   @override
-  late final GeneratedColumn<String> itemType = GeneratedColumn<String>(
-    'item_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _targetIdMeta = const VerificationMeta(
-    'targetId',
-  );
-  @override
-  late final GeneratedColumn<int> targetId = GeneratedColumn<int>(
-    'target_id',
+  late final GeneratedColumn<int> chatId = GeneratedColumn<int>(
+    'chat_id',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _topicNameMeta = const VerificationMeta(
-    'topicName',
-  );
   @override
-  late final GeneratedColumn<String> topicName = GeneratedColumn<String>(
-    'topic_name',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    folderId,
-    organizationId,
-    itemType,
-    targetId,
-    topicName,
-  ];
+  List<GeneratedColumn> get $columns => [id, folderId, organizationId, chatId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1090,27 +1059,13 @@ class $FolderItemsTable extends FolderItems
     } else if (isInserting) {
       context.missing(_organizationIdMeta);
     }
-    if (data.containsKey('item_type')) {
+    if (data.containsKey('chat_id')) {
       context.handle(
-        _itemTypeMeta,
-        itemType.isAcceptableOrUnknown(data['item_type']!, _itemTypeMeta),
+        _chatIdMeta,
+        chatId.isAcceptableOrUnknown(data['chat_id']!, _chatIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_itemTypeMeta);
-    }
-    if (data.containsKey('target_id')) {
-      context.handle(
-        _targetIdMeta,
-        targetId.isAcceptableOrUnknown(data['target_id']!, _targetIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_targetIdMeta);
-    }
-    if (data.containsKey('topic_name')) {
-      context.handle(
-        _topicNameMeta,
-        topicName.isAcceptableOrUnknown(data['topic_name']!, _topicNameMeta),
-      );
+      context.missing(_chatIdMeta);
     }
     return context;
   }
@@ -1133,18 +1088,10 @@ class $FolderItemsTable extends FolderItems
         DriftSqlType.int,
         data['${effectivePrefix}organization_id'],
       )!,
-      itemType: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}item_type'],
-      )!,
-      targetId: attachedDatabase.typeMapping.read(
+      chatId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}target_id'],
+        data['${effectivePrefix}chat_id'],
       )!,
-      topicName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}topic_name'],
-      ),
     );
   }
 
@@ -1158,16 +1105,12 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
   final int id;
   final int folderId;
   final int organizationId;
-  final String itemType;
-  final int targetId;
-  final String? topicName;
+  final int chatId;
   const FolderItem({
     required this.id,
     required this.folderId,
     required this.organizationId,
-    required this.itemType,
-    required this.targetId,
-    this.topicName,
+    required this.chatId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1175,11 +1118,7 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
     map['id'] = Variable<int>(id);
     map['folder_id'] = Variable<int>(folderId);
     map['organization_id'] = Variable<int>(organizationId);
-    map['item_type'] = Variable<String>(itemType);
-    map['target_id'] = Variable<int>(targetId);
-    if (!nullToAbsent || topicName != null) {
-      map['topic_name'] = Variable<String>(topicName);
-    }
+    map['chat_id'] = Variable<int>(chatId);
     return map;
   }
 
@@ -1188,11 +1127,7 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
       id: Value(id),
       folderId: Value(folderId),
       organizationId: Value(organizationId),
-      itemType: Value(itemType),
-      targetId: Value(targetId),
-      topicName: topicName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(topicName),
+      chatId: Value(chatId),
     );
   }
 
@@ -1205,9 +1140,7 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
       id: serializer.fromJson<int>(json['id']),
       folderId: serializer.fromJson<int>(json['folderId']),
       organizationId: serializer.fromJson<int>(json['organizationId']),
-      itemType: serializer.fromJson<String>(json['itemType']),
-      targetId: serializer.fromJson<int>(json['targetId']),
-      topicName: serializer.fromJson<String?>(json['topicName']),
+      chatId: serializer.fromJson<int>(json['chatId']),
     );
   }
   @override
@@ -1217,9 +1150,7 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
       'id': serializer.toJson<int>(id),
       'folderId': serializer.toJson<int>(folderId),
       'organizationId': serializer.toJson<int>(organizationId),
-      'itemType': serializer.toJson<String>(itemType),
-      'targetId': serializer.toJson<int>(targetId),
-      'topicName': serializer.toJson<String?>(topicName),
+      'chatId': serializer.toJson<int>(chatId),
     };
   }
 
@@ -1227,16 +1158,12 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
     int? id,
     int? folderId,
     int? organizationId,
-    String? itemType,
-    int? targetId,
-    Value<String?> topicName = const Value.absent(),
+    int? chatId,
   }) => FolderItem(
     id: id ?? this.id,
     folderId: folderId ?? this.folderId,
     organizationId: organizationId ?? this.organizationId,
-    itemType: itemType ?? this.itemType,
-    targetId: targetId ?? this.targetId,
-    topicName: topicName.present ? topicName.value : this.topicName,
+    chatId: chatId ?? this.chatId,
   );
   FolderItem copyWithCompanion(FolderItemsCompanion data) {
     return FolderItem(
@@ -1245,9 +1172,7 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
       organizationId: data.organizationId.present
           ? data.organizationId.value
           : this.organizationId,
-      itemType: data.itemType.present ? data.itemType.value : this.itemType,
-      targetId: data.targetId.present ? data.targetId.value : this.targetId,
-      topicName: data.topicName.present ? data.topicName.value : this.topicName,
+      chatId: data.chatId.present ? data.chatId.value : this.chatId,
     );
   }
 
@@ -1257,16 +1182,13 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
           ..write('id: $id, ')
           ..write('folderId: $folderId, ')
           ..write('organizationId: $organizationId, ')
-          ..write('itemType: $itemType, ')
-          ..write('targetId: $targetId, ')
-          ..write('topicName: $topicName')
+          ..write('chatId: $chatId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, folderId, organizationId, itemType, targetId, topicName);
+  int get hashCode => Object.hash(id, folderId, organizationId, chatId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1274,52 +1196,39 @@ class FolderItem extends DataClass implements Insertable<FolderItem> {
           other.id == this.id &&
           other.folderId == this.folderId &&
           other.organizationId == this.organizationId &&
-          other.itemType == this.itemType &&
-          other.targetId == this.targetId &&
-          other.topicName == this.topicName);
+          other.chatId == this.chatId);
 }
 
 class FolderItemsCompanion extends UpdateCompanion<FolderItem> {
   final Value<int> id;
   final Value<int> folderId;
   final Value<int> organizationId;
-  final Value<String> itemType;
-  final Value<int> targetId;
-  final Value<String?> topicName;
+  final Value<int> chatId;
   const FolderItemsCompanion({
     this.id = const Value.absent(),
     this.folderId = const Value.absent(),
     this.organizationId = const Value.absent(),
-    this.itemType = const Value.absent(),
-    this.targetId = const Value.absent(),
-    this.topicName = const Value.absent(),
+    this.chatId = const Value.absent(),
   });
   FolderItemsCompanion.insert({
     this.id = const Value.absent(),
     required int folderId,
     required int organizationId,
-    required String itemType,
-    required int targetId,
-    this.topicName = const Value.absent(),
+    required int chatId,
   }) : folderId = Value(folderId),
        organizationId = Value(organizationId),
-       itemType = Value(itemType),
-       targetId = Value(targetId);
+       chatId = Value(chatId);
   static Insertable<FolderItem> custom({
     Expression<int>? id,
     Expression<int>? folderId,
     Expression<int>? organizationId,
-    Expression<String>? itemType,
-    Expression<int>? targetId,
-    Expression<String>? topicName,
+    Expression<int>? chatId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (folderId != null) 'folder_id': folderId,
       if (organizationId != null) 'organization_id': organizationId,
-      if (itemType != null) 'item_type': itemType,
-      if (targetId != null) 'target_id': targetId,
-      if (topicName != null) 'topic_name': topicName,
+      if (chatId != null) 'chat_id': chatId,
     });
   }
 
@@ -1327,17 +1236,13 @@ class FolderItemsCompanion extends UpdateCompanion<FolderItem> {
     Value<int>? id,
     Value<int>? folderId,
     Value<int>? organizationId,
-    Value<String>? itemType,
-    Value<int>? targetId,
-    Value<String?>? topicName,
+    Value<int>? chatId,
   }) {
     return FolderItemsCompanion(
       id: id ?? this.id,
       folderId: folderId ?? this.folderId,
       organizationId: organizationId ?? this.organizationId,
-      itemType: itemType ?? this.itemType,
-      targetId: targetId ?? this.targetId,
-      topicName: topicName ?? this.topicName,
+      chatId: chatId ?? this.chatId,
     );
   }
 
@@ -1353,14 +1258,8 @@ class FolderItemsCompanion extends UpdateCompanion<FolderItem> {
     if (organizationId.present) {
       map['organization_id'] = Variable<int>(organizationId.value);
     }
-    if (itemType.present) {
-      map['item_type'] = Variable<String>(itemType.value);
-    }
-    if (targetId.present) {
-      map['target_id'] = Variable<int>(targetId.value);
-    }
-    if (topicName.present) {
-      map['topic_name'] = Variable<String>(topicName.value);
+    if (chatId.present) {
+      map['chat_id'] = Variable<int>(chatId.value);
     }
     return map;
   }
@@ -1371,9 +1270,7 @@ class FolderItemsCompanion extends UpdateCompanion<FolderItem> {
           ..write('id: $id, ')
           ..write('folderId: $folderId, ')
           ..write('organizationId: $organizationId, ')
-          ..write('itemType: $itemType, ')
-          ..write('targetId: $targetId, ')
-          ..write('topicName: $topicName')
+          ..write('chatId: $chatId')
           ..write(')'))
         .toString();
   }
@@ -1444,15 +1341,6 @@ class $PinnedChatsTable extends PinnedChats
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
-  @override
-  late final GeneratedColumnWithTypeConverter<PinnedChatType, String> type =
-      GeneratedColumn<String>(
-        'type',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<PinnedChatType>($PinnedChatsTable.$convertertype);
   static const VerificationMeta _organizationIdMeta = const VerificationMeta(
     'organizationId',
   );
@@ -1474,7 +1362,6 @@ class $PinnedChatsTable extends PinnedChats
     orderIndex,
     chatId,
     pinnedAt,
-    type,
     organizationId,
   ];
   @override
@@ -1564,12 +1451,6 @@ class $PinnedChatsTable extends PinnedChats
         DriftSqlType.dateTime,
         data['${effectivePrefix}pinned_at'],
       )!,
-      type: $PinnedChatsTable.$convertertype.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}type'],
-        )!,
-      ),
       organizationId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}organization_id'],
@@ -1581,9 +1462,6 @@ class $PinnedChatsTable extends PinnedChats
   $PinnedChatsTable createAlias(String alias) {
     return $PinnedChatsTable(attachedDatabase, alias);
   }
-
-  static JsonTypeConverter2<PinnedChatType, String, String> $convertertype =
-      const EnumNameConverter<PinnedChatType>(PinnedChatType.values);
 }
 
 class PinnedChat extends DataClass implements Insertable<PinnedChat> {
@@ -1592,7 +1470,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
   final int? orderIndex;
   final int chatId;
   final DateTime pinnedAt;
-  final PinnedChatType type;
   final int organizationId;
   const PinnedChat({
     required this.id,
@@ -1600,7 +1477,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
     this.orderIndex,
     required this.chatId,
     required this.pinnedAt,
-    required this.type,
     required this.organizationId,
   });
   @override
@@ -1613,11 +1489,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
     }
     map['chat_id'] = Variable<int>(chatId);
     map['pinned_at'] = Variable<DateTime>(pinnedAt);
-    {
-      map['type'] = Variable<String>(
-        $PinnedChatsTable.$convertertype.toSql(type),
-      );
-    }
     map['organization_id'] = Variable<int>(organizationId);
     return map;
   }
@@ -1631,7 +1502,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           : Value(orderIndex),
       chatId: Value(chatId),
       pinnedAt: Value(pinnedAt),
-      type: Value(type),
       organizationId: Value(organizationId),
     );
   }
@@ -1647,9 +1517,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
       orderIndex: serializer.fromJson<int?>(json['orderIndex']),
       chatId: serializer.fromJson<int>(json['chatId']),
       pinnedAt: serializer.fromJson<DateTime>(json['pinnedAt']),
-      type: $PinnedChatsTable.$convertertype.fromJson(
-        serializer.fromJson<String>(json['type']),
-      ),
       organizationId: serializer.fromJson<int>(json['organizationId']),
     );
   }
@@ -1662,9 +1529,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
       'orderIndex': serializer.toJson<int?>(orderIndex),
       'chatId': serializer.toJson<int>(chatId),
       'pinnedAt': serializer.toJson<DateTime>(pinnedAt),
-      'type': serializer.toJson<String>(
-        $PinnedChatsTable.$convertertype.toJson(type),
-      ),
       'organizationId': serializer.toJson<int>(organizationId),
     };
   }
@@ -1675,7 +1539,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
     Value<int?> orderIndex = const Value.absent(),
     int? chatId,
     DateTime? pinnedAt,
-    PinnedChatType? type,
     int? organizationId,
   }) => PinnedChat(
     id: id ?? this.id,
@@ -1683,7 +1546,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
     orderIndex: orderIndex.present ? orderIndex.value : this.orderIndex,
     chatId: chatId ?? this.chatId,
     pinnedAt: pinnedAt ?? this.pinnedAt,
-    type: type ?? this.type,
     organizationId: organizationId ?? this.organizationId,
   );
   PinnedChat copyWithCompanion(PinnedChatsCompanion data) {
@@ -1695,7 +1557,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           : this.orderIndex,
       chatId: data.chatId.present ? data.chatId.value : this.chatId,
       pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
-      type: data.type.present ? data.type.value : this.type,
       organizationId: data.organizationId.present
           ? data.organizationId.value
           : this.organizationId,
@@ -1710,22 +1571,14 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           ..write('orderIndex: $orderIndex, ')
           ..write('chatId: $chatId, ')
           ..write('pinnedAt: $pinnedAt, ')
-          ..write('type: $type, ')
           ..write('organizationId: $organizationId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    folderId,
-    orderIndex,
-    chatId,
-    pinnedAt,
-    type,
-    organizationId,
-  );
+  int get hashCode =>
+      Object.hash(id, folderId, orderIndex, chatId, pinnedAt, organizationId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1735,7 +1588,6 @@ class PinnedChat extends DataClass implements Insertable<PinnedChat> {
           other.orderIndex == this.orderIndex &&
           other.chatId == this.chatId &&
           other.pinnedAt == this.pinnedAt &&
-          other.type == this.type &&
           other.organizationId == this.organizationId);
 }
 
@@ -1745,7 +1597,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
   final Value<int?> orderIndex;
   final Value<int> chatId;
   final Value<DateTime> pinnedAt;
-  final Value<PinnedChatType> type;
   final Value<int> organizationId;
   const PinnedChatsCompanion({
     this.id = const Value.absent(),
@@ -1753,7 +1604,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     this.orderIndex = const Value.absent(),
     this.chatId = const Value.absent(),
     this.pinnedAt = const Value.absent(),
-    this.type = const Value.absent(),
     this.organizationId = const Value.absent(),
   });
   PinnedChatsCompanion.insert({
@@ -1762,11 +1612,9 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     this.orderIndex = const Value.absent(),
     required int chatId,
     this.pinnedAt = const Value.absent(),
-    required PinnedChatType type,
     required int organizationId,
   }) : folderId = Value(folderId),
        chatId = Value(chatId),
-       type = Value(type),
        organizationId = Value(organizationId);
   static Insertable<PinnedChat> custom({
     Expression<int>? id,
@@ -1774,7 +1622,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     Expression<int>? orderIndex,
     Expression<int>? chatId,
     Expression<DateTime>? pinnedAt,
-    Expression<String>? type,
     Expression<int>? organizationId,
   }) {
     return RawValuesInsertable({
@@ -1783,7 +1630,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
       if (orderIndex != null) 'order_index': orderIndex,
       if (chatId != null) 'chat_id': chatId,
       if (pinnedAt != null) 'pinned_at': pinnedAt,
-      if (type != null) 'type': type,
       if (organizationId != null) 'organization_id': organizationId,
     });
   }
@@ -1794,7 +1640,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     Value<int?>? orderIndex,
     Value<int>? chatId,
     Value<DateTime>? pinnedAt,
-    Value<PinnedChatType>? type,
     Value<int>? organizationId,
   }) {
     return PinnedChatsCompanion(
@@ -1803,7 +1648,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
       orderIndex: orderIndex ?? this.orderIndex,
       chatId: chatId ?? this.chatId,
       pinnedAt: pinnedAt ?? this.pinnedAt,
-      type: type ?? this.type,
       organizationId: organizationId ?? this.organizationId,
     );
   }
@@ -1826,11 +1670,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
     if (pinnedAt.present) {
       map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
     }
-    if (type.present) {
-      map['type'] = Variable<String>(
-        $PinnedChatsTable.$convertertype.toSql(type.value),
-      );
-    }
     if (organizationId.present) {
       map['organization_id'] = Variable<int>(organizationId.value);
     }
@@ -1845,7 +1684,6 @@ class PinnedChatsCompanion extends UpdateCompanion<PinnedChat> {
           ..write('orderIndex: $orderIndex, ')
           ..write('chatId: $chatId, ')
           ..write('pinnedAt: $pinnedAt, ')
-          ..write('type: $type, ')
           ..write('organizationId: $organizationId')
           ..write(')'))
         .toString();
@@ -3087,18 +2925,14 @@ typedef $$FolderItemsTableCreateCompanionBuilder =
       Value<int> id,
       required int folderId,
       required int organizationId,
-      required String itemType,
-      required int targetId,
-      Value<String?> topicName,
+      required int chatId,
     });
 typedef $$FolderItemsTableUpdateCompanionBuilder =
     FolderItemsCompanion Function({
       Value<int> id,
       Value<int> folderId,
       Value<int> organizationId,
-      Value<String> itemType,
-      Value<int> targetId,
-      Value<String?> topicName,
+      Value<int> chatId,
     });
 
 final class $$FolderItemsTableReferences
@@ -3161,18 +2995,8 @@ class $$FolderItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get itemType => $composableBuilder(
-    column: $table.itemType,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get targetId => $composableBuilder(
-    column: $table.targetId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get topicName => $composableBuilder(
-    column: $table.topicName,
+  ColumnFilters<int> get chatId => $composableBuilder(
+    column: $table.chatId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3237,18 +3061,8 @@ class $$FolderItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get itemType => $composableBuilder(
-    column: $table.itemType,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get targetId => $composableBuilder(
-    column: $table.targetId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get topicName => $composableBuilder(
-    column: $table.topicName,
+  ColumnOrderings<int> get chatId => $composableBuilder(
+    column: $table.chatId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3311,14 +3125,8 @@ class $$FolderItemsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get itemType =>
-      $composableBuilder(column: $table.itemType, builder: (column) => column);
-
-  GeneratedColumn<int> get targetId =>
-      $composableBuilder(column: $table.targetId, builder: (column) => column);
-
-  GeneratedColumn<String> get topicName =>
-      $composableBuilder(column: $table.topicName, builder: (column) => column);
+  GeneratedColumn<int> get chatId =>
+      $composableBuilder(column: $table.chatId, builder: (column) => column);
 
   $$FoldersTableAnnotationComposer get folderId {
     final $$FoldersTableAnnotationComposer composer = $composerBuilder(
@@ -3398,32 +3206,24 @@ class $$FolderItemsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> folderId = const Value.absent(),
                 Value<int> organizationId = const Value.absent(),
-                Value<String> itemType = const Value.absent(),
-                Value<int> targetId = const Value.absent(),
-                Value<String?> topicName = const Value.absent(),
+                Value<int> chatId = const Value.absent(),
               }) => FolderItemsCompanion(
                 id: id,
                 folderId: folderId,
                 organizationId: organizationId,
-                itemType: itemType,
-                targetId: targetId,
-                topicName: topicName,
+                chatId: chatId,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int folderId,
                 required int organizationId,
-                required String itemType,
-                required int targetId,
-                Value<String?> topicName = const Value.absent(),
+                required int chatId,
               }) => FolderItemsCompanion.insert(
                 id: id,
                 folderId: folderId,
                 organizationId: organizationId,
-                itemType: itemType,
-                targetId: targetId,
-                topicName: topicName,
+                chatId: chatId,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3512,7 +3312,6 @@ typedef $$PinnedChatsTableCreateCompanionBuilder =
       Value<int?> orderIndex,
       required int chatId,
       Value<DateTime> pinnedAt,
-      required PinnedChatType type,
       required int organizationId,
     });
 typedef $$PinnedChatsTableUpdateCompanionBuilder =
@@ -3522,7 +3321,6 @@ typedef $$PinnedChatsTableUpdateCompanionBuilder =
       Value<int?> orderIndex,
       Value<int> chatId,
       Value<DateTime> pinnedAt,
-      Value<PinnedChatType> type,
       Value<int> organizationId,
     });
 
@@ -3601,12 +3399,6 @@ class $$PinnedChatsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<PinnedChatType, PinnedChatType, String>
-  get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
   $$FoldersTableFilterComposer get folderId {
     final $$FoldersTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -3683,11 +3475,6 @@ class $$PinnedChatsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   $$FoldersTableOrderingComposer get folderId {
     final $$FoldersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3757,9 +3544,6 @@ class $$PinnedChatsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get pinnedAt =>
       $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<PinnedChatType, String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
 
   $$FoldersTableAnnotationComposer get folderId {
     final $$FoldersTableAnnotationComposer composer = $composerBuilder(
@@ -3841,7 +3625,6 @@ class $$PinnedChatsTableTableManager
                 Value<int?> orderIndex = const Value.absent(),
                 Value<int> chatId = const Value.absent(),
                 Value<DateTime> pinnedAt = const Value.absent(),
-                Value<PinnedChatType> type = const Value.absent(),
                 Value<int> organizationId = const Value.absent(),
               }) => PinnedChatsCompanion(
                 id: id,
@@ -3849,7 +3632,6 @@ class $$PinnedChatsTableTableManager
                 orderIndex: orderIndex,
                 chatId: chatId,
                 pinnedAt: pinnedAt,
-                type: type,
                 organizationId: organizationId,
               ),
           createCompanionCallback:
@@ -3859,7 +3641,6 @@ class $$PinnedChatsTableTableManager
                 Value<int?> orderIndex = const Value.absent(),
                 required int chatId,
                 Value<DateTime> pinnedAt = const Value.absent(),
-                required PinnedChatType type,
                 required int organizationId,
               }) => PinnedChatsCompanion.insert(
                 id: id,
@@ -3867,7 +3648,6 @@ class $$PinnedChatsTableTableManager
                 orderIndex: orderIndex,
                 chatId: chatId,
                 pinnedAt: pinnedAt,
-                type: type,
                 organizationId: organizationId,
               ),
           withReferenceMapper: (p0) => p0
