@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -46,8 +47,7 @@ class RealTimeConnection {
        _initialRetryDelay = initialRetryDelay,
        _maxRetryDelay = maxRetryDelay;
 
-  final StreamController<TypingEventEntity> _typingEventsController =
-      StreamController<TypingEventEntity>.broadcast();
+  final StreamController<TypingEventEntity> _typingEventsController = StreamController<TypingEventEntity>.broadcast();
   final StreamController<MessageEventEntity> _messageEventsController =
       StreamController<MessageEventEntity>.broadcast();
   final StreamController<UpdateMessageFlagsEventEntity> _messageFlagsEventsController =
@@ -67,33 +67,46 @@ class RealTimeConnection {
 
   Stream<MessageEventEntity> get messageEventsStream => _messageEventsController.stream;
 
-  Stream<UpdateMessageFlagsEventEntity> get messageFlagsEventsStream =>
-      _messageFlagsEventsController.stream;
+  Stream<UpdateMessageFlagsEventEntity> get messageFlagsEventsStream => _messageFlagsEventsController.stream;
 
   Stream<ReactionEventEntity> get reactionEventsStream => _reactionEventsController.stream;
 
   Stream<PresenceEventEntity> get presenceEventsStream => _presenceEventsController.stream;
 
-  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream =>
-      _deleteMessageEventsController.stream;
+  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream => _deleteMessageEventsController.stream;
 
-  Stream<UpdateMessageEventEntity> get updateMessageEventsStream =>
-      _updateMessageEventsController.stream;
+  Stream<UpdateMessageEventEntity> get updateMessageEventsStream => _updateMessageEventsController.stream;
 
-  Stream<SubscriptionEventEntity> get subscriptionEventsStream =>
-      _subscriptionEventsController.stream;
+  Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
 
   Future<void> start() async {
     if (_isActive) return;
-    _isActive = true;
-    await _ensureRegistered();
-    _pollingTask = _pollLoop();
+    try {
+      await _registerQueue();
+      _isActive = true;
+      _pollingTask = _pollLoop();
+    } catch (e) {
+      inspect(e);
+    }
   }
 
   Future<void> stop() async {
     _isActive = false;
     await _pollingTask;
     await _closeControllers();
+  }
+
+  Future<bool> checkConnection() async {
+    if (_isActive) {
+      final body = EventsByQueueIdRequestBodyEntity(queueId: _queueId!, lastEventId: _lastEventId, dontBlock: true);
+      final response = await _getEventsByQueueIdUseCase.call(body);
+      if (response.result == 'success') {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
   }
 
   Future<void> _closeControllers() async {
@@ -109,12 +122,16 @@ class RealTimeConnection {
     ]);
   }
 
-  Future<void> _ensureRegistered() async {
-    final RegisterQueueEntity registerQueueEntity = await _registerQueueUseCase.call(
-      RegisterQueueRequestBodyEntity(eventTypes: [EventTypes.message, EventTypes.realm_user]),
-    );
-    _queueId = registerQueueEntity.queueId;
-    _lastEventId = registerQueueEntity.lastEventId;
+  Future<void> _registerQueue() async {
+    try {
+      final RegisterQueueEntity registerQueueEntity = await _registerQueueUseCase.call(
+        RegisterQueueRequestBodyEntity(eventTypes: [EventTypes.message, EventTypes.realm_user]),
+      );
+      _queueId = registerQueueEntity.queueId;
+      _lastEventId = registerQueueEntity.lastEventId;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> _pollLoop() async {
@@ -127,10 +144,9 @@ class RealTimeConnection {
         retryDelay = _initialRetryDelay;
       } on DioException catch (error) {
         final bool isBadQueueId =
-            error.response?.statusCode == 400 &&
-            error.response?.data?['code'] == 'BAD_EVENT_QUEUE_ID';
+            error.response?.statusCode == 400 && error.response?.data?['code'] == 'BAD_EVENT_QUEUE_ID';
         if (isBadQueueId) {
-          await _ensureRegistered();
+          await _registerQueue();
           continue;
         }
         await _sleepWithJitter(retryDelay, random);
@@ -143,49 +159,57 @@ class RealTimeConnection {
   }
 
   Future<void> _fetchAndDispatch() async {
-    if (_queueId == null) {
-      await _ensureRegistered();
-    }
-    final String queueIdValue = _queueId!;
-    final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
-      EventsByQueueIdRequestBodyEntity(queueId: queueIdValue, lastEventId: _lastEventId),
-    );
-
-    if (response.events.isEmpty) return;
-
-    for (final EventEntity event in response.events) {
-      event.organizationId = organizationId;
-      switch (event.type) {
-        case EventType.typing:
-          _typingEventsController.add(event as TypingEventEntity);
-          break;
-        case EventType.message:
-          _messageEventsController.add(event as MessageEventEntity);
-          break;
-        case EventType.updateMessageFlags:
-          _messageFlagsEventsController.add(event as UpdateMessageFlagsEventEntity);
-          break;
-        case EventType.reaction:
-          _reactionEventsController.add(event as ReactionEventEntity);
-          break;
-        case EventType.presence:
-          _presenceEventsController.add(event as PresenceEventEntity);
-          break;
-        case EventType.deleteMessage:
-          _deleteMessageEventsController.add(event as DeleteMessageEventEntity);
-          break;
-        case EventType.updateMessage:
-          _updateMessageEventsController.add(event as UpdateMessageEventEntity);
-          break;
-        case EventType.subscription:
-          _subscriptionEventsController.add(event as SubscriptionEventEntity);
-          break;
-        default:
-          break;
+    try {
+      if (_queueId == null) {
+        await _registerQueue();
       }
-    }
+      final String queueIdValue = _queueId!;
+      final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
+        EventsByQueueIdRequestBodyEntity(queueId: queueIdValue, lastEventId: _lastEventId),
+      );
 
-    _lastEventId = response.events.last.id;
+      if (response.queueId != null) {
+        _queueId = response.queueId;
+      }
+
+      if (response.events.isEmpty) return;
+
+      for (final EventEntity event in response.events) {
+        event.organizationId = organizationId;
+        switch (event.type) {
+          case EventType.typing:
+            _typingEventsController.add(event as TypingEventEntity);
+            break;
+          case EventType.message:
+            _messageEventsController.add(event as MessageEventEntity);
+            break;
+          case EventType.updateMessageFlags:
+            _messageFlagsEventsController.add(event as UpdateMessageFlagsEventEntity);
+            break;
+          case EventType.reaction:
+            _reactionEventsController.add(event as ReactionEventEntity);
+            break;
+          case EventType.presence:
+            _presenceEventsController.add(event as PresenceEventEntity);
+            break;
+          case EventType.deleteMessage:
+            _deleteMessageEventsController.add(event as DeleteMessageEventEntity);
+            break;
+          case EventType.updateMessage:
+            _updateMessageEventsController.add(event as UpdateMessageEventEntity);
+            break;
+          case EventType.subscription:
+            _subscriptionEventsController.add(event as SubscriptionEventEntity);
+            break;
+          default:
+            break;
+        }
+      }
+
+      _lastEventId = response.events.last.id;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> _sleepWithJitter(Duration baseDelay, Random random) async {

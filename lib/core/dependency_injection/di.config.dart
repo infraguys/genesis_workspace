@@ -657,9 +657,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i771.GetChannelMembersUseCase>(),
       ),
     );
-    gh.lazySingleton<_i573.RealTimeCubit>(
-      () => _i573.RealTimeCubit(gh<_i823.MultiPollingService>()),
-    );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(
         gh<_i82.RealTimeService>(),
@@ -749,6 +746,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i573.RealTimeCubit>(
+      () => _i573.RealTimeCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i214.OrganizationsCubit>(),
       ),
     );
     gh.factory<_i404.AllChatsCubit>(

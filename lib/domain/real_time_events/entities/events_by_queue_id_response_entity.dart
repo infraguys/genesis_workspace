@@ -4,12 +4,12 @@ class EventsByQueueIdResponseEntity {
   final String result;
   final String msg;
   final List<EventEntity> events;
-  // final String queueId;
+  final String? queueId;
 
   EventsByQueueIdResponseEntity({
     required this.result,
     required this.msg,
     required this.events,
-    // required this.queueId,
+    this.queueId,
   });
 }

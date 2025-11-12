@@ -8,6 +8,7 @@ import 'package:genesis_workspace/features/desktop_app_bar/view/organization_ite
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -209,7 +210,12 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                   ],
                                 ),
 
-                                IconButton(onPressed: () {}, icon: Assets.icons.arrowDown.svg()),
+                                IconButton(
+                                  onPressed: () async {
+                                    await context.read<RealTimeCubit>().ensureConnection();
+                                  },
+                                  icon: Assets.icons.arrowDown.svg(),
+                                ),
                               ],
                             );
                           },

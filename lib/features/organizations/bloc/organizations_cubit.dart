@@ -25,7 +25,12 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     this._removeOrganizationUseCase,
     this._organizationSwitcherService,
     this._multiPollingService,
-  ) : super(const OrganizationsState.initial()) {
+  ) : super(
+        OrganizationsState(
+          organizations: [],
+          selectedOrganizationId: null,
+        ),
+      ) {
     _organizationsSubscription = _watchOrganizationsUseCase().listen(
       _onOrganizationsUpdated,
       onError: (error, _) => inspect(error),
@@ -45,8 +50,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
 
   void _onOrganizationsUpdated(List<OrganizationEntity> organizations) {
-    final int? persistedSelection =
-        state.selectedOrganizationId ?? AppConstants.selectedOrganizationId;
+    final int? persistedSelection = state.selectedOrganizationId ?? AppConstants.selectedOrganizationId;
     int? nextSelection = persistedSelection;
 
     if (nextSelection != null && organizations.every((element) => element.id != nextSelection)) {

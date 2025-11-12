@@ -37,8 +37,7 @@ class MultiPollingService {
 
   final Map<int, RealTimeConnection> _activeConnections = {};
 
-  final StreamController<TypingEventEntity> _typingEventsController =
-      StreamController<TypingEventEntity>.broadcast();
+  final StreamController<TypingEventEntity> _typingEventsController = StreamController<TypingEventEntity>.broadcast();
   final StreamController<MessageEventEntity> _messageEventsController =
       StreamController<MessageEventEntity>.broadcast();
   final StreamController<UpdateMessageFlagsEventEntity> _messageFlagsEventsController =
@@ -56,16 +55,12 @@ class MultiPollingService {
 
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
   Stream<MessageEventEntity> get messageEventsStream => _messageEventsController.stream;
-  Stream<UpdateMessageFlagsEventEntity> get messageFlagsEventsStream =>
-      _messageFlagsEventsController.stream;
+  Stream<UpdateMessageFlagsEventEntity> get messageFlagsEventsStream => _messageFlagsEventsController.stream;
   Stream<ReactionEventEntity> get reactionEventsStream => _reactionEventsController.stream;
   Stream<PresenceEventEntity> get presenceEventsStream => _presenceEventsController.stream;
-  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream =>
-      _deleteMessageEventsController.stream;
-  Stream<UpdateMessageEventEntity> get updateMessageEventsStream =>
-      _updateMessageEventsController.stream;
-  Stream<SubscriptionEventEntity> get subscriptionEventsStream =>
-      _subscriptionEventsController.stream;
+  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream => _deleteMessageEventsController.stream;
+  Stream<UpdateMessageEventEntity> get updateMessageEventsStream => _updateMessageEventsController.stream;
+  Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
 
   Future<void> init() async {
     final List<OrganizationEntity> organizations = await _getAllOrganizationsUseCase.call();
@@ -79,8 +74,7 @@ class MultiPollingService {
 
       final bool isAuthorized =
           (token != null && token.trim().isNotEmpty) ||
-          ((csrfToken != null && csrfToken.isNotEmpty) &&
-              (sessionId != null && sessionId.isNotEmpty));
+          ((csrfToken != null && csrfToken.isNotEmpty) && (sessionId != null && sessionId.isNotEmpty));
 
       if (isAuthorized) {
         authorizedOrganizations.add(organization);
@@ -92,6 +86,17 @@ class MultiPollingService {
     }
   }
 
+  Future<void> ensureConnection(int organizationId) async {
+    final connection = _activeConnections[organizationId];
+    final connectionActive = await connection?.checkConnection() ?? false;
+    if (connectionActive) {
+      return;
+    } else {
+      await closeConnection(organizationId);
+      await addConnection(organizationId, _activeConnections[organizationId]!.baseUrl);
+    }
+  }
+
   Future<void> addConnection(int organizationId, String baseUrl) async {
     if (_activeConnections.containsKey(organizationId)) return;
 
@@ -99,8 +104,10 @@ class MultiPollingService {
       organizationId: organizationId,
       baseUrl: baseUrl,
     );
-    final GetEventsByQueueIdUseCase getEventsByQueueIdUseCase = _connectionFactory
-        .createGetEventsByQueueIdUseCase(organizationId: organizationId, baseUrl: baseUrl);
+    final GetEventsByQueueIdUseCase getEventsByQueueIdUseCase = _connectionFactory.createGetEventsByQueueIdUseCase(
+      organizationId: organizationId,
+      baseUrl: baseUrl,
+    );
 
     final RealTimeConnection connection = RealTimeConnection(
       organizationId: organizationId,

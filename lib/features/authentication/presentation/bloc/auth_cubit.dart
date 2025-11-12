@@ -118,8 +118,7 @@ class AuthCubit extends Cubit<AuthState> {
 
     final bool hasCredentials =
         (token != null && token.isNotEmpty) ||
-        ((sessionId != null && sessionId.isNotEmpty) &&
-            (csrfToken != null && csrfToken.isNotEmpty));
+        ((sessionId != null && sessionId.isNotEmpty) && (csrfToken != null && csrfToken.isNotEmpty));
 
     final int? selectedOrganizationId = _sharedPreferences.getInt(
       SharedPrefsKeys.selectedOrganizationId,
@@ -148,18 +147,18 @@ class AuthCubit extends Cubit<AuthState> {
       emit(state.copyWith(isAuthorized: true, errorMessage: null));
     } on DioException catch (e, st) {
       final bool unauthorized = e.response?.statusCode == 401;
-      final String? backendMsg = e.response?.data is Map
-          ? e.response?.data['msg'] as String?
-          : null;
+      final String? backendMsg = e.response?.data is Map ? e.response?.data['msg'] as String? : null;
       final String message = unauthorized
           ? (backendMsg ?? 'Invalid credentials')
           : (backendMsg ?? 'Network error. Please try again.');
 
       inspect(e);
       emit(state.copyWith(isAuthorized: false, errorMessage: message));
+      rethrow;
     } catch (e, st) {
       inspect(e);
       emit(state.copyWith(isAuthorized: false, errorMessage: 'Unexpected error'));
+      rethrow;
     } finally {
       emit(state.copyWith(isPending: false));
     }

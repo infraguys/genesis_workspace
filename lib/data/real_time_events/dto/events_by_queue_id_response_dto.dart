@@ -5,13 +5,13 @@ class EventByQueueIdResponseDto {
   final String result;
   final String msg;
   final List<EventDto> events;
-  // final String queueId;
+  final String? queueId;
 
   EventByQueueIdResponseDto({
     required this.result,
     required this.msg,
     required this.events,
-    // required this.queueId,
+    this.queueId,
   });
 
   factory EventByQueueIdResponseDto.fromJson(Map<String, dynamic> json) {
@@ -21,6 +21,7 @@ class EventByQueueIdResponseDto {
       result: json['result'] as String,
       msg: json['msg'] as String,
       events: rawEvents.map((e) => parseEventDto(e as Map<String, dynamic>)).toList(),
+      queueId: json['queue_id'] as String?,
     );
   }
 
@@ -28,6 +29,6 @@ class EventByQueueIdResponseDto {
     result: result,
     msg: msg,
     events: events.map((e) => e.toEntity()).toList(),
-    // queueId: queueId,
+    queueId: queueId,
   );
 }

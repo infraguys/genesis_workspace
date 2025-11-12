@@ -100,6 +100,15 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     switch (state) {
       case AppLifecycleState.inactive:
         await setIdleStatus();
+      case AppLifecycleState.resumed:
+        await context.read<RealTimeCubit>().ensureConnection();
+        print("resumed");
+      case AppLifecycleState.detached:
+        print("detached");
+      case AppLifecycleState.paused:
+        print("paused");
+      case AppLifecycleState.hidden:
+        print("hidden");
       default:
         break;
     }
