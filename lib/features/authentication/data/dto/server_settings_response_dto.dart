@@ -10,6 +10,8 @@ class ServerSettingsResponseDto extends ResponseDto {
   final String realmName;
   @JsonKey(name: 'realm_uri')
   final String realmUri;
+  @JsonKey(name: 'realm_icon')
+  final String realmIcon;
   @JsonKey(name: 'external_authentication_methods')
   final List<ExternalAuthenticationMethodDto> externalAuthenticationMethods;
 
@@ -18,6 +20,7 @@ class ServerSettingsResponseDto extends ResponseDto {
     required super.result,
     required this.realmName,
     required this.realmUri,
+    required this.realmIcon,
     required this.externalAuthenticationMethods,
   });
 
@@ -27,6 +30,7 @@ class ServerSettingsResponseDto extends ResponseDto {
   ServerSettingsEntity toEntity() => ServerSettingsEntity(
     realmName: realmName,
     realmUri: realmUri,
+    realmIcon: realmIcon,
     externalAuthenticationMethods: externalAuthenticationMethods.map((e) => e.toEntity()).toList(),
   );
 }

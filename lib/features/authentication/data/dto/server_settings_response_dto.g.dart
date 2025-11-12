@@ -13,6 +13,7 @@ ServerSettingsResponseDto _$ServerSettingsResponseDtoFromJson(
   result: json['result'] as String,
   realmName: json['realm_name'] as String,
   realmUri: json['realm_uri'] as String,
+  realmIcon: json['realm_icon'] as String,
   externalAuthenticationMethods:
       (json['external_authentication_methods'] as List<dynamic>)
           .map(
@@ -30,6 +31,7 @@ Map<String, dynamic> _$ServerSettingsResponseDtoToJson(
   'result': instance.result,
   'realm_name': instance.realmName,
   'realm_uri': instance.realmUri,
+  'realm_icon': instance.realmIcon,
   'external_authentication_methods': instance.externalAuthenticationMethods,
 };
 

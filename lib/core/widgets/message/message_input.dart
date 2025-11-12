@@ -1,7 +1,10 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -12,6 +15,7 @@ import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.d
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 
@@ -32,8 +36,8 @@ class MessageInput extends StatefulWidget {
   final bool isDropOver;
   final MessageEntity? editingMessage;
   final Function(EditingAttachment)? onRemoveEditingAttachment;
-  // If returns true, the submit is considered handled and default send/edit is skipped
   final bool Function()? onSubmitIntercept;
+  final String? inputTitle;
 
   const MessageInput({
     super.key,
@@ -54,6 +58,7 @@ class MessageInput extends StatefulWidget {
     this.editingFiles,
     this.onRemoveEditingAttachment,
     this.onSubmitIntercept,
+    this.inputTitle,
   });
 
   @override
@@ -128,295 +133,416 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
       builder: (context, emojiState) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 12),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              transitionBuilder: (child, animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SizeTransition(sizeFactor: animation, child: child),
-                );
-              },
-              child: widget.isEdit
-                  ? Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        margin: const EdgeInsets.fromLTRB(6, 6, 6, 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: theme.colorScheme.primary, width: 2),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    widget.editingMessage?.content ?? '',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodyMedium,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  tooltip: context.t.cancelEditing,
-                                  visualDensity: VisualDensity.compact,
-                                  icon: const Icon(Icons.close_rounded, size: 20),
-                                  onPressed: widget.onCancelEdit,
-                                ),
-                              ],
-                            ),
-                            if (widget.editingFiles != null && widget.editingFiles!.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                height: 96,
-                                child: ListView.separated(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: widget.editingFiles!.length,
-                                  separatorBuilder: (_, __) => const SizedBox(width: 10),
-                                  itemBuilder: (context, index) {
-                                    final EditingAttachment attachment =
-                                        widget.editingFiles![index];
-                                    return EditingAttachmentTile(
-                                      attachment: attachment,
-                                      onRemove: widget.onRemoveEditingAttachment == null
-                                          ? null
-                                          : () {
-                                              widget.onRemoveEditingAttachment!(attachment);
-                                            },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
             ),
-            if (widget.files != null && widget.files!.isNotEmpty)
-              SizedBox(
-                height: 92,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  itemCount: widget.files!.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final UploadFileEntity entity = widget.files![index];
-                    return _buildAttachmentTile(
-                      entity,
-                      onRemoveUploaded: widget.onRemoveFile,
-                      onCancelUploading: widget.onCancelUpload,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SizeTransition(sizeFactor: animation, child: child),
                     );
                   },
+                  child: widget.isEdit
+                      ? Material(
+                          color: Colors.transparent,
+                          child: Container(
+                            margin: const EdgeInsets.fromLTRB(6, 6, 6, 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: theme.colorScheme.primary, width: 2),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        widget.editingMessage?.content ?? '',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      tooltip: context.t.cancelEditing,
+                                      visualDensity: VisualDensity.compact,
+                                      icon: const Icon(Icons.close_rounded, size: 20),
+                                      onPressed: widget.onCancelEdit,
+                                    ),
+                                  ],
+                                ),
+                                if (widget.editingFiles != null &&
+                                    widget.editingFiles!.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    height: 96,
+                                    child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: widget.editingFiles!.length,
+                                      separatorBuilder: (_, __) => const SizedBox(width: 10),
+                                      itemBuilder: (context, index) {
+                                        final EditingAttachment attachment =
+                                            widget.editingFiles![index];
+                                        return EditingAttachmentTile(
+                                          attachment: attachment,
+                                          onRemove: widget.onRemoveEditingAttachment == null
+                                              ? null
+                                              : () {
+                                                  widget.onRemoveEditingAttachment!(attachment);
+                                                },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
-              ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4).copyWith(bottom: 20),
-              decoration: BoxDecoration(color: theme.colorScheme.surface),
-              child: Row(
-                spacing: 8,
-                children: [
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: CustomPopup(
-                      key: attachmentsKey,
-                      showArrow: false,
-                      content: ConstrainedBox(
-                        constraints: const BoxConstraints(minWidth: 220, maxWidth: 280),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            AttachmentAction(
-                              iconData: Icons.insert_drive_file_rounded,
-                              label: context.t.attachmentButton.file,
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                widget.onUploadFile();
-                              },
-                            ),
-                            const SizedBox(height: 4),
-                            AttachmentAction(
-                              iconData: Icons.image_outlined,
-                              label: context.t.attachmentButton.image,
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                widget.onUploadImage();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      child: const Icon(Icons.attach_file),
+                if (widget.files != null && widget.files!.isNotEmpty)
+                  SizedBox(
+                    height: 92,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      itemCount: widget.files!.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final UploadFileEntity entity = widget.files![index];
+                        return _buildAttachmentTile(
+                          entity,
+                          onRemoveUploaded: widget.onRemoveFile,
+                          onCancelUploading: widget.onCancelUpload,
+                        );
+                      },
                     ),
                   ),
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(24),
-                            border: widget.isDropOver
-                                ? Border.all(color: theme.colorScheme.primary, width: 2)
-                                : Border.all(color: Colors.transparent, width: 2),
-                          ),
-                          child: TextField(
-                            controller: widget.controller,
-                            focusNode: widget.focusNode,
-                            minLines: 1,
-                            maxLines: 4,
-                            autofocus: platformInfo.isDesktop,
-                            onTap: () {
-                              if (currentSize(context) < ScreenSize.lTablet) {
-                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
-                              }
-                            },
-                            textInputAction: TextInputAction.send,
-                            onSubmitted: (value) {
-                              // Allow caller to intercept Enter (e.g., when mention popup is open)
-                              if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
-                                if (platformInfo.isDesktop) {
-                                  widget.focusNode.requestFocus();
-                                }
-                                return;
-                              }
-                              if (widget.isEdit) {
-                                if (widget.onEdit != null) {
-                                  widget.onEdit!();
-                                }
-                              } else {
-                                if (widget.onSend != null) {
-                                  widget.onSend!();
-                                }
-                              }
-                              if (platformInfo.isDesktop) {
-                                widget.focusNode.requestFocus();
-                              }
-                            },
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: widget.isDropOver ? "" : "Message",
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              suffixIcon: IconButton(
-                                onPressed: () {
-                                  if (currentSize(context) >= ScreenSize.lTablet) {
-                                    if (emojiState.showEmojiKeyboard) {
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                        false,
-                                        closeKeyboard: true,
-                                      );
-                                    } else {
-                                      context.read<EmojiKeyboardCubit>().setHeight(300);
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
-                                    }
-                                  } else {
-                                    if (emojiState.showEmojiKeyboard) {
-                                      FocusScope.of(context).requestFocus(widget.focusNode);
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                        false,
-                                      );
-                                    } else {
-                                      FocusScope.of(context).unfocus();
-                                      if (emojiState.keyboardHeight == 0) {
-                                        context.read<EmojiKeyboardCubit>().setHeight(300);
-                                      }
-                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
-                                    }
-                                  }
-                                },
-                                icon: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  transitionBuilder: (child, animation) => RotationTransition(
-                                    turns: child.key == const ValueKey('emoji')
-                                        ? Tween<double>(begin: 0.75, end: 1.0).animate(animation)
-                                        : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
-                                    child: FadeTransition(opacity: animation, child: child),
-                                  ),
-                                  child: emojiState.showEmojiKeyboard
-                                      ? const Icon(Icons.keyboard, key: ValueKey('keyboard'))
-                                      : const Icon(Icons.emoji_emotions, key: ValueKey('emoji')),
-                                ),
+                Row(
+                  spacing: 8,
+                  children: [
+                    Material(
+                      child: Column(
+                        spacing: 12,
+                        children: [
+                          InkWell(
+                            onTap: () {},
+                            borderRadius: BorderRadius.circular(32),
+                            child: Ink(
+                              width: 32,
+                              height: 32,
+                              child: Assets.icons.moreVert.svg(
+                                colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
                               ),
                             ),
                           ),
-                        ),
-
-                        // Оверлей при перетаскивании
-                        if (widget.isDropOver)
-                          Positioned.fill(
-                            child: IgnorePointer(
-                              child: AnimatedOpacity(
-                                duration: const Duration(milliseconds: 120),
-                                opacity: 1.0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.primary.withOpacity(0.06),
-                                    borderRadius: BorderRadius.circular(24),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    context.t.dropFilesToUpload,
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w600,
+                          MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: CustomPopup(
+                              key: attachmentsKey,
+                              isLongPress: true,
+                              showArrow: false,
+                              contentPadding: EdgeInsets.zero,
+                              contentRadius: 12,
+                              backgroundColor: theme.colorScheme.surface,
+                              content: Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                constraints: const BoxConstraints(minWidth: 220, maxWidth: 280),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    AttachmentAction(
+                                      iconData: Icons.insert_drive_file_rounded,
+                                      label: context.t.attachmentButton.file,
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        widget.onUploadFile();
+                                      },
+                                    ),
+                                    const SizedBox(height: 4),
+                                    AttachmentAction(
+                                      iconData: Icons.image_outlined,
+                                      label: context.t.attachmentButton.image,
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        widget.onUploadImage();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(32),
+                                onTap: () => attachmentsKey.currentState?.show(),
+                                child: Ink(
+                                  width: 32,
+                                  height: 32,
+                                  child: Assets.icons.attachFile.svg(
+                                    width: 32,
+                                    height: 32,
+                                    colorFilter: ColorFilter.mode(
+                                      textColors.text30,
+                                      BlendMode.srcIn,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        constraints: BoxConstraints(
+                          minHeight: 88,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.background,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                              child: Row(
+                                spacing: 8,
+                                children: [
+                                  Container(
+                                    height: 16,
+                                    width: 3,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  Text(
+                                    "# ${widget.inputTitle ?? ''}",
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: textColors.text30,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Stack(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  clipBehavior: Clip.hardEdge,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.background,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: TextField(
+                                    controller: widget.controller,
+                                    focusNode: widget.focusNode,
+                                    minLines: 1,
+                                    maxLines: 4,
+                                    autofocus: platformInfo.isDesktop,
+                                    clipBehavior: Clip.none,
+                                    onTap: () {
+                                      if (currentSize(context) < ScreenSize.lTablet) {
+                                        context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                          false,
+                                        );
+                                      }
+                                    },
+                                    textInputAction: TextInputAction.send,
+                                    onSubmitted: (value) {
+                                      if (widget.onSubmitIntercept != null &&
+                                          widget.onSubmitIntercept!()) {
+                                        if (platformInfo.isDesktop) {
+                                          widget.focusNode.requestFocus();
+                                        }
+                                        return;
+                                      }
+                                      if (widget.isEdit) {
+                                        if (widget.onEdit != null) {
+                                          widget.onEdit!();
+                                        }
+                                      } else {
+                                        if (widget.onSend != null) {
+                                          widget.onSend!();
+                                        }
+                                      }
+                                      if (platformInfo.isDesktop) {
+                                        widget.focusNode.requestFocus();
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      filled: true,
+                                      fillColor: theme.colorScheme.background,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      focusedBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      hintText: widget.isDropOver ? "" : "Message",
+                                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                        color: textColors.text30,
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Оверлей при перетаскивании
+                                if (widget.isDropOver)
+                                  Positioned.fill(
+                                    child: IgnorePointer(
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(milliseconds: 120),
+                                        opacity: 1.0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.primary.withOpacity(0.06),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            context.t.dropFilesToUpload,
+                                            textAlign: TextAlign.center,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 12,
+                      children: [
+                        IconButton.filled(
+                          onPressed: widget.isEdit ? widget.onEdit : widget.onSend,
+                          style: IconButton.styleFrom(
+                            fixedSize: const Size(46, 46),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: widget.isEdit
+                              ? Icon(
+                                  Icons.check,
+                                  color: theme.colorScheme.onPrimary,
+                                )
+                              : Assets.icons.send.svg(
+                                  width: 23,
+                                  height: 20,
+                                  colorFilter: ColorFilter.mode(
+                                    theme.colorScheme.onPrimary,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                        ).pending(widget.isMessagePending),
+                        IconButton(
+                          onPressed: () {
+                            if (currentSize(context) >= ScreenSize.lTablet) {
+                              if (emojiState.showEmojiKeyboard) {
+                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                  false,
+                                  closeKeyboard: true,
+                                );
+                              } else {
+                                context.read<EmojiKeyboardCubit>().setHeight(300);
+                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
+                              }
+                            } else {
+                              if (emojiState.showEmojiKeyboard) {
+                                FocusScope.of(context).requestFocus(widget.focusNode);
+                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                  false,
+                                );
+                              } else {
+                                FocusScope.of(context).unfocus();
+                                if (emojiState.keyboardHeight == 0) {
+                                  context.read<EmojiKeyboardCubit>().setHeight(300);
+                                }
+                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
+                              }
+                            }
+                          },
+                          icon: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            transitionBuilder: (child, animation) => RotationTransition(
+                              turns: child.key == const ValueKey('emoji')
+                                  ? Tween<double>(begin: 0.75, end: 1.0).animate(animation)
+                                  : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
+                              child: FadeTransition(opacity: animation, child: child),
+                            ),
+                            child: emojiState.showEmojiKeyboard
+                                ? Icon(
+                                    Icons.keyboard,
+                                    color: textColors.text30,
+                                    key: ValueKey('keyboard'),
+                                  )
+                                : Icon(
+                                    CupertinoIcons.smiley,
+                                    color: textColors.text30,
+                                    key: ValueKey('emoji'),
+                                  ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-
-                  ElevatedButton(
-                    onPressed: widget.isEdit ? widget.onEdit : widget.onSend,
-                    child: widget.isEdit
-                        ? const Icon(Icons.check)
-                        : const Icon(Icons.send_outlined),
-                  ).pending(widget.isMessagePending),
-                ],
-              ),
-            ),
-            AnimatedContainer(
-              height: emojiState.keyboardHeight,
-              duration: Duration(milliseconds: 250),
-              child: EmojiPicker(
-                textEditingController: widget.controller,
-                onEmojiSelected: (_, _) {
-                  widget.focusNode.requestFocus();
-                },
-                config: Config(
-                  height: emojiState.keyboardHeight,
-                  bottomActionBarConfig: BottomActionBarConfig(enabled: true),
+                  ],
                 ),
-              ),
+                AnimatedContainer(
+                  height: emojiState.keyboardHeight,
+                  duration: Duration(milliseconds: 250),
+                  child: EmojiPicker(
+                    textEditingController: widget.controller,
+                    onEmojiSelected: (_, _) {
+                      widget.focusNode.requestFocus();
+                    },
+                    config: emojiPickerConfig(context, emojiState: emojiState, theme: theme),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );

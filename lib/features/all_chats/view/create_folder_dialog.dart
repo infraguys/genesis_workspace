@@ -42,12 +42,17 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   }
 
   FolderItemEntity onSubmitPressed() {
+    final int? organizationId = widget.initial?.organizationId ?? AppConstants.selectedOrganizationId;
+    if (organizationId == null) {
+      throw StateError('Organization is not selected');
+    }
     final FolderItemEntity folder = FolderItemEntity(
       id: widget.initial?.id,
       title: titleController.text.trim(),
       iconData: selectedIconData!,
       backgroundColor: selectedColor,
       pinnedChats: widget.initial?.pinnedChats ?? [],
+      organizationId: organizationId,
     );
     return folder;
   }

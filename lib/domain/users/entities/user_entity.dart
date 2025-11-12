@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/data/users/dto/user_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 
-class UserEntity {
+class UserEntity extends Equatable {
   final String email;
   final int userId;
   final int role;
@@ -67,4 +68,8 @@ class UserEntity {
       avatarUrl: "https://placehold.co/128x128",
     );
   }
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [userId];
 }

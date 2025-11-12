@@ -1,4 +1,3 @@
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/pinned_chats_repository.dart';
 import 'package:injectable/injectable.dart';
 
@@ -11,13 +10,15 @@ class PinChatUseCase {
     required int folderId,
     required int chatId,
     required int orderIndex,
-    required PinnedChatType type,
+    // required PinnedChatType type,
+    required int organizationId,
   }) async {
     return await _repository.pinChat(
       folderId: folderId,
       chatId: chatId,
       orderIndex: orderIndex,
-      type: type,
+      // type: type,
+      organizationId: organizationId,
     );
   }
 }

@@ -6,14 +6,25 @@ class MessagesRequestEntity {
   final List<MessageNarrowEntity>? narrow;
   final int? numBefore;
   final int? numAfter;
+  final bool applyMarkdown;
+  final bool clientGravatar;
 
-  MessagesRequestEntity({required this.anchor, this.narrow, this.numBefore, this.numAfter});
+  MessagesRequestEntity({
+    required this.anchor,
+    this.narrow,
+    this.numBefore,
+    this.numAfter,
+    this.applyMarkdown = true,
+    this.clientGravatar = false,
+  });
 
   MessagesRequestDto toDto() => MessagesRequestDto(
     anchor: anchor.toJson(),
     narrow: narrow?.map((e) => e.toDto()).toList(),
     numBefore: numBefore,
     numAfter: numAfter,
+    applyMarkdown: applyMarkdown,
+    clientGravatar: clientGravatar,
   );
 }
 

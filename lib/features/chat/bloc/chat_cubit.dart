@@ -33,7 +33,7 @@ import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.
 import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
-import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
 part 'chat_state.dart';
@@ -81,11 +81,11 @@ class ChatCubit extends Cubit<ChatState>
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
-    _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
-    _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
+    _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
+    _messageFlagsSubscription = _realTimeService.messageFlagsEventsStream.listen(
       onMessageFlagsEvents,
     );
-    _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(onReactionEvents);
+    _reactionsSubscription = _realTimeService.reactionEventsStream.listen(onReactionEvents);
     _deleteMessageSubscription = _realTimeService.deleteMessageEventsStream.listen(
       onDeleteMessageEvents,
     );
@@ -94,7 +94,7 @@ class ChatCubit extends Cubit<ChatState>
     );
   }
 
-  final RealTimeService _realTimeService;
+  final MultiPollingService _realTimeService;
 
   final GetMessagesUseCase _getMessagesUseCase;
   final SendMessageUseCase _sendMessageUseCase;
@@ -198,9 +198,8 @@ class ChatCubit extends Cubit<ChatState>
     int? unreadMessagesCount,
   }) async {
     state.chatIds = userIds.toSet();
-
-    if (userIds.length == 1) {
-      final userId = userIds.first;
+    if (userIds.length == 2) {
+      final userId = userIds.firstWhere((userId) => userId != myUserId);
       try {
         final UserEntity user = await _getUserByIdUseCase.call(userId);
         final DmUserEntity dmUser = user.toDmUser();
@@ -345,11 +344,11 @@ class ChatCubit extends Cubit<ChatState>
           .toList();
       isThisChatMessage = unorderedEquals(chatIds ?? [], messageRecipients);
     } else {
-      final chatIds = [state.myUserId, ...state.chatIds!];
+      final chatIds = state.chatIds!;
       final messageRecipients = event.message.displayRecipient.recipients
           .map((recipient) => recipient.userId)
           .toList();
-      isThisChatMessage = unorderedEquals(chatIds, messageRecipients);
+      isThisChatMessage = unorderedEquals(chatIds.toList(), messageRecipients);
     }
     if (isThisChatMessage) {
       state.messages = [...state.messages, event.message];

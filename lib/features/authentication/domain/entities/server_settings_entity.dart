@@ -1,11 +1,13 @@
 class ServerSettingsEntity {
   final String realmName;
   final String realmUri;
+  final String realmIcon;
   final List<ExternalAuthenticationMethodEntity> externalAuthenticationMethods;
 
   ServerSettingsEntity({
     required this.realmName,
     required this.realmUri,
+    required this.realmIcon,
     required this.externalAuthenticationMethods,
   });
 }

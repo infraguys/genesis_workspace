@@ -1,5 +1,6 @@
 class StreamEntity {
   final int streamId;
   final String name;
-  StreamEntity({required this.streamId, required this.name});
+  final int subscriberCount;
+  StreamEntity({required this.streamId, required this.name, required this.subscriberCount});
 }

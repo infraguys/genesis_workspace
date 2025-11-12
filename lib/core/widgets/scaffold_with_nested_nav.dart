@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
-import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
+import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/desktop_app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -28,8 +28,7 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
   State<ScaffoldWithNestedNavigation> createState() => _ScaffoldWithNestedNavigationState();
 }
 
-class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation>
-    with WidgetsBindingObserver {
+class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> with WidgetsBindingObserver {
   late final Future _future;
   late final AppShellController appShellController;
 
@@ -83,7 +82,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       context.read<UpdateCubit>().checkUpdateNeed(),
       context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
-      context.read<MessagesCubit>().getLastMessages(),
     ]);
     super.initState();
   }
@@ -109,6 +107,8 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
     return BlocListener<UpdateCubit, UpdateState>(
       listener: (context, state) {
         if (state.isUpdateRequired) {
@@ -119,111 +119,21 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
         future: _future,
         builder: (context, asyncSnapshot) {
           return Scaffold(
-            body: Row(
+            body: Column(
+              spacing: 4.0,
               children: [
-                if (currentSize(context) > ScreenSize.tablet) ...[
-                  BlocBuilder<MessagesCubit, MessagesState>(
-                    builder: (context, state) {
-                      return NavigationRail(
-                        selectedIndex: widget.navigationShell.currentIndex,
-                        onDestinationSelected: _goBranch,
-                        labelType: NavigationRailLabelType.all,
-                        destinations: [
-                          NavigationRailDestination(
-                            label: Text(context.t.navBar.allChats),
-                            icon: Icon(Icons.chat),
-                          ),
-                          NavigationRailDestination(
-                            label: Text(context.t.navBar.directMessages),
-                            icon: Badge(
-                              isLabelVisible: state.messages.any(
-                                (message) =>
-                                    (message.type == MessageType.private &&
-                                    message.hasUnreadMessages),
-                              ),
-                              child: Icon(Icons.people),
-                            ),
-                          ),
-                          NavigationRailDestination(
-                            label: Text(context.t.navBar.channels),
-                            icon: Badge(
-                              isLabelVisible: state.messages.any(
-                                (message) =>
-                                    (message.type == MessageType.stream &&
-                                    message.hasUnreadMessages),
-                              ),
-                              child: Icon(Icons.chat),
-                            ),
-                          ),
-                          NavigationRailDestination(
-                            label: Text(context.t.navBar.menu),
-                            icon: Icon(Icons.menu),
-                          ),
-                          NavigationRailDestination(
-                            label: Text(context.t.navBar.settings),
-                            icon: Icon(Icons.settings),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const VerticalDivider(thickness: 1, width: 1),
-                ],
-                Expanded(child: widget.navigationShell),
+                ScaffoldDesktopAppBar(
+                  onSelectBranch: _goBranch,
+                  selectedIndex: widget.navigationShell.currentIndex,
+                ),
+                BlocBuilder<AuthCubit, AuthState>(
+                  buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                  builder: (_, state) {
+                    return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
+                  },
+                ),
               ],
             ),
-            bottomNavigationBar: currentSize(context) > ScreenSize.tablet
-                ? null
-                : BlocBuilder<MessagesCubit, MessagesState>(
-                    builder: (context, state) {
-                      return BlocBuilder<ProfileCubit, ProfileState>(
-                        builder: (context, profileState) {
-                          return BottomNavigationBar(
-                            currentIndex: widget.navigationShell.currentIndex,
-                            type: BottomNavigationBarType.shifting,
-                            onTap: _goBranch,
-                            items: [
-                              BottomNavigationBarItem(
-                                label: context.t.navBar.allChats,
-                                icon: Icon(Icons.chat),
-                              ),
-                              BottomNavigationBarItem(
-                                label: context.t.navBar.directMessages,
-                                icon: Badge(
-                                  isLabelVisible: state.messages.any(
-                                    (message) =>
-                                        (message.type == MessageType.private &&
-                                        message.senderId != profileState.user?.userId),
-                                  ),
-                                  child: Icon(Icons.people),
-                                ),
-                              ),
-                              BottomNavigationBarItem(
-                                label: context.t.navBar.channels,
-                                icon: Badge(
-                                  isLabelVisible: state.messages.any(
-                                    (message) =>
-                                        (message.type == MessageType.stream &&
-                                        message.senderId != profileState.user?.userId),
-                                  ),
-                                  child: Icon(Icons.chat),
-                                ),
-                              ),
-                              BottomNavigationBarItem(
-                                label: context.t.navBar.menu,
-                                icon: Icon(Icons.menu),
-                              ),
-                              BottomNavigationBarItem(
-                                label: context.t.navBar.settings,
-                                icon: Icon(Icons.settings),
-                              ),
-                            ],
-                            // onDestinationSelected: _goBranch,
-                          );
-                        },
-                      );
-                    },
-                  ),
           );
         },
       ),

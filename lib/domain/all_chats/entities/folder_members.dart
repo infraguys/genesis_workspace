@@ -1,11 +1,5 @@
 class FolderMembers {
-  final List<int> dmUserIds;
-  final List<int> channelIds;
-  final List<int> groupChatIds;
+  final List<int> chatIds;
 
-  const FolderMembers({
-    required this.dmUserIds,
-    required this.channelIds,
-    required this.groupChatIds,
-  });
+  const FolderMembers({required this.chatIds});
 }

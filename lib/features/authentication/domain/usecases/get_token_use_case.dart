@@ -7,7 +7,7 @@ class GetTokenUseCase {
 
   GetTokenUseCase(this.tokenStorage);
 
-  Future<String?> call() async {
-    return tokenStorage.getToken();
+  Future<String?> call(String baseUrl) async {
+    return tokenStorage.getToken(baseUrl);
   }
 }

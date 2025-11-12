@@ -106,7 +106,9 @@
   "error": "Ошибка",
   "general": {
     "something_went_wrong": "Что-то пошло не так",
-    "nothing_here_yet": "Здесь пока ничего нет"
+    "nothing_here_yet": "Здесь пока ничего нет",
+    "find": "Найти",
+    "close": "Закрыть"
   },
   "message_actions": {
     "quote": "Цитировать это сообщение",
@@ -138,7 +140,19 @@
     "delete": "Удалить",
     "deleteConfirmTitle": "Удалить папку?",
     "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
-   "folder_is_empty": "Папка пустая"
+    "folder_is_empty": "Папка пустая"
+  },
+  "organizations": {
+    "addDialog": {
+      "title": "Добавить организацию",
+      "description": "Укажите ссылку на организацию, чтобы добавить её в список.",
+      "urlLabel": "Ссылка на организацию",
+      "urlHint": "https://example.com",
+      "urlRequired": "Введите ссылку на организацию",
+      "urlInvalid": "Некорректная ссылка",
+      "submit": "Добавить"
+    },
+    "delete_organization": "Удалить организацию"
   },
   "channel": {
     "muteChannel": "Заглушить канал",
@@ -149,7 +163,7 @@
     "unpinChat": "Открепить чат"
   },
   "group": {
-    "members_count": "Участников: {count}"
+    "members_count": "{count} участников"
   },
   "group_chat": {
     "create_tooltip": "Создать групповой чат",
@@ -192,5 +206,18 @@
     "update": "Обновить",
     "unsupported_platform": "Обновления на этой платформе пока не поддержаны.",
     "failed_to_start": "Не удалось запустить обновление: {error}"
+  },
+  "emoji": {
+    "no_recent": "Нет недавних эмоджи"
+  },
+  "messenger": "Мессенджер",
+  "notifications": "Уведомления",
+  "chats": "Чаты",
+  "calendar": "Календарь",
+  "email": "Почта",
+  "groups": "Группы",
+  "calls": "Звонки",
+  "messenger_view": {
+    "chats_and_channels": "Чаты и каналы"
   }
 }

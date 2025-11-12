@@ -4,14 +4,14 @@ import 'package:genesis_workspace/core/config/constants.dart';
 
 import '../../services/token_storage/token_storage.dart';
 
-class SessionidInterceptor extends Interceptor {
+class SessionIdInterceptor extends Interceptor {
   final TokenStorage _tokenStorage;
-  SessionidInterceptor(this._tokenStorage);
+  SessionIdInterceptor(this._tokenStorage);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final sessionId = await _tokenStorage.getSessionId(); // __Host-sessionid
+      final sessionId = await _tokenStorage.getSessionId(AppConstants.baseUrl); // __Host-sessionid
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
       final existingCookie = (options.headers['Cookie'] as String?)?.trim();

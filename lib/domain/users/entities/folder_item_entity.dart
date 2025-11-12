@@ -12,6 +12,7 @@ class FolderItemEntity {
   final Color? backgroundColor;
   final SystemFolderType? systemType;
   final List<PinnedChatEntity> pinnedChats;
+  final int organizationId;
 
   const FolderItemEntity({
     this.id,
@@ -21,6 +22,7 @@ class FolderItemEntity {
     this.backgroundColor,
     this.systemType,
     required this.pinnedChats,
+    required this.organizationId,
   });
 
   FolderItemEntity copyWith({
@@ -31,6 +33,7 @@ class FolderItemEntity {
     Color? backgroundColor,
     SystemFolderType? systemType,
     List<PinnedChatEntity>? pinnedChats,
+    int? organizationId,
   }) {
     return FolderItemEntity(
       id: id ?? this.id,
@@ -40,6 +43,7 @@ class FolderItemEntity {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       systemType: systemType ?? this.systemType,
       pinnedChats: pinnedChats ?? this.pinnedChats,
+      organizationId: organizationId ?? this.organizationId,
     );
   }
 }

@@ -7,7 +7,7 @@ class SaveCsrftokenUseCase {
 
   SaveCsrftokenUseCase(this._repository);
 
-  Future<void> call({required String csrftoken}) async {
-    await _repository.saveCsrfToken(csrftoken: csrftoken);
+  Future<void> call({required String baseUrl, required String csrftoken}) async {
+    await _repository.saveCsrfToken(baseUrl: baseUrl, csrftoken: csrftoken);
   }
 }

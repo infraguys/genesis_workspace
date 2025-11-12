@@ -8,6 +8,12 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    self.titleVisibility = .hidden
+    self.titlebarAppearsTransparent = true
+    self.isMovableByWindowBackground = true
+    self.styleMask.insert(.fullSizeContentView)
+    self.backgroundColor = NSColor.clear
+
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()

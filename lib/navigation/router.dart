@@ -10,11 +10,11 @@ import 'package:genesis_workspace/features/authentication/presentation/view/past
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
-import 'package:genesis_workspace/features/direct_messages/direct_messages.dart';
 import 'package:genesis_workspace/features/feed/feed.dart';
 import 'package:genesis_workspace/features/inbox/inbox.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/menu/menu.dart';
+import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
@@ -29,6 +29,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorDMKey = GlobalKey<NavigatorState>(debugLabel: 'shellDM');
 final shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');
 final _shellNavigatorAllChatsKey = GlobalKey<NavigatorState>(debugLabel: 'shellAllChats');
+final _shellNavigatorMessengerKey = GlobalKey<NavigatorState>(debugLabel: 'shellMessenger');
 final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
 final _shellNavigatorMenuKey = GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
@@ -52,6 +53,7 @@ class Routes {
   static const String imageFullScreen = '/image-full-screen';
   static const String pasteBaseUrl = '/paste-base-url';
   static const String forceUpdate = '/force-update';
+  static const String messenger = '/messenger';
 }
 
 final router = GoRouter(
@@ -63,6 +65,25 @@ final router = GoRouter(
         return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
       },
       branches: [
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorMessengerKey,
+          routes: [
+            GoRoute(
+              path: Routes.messenger,
+              name: Routes.messenger,
+              redirect: (BuildContext context, GoRouterState state) {
+                if (!context.read<AuthCubit>().state.isAuthorized) {
+                  // return Routes.auth;
+                }
+                return null;
+              },
+              builder: (context, state) {
+                return Messenger();
+              },
+            ),
+          ],
+        ),
+
         StatefulShellBranch(
           navigatorKey: _shellNavigatorAllChatsKey,
           routes: [
@@ -81,41 +102,41 @@ final router = GoRouter(
             ),
           ],
         ),
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorDMKey,
-          routes: [
-            GoRoute(
-              path: Routes.directMessages,
-              name: Routes.directMessages,
-              redirect: (BuildContext context, GoRouterState state) {
-                if (!context.read<AuthCubit>().state.isAuthorized) {
-                  return Routes.auth;
-                }
-                return null;
-              },
-              builder: (context, state) {
-                return DirectMessages();
-              },
-            ),
-            if (kIsWeb) ...[
-              GoRoute(
-                path: '${Routes.directMessages}/:userId',
-                name: Routes.chat,
-                builder: (context, state) {
-                  final userId = int.parse(state.pathParameters['userId']!);
-                  final extra = state.extra as Map<String, dynamic>?;
-                  final unread = extra?['unreadMessagesCount'] ?? 0;
-
-                  if (currentSize(context) > ScreenSize.lTablet) {
-                    return DirectMessages(initialUserId: userId);
-                  } else {
-                    return Chat(userIds: [userId], unreadMessagesCount: unread);
-                  }
-                },
-              ),
-            ],
-          ],
-        ),
+        // StatefulShellBranch(
+        //   navigatorKey: _shellNavigatorDMKey,
+        //   routes: [
+        //     GoRoute(
+        //       path: Routes.directMessages,
+        //       name: Routes.directMessages,
+        //       redirect: (BuildContext context, GoRouterState state) {
+        //         if (!context.read<AuthCubit>().state.isAuthorized) {
+        //           return Routes.auth;
+        //         }
+        //         return null;
+        //       },
+        //       builder: (context, state) {
+        //         return DirectMessages();
+        //       },
+        //     ),
+        //     if (kIsWeb) ...[
+        //       GoRoute(
+        //         path: '${Routes.directMessages}/:userId',
+        //         name: Routes.chat,
+        //         builder: (context, state) {
+        //           final userId = int.parse(state.pathParameters['userId']!);
+        //           final extra = state.extra as Map<String, dynamic>?;
+        //           final unread = extra?['unreadMessagesCount'] ?? 0;
+        //
+        //           if (currentSize(context) > ScreenSize.lTablet) {
+        //             return DirectMessages(initialUserId: userId);
+        //           } else {
+        //             return Chat(userIds: [userId], unreadMessagesCount: unread);
+        //           }
+        //         },
+        //       ),
+        //     ],
+        //   ],
+        // ),
         StatefulShellBranch(
           navigatorKey: shellNavigatorChannelsKey,
           routes: [
@@ -328,7 +349,7 @@ final router = GoRouter(
       name: Routes.auth,
       redirect: (BuildContext context, GoRouterState state) {
         if (context.read<AuthCubit>().state.isAuthorized) {
-          return Routes.allChats;
+          return Routes.messenger;
         }
         return null;
       },

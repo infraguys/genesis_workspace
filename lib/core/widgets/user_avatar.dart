@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 
 class UserAvatar extends StatelessWidget {
-  final String? avatarUrl;
-  final double? radius;
+  const UserAvatar({super.key, this.avatarUrl, this.size});
 
-  const UserAvatar({super.key, this.avatarUrl, this.radius});
+  final String? avatarUrl;
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +17,15 @@ class UserAvatar extends StatelessWidget {
         fullUrl = "${AppConstants.baseUrl}$avatarUrl";
       }
       return CircleAvatar(
-        radius: radius,
+        radius: size != null ? size! / 2 : null,
         backgroundImage: NetworkImage(fullUrl),
         backgroundColor: Colors.grey[200],
       );
     } else {
-      return const CircleAvatar(child: Icon(Icons.person));
+      return CircleAvatar(
+        radius: size != null ? size! / 2 : null,
+        child: Icon(Icons.person),
+      );
     }
   }
 }

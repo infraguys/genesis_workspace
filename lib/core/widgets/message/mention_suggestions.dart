@@ -204,7 +204,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
                                   padding: const EdgeInsets.symmetric(horizontal: 12),
                                   alignment: Alignment.centerLeft,
                                   child: ListTile(
-                                    leading: UserAvatar(avatarUrl: user.avatarUrl, radius: 12),
+                                    leading: UserAvatar(avatarUrl: user.avatarUrl, size: 24),
                                     title: Text(
                                       user.fullName,
                                       style: theme.textTheme.bodyMedium!.copyWith(

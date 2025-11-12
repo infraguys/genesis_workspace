@@ -7,7 +7,7 @@ class SaveSessionIdUseCase {
 
   SaveSessionIdUseCase(this._repository);
 
-  Future<void> call({required String sessionId}) async {
-    await _repository.saveSessionId(sessionId: sessionId);
+  Future<void> call({required String baseUrl, required String sessionId}) async {
+    await _repository.saveSessionId(baseUrl: baseUrl, sessionId: sessionId);
   }
 }
