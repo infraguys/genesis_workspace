@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -38,7 +39,8 @@ class _AuthViewState extends State<AuthView> {
   Future<void>? _future;
 
   Future<void> getInitialData() async {
-    await context.read<AuthCubit>().getServerSettings();
+    final baseUrl = AppConstants.baseUrl;
+    await context.read<AuthCubit>().getServerSettings(baseUrl);
   }
 
   @override

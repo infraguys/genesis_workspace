@@ -33,7 +33,7 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_c
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_session_id_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/save_token_use_case.dart';
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart';
-import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -45,7 +45,7 @@ class AuthCubit extends Cubit<AuthState> {
   final GetTokenUseCase _getTokenUseCase;
   final DeleteQueueUseCase _deleteQueueUseCase;
   final DeleteTokenUseCase _deleteTokenUseCase;
-  final RealTimeService _realTimeService;
+  final MultiPollingService _realTimeService;
   final UpdatePresenceUseCase _updatePresenceUseCase;
   final GetServerSettingsUseCase _getServerSettingsUseCase;
   final GetOrganizationSettingsUseCase _getOrganizationSettingsUseCase;
@@ -83,7 +83,7 @@ class AuthCubit extends Cubit<AuthState> {
     this._getAllOrganizationsUseCase,
     this._organizationSwitcherService,
   ) : super(
-        const AuthState(
+        AuthState(
           isPending: false,
           isAuthorized: false,
           rawKey: null,
@@ -130,7 +130,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(isAuthorized: hasCredentials, selectedOrganization: organization));
 
     if (!hasCredentials) {
-      await getServerSettings();
+      await getServerSettings(organization.baseUrl);
     }
   }
 
@@ -164,14 +164,12 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> getServerSettings() async {
-    emit(state.copyWith(serverSettingsPending: true));
+  Future<void> getServerSettings(String url) async {
+    state.serverSettings = null;
+    emit(state.copyWith(serverSettingsPending: true, serverSettings: state.serverSettings));
     try {
-      if (state.serverSettings == null) {
-        final response = await _getServerSettingsUseCase.call();
-
-        emit(state.copyWith(serverSettings: response));
-      }
+      final response = await _getOrganizationSettingsUseCase.call(state.selectedOrganization!.baseUrl);
+      emit(state.copyWith(serverSettings: response));
     } catch (e) {
       inspect(e);
     } finally {
@@ -314,21 +312,20 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     emit(state.copyWith(isPending: true));
     try {
-      final String? queueId = _realTimeService.queueId;
-
       final presence = UpdatePresenceRequestEntity(
         status: PresenceStatus.idle,
         newUserInput: true,
         pingOnly: true,
       );
 
+      final organizationId = AppConstants.selectedOrganizationId ?? -1;
+
       final futures = <Future<dynamic>>[
         _updatePresenceUseCase.call(presence),
-        if (queueId != null) _deleteQueueUseCase.call(queueId),
       ];
 
       await Future.wait(futures);
-      await _realTimeService.stopPolling();
+      await _realTimeService.closeConnection(organizationId);
       await Future.wait([
         _deleteTokenUseCase.call(baseUrl: _baseUrl),
         _deleteSessionIdUseCase.call(baseUrl: _baseUrl),
@@ -495,7 +492,7 @@ class AuthState {
   final bool isPending;
   final bool isAuthorized;
   final String? errorMessage;
-  final ServerSettingsEntity? serverSettings;
+  ServerSettingsEntity? serverSettings;
   final String? otp;
   final Uint8List? rawKey;
   final bool isParseTokenPending;
@@ -505,7 +502,7 @@ class AuthState {
   final bool serverSettingsPending;
   final OrganizationEntity? selectedOrganization;
 
-  const AuthState({
+  AuthState({
     required this.isPending,
     required this.isAuthorized,
     this.errorMessage,
