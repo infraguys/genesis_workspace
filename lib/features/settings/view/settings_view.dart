@@ -215,7 +215,7 @@ class _SettingsViewState extends State<SettingsView> {
               ),
               onPressed: () async {
                 await context.read<AuthCubit>().logout();
-                context.go(Routes.auth);
+                // context.go(Routes.auth);
               },
               icon: const Icon(Icons.logout),
               label: Text(
@@ -245,7 +245,7 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
                 onPressed: () async {
                   await context.read<AuthCubit>().devLogout();
-                  context.go(Routes.auth);
+                  // context.go(Routes.auth);
                 },
                 icon: const Icon(Icons.logout),
                 label: Text(

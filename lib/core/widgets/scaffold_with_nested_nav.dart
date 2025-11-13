@@ -29,7 +29,7 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
 }
 
 class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> with WidgetsBindingObserver {
-  late final Future _future;
+  Future<void>? _future;
   late final AppShellController appShellController;
 
   void _goBranch(int index) {
@@ -71,6 +71,14 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     InAppIdleDetector.pause();
   }
 
+  Future<void> getInitialData() async {
+    await Future.wait([
+      context.read<UpdateCubit>().checkUpdateNeed(),
+      context.read<RealTimeCubit>().init(),
+      context.read<ProfileCubit>().getOwnUser(),
+    ]);
+  }
+
   @override
   void initState() {
     appShellController = getIt<AppShellController>();
@@ -78,11 +86,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     _initIdleDetector();
     WidgetsBinding.instance.addObserver(this);
     if (kIsWeb) BrowserContextMenu.disableContextMenu();
-    _future = Future.wait([
-      context.read<UpdateCubit>().checkUpdateNeed(),
-      context.read<RealTimeCubit>().init(),
-      context.read<ProfileCubit>().getOwnUser(),
-    ]);
+    _future = getInitialData();
     super.initState();
   }
 
@@ -100,6 +104,15 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     switch (state) {
       case AppLifecycleState.inactive:
         await setIdleStatus();
+      case AppLifecycleState.resumed:
+        await context.read<RealTimeCubit>().ensureConnection();
+      // print("resumed");
+      case AppLifecycleState.detached:
+      // print("detached");
+      case AppLifecycleState.paused:
+      // print("paused");
+      case AppLifecycleState.hidden:
+      // print("hidden");
       default:
         break;
     }
@@ -109,33 +122,41 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
-    return BlocListener<UpdateCubit, UpdateState>(
+    return BlocListener<AuthCubit, AuthState>(
+      listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
       listener: (context, state) {
-        if (state.isUpdateRequired) {
-          context.goNamed(Routes.forceUpdate);
-        }
+        setState(() {
+          _future = getInitialData();
+        });
       },
-      child: FutureBuilder(
-        future: _future,
-        builder: (context, asyncSnapshot) {
-          return Scaffold(
-            body: Column(
-              spacing: 4.0,
-              children: [
-                ScaffoldDesktopAppBar(
-                  onSelectBranch: _goBranch,
-                  selectedIndex: widget.navigationShell.currentIndex,
-                ),
-                BlocBuilder<AuthCubit, AuthState>(
-                  buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                  builder: (_, state) {
-                    return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
-                  },
-                ),
-              ],
-            ),
-          );
+      child: BlocListener<UpdateCubit, UpdateState>(
+        listener: (context, state) {
+          if (state.isUpdateRequired) {
+            context.goNamed(Routes.forceUpdate);
+          }
         },
+        child: FutureBuilder(
+          future: _future,
+          builder: (context, asyncSnapshot) {
+            return Scaffold(
+              body: Column(
+                spacing: 4.0,
+                children: [
+                  ScaffoldDesktopAppBar(
+                    onSelectBranch: _goBranch,
+                    selectedIndex: widget.navigationShell.currentIndex,
+                  ),
+                  BlocBuilder<AuthCubit, AuthState>(
+                    buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                    builder: (_, state) {
+                      return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

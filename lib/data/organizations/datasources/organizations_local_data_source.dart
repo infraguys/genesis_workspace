@@ -15,14 +15,14 @@ class OrganizationsLocalDataSource {
       name: body.name,
       icon: body.icon,
       baseUrl: body.baseUrl,
-      unreadCount: body.unreadCount,
+      unreadMessages: body.unreadMessages,
     );
     return OrganizationDto(
       id: id,
       name: body.name,
       icon: body.icon,
       baseUrl: body.baseUrl,
-      unreadCount: body.unreadCount,
+      unreadMessages: body.unreadMessages,
     );
   }
 
@@ -43,7 +43,7 @@ class OrganizationsLocalDataSource {
               name: org.name,
               icon: org.icon,
               baseUrl: org.baseUrl,
-              unreadCount: org.unreadCount,
+              unreadMessages: org.unreadMessages,
             ),
           )
           .toList(),
@@ -60,7 +60,7 @@ class OrganizationsLocalDataSource {
               name: org.name,
               icon: org.icon,
               baseUrl: org.baseUrl,
-              unreadCount: org.unreadCount,
+              unreadMessages: org.unreadMessages,
             ),
           )
           .toList();
@@ -80,7 +80,7 @@ class OrganizationsLocalDataSource {
         name: response.name,
         icon: response.icon,
         baseUrl: response.baseUrl,
-        unreadCount: response.unreadCount,
+        unreadMessages: response.unreadMessages,
       );
     } catch (e) {
       rethrow;

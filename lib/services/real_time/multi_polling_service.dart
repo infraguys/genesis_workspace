@@ -10,6 +10,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/subscri
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_csrftoken_use_case.dart';
@@ -37,8 +38,7 @@ class MultiPollingService {
 
   final Map<int, RealTimeConnection> _activeConnections = {};
 
-  final StreamController<TypingEventEntity> _typingEventsController =
-      StreamController<TypingEventEntity>.broadcast();
+  final StreamController<TypingEventEntity> _typingEventsController = StreamController<TypingEventEntity>.broadcast();
   final StreamController<MessageEventEntity> _messageEventsController =
       StreamController<MessageEventEntity>.broadcast();
   final StreamController<UpdateMessageFlagsEventEntity> _messageFlagsEventsController =
@@ -56,16 +56,12 @@ class MultiPollingService {
 
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
   Stream<MessageEventEntity> get messageEventsStream => _messageEventsController.stream;
-  Stream<UpdateMessageFlagsEventEntity> get messageFlagsEventsStream =>
-      _messageFlagsEventsController.stream;
+  Stream<UpdateMessageFlagsEventEntity> get messageFlagsEventsStream => _messageFlagsEventsController.stream;
   Stream<ReactionEventEntity> get reactionEventsStream => _reactionEventsController.stream;
   Stream<PresenceEventEntity> get presenceEventsStream => _presenceEventsController.stream;
-  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream =>
-      _deleteMessageEventsController.stream;
-  Stream<UpdateMessageEventEntity> get updateMessageEventsStream =>
-      _updateMessageEventsController.stream;
-  Stream<SubscriptionEventEntity> get subscriptionEventsStream =>
-      _subscriptionEventsController.stream;
+  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream => _deleteMessageEventsController.stream;
+  Stream<UpdateMessageEventEntity> get updateMessageEventsStream => _updateMessageEventsController.stream;
+  Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
 
   Future<void> init() async {
     final List<OrganizationEntity> organizations = await _getAllOrganizationsUseCase.call();
@@ -79,8 +75,7 @@ class MultiPollingService {
 
       final bool isAuthorized =
           (token != null && token.trim().isNotEmpty) ||
-          ((csrfToken != null && csrfToken.isNotEmpty) &&
-              (sessionId != null && sessionId.isNotEmpty));
+          ((csrfToken != null && csrfToken.isNotEmpty) && (sessionId != null && sessionId.isNotEmpty));
 
       if (isAuthorized) {
         authorizedOrganizations.add(organization);
@@ -92,6 +87,17 @@ class MultiPollingService {
     }
   }
 
+  Future<void> ensureConnection(int organizationId) async {
+    final connection = _activeConnections[organizationId];
+    final connectionActive = await connection?.checkConnection() ?? false;
+    if (connectionActive) {
+      return;
+    } else {
+      await closeConnection(organizationId);
+      await addConnection(organizationId, _activeConnections[organizationId]!.baseUrl);
+    }
+  }
+
   Future<void> addConnection(int organizationId, String baseUrl) async {
     if (_activeConnections.containsKey(organizationId)) return;
 
@@ -99,14 +105,22 @@ class MultiPollingService {
       organizationId: organizationId,
       baseUrl: baseUrl,
     );
-    final GetEventsByQueueIdUseCase getEventsByQueueIdUseCase = _connectionFactory
-        .createGetEventsByQueueIdUseCase(organizationId: organizationId, baseUrl: baseUrl);
+    final GetEventsByQueueIdUseCase getEventsByQueueIdUseCase = _connectionFactory.createGetEventsByQueueIdUseCase(
+      organizationId: organizationId,
+      baseUrl: baseUrl,
+    );
+
+    final DeleteQueueUseCase deleteQueueUseCase = _connectionFactory.createDeleteQueueUseCase(
+      organizationId: organizationId,
+      baseUrl: baseUrl,
+    );
 
     final RealTimeConnection connection = RealTimeConnection(
       organizationId: organizationId,
       baseUrl: baseUrl,
       registerQueueUseCase: registerQueueUseCase,
       getEventsByQueueIdUseCase: getEventsByQueueIdUseCase,
+      deleteQueueUseCase: deleteQueueUseCase,
     );
 
     connection.typingEventsStream.listen(_typingEventsController.add, onError: (_) {});

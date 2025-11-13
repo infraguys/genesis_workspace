@@ -24,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -73,15 +73,12 @@ class AppDatabase extends _$AppDatabase {
         await migrator.create(pinnedChats);
       }
       if (from < 11) {
-        await migrator.alterTable(
-          TableMigration(
-            organizations,
-            newColumns: [organizations.unreadCount],
-            columnTransformer: {
-              organizations.unreadCount: const Constant(0),
-            },
-          ),
-        );
+        final hasUnreadCountColumn = await _hasColumn('organizations', 'unread_count');
+        if (!hasUnreadCountColumn) {
+          await customStatement(
+            'ALTER TABLE organizations ADD COLUMN unread_count INTEGER NOT NULL DEFAULT 0;',
+          );
+        }
       }
       if (from < 12) {
         int? defaultOrganizationId = AppConstants.selectedOrganizationId;
@@ -163,6 +160,18 @@ class AppDatabase extends _$AppDatabase {
           await customStatement('DROP TABLE folder_items_old;');
         });
       }
+      if (from < 15) {
+        await transaction(() async {
+          await customStatement('ALTER TABLE organizations RENAME TO organizations_old;');
+          await migrator.createTable(organizations);
+          await customStatement(
+            'INSERT INTO organizations '
+            '(id, name, icon, base_url, unread_messages) '
+            "SELECT id, name, icon, base_url, '[]' FROM organizations_old;",
+          );
+          await customStatement('DROP TABLE organizations_old;');
+        });
+      }
     },
   );
 
@@ -190,6 +199,14 @@ class AppDatabase extends _$AppDatabase {
         batch.deleteAll(organizations);
       });
     });
+  }
+
+  Future<bool> _hasColumn(String tableName, String columnName) async {
+    final columnInfo = await customSelect('PRAGMA table_info($tableName);').get();
+    return columnInfo
+        .map((row) => row.data['name'] as String?)
+        .whereType<String>()
+        .contains(columnName);
   }
 
   /// Determines which legacy column should be used when migrating folder items.

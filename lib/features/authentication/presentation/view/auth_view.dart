@@ -1,12 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
+import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +39,8 @@ class _AuthViewState extends State<AuthView> {
   Future<void>? _future;
 
   Future<void> getInitialData() async {
-    await context.read<AuthCubit>().getServerSettings();
+    final baseUrl = AppConstants.baseUrl;
+    await context.read<AuthCubit>().getServerSettings(baseUrl);
   }
 
   @override
@@ -63,11 +68,16 @@ class _AuthViewState extends State<AuthView> {
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      await context.read<AuthCubit>().login(
-        _usernameController.text.trim(),
-        _passwordController.text,
-      );
-      FocusScope.of(context).unfocus();
+      try {
+        await context.read<AuthCubit>().login(
+          _usernameController.text.trim(),
+          _passwordController.text,
+        );
+        await context.read<RealTimeCubit>().addConnection();
+        FocusScope.of(context).unfocus();
+      } catch (e) {
+        inspect(e);
+      }
     }
   }
 
@@ -87,8 +97,7 @@ class _AuthViewState extends State<AuthView> {
         return Scaffold(
           resizeToAvoidBottomInset: true,
           body: BlocListener<OrganizationsCubit, OrganizationsState>(
-            listenWhen: (previous, current) =>
-                previous.selectedOrganizationId != current.selectedOrganizationId,
+            listenWhen: (previous, current) => previous.selectedOrganizationId != current.selectedOrganizationId,
             listener: (context, state) {
               setState(() {
                 _future = getInitialData();
@@ -178,9 +187,7 @@ class _AuthViewState extends State<AuthView> {
                                             Text(
                                               state.selectedOrganization!.baseUrl,
                                               style: theme.textTheme.bodySmall?.copyWith(
-                                                color: theme
-                                                    .colorScheme
-                                                    .onSurfaceVariant, // secondary цвет
+                                                color: theme.colorScheme.onSurfaceVariant, // secondary цвет
                                               ),
                                             ),
                                           ],
@@ -218,25 +225,18 @@ class _AuthViewState extends State<AuthView> {
                                           labelText: t.password,
                                           hintText: t.auth.passwordHint,
                                           suffixIcon: Semantics(
-                                            label: _obscureText
-                                                ? t.auth.showPassword
-                                                : t.auth.hidePassword,
+                                            label: _obscureText ? t.auth.showPassword : t.auth.hidePassword,
                                             button: true,
                                             child: IconButton(
                                               icon: Icon(
-                                                _obscureText
-                                                    ? Icons.visibility_off
-                                                    : Icons.visibility,
+                                                _obscureText ? Icons.visibility_off : Icons.visibility,
                                               ),
                                               onPressed: _toggleVisibility,
-                                              tooltip: _obscureText
-                                                  ? t.auth.showPassword
-                                                  : t.auth.hidePassword,
+                                              tooltip: _obscureText ? t.auth.showPassword : t.auth.hidePassword,
                                             ),
                                           ),
                                         ),
-                                        validator: (v) =>
-                                            (v == null || v.isEmpty) ? t.passwordCantBeEmpty : null,
+                                        validator: (v) => (v == null || v.isEmpty) ? t.passwordCantBeEmpty : null,
                                       ),
                                       if (state.errorMessage != null)
                                         Container(

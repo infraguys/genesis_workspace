@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class PasteCodeView extends StatefulWidget {
@@ -51,6 +52,7 @@ class _PasteCodeViewState extends State<PasteCodeView> {
     setState(() => _submitting = true);
     try {
       await context.read<AuthCubit>().parsePastedZulipCode(pastedText: code);
+      await context.read<RealTimeCubit>().addConnection();
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

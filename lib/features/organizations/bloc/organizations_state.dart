@@ -2,28 +2,20 @@ part of 'organizations_cubit.dart';
 
 class OrganizationsState {
   final List<OrganizationEntity> organizations;
-  final int? selectedOrganizationId;
+  int? selectedOrganizationId;
 
-  const OrganizationsState({
+  OrganizationsState({
     required this.organizations,
-    required this.selectedOrganizationId,
+    this.selectedOrganizationId,
   });
-
-  const OrganizationsState.initial()
-      : organizations = const [],
-        selectedOrganizationId = null;
 
   OrganizationsState copyWith({
     List<OrganizationEntity>? organizations,
-    Object? selectedOrganizationId = _noValue,
+    int? selectedOrganizationId,
   }) {
     return OrganizationsState(
       organizations: organizations ?? this.organizations,
-      selectedOrganizationId: identical(selectedOrganizationId, _noValue)
-          ? this.selectedOrganizationId
-          : selectedOrganizationId as int?,
+      selectedOrganizationId: selectedOrganizationId ?? this.selectedOrganizationId,
     );
   }
 }
-
-const Object _noValue = Object();
