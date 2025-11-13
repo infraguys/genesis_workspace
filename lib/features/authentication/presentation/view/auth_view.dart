@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
@@ -170,8 +171,11 @@ class _AuthViewState extends State<AuthView> {
                                         height: 90,
                                         width: 90,
                                         child: Image.network(
-                                          state.selectedOrganization!.imageUrl,
+                                          state.selectedOrganization?.imageUrl ?? '',
                                           fit: BoxFit.fitHeight,
+                                          errorBuilder: (_, _, _) {
+                                            return GenesisLogo();
+                                          },
                                         ),
                                       ),
                                       if (state.selectedOrganization != null) ...[

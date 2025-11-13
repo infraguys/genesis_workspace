@@ -280,17 +280,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
     );
-    gh.lazySingleton<_i113.PasteCaptureService>(
-      () => _i113.PasteCaptureService(),
-    );
-    gh.lazySingleton<_i435.LocalizationService>(
-      () => _i435.LocalizationService(),
-    );
     gh.lazySingleton<_i733.RealTimeRepositoryFactory>(
       () => realTimeModule.realTimeRepositoryFactory(),
     );
     gh.lazySingleton<_i215.PerOrganizationDioFactory>(
       () => realTimeModule.perOrganizationDioFactory(),
+    );
+    gh.lazySingleton<_i113.PasteCaptureService>(
+      () => _i113.PasteCaptureService(),
+    );
+    gh.lazySingleton<_i435.LocalizationService>(
+      () => _i435.LocalizationService(),
     );
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
@@ -530,13 +530,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
-    gh.factory<_i438.GetMembersForFolderUseCase>(
-      () => _i438.GetMembersForFolderUseCase(
+    gh.factory<_i247.GetFolderIdsForChatUseCase>(
+      () => _i247.GetFolderIdsForChatUseCase(
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
-    gh.factory<_i247.GetFolderIdsForChatUseCase>(
-      () => _i247.GetFolderIdsForChatUseCase(
+    gh.factory<_i438.GetMembersForFolderUseCase>(
+      () => _i438.GetMembersForFolderUseCase(
         gh<_i915.FolderMembershipRepository>(),
       ),
     );

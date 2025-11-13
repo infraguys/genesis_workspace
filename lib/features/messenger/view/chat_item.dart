@@ -122,6 +122,8 @@ class _ChatItemState extends State<ChatItem> {
         ),
       ),
       child: Material(
+        borderRadius: BorderRadius.circular(8),
+        color: cardColors.base,
         child: Column(
           children: [
             InkWell(

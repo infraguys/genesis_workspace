@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
@@ -142,10 +143,11 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               body: Column(
                 spacing: 4.0,
                 children: [
-                  ScaffoldDesktopAppBar(
-                    onSelectBranch: _goBranch,
-                    selectedIndex: widget.navigationShell.currentIndex,
-                  ),
+                  if (currentSize(context) > ScreenSize.tablet)
+                    ScaffoldDesktopAppBar(
+                      onSelectBranch: _goBranch,
+                      selectedIndex: widget.navigationShell.currentIndex,
+                    ),
                   BlocBuilder<AuthCubit, AuthState>(
                     buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
                     builder: (_, state) {
