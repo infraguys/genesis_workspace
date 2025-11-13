@@ -69,7 +69,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
         name: serverSettings.realmName,
         icon: serverSettings.realmIcon,
         baseUrl: baseUrl,
-        unreadCount: 0,
+        unreadMessages: {},
       );
       final organization = await _addOrganizationUseCase.call(body);
       await _multiPollingService.addConnection(organization.id, organization.baseUrl);
@@ -105,10 +105,11 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
 
   void _onMessageEvents(MessageEventEntity event) {
     final orgId = event.organizationId;
+    inspect(event);
     List<OrganizationEntity> updatedOrganizations = [...state.organizations];
     final org = updatedOrganizations.firstWhere((element) => element.id == orgId);
     final index = updatedOrganizations.indexOf(org);
-    updatedOrganizations[index] = org.copyWith(unreadCount: org.unreadCount + 1);
+    updatedOrganizations[index].unreadMessages.add(event.message.id);
     emit(state.copyWith(organizations: updatedOrganizations));
   }
 

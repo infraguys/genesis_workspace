@@ -85,7 +85,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                 itemBuilder: (context, index) {
                                   final organization = organizations[index];
                                   return OrganizationItem(
-                                    unreadCount: organization.unreadCount,
+                                    unreadCount: organization.unreadMessages.length,
                                     imagePath: organization.imageUrl,
                                     isSelected: organization.id == selectedId,
                                     onTap: () async {

@@ -14,18 +14,17 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required String name,
     required String icon,
     required String baseUrl,
-    required int unreadCount,
+    required Set<int> unreadMessages,
   }) {
     return transaction(() async {
-      final existing = await (select(organizations)..where((t) => t.baseUrl.equals(baseUrl)))
-          .getSingleOrNull();
+      final existing = await (select(organizations)..where((t) => t.baseUrl.equals(baseUrl))).getSingleOrNull();
       if (existing != null) {
         await (update(organizations)..where((t) => t.id.equals(existing.id))).write(
           OrganizationsCompanion(
             name: Value(name),
             icon: Value(icon),
             baseUrl: Value(baseUrl),
-            unreadCount: Value(unreadCount),
+            unreadMessages: Value(unreadMessages),
           ),
         );
         return existing.id;
@@ -36,7 +35,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
           name: name,
           icon: icon,
           baseUrl: baseUrl,
-          unreadCount: Value(unreadCount),
+          unreadMessages: Value(unreadMessages),
         ),
         mode: InsertMode.insert,
       );

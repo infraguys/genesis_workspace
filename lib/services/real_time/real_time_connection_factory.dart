@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 import 'package:genesis_workspace/services/real_time/per_org_dio_factory.dart';
@@ -34,6 +35,11 @@ abstract class RealTimeConnectionFactory {
     required int organizationId,
     required String baseUrl,
   });
+
+  DeleteQueueUseCase createDeleteQueueUseCase({
+    required int organizationId,
+    required String baseUrl,
+  });
 }
 
 @LazySingleton(as: RealTimeConnectionFactory)
@@ -48,8 +54,7 @@ class RealTimeConnectionFactoryImpl implements RealTimeConnectionFactory {
   final PerOrganizationDioFactory _dioFactory;
   final RealTimeRepositoryFactory _repositoryFactory;
 
-  final Map<String, RealTimeEventsRepository> _repositoryByBaseUrl =
-      <String, RealTimeEventsRepository>{};
+  final Map<String, RealTimeEventsRepository> _repositoryByBaseUrl = <String, RealTimeEventsRepository>{};
 
   @override
   RegisterQueueUseCase createRegisterQueueUseCase({
@@ -67,6 +72,15 @@ class RealTimeConnectionFactoryImpl implements RealTimeConnectionFactory {
   }) {
     final RealTimeEventsRepository repository = _getOrCreateRepository(baseUrl);
     return GetEventsByQueueIdUseCase(repository);
+  }
+
+  @override
+  DeleteQueueUseCase createDeleteQueueUseCase({
+    required int organizationId,
+    required String baseUrl,
+  }) {
+    final RealTimeEventsRepository repository = _getOrCreateRepository(baseUrl);
+    return DeleteQueueUseCase(repository);
   }
 
   RealTimeEventsRepository _getOrCreateRepository(String baseUrl) {

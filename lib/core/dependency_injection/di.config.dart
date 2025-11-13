@@ -722,6 +722,31 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
       ),
     );
+    gh.lazySingleton<_i862.AuthCubit>(
+      () => _i862.AuthCubit(
+        gh<_i460.SharedPreferences>(),
+        gh<_i440.DioFactory>(),
+        gh<_i799.FetchApiKeyUseCase>(),
+        gh<_i643.SaveTokenUseCase>(),
+        gh<_i75.GetTokenUseCase>(),
+        gh<_i433.DeleteTokenUseCase>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i832.UpdatePresenceUseCase>(),
+        gh<_i848.GetServerSettingsUseCase>(),
+        gh<_i286.GetOrganizationSettingsUseCase>(),
+        gh<_i721.SaveSessionIdUseCase>(),
+        gh<_i361.DeleteSessionIdUseCase>(),
+        gh<_i352.SaveCsrftokenUseCase>(),
+        gh<_i862.GetCsrftokenUseCase>(),
+        gh<_i350.GetSessionIdUseCase>(),
+        gh<_i819.DeleteCsrftokenUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
+        gh<_i401.GetOrganizationByIdUseCase>(),
+        gh<_i535.GetAllOrganizationsUseCase>(),
+        gh<_i377.OrganizationSwitcherService>(),
+      ),
+      dispose: _i862.disposeAuthCubit,
+    );
     gh.lazySingleton<_i573.RealTimeCubit>(
       () => _i573.RealTimeCubit(
         gh<_i823.MultiPollingService>(),
@@ -743,32 +768,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i631.UnpinChatUseCase>(),
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
       ),
-    );
-    gh.lazySingleton<_i862.AuthCubit>(
-      () => _i862.AuthCubit(
-        gh<_i460.SharedPreferences>(),
-        gh<_i440.DioFactory>(),
-        gh<_i799.FetchApiKeyUseCase>(),
-        gh<_i643.SaveTokenUseCase>(),
-        gh<_i75.GetTokenUseCase>(),
-        gh<_i435.DeleteQueueUseCase>(),
-        gh<_i433.DeleteTokenUseCase>(),
-        gh<_i823.MultiPollingService>(),
-        gh<_i832.UpdatePresenceUseCase>(),
-        gh<_i848.GetServerSettingsUseCase>(),
-        gh<_i286.GetOrganizationSettingsUseCase>(),
-        gh<_i721.SaveSessionIdUseCase>(),
-        gh<_i361.DeleteSessionIdUseCase>(),
-        gh<_i352.SaveCsrftokenUseCase>(),
-        gh<_i862.GetCsrftokenUseCase>(),
-        gh<_i350.GetSessionIdUseCase>(),
-        gh<_i819.DeleteCsrftokenUseCase>(),
-        gh<_i183.AddOrganizationUseCase>(),
-        gh<_i401.GetOrganizationByIdUseCase>(),
-        gh<_i535.GetAllOrganizationsUseCase>(),
-        gh<_i377.OrganizationSwitcherService>(),
-      ),
-      dispose: _i862.disposeAuthCubit,
     );
     return this;
   }

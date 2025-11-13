@@ -18,6 +18,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/events_by_que
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_request_body_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 
@@ -26,6 +27,7 @@ class RealTimeConnection {
   final String baseUrl;
   final RegisterQueueUseCase _registerQueueUseCase;
   final GetEventsByQueueIdUseCase _getEventsByQueueIdUseCase;
+  final DeleteQueueUseCase _deleteQueueUseCase;
 
   final Duration _initialRetryDelay;
   final Duration _maxRetryDelay;
@@ -40,10 +42,12 @@ class RealTimeConnection {
     required this.baseUrl,
     required RegisterQueueUseCase registerQueueUseCase,
     required GetEventsByQueueIdUseCase getEventsByQueueIdUseCase,
+    required DeleteQueueUseCase deleteQueueUseCase,
     Duration initialRetryDelay = const Duration(seconds: 1),
     Duration maxRetryDelay = const Duration(seconds: 20),
   }) : _registerQueueUseCase = registerQueueUseCase,
        _getEventsByQueueIdUseCase = getEventsByQueueIdUseCase,
+       _deleteQueueUseCase = deleteQueueUseCase,
        _initialRetryDelay = initialRetryDelay,
        _maxRetryDelay = maxRetryDelay;
 
@@ -92,6 +96,7 @@ class RealTimeConnection {
 
   Future<void> stop() async {
     _isActive = false;
+    await _deleteQueueUseCase.call(_queueId);
     await _pollingTask;
     await _closeControllers();
   }

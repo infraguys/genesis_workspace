@@ -5,7 +5,7 @@ class OrganizationEntity {
   final String name;
   final String icon;
   final String baseUrl;
-  final int unreadCount;
+  final Set<int> unreadMessages;
 
   String get imageUrl => icon.contains('https://') ? icon : '$baseUrl$icon';
 
@@ -14,16 +14,16 @@ class OrganizationEntity {
     required this.name,
     required this.icon,
     required this.baseUrl,
-    required this.unreadCount,
+    required this.unreadMessages,
   });
 
-  OrganizationEntity copyWith({int? unreadCount}) {
+  OrganizationEntity copyWith({Set<int>? unreadMessages}) {
     return OrganizationEntity(
       id: id,
       name: name,
       icon: icon,
       baseUrl: baseUrl,
-      unreadCount: unreadCount ?? this.unreadCount,
+      unreadMessages: unreadMessages ?? this.unreadMessages,
     );
   }
 }
@@ -32,15 +32,15 @@ class OrganizationRequestEntity {
   final String name;
   final String icon;
   final String baseUrl;
-  final int unreadCount;
+  final Set<int> unreadMessages;
 
   OrganizationRequestEntity({
     required this.name,
     required this.icon,
     required this.baseUrl,
-    required this.unreadCount,
+    required this.unreadMessages,
   });
 
   OrganizationRequestDto toDto() =>
-      OrganizationRequestDto(name: name, icon: icon, baseUrl: baseUrl, unreadCount: unreadCount);
+      OrganizationRequestDto(name: name, icon: icon, baseUrl: baseUrl, unreadMessages: unreadMessages);
 }

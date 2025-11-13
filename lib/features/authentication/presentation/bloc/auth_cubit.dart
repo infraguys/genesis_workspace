@@ -16,7 +16,6 @@ import 'package:genesis_workspace/domain/organizations/usecases/add_organization
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_settings_use_case.dart';
-import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/api_key_entity.dart';
@@ -43,7 +42,6 @@ class AuthCubit extends Cubit<AuthState> {
   final FetchApiKeyUseCase _fetchApiKeyUseCase;
   final SaveTokenUseCase _saveTokenUseCase;
   final GetTokenUseCase _getTokenUseCase;
-  final DeleteQueueUseCase _deleteQueueUseCase;
   final DeleteTokenUseCase _deleteTokenUseCase;
   final MultiPollingService _realTimeService;
   final UpdatePresenceUseCase _updatePresenceUseCase;
@@ -66,7 +64,6 @@ class AuthCubit extends Cubit<AuthState> {
     this._fetchApiKeyUseCase,
     this._saveTokenUseCase,
     this._getTokenUseCase,
-    this._deleteQueueUseCase,
     this._deleteTokenUseCase,
     this._realTimeService,
     this._updatePresenceUseCase,
@@ -441,7 +438,7 @@ class AuthCubit extends Cubit<AuthState> {
           name: serverSettings.realmName,
           icon: serverSettings.realmIcon,
           baseUrl: normalizedBaseUrl,
-          unreadCount: 0,
+          unreadMessages: {},
         ),
       );
 

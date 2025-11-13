@@ -10,6 +10,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/subscri
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
 import 'package:genesis_workspace/features/authentication/domain/usecases/get_csrftoken_use_case.dart';
@@ -109,11 +110,17 @@ class MultiPollingService {
       baseUrl: baseUrl,
     );
 
+    final DeleteQueueUseCase deleteQueueUseCase = _connectionFactory.createDeleteQueueUseCase(
+      organizationId: organizationId,
+      baseUrl: baseUrl,
+    );
+
     final RealTimeConnection connection = RealTimeConnection(
       organizationId: organizationId,
       baseUrl: baseUrl,
       registerQueueUseCase: registerQueueUseCase,
       getEventsByQueueIdUseCase: getEventsByQueueIdUseCase,
+      deleteQueueUseCase: deleteQueueUseCase,
     );
 
     connection.typingEventsStream.listen(_typingEventsController.add, onError: (_) {});
