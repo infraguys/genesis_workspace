@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -9,7 +10,7 @@ class FolderItem extends StatefulWidget {
   final FolderItemEntity folder;
   final bool isSelected;
   final String title;
-  final Widget icon;
+  final Widget? icon;
   final VoidCallback onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onOrderPinning;
@@ -20,7 +21,7 @@ class FolderItem extends StatefulWidget {
     required this.title,
     required this.folder,
     required this.isSelected,
-    required this.icon,
+    this.icon,
     required this.onTap,
     this.onEdit,
     this.onOrderPinning,
@@ -43,7 +44,7 @@ class _FolderItemState extends State<FolderItem> {
 
     return CustomPopup(
       key: popupKey,
-      isLongPress: true,
+      isLongPress: currentSize(context) <= ScreenSize.tablet,
       rootNavigator: true,
       arrowColor: theme.colorScheme.surfaceContainer,
       backgroundColor: theme.colorScheme.surfaceContainer,
@@ -74,27 +75,59 @@ class _FolderItemState extends State<FolderItem> {
           popupKey.currentState?.show();
         },
         onHover: (bool hover) => setState(() => _isHovered = hover),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            UnreadBadge(count: widget.folder.unreadCount),
-            SizedBox(height: 40, width: 40, child: widget.icon),
-            Tooltip(
-              message: widget.title,
-              child: Text(
-                widget.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: (widget.isSelected || _isHovered)
-                      ? widget.folder.backgroundColor
-                      : textColors.text30,
+        child: currentSize(context) > ScreenSize.tablet
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  UnreadBadge(count: widget.folder.unreadCount),
+                  SizedBox(height: 40, width: 40, child: widget.icon),
+                  Tooltip(
+                    message: widget.title,
+                    child: Text(
+                      widget.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: (widget.isSelected || _isHovered) ? widget.folder.backgroundColor : textColors.text30,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Material(
+                type: MaterialType.transparency,
+                child: GestureDetector(
+                  onTap: widget.onTap,
+                  child: Container(
+                    padding: EdgeInsets.only(bottom: 4),
+                    decoration: BoxDecoration(
+                      border: widget.isSelected
+                          ? Border(
+                              bottom: BorderSide(
+                                color: Colors.white,
+                                width: 1,
+                              ),
+                            )
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: widget.isSelected ? textColors.text100 : textColors.text30,
+                          ),
+                        ),
+                        UnreadBadge(count: widget.folder.unreadCount),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -280,72 +280,176 @@ class _MessengerViewState extends State<MessengerView> {
                                   ),
                               ],
                               bottom: PreferredSize(
-                                preferredSize: Size.fromHeight(48),
-                                child: Padding(
-                                  padding: currentSize(context) > ScreenSize.tablet
-                                      ? EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12)
-                                      : EdgeInsets.symmetric(horizontal: 20).copyWith(top: 14, bottom: 20),
-                                  child: Row(
-                                    spacing: 8,
-                                    children: [
-                                      Expanded(
-                                        child: SizedBox(
-                                          height: 36,
-                                          child: TextField(
-                                            style: TextStyle(fontSize: 14),
-                                            decoration: InputDecoration(
-                                              hintText: context.t.general.find,
-                                              // constraints: BoxConstraints(maxHeight: 36),
-                                              suffixIcon: currentSize(context) > ScreenSize.tablet
-                                                  ? Align(
-                                                      widthFactor: 1.0,
-                                                      heightFactor: 1.0,
-                                                      child: Assets.icons.search.svg(
-                                                        width: 20,
-                                                        height: 20,
-                                                      ),
-                                                    )
-                                                  : null,
-                                              prefixIcon: currentSize(context) <= ScreenSize.tablet
-                                                  ? Align(
-                                                      widthFactor: 1.0,
-                                                      heightFactor: 1.0,
-                                                      child: Assets.icons.search.svg(
-                                                        width: 20,
-                                                        height: 20,
-                                                      ),
-                                                    )
-                                                  : null,
+                                preferredSize: Size.fromHeight(
+                                  currentSize(context) <= ScreenSize.tablet ? 96 : 48,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Padding(
+                                      padding: currentSize(context) > ScreenSize.tablet
+                                          ? EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12)
+                                          : EdgeInsets.symmetric(horizontal: 20).copyWith(top: 14, bottom: 20),
+                                      child: Row(
+                                        spacing: 8,
+                                        children: [
+                                          Expanded(
+                                            child: SizedBox(
+                                              height: 36,
+                                              child: TextField(
+                                                style: TextStyle(fontSize: 14),
+                                                decoration: InputDecoration(
+                                                  hintText: context.t.general.find,
+                                                  suffixIcon: currentSize(context) > ScreenSize.tablet
+                                                      ? Align(
+                                                          widthFactor: 1.0,
+                                                          heightFactor: 1.0,
+                                                          child: Assets.icons.search.svg(
+                                                            width: 20,
+                                                            height: 20,
+                                                          ),
+                                                        )
+                                                      : null,
+                                                  prefixIcon: currentSize(context) <= ScreenSize.tablet
+                                                      ? Align(
+                                                          widthFactor: 1.0,
+                                                          heightFactor: 1.0,
+                                                          child: Assets.icons.search.svg(
+                                                            width: 20,
+                                                            height: 20,
+                                                          ),
+                                                        )
+                                                      : null,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          if (currentSize(context) > ScreenSize.tablet)
+                                            SizedBox(
+                                              height: 32,
+                                              width: 32,
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  unawaited(createNewFolder(context));
+                                                },
+                                                icon: Assets.icons.add.svg(),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (currentSize(context) <= ScreenSize.tablet)
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: theme.dividerColor,
+                                              width: 1,
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      if (currentSize(context) > ScreenSize.tablet)
-                                        SizedBox(
-                                          height: 32,
-                                          width: 32,
-                                          child: IconButton(
-                                            onPressed: () {
-                                              unawaited(createNewFolder(context));
-                                            },
-                                            icon: Assets.icons.add.svg(),
-                                          ),
+                                        height: 24,
+                                        child: ListView.separated(
+                                          shrinkWrap: true,
+                                          physics: BouncingScrollPhysics(),
+                                          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: state.folders.length + 1,
+                                          separatorBuilder: (_, __) => SizedBox(width: 32),
+                                          itemBuilder: (context, index) {
+                                            if (index == state.folders.length) {
+                                              return GestureDetector(
+                                                onTap: () => unawaited(createNewFolder(context)),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  spacing: 4,
+                                                  children: [
+                                                    Text(
+                                                      context.t.folders.create,
+                                                      style: theme.textTheme.labelLarge?.copyWith(
+                                                        color: textColors.text100,
+                                                      ),
+                                                    ),
+                                                    Assets.icons.add.svg(
+                                                      width: 14,
+                                                      height: 14,
+                                                      colorFilter: ColorFilter.mode(
+                                                        textColors.text100,
+                                                        BlendMode.srcIn,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+                                            final folder = state.folders[index];
+                                            final bool isSelected = state.selectedFolderIndex == index;
+                                            final String title = index == 0
+                                                ? context.t.folders.all
+                                                : folder.title ?? '';
+                                            return FolderItem(
+                                              title: title,
+                                              folder: folder,
+                                              isSelected: isSelected,
+                                              onTap: () => context.read<MessengerCubit>().selectFolder(index),
+                                              onEdit: (folder.systemType == null)
+                                                  ? () => editFolder(context, folder)
+                                                  : null,
+                                              onOrderPinning: () {
+                                                context.pop();
+                                                context.read<MessengerCubit>().selectFolder(index);
+                                                editPinning();
+                                              },
+                                              onDelete: (folder.systemType == null)
+                                                  ? () async {
+                                                      context.pop();
+                                                      final confirmed = await showDialog<bool>(
+                                                        context: context,
+                                                        builder: (dialogContext) => AlertDialog(
+                                                          title: Text(context.t.folders.deleteConfirmTitle),
+                                                          content: Text(
+                                                            context.t.folders.deleteConfirmText(
+                                                              folderName: folder.title ?? '',
+                                                            ),
+                                                          ),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () => Navigator.of(dialogContext).pop(false),
+                                                              child: Text(context.t.folders.cancel),
+                                                            ),
+                                                            FilledButton(
+                                                              onPressed: () => Navigator.of(dialogContext).pop(true),
+                                                              child: Text(context.t.folders.delete),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                      if (confirmed == true) {
+                                                        await context.read<MessengerCubit>().deleteFolder(
+                                                          folder,
+                                                        );
+                                                      }
+                                                    }
+                                                  : null,
+                                            );
+                                          },
                                         ),
-                                    ],
-                                  ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
-                            if (currentSize(context) <= ScreenSize.tablet)
-                              //Folders list
-                              if (visibleChats.isEmpty)
-                                SliverToBoxAdapter(
+                            if (visibleChats.isEmpty)
+                              SliverPadding(
+                                padding: EdgeInsetsGeometry.symmetric(vertical: 20),
+                                sliver: SliverToBoxAdapter(
                                   child: Center(
                                     child: Text(context.t.folders.folderIsEmpty),
                                   ),
                                 ),
+                              ),
                             SliverPadding(
-                              padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
+                              padding: EdgeInsetsGeometry.symmetric(horizontal: 8, vertical: 20),
                               sliver: _isEditPinning
                                   ? SliverReorderableList(
                                       itemCount: pinnedChatsForEdit.length,
