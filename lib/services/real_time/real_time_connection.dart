@@ -96,13 +96,15 @@ class RealTimeConnection {
 
   Future<void> stop() async {
     _isActive = false;
-    await _deleteQueueUseCase.call(_queueId);
+    if (_queueId != null) {
+      await _deleteQueueUseCase.call(_queueId);
+    }
     await _pollingTask;
     await _closeControllers();
   }
 
   Future<bool> checkConnection() async {
-    if (_isActive) {
+    if (_isActive && _queueId != null) {
       final body = EventsByQueueIdRequestBodyEntity(queueId: _queueId!, lastEventId: _lastEventId, dontBlock: true);
       final response = await _getEventsByQueueIdUseCase.call(body);
       if (response.result == 'success') {
