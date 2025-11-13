@@ -24,7 +24,7 @@ class GetFoldersUseCase {
         id: row.id,
         title: row.title,
         iconData: FolderIconsConstants.byCodePoint[row.iconCodePoint] ?? Icons.folder,
-        unreadCount: row.unreadCount,
+        unreadMessages: row.unreadMessages,
         backgroundColor: row.backgroundColorValue != null ? Color(row.backgroundColorValue!) : null,
         pinnedChats: folderPinnedChats,
         organizationId: row.organizationId,

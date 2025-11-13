@@ -94,7 +94,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
           title: 'All',
           systemType: SystemFolderType.all,
           iconData: Icons.markunread,
-          unreadCount: 0,
+          unreadMessages: const <int>{},
           pinnedChats: [],
           organizationId: organizationId,
         );

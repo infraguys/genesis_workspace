@@ -10,7 +10,7 @@ class FolderPill extends StatelessWidget {
   final void Function()? onEdit;
   final void Function()? onEditPinning;
   final void Function()? onDelete;
-  // When provided, overrides folder.unreadCount for display
+  // When provided, overrides folder.unreadMessages.length for display
   final int? unreadCount;
   const FolderPill({
     super.key,
@@ -71,9 +71,9 @@ class FolderPill extends StatelessWidget {
                 Icon(folder.iconData, size: 18, color: folder.backgroundColor),
                 const SizedBox(width: 8),
                 Text(folder.displayTitle(context), style: TextStyle(color: foregroundColor)),
-                if ((unreadCount ?? folder.unreadCount) > 0) ...[
+                if ((unreadCount ?? folder.unreadMessages.length) > 0) ...[
                   const SizedBox(width: 8),
-                  UnreadBadge(count: (unreadCount ?? folder.unreadCount)),
+                  UnreadBadge(count: (unreadCount ?? folder.unreadMessages.length)),
                 ],
               ],
             ),

@@ -229,7 +229,7 @@ class _MessengerViewState extends State<MessengerView> {
                               centerTitle: currentSize(context) <= ScreenSize.tablet,
                               floating: true,
                               snap: true,
-                              pinned: false,
+                              pinned: currentSize(context) <= ScreenSize.tablet,
                               leading: IconButton(
                                 padding: EdgeInsets.zero,
                                 onPressed: () {},
@@ -449,7 +449,9 @@ class _MessengerViewState extends State<MessengerView> {
                                 ),
                               ),
                             SliverPadding(
-                              padding: EdgeInsetsGeometry.symmetric(horizontal: 8, vertical: 20),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 20).copyWith(
+                                bottom: currentSize(context) <= ScreenSize.tablet ? 110 : 20,
+                              ),
                               sliver: _isEditPinning
                                   ? SliverReorderableList(
                                       itemCount: pinnedChatsForEdit.length,

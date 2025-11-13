@@ -79,7 +79,7 @@ class _FolderItemState extends State<FolderItem> {
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  UnreadBadge(count: widget.folder.unreadCount),
+            UnreadBadge(count: widget.folder.unreadMessages.length),
                   SizedBox(height: 40, width: 40, child: widget.icon),
                   Tooltip(
                     message: widget.title,
@@ -122,7 +122,7 @@ class _FolderItemState extends State<FolderItem> {
                             color: widget.isSelected ? textColors.text100 : textColors.text30,
                           ),
                         ),
-                        UnreadBadge(count: widget.folder.unreadCount),
+                        UnreadBadge(count: widget.folder.unreadMessages.length),
                       ],
                     ),
                   ),

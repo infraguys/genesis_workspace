@@ -9,9 +9,10 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
+import 'package:genesis_workspace/features/app_bar/view/branch_item.dart';
+import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
-import 'package:genesis_workspace/features/desktop_app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -140,20 +141,57 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           future: _future,
           builder: (context, asyncSnapshot) {
             return Scaffold(
-              body: Column(
-                spacing: 4.0,
+              body: Stack(
+                fit: StackFit.expand,
                 children: [
-                  if (currentSize(context) > ScreenSize.tablet)
-                    ScaffoldDesktopAppBar(
-                      onSelectBranch: _goBranch,
-                      selectedIndex: widget.navigationShell.currentIndex,
-                    ),
-                  BlocBuilder<AuthCubit, AuthState>(
-                    buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                    builder: (_, state) {
-                      return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
-                    },
+                  Column(
+                    spacing: 4.0,
+                    children: [
+                      if (currentSize(context) > ScreenSize.tablet)
+                        ScaffoldDesktopAppBar(
+                          onSelectBranch: _goBranch,
+                          selectedIndex: widget.navigationShell.currentIndex,
+                        ),
+                      BlocBuilder<AuthCubit, AuthState>(
+                        buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                        builder: (_, state) {
+                          return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
+                        },
+                      ),
+                    ],
                   ),
+                  if (currentSize(context) <= ScreenSize.tablet)
+                    Align(
+                      alignment: AlignmentGeometry.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 30),
+                        child: Container(
+                          height: 73,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: branchModels.length,
+                            physics: NeverScrollableScrollPhysics(),
+                            // shrinkWrap: true,
+                            itemBuilder: (BuildContext context, int index) {
+                              final model = branchModels[index];
+                              return BranchItem(
+                                icon: model.icon,
+                                isSelected: index == widget.navigationShell.currentIndex,
+                                // size: 54,
+                                onPressed: () {
+                                  // mainTitleNotifier.value = model.title(context);
+                                  _goBranch(index);
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             );

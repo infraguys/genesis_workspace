@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -99,8 +99,8 @@ class AppDatabase extends _$AppDatabase {
           if (defaultOrganizationId != null) {
             await customStatement(
               'INSERT INTO folders '
-              '(id, title, icon_code_point, background_color_value, unread_count, system_type, organization_id) '
-              'SELECT id, title, icon_code_point, background_color_value, unread_count, system_type, $defaultOrganizationId '
+              '(id, title, icon_code_point, background_color_value, unread_messages, system_type, organization_id) '
+              "SELECT id, title, icon_code_point, background_color_value, '[]', system_type, $defaultOrganizationId "
               'FROM folders_old;',
             );
           }
@@ -169,6 +169,18 @@ class AppDatabase extends _$AppDatabase {
             "SELECT id, name, icon, base_url, '[]' FROM organizations_old;",
           );
           await customStatement('DROP TABLE organizations_old;');
+        });
+      }
+      if (from < 16) {
+        await transaction(() async {
+          await customStatement('ALTER TABLE folders RENAME TO folders_old;');
+          await migrator.createTable(folders);
+          await customStatement(
+            'INSERT INTO folders '
+            '(id, title, icon_code_point, background_color_value, unread_messages, system_type, organization_id) '
+            "SELECT id, title, icon_code_point, background_color_value, '[]', system_type, organization_id FROM folders_old;",
+          );
+          await customStatement('DROP TABLE folders_old;');
         });
       }
     },
