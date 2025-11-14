@@ -153,7 +153,10 @@ class _ChatItemState extends State<ChatItem> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        UserAvatar(avatarUrl: widget.chat.avatarUrl, size: 30),
+                        UserAvatar(
+                          avatarUrl: widget.chat.avatarUrl,
+                          size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -219,96 +222,97 @@ class _ChatItemState extends State<ChatItem> {
                 ),
               ),
             ),
-            AnimatedSize(
-              duration: _animationDuration,
-              curve: _animationCurve,
-              child: _isExpanded
-                  ? Skeletonizer(
-                      enabled: widget.chat.isTopicsLoading,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
-                          return InkWell(
-                            onTap: () {
-                              context.read<MessengerCubit>().selectChat(
-                                widget.chat,
-                                selectedTopic: topic.name,
-                              );
-                            },
-                            child: Container(
-                              height: 76,
-                              padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
-                              decoration: BoxDecoration(
-                                color: cardColors.base,
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: 3,
-                                          height: 47,
-                                          decoration: BoxDecoration(
-                                            color: Colors.yellow,
-                                            borderRadius: BorderRadiusGeometry.circular(4),
+            if (currentSize(context) > ScreenSize.tablet)
+              AnimatedSize(
+                duration: _animationDuration,
+                curve: _animationCurve,
+                child: _isExpanded
+                    ? Skeletonizer(
+                        enabled: widget.chat.isTopicsLoading,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
+                            return InkWell(
+                              onTap: () {
+                                context.read<MessengerCubit>().selectChat(
+                                  widget.chat,
+                                  selectedTopic: topic.name,
+                                );
+                              },
+                              child: Container(
+                                height: 76,
+                                padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: cardColors.base,
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            width: 3,
+                                            height: 47,
+                                            decoration: BoxDecoration(
+                                              color: Colors.yellow,
+                                              borderRadius: BorderRadiusGeometry.circular(4),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          width: 12,
-                                        ),
-                                        Expanded(
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Tooltip(
-                                                message: topic.name,
-                                                child: Text(
-                                                  "# ${topic.name}",
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: theme.textTheme.labelMedium?.copyWith(
-                                                    fontSize: 14,
-                                                    color: textColors.text100,
+                                          SizedBox(
+                                            width: 12,
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Tooltip(
+                                                  message: topic.name,
+                                                  child: Text(
+                                                    "# ${topic.name}",
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: theme.textTheme.labelMedium?.copyWith(
+                                                      fontSize: 14,
+                                                      color: textColors.text100,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              Text(
-                                                topic.lastMessageSenderName,
-                                                style: theme.textTheme.bodySmall?.copyWith(
-                                                  color: theme.colorScheme.primary,
+                                                Text(
+                                                  topic.lastMessageSenderName,
+                                                  style: theme.textTheme.bodySmall?.copyWith(
+                                                    color: theme.colorScheme.primary,
+                                                  ),
                                                 ),
-                                              ),
-                                              MessagePreview(
-                                                messagePreview: topic.lastMessagePreview,
-                                              ),
-                                            ],
+                                                MessagePreview(
+                                                  messagePreview: topic.lastMessagePreview,
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  Skeleton.ignore(
-                                    child: SizedBox(
-                                      height: 21,
-                                      child: UnreadBadge(count: topic.unreadMessages.length),
+                                    Skeleton.ignore(
+                                      child: SizedBox(
+                                        height: 21,
+                                        child: UnreadBadge(count: topic.unreadMessages.length),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
+                            );
+                          },
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
           ],
         ),
       ),
