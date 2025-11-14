@@ -115,12 +115,8 @@ class _MessagesListState extends State<MessagesList> {
       final bool isRead = message.flags?.contains('read') ?? false;
 
       if (!isRead) {
-        final MessageEntity? previous = (index + 1 < reversedMessages.length)
-            ? reversedMessages[index + 1]
-            : null;
-        final bool previousIsRead = previous == null
-            ? true
-            : (previous.flags?.contains('read') ?? false);
+        final MessageEntity? previous = (index + 1 < reversedMessages.length) ? reversedMessages[index + 1] : null;
+        final bool previousIsRead = previous == null ? true : (previous.flags?.contains('read') ?? false);
 
         if (previousIsRead) {
           return index;
@@ -131,8 +127,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void _onScroll() {
-    if (_autoScrollController.offset >= _autoScrollController.position.maxScrollExtent &&
-        !widget.isLoadingMore) {
+    if (_autoScrollController.offset >= _autoScrollController.position.maxScrollExtent && !widget.isLoadingMore) {
       if (widget.loadMore != null) {
         widget.loadMore!();
       }
@@ -147,8 +142,7 @@ class _MessagesListState extends State<MessagesList> {
 
     final showScrollToBottomOffset = 200.0;
     final isNearBottom =
-        _autoScrollController.offset <=
-        _autoScrollController.position.minScrollExtent + showScrollToBottomOffset;
+        _autoScrollController.offset <= _autoScrollController.position.minScrollExtent + showScrollToBottomOffset;
 
     if (_showScrollToBottom == isNearBottom) {
       setState(() {
@@ -201,8 +195,7 @@ class _MessagesListState extends State<MessagesList> {
 
                   final isNewDay = _dayInt(message.timestamp) != _dayInt(nextMessage.timestamp);
 
-                  if (_firstUnreadIndexInReversed != null &&
-                      index == _firstUnreadIndexInReversed!) {
+                  if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!) {
                     return UnreadMessagesMarker(
                       unreadCount: _reversed.where((message) => message.isUnread).length,
                     );
@@ -216,8 +209,7 @@ class _MessagesListState extends State<MessagesList> {
                 },
                 itemBuilder: (BuildContext context, int index) {
                   final message = _reversed[index];
-                  final MessageEntity? nextMessage =
-                      (_reversed.length > 1 && index != _reversed.length - 1)
+                  final MessageEntity? nextMessage = (_reversed.length > 1 && index != _reversed.length - 1)
                       ? _reversed[index + 1]
                       : null;
                   final MessageEntity? prevMessage = index != 0 ? _reversed[index - 1] : null;
@@ -228,8 +220,7 @@ class _MessagesListState extends State<MessagesList> {
                   final isNewUser = message.senderId != nextMessage?.senderId;
                   final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
                   final isMessageMiddle =
-                      message.senderId == nextMessage?.senderId &&
-                      message.senderId == prevMessage?.senderId;
+                      message.senderId == nextMessage?.senderId && message.senderId == prevMessage?.senderId;
                   final isSingle = prevOtherUser && isNewUser;
 
                   MessageUIOrder messageOrder;

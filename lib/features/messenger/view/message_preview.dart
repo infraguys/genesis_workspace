@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 
@@ -12,9 +13,10 @@ class MessagePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
+    final double messageContentWidth = currentSize(context) <= ScreenSize.tablet ? 240 : 200;
     return Container(
       margin: EdgeInsetsGeometry.symmetric(vertical: 1),
-      width: 200,
+      width: messageContentWidth,
       height: 18,
       child: ClipRect(
         child: OverflowBox(
@@ -27,7 +29,7 @@ class MessagePreview extends StatelessWidget {
             messagePreview,
             customStylesBuilder: (element) {
               return {
-                "max-width": "200px",
+                "max-width": "${messageContentWidth}px",
                 "text-overflow": "ellipsis",
               };
             },
@@ -37,8 +39,7 @@ class MessagePreview extends StatelessWidget {
                 color: textColors.text50,
               );
 
-              if (element.attributes.containsValue('image/png') ||
-                  element.attributes.containsValue('image/jpeg')) {
+              if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
                 return Text(
                   'Image',
                   maxLines: 1,

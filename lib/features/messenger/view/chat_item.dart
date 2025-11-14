@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -43,8 +44,9 @@ class _ChatItemState extends State<ChatItem> {
       if (_isExpanded == false) {
         return;
       }
+    } else {
+      widget.onTap();
     }
-    widget.onTap();
   }
 
   @override
@@ -67,6 +69,7 @@ class _ChatItemState extends State<ChatItem> {
       backgroundColor: theme.colorScheme.surfaceDim,
       arrowColor: theme.colorScheme.surface,
       rootNavigator: true,
+      isLongPress: currentSize(context) <= ScreenSize.tablet,
       contentDecoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceDim,
         borderRadius: BorderRadius.circular(12),
@@ -163,6 +166,9 @@ class _ChatItemState extends State<ChatItem> {
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: textColors.text100,
+                                  fontWeight: currentSize(context) <= ScreenSize.tablet
+                                      ? FontWeight.w500
+                                      : FontWeight.w400,
                                 ),
                               ),
                               if (widget.chat.type == ChatType.channel)

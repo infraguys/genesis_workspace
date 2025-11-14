@@ -159,7 +159,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                       itemBuilder: (BuildContext context, int index) {
                         final model = branchModels[index];
                         return BranchItem(
-                          icon: model.icon,
+                          icon: model.icon.svg(),
                           isSelected: index == widget.selectedIndex,
                           onPressed: () {
                             mainTitleNotifier.value = model.title(context);
@@ -235,13 +235,13 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
   }
 }
 
-final branchModels = [
-  (icon: Assets.icons.notif.svg(), title: (BuildContext context) => context.t.notifications),
-  (icon: Assets.icons.chatBubble.svg(), title: (BuildContext context) => context.t.chats),
-  (icon: Assets.icons.calendarMonth.svg(), title: (BuildContext context) => context.t.calendar),
-  (icon: Assets.icons.mail.svg(), title: (BuildContext context) => context.t.email),
-  (icon: Assets.icons.group.svg(), title: (BuildContext context) => context.t.groups),
-  (icon: Assets.icons.call.svg(), title: (BuildContext context) => context.t.calls),
+final List<({SvgGenImage icon, String Function(BuildContext) title})> branchModels = [
+  (icon: Assets.icons.notif, title: (BuildContext context) => context.t.notifications),
+  (icon: Assets.icons.chatBubble, title: (BuildContext context) => context.t.chats),
+  (icon: Assets.icons.calendarMonth, title: (BuildContext context) => context.t.calendar),
+  (icon: Assets.icons.mail, title: (BuildContext context) => context.t.email),
+  (icon: Assets.icons.group, title: (BuildContext context) => context.t.groups),
+  (icon: Assets.icons.call, title: (BuildContext context) => context.t.calls),
 ];
 
 //TODO(Koretsky): В будущем попробовать перевести все на CustomMultiChildLayout

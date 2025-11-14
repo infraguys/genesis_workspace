@@ -79,7 +79,7 @@ class _FolderItemState extends State<FolderItem> {
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-            UnreadBadge(count: widget.folder.unreadMessages.length),
+                  UnreadBadge(count: widget.folder.unreadMessages.length),
                   SizedBox(height: 40, width: 40, child: widget.icon),
                   Tooltip(
                     message: widget.title,
@@ -100,7 +100,7 @@ class _FolderItemState extends State<FolderItem> {
                 child: GestureDetector(
                   onTap: widget.onTap,
                   child: Container(
-                    padding: EdgeInsets.only(bottom: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 8).copyWith(bottom: 4),
                     decoration: BoxDecoration(
                       border: widget.isSelected
                           ? Border(

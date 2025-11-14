@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
@@ -94,7 +95,8 @@ class MultiPollingService {
       return;
     } else {
       await closeConnection(organizationId);
-      await addConnection(organizationId, _activeConnections[organizationId]!.baseUrl);
+      final baseUrl = _activeConnections[organizationId]?.baseUrl ?? AppConstants.baseUrl;
+      await addConnection(organizationId, baseUrl);
     }
   }
 
