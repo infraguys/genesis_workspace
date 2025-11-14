@@ -301,6 +301,14 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
+  Future<void> loadTopics(int streamId) async {
+    final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
+    emit(state.copyWith(selectedChat: chat));
+    await getChannelTopics(streamId);
+    final updatedChat = state.chats.firstWhere((chat) => chat.streamId == streamId);
+    emit(state.copyWith(selectedChat: updatedChat));
+  }
+
   Future<void> pinChat({required int chatId}) async {
     try {
       final int? organizationId = AppConstants.selectedOrganizationId;

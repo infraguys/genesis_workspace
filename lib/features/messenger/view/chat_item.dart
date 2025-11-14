@@ -20,8 +20,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 class ChatItem extends StatefulWidget {
   final ChatEntity chat;
   final VoidCallback onTap;
+  final bool showTopics;
 
-  const ChatItem({super.key, required this.chat, required this.onTap});
+  const ChatItem({super.key, required this.chat, required this.onTap, required this.showTopics});
 
   @override
   State<ChatItem> createState() => _ChatItemState();
@@ -37,16 +38,19 @@ class _ChatItemState extends State<ChatItem> {
 
   onTap() async {
     if (widget.chat.type == ChatType.channel) {
-      setState(() {
-        _isExpanded = !_isExpanded;
-      });
-      await context.read<MessengerCubit>().getChannelTopics(widget.chat.streamId!);
-      if (_isExpanded == false) {
-        return;
+      if (mounted && currentSize(context) > ScreenSize.tablet) {
+        setState(() {
+          _isExpanded = !_isExpanded;
+        });
+        if (_isExpanded == false) {
+          return;
+        }
+        await context.read<MessengerCubit>().getChannelTopics(widget.chat.streamId!);
+      } else {
+        context.read<MessengerCubit>().loadTopics(widget.chat.streamId!);
       }
-    } else {
-      widget.onTap();
     }
+    widget.onTap();
   }
 
   @override
@@ -78,7 +82,7 @@ class _ChatItemState extends State<ChatItem> {
       content: Container(
         width: 240,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -126,7 +130,9 @@ class _ChatItemState extends State<ChatItem> {
       ),
       child: Material(
         borderRadius: BorderRadius.circular(8),
-        color: cardColors.base,
+        animationDuration: const Duration(milliseconds: 200),
+        animateColor: true,
+        color: widget.showTopics ? Colors.transparent : cardColors.base,
         child: Column(
           children: [
             InkWell(
@@ -146,7 +152,7 @@ class _ChatItemState extends State<ChatItem> {
                       bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
                       bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
                     ),
-                    color: cardColors.base,
+                    color: widget.showTopics ? Colors.transparent : cardColors.base,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
