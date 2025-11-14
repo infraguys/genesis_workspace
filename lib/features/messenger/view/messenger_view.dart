@@ -8,11 +8,9 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
-import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
@@ -20,14 +18,12 @@ import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_item.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
-import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class MessengerView extends StatefulWidget {
   const MessengerView({super.key});
@@ -305,13 +301,13 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                       ),
                                     ),
                                   ),
-                                _isEditPinning
-                                    ? SliverPadding(
-                                        padding: EdgeInsets.symmetric(horizontal: 8).copyWith(
-                                          top: isTabletOrSmaller ? 20 : 0,
-                                          bottom: isTabletOrSmaller ? 110 : 20,
-                                        ),
-                                        sliver: SliverReorderableList(
+                                SliverPadding(
+                                  padding: EdgeInsets.symmetric(horizontal: 20).copyWith(
+                                    top: isTabletOrSmaller ? 20 : 0,
+                                    bottom: isTabletOrSmaller ? 110 : 20,
+                                  ),
+                                  sliver: _isEditPinning
+                                      ? SliverReorderableList(
                                           itemCount: pinnedChatsForEdit.length,
                                           itemBuilder: (context, index) {
                                             final chat = pinnedChatsForEdit[index];
@@ -341,161 +337,39 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                               child: child,
                                             );
                                           },
+                                        )
+                                      : SliverList.separated(
+                                          // controller: _chatsController,
+                                          // padding: EdgeInsets.symmetric(horizontal: 20).copyWith(
+                                          //   top: isTabletOrSmaller ? 20 : 0,
+                                          //   bottom: 20,
+                                          // ),
+                                          // shrinkWrap: true,
+                                          itemCount: visibleChats.length,
+                                          separatorBuilder: (_, _) => SizedBox(height: 4),
+                                          itemBuilder: (BuildContext context, int index) {
+                                            final chat = visibleChats[index];
+                                            return ChatItem(
+                                              key: ValueKey(chat.id),
+                                              chat: chat,
+                                              showTopics: _showTopics,
+                                              onTap: () async {
+                                                if (isTabletOrSmaller) {
+                                                  if (chat.type == ChatType.channel) {
+                                                    setState(() {
+                                                      _showTopics = !_showTopics;
+                                                    });
+                                                  } else {
+                                                    openChat(context, chat.dmIds?.toSet() ?? {});
+                                                  }
+                                                } else {
+                                                  context.read<MessengerCubit>().selectChat(chat);
+                                                }
+                                              },
+                                            );
+                                          },
                                         ),
-                                      )
-                                    : SliverToBoxAdapter(
-                                        child: Expanded(
-                                          child: Stack(
-                                            // alignment: .topRight,
-                                            children: [
-                                              ListView.separated(
-                                                controller: _chatsController,
-                                                padding: EdgeInsets.symmetric(horizontal: 20).copyWith(
-                                                  top: isTabletOrSmaller ? 20 : 0,
-                                                  bottom: 20,
-                                                ),
-                                                shrinkWrap: true,
-                                                itemCount: visibleChats.length,
-                                                separatorBuilder: (_, _) => SizedBox(height: 4),
-                                                itemBuilder: (BuildContext context, int index) {
-                                                  final chat = visibleChats[index];
-                                                  return ChatItem(
-                                                    key: ValueKey(chat.id),
-                                                    chat: chat,
-                                                    showTopics: _showTopics,
-                                                    onTap: () async {
-                                                      if (isTabletOrSmaller) {
-                                                        if (chat.type == ChatType.channel) {
-                                                          setState(() {
-                                                            _showTopics = !_showTopics;
-                                                          });
-                                                        } else {
-                                                          openChat(context, chat.dmIds?.toSet() ?? {});
-                                                        }
-                                                      } else {
-                                                        context.read<MessengerCubit>().selectChat(chat);
-                                                      }
-                                                    },
-                                                  );
-                                                },
-                                              ),
-                                              Positioned(
-                                                right: 0,
-                                                child: AnimatedContainer(
-                                                  duration: const Duration(milliseconds: 200),
-                                                  decoration: BoxDecoration(color: theme.colorScheme.background),
-                                                  constraints: BoxConstraints(
-                                                    maxWidth: _showTopics ? MediaQuery.sizeOf(context).width - 70 : 0,
-                                                  ),
-                                                  child: Skeletonizer(
-                                                    enabled: state.selectedChat?.isTopicsLoading ?? false,
-                                                    child: state.selectedChat == null
-                                                        ? SizedBox.shrink()
-                                                        : ListView.builder(
-                                                            controller: _topicsController,
-                                                            padding: EdgeInsets.zero,
-                                                            shrinkWrap: true,
-                                                            itemCount: state.selectedChat!.isTopicsLoading
-                                                                ? 4
-                                                                : state.selectedChat!.topics!.length,
-                                                            itemBuilder: (BuildContext context, int index) {
-                                                              final topic =
-                                                                  state.selectedChat?.topics?[index] ??
-                                                                  TopicEntity.fake();
-                                                              return InkWell(
-                                                                onTap: () {
-                                                                  context.read<MessengerCubit>().selectChat(
-                                                                    state.selectedChat!,
-                                                                    selectedTopic: topic.name,
-                                                                  );
-                                                                },
-                                                                child: Container(
-                                                                  height: 76,
-                                                                  padding: EdgeInsetsGeometry.only(
-                                                                    left: 38,
-                                                                    right: 8,
-                                                                    bottom: 12,
-                                                                  ),
-                                                                  child: Row(
-                                                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                                                    children: [
-                                                                      Expanded(
-                                                                        child: Row(
-                                                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                                                          children: [
-                                                                            Container(
-                                                                              width: 3,
-                                                                              height: 47,
-                                                                              decoration: BoxDecoration(
-                                                                                color: Colors.yellow,
-                                                                                borderRadius:
-                                                                                    BorderRadiusGeometry.circular(
-                                                                                      4,
-                                                                                    ),
-                                                                              ),
-                                                                            ),
-                                                                            SizedBox(
-                                                                              width: 12,
-                                                                            ),
-                                                                            Expanded(
-                                                                              child: Column(
-                                                                                mainAxisAlignment:
-                                                                                    MainAxisAlignment.center,
-                                                                                crossAxisAlignment:
-                                                                                    CrossAxisAlignment.start,
-                                                                                children: [
-                                                                                  Tooltip(
-                                                                                    message: topic.name,
-                                                                                    child: Text(
-                                                                                      "# ${topic.name}",
-                                                                                      maxLines: 1,
-                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                      style: theme.textTheme.labelMedium
-                                                                                          ?.copyWith(
-                                                                                            fontSize: 14,
-                                                                                            color: textColors.text100,
-                                                                                          ),
-                                                                                    ),
-                                                                                  ),
-                                                                                  Text(
-                                                                                    topic.lastMessageSenderName,
-                                                                                    style: theme.textTheme.bodySmall
-                                                                                        ?.copyWith(
-                                                                                          color:
-                                                                                              theme.colorScheme.primary,
-                                                                                        ),
-                                                                                  ),
-                                                                                  MessagePreview(
-                                                                                    messagePreview:
-                                                                                        topic.lastMessagePreview,
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                      Skeleton.ignore(
-                                                                        child: SizedBox(
-                                                                          height: 21,
-                                                                          child: UnreadBadge(
-                                                                            count: topic.unreadMessages.length,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              );
-                                                            },
-                                                          ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                ),
                               ],
                             ),
                           ),
