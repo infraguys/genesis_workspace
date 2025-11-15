@@ -21,8 +21,15 @@ class ChatItem extends StatefulWidget {
   final ChatEntity chat;
   final VoidCallback onTap;
   final bool showTopics;
+  final int? selectedChatId;
 
-  const ChatItem({super.key, required this.chat, required this.onTap, required this.showTopics});
+  const ChatItem({
+    super.key,
+    required this.chat,
+    required this.onTap,
+    required this.showTopics,
+    this.selectedChatId,
+  });
 
   @override
   State<ChatItem> createState() => _ChatItemState();
@@ -58,6 +65,7 @@ class _ChatItemState extends State<ChatItem> {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
     final cardColors = Theme.of(context).extension<CardColors>()!;
+    const BorderRadius materialBorderRadius = BorderRadius.all(Radius.circular(8));
     double rightContainerHeight;
 
     switch (widget.chat.type) {
@@ -68,6 +76,7 @@ class _ChatItemState extends State<ChatItem> {
         rightContainerHeight = 49;
         break;
     }
+    final bool shouldShowLeftBorder = widget.showTopics && widget.chat.id == widget.selectedChatId;
     return CustomPopup(
       key: popupKey,
       backgroundColor: theme.colorScheme.surfaceDim,
@@ -129,7 +138,7 @@ class _ChatItemState extends State<ChatItem> {
         ),
       ),
       child: Material(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: materialBorderRadius,
         animationDuration: const Duration(milliseconds: 200),
         animateColor: true,
         color: widget.showTopics ? Colors.transparent : cardColors.base,
@@ -146,85 +155,105 @@ class _ChatItemState extends State<ChatItem> {
                 constraints: const BoxConstraints(
                   minHeight: 65,
                 ),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8).copyWith(
-                      bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
-                      bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
-                    ),
-                    color: widget.showTopics ? Colors.transparent : cardColors.base,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        UserAvatar(
-                          avatarUrl: widget.chat.avatarUrl,
-                          size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.chat.displayTitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: textColors.text100,
-                                  fontWeight: currentSize(context) <= ScreenSize.tablet
-                                      ? FontWeight.w500
-                                      : FontWeight.w400,
-                                ),
-                              ),
-                              if (widget.chat.type == ChatType.channel)
-                                Text(
-                                  widget.chat.lastMessageSenderName!,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              MessagePreview(messagePreview: widget.chat.lastMessagePreview),
-                            ],
+                child: Stack(
+                  alignment: AlignmentGeometry.centerLeft,
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: 65,
+                      ),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8).copyWith(
+                            bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
+                            bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
                           ),
+                          color: widget.showTopics ? Colors.transparent : cardColors.base,
                         ),
-                        SizedBox(
-                          height: rightContainerHeight,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            // spacing: 10,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Row(
-                                children: [
-                                  if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
-                                  widget.chat.type == ChatType.channel
-                                      ? AnimatedRotation(
-                                          duration: const Duration(milliseconds: 200),
-                                          turns: _isExpanded ? 0.5 : 0.0,
-                                          child: Assets.icons.arrowDown.svg(),
-                                        )
-                                      : SizedBox(
-                                          height: 20,
-                                          child: Text(
-                                            DateFormat('HH:mm').format(widget.chat.lastMessageDate),
-                                            style: theme.textTheme.bodySmall?.copyWith(
-                                              color: textColors.text50,
-                                            ),
-                                          ),
+                              UserAvatar(
+                                avatarUrl: widget.chat.avatarUrl,
+                                size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      widget.chat.displayTitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: textColors.text100,
+                                        fontWeight: currentSize(context) <= ScreenSize.tablet
+                                            ? FontWeight.w500
+                                            : FontWeight.w400,
+                                      ),
+                                    ),
+                                    if (widget.chat.type == ChatType.channel)
+                                      Text(
+                                        widget.chat.lastMessageSenderName!,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.primary,
                                         ),
-                                ],
+                                      ),
+                                    MessagePreview(messagePreview: widget.chat.lastMessagePreview),
+                                  ],
+                                ),
                               ),
-                              UnreadBadge(count: widget.chat.unreadMessages.length),
+                              SizedBox(
+                                height: rightContainerHeight,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
+                                        widget.chat.type == ChatType.channel
+                                            ? AnimatedRotation(
+                                                duration: const Duration(milliseconds: 200),
+                                                turns: _isExpanded ? 0.5 : 0.0,
+                                                child: Assets.icons.arrowDown.svg(),
+                                              )
+                                            : SizedBox(
+                                                height: 20,
+                                                child: Text(
+                                                  DateFormat('HH:mm').format(widget.chat.lastMessageDate),
+                                                  style: theme.textTheme.bodySmall?.copyWith(
+                                                    color: textColors.text50,
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
+                                    ),
+                                    UnreadBadge(count: widget.chat.unreadMessages.length),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    if (shouldShowLeftBorder)
+                      IgnorePointer(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            width: 1,
+                            height: 40,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),

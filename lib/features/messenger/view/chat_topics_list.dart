@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatTopicsList extends StatefulWidget {
@@ -57,81 +57,93 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
                   itemCount: widget.selectedChat!.isTopicsLoading ? 4 : widget.selectedChat!.topics!.length,
                   itemBuilder: (BuildContext context, int index) {
                     final topic = widget.selectedChat?.topics?[index] ?? TopicEntity.fake();
-                    return InkWell(
-                      onTap: () {
-                        context.read<MessengerCubit>().selectChat(
-                          widget.selectedChat!,
-                          selectedTopic: topic.name,
-                        );
-                      },
-                      child: Container(
-                        height: 76,
-                        padding: EdgeInsetsGeometry.only(
-                          left: 38,
-                          right: 8,
-                          bottom: 12,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 3,
-                                    height: 47,
-                                    decoration: BoxDecoration(
-                                      color: Colors.yellow,
-                                      borderRadius: BorderRadiusGeometry.circular(
-                                        4,
+                    return Padding(
+                      padding: EdgeInsetsGeometry.only(
+                        left: 38,
+                        // right: 8,
+                        // bottom: 12,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            context.pushNamed(
+                              Routes.channelChatTopic,
+                              pathParameters: {
+                                'channelId': widget.selectedChat!.streamId.toString(),
+                                'topicName': topic.name,
+                              },
+                              extra: {'unreadMessagesCount': topic.unreadMessages.length},
+                            );
+                          },
+                          child: Ink(
+                            height: 76,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 3,
+                                        height: 47,
+                                        decoration: BoxDecoration(
+                                          color: Colors.yellow,
+                                          borderRadius: BorderRadiusGeometry.circular(
+                                            4,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Tooltip(
+                                              message: topic.name,
+                                              child: Text(
+                                                "# ${topic.name}",
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: theme.textTheme.labelMedium?.copyWith(
+                                                  fontSize: 14,
+                                                  color: textColors.text100,
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              topic.lastMessageSenderName,
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                color: theme.colorScheme.primary,
+                                              ),
+                                            ),
+                                            MessagePreview(
+                                              messagePreview: topic.lastMessagePreview,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Skeleton.ignore(
+                                    child: SizedBox(
+                                      height: 21,
+                                      child: UnreadBadge(
+                                        count: topic.unreadMessages.length,
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: 12,
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Tooltip(
-                                          message: topic.name,
-                                          child: Text(
-                                            "# ${topic.name}",
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: theme.textTheme.labelMedium?.copyWith(
-                                              fontSize: 14,
-                                              color: textColors.text100,
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          topic.lastMessageSenderName,
-                                          style: theme.textTheme.bodySmall?.copyWith(
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                        MessagePreview(
-                                          messagePreview: topic.lastMessagePreview,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Skeleton.ignore(
-                              child: SizedBox(
-                                height: 21,
-                                child: UnreadBadge(
-                                  count: topic.unreadMessages.length,
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     );

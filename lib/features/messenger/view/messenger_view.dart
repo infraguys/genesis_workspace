@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -164,7 +163,6 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
               }
               return BlocBuilder<MessengerCubit, MessengerState>(
                 builder: (context, state) {
-                  inspect(state.selectedChat);
                   final List<ChatEntity> visibleChats = state.filteredChatIds == null
                       ? state.chats
                       : state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
@@ -363,6 +361,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                                   return ChatItem(
                                                     key: ValueKey(chat.id),
                                                     chat: chat,
+                                                    selectedChatId: state.selectedChat?.id,
                                                     showTopics: _showTopics,
                                                     onTap: () async {
                                                       if (isTabletOrSmaller) {
