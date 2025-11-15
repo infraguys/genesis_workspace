@@ -53,6 +53,7 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
               : ListView.builder(
                   controller: _topicsController,
                   shrinkWrap: true,
+                  padding: EdgeInsets.only(bottom: 300),
                   itemCount: widget.selectedChat!.isTopicsLoading ? 4 : widget.selectedChat!.topics!.length,
                   itemBuilder: (BuildContext context, int index) {
                     final topic = widget.selectedChat?.topics?[index] ?? TopicEntity.fake();

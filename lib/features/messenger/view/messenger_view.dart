@@ -130,7 +130,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
 
     final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: 20).copyWith(
       top: isTabletOrSmaller ? 20 : 0,
-      bottom: isTabletOrSmaller ? 110 : 20,
+      bottom: 20,
     );
 
     return PopScope(
@@ -283,8 +283,13 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 MessengerAppBar(
-                                  theme: theme,
-                                  textColors: textColors,
+                                  selectedChatLabel: state.selectedChat?.displayTitle,
+                                  showTopics: _showTopics,
+                                  onTapBack: () {
+                                    setState(() {
+                                      _showTopics = false;
+                                    });
+                                  },
                                   isLargeScreen: isLargeScreen,
                                   searchSectionPadding: searchSectionPadding,
                                   searchVisibility: searchVisibility,
@@ -300,7 +305,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                   isEditPinning: _isEditPinning,
                                   onStopEditingPins: () => setState(() => _isEditPinning = false),
                                   showSearchField: _isSearchVisible,
-                                  selfUserId: state.selfUser!.userId,
+                                  selfUserId: state.selfUser?.userId ?? -1,
                                 ),
                                 if (visibleChats.isEmpty)
                                   Padding(

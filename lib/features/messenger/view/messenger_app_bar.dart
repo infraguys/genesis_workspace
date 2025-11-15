@@ -12,8 +12,6 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   const MessengerAppBar({
     super.key,
-    required this.theme,
-    required this.textColors,
     required this.isLargeScreen,
     required this.searchSectionPadding,
     required this.searchVisibility,
@@ -28,10 +26,11 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     required this.onStopEditingPins,
     required this.showSearchField,
     required this.selfUserId,
+    required this.showTopics,
+    required this.onTapBack,
+    this.selectedChatLabel,
   });
 
-  final ThemeData theme;
-  final TextColors textColors;
   final bool isLargeScreen;
   final EdgeInsetsGeometry searchSectionPadding;
   final double searchVisibility;
@@ -46,11 +45,16 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   final VoidCallback onStopEditingPins;
   final bool showSearchField;
   final int selfUserId;
+  final bool showTopics;
+  final VoidCallback onTapBack;
+  final String? selectedChatLabel;
 
   bool get isTabletOrSmaller => !isLargeScreen;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
     final t = context.t;
     final String largeScreenTitle = selectedFolderIndex != 0
         ? folders[selectedFolderIndex].title ?? ''
@@ -65,24 +69,9 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
             ),
           )
         : Text(
-            t.messenger,
+            showTopics ? selectedChatLabel! : context.t.messenger,
             style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
           );
-
-    final Widget? leading = isTabletOrSmaller
-        ? IconButton(
-            padding: EdgeInsets.zero,
-            onPressed: () {},
-            icon: Assets.icons.menu.svg(
-              width: 32,
-              height: 32,
-              colorFilter: ColorFilter.mode(
-                theme.colorScheme.primary,
-                BlendMode.srcIn,
-              ),
-            ),
-          )
-        : null;
 
     final List<Widget> actions = [];
     if (isTabletOrSmaller) {
@@ -136,8 +125,27 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                 : EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               children: [
-                if (leading != null) leading,
-                if (leading != null) SizedBox(width: 8),
+                if (isTabletOrSmaller) ...[
+                  IconButton(
+                    onPressed: () {
+                      if (showTopics) {
+                        onTapBack();
+                        return;
+                      }
+                    },
+                    icon: showTopics
+                        ? Icon(Icons.arrow_back_ios)
+                        : Assets.icons.menu.svg(
+                            width: 32,
+                            height: 32,
+                            colorFilter: ColorFilter.mode(
+                              theme.colorScheme.primary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                  ),
+                  SizedBox(width: 8),
+                ],
                 Expanded(
                   child: isTabletOrSmaller
                       ? Center(child: titleWidget)
