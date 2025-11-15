@@ -216,7 +216,8 @@ class _ChatItemState extends State<ChatItem> {
                                     Row(
                                       children: [
                                         if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
-                                        widget.chat.type == ChatType.channel
+                                        (widget.chat.type == ChatType.channel &&
+                                                currentSize(context) >= ScreenSize.tablet)
                                             ? AnimatedRotation(
                                                 duration: const Duration(milliseconds: 200),
                                                 turns: _isExpanded ? 0.5 : 0.0,

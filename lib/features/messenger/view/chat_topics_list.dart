@@ -12,7 +12,14 @@ class ChatTopicsList extends StatefulWidget {
   final bool showTopics;
   final bool isPending;
   final ChatEntity? selectedChat;
-  const ChatTopicsList({super.key, required this.showTopics, required this.isPending, this.selectedChat});
+  final double listPadding;
+  const ChatTopicsList({
+    super.key,
+    required this.showTopics,
+    required this.isPending,
+    this.selectedChat,
+    required this.listPadding,
+  });
 
   @override
   State<ChatTopicsList> createState() => _ChatTopicsListState();
@@ -53,15 +60,13 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
               : ListView.builder(
                   controller: _topicsController,
                   shrinkWrap: true,
-                  padding: EdgeInsets.only(bottom: 300),
+                  padding: EdgeInsets.only(bottom: widget.listPadding),
                   itemCount: widget.selectedChat!.isTopicsLoading ? 4 : widget.selectedChat!.topics!.length,
                   itemBuilder: (BuildContext context, int index) {
                     final topic = widget.selectedChat?.topics?[index] ?? TopicEntity.fake();
                     return Padding(
                       padding: EdgeInsetsGeometry.only(
                         left: 38,
-                        // right: 8,
-                        // bottom: 12,
                       ),
                       child: Material(
                         color: Colors.transparent,

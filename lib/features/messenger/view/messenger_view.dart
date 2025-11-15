@@ -133,7 +133,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
     );
 
     return PopScope(
-      onPopInvokedWithResult: (didPop, _) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           setState(() {
             _showTopics = false;
@@ -384,6 +384,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                         showTopics: _showTopics,
                                         isPending: state.selectedChat?.topics == null,
                                         selectedChat: state.selectedChat,
+                                        listPadding: _isSearchVisible ? 350 : 300,
                                       ),
                                     ],
                                   ),
