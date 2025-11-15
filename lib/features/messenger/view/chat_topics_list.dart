@@ -41,6 +41,7 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
       right: 0,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        height: MediaQuery.sizeOf(context).height,
         decoration: BoxDecoration(color: theme.colorScheme.background),
         constraints: BoxConstraints(
           maxWidth: widget.showTopics ? MediaQuery.sizeOf(context).width - 70 : 0,
@@ -51,7 +52,6 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
               ? SizedBox.shrink()
               : ListView.builder(
                   controller: _topicsController,
-                  padding: EdgeInsets.zero,
                   shrinkWrap: true,
                   itemCount: widget.selectedChat!.isTopicsLoading ? 4 : widget.selectedChat!.topics!.length,
                   itemBuilder: (BuildContext context, int index) {
