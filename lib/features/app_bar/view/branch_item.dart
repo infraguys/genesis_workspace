@@ -23,9 +23,7 @@ class BranchItem extends StatelessWidget {
     final Color baseOverlay = theme.colorScheme.onSurface;
 
     return Material(
-      color: isSelected
-          ? theme.colorScheme.onSurface.withOpacity(0.05)
-          : Colors.transparent,
+      color: isSelected ? theme.colorScheme.onSurface.withOpacity(0.05) : Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),

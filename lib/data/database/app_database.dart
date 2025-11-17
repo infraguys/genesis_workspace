@@ -7,6 +7,7 @@ import 'package:genesis_workspace/data/all_chats/dao/pinned_chats_dao.dart';
 import 'package:genesis_workspace/data/all_chats/tables/folder_item_mapping_table.dart';
 import 'package:genesis_workspace/data/all_chats/tables/folder_table.dart';
 import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
+import 'package:genesis_workspace/data/common/converters/unread_messages_converter.dart';
 import 'package:genesis_workspace/data/organizations/dao/organizations_dao.dart';
 import 'package:genesis_workspace/data/organizations/tables/organization_table.dart';
 import 'package:genesis_workspace/data/users/dao/recent_dm_dao.dart';
@@ -24,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -98,8 +99,8 @@ class AppDatabase extends _$AppDatabase {
           if (defaultOrganizationId != null) {
             await customStatement(
               'INSERT INTO folders '
-              '(id, title, icon_code_point, background_color_value, unread_count, system_type, organization_id) '
-              'SELECT id, title, icon_code_point, background_color_value, unread_count, system_type, $defaultOrganizationId '
+              '(id, title, icon_code_point, background_color_value, unread_messages, system_type, organization_id) '
+              "SELECT id, title, icon_code_point, background_color_value, '[]', system_type, $defaultOrganizationId "
               'FROM folders_old;',
             );
           }
@@ -108,8 +109,7 @@ class AppDatabase extends _$AppDatabase {
           await customStatement('ALTER TABLE folder_items RENAME TO folder_items_old;');
           await migrator.createTable(folderItems);
           if (defaultOrganizationId != null) {
-            final legacyChatIdColumn =
-                await _resolveLegacyFolderItemsChatColumn('folder_items_old');
+            final legacyChatIdColumn = await _resolveLegacyFolderItemsChatColumn('folder_items_old');
             await customStatement(
               'INSERT INTO folder_items '
               '(id, folder_id, organization_id, chat_id) '
@@ -149,8 +149,7 @@ class AppDatabase extends _$AppDatabase {
         await transaction(() async {
           await customStatement('ALTER TABLE folder_items RENAME TO folder_items_old;');
           await migrator.createTable(folderItems);
-          final legacyChatIdColumn =
-              await _resolveLegacyFolderItemsChatColumn('folder_items_old');
+          final legacyChatIdColumn = await _resolveLegacyFolderItemsChatColumn('folder_items_old');
           await customStatement(
             'INSERT INTO folder_items '
             '(id, folder_id, organization_id, chat_id) '
@@ -170,6 +169,18 @@ class AppDatabase extends _$AppDatabase {
             "SELECT id, name, icon, base_url, '[]' FROM organizations_old;",
           );
           await customStatement('DROP TABLE organizations_old;');
+        });
+      }
+      if (from < 16) {
+        await transaction(() async {
+          await customStatement('ALTER TABLE folders RENAME TO folders_old;');
+          await migrator.createTable(folders);
+          await customStatement(
+            'INSERT INTO folders '
+            '(id, title, icon_code_point, background_color_value, unread_messages, system_type, organization_id) '
+            "SELECT id, title, icon_code_point, background_color_value, '[]', system_type, organization_id FROM folders_old;",
+          );
+          await customStatement('DROP TABLE folders_old;');
         });
       }
     },
@@ -203,19 +214,13 @@ class AppDatabase extends _$AppDatabase {
 
   Future<bool> _hasColumn(String tableName, String columnName) async {
     final columnInfo = await customSelect('PRAGMA table_info($tableName);').get();
-    return columnInfo
-        .map((row) => row.data['name'] as String?)
-        .whereType<String>()
-        .contains(columnName);
+    return columnInfo.map((row) => row.data['name'] as String?).whereType<String>().contains(columnName);
   }
 
   /// Determines which legacy column should be used when migrating folder items.
   Future<String> _resolveLegacyFolderItemsChatColumn(String tableName) async {
     final columnInfo = await customSelect('PRAGMA table_info($tableName);').get();
-    final columnNames = columnInfo
-        .map((row) => row.data['name'] as String?)
-        .whereType<String>()
-        .toSet();
+    final columnNames = columnInfo.map((row) => row.data['name'] as String?).whereType<String>().toSet();
     if (columnNames.contains('target_id')) {
       return 'target_id';
     }

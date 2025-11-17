@@ -68,11 +68,20 @@ class CardColors extends ThemeExtension<CardColors> {
   final Color base;
   final Color active;
 
-  const CardColors({required this.base, required this.active});
+  const CardColors({
+    required this.base,
+    required this.active,
+  });
 
   @override
-  CardColors copyWith({Color? base, Color? active}) {
-    return CardColors(base: base ?? this.base, active: active ?? this.active);
+  CardColors copyWith({
+    Color? base,
+    Color? active,
+  }) {
+    return CardColors(
+      base: base ?? this.base,
+      active: active ?? this.active,
+    );
   }
 
   @override

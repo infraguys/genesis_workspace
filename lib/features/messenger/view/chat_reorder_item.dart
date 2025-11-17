@@ -16,6 +16,7 @@ class ChatReorderItem extends StatelessWidget {
     final cardColors = Theme.of(context).extension<CardColors>()!;
 
     return Material(
+      borderRadius: BorderRadius.circular(12),
       child: Column(
         children: [
           ConstrainedBox(
@@ -24,7 +25,7 @@ class ChatReorderItem extends StatelessWidget {
             ),
             child: Ink(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 color: cardColors.base,
               ),
               child: Padding(

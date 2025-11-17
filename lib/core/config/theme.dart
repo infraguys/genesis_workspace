@@ -20,6 +20,7 @@ final darkTheme = ThemeData(
     stopIndicatorRadius: 12,
   ),
   elevatedButtonTheme: _darkElevatedButtonTheme,
+  dividerColor: Color(0xFFFFFFFF).withValues(alpha: 0.1),
 );
 
 final darkColorScheme = ColorScheme.dark(

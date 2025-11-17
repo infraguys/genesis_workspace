@@ -14,7 +14,7 @@ class FolderLocalDataSource {
       title: entity.title ?? '',
       iconCodePoint: entity.iconData.codePoint,
       backgroundColorValue: entity.backgroundColor?.value,
-      unreadCount: entity.unreadCount,
+      unreadMessages: entity.unreadMessages,
       organizationId: entity.organizationId,
     );
   }
@@ -31,7 +31,7 @@ class FolderLocalDataSource {
       title: folder.title,
       iconCodePoint: folder.iconData.codePoint,
       backgroundColorValue: folder.backgroundColor?.value,
-      unreadCount: folder.unreadCount,
+      unreadMessages: folder.unreadMessages,
     );
   }
 

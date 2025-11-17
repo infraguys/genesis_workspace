@@ -125,8 +125,11 @@ class MessageItem extends StatelessWidget {
       case ScreenSize.laptop:
         maxMessageWidth = MediaQuery.of(context).size.width * 0.4;
         break;
+      case ScreenSize.sMobile:
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.55;
+        break;
       default:
-        maxMessageWidth = MediaQuery.of(context).size.width * 0.7;
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.6;
     }
 
     final bool isStarred = message.flags?.contains('starred') ?? false;
@@ -224,8 +227,7 @@ class MessageItem extends StatelessWidget {
                     constraints: (showAvatar)
                         ? BoxConstraints(
                             minHeight: 40,
-                            maxWidth:
-                                (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
+                            maxWidth: (MediaQuery.sizeOf(context).width * 0.9) - (isMyMessage ? 30 : 0),
                           )
                         : null,
                     decoration: BoxDecoration(

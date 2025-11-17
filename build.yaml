@@ -30,6 +30,7 @@ targets:
           - lib/data/database/app_database.dart
           - lib/data/**/tables/**.dart
           - lib/data/**/dao/**.dart
+          - lib/data/**/converters/**.dart
       retrofit_generator:
         generate_for:
           - lib/data/**/api/**.dart
