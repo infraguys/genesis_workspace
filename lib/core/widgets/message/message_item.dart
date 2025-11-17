@@ -125,6 +125,9 @@ class MessageItem extends StatelessWidget {
       case ScreenSize.laptop:
         maxMessageWidth = MediaQuery.of(context).size.width * 0.4;
         break;
+      case ScreenSize.sMobile:
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.55;
+        break;
       default:
         maxMessageWidth = MediaQuery.of(context).size.width * 0.6;
     }

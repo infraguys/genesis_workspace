@@ -11,8 +11,10 @@ ScreenSize currentSize(BuildContext context) {
       return ScreenSize.lTablet;
     case (<= 768 && > 425):
       return ScreenSize.tablet;
-    case (<= 425):
+    case (<= 425 && > 375):
       return ScreenSize.mobile;
+    case (<= 375):
+      return ScreenSize.sMobile;
     default:
       return ScreenSize.mobile;
   }
@@ -33,6 +35,9 @@ enum ScreenSize {
 
   /// <= 425
   mobile,
+
+  /// <= 375
+  sMobile,
 }
 
 // screen_size.dart (continued)

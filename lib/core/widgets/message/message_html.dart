@@ -45,10 +45,10 @@ class MessageHtml extends StatelessWidget {
         customStylesBuilder: (element) {
           return null;
         },
+        textStyle: TextStyle(overflow: TextOverflow.ellipsis),
         factoryBuilder: () => WorkspaceHtmlFactory(),
         customWidgetBuilder: (element) {
-          if (element.attributes.containsValue('image/png') ||
-              element.attributes.containsValue('image/jpeg')) {
+          if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
             final src = element.parentNode?.attributes['href'];
             final size = extractDimensionsFromUrl(src ?? '');
             return AuthorizedImage(

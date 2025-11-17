@@ -1,5 +1,4 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -9,9 +8,10 @@ import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
-import 'package:genesis_workspace/core/widgets/message/attachment_action.dart';
+import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
+import 'package:genesis_workspace/core/widgets/message/toggle_emoji_keyboard_button.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -134,15 +134,30 @@ class _MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
       builder: (context, emojiState) {
+        double bottomPadding = 12;
+        if (!isTabletOrSmaller) {
+          bottomPadding = 12;
+        } else if (!emojiState.showEmojiKeyboard && widget.focusNode.hasFocus) {
+          bottomPadding = 4;
+        } else {
+          bottomPadding = 20;
+        }
         return AnimatedSize(
           duration: const Duration(milliseconds: 200),
-          child: Container(
-            padding: EdgeInsets.all(12),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: EdgeInsets.all(12).copyWith(
+              bottom: bottomPadding,
+            ),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12).copyWith(
+                bottomLeft: isTabletOrSmaller ? Radius.zero : null,
+                bottomRight: isTabletOrSmaller ? Radius.zero : null,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,8 +209,7 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                   ],
                                 ),
-                                if (widget.editingFiles != null &&
-                                    widget.editingFiles!.isNotEmpty) ...[
+                                if (widget.editingFiles != null && widget.editingFiles!.isNotEmpty) ...[
                                   const SizedBox(height: 8),
                                   SizedBox(
                                     height: 96,
@@ -204,8 +218,7 @@ class _MessageInputState extends State<MessageInput> {
                                       itemCount: widget.editingFiles!.length,
                                       separatorBuilder: (_, __) => const SizedBox(width: 10),
                                       itemBuilder: (context, index) {
-                                        final EditingAttachment attachment =
-                                            widget.editingFiles![index];
+                                        final EditingAttachment attachment = widget.editingFiles![index];
                                         return EditingAttachmentTile(
                                           attachment: attachment,
                                           onRemove: widget.onRemoveEditingAttachment == null
@@ -224,7 +237,7 @@ class _MessageInputState extends State<MessageInput> {
                         )
                       : const SizedBox.shrink(),
                 ),
-                if (widget.files != null && widget.files!.isNotEmpty)
+                if (widget.files != null && widget.files!.isNotEmpty) ...[
                   SizedBox(
                     height: 92,
                     child: ListView.separated(
@@ -242,89 +255,42 @@ class _MessageInputState extends State<MessageInput> {
                       },
                     ),
                   ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                ],
                 Row(
                   spacing: 8,
                   children: [
-                    Material(
-                      child: Column(
-                        spacing: 12,
-                        children: [
-                          InkWell(
-                            onTap: () {},
-                            borderRadius: BorderRadius.circular(32),
-                            child: Ink(
-                              width: 32,
-                              height: 32,
-                              child: Assets.icons.moreVert.svg(
+                    if (!isTabletOrSmaller)
+                      Material(
+                        child: Column(
+                          spacing: 12,
+                          children: [
+                            IconButton(
+                              iconSize: 28,
+                              onPressed: () {},
+                              icon: Assets.icons.moreVert.svg(
+                                width: 28,
+                                height: 28,
                                 colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
                               ),
                             ),
-                          ),
-                          MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: CustomPopup(
-                              key: attachmentsKey,
-                              isLongPress: true,
-                              showArrow: false,
-                              contentPadding: EdgeInsets.zero,
-                              contentRadius: 12,
-                              backgroundColor: theme.colorScheme.surface,
-                              content: Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                constraints: const BoxConstraints(minWidth: 220, maxWidth: 280),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    AttachmentAction(
-                                      iconData: Icons.insert_drive_file_rounded,
-                                      label: context.t.attachmentButton.file,
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                        widget.onUploadFile();
-                                      },
-                                    ),
-                                    const SizedBox(height: 4),
-                                    AttachmentAction(
-                                      iconData: Icons.image_outlined,
-                                      label: context.t.attachmentButton.image,
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                        widget.onUploadImage();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(32),
-                                onTap: () => attachmentsKey.currentState?.show(),
-                                child: Ink(
-                                  width: 32,
-                                  height: 32,
-                                  child: Assets.icons.attachFile.svg(
-                                    width: 32,
-                                    height: 32,
-                                    colorFilter: ColorFilter.mode(
-                                      textColors.text30,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
-                                ),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: AttachFilesButton(
+                                attachmentsKey: attachmentsKey,
+                                onUploadFile: widget.onUploadFile,
+                                onUploadImage: widget.onUploadImage,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                     Expanded(
                       child: Container(
                         constraints: BoxConstraints(
-                          minHeight: 88,
+                          minHeight: isTabletOrSmaller ? 44 : 88,
                         ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.background,
@@ -332,28 +298,29 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         child: Column(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                              child: Row(
-                                spacing: 8,
-                                children: [
-                                  Container(
-                                    height: 16,
-                                    width: 3,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary,
-                                      borderRadius: BorderRadius.circular(16),
+                            if (!isTabletOrSmaller)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                child: Row(
+                                  spacing: 8,
+                                  children: [
+                                    Container(
+                                      height: 16,
+                                      width: 3,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    "# ${widget.inputTitle ?? ''}",
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: textColors.text30,
+                                    Text(
+                                      "# ${widget.inputTitle ?? ''}",
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: textColors.text30,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
                             Stack(
                               children: [
                                 AnimatedContainer(
@@ -379,8 +346,7 @@ class _MessageInputState extends State<MessageInput> {
                                     },
                                     textInputAction: TextInputAction.send,
                                     onSubmitted: (value) {
-                                      if (widget.onSubmitIntercept != null &&
-                                          widget.onSubmitIntercept!()) {
+                                      if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
                                         if (platformInfo.isDesktop) {
                                           widget.focusNode.requestFocus();
                                         }
@@ -412,6 +378,19 @@ class _MessageInputState extends State<MessageInput> {
                                       hintStyle: theme.textTheme.bodyLarge?.copyWith(
                                         color: textColors.text30,
                                       ),
+                                      prefixIcon: isTabletOrSmaller
+                                          ? AttachFilesButton(
+                                              attachmentsKey: attachmentsKey,
+                                              onUploadFile: widget.onUploadFile,
+                                              onUploadImage: widget.onUploadImage,
+                                            )
+                                          : null,
+                                      suffixIcon: isTabletOrSmaller
+                                          ? ToggleEmojiKeyboardButton(
+                                              emojiState: emojiState,
+                                              focusNode: widget.focusNode,
+                                            )
+                                          : null,
                                       contentPadding: const EdgeInsets.symmetric(
                                         horizontal: 20,
                                         vertical: 12,
@@ -477,54 +456,11 @@ class _MessageInputState extends State<MessageInput> {
                                   ),
                                 ),
                         ).pending(widget.isMessagePending),
-                        IconButton(
-                          onPressed: () {
-                            if (currentSize(context) >= ScreenSize.lTablet) {
-                              if (emojiState.showEmojiKeyboard) {
-                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                  false,
-                                  closeKeyboard: true,
-                                );
-                              } else {
-                                context.read<EmojiKeyboardCubit>().setHeight(300);
-                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
-                              }
-                            } else {
-                              if (emojiState.showEmojiKeyboard) {
-                                FocusScope.of(context).requestFocus(widget.focusNode);
-                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                  false,
-                                );
-                              } else {
-                                FocusScope.of(context).unfocus();
-                                if (emojiState.keyboardHeight == 0) {
-                                  context.read<EmojiKeyboardCubit>().setHeight(300);
-                                }
-                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
-                              }
-                            }
-                          },
-                          icon: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            transitionBuilder: (child, animation) => RotationTransition(
-                              turns: child.key == const ValueKey('emoji')
-                                  ? Tween<double>(begin: 0.75, end: 1.0).animate(animation)
-                                  : Tween<double>(begin: 1.25, end: 1.0).animate(animation),
-                              child: FadeTransition(opacity: animation, child: child),
-                            ),
-                            child: emojiState.showEmojiKeyboard
-                                ? Icon(
-                                    Icons.keyboard,
-                                    color: textColors.text30,
-                                    key: ValueKey('keyboard'),
-                                  )
-                                : Icon(
-                                    CupertinoIcons.smiley,
-                                    color: textColors.text30,
-                                    key: ValueKey('emoji'),
-                                  ),
+                        if (!isTabletOrSmaller)
+                          ToggleEmojiKeyboardButton(
+                            emojiState: emojiState,
+                            focusNode: widget.focusNode,
                           ),
-                        ),
                       ],
                     ),
                   ],
