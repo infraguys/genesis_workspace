@@ -28,6 +28,10 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     required this.selfUserId,
     required this.showTopics,
     required this.onTapBack,
+    required this.onClearSearch,
+    required this.searchController,
+    required this.searchQuery,
+    required this.onSearchChanged,
     this.selectedChatLabel,
   });
 
@@ -48,6 +52,10 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   final bool showTopics;
   final VoidCallback onTapBack;
   final String? selectedChatLabel;
+  final VoidCallback onClearSearch;
+  final TextEditingController searchController;
+  final String searchQuery;
+  final ValueChanged<String> onSearchChanged;
 
   bool get isTabletOrSmaller => !isLargeScreen;
 
@@ -184,10 +192,21 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                         child: SizedBox(
                           height: isTabletOrSmaller ? 36 : 32,
                           child: TextField(
+                            controller: searchController,
                             style: TextStyle(fontSize: 14),
+                            onChanged: onSearchChanged,
                             decoration: InputDecoration(
                               hintText: t.general.find,
-                              suffixIcon: isLargeScreen
+                              suffixIcon: searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      onPressed: onClearSearch,
+                                      padding: .zero,
+                                      iconSize: 20,
+                                      icon: Icon(
+                                        Icons.close,
+                                      ),
+                                    )
+                                  : isLargeScreen
                                   ? Align(
                                       widthFactor: 1.0,
                                       heightFactor: 1.0,
