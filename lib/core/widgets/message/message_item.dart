@@ -227,7 +227,7 @@ class MessageItem extends StatelessWidget {
                     constraints: (showAvatar)
                         ? BoxConstraints(
                             minHeight: 40,
-                            maxWidth: (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
+                            maxWidth: (MediaQuery.sizeOf(context).width * 0.9) - (isMyMessage ? 30 : 0),
                           )
                         : null,
                     decoration: BoxDecoration(

@@ -170,11 +170,19 @@ class _AuthViewState extends State<AuthView> {
                                       SizedBox(
                                         height: 90,
                                         width: 90,
-                                        child: Image.network(
-                                          state.selectedOrganization?.imageUrl ?? '',
-                                          fit: BoxFit.fitHeight,
-                                          errorBuilder: (_, _, _) {
-                                            return GenesisLogo();
+                                        child: Builder(
+                                          builder: (context) {
+                                            final imageUrl = state.selectedOrganization?.imageUrl;
+                                            if (imageUrl == null || imageUrl.isEmpty) {
+                                              return GenesisLogo();
+                                            }
+                                            return Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.fitHeight,
+                                              errorBuilder: (_, _, _) {
+                                                return GenesisLogo();
+                                              },
+                                            );
                                           },
                                         ),
                                       ),
