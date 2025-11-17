@@ -55,6 +55,7 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsEventsSubscription;
+  String _searchQuery = '';
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -83,6 +84,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           selectedChat: null,
           pinnedChats: [],
           filteredChatIds: null,
+          filteredChats: null,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -211,6 +213,11 @@ class MessengerCubit extends Cubit<MessengerState> {
     _filterChatsByFolder();
     await getPinnedChats();
     _sortChats();
+  }
+
+  void searchChats(String query) {
+    _searchQuery = query.trim();
+    _applySearchFilter();
   }
 
   Future<void> setFoldersForChat(List<int> foldersIds, int chatId) async {
@@ -400,6 +407,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   void resetState() {
+    _searchQuery = '';
     emit(
       state.copyWith(
         folders: [],
@@ -407,6 +415,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         messages: [],
         chats: [],
         filteredChatIds: null,
+        filteredChats: null,
       ),
     );
   }
@@ -493,45 +502,57 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> _filterChatsByFolder() async {
-    if (state.folders.isEmpty) {
-      state.filteredChatIds = null;
-      emit(state.copyWith(filteredChatIds: state.filteredChatIds));
-      return;
-    }
-
-    final int selectedIndex = state.selectedFolderIndex;
-
-    if (selectedIndex <= 0) {
-      state.filteredChatIds = null;
-      emit(state.copyWith(filteredChatIds: state.filteredChatIds));
-      return;
-    }
-
-    if (selectedIndex >= state.folders.length) {
-      state.filteredChatIds = null;
-      emit(state.copyWith(filteredChatIds: state.filteredChatIds));
-      return;
-    }
-
-    final folder = state.folders[selectedIndex];
-    final int? folderId = folder.id;
+    Set<int>? filteredIds;
     final int? organizationId = AppConstants.selectedOrganizationId;
 
-    if (folderId == null || organizationId == null) {
-      state.filteredChatIds = null;
-      emit(state.copyWith(filteredChatIds: state.filteredChatIds));
+    if (state.folders.isNotEmpty && state.selectedFolderIndex > 0 && state.selectedFolderIndex < state.folders.length) {
+      final folder = state.folders[state.selectedFolderIndex];
+      final int? folderId = folder.id;
+
+      if (folderId != null && organizationId != null) {
+        try {
+          final members = await _getMembersForFolderUseCase.call(
+            folderId,
+            organizationId: organizationId,
+          );
+          filteredIds = members.chatIds.toSet();
+        } catch (e) {
+          inspect(e);
+        }
+      }
+    }
+
+    state.filteredChatIds = filteredIds;
+
+    emit(state.copyWith(filteredChatIds: state.filteredChatIds));
+    _applySearchFilter();
+  }
+
+  List<ChatEntity> _chatsForCurrentFolder() {
+    if (state.filteredChatIds == null) {
+      return state.chats;
+    }
+    return state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
+  }
+
+  void _applySearchFilter() {
+    final String query = _searchQuery.trim();
+    if (query.isEmpty) {
+      if (state.filteredChats != null) {
+        state.filteredChats = null;
+        emit(state.copyWith(filteredChats: state.filteredChats));
+      }
       return;
     }
 
-    try {
-      final members = await _getMembersForFolderUseCase.call(
-        folderId,
-        organizationId: organizationId,
-      );
-      emit(state.copyWith(filteredChatIds: members.chatIds.toSet()));
-    } catch (e) {
-      inspect(e);
-    }
+    final String loweredQuery = query.toLowerCase();
+    final List<ChatEntity> baseChats = _chatsForCurrentFolder();
+    final List<ChatEntity> filtered = baseChats.where((chat) {
+      final bool matchesTitle = chat.displayTitle.toLowerCase().contains(loweredQuery);
+      return matchesTitle;
+    }).toList();
+
+    emit(state.copyWith(filteredChats: filtered));
   }
 
   void _sortChats() {
@@ -586,5 +607,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     });
     final result = [...pinnedChats, ...regularChats];
     emit(state.copyWith(chats: result));
+    _applySearchFilter();
   }
 }

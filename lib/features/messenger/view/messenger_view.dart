@@ -35,6 +35,7 @@ class MessengerView extends StatefulWidget {
 class _MessengerViewState extends State<MessengerView> with SingleTickerProviderStateMixin, OpenDmChatMixin {
   static const Duration _searchAnimationDuration = Duration(milliseconds: 220);
   Future<void>? _future;
+  final TextEditingController _searchController = TextEditingController();
 
   bool _isEditPinning = false;
   List<ChatEntity>? _optimisticPinnedChats;
@@ -42,6 +43,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
   bool _isSearchVisible = true;
   late final AnimationController _searchBarController;
   late final Animation<double> _searchBarAnimation;
+  String _searchQuery = '';
 
   late final ScrollController _chatsController;
   late final ScrollController _topicsController;
@@ -80,6 +82,18 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
     });
   }
 
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+    context.read<MessengerCubit>().searchChats(query);
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _onSearchChanged('');
+  }
+
   Future<void> getInitialData() async {
     await Future.wait([
       context.read<MessengerCubit>().loadFolders(),
@@ -109,6 +123,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
   @override
   void dispose() {
     _searchBarController.dispose();
+    _searchController.dispose();
     _chatsController.dispose();
     _topicsController.dispose();
     super.dispose();
@@ -144,7 +159,10 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
         listenWhen: (previous, current) => previous.selectedOrganizationId != current.selectedOrganizationId,
         listener: (context, state) {
           context.read<MessengerCubit>().resetState();
+          context.read<MessengerCubit>().searchChats('');
           setState(() {
+            _searchQuery = '';
+            _searchController.clear();
             _future = getInitialData();
           });
         },
@@ -163,9 +181,10 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
               }
               return BlocBuilder<MessengerCubit, MessengerState>(
                 builder: (context, state) {
-                  final List<ChatEntity> visibleChats = state.filteredChatIds == null
+                  final List<ChatEntity> baseChats = state.filteredChatIds == null
                       ? state.chats
                       : state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
+                  final List<ChatEntity> visibleChats = state.filteredChats ?? baseChats;
                   final List<ChatEntity> pinnedChatsForEdit =
                       _optimisticPinnedChats ?? _pinnedChatsForEdit(visibleChats, state.pinnedChats);
 
@@ -304,6 +323,10 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                   onStopEditingPins: () => setState(() => _isEditPinning = false),
                                   showSearchField: _isSearchVisible,
                                   selfUserId: state.selfUser?.userId ?? -1,
+                                  onSearchChanged: _onSearchChanged,
+                                  onClearSearch: _clearSearch,
+                                  searchController: _searchController,
+                                  searchQuery: _searchQuery,
                                 ),
                                 if (visibleChats.isEmpty)
                                   Padding(
