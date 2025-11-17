@@ -213,7 +213,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
             primary: isTabletOrSmaller,
             backgroundColor: theme.colorScheme.surface,
             surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12).copyWith(
+                topLeft: isTabletOrSmaller ? Radius.zero : null,
+                topRight: isTabletOrSmaller ? Radius.zero : null,
+              ),
+            ),
             clipBehavior: Clip.hardEdge,
             centerTitle: false,
             actionsPadding: isTabletOrSmaller
