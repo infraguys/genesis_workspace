@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +33,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
@@ -46,8 +48,7 @@ class ChatView extends StatefulWidget {
   State<ChatView> createState() => _ChatViewState();
 }
 
-class _ChatViewState extends State<ChatView>
-    with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
+class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
@@ -128,10 +129,10 @@ class _ChatViewState extends State<ChatView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocConsumer<ChatCubit, ChatState>(
       listenWhen: (prev, current) =>
-          prev.uploadFileError != current.uploadFileError ||
-          prev.uploadFileErrorName != current.uploadFileErrorName,
+          prev.uploadFileError != current.uploadFileError || prev.uploadFileErrorName != current.uploadFileErrorName,
       listener: (context, state) {
         if (state.uploadFileError != null && state.uploadFileErrorName != null) {
           ScaffoldMessenger.maybeOf(context)
@@ -172,45 +173,62 @@ class _ChatViewState extends State<ChatView>
         return Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            primary: false,
+            primary: isTabletOrSmaller,
             backgroundColor: theme.colorScheme.surface,
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
             clipBehavior: Clip.hardEdge,
             centerTitle: false,
-            actionsPadding: EdgeInsetsGeometry.symmetric(
-              horizontal: 20,
-            ),
-            leading: IconButton(
-              onPressed: () {},
-              icon: Assets.icons.moreVert.svg(
-                colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
-              ),
-            ),
+            actionsPadding: isTabletOrSmaller
+                ? null
+                : EdgeInsetsGeometry.symmetric(
+                    horizontal: 20,
+                  ),
+            leading: isTabletOrSmaller
+                ? IconButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                    icon: Icon(
+                      CupertinoIcons.back,
+                      color: textColors.text30,
+                    ),
+                  )
+                : IconButton(
+                    onPressed: () {},
+                    icon: Assets.icons.moreVert.svg(
+                      colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                    ),
+                  ),
             actions: [
               IconButton(
                 onPressed: () {},
                 icon: Assets.icons.joinCall.svg(
+                  width: 28,
+                  height: 28,
                   colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
                 ),
               ),
               IconButton(
                 onPressed: () {},
                 icon: Assets.icons.call.svg(
+                  width: 28,
+                  height: 28,
                   colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: Assets.icons.videocam.svg(
-                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+              if (!isTabletOrSmaller)
+                IconButton(
+                  onPressed: () {},
+                  icon: Assets.icons.videocam.svg(
+                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                  ),
                 ),
-              ),
             ],
             title: Builder(
               builder: (context) {
                 final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
-                  fontSize: 16,
+                  fontSize: isTabletOrSmaller ? 14 : 16,
                 );
                 final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
                   color: textColors.text30,
@@ -220,7 +238,7 @@ class _ChatViewState extends State<ChatView>
                     child: Row(
                       spacing: 8,
                       children: [
-                        UserAvatar(),
+                        if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
                         BlocBuilder<ChatCubit, ChatState>(
                           builder: (context, state) {
                             return Column(
@@ -259,9 +277,7 @@ class _ChatViewState extends State<ChatView>
                     );
                   } else {
                     userStatus = Text(
-                      isJustNow(lastSeen)
-                          ? context.t.wasOnlineJustNow
-                          : context.t.wasOnline(time: timeAgo),
+                      isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
                       style: subtitleTextStyle,
                     );
                   }
@@ -272,7 +288,7 @@ class _ChatViewState extends State<ChatView>
                   return Row(
                     spacing: 8,
                     children: [
-                      UserAvatar(avatarUrl: userEntity.avatarUrl),
+                      if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
                       BlocBuilder<ChatCubit, ChatState>(
                         builder: (context, state) {
                           return Column(
@@ -392,8 +408,7 @@ class _ChatViewState extends State<ChatView>
                                           showPopup: state.showMentionPopup,
                                           suggestedMentions: state.suggestedMentions,
                                           isSuggestionsPending: state.isSuggestionsPending,
-                                          filteredSuggestedMentions:
-                                              state.filteredSuggestedMentions,
+                                          filteredSuggestedMentions: state.filteredSuggestedMentions,
                                           onSelectMention: onMentionSelected,
                                           inputFocusNode: messageInputFocusNode,
                                         ),
@@ -469,11 +484,9 @@ class _ChatViewState extends State<ChatView>
 
                         final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
                         final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
-                        final bool canSendByTextAndFiles =
-                            hasText && hasFiles && !hasUploadingFiles;
+                        final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
 
-                        final bool isSendEnabled =
-                            canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                        final bool isSendEnabled = canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
                         final bool isEditEnabled = isSendEnabled || state.isEdited;
 
                         return Actions(
@@ -492,20 +505,14 @@ class _ChatViewState extends State<ChatView>
                           child: Shortcuts(
                             shortcuts: state.showMentionPopup
                                 ? <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
-                                        const MentionNavIntent.down(),
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                                        const MentionNavIntent.up(),
-                                    LogicalKeySet(LogicalKeyboardKey.enter):
-                                        const MentionSelectIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter):
-                                        const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowDown): const MentionNavIntent.down(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const MentionNavIntent.up(),
+                                    LogicalKeySet(LogicalKeyboardKey.enter): const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter): const MentionSelectIntent(),
                                   }
                                 : <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                                        const EditLastMessageIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.escape):
-                                        const CancelEditMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const EditLastMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.escape): const CancelEditMessageIntent(),
                                   },
                             child: Actions(
                               actions: <Type, Action<Intent>>{
@@ -536,8 +543,7 @@ class _ChatViewState extends State<ChatView>
                                 ),
                                 MentionNavIntent: CallbackAction<MentionNavIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       if (intent.direction == TraversalDirection.down) {
                                         st?.moveNext();
@@ -550,8 +556,7 @@ class _ChatViewState extends State<ChatView>
                                 ),
                                 MentionSelectIntent: CallbackAction<MentionSelectIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                     }
@@ -566,8 +571,7 @@ class _ChatViewState extends State<ChatView>
                                   isMessagePending: state.isMessagePending,
                                   focusNode: messageInputFocusNode,
                                   onSubmitIntercept: () {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                       return true;
