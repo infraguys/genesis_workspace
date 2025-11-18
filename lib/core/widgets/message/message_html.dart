@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -16,6 +14,7 @@ import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
+import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -51,8 +50,9 @@ class MessageHtml extends StatelessWidget {
         factoryBuilder: () => WorkspaceHtmlFactory(),
         onTapUrl: (String? url) async {
           final Uri _url = Uri.parse(url ?? '');
-          inspect(_url.path);
           if (_url.path.startsWith("/user_uploads/")) {
+            final pathToFile = _url.path;
+            await context.read<DownloadFilesCubit>().download(pathToFile);
           } else {
             await launchUrl(_url);
           }
