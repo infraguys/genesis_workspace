@@ -296,33 +296,33 @@ class _MessageInputState extends State<MessageInput> {
                           color: theme.colorScheme.background,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Column(
+                        child: Stack(
                           children: [
-                            if (!isTabletOrSmaller)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                                child: Row(
-                                  spacing: 8,
-                                  children: [
-                                    Container(
-                                      height: 16,
-                                      width: 3,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                    Text(
-                                      "# ${widget.inputTitle ?? ''}",
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: textColors.text30,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            Stack(
+                            Column(
                               children: [
+                                if (!isTabletOrSmaller)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Container(
+                                          height: 16,
+                                          width: 3,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary,
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                        ),
+                                        Text(
+                                          "# ${widget.inputTitle ?? ''}",
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            color: textColors.text30,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 150),
                                   clipBehavior: Clip.hardEdge,
@@ -398,34 +398,32 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                   ),
                                 ),
-
-                                // Оверлей при перетаскивании
-                                if (widget.isDropOver)
-                                  Positioned.fill(
-                                    child: IgnorePointer(
-                                      child: AnimatedOpacity(
-                                        duration: const Duration(milliseconds: 120),
-                                        opacity: 1.0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: theme.colorScheme.primary.withOpacity(0.06),
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            context.t.dropFilesToUpload,
-                                            textAlign: TextAlign.center,
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: theme.colorScheme.primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
+                              ],
+                            ),
+                            if (widget.isDropOver)
+                              Positioned.fill(
+                                child: IgnorePointer(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 120),
+                                    opacity: 1.0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.primary.withOpacity(0.06),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        context.t.dropFilesToUpload,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),
                                   ),
-                              ],
-                            ),
+                                ),
+                              ),
                           ],
                         ),
                       ),

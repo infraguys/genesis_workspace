@@ -72,15 +72,12 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   }) async {
     try {
       // 1) Если пришли PlatformFile — используем их напрямую
-      final List<PlatformFile> platformFiles =
-          (droppedPlatformImages != null && droppedPlatformImages.isNotEmpty)
+      final List<PlatformFile> platformFiles = (droppedPlatformImages != null && droppedPlatformImages.isNotEmpty)
           ? droppedPlatformImages
           : <PlatformFile>[];
 
       // 2) Если нет — тогда работаем с XFile (из picker)
-      final List<XFile> xfiles = (platformFiles.isEmpty)
-          ? (droppedImages ?? await pickImages())
-          : const <XFile>[];
+      final List<XFile> xfiles = (platformFiles.isEmpty) ? (droppedImages ?? await pickImages()) : const <XFile>[];
 
       if (platformFiles.isEmpty && xfiles.isEmpty) return;
 
@@ -99,9 +96,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
           bytesSent: 0,
           bytesTotal: fileSize == 0 ? null : fileSize,
           type: UploadFileType.image,
-          path: (platformfile.path != null && platformfile.path!.isNotEmpty)
-              ? platformfile.path
-              : null,
+          path: (platformfile.path != null && platformfile.path!.isNotEmpty) ? platformfile.path : null,
           bytes: bytes,
         );
         _addUploadingFile(placeholder);
@@ -111,9 +106,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
             platformFile: PlatformFile(
               name: platformfile.name,
               size: fileSize,
-              path: (platformfile.path != null && platformfile.path!.isNotEmpty)
-                  ? platformfile.path
-                  : null,
+              path: (platformfile.path != null && platformfile.path!.isNotEmpty) ? platformfile.path : null,
               bytes: bytes.isNotEmpty ? bytes : null,
             ),
             localId: localId,
@@ -302,9 +295,9 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     removeUploadedFileCommon(localId);
   }
 
-  void clearUploadFileErrorCommon() {
-    emit(copyWithCommon(uploadFileError: null, uploadFileErrorName: null));
-  }
+  // void clearUploadFileErrorCommon() {
+  //   emit(copyWithCommon(uploadFileError: null, uploadFileErrorName: null));
+  // }
 
   void _addUploadingFile(UploadingFileEntity newItem) {
     final List<UploadFileEntity> next = List.of(getUploadedFiles(state))..add(newItem);
@@ -382,9 +375,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     final editingAttachments = getEditingAttachments(state);
     final uploadedFiles = getUploadedFiles(state);
 
-    final String trimmedContent = stripExistingAttachmentsFromContent
-        ? extractMessageText(content)
-        : content.trim();
+    final String trimmedContent = stripExistingAttachmentsFromContent ? extractMessageText(content) : content.trim();
 
     final List<String> editingLinks = editingAttachments
         .map((attachment) {
@@ -513,8 +504,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
           filteredUsers = users
               .where(
                 (user) =>
-                    user.fullName.toLowerCase().contains(lowerQuery) ||
-                    user.email.toLowerCase().contains(lowerQuery),
+                    user.fullName.toLowerCase().contains(lowerQuery) || user.email.toLowerCase().contains(lowerQuery),
               )
               .toList();
         } else {
@@ -604,8 +594,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   }
 
   void onDeleteMessageEvents(DeleteMessageEventEntity event) {
-    final List<MessageEntity> next = List.of(getStateMessages(state))
-      ..removeWhere((m) => m.id == event.messageId);
+    final List<MessageEntity> next = List.of(getStateMessages(state))..removeWhere((m) => m.id == event.messageId);
     emit(copyWithCommon(messages: next));
   }
 

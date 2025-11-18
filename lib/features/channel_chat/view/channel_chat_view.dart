@@ -184,7 +184,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
               .closed
               .then((_) {
                 if (context.mounted) {
-                  context.read<ChannelChatCubit>().clearUploadFileErrorCommon();
+                  context.read<ChannelChatCubit>().clearUploadFileError();
                 }
               });
         }

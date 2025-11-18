@@ -155,7 +155,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               .closed
               .then((_) {
                 if (context.mounted) {
-                  context.read<ChatCubit>().clearUploadFileErrorCommon();
+                  context.read<ChatCubit>().clearUploadFileError();
                 }
               });
         }
@@ -460,19 +460,22 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                           nonImageFiles.add(pf);
                         }
                       }
-
-                      if (nonImageFiles.isNotEmpty) {
-                        unawaited(
-                          context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
-                        );
-                      }
-                      if (imageFiles.isNotEmpty) {
-                        unawaited(
-                          context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
-                        );
-                      }
-                      if (platformInfo.isDesktop) {
-                        messageInputFocusNode.requestFocus();
+                      try {
+                        if (nonImageFiles.isNotEmpty) {
+                          unawaited(
+                            context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
+                          );
+                        }
+                        if (imageFiles.isNotEmpty) {
+                          unawaited(
+                            context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
+                          );
+                        }
+                        if (platformInfo.isDesktop) {
+                          messageInputFocusNode.requestFocus();
+                        }
+                      } catch (e) {
+                        inspect(e);
                       }
                     },
                     child: BlocBuilder<ChatCubit, ChatState>(

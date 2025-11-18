@@ -39,9 +39,7 @@ import 'package:injectable/injectable.dart';
 part 'chat_state.dart';
 
 @injectable
-class ChatCubit extends Cubit<ChatState>
-    with ChatCubitMixin<ChatState>
-    implements ChatCubitCapable {
+class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implements ChatCubitCapable {
   ChatCubit(
     this._realTimeService,
     this._getMessagesUseCase,
@@ -322,10 +320,20 @@ class ChatCubit extends Cubit<ChatState>
     }
   }
 
+  void clearUploadFileError() {
+    state.uploadFileError = null;
+    state.uploadFileErrorName = null;
+    emit(
+      state.copyWith(
+        uploadFileError: state.uploadFileError,
+        uploadFileErrorName: state.uploadFileErrorName,
+      ),
+    );
+  }
+
   void _onTypingEvents(TypingEventEntity event) {
     final senderId = event.sender.userId;
-    final isWriting =
-        event.op == TypingEventOp.start && (state.chatIds?.any((id) => id == senderId) ?? false);
+    final isWriting = event.op == TypingEventOp.start && (state.chatIds?.any((id) => id == senderId) ?? false);
 
     if (isWriting) {
       state.typingId = senderId;
@@ -339,15 +347,11 @@ class ChatCubit extends Cubit<ChatState>
     bool isThisChatMessage = false;
     if (event.message.isGroupChatMessage) {
       final chatIds = state.chatIds?.toList();
-      final messageRecipients = event.message.displayRecipient.recipients
-          .map((recipient) => recipient.userId)
-          .toList();
+      final messageRecipients = event.message.displayRecipient.recipients.map((recipient) => recipient.userId).toList();
       isThisChatMessage = unorderedEquals(chatIds ?? [], messageRecipients);
     } else {
       final chatIds = state.chatIds!;
-      final messageRecipients = event.message.displayRecipient.recipients
-          .map((recipient) => recipient.userId)
-          .toList();
+      final messageRecipients = event.message.displayRecipient.recipients.map((recipient) => recipient.userId).toList();
       isThisChatMessage = unorderedEquals(chatIds.toList(), messageRecipients);
     }
     if (isThisChatMessage) {

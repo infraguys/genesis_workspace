@@ -272,8 +272,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           anchor: MessageAnchor.newest(),
           narrow: [
             MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
-            if (state.topic != null)
-              MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+            if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
           ],
           numBefore: numBefore,
           numAfter: 0,
@@ -308,8 +307,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
           narrow: [
             MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
-            if (state.topic != null)
-              MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+            if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
           ],
           numBefore: 25,
           numAfter: 0,
@@ -395,6 +393,17 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         inspect(e);
       }
     }
+  }
+
+  void clearUploadFileError() {
+    state.uploadFileError = null;
+    state.uploadFileErrorName = null;
+    emit(
+      state.copyWith(
+        uploadFileError: state.uploadFileError,
+        uploadFileErrorName: state.uploadFileErrorName,
+      ),
+    );
   }
 
   @override
