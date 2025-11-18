@@ -132,6 +132,37 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
     super.dispose();
   }
 
+  Widget? _buildDownloadSubtitle(DownloadFileEntity file, ThemeData theme) {
+    if (file is! DownloadingFileEntity) return Text('Готово', style: theme.textTheme.bodySmall);
+
+    final int progress = file.progress;
+    final int total = file.total;
+    if (total <= 0) {
+      return Text(
+        '${_formatBytes(progress)}',
+        style: theme.textTheme.bodySmall,
+      );
+    }
+    final double percent = (progress / total * 100).clamp(0, 100);
+    return Text(
+      '${percent.toStringAsFixed(0)}% • ${_formatBytes(progress)} / ${_formatBytes(total)}',
+      style: theme.textTheme.bodySmall,
+    );
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes <= 0) return '0 B';
+    const suffixes = ['B', 'KB', 'MB', 'GB'];
+    double size = bytes.toDouble();
+    int i = 0;
+    while (size >= 1024 && i < suffixes.length - 1) {
+      size /= 1024;
+      i++;
+    }
+    final String formatted = size >= 10 ? size.toStringAsFixed(0) : size.toStringAsFixed(1);
+    return '$formatted ${suffixes[i]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -245,36 +276,68 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     (file) => file is DownloadingFileEntity,
                     orElse: () => DownloadedFileEntity(pathToFile: "-1", fileName: '', bytes: Uint8List(0)),
                   );
-                  if (state.files.isNotEmpty && lastDownloadingFile is DownloadingFileEntity) {
+                  if (state.files.isNotEmpty) {
                     final bool showSuccessIcon = state.isFinished && _showDownloadFinishedIcon;
                     return CustomPopup(
                       key: _downloadFilesKey,
                       rootNavigator: true,
+                      position: PopupPosition.bottom,
                       backgroundColor: theme.colorScheme.surface,
                       content: Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: state.files.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final file = state.files[index];
-                            return ListTile(
-                              title: Text(
-                                file.fileName,
-                                style: theme.textTheme.bodyMedium,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                        width: 240,
+                        constraints: const BoxConstraints(maxHeight: 260),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: state.files.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'Нет загрузок',
+                                  style: theme.textTheme.bodyMedium?.copyWith(color: textColors.text30),
+                                ),
+                              )
+                            : ListView.separated(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                itemCount: state.files.length,
+                                separatorBuilder: (_, __) => const Divider(height: 1),
+                                itemBuilder: (BuildContext context, int index) {
+                                  final file = state.files[index];
+                                  return ListTile(
+                                    dense: false,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    leading: Builder(
+                                      builder: (BuildContext context) {
+                                        if (file is DownloadingFileEntity) {
+                                          final double? value = file.total > 0 ? file.progress / file.total : null;
+                                          return SizedBox(
+                                            width: 32,
+                                            height: 32,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 3,
+                                              value: value != null ? value.clamp(0, 1) : null,
+                                            ),
+                                          );
+                                        }
+                                        return CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: AppColors.callGreen.withValues(alpha: 0.15),
+                                          child: Icon(Icons.check, size: 18, color: AppColors.callGreen),
+                                        );
+                                      },
+                                    ),
+                                    title: Text(
+                                      file.fileName,
+                                      style: theme.textTheme.bodyMedium,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    subtitle: _buildDownloadSubtitle(file, theme),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
                       ),
                       child: Stack(
                         alignment: AlignmentGeometry.center,
                         children: [
-                          if (!state.isFinished && !showSuccessIcon)
+                          if (!state.isFinished && !showSuccessIcon && lastDownloadingFile is DownloadingFileEntity)
                             CircularProgressIndicator(
                               value: lastDownloadingFile.progress / lastDownloadingFile.total,
                             ),
