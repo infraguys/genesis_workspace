@@ -21,8 +21,10 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
 
   Future<void> download(String pathToFile) async {
     try {
+      String fileName = Uri.parse(pathToFile).pathSegments.last;
       DownloadingFileEntity downloadingFileEntity = DownloadingFileEntity(
         pathToFile: pathToFile,
+        fileName: fileName,
         progress: 0,
         total: 1,
       );

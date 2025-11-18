@@ -15,7 +15,7 @@ class DownloadFilesService {
   /// Делает авторизованный GET к файловому пути (`/user_uploads/...`) без подстановки `/api/v1`.
   Future<Response<Uint8List>> download(
     String pathToFile, {
-    Function(int progress, int total)? onReceiveProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
     final String? savedBaseUrl = _sharedPreferences.getString(SharedPrefsKeys.baseUrl);
     if (savedBaseUrl == null || savedBaseUrl.trim().isEmpty) {

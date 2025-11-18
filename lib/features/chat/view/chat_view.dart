@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
@@ -55,6 +56,9 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   late final ScrollController _controller;
   late final UserEntity _myUser;
   final GlobalKey _mentionKey = GlobalKey();
+  final GlobalKey<CustomPopupState> _downloadFilesKey = GlobalKey();
+  bool _showDownloadFinishedIcon = false;
+  Timer? _downloadFinishedTimer;
 
   @override
   void initState() {
@@ -123,6 +127,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
     messageController.dispose();
     messageInputFocusNode.dispose();
     removeWebDnD?.call();
+    _downloadFinishedTimer?.cancel();
 
     super.dispose();
   }
@@ -216,28 +221,108 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
               //   ),
               // ),
-              BlocBuilder<DownloadFilesCubit, DownloadFilesState>(
+              BlocConsumer<DownloadFilesCubit, DownloadFilesState>(
+                listenWhen: (prev, current) => prev.isFinished != current.isFinished,
+                listener: (context, state) {
+                  if (!mounted) return;
+                  if (!state.isFinished) {
+                    _downloadFinishedTimer?.cancel();
+                    if (_showDownloadFinishedIcon) {
+                      setState(() => _showDownloadFinishedIcon = false);
+                    }
+                    return;
+                  }
+                  if (state.files.isEmpty) return;
+                  _downloadFinishedTimer?.cancel();
+                  setState(() => _showDownloadFinishedIcon = true);
+                  _downloadFinishedTimer = Timer(const Duration(seconds: 1), () {
+                    if (!mounted) return;
+                    setState(() => _showDownloadFinishedIcon = false);
+                  });
+                },
                 builder: (context, state) {
                   final lastDownloadingFile = state.files.lastWhere(
                     (file) => file is DownloadingFileEntity,
-                    orElse: () => DownloadedFileEntity(pathToFile: "-1", bytes: Uint8List(0)),
+                    orElse: () => DownloadedFileEntity(pathToFile: "-1", fileName: '', bytes: Uint8List(0)),
                   );
                   if (state.files.isNotEmpty && lastDownloadingFile is DownloadingFileEntity) {
-                    return Stack(
-                      alignment: AlignmentGeometry.center,
-                      children: [
-                        if (!state.isFinished)
-                          CircularProgressIndicator(
-                            value: lastDownloadingFile.progress / lastDownloadingFile.total,
-                          ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.file_download_outlined,
-                            color: state.isFinished ? AppColors.callGreen : textColors.text30,
-                          ),
+                    final bool showSuccessIcon = state.isFinished && _showDownloadFinishedIcon;
+                    return CustomPopup(
+                      key: _downloadFilesKey,
+                      rootNavigator: true,
+                      backgroundColor: theme.colorScheme.surface,
+                      content: Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: state.files.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final file = state.files[index];
+                            return ListTile(
+                              title: Text(
+                                file.fileName,
+                                style: theme.textTheme.bodyMedium,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          },
                         ),
-                      ],
+                      ),
+                      child: Stack(
+                        alignment: AlignmentGeometry.center,
+                        children: [
+                          if (!state.isFinished && !showSuccessIcon)
+                            CircularProgressIndicator(
+                              value: lastDownloadingFile.progress / lastDownloadingFile.total,
+                            ),
+                          IconButton(
+                            onPressed: () {
+                              _downloadFilesKey.currentState?.show();
+                            },
+                            icon: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 250),
+                              transitionBuilder: (child, animation) {
+                                final bool isCheck = child.key == const ValueKey('downloadFinished');
+                                if (isCheck) {
+                                  final slideAnimation = Tween<Offset>(
+                                    begin: const Offset(0, -1),
+                                    end: Offset.zero,
+                                  ).chain(CurveTween(curve: Curves.bounceInOut)).animate(animation);
+                                  final bounceScale = CurvedAnimation(parent: animation, curve: Curves.elasticOut);
+
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position: slideAnimation,
+                                      child: ScaleTransition(scale: bounceScale, child: child),
+                                    ),
+                                  );
+                                }
+
+                                final curved = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: ScaleTransition(scale: curved, child: child),
+                                );
+                              },
+                              child: showSuccessIcon
+                                  ? Icon(
+                                      Icons.check,
+                                      key: const ValueKey('downloadFinished'),
+                                      color: AppColors.callGreen,
+                                    )
+                                  : Icon(
+                                      Icons.file_download_outlined,
+                                      key: const ValueKey('downloadInProgress'),
+                                      color: state.isFinished ? AppColors.callGreen : textColors.text30,
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }
                   return SizedBox.shrink();
