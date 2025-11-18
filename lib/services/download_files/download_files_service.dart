@@ -13,7 +13,10 @@ class DownloadFilesService {
   final SharedPreferences _sharedPreferences;
 
   /// Делает авторизованный GET к файловому пути (`/user_uploads/...`) без подстановки `/api/v1`.
-  Future<Response<Uint8List>> download(String pathToFile) async {
+  Future<Response<Uint8List>> download(
+    String pathToFile, {
+    Function(int progress, int total)? onReceiveProgress,
+  }) async {
     final String? savedBaseUrl = _sharedPreferences.getString(SharedPrefsKeys.baseUrl);
     if (savedBaseUrl == null || savedBaseUrl.trim().isEmpty) {
       throw StateError('Base URL is not set.');
@@ -25,6 +28,7 @@ class DownloadFilesService {
 
     return _dio.getUri<Uint8List>(
       targetUri,
+      onReceiveProgress: onReceiveProgress,
       options: Options(
         responseType: ResponseType.bytes,
         followRedirects: true,

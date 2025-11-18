@@ -166,7 +166,6 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   Widget build(BuildContext context) {
-    // final reversedMessages = widget.messages.reversed.toList();
     final theme = Theme.of(context);
 
     return Column(
@@ -357,6 +356,7 @@ class _MessagesListState extends State<MessagesList> {
 
 class MessageDayLabel extends StatelessWidget {
   final String label;
+
   const MessageDayLabel({super.key, required this.label});
 
   @override

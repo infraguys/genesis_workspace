@@ -24,11 +24,13 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
+import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -206,13 +208,40 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     ),
                   ),
             actions: [
-              IconButton(
-                onPressed: () {},
-                icon: Assets.icons.joinCall.svg(
-                  width: 28,
-                  height: 28,
-                  colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-                ),
+              // IconButton(
+              //   onPressed: () {},
+              //   icon: Assets.icons.joinCall.svg(
+              //     width: 28,
+              //     height: 28,
+              //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+              //   ),
+              // ),
+              BlocBuilder<DownloadFilesCubit, DownloadFilesState>(
+                builder: (context, state) {
+                  final lastDownloadingFile = state.files.lastWhere(
+                    (file) => file is DownloadingFileEntity,
+                    orElse: () => DownloadedFileEntity(pathToFile: "-1", bytes: Uint8List(0)),
+                  );
+                  if (state.files.isNotEmpty && lastDownloadingFile is DownloadingFileEntity) {
+                    return Stack(
+                      alignment: AlignmentGeometry.center,
+                      children: [
+                        if (!state.isFinished)
+                          CircularProgressIndicator(
+                            value: lastDownloadingFile.progress / lastDownloadingFile.total,
+                          ),
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.file_download_outlined,
+                            color: state.isFinished ? AppColors.callGreen : textColors.text30,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  return SizedBox.shrink();
+                },
               ),
               IconButton(
                 onPressed: () {},
