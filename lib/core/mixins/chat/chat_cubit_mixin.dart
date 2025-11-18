@@ -295,10 +295,6 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
     removeUploadedFileCommon(localId);
   }
 
-  // void clearUploadFileErrorCommon() {
-  //   emit(copyWithCommon(uploadFileError: null, uploadFileErrorName: null));
-  // }
-
   void _addUploadingFile(UploadingFileEntity newItem) {
     final List<UploadFileEntity> next = List.of(getUploadedFiles(state))..add(newItem);
     emit(copyWithCommon(uploadedFiles: next));
