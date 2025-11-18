@@ -197,6 +197,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         }
       },
       builder: (context, state) {
+        inspect(state);
         final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
           fontSize: isTabletOrSmaller ? 14 : 16,
         );

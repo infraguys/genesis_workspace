@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -47,6 +49,15 @@ class MessageHtml extends StatelessWidget {
         },
         textStyle: TextStyle(overflow: TextOverflow.ellipsis),
         factoryBuilder: () => WorkspaceHtmlFactory(),
+        onTapUrl: (String? url) async {
+          final Uri _url = Uri.parse(url ?? '');
+          inspect(_url.path);
+          if (_url.path.startsWith("/user_uploads/")) {
+          } else {
+            await launchUrl(_url);
+          }
+          return true;
+        },
         customWidgetBuilder: (element) {
           if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
             final src = element.parentNode?.attributes['href'];
@@ -205,11 +216,6 @@ class MessageHtml extends StatelessWidget {
             );
           }
           return null;
-        },
-        onTapUrl: (String? url) async {
-          final Uri _url = Uri.parse(url ?? '');
-          await launchUrl(_url);
-          return true;
         },
       ),
     );
