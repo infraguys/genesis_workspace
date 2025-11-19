@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
 import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class DownloadFilesButton extends StatefulWidget {
   DownloadFilesButton({super.key});
@@ -151,7 +153,7 @@ class _DownloadFilesPopupContent extends StatelessWidget {
           child: state.files.isEmpty
               ? Center(
                   child: Text(
-                    'Нет загрузок',
+                    context.t.downloadFiles.noDownloads,
                     style: theme.textTheme.bodyMedium?.copyWith(color: textColors.text30),
                   ),
                 )
@@ -176,7 +178,7 @@ class _DownloadFilesPopupContent extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: _buildSubtitle(file, theme),
+                      subtitle: _buildSubtitle(context, file, theme),
                     );
                   },
                 ),
@@ -204,8 +206,13 @@ class _DownloadFilesPopupContent extends StatelessWidget {
     );
   }
 
-  Widget? _buildSubtitle(DownloadFileEntity file, ThemeData theme) {
-    if (file is! DownloadingFileEntity) return Text('Готово', style: theme.textTheme.bodySmall);
+  Widget? _buildSubtitle(BuildContext context, DownloadFileEntity file, ThemeData theme) {
+    if (file is! DownloadingFileEntity) {
+      return Text(
+        context.t.downloadFiles.ready,
+        style: theme.textTheme.bodySmall,
+      );
+    }
 
     final int progress = file.progress;
     final int total = file.total;

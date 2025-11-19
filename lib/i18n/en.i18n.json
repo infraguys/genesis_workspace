@@ -115,6 +115,10 @@
     "image": "Pick an image"
   },
   "drop_files_to_upload": "Drop files here to upload",
+  "download_files": {
+    "no_downloads": "No downloads",
+    "ready": "Ready"
+  },
   "cancel_editing": "Cancel editing",
   "folders": {
     "all": "All",
