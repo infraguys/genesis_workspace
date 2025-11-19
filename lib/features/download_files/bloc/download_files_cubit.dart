@@ -17,6 +17,7 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
         DownloadFilesState(
           files: [],
           isFinished: true,
+          duplicateRequestTick: 0,
         ),
       );
 
@@ -32,6 +33,7 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
         total: 1,
       );
       if (state.files.any((file) => file.pathToFile == pathToFile)) {
+        emit(state.copyWith(duplicateRequestTick: state.duplicateRequestTick + 1));
         return;
       }
 
@@ -40,7 +42,6 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
       final index = state.files.length;
       updatedFiles.add(downloadingFileEntity);
       emit(state.copyWith(files: updatedFiles));
-      // int fileSize = 1;
       final response = await _downloadFilesService.download(
         pathToFile,
         onReceiveProgress: (progress, total) {
@@ -53,7 +54,8 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
         },
       );
       final bytes = response.data ?? Uint8List(0);
-      final localPath = await _saveToFileSystem(
+      final localPath =
+          await _saveToFileSystem(
             fileName: fileName,
             bytes: bytes,
           ) ??

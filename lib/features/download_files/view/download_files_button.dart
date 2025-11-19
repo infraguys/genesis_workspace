@@ -18,15 +18,40 @@ class DownloadFilesButton extends StatefulWidget {
   State<DownloadFilesButton> createState() => _DownloadFilesButtonState();
 }
 
-class _DownloadFilesButtonState extends State<DownloadFilesButton> {
+class _DownloadFilesButtonState extends State<DownloadFilesButton> with SingleTickerProviderStateMixin {
   final GlobalKey<CustomPopupState> _downloadFilesKey = GlobalKey();
 
   Timer? _downloadFinishedTimer;
   bool _showDownloadFinishedIcon = false;
+  bool _lastIsFinished = true;
+  int _lastDuplicateRequestTick = 0;
+
+  late final AnimationController _duplicateAnimationController;
+  late final Animation<double> _duplicateScaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _duplicateAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    _duplicateScaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1, end: 1.15).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.15, end: 1).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 50,
+      ),
+    ]).animate(_duplicateAnimationController);
+  }
 
   @override
   void dispose() {
     _downloadFinishedTimer?.cancel();
+    _duplicateAnimationController.dispose();
     super.dispose();
   }
 
@@ -36,9 +61,17 @@ class _DownloadFilesButtonState extends State<DownloadFilesButton> {
     final textColors = theme.extension<TextColors>()!;
 
     return BlocConsumer<DownloadFilesCubit, DownloadFilesState>(
-      listenWhen: (prev, current) => prev.isFinished != current.isFinished,
+      listenWhen: (prev, current) =>
+          prev.isFinished != current.isFinished || prev.duplicateRequestTick != current.duplicateRequestTick,
       listener: (context, state) {
         if (!mounted) return;
+        if (_lastDuplicateRequestTick != state.duplicateRequestTick) {
+          _lastDuplicateRequestTick = state.duplicateRequestTick;
+          _duplicateAnimationController.forward(from: 0);
+        }
+
+        if (_lastIsFinished == state.isFinished) return;
+        _lastIsFinished = state.isFinished;
         if (!state.isFinished) {
           _downloadFinishedTimer?.cancel();
           if (_showDownloadFinishedIcon) {
@@ -82,47 +115,50 @@ class _DownloadFilesButtonState extends State<DownloadFilesButton> {
                   CircularProgressIndicator(
                     value: lastDownloadingFile.progress / lastDownloadingFile.total,
                   ),
-                IconButton(
-                  onPressed: () {
-                    _downloadFilesKey.currentState?.show();
-                  },
-                  icon: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    transitionBuilder: (child, animation) {
-                      final bool isCheck = child.key == const ValueKey('downloadFinished');
-                      if (isCheck) {
-                        final slideAnimation = Tween<Offset>(
-                          begin: const Offset(0, -1),
-                          end: Offset.zero,
-                        ).chain(CurveTween(curve: Curves.bounceInOut)).animate(animation);
-                        final bounceScale = CurvedAnimation(parent: animation, curve: Curves.elasticOut);
+                ScaleTransition(
+                  scale: _duplicateScaleAnimation,
+                  child: IconButton(
+                    onPressed: () {
+                      _downloadFilesKey.currentState?.show();
+                    },
+                    icon: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      transitionBuilder: (child, animation) {
+                        final bool isCheck = child.key == const ValueKey('downloadFinished');
+                        if (isCheck) {
+                          final slideAnimation = Tween<Offset>(
+                            begin: const Offset(0, -1),
+                            end: Offset.zero,
+                          ).chain(CurveTween(curve: Curves.bounceInOut)).animate(animation);
+                          final bounceScale = CurvedAnimation(parent: animation, curve: Curves.elasticOut);
 
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: slideAnimation,
+                              child: ScaleTransition(scale: bounceScale, child: child),
+                            ),
+                          );
+                        }
+
+                        final curved = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
                         return FadeTransition(
                           opacity: animation,
-                          child: SlideTransition(
-                            position: slideAnimation,
-                            child: ScaleTransition(scale: bounceScale, child: child),
-                          ),
+                          child: ScaleTransition(scale: curved, child: child),
                         );
-                      }
-
-                      final curved = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
-                      return FadeTransition(
-                        opacity: animation,
-                        child: ScaleTransition(scale: curved, child: child),
-                      );
-                    },
-                    child: showSuccessIcon
-                        ? Icon(
-                            Icons.check,
-                            key: const ValueKey('downloadFinished'),
-                            color: AppColors.callGreen,
-                          )
-                        : Icon(
-                            Icons.file_download_outlined,
-                            key: const ValueKey('downloadInProgress'),
-                            color: state.isFinished ? AppColors.callGreen : textColors.text30,
-                          ),
+                      },
+                      child: showSuccessIcon
+                          ? Icon(
+                              Icons.check,
+                              key: const ValueKey('downloadFinished'),
+                              color: AppColors.callGreen,
+                            )
+                          : Icon(
+                              Icons.file_download_outlined,
+                              key: const ValueKey('downloadInProgress'),
+                              color: state.isFinished ? AppColors.callGreen : textColors.text30,
+                            ),
+                    ),
                   ),
                 ),
               ],
