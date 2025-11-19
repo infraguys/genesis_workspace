@@ -1,6 +1,8 @@
 part of 'chat_cubit.dart';
 
 class ChatState {
+  static const Object _notSpecified = Object();
+
   List<MessageEntity> messages;
   Set<int>? chatIds;
   int? typingId;
@@ -67,8 +69,8 @@ class ChatState {
     DmUserEntity? userEntity,
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,
-    String? uploadFileError,
-    String? uploadFileErrorName,
+    Object? uploadFileError = _notSpecified,
+    Object? uploadFileErrorName = _notSpecified,
     bool? isEdit,
     MessageEntity? editingMessage,
     List<EditingAttachment>? editingAttachments,
@@ -93,8 +95,10 @@ class ChatState {
       userEntity: userEntity ?? this.userEntity,
       uploadedFiles: uploadedFiles ?? this.uploadedFiles,
       uploadedFilesString: uploadedFilesString ?? this.uploadedFilesString,
-      uploadFileError: uploadFileError ?? this.uploadFileError,
-      uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
+      uploadFileError: identical(uploadFileError, _notSpecified) ? this.uploadFileError : uploadFileError as String?,
+      uploadFileErrorName: identical(uploadFileErrorName, _notSpecified)
+          ? this.uploadFileErrorName
+          : uploadFileErrorName as String?,
       isEdit: isEdit ?? this.isEdit,
       editingMessage: editingMessage ?? this.editingMessage,
       editingAttachments: editingAttachments ?? this.editingAttachments,
