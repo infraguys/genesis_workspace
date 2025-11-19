@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
@@ -25,13 +24,12 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
-import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
-import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart';
+import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -56,9 +54,6 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   late final ScrollController _controller;
   late final UserEntity _myUser;
   final GlobalKey _mentionKey = GlobalKey();
-  final GlobalKey<CustomPopupState> _downloadFilesKey = GlobalKey();
-  bool _showDownloadFinishedIcon = false;
-  Timer? _downloadFinishedTimer;
 
   @override
   void initState() {
@@ -127,40 +122,8 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
     messageController.dispose();
     messageInputFocusNode.dispose();
     removeWebDnD?.call();
-    _downloadFinishedTimer?.cancel();
 
     super.dispose();
-  }
-
-  Widget? _buildDownloadSubtitle(DownloadFileEntity file, ThemeData theme) {
-    if (file is! DownloadingFileEntity) return Text('Готово', style: theme.textTheme.bodySmall);
-
-    final int progress = file.progress;
-    final int total = file.total;
-    if (total <= 0) {
-      return Text(
-        '${_formatBytes(progress)}',
-        style: theme.textTheme.bodySmall,
-      );
-    }
-    final double percent = (progress / total * 100).clamp(0, 100);
-    return Text(
-      '${percent.toStringAsFixed(0)}% • ${_formatBytes(progress)} / ${_formatBytes(total)}',
-      style: theme.textTheme.bodySmall,
-    );
-  }
-
-  String _formatBytes(int bytes) {
-    if (bytes <= 0) return '0 B';
-    const suffixes = ['B', 'KB', 'MB', 'GB'];
-    double size = bytes.toDouble();
-    int i = 0;
-    while (size >= 1024 && i < suffixes.length - 1) {
-      size /= 1024;
-      i++;
-    }
-    final String formatted = size >= 10 ? size.toStringAsFixed(0) : size.toStringAsFixed(1);
-    return '$formatted ${suffixes[i]}';
   }
 
   @override
@@ -252,145 +215,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
               //   ),
               // ),
-              BlocConsumer<DownloadFilesCubit, DownloadFilesState>(
-                listenWhen: (prev, current) => prev.isFinished != current.isFinished,
-                listener: (context, state) {
-                  if (!mounted) return;
-                  if (!state.isFinished) {
-                    _downloadFinishedTimer?.cancel();
-                    if (_showDownloadFinishedIcon) {
-                      setState(() => _showDownloadFinishedIcon = false);
-                    }
-                    return;
-                  }
-                  if (state.files.isEmpty) return;
-                  _downloadFinishedTimer?.cancel();
-                  setState(() => _showDownloadFinishedIcon = true);
-                  _downloadFinishedTimer = Timer(const Duration(seconds: 1), () {
-                    if (!mounted) return;
-                    setState(() => _showDownloadFinishedIcon = false);
-                  });
-                },
-                builder: (context, state) {
-                  final lastDownloadingFile = state.files.lastWhere(
-                    (file) => file is DownloadingFileEntity,
-                    orElse: () => DownloadedFileEntity(pathToFile: "-1", fileName: '', bytes: Uint8List(0)),
-                  );
-                  if (state.files.isNotEmpty) {
-                    final bool showSuccessIcon = state.isFinished && _showDownloadFinishedIcon;
-                    return CustomPopup(
-                      key: _downloadFilesKey,
-                      rootNavigator: true,
-                      position: PopupPosition.bottom,
-                      backgroundColor: theme.colorScheme.surface,
-                      content: Container(
-                        width: 240,
-                        constraints: const BoxConstraints(maxHeight: 260),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: state.files.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'Нет загрузок',
-                                  style: theme.textTheme.bodyMedium?.copyWith(color: textColors.text30),
-                                ),
-                              )
-                            : ListView.separated(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                itemCount: state.files.length,
-                                separatorBuilder: (_, __) => const Divider(height: 1),
-                                itemBuilder: (BuildContext context, int index) {
-                                  final file = state.files[index];
-                                  return ListTile(
-                                    dense: false,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    leading: Builder(
-                                      builder: (BuildContext context) {
-                                        if (file is DownloadingFileEntity) {
-                                          final double? value = file.total > 0 ? file.progress / file.total : null;
-                                          return SizedBox(
-                                            width: 32,
-                                            height: 32,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 3,
-                                              value: value != null ? value.clamp(0, 1) : null,
-                                            ),
-                                          );
-                                        }
-                                        return CircleAvatar(
-                                          radius: 16,
-                                          backgroundColor: AppColors.callGreen.withValues(alpha: 0.15),
-                                          child: Icon(Icons.check, size: 18, color: AppColors.callGreen),
-                                        );
-                                      },
-                                    ),
-                                    title: Text(
-                                      file.fileName,
-                                      style: theme.textTheme.bodyMedium,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    subtitle: _buildDownloadSubtitle(file, theme),
-                                  );
-                                },
-                              ),
-                      ),
-                      child: Stack(
-                        alignment: AlignmentGeometry.center,
-                        children: [
-                          if (!state.isFinished && !showSuccessIcon && lastDownloadingFile is DownloadingFileEntity)
-                            CircularProgressIndicator(
-                              value: lastDownloadingFile.progress / lastDownloadingFile.total,
-                            ),
-                          IconButton(
-                            onPressed: () {
-                              _downloadFilesKey.currentState?.show();
-                            },
-                            icon: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 250),
-                              transitionBuilder: (child, animation) {
-                                final bool isCheck = child.key == const ValueKey('downloadFinished');
-                                if (isCheck) {
-                                  final slideAnimation = Tween<Offset>(
-                                    begin: const Offset(0, -1),
-                                    end: Offset.zero,
-                                  ).chain(CurveTween(curve: Curves.bounceInOut)).animate(animation);
-                                  final bounceScale = CurvedAnimation(parent: animation, curve: Curves.elasticOut);
-
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: SlideTransition(
-                                      position: slideAnimation,
-                                      child: ScaleTransition(scale: bounceScale, child: child),
-                                    ),
-                                  );
-                                }
-
-                                final curved = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: ScaleTransition(scale: curved, child: child),
-                                );
-                              },
-                              child: showSuccessIcon
-                                  ? Icon(
-                                      Icons.check,
-                                      key: const ValueKey('downloadFinished'),
-                                      color: AppColors.callGreen,
-                                    )
-                                  : Icon(
-                                      Icons.file_download_outlined,
-                                      key: const ValueKey('downloadInProgress'),
-                                      color: state.isFinished ? AppColors.callGreen : textColors.text30,
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return SizedBox.shrink();
-                },
-              ),
+              DownloadFilesButton(),
               IconButton(
                 onPressed: () {},
                 icon: Assets.icons.call.svg(
