@@ -142,8 +142,7 @@ class AuthCubit extends Cubit<AuthState> {
         email: response.email,
         token: response.apiKey,
       );
-
-      emit(state.copyWith(isAuthorized: true, errorMessage: null));
+      emit(state.copyWith(isAuthorized: true));
     } on DioException catch (e, st) {
       final bool unauthorized = e.response?.statusCode == 401;
       final String? backendMsg = e.response?.data is Map ? e.response?.data['msg'] as String? : null;
@@ -417,6 +416,7 @@ class AuthCubit extends Cubit<AuthState> {
         }
       }
     } catch (e) {
+      inspect(e);
       AppConstants.setSelectedOrganizationId(null);
       emit(state.copyWith(hasBaseUrl: false, isPending: false));
     }

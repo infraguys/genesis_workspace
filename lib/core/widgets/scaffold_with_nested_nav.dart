@@ -137,9 +137,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   }
 
   Future<void> getInitialData() async {
+    await context.read<RealTimeCubit>().init();
+
     await Future.wait([
       context.read<UpdateCubit>().checkUpdateNeed(),
-      context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
     ]);
   }

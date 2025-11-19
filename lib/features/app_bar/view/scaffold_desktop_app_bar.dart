@@ -98,7 +98,9 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                       ]);
                                     },
                                     onDelete: () async {
-                                      context.pop();
+                                      if (context.canPop()) {
+                                        context.pop();
+                                      }
                                       await context.read<OrganizationsCubit>().removeOrganization(
                                         organization.id,
                                       );

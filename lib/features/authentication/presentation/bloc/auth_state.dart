@@ -1,6 +1,8 @@
 part of 'auth_cubit.dart';
 
 class AuthState {
+  static const Object _notSpecified = Object();
+
   final bool isPending;
   final bool isAuthorized;
   final String? errorMessage;
@@ -32,7 +34,7 @@ class AuthState {
   AuthState copyWith({
     bool? isPending,
     bool? isAuthorized,
-    String? errorMessage,
+    Object? errorMessage = _notSpecified,
     ServerSettingsEntity? serverSettings,
     String? otp,
     Uint8List? rawKey,
@@ -46,7 +48,7 @@ class AuthState {
     return AuthState(
       isPending: isPending ?? this.isPending,
       isAuthorized: isAuthorized ?? this.isAuthorized,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: identical(errorMessage, _notSpecified) ? this.errorMessage : errorMessage as String?,
       serverSettings: serverSettings ?? this.serverSettings,
       otp: otp ?? this.otp,
       rawKey: rawKey ?? this.rawKey,

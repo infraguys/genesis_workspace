@@ -56,12 +56,19 @@ class MultiPollingService {
       StreamController<SubscriptionEventEntity>.broadcast();
 
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
+
   Stream<MessageEventEntity> get messageEventsStream => _messageEventsController.stream;
+
   Stream<UpdateMessageFlagsEventEntity> get messageFlagsEventsStream => _messageFlagsEventsController.stream;
+
   Stream<ReactionEventEntity> get reactionEventsStream => _reactionEventsController.stream;
+
   Stream<PresenceEventEntity> get presenceEventsStream => _presenceEventsController.stream;
+
   Stream<DeleteMessageEventEntity> get deleteMessageEventsStream => _deleteMessageEventsController.stream;
+
   Stream<UpdateMessageEventEntity> get updateMessageEventsStream => _updateMessageEventsController.stream;
+
   Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
 
   Future<void> init() async {
@@ -101,7 +108,9 @@ class MultiPollingService {
   }
 
   Future<void> addConnection(int organizationId, String baseUrl) async {
-    if (_activeConnections.containsKey(organizationId)) return;
+    if (_activeConnections.containsKey(organizationId) && (_activeConnections[organizationId]?.isActive ?? false)) {
+      return;
+    }
 
     final RegisterQueueUseCase registerQueueUseCase = _connectionFactory.createRegisterQueueUseCase(
       organizationId: organizationId,
