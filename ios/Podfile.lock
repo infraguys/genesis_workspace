@@ -56,6 +56,8 @@ PODS:
     - FlutterMacOS
   - keyboard_height_plugin (0.0.1):
     - Flutter
+  - open_file_ios (0.0.1):
+    - Flutter
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -122,6 +124,7 @@ DEPENDENCIES:
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - keyboard_height_plugin (from `.symlinks/plugins/keyboard_height_plugin/ios`)
+  - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -166,6 +169,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/just_audio/darwin"
   keyboard_height_plugin:
     :path: ".symlinks/plugins/keyboard_height_plugin/ios"
+  open_file_ios:
+    :path: ".symlinks/plugins/open_file_ios/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -202,6 +207,7 @@ SPEC CHECKSUMS:
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   keyboard_height_plugin: ef70a8181b29f27670e9e2450814ca6b6dc05b05
+  open_file_ios: 5ff7526df64e4394b4fe207636b67a95e83078bb
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   SDWebImage: f29024626962457f3470184232766516dee8dfea

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
 import 'package:genesis_workspace/services/download_files/download_files_service.dart';
 import 'package:injectable/injectable.dart';
+import 'package:open_file/open_file.dart';
 
 part 'download_files_state.dart';
 
@@ -38,7 +39,7 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
       final index = state.files.length;
       updatedFiles.add(downloadingFileEntity);
       emit(state.copyWith(files: updatedFiles));
-      int fileSize = 1;
+      // int fileSize = 1;
       final response = await _downloadFilesService.download(
         pathToFile,
         onReceiveProgress: (progress, total) {
@@ -56,6 +57,14 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
         fileName: fileName,
       );
       emit(state.copyWith(isFinished: true, files: updatedFiles));
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> openFile(String filePath) async {
+    try {
+      await OpenFile.open(filePath);
     } catch (e) {
       inspect(e);
     }

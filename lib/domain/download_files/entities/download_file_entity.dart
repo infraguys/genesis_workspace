@@ -33,6 +33,10 @@ class DownloadingFileEntity extends DownloadFileEntity {
 }
 
 class DownloadedFileEntity extends DownloadFileEntity {
-  const DownloadedFileEntity({required super.pathToFile, required this.bytes, required super.fileName});
+  const DownloadedFileEntity({
+    required super.pathToFile,
+    required this.bytes,
+    required super.fileName,
+  });
   final Uint8List bytes;
 }

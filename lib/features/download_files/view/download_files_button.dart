@@ -160,6 +160,11 @@ class _DownloadFilesPopupContent extends StatelessWidget {
                       dense: false,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       leading: _buildLeading(file),
+                      onTap: () async {
+                        if (file is DownloadedFileEntity) {
+                          // await context.read<DownloadFilesCubit>().openFile(file.localFilePath);
+                        }
+                      },
                       title: Text(
                         file.fileName,
                         style: theme.textTheme.bodyMedium,
