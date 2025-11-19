@@ -86,11 +86,7 @@ class _AuthViewState extends State<AuthView> {
   Widget build(BuildContext context) {
     final t = context.t;
 
-    return BlocConsumer<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state.isAuthorized) context.go(Routes.allChats);
-        if (!state.hasBaseUrl) context.go(Routes.pasteBaseUrl);
-      },
+    return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
         final theme = Theme.of(context);
         final isWide = currentSize(context) >= ScreenSize.lTablet;
