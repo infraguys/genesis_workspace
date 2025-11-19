@@ -37,6 +37,8 @@ class DownloadedFileEntity extends DownloadFileEntity {
     required super.pathToFile,
     required this.bytes,
     required super.fileName,
+    required this.localFilePath,
   });
   final Uint8List bytes;
+  final String localFilePath;
 }

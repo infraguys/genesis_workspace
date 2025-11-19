@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -55,7 +55,12 @@ class _DownloadFilesButtonState extends State<DownloadFilesButton> {
       builder: (context, state) {
         final lastDownloadingFile = state.files.lastWhere(
           (file) => file is DownloadingFileEntity,
-          orElse: () => DownloadedFileEntity(pathToFile: "-1", fileName: '', bytes: Uint8List(0)),
+          orElse: () => DownloadedFileEntity(
+            pathToFile: "-1",
+            fileName: '',
+            bytes: Uint8List(0),
+            localFilePath: '',
+          ),
         );
         if (state.files.isNotEmpty) {
           final bool showSuccessIcon = state.isFinished && _showDownloadFinishedIcon;
@@ -161,8 +166,8 @@ class _DownloadFilesPopupContent extends StatelessWidget {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       leading: _buildLeading(file),
                       onTap: () async {
-                        if (file is DownloadedFileEntity) {
-                          // await context.read<DownloadFilesCubit>().openFile(file.localFilePath);
+                        if (file is DownloadedFileEntity && !kIsWeb) {
+                          await context.read<DownloadFilesCubit>().openFile(file.localFilePath);
                         }
                       },
                       title: Text(

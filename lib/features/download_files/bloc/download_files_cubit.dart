@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:file_saver/file_saver.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
 import 'package:genesis_workspace/services/download_files/download_files_service.dart';
@@ -51,10 +52,17 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
           emit(state.copyWith(files: updatedFiles));
         },
       );
+      final bytes = response.data ?? Uint8List(0);
+      final localPath = await _saveToFileSystem(
+            fileName: fileName,
+            bytes: bytes,
+          ) ??
+          '';
       updatedFiles[index] = DownloadedFileEntity(
         pathToFile: pathToFile,
-        bytes: response.data ?? Uint8List(0),
+        bytes: bytes,
         fileName: fileName,
+        localFilePath: localPath,
       );
       emit(state.copyWith(isFinished: true, files: updatedFiles));
     } catch (e) {
@@ -64,9 +72,104 @@ class DownloadFilesCubit extends Cubit<DownloadFilesState> {
 
   Future<void> openFile(String filePath) async {
     try {
+      if (filePath.isEmpty) return;
       await OpenFile.open(filePath);
     } catch (e) {
       inspect(e);
     }
   }
+
+  Future<String?> _saveToFileSystem({
+    required String fileName,
+    required Uint8List bytes,
+  }) async {
+    final String extension = _extractExtension(fileName);
+    final String sanitizedName = _sanitizeFileName(_extractFileNameWithoutExtension(fileName));
+
+    try {
+      return await FileSaver.instance.saveFile(
+        name: sanitizedName,
+        bytes: bytes,
+        fileExtension: extension,
+        mimeType: _resolveMimeType(extension),
+      );
+    } catch (error) {
+      inspect(error);
+      return null;
+    }
+  }
+
+  String _extractExtension(String fileName) {
+    final int dotIndex = fileName.lastIndexOf('.');
+    if (dotIndex == -1 || dotIndex == fileName.length - 1) {
+      return '';
+    }
+    return fileName.substring(dotIndex + 1).toLowerCase();
+  }
+
+  String _extractFileNameWithoutExtension(String fileName) {
+    final int dotIndex = fileName.lastIndexOf('.');
+    if (dotIndex <= 0) {
+      return fileName.isEmpty ? 'downloaded_file' : fileName;
+    }
+    return fileName.substring(0, dotIndex);
+  }
+
+  String _sanitizeFileName(String name) {
+    final sanitized = name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '').trim();
+    if (sanitized.isEmpty) {
+      return 'downloaded_file';
+    }
+    return sanitized;
+  }
+
+  MimeType _resolveMimeType(String extension) {
+    if (extension.isEmpty) return MimeType.other;
+    return _extensionMimeTypes[extension.toLowerCase()] ?? MimeType.other;
+  }
 }
+
+const Map<String, MimeType> _extensionMimeTypes = <String, MimeType>{
+  'aac': MimeType.aac,
+  'apng': MimeType.apng,
+  'asice': MimeType.asice,
+  'asics': MimeType.asics,
+  'avi': MimeType.avi,
+  'avif': MimeType.avif,
+  'bmp': MimeType.bmp,
+  'csv': MimeType.csv,
+  'epub': MimeType.epub,
+  'gif': MimeType.gif,
+  'heic': MimeType.heic,
+  'heif': MimeType.heif,
+  'jpg': MimeType.jpeg,
+  'jpeg': MimeType.jpeg,
+  'json': MimeType.json,
+  'md': MimeType.markdown,
+  'mp3': MimeType.mp3,
+  'mp4': MimeType.mp4Video,
+  'mpeg': MimeType.mpeg,
+  'odp': MimeType.openDocPresentation,
+  'ods': MimeType.openDocSheets,
+  'odt': MimeType.openDocText,
+  'otf': MimeType.otf,
+  'pdf': MimeType.pdf,
+  'png': MimeType.png,
+  'ppt': MimeType.microsoftPresentation,
+  'pptx': MimeType.microsoftPresentation,
+  'rar': MimeType.rar,
+  'sql': MimeType.sql,
+  'svg': MimeType.svg,
+  'txt': MimeType.text,
+  'ttf': MimeType.ttf,
+  'webm': MimeType.webm,
+  'webp': MimeType.webp,
+  'xml': MimeType.xml,
+  'yaml': MimeType.yaml,
+  'yml': MimeType.yaml,
+  'zip': MimeType.zip,
+  'xls': MimeType.microsoftExcel,
+  'xlsx': MimeType.microsoftExcel,
+  'doc': MimeType.microsoftWord,
+  'docx': MimeType.microsoftWord,
+};
