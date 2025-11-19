@@ -322,10 +322,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
 
   void clearUploadFileError() {
     emit(
-      state.copyWith(
-        uploadFileError: null,
-        uploadFileErrorName: null,
-      ),
+      state.copyWith(uploadFileError: null, uploadFileErrorName: null),
     );
   }
 
