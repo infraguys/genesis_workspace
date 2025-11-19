@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -199,10 +198,28 @@ class _DownloadFilesPopupContent extends StatelessWidget {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (BuildContext context, int index) {
                     final file = state.files[index];
+                    double? value;
+                    if (file is DownloadingFileEntity) {
+                      value = file.total > 0 ? file.progress / file.total : null;
+                    }
                     return ListTile(
                       dense: false,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      leading: _buildLeading(file),
+                      // leading: _buildLeading(file),
+                      leading: file is DownloadingFileEntity
+                          ? SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                value: value?.clamp(0, 1),
+                              ),
+                            )
+                          : CircleAvatar(
+                              radius: 16,
+                              backgroundColor: AppColors.callGreen.withValues(alpha: 0.15),
+                              child: Icon(Icons.check, size: 18, color: AppColors.callGreen),
+                            ),
                       onTap: () async {
                         if (file is DownloadedFileEntity && !kIsWeb) {
                           await context.read<DownloadFilesCubit>().openFile(file.localFilePath);
@@ -214,54 +231,35 @@ class _DownloadFilesPopupContent extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: _buildSubtitle(context, file, theme),
+                      subtitle: Builder(
+                        builder: (BuildContext) {
+                          if (file is! DownloadingFileEntity) {
+                            return Text(
+                              context.t.downloadFiles.ready,
+                              style: theme.textTheme.bodySmall,
+                            );
+                          }
+
+                          final int progress = file.progress;
+                          final int total = file.total;
+                          if (total <= 0) {
+                            return Text(
+                              formatFileSize(progress),
+                              style: theme.textTheme.bodySmall,
+                            );
+                          }
+                          final double percent = (progress / total * 100).clamp(0, 100);
+                          return Text(
+                            '${percent.toStringAsFixed(0)}% • ${formatFileSize(progress)} / ${formatFileSize(total)}',
+                            style: theme.textTheme.bodySmall,
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
         );
       },
-    );
-  }
-
-  Widget _buildLeading(DownloadFileEntity file) {
-    if (file is DownloadingFileEntity) {
-      final double? value = file.total > 0 ? file.progress / file.total : null;
-      return SizedBox(
-        width: 32,
-        height: 32,
-        child: CircularProgressIndicator(
-          strokeWidth: 3,
-          value: value != null ? value.clamp(0, 1) : null,
-        ),
-      );
-    }
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor: AppColors.callGreen.withValues(alpha: 0.15),
-      child: Icon(Icons.check, size: 18, color: AppColors.callGreen),
-    );
-  }
-
-  Widget? _buildSubtitle(BuildContext context, DownloadFileEntity file, ThemeData theme) {
-    if (file is! DownloadingFileEntity) {
-      return Text(
-        context.t.downloadFiles.ready,
-        style: theme.textTheme.bodySmall,
-      );
-    }
-
-    final int progress = file.progress;
-    final int total = file.total;
-    if (total <= 0) {
-      return Text(
-        formatFileSize(progress),
-        style: theme.textTheme.bodySmall,
-      );
-    }
-    final double percent = (progress / total * 100).clamp(0, 100);
-    return Text(
-      '${percent.toStringAsFixed(0)}% • ${formatFileSize(progress)} / ${formatFileSize(total)}',
-      style: theme.textTheme.bodySmall,
     );
   }
 }
