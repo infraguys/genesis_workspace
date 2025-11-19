@@ -8,6 +8,12 @@ part 'own_user_response_dto.g.dart';
 class OwnUserResponseDto extends ResponseDto {
   @JsonKey(name: "user_id")
   final int userId;
+  @JsonKey(name: "is_owner")
+  final bool isOwner;
+  @JsonKey(name: "is_guest")
+  final bool isGuest;
+  @JsonKey(name: "is_admin")
+  final bool isAdmin;
   @JsonKey(name: "is_bot")
   final bool isBot;
   @JsonKey(name: "full_name")
@@ -16,7 +22,8 @@ class OwnUserResponseDto extends ResponseDto {
   @JsonKey(name: "avatar_url")
   final String? avatarUrl;
   final String email;
-  final int role;
+  @JsonKey(name: "role", fromJson: _fromJsonToUserRole)
+  final UserRole role;
   @JsonKey(name: "is_active")
   final bool isActive;
 
@@ -31,6 +38,9 @@ class OwnUserResponseDto extends ResponseDto {
     required this.email,
     required this.role,
     required this.isActive,
+    required this.isOwner,
+    required this.isAdmin,
+    required this.isGuest,
   });
 
   factory OwnUserResponseDto.fromJson(Map<String, dynamic> json) =>
@@ -45,5 +55,18 @@ class OwnUserResponseDto extends ResponseDto {
     email: email,
     isActive: isActive,
     role: role,
+    isAdmin: isAdmin,
+    isOwner: isOwner,
+    isGuest: isGuest,
   );
+
+  static UserRole _fromJsonToUserRole(int json) {
+    return switch (json) {
+      100 => UserRole.admin,
+      200 => UserRole.owner,
+      300 => UserRole.moderator,
+      400 => UserRole.member,
+      _ => UserRole.guest,
+    };
+  }
 }
