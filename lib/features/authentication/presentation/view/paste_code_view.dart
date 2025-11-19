@@ -7,6 +7,8 @@ import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class PasteCodeView extends StatefulWidget {
   const PasteCodeView({super.key});
@@ -54,7 +56,12 @@ class _PasteCodeViewState extends State<PasteCodeView> {
       await context.read<AuthCubit>().parsePastedZulipCode(pastedText: code);
       await context.read<RealTimeCubit>().addConnection();
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) {
+        setState(() => _submitting = false);
+        if (context.read<AuthCubit>().state.isAuthorized) {
+          context.go(Routes.messenger);
+        }
+      }
     }
   }
 

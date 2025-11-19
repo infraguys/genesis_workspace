@@ -119,6 +119,14 @@
     "no_downloads": "No downloads",
     "ready": "Ready"
   },
+  "in_development": {
+    "title": "Work in progress",
+    "subtitle": "This section is currently in development.",
+    "description": "We're polishing this experience right now. Thank you for your patience while we finish it.",
+    "tip_one": "Watch the release notes to be the first to know when it launches.",
+    "tip_two": "Share your feedback so we can prioritize what matters most.",
+    "cta": "Back to previous screen"
+  },
   "cancel_editing": "Cancel editing",
   "folders": {
     "all": "All",
