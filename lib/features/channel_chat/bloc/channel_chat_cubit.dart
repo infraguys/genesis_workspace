@@ -396,13 +396,8 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   }
 
   void clearUploadFileError() {
-    state.uploadFileError = null;
-    state.uploadFileErrorName = null;
     emit(
-      state.copyWith(
-        uploadFileError: state.uploadFileError,
-        uploadFileErrorName: state.uploadFileErrorName,
-      ),
+      state.copyWith(uploadFileError: null, uploadFileErrorName: null),
     );
   }
 
