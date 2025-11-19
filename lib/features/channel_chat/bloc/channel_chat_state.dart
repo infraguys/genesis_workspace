@@ -1,6 +1,8 @@
 part of 'channel_chat_cubit.dart';
 
 class ChannelChatState {
+  static const Object _notSpecified = Object();
+
   List<MessageEntity> messages;
   bool isMessagePending;
   bool isLoadingMore;
@@ -65,8 +67,8 @@ class ChannelChatState {
     bool? isMessagesPending,
     List<UploadFileEntity>? uploadedFiles,
     String? uploadedFilesString,
-    String? uploadFileError,
-    String? uploadFileErrorName,
+    Object? uploadFileError = _notSpecified,
+    Object? uploadFileErrorName = _notSpecified,
     List<EditingAttachment>? editingAttachments,
     bool? isEdited,
     bool? showMentionPopup,
@@ -90,8 +92,10 @@ class ChannelChatState {
       isMessagesPending: isMessagesPending ?? this.isMessagesPending,
       uploadedFiles: uploadedFiles ?? this.uploadedFiles,
       uploadedFilesString: uploadedFilesString ?? this.uploadedFilesString,
-      uploadFileError: uploadFileError ?? this.uploadFileError,
-      uploadFileErrorName: uploadFileErrorName ?? this.uploadFileErrorName,
+      uploadFileError: identical(uploadFileError, _notSpecified) ? this.uploadFileError : uploadFileError as String?,
+      uploadFileErrorName: identical(uploadFileErrorName, _notSpecified)
+          ? this.uploadFileErrorName
+          : uploadFileErrorName as String?,
       editingAttachments: editingAttachments ?? this.editingAttachments,
       isEdited: isEdited ?? this.isEdited,
       showMentionPopup: showMentionPopup ?? this.showMentionPopup,

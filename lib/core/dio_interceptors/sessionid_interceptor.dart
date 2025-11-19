@@ -11,6 +11,7 @@ class SessionIdInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
+      final bool skipBaseUrlRewrite = options.extra['skipBaseUrlInterceptor'] == true;
       final sessionId = await _tokenStorage.getSessionId(AppConstants.baseUrl); // __Host-sessionid
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
@@ -24,8 +25,10 @@ class SessionIdInterceptor extends Interceptor {
       // --- 2) sessionid: добавляем только его (независимо от CSRF) ---
       if (sessionId != null && sessionId.isNotEmpty) {
         cookieParts.add('__Host-sessionid=$sessionId');
-        // Referer полезен и для GET сессии
-        options.baseUrl = '${AppConstants.baseUrl}/json';
+        if (!skipBaseUrlRewrite) {
+          // Referer полезен и для GET сессии
+          options.baseUrl = '${AppConstants.baseUrl}/json';
+        }
       }
       if (cookieParts.isNotEmpty) {
         // Склеиваем без дубликатов и лишних ; ;

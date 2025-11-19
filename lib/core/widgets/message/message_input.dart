@@ -69,41 +69,6 @@ class _MessageInputState extends State<MessageInput> {
   final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
   final GlobalKey<CustomPopupState> attachmentsKey = GlobalKey<CustomPopupState>();
 
-  Widget _buildAttachmentTile(
-    UploadFileEntity entity, {
-    Function(String localId)? onRemoveUploaded,
-    Function(String localId)? onCancelUploading,
-  }) {
-    final String fileExtension = extensionOf(entity.filename);
-
-    return switch (entity) {
-      UploadingFileEntity(:final size, :final bytesSent, :final bytesTotal) => AttachmentTile(
-        file: entity,
-        extension: fileExtension,
-        fileSize: size,
-        isUploading: true,
-        bytesSent: bytesSent,
-        bytesTotal: bytesTotal,
-        onCancelUploading: () {
-          if (onCancelUploading != null) {
-            onCancelUploading(entity.localId);
-          }
-        },
-      ),
-      UploadedFileEntity(:final size) => AttachmentTile(
-        file: entity,
-        extension: fileExtension,
-        fileSize: size,
-        isUploading: false,
-        onRemove: () {
-          if (onRemoveUploaded != null) {
-            onRemoveUploaded(entity.localId);
-          }
-        },
-      ),
-    };
-  }
-
   @override
   void initState() {
     super.initState();
@@ -247,11 +212,33 @@ class _MessageInputState extends State<MessageInput> {
                       separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         final UploadFileEntity entity = widget.files![index];
-                        return _buildAttachmentTile(
-                          entity,
-                          onRemoveUploaded: widget.onRemoveFile,
-                          onCancelUploading: widget.onCancelUpload,
-                        );
+                        final String fileExtension = extensionOf(entity.filename);
+                        return switch (entity) {
+                          UploadingFileEntity(:final size, :final bytesSent, :final bytesTotal) => AttachmentTile(
+                            file: entity,
+                            extension: fileExtension,
+                            fileSize: size,
+                            isUploading: true,
+                            bytesSent: bytesSent,
+                            bytesTotal: bytesTotal,
+                            onCancelUploading: () {
+                              if (widget.onCancelUpload != null) {
+                                widget.onCancelUpload(entity.localId);
+                              }
+                            },
+                          ),
+                          UploadedFileEntity(:final size) => AttachmentTile(
+                            file: entity,
+                            extension: fileExtension,
+                            fileSize: size,
+                            isUploading: false,
+                            onRemove: () {
+                              if (widget.onRemoveFile != null) {
+                                widget.onRemoveFile(entity.localId);
+                              }
+                            },
+                          ),
+                        };
                       },
                     ),
                   ),
@@ -296,33 +283,33 @@ class _MessageInputState extends State<MessageInput> {
                           color: theme.colorScheme.background,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Column(
+                        child: Stack(
                           children: [
-                            if (!isTabletOrSmaller)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                                child: Row(
-                                  spacing: 8,
-                                  children: [
-                                    Container(
-                                      height: 16,
-                                      width: 3,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                    Text(
-                                      "# ${widget.inputTitle ?? ''}",
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: textColors.text30,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            Stack(
+                            Column(
                               children: [
+                                if (!isTabletOrSmaller)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Container(
+                                          height: 16,
+                                          width: 3,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary,
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                        ),
+                                        Text(
+                                          "# ${widget.inputTitle ?? ''}",
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            color: textColors.text30,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 150),
                                   clipBehavior: Clip.hardEdge,
@@ -398,34 +385,32 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                   ),
                                 ),
-
-                                // Оверлей при перетаскивании
-                                if (widget.isDropOver)
-                                  Positioned.fill(
-                                    child: IgnorePointer(
-                                      child: AnimatedOpacity(
-                                        duration: const Duration(milliseconds: 120),
-                                        opacity: 1.0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: theme.colorScheme.primary.withOpacity(0.06),
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            context.t.dropFilesToUpload,
-                                            textAlign: TextAlign.center,
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: theme.colorScheme.primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
+                              ],
+                            ),
+                            if (widget.isDropOver)
+                              Positioned.fill(
+                                child: IgnorePointer(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 120),
+                                    opacity: 1.0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.primary.withOpacity(0.06),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        context.t.dropFilesToUpload,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),
                                   ),
-                              ],
-                            ),
+                                ),
+                              ),
                           ],
                         ),
                       ),

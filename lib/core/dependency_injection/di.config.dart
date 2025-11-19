@@ -199,6 +199,8 @@ import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart'
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart' as _i277;
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart'
     as _i852;
+import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart'
+    as _i1004;
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart'
     as _i144;
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
@@ -223,6 +225,8 @@ import 'package:genesis_workspace/features/update/bloc/update_cubit.dart'
     as _i326;
 import 'package:genesis_workspace/navigation/app_shell_controller.dart'
     as _i188;
+import 'package:genesis_workspace/services/download_files/download_files_service.dart'
+    as _i124;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart'
@@ -525,6 +529,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
+    gh.lazySingleton<_i124.DownloadFilesService>(
+      () => _i124.DownloadFilesService(
+        gh<_i361.Dio>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+    );
     gh.factory<_i247.GetFolderIdsForChatUseCase>(
       () => _i247.GetFolderIdsForChatUseCase(
         gh<_i915.FolderMembershipRepository>(),
@@ -592,6 +602,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i547.GetOwnUserUseCase>(),
         gh<_i832.UpdatePresenceUseCase>(),
       ),
+    );
+    gh.factory<_i1004.DownloadFilesCubit>(
+      () => _i1004.DownloadFilesCubit(gh<_i124.DownloadFilesService>()),
     );
     gh.factory<_i852.DirectMessagesCubit>(
       () => _i852.DirectMessagesCubit(

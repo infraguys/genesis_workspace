@@ -121,6 +121,10 @@
     "image": "Выбрать изображение"
   },
   "drop_files_to_upload": "Отпустите файлы, чтобы загрузить",
+  "download_files": {
+    "no_downloads": "Нет загрузок",
+    "ready": "Готово"
+  },
   "cancel_editing": "Отменить редактирование",
   "folders": {
     "all": "Все",

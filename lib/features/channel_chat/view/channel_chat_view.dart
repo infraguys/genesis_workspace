@@ -27,6 +27,7 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
+import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -184,7 +185,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
               .closed
               .then((_) {
                 if (context.mounted) {
-                  context.read<ChannelChatCubit>().clearUploadFileErrorCommon();
+                  context.read<ChannelChatCubit>().clearUploadFileError();
                 }
               });
         }
@@ -243,6 +244,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                     ),
                   ),
             actions: [
+              DownloadFilesButton(),
               IconButton(
                 onPressed: () {},
                 icon: Assets.icons.joinCall.svg(

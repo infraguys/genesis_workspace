@@ -29,6 +29,7 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
+import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -155,7 +156,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               .closed
               .then((_) {
                 if (context.mounted) {
-                  context.read<ChatCubit>().clearUploadFileErrorCommon();
+                  context.read<ChatCubit>().clearUploadFileError();
                 }
               });
         }
@@ -206,14 +207,15 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     ),
                   ),
             actions: [
-              IconButton(
-                onPressed: () {},
-                icon: Assets.icons.joinCall.svg(
-                  width: 28,
-                  height: 28,
-                  colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-                ),
-              ),
+              // IconButton(
+              //   onPressed: () {},
+              //   icon: Assets.icons.joinCall.svg(
+              //     width: 28,
+              //     height: 28,
+              //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+              //   ),
+              // ),
+              DownloadFilesButton(),
               IconButton(
                 onPressed: () {},
                 icon: Assets.icons.call.svg(
@@ -460,19 +462,22 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                           nonImageFiles.add(pf);
                         }
                       }
-
-                      if (nonImageFiles.isNotEmpty) {
-                        unawaited(
-                          context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
-                        );
-                      }
-                      if (imageFiles.isNotEmpty) {
-                        unawaited(
-                          context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
-                        );
-                      }
-                      if (platformInfo.isDesktop) {
-                        messageInputFocusNode.requestFocus();
+                      try {
+                        if (nonImageFiles.isNotEmpty) {
+                          unawaited(
+                            context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
+                          );
+                        }
+                        if (imageFiles.isNotEmpty) {
+                          unawaited(
+                            context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
+                          );
+                        }
+                        if (platformInfo.isDesktop) {
+                          messageInputFocusNode.requestFocus();
+                        }
+                      } catch (e) {
+                        inspect(e);
                       }
                     },
                     child: BlocBuilder<ChatCubit, ChatState>(
