@@ -11,7 +11,6 @@ import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
-import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -74,7 +73,8 @@ class _AuthViewState extends State<AuthView> {
           _usernameController.text.trim(),
           _passwordController.text,
         );
-        await context.read<RealTimeCubit>().addConnection();
+        context.go(Routes.messenger);
+        // await context.read<RealTimeCubit>().addConnection();
         FocusScope.of(context).unfocus();
       } catch (e) {
         inspect(e);

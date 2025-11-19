@@ -16,6 +16,7 @@ import 'package:genesis_workspace/features/authentication/domain/entities/server
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'organizations_state.dart';
 
@@ -86,6 +87,8 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   Future<void> removeOrganization(int id) async {
     try {
       await _removeOrganizationUseCase.call(id);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(SharedPrefsKeys.selectedOrganizationId);
       await _multiPollingService.closeConnection(id);
       if (state.organizations.isNotEmpty) {
         final organization = state.organizations.first;

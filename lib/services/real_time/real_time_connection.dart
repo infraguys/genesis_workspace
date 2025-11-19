@@ -37,6 +37,8 @@ class RealTimeConnection {
   bool _isActive = false;
   Future<void>? _pollingTask;
 
+  bool get isActive => _isActive;
+
   RealTimeConnection({
     required this.organizationId,
     required this.baseUrl,
