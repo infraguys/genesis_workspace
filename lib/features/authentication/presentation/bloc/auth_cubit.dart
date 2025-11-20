@@ -128,7 +128,9 @@ class AuthCubit extends Cubit<AuthState> {
 
     emit(state.copyWith(isAuthorized: hasCredentials, selectedOrganization: organization));
 
-    if (!hasCredentials) {
+    if (hasCredentials) {
+      await _ensureRealTimeConnectionForOrganization(organization);
+    } else {
       await getServerSettings(organization.baseUrl);
     }
   }
@@ -142,6 +144,8 @@ class AuthCubit extends Cubit<AuthState> {
         email: response.email,
         token: response.apiKey,
       );
+      final OrganizationEntity? organization = await _loadSelectedOrganization();
+      await _ensureRealTimeConnectionForOrganization(organization);
       emit(state.copyWith(isAuthorized: true));
     } on DioException catch (e, st) {
       final bool unauthorized = e.response?.statusCode == 401;
@@ -218,6 +222,29 @@ class AuthCubit extends Cubit<AuthState> {
     return null;
   }
 
+  Future<OrganizationEntity?> _loadSelectedOrganization() async {
+    if (state.selectedOrganization != null) {
+      return state.selectedOrganization;
+    }
+    final int? selectedOrganizationId = _sharedPreferences.getInt(SharedPrefsKeys.selectedOrganizationId);
+    if (selectedOrganizationId == null) return null;
+    try {
+      return await _getOrganizationByIdUseCase.call(selectedOrganizationId);
+    } catch (e) {
+      inspect(e);
+      return null;
+    }
+  }
+
+  Future<void> _ensureRealTimeConnectionForOrganization(OrganizationEntity? organization) async {
+    if (organization == null) return;
+    try {
+      await _realTimeService.addConnection(organization.id, organization.baseUrl);
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
   setLogin() {
     emit(state.copyWith(isAuthorized: true));
   }
@@ -249,8 +276,10 @@ class AuthCubit extends Cubit<AuthState> {
         print('CSRF token not found');
       }
 
+      final OrganizationEntity? organization = await _loadSelectedOrganization();
       if (kIsWeb) {
         _sharedPreferences.setBool(SharedPrefsKeys.isWebAuth, true);
+        await _ensureRealTimeConnectionForOrganization(organization);
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       } else {
         final cookies = response.headers['set-cookie'];
@@ -269,6 +298,7 @@ class AuthCubit extends Cubit<AuthState> {
           await _saveCsrftokenUseCase.call(baseUrl: _baseUrl, csrftoken: csrfToken ?? '');
           await _saveSessionIdUseCase.call(baseUrl: _baseUrl, sessionId: sessionId ?? '');
         }
+        await _ensureRealTimeConnectionForOrganization(organization);
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       }
     } on FormatException catch (e) {
