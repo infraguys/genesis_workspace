@@ -78,7 +78,6 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
         unreadMessages: {},
       );
       final organization = await _addOrganizationUseCase.call(body);
-      await _multiPollingService.addConnection(organization.id, organization.baseUrl);
     } catch (e) {
       inspect(e);
     }

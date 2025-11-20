@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/in_development_widget.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
+import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/authentication/presentation/view/paste_code_view.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -21,8 +22,6 @@ import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:go_router/go_router.dart';
-
-import '../features/authentication/presentation/auth.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');

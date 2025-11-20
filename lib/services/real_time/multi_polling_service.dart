@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
@@ -72,38 +71,30 @@ class MultiPollingService {
   Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
 
   Future<void> init() async {
-    final List<OrganizationEntity> organizations = await _getAllOrganizationsUseCase.call();
-
-    // Фильтрация по факту авторизации (по токену/куки)
-    final List<OrganizationEntity> authorizedOrganizations = [];
-    for (final OrganizationEntity organization in organizations) {
-      final String? token = await _getTokenUseCase.call(organization.baseUrl);
-      final String? csrfToken = await _getCsrftokenUseCase.call(organization.baseUrl);
-      final String? sessionId = await _getSessionIdUseCase.call(organization.baseUrl);
-
-      final bool isAuthorized =
-          (token != null && token.trim().isNotEmpty) ||
-          ((csrfToken != null && csrfToken.isNotEmpty) && (sessionId != null && sessionId.isNotEmpty));
-
-      if (isAuthorized) {
-        authorizedOrganizations.add(organization);
-      }
-    }
-
+    final List<OrganizationEntity> authorizedOrganizations = await _fetchAuthorizedOrganizations();
     for (final OrganizationEntity organization in authorizedOrganizations) {
       await addConnection(organization.id, organization.baseUrl);
     }
   }
 
-  Future<void> ensureConnection(int organizationId) async {
-    final connection = _activeConnections[organizationId];
-    final connectionActive = await connection?.checkConnection() ?? false;
+  Future<void> ensureConnection(int organizationId, String baseUrl) async {
+    final RealTimeConnection? connection = _activeConnections[organizationId];
+    final bool connectionActive = await connection?.checkConnection() ?? false;
     if (connectionActive) {
       return;
-    } else {
+    }
+
+    final String resolvedBaseUrl = connection?.baseUrl ?? baseUrl;
+    if (connection != null) {
       await closeConnection(organizationId);
-      final baseUrl = _activeConnections[organizationId]?.baseUrl ?? AppConstants.baseUrl;
-      await addConnection(organizationId, baseUrl);
+    }
+    await addConnection(organizationId, resolvedBaseUrl);
+  }
+
+  Future<void> ensureAllConnections() async {
+    final List<OrganizationEntity> authorizedOrganizations = await _fetchAuthorizedOrganizations();
+    for (final OrganizationEntity organization in authorizedOrganizations) {
+      await ensureConnection(organization.id, organization.baseUrl);
     }
   }
 
@@ -181,5 +172,27 @@ class MultiPollingService {
       _updateMessageEventsController.close(),
       _subscriptionEventsController.close(),
     ]);
+  }
+
+  Future<List<OrganizationEntity>> _fetchAuthorizedOrganizations() async {
+    final List<OrganizationEntity> organizations = await _getAllOrganizationsUseCase.call();
+    final List<OrganizationEntity> authorizedOrganizations = [];
+    for (final OrganizationEntity organization in organizations) {
+      if (await _isAuthorized(organization.baseUrl)) {
+        authorizedOrganizations.add(organization);
+      }
+    }
+    return authorizedOrganizations;
+  }
+
+  Future<bool> _isAuthorized(String baseUrl) async {
+    final String? token = await _getTokenUseCase.call(baseUrl);
+    final String? csrfToken = await _getCsrftokenUseCase.call(baseUrl);
+    final String? sessionId = await _getSessionIdUseCase.call(baseUrl);
+
+    final bool hasToken = token != null && token.trim().isNotEmpty;
+    final bool hasSessionCookies =
+        (csrfToken != null && csrfToken.isNotEmpty) && (sessionId != null && sessionId.isNotEmpty);
+    return hasToken || hasSessionCookies;
   }
 }
