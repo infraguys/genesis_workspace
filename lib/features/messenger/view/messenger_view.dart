@@ -100,6 +100,9 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
       context.read<MessengerCubit>().loadFolders(),
       context.read<MessengerCubit>().getInitialMessages(),
     ]);
+    if (mounted) {
+      unawaited(context.read<MessengerCubit>().lazyLoadAllMessages());
+    }
   }
 
   void _checkUser() {
@@ -114,7 +117,6 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
   @override
   void initState() {
     _checkUser();
-    // _future = getInitialData();
     _searchBarController = AnimationController(
       vsync: this,
       duration: _searchAnimationDuration,
@@ -148,12 +150,9 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
     final ScreenSize screenSize = currentSize(context);
     final bool isLargeScreen = screenSize > ScreenSize.tablet;
     final bool isTabletOrSmaller = !isLargeScreen;
-    final EdgeInsetsGeometry searchSectionPadding = isLargeScreen
-        ? EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12)
-        : EdgeInsets.symmetric(horizontal: 20).copyWith(top: 14, bottom: 20);
     final double searchVisibility = _searchBarAnimation.value;
 
-    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: 20).copyWith(
+    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: isTabletOrSmaller ? 20 : 8).copyWith(
       top: isTabletOrSmaller ? 20 : 0,
       bottom: 20,
     );
@@ -176,7 +175,12 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
             _searchController.clear();
             _future = getInitialData();
           });
-          unawaited(context.read<RealTimeCubit>().ensureConnection());
+          unawaited(
+            Future.wait([
+              context.read<RealTimeCubit>().ensureConnection(),
+              context.read<MessengerCubit>().getUnreadMessages(),
+            ]),
+          );
         },
         child: BlocListener<ProfileCubit, ProfileState>(
           listenWhen: (prev, current) => prev.user != current.user,
@@ -320,7 +324,6 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                     });
                                   },
                                   isLargeScreen: isLargeScreen,
-                                  searchSectionPadding: searchSectionPadding,
                                   searchVisibility: searchVisibility,
                                   folders: state.folders,
                                   selectedFolderIndex: state.selectedFolderIndex,
@@ -339,6 +342,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                   onClearSearch: _clearSearch,
                                   searchController: _searchController,
                                   searchQuery: _searchQuery,
+                                  isLoadingMore: !state.foundOldestMessage,
                                 ),
                                 if (visibleChats.isEmpty)
                                   Padding(
