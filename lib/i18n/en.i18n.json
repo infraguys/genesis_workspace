@@ -217,6 +217,7 @@
   "groups": "Groups",
   "calls": "Calls",
   "messenger_view": {
-    "chats_and_channels": "Chats and channels"
+    "chats_and_channels": "Chats and channels",
+    "channelInfo": "Channel information"
   }
 }

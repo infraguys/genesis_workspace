@@ -222,6 +222,7 @@
   "groups": "Группы",
   "calls": "Звонки",
   "messenger_view": {
-    "chats_and_channels": "Чаты и каналы"
+    "chats_and_channels": "Чаты и каналы",
+    "channelInfo": "Информация о канале"
   }
 }
