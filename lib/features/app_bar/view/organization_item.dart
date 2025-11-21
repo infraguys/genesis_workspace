@@ -28,6 +28,7 @@ class OrganizationItem extends StatelessWidget {
       isLongPress: currentSize(context) < ScreenSize.lTablet,
       backgroundColor: theme.colorScheme.surface,
       arrowColor: theme.colorScheme.surface,
+      rootNavigator: true,
       content: SizedBox(
         width: 220,
         child: Column(
