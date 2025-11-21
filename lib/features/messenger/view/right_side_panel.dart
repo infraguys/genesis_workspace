@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/repositories/users_repository.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
+import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
-class RightSidePanel extends StatelessWidget {
-  const RightSidePanel({super.key, required this.onClose});
+class _RightSidePanelView extends StatelessWidget {
+  const _RightSidePanelView({super.key, required this.onClose});
 
   final VoidCallback onClose;
 
@@ -37,10 +41,10 @@ class RightSidePanel extends StatelessWidget {
                   Row(
                     mainAxisAlignment: .spaceBetween,
                     children: [
-                      _Subtitle('Информация о канале'),
+                      _Subtitle(context.t.messengerView.channelInfo),
                       IconButton(
                         onPressed: onClose,
-                        icon: Icon(Icons.close, color: Colors.grey),
+                        icon: Assets.icons.close.svg(),
                       ),
                     ],
                   ),
@@ -48,7 +52,12 @@ class RightSidePanel extends StatelessWidget {
                     spacing: 16.0,
                     children: [
                       UserAvatar.group(size: 64),
-                      BlocBuilder<ChannelChatCubit, ChannelChatState>(
+                      BlocConsumer<ChannelChatCubit, ChannelChatState>(
+                        listener: (context, state) {
+                          if (state.channelMembers.isNotEmpty) {
+                            context.read<ChannelMembersInfoCubit>().getUsers(state.channelMembers);
+                          }
+                        },
                         builder: (context, state) {
                           final length = state.channelMembers.length;
                           return Column(
@@ -122,38 +131,40 @@ class RightSidePanel extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: const .symmetric(horizontal: 20.0),
-              child: Column(
-                children: [
-                  Row(
+            Column(
+              children: [
+                Padding(
+                  padding: const .symmetric(horizontal: 16.0),
+                  child: Row(
                     mainAxisAlignment: .spaceBetween,
                     children: [
                       _Subtitle('Участники'),
-                      IconButton(onPressed: () {}, icon: Icon(Icons.person_add_alt_outlined)),
+                      IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
                     ],
                   ),
-                  // Container(
-                  //   color: Colors.green,
-                  //   height: 40,
-                  // ),
-                  SizedBox(
+                ),
+                Padding(
+                  padding: const .symmetric(horizontal: 8.0),
+                  child: SizedBox(
                     height: 400,
-                    child: BlocBuilder<ChannelChatCubit, ChannelChatState>(
+                    child: BlocBuilder<ChannelMembersInfoCubit, ChannelMembersInfoState>(
                       builder: (context, state) {
+                        if (state is! ChannelMembersLoadedState) {
+                          return SizedBox.shrink();
+                        }
                         return ListView.separated(
-                          itemCount: state.channelMembers.length,
+                          itemCount: state.users.length,
                           separatorBuilder: (context, index) => SizedBox(height: 4),
                           itemBuilder: (context, index) {
-                            final id = state.channelMembers.toList()[index];
-                            return _MemberItem(id: id.toString());
+                            final user = state.users[index];
+                            return _MemberItem(user: user);
                           },
                         );
                       },
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -163,7 +174,10 @@ class RightSidePanel extends StatelessWidget {
 }
 
 class _Subtitle extends StatelessWidget {
-  const _Subtitle(this.text, {super.key});
+  const _Subtitle(
+    this.text, {
+    super.key, //ignore: unused_element_parameter
+  });
 
   final String text;
 
@@ -177,9 +191,9 @@ class _Subtitle extends StatelessWidget {
 }
 
 class _MemberItem extends StatelessWidget {
-  const _MemberItem({super.key, required this.id});
+  const _MemberItem({super.key, required this.user});
 
-  final String id;
+  final UserEntity user;
 
   @override
   Widget build(BuildContext context) {
@@ -188,46 +202,55 @@ class _MemberItem extends StatelessWidget {
     final textColors = Theme.of(context).extension<TextColors>()!;
 
     return Material(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(8.0)),
+      shape: RoundedRectangleBorder(borderRadius: .circular(8.0)),
       color: cardColors.base,
       child: InkWell(
         onTap: () {},
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: .circular(8),
         overlayColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.hovered) ? cardColors.active : null,
         ),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: 65,
-          ),
+          constraints: const BoxConstraints(minHeight: 65),
           child: Stack(
-            alignment: AlignmentGeometry.centerLeft,
+            alignment: .centerLeft,
             children: [
               ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 65,
-                ),
+                constraints: const BoxConstraints(minHeight: 65),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const .symmetric(horizontal: 8),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: .center,
                     children: [
                       UserAvatar(
-                        // avatarUrl: widget.chat.avatarUrl,
+                        avatarUrl: user.avatarUrl,
                         // size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: .min,
+                          crossAxisAlignment: .start,
                           children: [
                             Text(
-                              'User\'s ID - $id',
+                              user.fullName,
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              overflow: .ellipsis,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: textColors.text100,
+                                fontSize: 14
+                                // fontWeight: currentSize(context) <= ScreenSize.tablet
+                                //     ? FontWeight.w500
+                                //     : FontWeight.w400,
+                              ),
+                            ),
+                            Text(
+                              'Был 45 минут назад',
+                              maxLines: 1,
+                              overflow: .ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: textColors.text30,
+                                fontSize: 12.0
                                 // fontWeight: currentSize(context) <= ScreenSize.tablet
                                 //     ? FontWeight.w500
                                 //     : FontWeight.w400,
@@ -244,6 +267,20 @@ class _MemberItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class RightSidePanel extends StatelessWidget {
+  const RightSidePanel({super.key, required this.onClose});
+
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ChannelMembersInfoCubit(getIt<UsersRepository>()),
+      child: _RightSidePanelView(onClose: onClose),
     );
   }
 }
