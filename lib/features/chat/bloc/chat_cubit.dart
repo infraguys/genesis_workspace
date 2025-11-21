@@ -241,6 +241,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(body);
+      inspect(response);
       if (response.messages.isNotEmpty) {
         state.lastMessageId = response.messages.first.id;
         state.messages = response.messages;
@@ -262,6 +263,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
           narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
           numBefore: 25,
           numAfter: 0,
+          includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;

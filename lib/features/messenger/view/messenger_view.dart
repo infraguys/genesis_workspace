@@ -21,6 +21,7 @@ import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -97,13 +98,25 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
   Future<void> getInitialData() async {
     await Future.wait([
       context.read<MessengerCubit>().loadFolders(),
-      context.read<MessengerCubit>().getMessages(),
+      context.read<MessengerCubit>().getInitialMessages(),
     ]);
+    if (mounted) {
+      unawaited(context.read<MessengerCubit>().lazyLoadAllMessages());
+    }
+  }
+
+  void _checkUser() {
+    if (context.read<MessengerCubit>().state.selfUser == null) {
+      final user = context.read<ProfileCubit>().state.user;
+      if (user != null) {
+        context.read<MessengerCubit>().setSelfUser(user);
+      }
+    }
   }
 
   @override
   void initState() {
-    _future = getInitialData();
+    _checkUser();
     _searchBarController = AnimationController(
       vsync: this,
       duration: _searchAnimationDuration,
@@ -137,12 +150,9 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
     final ScreenSize screenSize = currentSize(context);
     final bool isLargeScreen = screenSize > ScreenSize.tablet;
     final bool isTabletOrSmaller = !isLargeScreen;
-    final EdgeInsetsGeometry searchSectionPadding = isLargeScreen
-        ? EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12)
-        : EdgeInsets.symmetric(horizontal: 20).copyWith(top: 14, bottom: 20);
     final double searchVisibility = _searchBarAnimation.value;
 
-    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: 20).copyWith(
+    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: isTabletOrSmaller ? 20 : 8).copyWith(
       top: isTabletOrSmaller ? 20 : 0,
       bottom: 20,
     );
@@ -165,6 +175,12 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
             _searchController.clear();
             _future = getInitialData();
           });
+          unawaited(
+            Future.wait([
+              context.read<RealTimeCubit>().ensureConnection(),
+              context.read<MessengerCubit>().getUnreadMessages(),
+            ]),
+          );
         },
         child: BlocListener<ProfileCubit, ProfileState>(
           listenWhen: (prev, current) => prev.user != current.user,
@@ -308,7 +324,6 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                     });
                                   },
                                   isLargeScreen: isLargeScreen,
-                                  searchSectionPadding: searchSectionPadding,
                                   searchVisibility: searchVisibility,
                                   folders: state.folders,
                                   selectedFolderIndex: state.selectedFolderIndex,
@@ -327,6 +342,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                   onClearSearch: _clearSearch,
                                   searchController: _searchController,
                                   searchQuery: _searchQuery,
+                                  isLoadingMore: !state.foundOldestMessage,
                                 ),
                                 if (visibleChats.isEmpty)
                                   Padding(

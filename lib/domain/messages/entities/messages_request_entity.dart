@@ -8,6 +8,7 @@ class MessagesRequestEntity {
   final int? numAfter;
   final bool applyMarkdown;
   final bool clientGravatar;
+  final bool includeAnchor;
 
   MessagesRequestEntity({
     required this.anchor,
@@ -16,6 +17,7 @@ class MessagesRequestEntity {
     this.numAfter,
     this.applyMarkdown = true,
     this.clientGravatar = false,
+    this.includeAnchor = true,
   });
 
   MessagesRequestDto toDto() => MessagesRequestDto(
@@ -25,6 +27,7 @@ class MessagesRequestEntity {
     numAfter: numAfter,
     applyMarkdown: applyMarkdown,
     clientGravatar: clientGravatar,
+    includeAnchor: includeAnchor,
   );
 }
 

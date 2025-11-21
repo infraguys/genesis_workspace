@@ -37,6 +37,8 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+part 'auth_state.dart';
+
 @LazySingleton(dispose: disposeAuthCubit)
 class AuthCubit extends Cubit<AuthState> {
   final FetchApiKeyUseCase _fetchApiKeyUseCase;
@@ -126,7 +128,9 @@ class AuthCubit extends Cubit<AuthState> {
 
     emit(state.copyWith(isAuthorized: hasCredentials, selectedOrganization: organization));
 
-    if (!hasCredentials) {
+    if (hasCredentials) {
+      await _ensureRealTimeConnectionForOrganization(organization);
+    } else {
       await getServerSettings(organization.baseUrl);
     }
   }
@@ -140,8 +144,9 @@ class AuthCubit extends Cubit<AuthState> {
         email: response.email,
         token: response.apiKey,
       );
-
-      emit(state.copyWith(isAuthorized: true, errorMessage: null));
+      final OrganizationEntity? organization = await _loadSelectedOrganization();
+      await _ensureRealTimeConnectionForOrganization(organization);
+      emit(state.copyWith(isAuthorized: true));
     } on DioException catch (e, st) {
       final bool unauthorized = e.response?.statusCode == 401;
       final String? backendMsg = e.response?.data is Map ? e.response?.data['msg'] as String? : null;
@@ -217,6 +222,29 @@ class AuthCubit extends Cubit<AuthState> {
     return null;
   }
 
+  Future<OrganizationEntity?> _loadSelectedOrganization() async {
+    if (state.selectedOrganization != null) {
+      return state.selectedOrganization;
+    }
+    final int? selectedOrganizationId = _sharedPreferences.getInt(SharedPrefsKeys.selectedOrganizationId);
+    if (selectedOrganizationId == null) return null;
+    try {
+      return await _getOrganizationByIdUseCase.call(selectedOrganizationId);
+    } catch (e) {
+      inspect(e);
+      return null;
+    }
+  }
+
+  Future<void> _ensureRealTimeConnectionForOrganization(OrganizationEntity? organization) async {
+    if (organization == null) return;
+    try {
+      await _realTimeService.addConnection(organization.id, organization.baseUrl);
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
   setLogin() {
     emit(state.copyWith(isAuthorized: true));
   }
@@ -248,8 +276,10 @@ class AuthCubit extends Cubit<AuthState> {
         print('CSRF token not found');
       }
 
+      final OrganizationEntity? organization = await _loadSelectedOrganization();
       if (kIsWeb) {
         _sharedPreferences.setBool(SharedPrefsKeys.isWebAuth, true);
+        await _ensureRealTimeConnectionForOrganization(organization);
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       } else {
         final cookies = response.headers['set-cookie'];
@@ -268,6 +298,7 @@ class AuthCubit extends Cubit<AuthState> {
           await _saveCsrftokenUseCase.call(baseUrl: _baseUrl, csrftoken: csrfToken ?? '');
           await _saveSessionIdUseCase.call(baseUrl: _baseUrl, sessionId: sessionId ?? '');
         }
+        await _ensureRealTimeConnectionForOrganization(organization);
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       }
     } on FormatException catch (e) {
@@ -415,6 +446,7 @@ class AuthCubit extends Cubit<AuthState> {
         }
       }
     } catch (e) {
+      inspect(e);
       AppConstants.setSelectedOrganizationId(null);
       emit(state.copyWith(hasBaseUrl: false, isPending: false));
     }
@@ -484,63 +516,3 @@ class AuthCubit extends Cubit<AuthState> {
 }
 
 void disposeAuthCubit(AuthCubit cubit) => cubit.close();
-
-class AuthState {
-  final bool isPending;
-  final bool isAuthorized;
-  final String? errorMessage;
-  ServerSettingsEntity? serverSettings;
-  final String? otp;
-  final Uint8List? rawKey;
-  final bool isParseTokenPending;
-  final String? parseTokenError;
-  final bool hasBaseUrl;
-  final bool pasteBaseUrlPending;
-  final bool serverSettingsPending;
-  final OrganizationEntity? selectedOrganization;
-
-  AuthState({
-    required this.isPending,
-    required this.isAuthorized,
-    this.errorMessage,
-    this.serverSettings,
-    this.otp,
-    this.rawKey,
-    required this.isParseTokenPending,
-    this.parseTokenError,
-    required this.hasBaseUrl,
-    required this.pasteBaseUrlPending,
-    required this.serverSettingsPending,
-    this.selectedOrganization,
-  });
-
-  AuthState copyWith({
-    bool? isPending,
-    bool? isAuthorized,
-    String? errorMessage,
-    ServerSettingsEntity? serverSettings,
-    String? otp,
-    Uint8List? rawKey,
-    bool? isParseTokenPending,
-    String? parseTokenError,
-    bool? hasBaseUrl,
-    bool? pasteBaseUrlPending,
-    bool? serverSettingsPending,
-    OrganizationEntity? selectedOrganization,
-  }) {
-    return AuthState(
-      isPending: isPending ?? this.isPending,
-      isAuthorized: isAuthorized ?? this.isAuthorized,
-      errorMessage: errorMessage ?? this.errorMessage,
-      serverSettings: serverSettings ?? this.serverSettings,
-      otp: otp ?? this.otp,
-      rawKey: rawKey ?? this.rawKey,
-      isParseTokenPending: isParseTokenPending ?? this.isParseTokenPending,
-      parseTokenError: parseTokenError ?? this.parseTokenError,
-      hasBaseUrl: hasBaseUrl ?? this.hasBaseUrl,
-      pasteBaseUrlPending: pasteBaseUrlPending ?? this.pasteBaseUrlPending,
-      serverSettingsPending: serverSettingsPending ?? this.serverSettingsPending,
-      selectedOrganization: selectedOrganization ?? this.selectedOrganization,
-    );
-  }
-}

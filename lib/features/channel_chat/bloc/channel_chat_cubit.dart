@@ -311,6 +311,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           ],
           numBefore: 25,
           numAfter: 0,
+          includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;

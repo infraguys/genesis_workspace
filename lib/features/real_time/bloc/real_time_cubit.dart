@@ -39,8 +39,7 @@ class RealTimeCubit extends Cubit<RealTimeState> {
 
   Future<void> ensureConnection() async {
     try {
-      final selectedOrganizationId = _organizationsCubit.state.selectedOrganizationId;
-      await _multiPollingService.ensureConnection(selectedOrganizationId ?? -1);
+      await _multiPollingService.ensureAllConnections();
     } catch (e) {
       inspect(e);
     }

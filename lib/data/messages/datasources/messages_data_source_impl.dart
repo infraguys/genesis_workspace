@@ -33,6 +33,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final narrowString = jsonEncode(body.narrow?.map((e) => e.toJson()).toList());
       final bool applyMarkdown = body.applyMarkdown;
       final bool clientGravatar = body.clientGravatar;
+      final bool includeAnchor = body.includeAnchor;
 
       return await apiClient.getMessages(
         anchor,
@@ -41,6 +42,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
         body.numAfter,
         applyMarkdown,
         clientGravatar,
+        includeAnchor,
       );
     } catch (e) {
       rethrow;
@@ -175,8 +177,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
 
     final create = await apiClient.createUpload(fileSize.toString(), metadata);
 
-    final String? location =
-        create.response.headers.value('location') ?? create.response.headers.value('Location');
+    final String? location = create.response.headers.value('location') ?? create.response.headers.value('Location');
     if (location == null) {
       throw StateError('TUS: Location header is missing');
     }
@@ -259,8 +260,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       options: Options(headers: {'Tus-Resumable': AppConstants.tusVersion}),
       cancelToken: cancelToken,
     );
-    final String value =
-        res.headers.value('Upload-Offset') ?? res.headers.value('upload-offset') ?? '0';
+    final String value = res.headers.value('Upload-Offset') ?? res.headers.value('upload-offset') ?? '0';
     return int.parse(value);
   }
 

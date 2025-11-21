@@ -12,6 +12,7 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_request_
 import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -137,9 +138,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   }
 
   Future<void> getInitialData() async {
+    await context.read<RealTimeCubit>().init();
+
     await Future.wait([
       context.read<UpdateCubit>().checkUpdateNeed(),
-      context.read<RealTimeCubit>().init(),
       context.read<ProfileCubit>().getOwnUser(),
     ]);
   }
@@ -170,7 +172,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       case AppLifecycleState.inactive:
         await setIdleStatus();
       case AppLifecycleState.resumed:
-        await context.read<RealTimeCubit>().ensureConnection();
+        await Future.wait([
+          context.read<MessengerCubit>().getUnreadMessages(),
+          context.read<RealTimeCubit>().ensureConnection(),
+        ]);
       // print("resumed");
       case AppLifecycleState.detached:
       // print("detached");
@@ -204,59 +209,32 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
         },
         child: FutureBuilder(
           future: _future,
-          builder: (context, asyncSnapshot) {
+          builder: (context, snapshot) {
             return Scaffold(
               bottomNavigationBar: isCompactLayout ? _buildMobileBottomNavigationBar(context, theme, textColors) : null,
-              body: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Column(
-                    spacing: 4.0,
-                    children: [
-                      if (!isCompactLayout)
-                        ScaffoldDesktopAppBar(
-                          onSelectBranch: _goBranch,
-                          selectedIndex: widget.navigationShell.currentIndex,
+              body: snapshot.connectionState == .waiting
+                  ? Center(child: CircularProgressIndicator())
+                  : Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Column(
+                          spacing: 4.0,
+                          children: [
+                            if (!isCompactLayout)
+                              ScaffoldDesktopAppBar(
+                                onSelectBranch: _goBranch,
+                                selectedIndex: widget.navigationShell.currentIndex,
+                              ),
+                            BlocBuilder<AuthCubit, AuthState>(
+                              buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                              builder: (_, state) {
+                                return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
+                              },
+                            ),
+                          ],
                         ),
-                      BlocBuilder<AuthCubit, AuthState>(
-                        buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                        builder: (_, state) {
-                          return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
-                        },
-                      ),
-                    ],
-                  ),
-                  // if (currentSize(context) <= ScreenSize.tablet)
-                  //   Align(
-                  //     alignment: AlignmentGeometry.bottomCenter,
-                  //     child: Padding(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 30),
-                  //       child: Container(
-                  //         height: 73,
-                  //         decoration: BoxDecoration(
-                  //           color: theme.colorScheme.surface,
-                  //           borderRadius: BorderRadius.circular(12),
-                  //         ),
-                  //         child: ListView.builder(
-                  //           scrollDirection: Axis.horizontal,
-                  //           itemCount: branchModels.length,
-                  //           physics: NeverScrollableScrollPhysics(),
-                  //           itemBuilder: (BuildContext context, int index) {
-                  //             final model = branchModels[index];
-                  //             return BranchItem(
-                  //               icon: model.icon,
-                  //               isSelected: index == widget.navigationShell.currentIndex,
-                  //               onPressed: () {
-                  //                 _goBranch(index);
-                  //               },
-                  //             );
-                  //           },
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                ],
-              ),
+                      ],
+                    ),
             );
           },
         ),

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
@@ -13,7 +14,6 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   const MessengerAppBar({
     super.key,
     required this.isLargeScreen,
-    required this.searchSectionPadding,
     required this.searchVisibility,
     required this.folders,
     required this.selectedFolderIndex,
@@ -33,10 +33,10 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     required this.searchQuery,
     required this.onSearchChanged,
     this.selectedChatLabel,
+    required this.isLoadingMore,
   });
 
   final bool isLargeScreen;
-  final EdgeInsetsGeometry searchSectionPadding;
   final double searchVisibility;
   final List<FolderItemEntity> folders;
   final int selectedFolderIndex;
@@ -56,6 +56,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   final TextEditingController searchController;
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
+  final bool isLoadingMore;
 
   bool get isTabletOrSmaller => !isLargeScreen;
 
@@ -69,12 +70,9 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
         : t.messengerView.chatsAndChannels;
 
     final Widget titleWidget = isLargeScreen
-        ? Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 20).copyWith(bottom: 0),
-            child: Text(
-              largeScreenTitle,
-              style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
-            ),
+        ? Text(
+            largeScreenTitle,
+            style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
           )
         : Text(
             showTopics ? selectedChatLabel! : context.t.messenger,
@@ -155,12 +153,28 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                   SizedBox(width: 8),
                 ],
                 Expanded(
-                  child: isTabletOrSmaller
-                      ? Center(child: titleWidget)
-                      : Align(
-                          alignment: Alignment.centerLeft,
-                          child: titleWidget,
-                        ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 4,
+                      children: [
+                        isTabletOrSmaller
+                            ? Center(child: titleWidget)
+                            : Align(
+                                alignment: Alignment.centerLeft,
+                                child: titleWidget,
+                              ),
+                        if (isLoadingMore)
+                          SizedBox(
+                            height: 14,
+                            child: CupertinoActivityIndicator(
+                              radius: 7,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
                 if (actions.isNotEmpty)
                   Row(
@@ -184,7 +198,9 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
               child: Opacity(
                 opacity: showSearchField ? clampedVisibility : 0,
                 child: Padding(
-                  padding: searchSectionPadding,
+                  padding: isLargeScreen
+                      ? EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12)
+                      : EdgeInsets.symmetric(horizontal: 20).copyWith(top: 14, bottom: 20),
                   child: Row(
                     spacing: 8,
                     children: [

@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
@@ -12,6 +11,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/real_time/real_time_service.dart';
 
@@ -58,8 +58,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   _onMessageEvents(MessageEventEntity event) async {
     if (event.message.senderId != state.user?.userId) {
       final prefs = await SharedPreferences.getInstance();
-      final selected =
-          prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
+      final selected = prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
       player.play(AssetSource(selected));
     }
   }
