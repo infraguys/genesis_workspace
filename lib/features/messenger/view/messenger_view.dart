@@ -131,6 +131,7 @@ class _MessengerViewState extends State<MessengerView>
     _searchBarController.addListener(() => setState(() {}));
     _chatsController = ScrollController();
     _topicsController = ScrollController();
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
@@ -148,12 +149,8 @@ class _MessengerViewState extends State<MessengerView>
     switch (state) {
       case AppLifecycleState.inactive:
       case AppLifecycleState.resumed:
-        // try {
-        //   await context.read<MessengerCubit>().getUnreadMessages();
-        // } catch (e) {
-        //   inspect(e);
-        // }
-        print("resumed from messenger");
+        await context.read<MessengerCubit>().getUnreadMessages();
+      // print("resumed from messenger");
       case AppLifecycleState.detached:
       // print("detached");
       case AppLifecycleState.paused:
@@ -163,7 +160,7 @@ class _MessengerViewState extends State<MessengerView>
       default:
         break;
     }
-    // super.didChangeAppLifecycleState(state);
+    super.didChangeAppLifecycleState(state);
   }
 
   @override

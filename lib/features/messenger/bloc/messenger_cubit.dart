@@ -200,6 +200,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      final updatedMessages = [...state.unreadMessages];
+      updatedMessages.addAll(response.messages);
+      emit(state.copyWith(unreadMessages: updatedMessages));
       _createChatsFromMessages(response.messages);
     } catch (e) {
       inspect(e);
@@ -547,7 +550,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       for (final messageId in event.messages) {
         updatedUnreadMessages.removeWhere((message) => message.id == messageId);
-        final message = state.messages.firstWhere((message) => message.id == messageId);
+        final message = state.unreadMessages.firstWhere((message) => message.id == messageId);
         ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
         final indexOfChat = state.chats.indexOf(updatedChat);
         updatedChat.unreadMessages.remove(messageId);
