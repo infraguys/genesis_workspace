@@ -98,13 +98,23 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
   Future<void> getInitialData() async {
     await Future.wait([
       context.read<MessengerCubit>().loadFolders(),
-      context.read<MessengerCubit>().getMessages(),
+      context.read<MessengerCubit>().getInitialMessages(),
     ]);
+  }
+
+  void _checkUser() {
+    if (context.read<MessengerCubit>().state.selfUser == null) {
+      final user = context.read<ProfileCubit>().state.user;
+      if (user != null) {
+        context.read<MessengerCubit>().setSelfUser(user);
+      }
+    }
   }
 
   @override
   void initState() {
-    _future = getInitialData();
+    _checkUser();
+    // _future = getInitialData();
     _searchBarController = AnimationController(
       vsync: this,
       duration: _searchAnimationDuration,

@@ -15,6 +15,7 @@ class MessagesRequestDto {
 
   final bool applyMarkdown;
   final bool clientGravatar;
+  final bool includeAnchor;
 
   MessagesRequestDto({
     required this.anchor,
@@ -23,10 +24,10 @@ class MessagesRequestDto {
     this.numAfter,
     this.applyMarkdown = true,
     this.clientGravatar = false,
+    this.includeAnchor = true,
   });
 
-  factory MessagesRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$MessagesRequestDtoFromJson(json);
+  factory MessagesRequestDto.fromJson(Map<String, dynamic> json) => _$MessagesRequestDtoFromJson(json);
 
   Map<String, dynamic> toJson() => {
     "anchor": anchor,
@@ -35,5 +36,6 @@ class MessagesRequestDto {
     "num_after": numAfter,
     "apply_markdown": applyMarkdown,
     "client_gravatar": clientGravatar,
+    "include_anchor": includeAnchor,
   };
 }

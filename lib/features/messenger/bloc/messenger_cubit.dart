@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -85,6 +86,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           pinnedChats: [],
           filteredChatIds: null,
           filteredChats: null,
+          foundOldestMessage: false,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -97,21 +99,23 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(selfUser: user));
   }
 
-  Future<void> getMessages() async {
+  Future<void> getInitialMessages() async {
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
         narrow: [
           // MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: "dm"),
         ],
-        numBefore: 5000,
+        numBefore: 1000,
         numAfter: 0,
         clientGravatar: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      final lastMessageId = response.messages.first.id;
       final messages = response.messages;
       final unreadMessages = [...state.unreadMessages];
       final chats = [...state.chats];
+      final foundOldest = response.foundOldest;
       for (var message in messages.reversed) {
         final recipientId = message.recipientId;
         final isMyMessage = message.isMyMessage(state.selfUser?.userId);
@@ -133,10 +137,25 @@ class MessengerCubit extends Cubit<MessengerState> {
         }
       }
       await getPinnedChats();
-      emit(state.copyWith(messages: messages, unreadMessages: unreadMessages, chats: chats));
+      emit(
+        state.copyWith(
+          messages: messages,
+          unreadMessages: unreadMessages,
+          chats: chats,
+          foundOldestMessage: foundOldest,
+        ),
+      );
       _sortChats();
     } catch (e) {
       inspect(e);
+    }
+  }
+
+  Future<void> lazyLoadAllMessages() async {
+    try {} catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 

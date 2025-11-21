@@ -25,6 +25,7 @@ abstract class MessagesApiClient {
     @Query("num_after") int? numAfter,
     @Query("apply_markdown") bool? applyMarkdown,
     @Query("client_gravatar") bool? clientGravatar,
+    @Query("include_anchor") bool? includeAnchor,
   );
 
   @GET('/messages/{message_id}')
