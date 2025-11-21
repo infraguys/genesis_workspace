@@ -19,6 +19,7 @@ import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
+import 'package:genesis_workspace/features/messenger/view/right_side_panel.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
@@ -50,6 +51,8 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
   late final ScrollController _topicsController;
 
   bool _showTopics = false;
+
+  final _isOpenNotifier = ValueNotifier(false);
 
   Future<void> createNewFolder(BuildContext context) {
     return showDialog(
@@ -431,6 +434,7 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                   ),
                                   userIds: state.selectedChat!.dmIds!,
                                   unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                  leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
                                 );
                               }
                               if (state.selectedChat?.streamId != null) {
@@ -441,12 +445,27 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
                                   channelId: state.selectedChat!.streamId!,
                                   topicName: state.selectedTopic,
                                   unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                  leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
                                 );
                               }
                               return Center(child: Text(context.t.selectAnyChat));
                             },
                           ),
                         ),
+                      const SizedBox(width: 4.0),
+                      ValueListenableBuilder(
+                        valueListenable: _isOpenNotifier,
+                        builder: (context, value, _) {
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            width: value ? 315 : 0,
+                            child: RightSidePanel(
+                              onClose: () => _isOpenNotifier.value = false,
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   );
                 },
