@@ -241,7 +241,6 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(body);
-      inspect(response);
       if (response.messages.isNotEmpty) {
         state.lastMessageId = response.messages.first.id;
         state.messages = response.messages;

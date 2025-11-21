@@ -12,7 +12,6 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_request_
 import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -172,11 +171,12 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       case AppLifecycleState.inactive:
         await setIdleStatus();
       case AppLifecycleState.resumed:
-        await Future.wait([
-          context.read<MessengerCubit>().getUnreadMessages(),
-          context.read<RealTimeCubit>().ensureConnection(),
-        ]);
-      // print("resumed");
+        // await Future.wait([
+        //   context.read<RealTimeCubit>().ensureConnection(),
+        //   context.read<MessengerCubit>().getUnreadMessages(),
+        // ]);
+        await context.read<RealTimeCubit>().ensureConnection();
+        print("resumed from scaffold");
       case AppLifecycleState.detached:
       // print("detached");
       case AppLifecycleState.paused:
@@ -186,6 +186,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       default:
         break;
     }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override

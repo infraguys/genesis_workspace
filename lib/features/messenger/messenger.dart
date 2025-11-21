@@ -9,6 +9,9 @@ class Messenger extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<MessengerCubit>(), child: MessengerView());
+    return BlocProvider(
+      create: (context) => getIt<MessengerCubit>(),
+      child: MessengerView(),
+    );
   }
 }

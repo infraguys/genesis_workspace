@@ -33,7 +33,8 @@ class MessengerView extends StatefulWidget {
   State<MessengerView> createState() => _MessengerViewState();
 }
 
-class _MessengerViewState extends State<MessengerView> with SingleTickerProviderStateMixin, OpenDmChatMixin {
+class _MessengerViewState extends State<MessengerView>
+    with SingleTickerProviderStateMixin, OpenDmChatMixin, WidgetsBindingObserver {
   static const Duration _searchAnimationDuration = Duration(milliseconds: 220);
   Future<void>? _future;
   final TextEditingController _searchController = TextEditingController();
@@ -140,6 +141,29 @@ class _MessengerViewState extends State<MessengerView> with SingleTickerProvider
     _chatsController.dispose();
     _topicsController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.resumed:
+        // try {
+        //   await context.read<MessengerCubit>().getUnreadMessages();
+        // } catch (e) {
+        //   inspect(e);
+        // }
+        print("resumed from messenger");
+      case AppLifecycleState.detached:
+      // print("detached");
+      case AppLifecycleState.paused:
+      // print("paused");
+      case AppLifecycleState.hidden:
+      // print("hidden");
+      default:
+        break;
+    }
+    // super.didChangeAppLifecycleState(state);
   }
 
   @override
