@@ -141,6 +141,7 @@ class _MessengerViewState extends State<MessengerView>
     _searchController.dispose();
     _chatsController.dispose();
     _topicsController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

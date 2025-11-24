@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
@@ -248,6 +249,28 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
       emit(state.copyWith(messages: state.messages, isAllMessagesLoaded: response.foundOldest));
     } catch (e) {
       inspect(e);
+    }
+  }
+
+  Future<void> getUnreadMessages() async {
+    try {
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.dm, operand: state.chatIds!.toList()),
+          MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread'),
+        ],
+        numBefore: 5000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase(body);
+      final updatedMessages = [...state.messages];
+      updatedMessages.addAll(response.messages);
+      emit(state.copyWith(messages: updatedMessages, lastMessageId: updatedMessages.first.id));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 

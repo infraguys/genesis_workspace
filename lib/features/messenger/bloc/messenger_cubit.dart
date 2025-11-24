@@ -200,7 +200,15 @@ class MessengerCubit extends Cubit<MessengerState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      final updatedMessages = [...state.unreadMessages];
+      if (response.messages.isEmpty) {
+        List<ChatEntity> updatedChats = [...state.chats];
+        for (var chat in updatedChats) {
+          chat.unreadMessages.clear();
+        }
+        emit(state.copyWith(chats: updatedChats));
+        return;
+      }
+      final updatedMessages = response.messages.isEmpty ? <MessageEntity>[] : [...state.unreadMessages];
       updatedMessages.addAll(response.messages);
       emit(state.copyWith(unreadMessages: updatedMessages));
       _createChatsFromMessages(response.messages);

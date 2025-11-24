@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
@@ -267,17 +268,16 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
       if (unreadMessagesCount != null && unreadMessagesCount > 25) {
         numBefore = unreadMessagesCount + 10;
       }
-      final response = await _getMessagesUseCase.call(
-        MessagesRequestEntity(
-          anchor: MessageAnchor.newest(),
-          narrow: [
-            MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
-            if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
-          ],
-          numBefore: numBefore,
-          numAfter: 0,
-        ),
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
+          if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+        ],
+        numBefore: numBefore,
+        numAfter: 0,
       );
+      final response = await _getMessagesUseCase(body);
       final Set<int> channelMembers = {...state.channelMembers};
       final sortedChannelMembers = _sortChannelMembersByRecentMessages(
         channelMembers: channelMembers,
@@ -295,6 +295,29 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
       inspect(e);
     } finally {
       emit(state.copyWith(isMessagesPending: false));
+    }
+  }
+
+  Future<void> getUnreadMessages() async {
+    try {
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread'),
+          MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
+          if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+        ],
+        numBefore: 5000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase(body);
+      final updatedMessages = [...state.messages];
+      updatedMessages.addAll(response.messages);
+      emit(state.copyWith(messages: updatedMessages, lastMessageId: updatedMessages.first.id));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
