@@ -125,8 +125,8 @@ class MessengerCubit extends Cubit<MessengerState> {
         );
         chats.add(chat);
       }
-      emit(state.copyWith(chats: chats, unreadMessages: unreadMessages));
     }
+    emit(state.copyWith(chats: chats, unreadMessages: unreadMessages));
   }
 
   Future<void> getInitialMessages() async {
