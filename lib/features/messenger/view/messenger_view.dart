@@ -147,16 +147,9 @@ class _MessengerViewState extends State<MessengerView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
-      case AppLifecycleState.inactive:
       case AppLifecycleState.resumed:
         await context.read<MessengerCubit>().getUnreadMessages();
-      // print("resumed from messenger");
-      case AppLifecycleState.detached:
-      // print("detached");
-      case AppLifecycleState.paused:
-      // print("paused");
-      case AppLifecycleState.hidden:
-      // print("hidden");
+        break;
       default:
         break;
     }
