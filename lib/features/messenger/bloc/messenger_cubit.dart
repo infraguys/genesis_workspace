@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
@@ -21,6 +23,7 @@ import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_ca
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -56,6 +59,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsEventsSubscription;
   String _searchQuery = '';
+  int _lastMessageId = 0;
+  int _loadingTimes = 0;
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -85,6 +90,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           pinnedChats: [],
           filteredChatIds: null,
           filteredChats: null,
+          foundOldestMessage: false,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -97,44 +103,115 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(selfUser: user));
   }
 
-  Future<void> getMessages() async {
+  void _createChatsFromMessages(List<MessageEntity> messages) {
+    final chats = [...state.chats];
+    final unreadMessages = [...state.unreadMessages];
+    for (var message in messages.reversed) {
+      final recipientId = message.recipientId;
+      final isMyMessage = message.isMyMessage(state.selfUser?.userId);
+      final bool isChatExist = chats.any((chat) => chat.id == message.recipientId);
+      if (message.isUnread) {
+        unreadMessages.add(message);
+      }
+      if (isChatExist) {
+        ChatEntity chat = chats.firstWhere((chat) => chat.id == recipientId);
+        final indexOfChat = chats.indexOf(chat);
+        chat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
+        chats[indexOfChat] = chat;
+      } else {
+        final chat = ChatEntity.createChatFromMessage(
+          message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),
+          isMyMessage: isMyMessage,
+        );
+        chats.add(chat);
+      }
+    }
+    emit(state.copyWith(chats: chats, unreadMessages: unreadMessages));
+  }
+
+  Future<void> getInitialMessages() async {
+    _loadingTimes = 0;
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
-        narrow: [
-          // MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: "dm"),
-        ],
-        numBefore: 5000,
+        numBefore: 1000,
         numAfter: 0,
         clientGravatar: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      _lastMessageId = response.messages.first.id;
       final messages = response.messages;
-      final unreadMessages = [...state.unreadMessages];
-      final chats = [...state.chats];
-      for (var message in messages.reversed) {
-        final recipientId = message.recipientId;
-        final isMyMessage = message.isMyMessage(state.selfUser?.userId);
-        final bool isChatExist = chats.any((chat) => chat.id == message.recipientId);
-        if (message.isUnread) {
-          unreadMessages.add(message);
-        }
-        if (isChatExist) {
-          ChatEntity chat = chats.firstWhere((chat) => chat.id == recipientId);
-          final indexOfChat = chats.indexOf(chat);
-          chat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
-          chats[indexOfChat] = chat;
-        } else {
-          final chat = ChatEntity.createChatFromMessage(
-            message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),
-            isMyMessage: isMyMessage,
-          );
-          chats.add(chat);
+      final foundOldest = response.foundOldest;
+      emit(
+        state.copyWith(
+          messages: messages,
+          foundOldestMessage: foundOldest,
+        ),
+      );
+      _createChatsFromMessages(messages);
+      await getPinnedChats();
+      _sortChats();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> lazyLoadAllMessages() async {
+    if (!state.foundOldestMessage && _loadingTimes < 6) {
+      try {
+        final body = MessagesRequestEntity(
+          anchor: MessageAnchor.id(_lastMessageId),
+          numBefore: 5000,
+          numAfter: 0,
+          includeAnchor: false,
+        );
+        final response = await _getMessagesUseCase.call(body);
+        _lastMessageId = response.messages.first.id;
+        final foundOldest = response.foundOldest;
+        final messages = [...state.messages];
+        messages.addAll(response.messages);
+        emit(
+          state.copyWith(
+            messages: messages,
+            foundOldestMessage: _loadingTimes == 5 ? true : foundOldest,
+          ),
+        );
+        _createChatsFromMessages(response.messages);
+        await getPinnedChats();
+        _sortChats();
+        _loadingTimes += 1;
+        await lazyLoadAllMessages();
+      } catch (e) {
+        if (kDebugMode) {
+          inspect(e);
         }
       }
-      await getPinnedChats();
-      emit(state.copyWith(messages: messages, unreadMessages: unreadMessages, chats: chats));
-      _sortChats();
+    }
+  }
+
+  Future<void> getUnreadMessages() async {
+    try {
+      final messagesBody = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread')],
+        numBefore: 5000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase.call(messagesBody);
+      if (response.messages.isEmpty) {
+        List<ChatEntity> updatedChats = [...state.chats];
+        for (var chat in updatedChats) {
+          chat.unreadMessages.clear();
+        }
+        emit(state.copyWith(chats: updatedChats));
+        return;
+      }
+      final updatedMessages = response.messages.isEmpty ? <MessageEntity>[] : [...state.unreadMessages];
+      updatedMessages.addAll(response.messages);
+      emit(state.copyWith(unreadMessages: updatedMessages));
+      _createChatsFromMessages(response.messages);
     } catch (e) {
       inspect(e);
     }
@@ -481,7 +558,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       for (final messageId in event.messages) {
         updatedUnreadMessages.removeWhere((message) => message.id == messageId);
-        final message = state.messages.firstWhere((message) => message.id == messageId);
+        final message = state.unreadMessages.firstWhere((message) => message.id == messageId);
         ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
         final indexOfChat = state.chats.indexOf(updatedChat);
         updatedChat.unreadMessages.remove(messageId);

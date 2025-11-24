@@ -216,7 +216,8 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
 
                                 IconButton(
                                   onPressed: () async {
-                                    await context.read<RealTimeCubit>().ensureConnection();
+                                    // await context.read<RealTimeCubit>().ensureConnection();
+                                    await context.read<RealTimeCubit>().disconnect();
                                   },
                                   icon: Assets.icons.arrowDown.svg(),
                                 ),

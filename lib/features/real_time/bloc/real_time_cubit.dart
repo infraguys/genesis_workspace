@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
@@ -42,6 +43,18 @@ class RealTimeCubit extends Cubit<RealTimeState> {
       await _multiPollingService.ensureAllConnections();
     } catch (e) {
       inspect(e);
+    }
+  }
+
+  Future<void> disconnect() async {
+    try {
+      final selectedOrganizationId = _organizationsCubit.state.selectedOrganizationId;
+
+      await _multiPollingService.closeConnection(selectedOrganizationId ?? -1);
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 

@@ -33,6 +33,7 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<OrganizationsCubit>()),
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider(create: (_) => getIt<DownloadFilesCubit>()),
+        // BlocProvider(create: (context) => getIt<MessengerCubit>()),
       ],
       child: MaterialApp.router(
         locale: TranslationProvider.of(context).flutterLocale,

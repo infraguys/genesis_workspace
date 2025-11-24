@@ -113,6 +113,18 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        await context.read<ChatCubit>().getUnreadMessages();
+        break;
+      default:
+        break;
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();

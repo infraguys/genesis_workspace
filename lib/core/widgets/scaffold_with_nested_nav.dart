@@ -170,18 +170,14 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     switch (state) {
       case AppLifecycleState.inactive:
         await setIdleStatus();
+        break;
       case AppLifecycleState.resumed:
         await context.read<RealTimeCubit>().ensureConnection();
-      // print("resumed");
-      case AppLifecycleState.detached:
-      // print("detached");
-      case AppLifecycleState.paused:
-      // print("paused");
-      case AppLifecycleState.hidden:
-      // print("hidden");
+        break;
       default:
         break;
     }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -205,59 +201,32 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
         },
         child: FutureBuilder(
           future: _future,
-          builder: (context, asyncSnapshot) {
+          builder: (context, snapshot) {
             return Scaffold(
               bottomNavigationBar: isCompactLayout ? _buildMobileBottomNavigationBar(context, theme, textColors) : null,
-              body: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Column(
-                    spacing: 4.0,
-                    children: [
-                      if (!isCompactLayout)
-                        ScaffoldDesktopAppBar(
-                          onSelectBranch: _goBranch,
-                          selectedIndex: widget.navigationShell.currentIndex,
+              body: snapshot.connectionState == .waiting
+                  ? Center(child: CircularProgressIndicator())
+                  : Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Column(
+                          spacing: 4.0,
+                          children: [
+                            if (!isCompactLayout)
+                              ScaffoldDesktopAppBar(
+                                onSelectBranch: _goBranch,
+                                selectedIndex: widget.navigationShell.currentIndex,
+                              ),
+                            BlocBuilder<AuthCubit, AuthState>(
+                              buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                              builder: (_, state) {
+                                return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
+                              },
+                            ),
+                          ],
                         ),
-                      BlocBuilder<AuthCubit, AuthState>(
-                        buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                        builder: (_, state) {
-                          return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
-                        },
-                      ),
-                    ],
-                  ),
-                  // if (currentSize(context) <= ScreenSize.tablet)
-                  //   Align(
-                  //     alignment: AlignmentGeometry.bottomCenter,
-                  //     child: Padding(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 30),
-                  //       child: Container(
-                  //         height: 73,
-                  //         decoration: BoxDecoration(
-                  //           color: theme.colorScheme.surface,
-                  //           borderRadius: BorderRadius.circular(12),
-                  //         ),
-                  //         child: ListView.builder(
-                  //           scrollDirection: Axis.horizontal,
-                  //           itemCount: branchModels.length,
-                  //           physics: NeverScrollableScrollPhysics(),
-                  //           itemBuilder: (BuildContext context, int index) {
-                  //             final model = branchModels[index];
-                  //             return BranchItem(
-                  //               icon: model.icon,
-                  //               isSelected: index == widget.navigationShell.currentIndex,
-                  //               onPressed: () {
-                  //                 _goBranch(index);
-                  //               },
-                  //             );
-                  //           },
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                ],
-              ),
+                      ],
+                    ),
             );
           },
         ),

@@ -144,7 +144,6 @@ class _ChannelChatViewState extends State<ChannelChatView>
 
   @override
   void dispose() {
-    // _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     messageController
       ..removeListener(onTextChanged)
@@ -152,7 +151,20 @@ class _ChannelChatViewState extends State<ChannelChatView>
     messageController.dispose();
     messageInputFocusNode.dispose();
     removeWebDnD?.call();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        await context.read<ChannelChatCubit>().getUnreadMessages();
+        break;
+      default:
+        break;
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
