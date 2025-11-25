@@ -707,25 +707,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i194.GetUsersUseCase>(),
       ),
     );
-    gh.factory<_i49.MessengerCubit>(
-      () => _i49.MessengerCubit(
-        gh<_i125.AddFolderUseCase>(),
-        gh<_i815.GetFoldersUseCase>(),
-        gh<_i7.UpdateFolderUseCase>(),
-        gh<_i849.DeleteFolderUseCase>(),
-        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
-        gh<_i438.GetMembersForFolderUseCase>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i699.GetTopicsUseCase>(),
-        gh<_i823.MultiPollingService>(),
-        gh<_i1012.PinChatUseCase>(),
-        gh<_i631.UnpinChatUseCase>(),
-        gh<_i126.GetPinnedChatsUseCase>(),
-        gh<_i1004.SetFoldersForChatUseCase>(),
-        gh<_i247.GetFolderIdsForChatUseCase>(),
-        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
-      ),
-    );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
         gh<_i82.RealTimeService>(),
@@ -780,6 +761,26 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1012.PinChatUseCase>(),
         gh<_i631.UnpinChatUseCase>(),
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+      ),
+    );
+    gh.factory<_i49.MessengerCubit>(
+      () => _i49.MessengerCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+        gh<_i7.UpdateFolderUseCase>(),
+        gh<_i849.DeleteFolderUseCase>(),
+        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
+        gh<_i438.GetMembersForFolderUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
+        gh<_i1004.SetFoldersForChatUseCase>(),
+        gh<_i247.GetFolderIdsForChatUseCase>(),
+        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+        gh<_i766.ProfileCubit>(),
       ),
     );
     return this;
