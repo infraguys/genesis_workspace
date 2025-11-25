@@ -137,6 +137,13 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(chats: chats, unreadMessages: unreadMessages));
   }
 
+  void getUser() {
+    final user = _profileCubit.state.user;
+    if (state.selfUser == null) {
+      emit(state.copyWith(selfUser: user));
+    }
+  }
+
   Future<void> getInitialMessages() async {
     _loadingTimes = 0;
     try {
