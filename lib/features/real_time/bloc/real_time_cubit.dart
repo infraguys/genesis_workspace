@@ -32,7 +32,6 @@ class RealTimeCubit extends Cubit<RealTimeState> {
         sound: true,
       );
       final token = await messaging.getToken();
-      print(token);
       await _multiPollingService.init();
     } catch (e) {
       inspect(e);
