@@ -102,17 +102,13 @@ class MessengerCubit extends Cubit<MessengerState> {
       _onMessageFlagsEvents,
     );
     _profileStateSubscription = _profileCubit.stream.listen(_onProfileStateChanged);
-
-    final currentUser = _profileCubit.state.user;
-    if (currentUser != null) {
-      emit(state.copyWith(selfUser: currentUser));
-    }
   }
 
   void _onProfileStateChanged(ProfileState profileState) {
     final user = profileState.user;
     if (user == null) return;
     if (state.selfUser?.userId == user.userId) return;
+    emit(state.copyWith(selfUser: user));
   }
 
   void _createChatsFromMessages(List<MessageEntity> messages) {
