@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
+import 'package:genesis_workspace/data/messages/dto/big_blue_button_call_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
@@ -117,6 +118,16 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   Future<UpdateMessageResponseDto> updateMessage(UpdateMessageRequestDto body) async {
     try {
       final response = await apiClient.updateMessage(body.messageId, body.content);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BigBlueButtonCallResponseDto> createBigBlueButtonCall(BigBlueButtonCallRequestDto body) async {
+    try {
+      final response = await apiClient.createBigBlueButtonCall(body.callName, body.voiceOnly);
       return response;
     } catch (e) {
       rethrow;

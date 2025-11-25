@@ -53,9 +53,7 @@ class MessageEntity extends Equatable {
     if (isChannelMessage) {
       return (displayRecipient as StreamDisplayRecipient).streamName;
     } else if (isGroupChatMessage) {
-      return (displayRecipient as DirectMessageRecipients).recipients
-          .map((user) => user.fullName)
-          .join(', ');
+      return (displayRecipient as DirectMessageRecipients).recipients.map((user) => user.fullName).join(', ');
     } else {
       return senderFullName;
     }
@@ -64,6 +62,8 @@ class MessageEntity extends Equatable {
   DateTime get messageDate => DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
 
   bool isMyMessage(int? userId) => senderId == userId;
+
+  bool get isCall => content.contains('https://meet.');
 
   Map<String, ReactionDetails> get aggregatedReactions {
     final Map<String, ReactionDetails> map = {};

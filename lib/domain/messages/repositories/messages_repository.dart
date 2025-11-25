@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:genesis_workspace/domain/messages/entities/big_blue_button_call_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/delete_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/emoji_reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -23,4 +24,5 @@ abstract class MessagesRepository {
     Function(int sent, int total)? onProgress,
     CancelToken? cancelToken,
   });
+  Future<BigBlueButtonCallResponseEntity> createBigBlueButtonCall(BigBlueButtonCallRequestEntity body);
 }

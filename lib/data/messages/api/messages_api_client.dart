@@ -3,6 +3,7 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/data/messages/dto/big_blue_button_call_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
@@ -85,5 +86,11 @@ abstract class MessagesApiClient {
   Future<HttpResponse<void>> createUpload(
     @Header('Upload-Length') String uploadLength,
     @Header('Upload-Metadata') String uploadMetadata,
+  );
+
+  @GET('/calls/bigbluebutton/create')
+  Future<BigBlueButtonCallResponseDto> createBigBlueButtonCall(
+    @Query('meeting_name') String meetingName,
+    @Query('voice_only') bool voiceOnly,
   );
 }

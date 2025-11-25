@@ -218,17 +218,11 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     ),
                   ),
             actions: [
-              // IconButton(
-              //   onPressed: () {},
-              //   icon: Assets.icons.joinCall.svg(
-              //     width: 28,
-              //     height: 28,
-              //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-              //   ),
-              // ),
               DownloadFilesButton(),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.read<ChatCubit>().createCall();
+                },
                 icon: Assets.icons.call.svg(
                   width: 28,
                   height: 28,

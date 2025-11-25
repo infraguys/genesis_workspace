@@ -15,6 +15,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
+import 'package:genesis_workspace/domain/messages/usecases/create_big_blue_button_call_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_message_use_case.dart';
@@ -58,6 +59,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     this._updateMessageUseCase,
     this._getUsersUseCase,
     this._getChannelMembersUseCase,
+    this._createBigBlueButtonCallUseCase,
   ) : super(
         ChannelChatState(
           messages: [],
@@ -111,6 +113,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   final UpdateMessageUseCase _updateMessageUseCase;
   final GetUsersUseCase _getUsersUseCase;
   final GetChannelMembersUseCase _getChannelMembersUseCase;
+  final CreateBigBlueButtonCallUseCase _createBigBlueButtonCallUseCase;
 
   late final StreamSubscription<TypingEventEntity> _typingEventsSubscription;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -132,6 +135,9 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   @override
   GetUsersUseCase get getUsersUseCase => _getUsersUseCase;
+
+  @override
+  CreateBigBlueButtonCallUseCase get createBigBlueButtonCallUseCase => _createBigBlueButtonCallUseCase;
 
   @override
   List<UploadFileEntity> getUploadedFiles(ChannelChatState s) => s.uploadedFiles;
