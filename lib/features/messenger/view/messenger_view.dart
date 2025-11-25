@@ -197,291 +197,281 @@ class _MessengerViewState extends State<MessengerView>
             ]),
           );
         },
-        child: BlocListener<ProfileCubit, ProfileState>(
-          listenWhen: (prev, current) => prev.user != current.user,
-          listener: (context, profileState) {
-            if (profileState.user != null) {
-              // context.read<MessengerCubit>().setSelfUser(profileState.user!);
+        child: FutureBuilder(
+          future: _future ?? Future.value(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
             }
-          },
-          child: FutureBuilder(
-            future: _future ?? Future.value(),
-            builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return BlocBuilder<MessengerCubit, MessengerState>(
-                builder: (context, state) {
-                  final List<ChatEntity> baseChats = state.filteredChatIds == null
-                      ? state.chats
-                      : state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
-                  final List<ChatEntity> visibleChats = state.filteredChats ?? baseChats;
-                  final List<ChatEntity> pinnedChatsForEdit =
-                      _optimisticPinnedChats ?? _pinnedChatsForEdit(visibleChats, state.pinnedChats);
+            return BlocBuilder<MessengerCubit, MessengerState>(
+              builder: (context, state) {
+                final List<ChatEntity> baseChats = state.filteredChatIds == null
+                    ? state.chats
+                    : state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
+                final List<ChatEntity> visibleChats = state.filteredChats ?? baseChats;
+                final List<ChatEntity> pinnedChatsForEdit =
+                    _optimisticPinnedChats ?? _pinnedChatsForEdit(visibleChats, state.pinnedChats);
 
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      if (isLargeScreen)
-                        Padding(
-                          padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
-                          child: SizedBox(
-                            width: 60,
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: ScrollConfiguration(
-                                    behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                    child: ListView.separated(
-                                      padding: EdgeInsets.zero,
-                                      itemCount: state.folders.length,
-                                      separatorBuilder: (_, __) => SizedBox(height: 28),
-                                      itemBuilder: (BuildContext context, int index) {
-                                        final FolderItemEntity folder = state.folders[index];
-                                        final bool isSelected = state.selectedFolderIndex == index;
-                                        Widget icon;
-                                        final String title = index == 0 ? context.t.folders.all : folder.title!;
-                                        if (index == 0) {
-                                          icon = Assets.icons.allChats.svg(
-                                            colorFilter: isSelected
-                                                ? ColorFilter.mode(textColors.text100, BlendMode.srcIn)
-                                                : null,
-                                          );
-                                        } else if (isSelected) {
-                                          icon = Assets.icons.folderOpen.svg();
-                                        } else {
-                                          icon = Assets.icons.folder.svg();
-                                        }
-                                        return FolderItem(
-                                          title: title,
-                                          folder: folder,
-                                          isSelected: isSelected,
-                                          icon: icon,
-                                          onTap: () {
-                                            context.read<MessengerCubit>().selectFolder(index);
-                                          },
-                                          onEdit: (folder.systemType == null)
-                                              ? () => editFolder(context, folder)
-                                              : null,
-                                          onOrderPinning: () {
-                                            context.pop();
-                                            context.read<MessengerCubit>().selectFolder(index);
-                                            editPinning();
-                                          },
-                                          onDelete: (folder.systemType == null)
-                                              ? () async {
-                                                  context.pop();
-                                                  final confirmed = await showDialog<bool>(
-                                                    context: context,
-                                                    builder: (dialogContext) => AlertDialog(
-                                                      title: Text(context.t.folders.deleteConfirmTitle),
-                                                      content: Text(
-                                                        context.t.folders.deleteConfirmText(
-                                                          folderName: folder.title ?? '',
-                                                        ),
-                                                      ),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () => Navigator.of(dialogContext).pop(false),
-                                                          child: Text(context.t.folders.cancel),
-                                                        ),
-                                                        FilledButton(
-                                                          onPressed: () => Navigator.of(dialogContext).pop(true),
-                                                          child: Text(context.t.folders.delete),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  );
-                                                  if (confirmed == true) {
-                                                    await context.read<MessengerCubit>().deleteFolder(
-                                                      folder,
-                                                    );
-                                                  }
-                                                }
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    if (isLargeScreen)
+                      Padding(
+                        padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                        child: SizedBox(
+                          width: 60,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ScrollConfiguration(
+                                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                  child: ListView.separated(
+                                    padding: EdgeInsets.zero,
+                                    itemCount: state.folders.length,
+                                    separatorBuilder: (_, __) => SizedBox(height: 28),
+                                    itemBuilder: (BuildContext context, int index) {
+                                      final FolderItemEntity folder = state.folders[index];
+                                      final bool isSelected = state.selectedFolderIndex == index;
+                                      Widget icon;
+                                      final String title = index == 0 ? context.t.folders.all : folder.title!;
+                                      if (index == 0) {
+                                        icon = Assets.icons.allChats.svg(
+                                          colorFilter: isSelected
+                                              ? ColorFilter.mode(textColors.text100, BlendMode.srcIn)
                                               : null,
                                         );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 28),
-                                IconButton(
-                                  onPressed: () {
-                                    createNewFolder(context);
-                                  },
-                                  icon: Assets.icons.add.svg(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      Container(
-                        constraints: BoxConstraints(
-                          maxWidth: isTabletOrSmaller ? MediaQuery.sizeOf(context).width : 315,
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(
-                          color: isTabletOrSmaller ? theme.colorScheme.background : theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                          child: SafeArea(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                MessengerAppBar(
-                                  selectedChatLabel: state.selectedChat?.displayTitle,
-                                  showTopics: _showTopics,
-                                  onTapBack: () {
-                                    setState(() {
-                                      _showTopics = false;
-                                    });
-                                  },
-                                  isLargeScreen: isLargeScreen,
-                                  searchVisibility: searchVisibility,
-                                  folders: state.folders,
-                                  selectedFolderIndex: state.selectedFolderIndex,
-                                  onSelectFolder: (index) => context.read<MessengerCubit>().selectFolder(index),
-                                  onCreateFolder: () => unawaited(createNewFolder(context)),
-                                  onEditFolder: (folder) async {
-                                    await editFolder(context, folder);
-                                  },
-                                  onOrderPinning: _handleOrderPinning,
-                                  onDeleteFolder: _handleFolderDelete,
-                                  isEditPinning: _isEditPinning,
-                                  onStopEditingPins: () => setState(() => _isEditPinning = false),
-                                  showSearchField: _isSearchVisible,
-                                  selfUserId: state.selfUser?.userId ?? -1,
-                                  onSearchChanged: _onSearchChanged,
-                                  onClearSearch: _clearSearch,
-                                  searchController: _searchController,
-                                  searchQuery: _searchQuery,
-                                  isLoadingMore: !state.foundOldestMessage,
-                                ),
-                                if (visibleChats.isEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 20),
-                                    child: Center(
-                                      child: Text(context.t.folders.folderIsEmpty),
-                                    ),
-                                  ),
-                                Expanded(
-                                  child: Stack(
-                                    children: [
-                                      NotificationListener<UserScrollNotification>(
-                                        onNotification: _onUserScroll,
-                                        child: _isEditPinning
-                                            ? ReorderableListView.builder(
-                                                padding: listPadding,
-                                                itemCount: pinnedChatsForEdit.length,
-                                                buildDefaultDragHandles: false,
-                                                onReorder: (oldIndex, newIndex) => _handlePinnedChatReorder(
-                                                  currentState: state,
-                                                  pinnedChats: pinnedChatsForEdit,
-                                                  oldIndex: oldIndex,
-                                                  newIndex: newIndex,
-                                                ),
-                                                proxyDecorator: (child, index, animation) {
-                                                  return Material(
-                                                    elevation: 4,
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    child: child,
-                                                  );
-                                                },
-                                                itemBuilder: (context, index) {
-                                                  final chat = pinnedChatsForEdit[index];
-                                                  return KeyedSubtree(
-                                                    key: ValueKey('pinned-chat-${chat.id}'),
-                                                    child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                        bottom: index == pinnedChatsForEdit.length - 1 ? 0 : 4,
-                                                      ),
-                                                      child: ChatReorderItem(
-                                                        chat: chat,
-                                                        index: index,
+                                      } else if (isSelected) {
+                                        icon = Assets.icons.folderOpen.svg();
+                                      } else {
+                                        icon = Assets.icons.folder.svg();
+                                      }
+                                      return FolderItem(
+                                        title: title,
+                                        folder: folder,
+                                        isSelected: isSelected,
+                                        icon: icon,
+                                        onTap: () {
+                                          context.read<MessengerCubit>().selectFolder(index);
+                                        },
+                                        onEdit: (folder.systemType == null) ? () => editFolder(context, folder) : null,
+                                        onOrderPinning: () {
+                                          context.pop();
+                                          context.read<MessengerCubit>().selectFolder(index);
+                                          editPinning();
+                                        },
+                                        onDelete: (folder.systemType == null)
+                                            ? () async {
+                                                context.pop();
+                                                final confirmed = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (dialogContext) => AlertDialog(
+                                                    title: Text(context.t.folders.deleteConfirmTitle),
+                                                    content: Text(
+                                                      context.t.folders.deleteConfirmText(
+                                                        folderName: folder.title ?? '',
                                                       ),
                                                     ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                                                        child: Text(context.t.folders.cancel),
+                                                      ),
+                                                      FilledButton(
+                                                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                                                        child: Text(context.t.folders.delete),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                if (confirmed == true) {
+                                                  await context.read<MessengerCubit>().deleteFolder(
+                                                    folder,
                                                   );
-                                                },
-                                              )
-                                            : ListView.separated(
-                                                padding: listPadding,
-                                                itemCount: visibleChats.length,
-                                                separatorBuilder: (_, __) => SizedBox(height: 4),
-                                                controller: _chatsController,
-                                                itemBuilder: (BuildContext context, int index) {
-                                                  final chat = visibleChats[index];
-                                                  return ChatItem(
-                                                    key: ValueKey(chat.id),
-                                                    chat: chat,
-                                                    selectedChatId: state.selectedChat?.id,
-                                                    showTopics: _showTopics,
-                                                    onTap: () async {
-                                                      if (isTabletOrSmaller) {
-                                                        if (chat.type == ChatType.channel) {
-                                                          setState(() {
-                                                            _showTopics = !_showTopics;
-                                                          });
-                                                        } else {
-                                                          openChat(context, chat.dmIds?.toSet() ?? {});
-                                                        }
-                                                      } else {
-                                                        context.read<MessengerCubit>().selectChat(chat);
-                                                      }
-                                                    },
-                                                  );
-                                                },
-                                              ),
-                                      ),
-                                      ChatTopicsList(
-                                        showTopics: _showTopics,
-                                        isPending: state.selectedChat?.topics == null,
-                                        selectedChat: state.selectedChat,
-                                        listPadding: _isSearchVisible ? 350 : 300,
-                                      ),
-                                    ],
+                                                }
+                                              }
+                                            : null,
+                                      );
+                                    },
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              SizedBox(height: 28),
+                              IconButton(
+                                onPressed: () {
+                                  createNewFolder(context);
+                                },
+                                icon: Assets.icons.add.svg(),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      if (isLargeScreen) SizedBox(width: 4),
-                      if (isLargeScreen)
-                        Expanded(
-                          child: Builder(
-                            builder: (context) {
-                              if (state.selectedChat?.dmIds != null) {
-                                return Chat(
-                                  key: ObjectKey(
-                                    state.selectedChat!.id,
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: isTabletOrSmaller ? MediaQuery.sizeOf(context).width : 315,
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        color: isTabletOrSmaller ? theme.colorScheme.background : theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                        child: SafeArea(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              MessengerAppBar(
+                                selectedChatLabel: state.selectedChat?.displayTitle,
+                                showTopics: _showTopics,
+                                onTapBack: () {
+                                  setState(() {
+                                    _showTopics = false;
+                                  });
+                                },
+                                isLargeScreen: isLargeScreen,
+                                searchVisibility: searchVisibility,
+                                folders: state.folders,
+                                selectedFolderIndex: state.selectedFolderIndex,
+                                onSelectFolder: (index) => context.read<MessengerCubit>().selectFolder(index),
+                                onCreateFolder: () => unawaited(createNewFolder(context)),
+                                onEditFolder: (folder) async {
+                                  await editFolder(context, folder);
+                                },
+                                onOrderPinning: _handleOrderPinning,
+                                onDeleteFolder: _handleFolderDelete,
+                                isEditPinning: _isEditPinning,
+                                onStopEditingPins: () => setState(() => _isEditPinning = false),
+                                showSearchField: _isSearchVisible,
+                                selfUserId: state.selfUser?.userId ?? -1,
+                                onSearchChanged: _onSearchChanged,
+                                onClearSearch: _clearSearch,
+                                searchController: _searchController,
+                                searchQuery: _searchQuery,
+                                isLoadingMore: !state.foundOldestMessage,
+                              ),
+                              if (visibleChats.isEmpty)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 20),
+                                  child: Center(
+                                    child: Text(context.t.folders.folderIsEmpty),
                                   ),
-                                  userIds: state.selectedChat!.dmIds!,
-                                  unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                );
-                              }
-                              if (state.selectedChat?.streamId != null) {
-                                return ChannelChat(
-                                  key: ObjectKey(
-                                    state.selectedChat!.id,
-                                  ),
-                                  channelId: state.selectedChat!.streamId!,
-                                  topicName: state.selectedTopic,
-                                  unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                );
-                              }
-                              return Center(child: Text(context.t.selectAnyChat));
-                            },
+                                ),
+                              Expanded(
+                                child: Stack(
+                                  children: [
+                                    NotificationListener<UserScrollNotification>(
+                                      onNotification: _onUserScroll,
+                                      child: _isEditPinning
+                                          ? ReorderableListView.builder(
+                                              padding: listPadding,
+                                              itemCount: pinnedChatsForEdit.length,
+                                              buildDefaultDragHandles: false,
+                                              onReorder: (oldIndex, newIndex) => _handlePinnedChatReorder(
+                                                currentState: state,
+                                                pinnedChats: pinnedChatsForEdit,
+                                                oldIndex: oldIndex,
+                                                newIndex: newIndex,
+                                              ),
+                                              proxyDecorator: (child, index, animation) {
+                                                return Material(
+                                                  elevation: 4,
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  child: child,
+                                                );
+                                              },
+                                              itemBuilder: (context, index) {
+                                                final chat = pinnedChatsForEdit[index];
+                                                return KeyedSubtree(
+                                                  key: ValueKey('pinned-chat-${chat.id}'),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(
+                                                      bottom: index == pinnedChatsForEdit.length - 1 ? 0 : 4,
+                                                    ),
+                                                    child: ChatReorderItem(
+                                                      chat: chat,
+                                                      index: index,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            )
+                                          : ListView.separated(
+                                              padding: listPadding,
+                                              itemCount: visibleChats.length,
+                                              separatorBuilder: (_, __) => SizedBox(height: 4),
+                                              controller: _chatsController,
+                                              itemBuilder: (BuildContext context, int index) {
+                                                final chat = visibleChats[index];
+                                                return ChatItem(
+                                                  key: ValueKey(chat.id),
+                                                  chat: chat,
+                                                  selectedChatId: state.selectedChat?.id,
+                                                  showTopics: _showTopics,
+                                                  onTap: () async {
+                                                    if (isTabletOrSmaller) {
+                                                      if (chat.type == ChatType.channel) {
+                                                        setState(() {
+                                                          _showTopics = !_showTopics;
+                                                        });
+                                                      } else {
+                                                        openChat(context, chat.dmIds?.toSet() ?? {});
+                                                      }
+                                                    } else {
+                                                      context.read<MessengerCubit>().selectChat(chat);
+                                                    }
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                    ),
+                                    ChatTopicsList(
+                                      showTopics: _showTopics,
+                                      isPending: state.selectedChat?.topics == null,
+                                      selectedChat: state.selectedChat,
+                                      listPadding: _isSearchVisible ? 350 : 300,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
+                      ),
+                    ),
+                    if (isLargeScreen) SizedBox(width: 4),
+                    if (isLargeScreen)
+                      Expanded(
+                        child: Builder(
+                          builder: (context) {
+                            if (state.selectedChat?.dmIds != null) {
+                              return Chat(
+                                key: ObjectKey(
+                                  state.selectedChat!.id,
+                                ),
+                                userIds: state.selectedChat!.dmIds!,
+                                unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                              );
+                            }
+                            if (state.selectedChat?.streamId != null) {
+                              return ChannelChat(
+                                key: ObjectKey(
+                                  state.selectedChat!.id,
+                                ),
+                                channelId: state.selectedChat!.streamId!,
+                                topicName: state.selectedTopic,
+                                unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                              );
+                            }
+                            return Center(child: Text(context.t.selectAnyChat));
+                          },
+                        ),
+                      ),
+                  ],
+                );
+              },
+            );
+          },
         ),
       ),
     );

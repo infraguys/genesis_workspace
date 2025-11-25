@@ -204,6 +204,9 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> getUnreadMessages() async {
+    final organizationId = AppConstants.selectedOrganizationId;
+    final connection = _realTimeService.activeConnections[organizationId];
+    if (connection?.isActive ?? false) return;
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
