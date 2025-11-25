@@ -32,6 +32,7 @@ import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart'
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
@@ -55,9 +56,11 @@ class MessengerCubit extends Cubit<MessengerState> {
   final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
 
   final MultiPollingService _realTimeService;
+  final ProfileCubit _profileCubit;
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsEventsSubscription;
+  late final StreamSubscription<ProfileState> _profileStateSubscription;
   String _searchQuery = '';
   int _lastMessageId = 0;
   int _loadingTimes = 0;
@@ -78,6 +81,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._setFoldersForChatUseCase,
     this._getFolderIdsForChatUseCase,
     this._updatePinnedChatOrderUseCase,
+    this._profileCubit,
   ) : super(
         MessengerState(
           selfUser: null,
@@ -97,9 +101,13 @@ class MessengerCubit extends Cubit<MessengerState> {
     _messageFlagsEventsSubscription = _realTimeService.messageFlagsEventsStream.listen(
       _onMessageFlagsEvents,
     );
+    _profileStateSubscription = _profileCubit.stream.listen(_onProfileStateChanged);
   }
 
-  void setSelfUser(UserEntity user) {
+  void _onProfileStateChanged(ProfileState profileState) {
+    final user = profileState.user;
+    if (user == null) return;
+    if (state.selfUser?.userId == user.userId) return;
     emit(state.copyWith(selfUser: user));
   }
 
@@ -192,6 +200,9 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> getUnreadMessages() async {
+    final organizationId = AppConstants.selectedOrganizationId;
+    final connection = _realTimeService.activeConnections[organizationId];
+    if (connection?.isActive ?? false) return;
     try {
       final messagesBody = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
@@ -575,6 +586,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   Future<void> close() {
     _messagesEventsSubscription.cancel();
     _messageFlagsEventsSubscription.cancel();
+    _profileStateSubscription.cancel();
     return super.close();
   }
 

@@ -36,6 +36,8 @@ class MultiPollingService {
     this._connectionFactory,
   );
 
+  Map<int, RealTimeConnection> get activeConnections => _activeConnections;
+
   final Map<int, RealTimeConnection> _activeConnections = {};
 
   final StreamController<TypingEventEntity> _typingEventsController = StreamController<TypingEventEntity>.broadcast();
