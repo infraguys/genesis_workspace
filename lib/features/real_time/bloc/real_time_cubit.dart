@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
@@ -20,6 +21,18 @@ class RealTimeCubit extends Cubit<RealTimeState> {
 
   Future<void> init() async {
     try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+      final token = await messaging.getToken();
+      print(token);
       await _multiPollingService.init();
     } catch (e) {
       inspect(e);
