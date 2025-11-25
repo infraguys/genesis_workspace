@@ -110,7 +110,7 @@ class _MessengerViewState extends State<MessengerView>
     if (context.read<MessengerCubit>().state.selfUser == null) {
       final user = context.read<ProfileCubit>().state.user;
       if (user != null) {
-        context.read<MessengerCubit>().setSelfUser(user);
+        // context.read<MessengerCubit>().setSelfUser(user);
       }
     }
   }
@@ -201,7 +201,7 @@ class _MessengerViewState extends State<MessengerView>
           listenWhen: (prev, current) => prev.user != current.user,
           listener: (context, profileState) {
             if (profileState.user != null) {
-              context.read<MessengerCubit>().setSelfUser(profileState.user!);
+              // context.read<MessengerCubit>().setSelfUser(profileState.user!);
             }
           },
           child: FutureBuilder(
