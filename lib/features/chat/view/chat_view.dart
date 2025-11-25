@@ -58,9 +58,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    inspect(context.read<ProfileCubit>().state.user);
     _myUser = context.read<ProfileCubit>().state.user!;
-
     _future = context.read<ChatCubit>().getInitialData(
       userIds: widget.userIds,
       myUserId: _myUser.userId,
