@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -21,6 +22,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 enum MessageUIOrder { first, last, middle, single, lastSingle }
@@ -200,6 +202,85 @@ class MessageItem extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     inspect(message.content);
+                    if (message.isCall) {
+                      final String meetingLink = extractMeetingLink(message.content);
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          final Size size = MediaQuery.sizeOf(context);
+
+                          return Dialog(
+                            insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                            backgroundColor: Colors.transparent,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minWidth: 320,
+                                maxWidth: size.width * 0.8,
+                                minHeight: 320,
+                                maxHeight: size.height * 0.8,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Material(
+                                  color: theme.colorScheme.surface,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.surfaceContainerHighest,
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'Call',
+                                              style: theme.textTheme.titleMedium,
+                                            ),
+                                            const Spacer(),
+                                            IconButton(
+                                              onPressed: () {},
+                                              icon: const Icon(Icons.minimize_rounded),
+                                              tooltip: 'Minimize',
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                context.pop();
+                                              },
+                                              icon: const Icon(Icons.close_rounded),
+                                              tooltip: 'Close',
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Divider(height: 1),
+                                      SizedBox(
+                                        height: size.height * 0.6,
+                                        width: double.infinity,
+                                        child: InAppWebView(
+                                          initialUrlRequest: URLRequest(url: WebUri.uri(Uri.parse(meetingLink))),
+                                          initialSettings: InAppWebViewSettings(
+                                            mediaPlaybackRequiresUserGesture: false,
+                                          ),
+                                          onPermissionRequest: (controller, request) async {
+                                            return PermissionResponse(
+                                              resources: request.resources,
+                                              action: PermissionResponseAction.GRANT,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
                   },
                   onSecondaryTap: () {
                     actionsPopupKey.currentState?.show();
