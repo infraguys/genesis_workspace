@@ -40,10 +40,16 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChatView extends StatefulWidget {
+  const ChatView({
+    super.key,
+    required this.userIds,
+    this.unreadMessagesCount = 0,
+    this.leadingOnPressed,
+  });
+
   final List<int> userIds;
   final int? unreadMessagesCount;
-
-  const ChatView({super.key, required this.userIds, this.unreadMessagesCount = 0});
+  final VoidCallback? leadingOnPressed;
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -212,7 +218,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     ),
                   )
                 : IconButton(
-                    onPressed: () {},
+                    onPressed: widget.leadingOnPressed,
                     icon: Assets.icons.moreVert.svg(
                       colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
                     ),

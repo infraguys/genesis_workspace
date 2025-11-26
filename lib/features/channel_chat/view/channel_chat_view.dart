@@ -38,16 +38,18 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChannelChatView extends StatefulWidget {
-  final int channelId;
-  final String? topicName;
-  final int? unreadMessagesCount;
-
   const ChannelChatView({
     super.key,
     required this.channelId,
     this.topicName,
     this.unreadMessagesCount = 0,
+    this.leadingOnPressed,
   });
+
+  final int channelId;
+  final String? topicName;
+  final int? unreadMessagesCount;
+  final VoidCallback? leadingOnPressed;
 
   @override
   State<ChannelChatView> createState() => _ChannelChatViewState();
@@ -250,7 +252,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                     ),
                   )
                 : IconButton(
-                    onPressed: () {},
+                    onPressed: widget.leadingOnPressed,
                     icon: Assets.icons.moreVert.svg(
                       colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
                     ),

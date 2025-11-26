@@ -5,6 +5,7 @@ class DmUserEntity extends UserEntity {
   Set<int> unreadMessages;
   PresenceStatus presenceStatus;
   int presenceTimestamp;
+
   DmUserEntity({
     required super.email,
     required super.userId,
@@ -17,5 +18,8 @@ class DmUserEntity extends UserEntity {
     required this.unreadMessages,
     required this.presenceStatus,
     required this.presenceTimestamp,
+    required super.isAdmin,
+    required super.isOwner,
+    required super.isGuest,
   });
 }

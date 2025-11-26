@@ -196,6 +196,8 @@ import 'package:genesis_workspace/features/authentication/presentation/bloc/auth
     as _i862;
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart'
     as _i739;
+import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart'
+    as _i325;
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart'
     as _i201;
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart' as _i277;
@@ -444,6 +446,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
+    );
+    gh.factory<_i325.ChannelMembersInfoCubit>(
+      () => _i325.ChannelMembersInfoCubit(
+        getUsersUseCase: gh<_i194.GetUsersUseCase>(),
+      ),
     );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),

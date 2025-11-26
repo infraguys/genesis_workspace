@@ -175,7 +175,8 @@
     "unpinChat": "Открепить чат"
   },
   "group": {
-    "members_count": "{count} участников"
+    "members_count": "{count} участников",
+    "members": "Участники"
   },
   "group_chat": {
     "create_tooltip": "Создать групповой чат",
@@ -229,7 +230,20 @@
   "email": "Почта",
   "groups": "Группы",
   "calls": "Звонки",
+  "information": "Информация",
+  "username": "Имя пользователя",
+  "role": "Роль",
+  "phone": "Телефон",
+  "birthday": "День рождения",
   "messenger_view": {
-    "chats_and_channels": "Чаты и каналы"
+    "chats_and_channels": "Чаты и каналы",
+    "channelInfo": "Информация о канале"
+  },
+  "roles": {
+    "owner": "Владелец",
+    "admin": "Администратор",
+    "moderator": "Модератор",
+    "member": "Участник",
+    "guest": "Гость"
   }
 }

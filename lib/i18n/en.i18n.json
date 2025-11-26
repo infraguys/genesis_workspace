@@ -76,15 +76,15 @@
     "channels_tab": "Channels"
   },
   "mentions": {
-   "title": "Mentions",
+    "title": "Mentions",
     "no_mentions": "No mentions"
   },
   "reactions": {
-   "title": "Reactions",
+    "title": "Reactions",
     "no_reactions": "No reactions"
   },
   "starred": {
-   "title": "Starred Messages",
+    "title": "Starred Messages",
     "no_starred": "No starred messages"
   },
   "select_any_chat": "Select any chat",
@@ -147,7 +147,6 @@
     "deleteConfirmTitle": "Delete folder?",
     "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?",
     "folder_is_empty": "Folder is empty"
-
   },
   "organizations": {
     "addDialog": {
@@ -170,7 +169,8 @@
     "unpinChat": "Unpin chat"
   },
   "group": {
-    "members_count": "{count} members"
+    "members_count": "{count} members",
+    "members": "Members"
   },
   "group_chat": {
     "create_tooltip": "Create new group chat",
@@ -224,7 +224,20 @@
   "email": "Email",
   "groups": "Groups",
   "calls": "Calls",
+  "information": "Information",
+  "username": "Username",
+  "role": "Role",
+  "phone": "Phone",
+  "birthday": "Birthday",
   "messenger_view": {
-    "chats_and_channels": "Chats and channels"
+    "chats_and_channels": "Chats and channels",
+    "channelInfo": "Channel information"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "moderator": "Moderator",
+    "member": "Member",
+    "guest": "Guest"
   }
 }
