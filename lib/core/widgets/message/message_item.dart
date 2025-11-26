@@ -301,11 +301,12 @@ class MessageItem extends StatelessWidget {
                               ),
                               Column(
                                 children: [
-                                  Assets.icons.call.svg(
-                                    width: 32,
-                                    height: 32,
-                                    colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-                                  ),
+                                  if (message.isCall)
+                                    Assets.icons.call.svg(
+                                      width: 32,
+                                      height: 32,
+                                      colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                    ),
                                   MessageTime(
                                     messageTime: messageTime,
                                     isMyMessage: isMyMessage,
