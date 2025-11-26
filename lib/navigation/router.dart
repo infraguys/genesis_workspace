@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/widgets/call_web_view_page.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/in_development_widget.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
@@ -52,6 +53,7 @@ class Routes {
   static const String forceUpdate = '/force-update';
   static const String messenger = '/messenger';
   static const String notifications = '/notifications';
+  static const String call = '/call';
 }
 
 final router = GoRouter(
@@ -342,6 +344,17 @@ final router = GoRouter(
             );
           },
         );
+      },
+    ),
+    GoRoute(
+      path: Routes.call,
+      name: Routes.call,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final meetingLink = state.extra as String?;
+        assert(meetingLink != null && meetingLink!.isNotEmpty, 'meeting link required');
+
+        return CallWebViewPage(meetingLink: meetingLink!);
       },
     ),
     GoRoute(
