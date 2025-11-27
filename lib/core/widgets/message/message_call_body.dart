@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/group_avatars.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageCallBody extends StatelessWidget {
   const MessageCallBody({super.key});
@@ -19,7 +20,7 @@ class MessageCallBody extends StatelessWidget {
           spacing: 12,
           children: [
             Text(
-              "Звонок",
+              context.t.call.title,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: AppColors.callGreen,
                 fontSize: 14,
