@@ -8,11 +8,11 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/group_avatars.dart';
-import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
@@ -500,7 +500,7 @@ class _MessengerViewState extends State<MessengerView>
                                       spacing: 8,
                                       children: [
                                         Text(
-                                          "Идет звонок в «Название канала»",
+                                          "Идет звонок в «${callState.meetLocationName}»",
                                           style: theme.textTheme.labelMedium?.copyWith(
                                             color: AppColors.callGreen,
                                             fontSize: 14,

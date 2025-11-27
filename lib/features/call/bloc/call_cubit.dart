@@ -15,10 +15,11 @@ class CallCubit extends Cubit<CallState> {
           isFullscreen: false,
           meetUrl: '',
           dockRect: null,
+          meetLocationName: '',
         ),
       );
 
-  void openCall(String meetUrl) {
+  void openCall({required String meetUrl, required String meetLocationName}) {
     emit(
       state.copyWith(
         isCallActive: true,
@@ -26,6 +27,7 @@ class CallCubit extends Cubit<CallState> {
         isMinimized: false,
         isFullscreen: false,
         dockRect: null,
+        meetLocationName: meetLocationName,
       ),
     );
   }
@@ -38,6 +40,7 @@ class CallCubit extends Cubit<CallState> {
         isFullscreen: false,
         meetUrl: '',
         dockRect: null,
+        meetLocationName: '',
       ),
     );
   }

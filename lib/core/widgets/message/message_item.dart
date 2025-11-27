@@ -17,6 +17,7 @@ import 'package:genesis_workspace/core/widgets/message/message_reactions_list.da
 import 'package:genesis_workspace/core/widgets/message/message_time.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
@@ -215,40 +216,13 @@ class MessageItem extends StatelessWidget {
                       if (currentSize(context) <= ScreenSize.tablet) {
                         context.pushNamed(Routes.call, extra: meetingLink);
                       } else {
-                        context.read<CallCubit>().openCall(meetingLink);
-                        // showDialog(
-                        //   context: context,
-                        //   builder: (BuildContext context) {
-                        //     final Size size = MediaQuery.sizeOf(context);
-                        //
-                        //     return Dialog(
-                        //       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                        //       backgroundColor: Colors.transparent,
-                        //       child: ConstrainedBox(
-                        //         constraints: BoxConstraints(
-                        //           minWidth: 320,
-                        //           maxWidth: size.width * 0.8,
-                        //           minHeight: 320,
-                        //           maxHeight: size.height * 0.8,
-                        //         ),
-                        //         child: ClipRRect(
-                        //           borderRadius: BorderRadius.circular(12),
-                        //           child: Material(
-                        //             color: theme.colorScheme.surface,
-                        //             child: SizedBox(
-                        //               height: size.height * 0.6,
-                        //               child: CallWebView(
-                        //                 meetingLink: meetingLink,
-                        //                 onClose: () => context.pop(),
-                        //                 onMinimize: () {},
-                        //               ),
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     );
-                        //   },
-                        // );
+                        String meetLocation = '';
+                        if (message.isChannelMessage) {
+                          meetLocation = message.displayRecipient.streamName;
+                        } else {
+                          meetLocation = message.displayRecipient.recipients.map((e) => e.fullName).join(', ');
+                        }
+                        context.read<CallCubit>().openCall(meetUrl: meetingLink, meetLocationName: meetLocation);
                       }
                     }
                   },
