@@ -12,6 +12,8 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_request_
 import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
+import 'package:genesis_workspace/features/call/view/call_web_view.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -185,7 +187,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
     final screenSize = currentSize(context);
-    final bool isCompactLayout = screenSize <= ScreenSize.tablet;
+    final bool isTabletOrSmaller = screenSize <= ScreenSize.tablet;
     return BlocListener<AuthCubit, AuthState>(
       listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
       listener: (context, state) {
@@ -194,39 +196,50 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
         });
       },
       child: BlocListener<UpdateCubit, UpdateState>(
-        listener: (context, state) {
-          if (state.isUpdateRequired) {
+        listener: (context, updateState) {
+          if (updateState.isUpdateRequired) {
             context.goNamed(Routes.forceUpdate);
           }
         },
         child: FutureBuilder(
           future: _future,
           builder: (context, snapshot) {
-            return Scaffold(
-              bottomNavigationBar: isCompactLayout ? _buildMobileBottomNavigationBar(context, theme, textColors) : null,
-              body: snapshot.connectionState == .waiting
-                  ? Center(child: CircularProgressIndicator())
-                  : Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Column(
-                          spacing: 4.0,
-                          children: [
-                            if (!isCompactLayout)
-                              ScaffoldDesktopAppBar(
-                                onSelectBranch: _goBranch,
-                                selectedIndex: widget.navigationShell.currentIndex,
-                              ),
-                            BlocBuilder<AuthCubit, AuthState>(
-                              buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                              builder: (_, state) {
-                                return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
-                              },
+            return BlocBuilder<CallCubit, CallState>(
+              builder: (context, callState) {
+                return Stack(
+                  children: [
+                    Scaffold(
+                      bottomNavigationBar: isTabletOrSmaller
+                          ? _buildMobileBottomNavigationBar(context, theme, textColors)
+                          : null,
+                      body: snapshot.connectionState == .waiting
+                          ? Center(child: CircularProgressIndicator())
+                          : Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Column(
+                                  spacing: 4.0,
+                                  children: [
+                                    if (!isTabletOrSmaller)
+                                      ScaffoldDesktopAppBar(
+                                        onSelectBranch: _goBranch,
+                                        selectedIndex: widget.navigationShell.currentIndex,
+                                      ),
+                                    BlocBuilder<AuthCubit, AuthState>(
+                                      buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                                      builder: (_, state) {
+                                        return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ],
                     ),
+                    if (callState.isCallActive) CallWebView(meetingLink: callState.meetUrl),
+                  ],
+                );
+              },
             );
           },
         ),

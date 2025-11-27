@@ -8,7 +8,6 @@ import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
-import 'package:genesis_workspace/core/widgets/call_web_view.dart';
 import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
@@ -20,10 +19,12 @@ import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 enum MessageUIOrder { first, last, middle, single, lastSingle }
@@ -201,46 +202,53 @@ class MessageItem extends StatelessWidget {
                 if (showAvatar) ...[avatar, const SizedBox(width: 12)],
                 if (!showAvatar && !isMyMessage) const SizedBox(width: 44),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     inspect(message.content);
                     if (message.isCall) {
                       final String meetingLink = extractMeetingLink(message.content);
+                      try {
+                        await Permission.camera.request();
+                        await Permission.microphone.request();
+                      } catch (e) {
+                        inspect(e);
+                      }
                       if (currentSize(context) <= ScreenSize.tablet) {
                         context.pushNamed(Routes.call, extra: meetingLink);
                       } else {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            final Size size = MediaQuery.sizeOf(context);
-
-                            return Dialog(
-                              insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                              backgroundColor: Colors.transparent,
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minWidth: 320,
-                                  maxWidth: size.width * 0.8,
-                                  minHeight: 320,
-                                  maxHeight: size.height * 0.8,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Material(
-                                    color: theme.colorScheme.surface,
-                                    child: SizedBox(
-                                      height: size.height * 0.6,
-                                      child: CallWebView(
-                                        meetingLink: meetingLink,
-                                        onClose: () => context.pop(),
-                                        onMinimize: () {},
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        );
+                        context.read<CallCubit>().openCall(meetingLink);
+                        // showDialog(
+                        //   context: context,
+                        //   builder: (BuildContext context) {
+                        //     final Size size = MediaQuery.sizeOf(context);
+                        //
+                        //     return Dialog(
+                        //       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                        //       backgroundColor: Colors.transparent,
+                        //       child: ConstrainedBox(
+                        //         constraints: BoxConstraints(
+                        //           minWidth: 320,
+                        //           maxWidth: size.width * 0.8,
+                        //           minHeight: 320,
+                        //           maxHeight: size.height * 0.8,
+                        //         ),
+                        //         child: ClipRRect(
+                        //           borderRadius: BorderRadius.circular(12),
+                        //           child: Material(
+                        //             color: theme.colorScheme.surface,
+                        //             child: SizedBox(
+                        //               height: size.height * 0.6,
+                        //               child: CallWebView(
+                        //                 meetingLink: meetingLink,
+                        //                 onClose: () => context.pop(),
+                        //                 onMinimize: () {},
+                        //               ),
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        // );
                       }
                     }
                   },

@@ -194,6 +194,7 @@ import 'package:genesis_workspace/features/authentication/domain/usecases/save_t
     as _i643;
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart'
     as _i862;
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart' as _i274;
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart'
     as _i739;
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart'
@@ -271,6 +272,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i397.GetVersionConfigUseCase>(
       () => _i397.GetVersionConfigUseCase(),
     );
+    gh.factory<_i274.CallCubit>(() => _i274.CallCubit());
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
     );
