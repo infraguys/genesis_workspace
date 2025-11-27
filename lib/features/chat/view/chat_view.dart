@@ -190,180 +190,189 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
 
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            primary: isTabletOrSmaller,
-            backgroundColor: theme.colorScheme.surface,
-            surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12).copyWith(
-                topLeft: isTabletOrSmaller ? Radius.zero : null,
-                topRight: isTabletOrSmaller ? Radius.zero : null,
+          appBar: PreferredSize(preferredSize: Size.fromHeight(76), child: Column(
+            children: [
+              Container(
+                height: 20.0,
+                width: double.infinity,
+                color: theme.colorScheme.surface,
               ),
-            ),
-            clipBehavior: Clip.hardEdge,
-            centerTitle: false,
-            actionsPadding: isTabletOrSmaller
-                ? null
-                : EdgeInsetsGeometry.symmetric(
-                    horizontal: 20,
-                  ),
-            leading: isTabletOrSmaller
-                ? IconButton(
-                    onPressed: () {
-                      context.pop();
-                    },
-                    icon: Icon(
-                      CupertinoIcons.back,
-                      color: textColors.text30,
-                    ),
-                  )
-                : IconButton(
-                    onPressed: widget.leadingOnPressed,
-                    icon: Assets.icons.moreVert.svg(
-                      colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
-                    ),
-                  ),
-            actions: [
-              // IconButton(
-              //   onPressed: () {},
-              //   icon: Assets.icons.joinCall.svg(
-              //     width: 28,
-              //     height: 28,
-              //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-              //   ),
-              // ),
-              DownloadFilesButton(),
-              IconButton(
-                onPressed: () {},
-                icon: Assets.icons.call.svg(
-                  width: 28,
-                  height: 28,
-                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
-                ),
-              ),
-              if (!isTabletOrSmaller)
-                IconButton(
-                  onPressed: () {},
-                  icon: Assets.icons.videocam.svg(
-                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+              AppBar(
+                primary: isTabletOrSmaller,
+                backgroundColor: theme.colorScheme.surface,
+                surfaceTintColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12).copyWith(
+                    topLeft: isTabletOrSmaller ? Radius.zero : null,
+                    topRight: isTabletOrSmaller ? Radius.zero : null,
                   ),
                 ),
-            ],
-            title: Builder(
-              builder: (context) {
-                final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
-                  fontSize: isTabletOrSmaller ? 14 : 16,
-                );
-                final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
-                  color: textColors.text30,
-                );
-                if (isLoading) {
-                  return Skeletonizer(
-                    child: Row(
-                      spacing: 8,
-                      children: [
-                        if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
-                        BlocBuilder<ChatCubit, ChatState>(
-                          builder: (context, state) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "User Userov",
-                                  style: titleTextStyle,
-                                ),
-                                Text(
-                                  context.t.online,
-                                  style: subtitleTextStyle,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
+                clipBehavior: Clip.hardEdge,
+                centerTitle: false,
+                actionsPadding: isTabletOrSmaller
+                    ? null
+                    : EdgeInsetsGeometry.symmetric(
+                  horizontal: 20,
+                ),
+                leading: isTabletOrSmaller
+                    ? IconButton(
+                  onPressed: () {
+                    context.pop();
+                  },
+                  icon: Icon(
+                    CupertinoIcons.back,
+                    color: textColors.text30,
+                  ),
+                )
+                    : IconButton(
+                  onPressed: widget.leadingOnPressed,
+                  icon: Assets.icons.moreVert.svg(
+                    colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                  ),
+                ),
+                actions: [
+                  // IconButton(
+                  //   onPressed: () {},
+                  //   icon: Assets.icons.joinCall.svg(
+                  //     width: 28,
+                  //     height: 28,
+                  //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                  //   ),
+                  // ),
+                  DownloadFilesButton(),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Assets.icons.call.svg(
+                      width: 28,
+                      height: 28,
+                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                     ),
-                  );
-                }
-
-                if (state.userEntity != null) {
-                  final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
-
-                  final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-                    (userEntity.presenceTimestamp * 1000).toInt(),
-                  );
-                  final timeAgo = timeAgoText(context, lastSeen);
-
-                  Widget userStatus;
-                  if (userEntity.presenceStatus == PresenceStatus.active) {
-                    userStatus = Text(
-                      context.t.online,
-                      style: subtitleTextStyle,
-                    );
-                  } else {
-                    userStatus = Text(
-                      isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
-                      style: subtitleTextStyle,
-                    );
-                  }
-                  if (state.typingId == userEntity.userId) {
-                    userStatus = Text(context.t.typing, style: subtitleTextStyle);
-                  }
-
-                  return Row(
-                    spacing: 8,
-                    children: [
-                      if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
-                      BlocBuilder<ChatCubit, ChatState>(
-                        builder: (context, state) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                userEntity.fullName,
-                                style: titleTextStyle,
-                              ),
-                              userStatus,
-                            ],
-                          );
-                        },
+                  ),
+                  if (!isTabletOrSmaller)
+                    IconButton(
+                      onPressed: () {},
+                      icon: Assets.icons.videocam.svg(
+                        colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                       ),
-                    ],
-                  );
-                } else if (state.groupUsers != null) {
-                  final users = state.groupUsers!;
-                  final names = users.map((u) => u.fullName).join(', ');
+                    ),
+                ],
+                title: Builder(
+                  builder: (context) {
+                    final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
+                      fontSize: isTabletOrSmaller ? 14 : 16,
+                    );
+                    final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
+                      color: textColors.text30,
+                    );
+                    if (isLoading) {
+                      return Skeletonizer(
+                        child: Row(
+                          spacing: 8,
+                          children: [
+                            if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
+                            BlocBuilder<ChatCubit, ChatState>(
+                              builder: (context, state) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "User Userov",
+                                      style: titleTextStyle,
+                                    ),
+                                    Text(
+                                      context.t.online,
+                                      style: subtitleTextStyle,
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                  return Row(
-                    spacing: 8,
-                    children: [
-                      const CircleAvatar(child: Icon(Icons.groups)),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    if (state.userEntity != null) {
+                      final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
+
+                      final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+                        (userEntity.presenceTimestamp * 1000).toInt(),
+                      );
+                      final timeAgo = timeAgoText(context, lastSeen);
+
+                      Widget userStatus;
+                      if (userEntity.presenceStatus == PresenceStatus.active) {
+                        userStatus = Text(
+                          context.t.online,
+                          style: subtitleTextStyle,
+                        );
+                      } else {
+                        userStatus = Text(
+                          isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
+                          style: subtitleTextStyle,
+                        );
+                      }
+                      if (state.typingId == userEntity.userId) {
+                        userStatus = Text(context.t.typing, style: subtitleTextStyle);
+                      }
+
+                      return Row(
+                        spacing: 8,
                         children: [
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.55,
-                            ),
-                            child: Text(
-                              names,
-                              style: titleTextStyle,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                          Text(
-                            context.t.group.membersCount(count: users.length),
-                            style: subtitleTextStyle,
+                          if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
+                          BlocBuilder<ChatCubit, ChatState>(
+                            builder: (context, state) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    userEntity.fullName,
+                                    style: titleTextStyle,
+                                  ),
+                                  userStatus,
+                                ],
+                              );
+                            },
                           ),
                         ],
-                      ),
-                    ],
-                  );
-                }
-                return SizedBox.shrink();
-              },
-            ),
-          ),
+                      );
+                    } else if (state.groupUsers != null) {
+                      final users = state.groupUsers!;
+                      final names = users.map((u) => u.fullName).join(', ');
+
+                      return Row(
+                        spacing: 8,
+                        children: [
+                          const CircleAvatar(child: Icon(Icons.groups)),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width * 0.55,
+                                ),
+                                child: Text(
+                                  names,
+                                  style: titleTextStyle,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                              Text(
+                                context.t.group.membersCount(count: users.length),
+                                style: subtitleTextStyle,
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                    return SizedBox.shrink();
+                  },
+                ),
+              )
+            ],
+          ),),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {

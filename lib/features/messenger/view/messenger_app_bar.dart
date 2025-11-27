@@ -125,6 +125,10 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(
+            height: 20.0,
+            width: double.infinity,
+          ),
           Padding(
             padding: isLargeScreen
                 ? EdgeInsets.symmetric(horizontal: 8).copyWith(top: 20, bottom: 8)
