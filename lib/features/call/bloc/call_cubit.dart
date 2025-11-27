@@ -17,4 +17,8 @@ class CallCubit extends Cubit<CallState> {
   void openCall(String meetUrl) {
     emit(state.copyWith(isCallActive: true, meetUrl: meetUrl, isMinimized: false));
   }
+
+  void closeCall() {
+    emit(state.copyWith(isCallActive: false, isMinimized: false, meetUrl: ''));
+  }
 }
