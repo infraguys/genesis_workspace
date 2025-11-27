@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/core/widgets/group_avatars.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 
 class MessageCallBody extends StatelessWidget {
@@ -42,39 +42,15 @@ class MessageCallBody extends StatelessWidget {
             Row(
               spacing: 4,
               children: [
-                Assets.icons.leftDownArrow.svg(),
+                Assets.icons.arrowLeftDown.svg(),
                 Text(
                   '0:47',
                   style: theme.textTheme.bodyMedium?.copyWith(color: textColors.text50),
                 ),
               ],
             ),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: 28,
-                maxWidth: 128,
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: List.generate(7, (index) {
-                  final double leftOffset = (15 * index).toDouble();
-                  return Positioned(
-                    left: leftOffset,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: messageColors.activeCallBackground,
-                          width: 1,
-                        ),
-                      ),
-                      child: UserAvatar(
-                        size: 28,
-                      ),
-                    ),
-                  );
-                }).reversed.toList(),
-              ),
+            GroupAvatars(
+              bgColor: messageColors.activeCallBackground,
             ),
           ],
         ),

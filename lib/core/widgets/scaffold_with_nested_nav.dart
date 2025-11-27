@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -240,7 +241,13 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                     if (callState.isCallActive)
                       _DraggableResizableCallModal(
                         meetingLink: callState.meetUrl,
+                        isMinimized: callState.isMinimized,
+                        isFullscreen: callState.isFullscreen,
+                        dockRect: callState.dockRect,
                         onClose: () => context.read<CallCubit>().closeCall(),
+                        onMinimize: () => context.read<CallCubit>().minimizeCall(),
+                        onRestore: () => context.read<CallCubit>().restoreCall(),
+                        onToggleFullscreen: () => context.read<CallCubit>().toggleFullscreen(),
                       ),
                   ],
                 );
@@ -256,11 +263,23 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 class _DraggableResizableCallModal extends StatefulWidget {
   const _DraggableResizableCallModal({
     required this.meetingLink,
+    required this.isMinimized,
+    required this.isFullscreen,
+    required this.dockRect,
     required this.onClose,
+    required this.onMinimize,
+    required this.onRestore,
+    required this.onToggleFullscreen,
   });
 
   final String meetingLink;
+  final bool isMinimized;
+  final bool isFullscreen;
+  final Rect? dockRect;
   final VoidCallback onClose;
+  final VoidCallback onMinimize;
+  final VoidCallback onRestore;
+  final VoidCallback onToggleFullscreen;
 
   @override
   State<_DraggableResizableCallModal> createState() => _DraggableResizableCallModalState();
@@ -268,7 +287,11 @@ class _DraggableResizableCallModal extends StatefulWidget {
 
 class _DraggableResizableCallModalState extends State<_DraggableResizableCallModal> {
   static const Size _minSize = Size(360, 260);
+  static const Size _minimizedSize = Size(220, 60);
+  static const Size _hiddenSize = Size(1, 1);
+  static const double _headerHeight = 52;
   static const double _edgePadding = 16;
+  static const Duration _animationDuration = Duration(milliseconds: 200);
 
   late Offset _position;
   late Size _size;
@@ -368,79 +391,144 @@ class _DraggableResizableCallModalState extends State<_DraggableResizableCallMod
           _position = boundedPosition;
         }
 
+        final Size fullscreenSize = Size(
+          math.max(1, constraints.maxWidth - padding.horizontal - _edgePadding * 2),
+          math.max(1, constraints.maxHeight - padding.vertical - _edgePadding * 2),
+        );
+
+        final bool hasDockTarget = widget.isMinimized && widget.dockRect != null;
+        final Size targetSize = widget.isMinimized
+            ? (hasDockTarget ? widget.dockRect!.size : _hiddenSize)
+            : widget.isFullscreen
+                ? fullscreenSize
+                : _size;
+
+        final Offset targetPosition = widget.isMinimized && widget.dockRect != null
+            ? widget.dockRect!.topLeft
+            : widget.isFullscreen
+                ? Offset(padding.left + _edgePadding, padding.top + _edgePadding)
+                : _clampPosition(_position, targetSize, constraints, padding);
+
+        final double targetOpacity = widget.isMinimized ? 0 : 1;
+
         return Stack(
           children: [
-            ModalBarrier(
-              dismissible: false,
-              color: Colors.black.withOpacity(0.25),
-            ),
-            Positioned(
-              left: _position.dx,
-              top: _position.dy,
-              width: _size.width,
-              height: _size.height,
-              child: Material(
-                elevation: 12,
-                borderRadius: BorderRadius.circular(12),
-                clipBehavior: Clip.antiAlias,
-                color: theme.colorScheme.surface,
-                child: Stack(
-                  children: [
-                    Column(
+            if (!widget.isMinimized)
+              ModalBarrier(
+                dismissible: false,
+                color: Colors.black.withOpacity(0.25),
+              ),
+            AnimatedPositioned(
+              duration: _animationDuration,
+              curve: Curves.easeOutCubic,
+              left: targetPosition.dx,
+              top: targetPosition.dy,
+              width: targetSize.width,
+              height: targetSize.height,
+              child: IgnorePointer(
+                ignoring: widget.isMinimized,
+                child: AnimatedOpacity(
+                  duration: _animationDuration,
+                  curve: Curves.easeOutCubic,
+                  opacity: targetOpacity,
+                  child: Material(
+                    elevation: 12,
+                    borderRadius: BorderRadius.circular(12),
+                    clipBehavior: Clip.antiAlias,
+                    color: theme.colorScheme.surface,
+                    child: Stack(
                       children: [
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onPanUpdate: (details) => _onDrag(details, constraints, padding),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest,
+                        Column(
+                          children: [
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onPanUpdate:
+                                  widget.isFullscreen ? null : (details) => _onDrag(details, constraints, padding),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10).copyWith(bottom: 0),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surfaceContainerHighest,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.call_rounded,
+                                      size: 18,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text('Call', style: theme.textTheme.titleMedium),
+                                    const Spacer(),
+                                    IconButton(
+                                      onPressed: widget.isMinimized ? widget.onRestore : widget.onMinimize,
+                                      icon: Icon(
+                                        widget.isMinimized ? Icons.unfold_more_rounded : Icons.minimize_rounded,
+                                      ),
+                                      tooltip: widget.isMinimized ? 'Restore' : 'Minimize',
+                                    ),
+                                    IconButton(
+                                      onPressed: widget.onToggleFullscreen,
+                                      icon: Icon(
+                                        widget.isFullscreen
+                                            ? Icons.fullscreen_exit_rounded
+                                            : Icons.fullscreen_rounded,
+                                      ),
+                                      tooltip: widget.isFullscreen ? 'Exit fullscreen' : 'Fullscreen',
+                                    ),
+                                    IconButton(
+                                      onPressed: widget.onClose,
+                                      icon: const Icon(Icons.close_rounded),
+                                      tooltip: 'Close',
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.call_rounded,
+                            const Divider(height: 1),
+                            ClipRect(
+                              child: AnimatedOpacity(
+                                duration: _animationDuration,
+                                curve: Curves.easeOutCubic,
+                                opacity: widget.isMinimized ? 0 : 1,
+                                child: AnimatedSize(
+                                  duration: _animationDuration,
+                                  curve: Curves.easeOutCubic,
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: math.max(0, targetSize.height - _headerHeight - 1),
+                                    child: IgnorePointer(
+                                      ignoring: widget.isMinimized,
+                                      child: CallWebView(
+                                        meetingLink: widget.meetingLink,
+                                        showHeader: false,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!widget.isFullscreen && !widget.isMinimized)
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onPanUpdate: (details) => _onResize(details, constraints, padding),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Icon(
+                                  Icons.open_in_full_rounded,
                                   size: 18,
-                                  color: theme.colorScheme.primary,
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
-                                const SizedBox(width: 8),
-                                Text('Call', style: theme.textTheme.titleMedium),
-                                const Spacer(),
-                                IconButton(
-                                  onPressed: widget.onClose,
-                                  icon: const Icon(Icons.close_rounded),
-                                  tooltip: 'Close',
-                                ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                        const Divider(height: 1),
-                        Expanded(
-                          child: CallWebView(
-                            meetingLink: widget.meetingLink,
-                            showHeader: false,
-                          ),
-                        ),
                       ],
                     ),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onPanUpdate: (details) => _onResize(details, constraints, padding),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Icon(
-                            Icons.open_in_full_rounded,
-                            size: 18,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

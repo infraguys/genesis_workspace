@@ -7,6 +7,8 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
+import 'package:genesis_workspace/core/widgets/group_avatars.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
@@ -19,7 +21,7 @@ import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
-import 'package:genesis_workspace/features/messenger/view/right_side_pane/right_side_panel.dart';
+import 'package:genesis_workspace/features/messenger/view/right_side_panel/right_side_panel.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
@@ -48,10 +50,12 @@ class _MessengerViewState extends State<MessengerView>
   late final Animation<double> _searchBarAnimation;
   String _searchQuery = '';
 
+  bool _showTopics = false;
+  final GlobalKey _activeCallKey = GlobalKey();
+  Rect? _lastReportedDockRect;
+
   late final ScrollController _chatsController;
   late final ScrollController _topicsController;
-
-  bool _showTopics = false;
 
   final _isOpenNotifier = ValueNotifier(false);
 
@@ -116,6 +120,26 @@ class _MessengerViewState extends State<MessengerView>
         // context.read<MessengerCubit>().setSelfUser(user);
       }
     }
+  }
+
+  void _reportCallDockRect() {
+    final renderContext = _activeCallKey.currentContext;
+    final renderObject = renderContext?.findRenderObject();
+    if (renderObject is! RenderBox || !renderObject.hasSize) return;
+
+    final Offset offset = renderObject.localToGlobal(Offset.zero);
+    final Size size = renderObject.size;
+    final Rect rect = offset & size;
+
+    if (_lastReportedDockRect == rect) return;
+    _lastReportedDockRect = rect;
+    renderContext!.read<CallCubit>().updateDockRect(rect);
+  }
+
+  void _clearDockRectIfNeeded() {
+    if (_lastReportedDockRect == null) return;
+    _lastReportedDockRect = null;
+    context.read<CallCubit>().updateDockRect(null);
   }
 
   @override
@@ -428,8 +452,92 @@ class _MessengerViewState extends State<MessengerView>
                                     selectedChat: state.selectedChat,
                                     listPadding: _isSearchVisible ? 350 : 300,
                                   ),
+                                  Align(
+                                    alignment: AlignmentGeometry.bottomCenter,
+                                    child: Padding(
+                                      padding: listPadding.copyWith(
+                                        bottom: 0,
+                                        top: 0,
+                                      ),
+                                      child: Container(
+                                        height: 1,
+                                        width: double.maxFinite,
+                                        decoration: BoxDecoration(
+                                          color: theme.dividerColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
+                            ),
+                            BlocBuilder<CallCubit, CallState>(
+                              builder: (context, callState) {
+                                if (!callState.isCallActive) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) => _clearDockRectIfNeeded());
+                                  return const SizedBox.shrink();
+                                }
+                                WidgetsBinding.instance.addPostFrameCallback((_) => _reportCallDockRect());
+
+                                return AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 200),
+                                  switchInCurve: Curves.easeOutCubic,
+                                  switchOutCurve: Curves.easeInCubic,
+                                  child: Container(
+                                    key: _activeCallKey,
+                                    padding:
+                                        EdgeInsets.symmetric(
+                                          vertical: 16,
+                                          horizontal: 16,
+                                        ).copyWith(
+                                          top: 20,
+                                        ),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.surface,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: .start,
+                                      spacing: 8,
+                                      children: [
+                                        Text(
+                                          "Идет звонок в «Название канала»",
+                                          style: theme.textTheme.labelMedium?.copyWith(
+                                            color: AppColors.callGreen,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: .spaceBetween,
+                                          children: [
+                                            Row(
+                                              spacing: 20,
+                                              children: [
+                                                Row(
+                                                  spacing: 4,
+                                                  children: [
+                                                    Assets.icons.arrowRightUp.svg(),
+                                                    Text(
+                                                      '0:47',
+                                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                                        color: textColors.text50,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                GroupAvatars(bgColor: theme.colorScheme.surface),
+                                              ],
+                                            ),
+                                            IconButton(
+                                              onPressed: context.read<CallCubit>().restoreCall,
+                                              icon: Assets.icons.joinCall.svg(),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
