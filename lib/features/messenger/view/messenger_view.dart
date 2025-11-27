@@ -479,6 +479,13 @@ class _MessengerViewState extends State<MessengerView>
                                 }
                                 WidgetsBinding.instance.addPostFrameCallback((_) => _reportCallDockRect());
 
+                                final String? chatTitle = state.selectedChat?.displayTitle;
+                                final String titleText = (chatTitle?.isNotEmpty ?? false)
+                                    ? context.t.call.activeCallIn(name: chatTitle!)
+                                    : (callState.meetLocationName.isNotEmpty
+                                        ? context.t.call.activeCallIn(name: callState.meetLocationName)
+                                        : context.t.call.activeCall);
+
                                 return AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 200),
                                   switchInCurve: Curves.easeOutCubic,
@@ -500,7 +507,7 @@ class _MessengerViewState extends State<MessengerView>
                                       spacing: 8,
                                       children: [
                                         Text(
-                                          "Идет звонок в «${callState.meetLocationName}»",
+                                          titleText,
                                           style: theme.textTheme.labelMedium?.copyWith(
                                             color: AppColors.callGreen,
                                             fontSize: 14,
@@ -528,6 +535,7 @@ class _MessengerViewState extends State<MessengerView>
                                               ],
                                             ),
                                             IconButton(
+                                              tooltip: context.t.call.resumeCall,
                                               onPressed: context.read<CallCubit>().restoreCall,
                                               icon: Assets.icons.joinCall.svg(),
                                             ),

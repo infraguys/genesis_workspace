@@ -20,6 +20,7 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -451,35 +452,38 @@ class _DraggableResizableCallModalState extends State<_DraggableResizableCallMod
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.call_rounded,
-                                      size: 18,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text('Call', style: theme.textTheme.titleMedium),
-                                    const Spacer(),
-                                    IconButton(
-                                      onPressed: widget.isMinimized ? widget.onRestore : widget.onMinimize,
-                                      icon: Icon(
-                                        widget.isMinimized ? Icons.unfold_more_rounded : Icons.minimize_rounded,
-                                      ),
-                                      tooltip: widget.isMinimized ? 'Restore' : 'Minimize',
-                                    ),
-                                    IconButton(
-                                      onPressed: widget.onToggleFullscreen,
-                                      icon: Icon(
-                                        widget.isFullscreen
-                                            ? Icons.fullscreen_exit_rounded
-                                            : Icons.fullscreen_rounded,
-                                      ),
-                                      tooltip: widget.isFullscreen ? 'Exit fullscreen' : 'Fullscreen',
-                                    ),
-                                    IconButton(
-                                      onPressed: widget.onClose,
-                                      icon: const Icon(Icons.close_rounded),
-                                      tooltip: 'Close',
-                                    ),
+                                Icon(
+                                  Icons.call_rounded,
+                                  size: 18,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(context.t.call.title, style: theme.textTheme.titleMedium),
+                                const Spacer(),
+                                IconButton(
+                                  onPressed: widget.isMinimized ? widget.onRestore : widget.onMinimize,
+                                  icon: Icon(
+                                    widget.isMinimized ? Icons.unfold_more_rounded : Icons.minimize_rounded,
+                                  ),
+                                  tooltip:
+                                      widget.isMinimized ? context.t.call.restore : context.t.call.minimize,
+                                ),
+                                IconButton(
+                                  onPressed: widget.onToggleFullscreen,
+                                  icon: Icon(
+                                    widget.isFullscreen
+                                        ? Icons.fullscreen_exit_rounded
+                                        : Icons.fullscreen_rounded,
+                                  ),
+                                  tooltip: widget.isFullscreen
+                                      ? context.t.call.exitFullscreen
+                                      : context.t.call.fullscreen,
+                                ),
+                                IconButton(
+                                  onPressed: widget.onClose,
+                                  icon: const Icon(Icons.close_rounded),
+                                  tooltip: context.t.general.close,
+                                ),
                                   ],
                                 ),
                               ),
@@ -500,6 +504,7 @@ class _DraggableResizableCallModalState extends State<_DraggableResizableCallMod
                                       ignoring: widget.isMinimized,
                                       child: CallWebView(
                                         meetingLink: widget.meetingLink,
+                                        title: context.t.call.title,
                                         showHeader: false,
                                       ),
                                     ),

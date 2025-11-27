@@ -58,6 +58,27 @@ class MessageItem extends StatelessWidget {
 
   final parser = EmojiParser();
 
+  void joinCall(BuildContext context) async {
+    final String meetingLink = extractMeetingLink(message.content);
+    try {
+      await Permission.camera.request();
+      await Permission.microphone.request();
+    } catch (e) {
+      inspect(e);
+    }
+    if (currentSize(context) <= ScreenSize.tablet) {
+      context.pushNamed(Routes.call, extra: meetingLink);
+    } else {
+      String meetLocation = '';
+      if (message.isChannelMessage) {
+        meetLocation = message.displayRecipient.streamName;
+      } else {
+        meetLocation = message.displayRecipient.recipients.map((e) => e.fullName).join(', ');
+      }
+      context.read<CallCubit>().openCall(meetUrl: meetingLink, meetLocationName: meetLocation);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -205,26 +226,7 @@ class MessageItem extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     inspect(message.content);
-                    if (message.isCall) {
-                      final String meetingLink = extractMeetingLink(message.content);
-                      try {
-                        await Permission.camera.request();
-                        await Permission.microphone.request();
-                      } catch (e) {
-                        inspect(e);
-                      }
-                      if (currentSize(context) <= ScreenSize.tablet) {
-                        context.pushNamed(Routes.call, extra: meetingLink);
-                      } else {
-                        String meetLocation = '';
-                        if (message.isChannelMessage) {
-                          meetLocation = message.displayRecipient.streamName;
-                        } else {
-                          meetLocation = message.displayRecipient.recipients.map((e) => e.fullName).join(', ');
-                        }
-                        context.read<CallCubit>().openCall(meetUrl: meetingLink, meetLocationName: meetLocation);
-                      }
-                    }
+                    if (message.isCall) {}
                   },
                   onSecondaryTap: () {
                     actionsPopupKey.currentState?.show();
@@ -297,10 +299,16 @@ class MessageItem extends StatelessWidget {
                                 crossAxisAlignment: .end,
                                 children: [
                                   if (message.isCall)
-                                    Assets.icons.call.svg(
-                                      width: 32,
-                                      height: 32,
-                                      colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                    IconButton(
+                                      padding: .zero,
+                                      onPressed: () {
+                                        joinCall(context);
+                                      },
+                                      icon: Assets.icons.call.svg(
+                                        width: 32,
+                                        height: 32,
+                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      ),
                                     ),
                                   MessageTime(
                                     messageTime: messageTime,
@@ -327,10 +335,16 @@ class MessageItem extends StatelessWidget {
                               Column(
                                 children: [
                                   if (message.isCall)
-                                    Assets.icons.call.svg(
-                                      width: 32,
-                                      height: 32,
-                                      colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                    IconButton(
+                                      padding: .zero,
+                                      onPressed: () {
+                                        joinCall(context);
+                                      },
+                                      icon: Assets.icons.call.svg(
+                                        width: 32,
+                                        height: 32,
+                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      ),
                                     ),
                                   MessageTime(
                                     messageTime: messageTime,

@@ -5,16 +5,16 @@ class CallWebView extends StatelessWidget {
   const CallWebView({
     super.key,
     required this.meetingLink,
+    required this.title,
     this.onClose,
     this.onMinimize,
-    this.title = 'Call',
     this.showHeader = true,
   });
 
   final String meetingLink;
+  final String title;
   final VoidCallback? onClose;
   final VoidCallback? onMinimize;
-  final String title;
   final bool showHeader;
 
   @override
