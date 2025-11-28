@@ -39,6 +39,12 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
         <provider
             android:name="com.superlist.super_native_extensions.DataProvider"
             android:authorities="${applicationId}.SuperClipboardDataProvider"

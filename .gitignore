@@ -57,3 +57,10 @@ app.*.map.json
 env.json
 
 update_script.sh
+
+# Firebase config that should stay local
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_app_id_file.json
+.firebase/
+firebase-debug.log
