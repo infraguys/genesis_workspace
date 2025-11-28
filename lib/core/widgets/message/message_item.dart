@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,6 +28,7 @@ import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum MessageUIOrder { first, last, middle, single, lastSingle }
 
@@ -69,8 +69,7 @@ class MessageItem extends StatelessWidget {
       inspect(e);
     }
     if (Platform.isLinux) {
-      final webview = await WebviewWindow.create();
-      webview.launch(meetingLink);
+      launchUrl(Uri.parse(meetingLink));
       return;
     }
     if (currentSize(context) <= ScreenSize.tablet) {

@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
-  desktop_webview_window
   emoji_picker_flutter
   file_saver
   file_selector_windows
