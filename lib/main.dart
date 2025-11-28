@@ -15,7 +15,6 @@ class Main {
     usePathUrlStrategy();
     final LocalizationService localizationService = getIt<LocalizationService>();
     await localizationService.init();
-
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }
 }

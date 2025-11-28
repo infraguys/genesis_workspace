@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -65,6 +67,11 @@ class MessageItem extends StatelessWidget {
       await Permission.microphone.request();
     } catch (e) {
       inspect(e);
+    }
+    if (Platform.isLinux) {
+      final webview = await WebviewWindow.create();
+      webview.launch(meetingLink);
+      return;
     }
     if (currentSize(context) <= ScreenSize.tablet) {
       context.pushNamed(Routes.call, extra: meetingLink);
@@ -226,7 +233,6 @@ class MessageItem extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     inspect(message.content);
-                    if (message.isCall) {}
                   },
                   onSecondaryTap: () {
                     actionsPopupKey.currentState?.show();
