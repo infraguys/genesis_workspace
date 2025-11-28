@@ -22,7 +22,7 @@ import argparse
 import urllib.request
 
 
-REPO_URL = "http://repository.genesis-core.tech:8081"
+REPO_URL = "https://repository.genesis-core.tech"
 STABLE_RE = re.compile(r"^(?P<maj>\d+)\.(?P<min>\d+)\.(?P<patch>\d+)$")
 DEV_RE = re.compile(
     r"^(?P<maj>\d+)\.(?P<min>\d+)\.(?P<patch>\d+)-dev\+(?P<ts>\d{14})\.(?P<hash>[0-9a-fA-F]{8})$"

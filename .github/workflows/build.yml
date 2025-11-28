@@ -23,7 +23,7 @@ env:
   PROJECT_ID: d4ef38ee-2667-4931-90fd-c858d4bc5f1c
   MIN_DEV_VERSION: ${{ vars.MIN_DEV_VERSION }}
   MIN_STABLE_VERSION: ${{ vars.MIN_STABLE_VERSION }}
-  WORKSPACE_PATH: http://repository.genesis-core.tech:8081/genesis_workspace/
+  WORKSPACE_PATH: https://repository.genesis-core.tech/genesis_workspace/
   # All vars you need to pass to build the flutter app goes here with prefix "UI_BUILD_ENV_".
   # There is a build python script `make_ui_build_env.py` that handles these variables and
   # form a json file. For instance, if you need to pass `api_url="https://console.genesis-core.tech/api"`
@@ -50,8 +50,17 @@ jobs:
             DEV_URL: ${{ secrets.DEV_URL }}
             MIN_DEV_VERSION: ${{ env.MIN_DEV_VERSION }}
             MIN_STABLE_VERSION: ${{ env.MIN_STABLE_VERSION }}
+            FB_GOOGLE_SERVICES_ANDROID: ${{ secrets.FB_GOOGLE_SERVICES_ANDROID }}
+            FB_GOOGLE_SERVICES_IOS: ${{ secrets.FB_GOOGLE_SERVICES_IOS }}
+            UI_BUILD_ENV_firebase_api_key: ${{ secrets.FB_API_KEY }}
         run: |
           set -eux
+
+          echo "${FB_GOOGLE_SERVICES_ANDROID}" | \
+            base64 --decode > android/app/google-services.json
+          echo "${FB_GOOGLE_SERVICES_IOS}" | \
+            base64 --decode > ios/Runner/GoogleService-Info.plist
+          
           mkdir -p ${ARTIFACTS_PATH}
           BUILD_TARGET="${UI_BUILD_ENV_BUILD_TARGET:-ci_stage}"
           WEB_DIR="$(pwd)/__html"
@@ -89,8 +98,14 @@ jobs:
             --min-stable "${MIN_STABLE_VERSION}" \
             --min-dev "${MIN_DEV_VERSION}" \
             "${WORKSPACE_PATH}" | tee workspace-index.json
+          # Calculate SHA256
+          sha256sum workspace-index.json > workspace-index.json.sha256
+          cat workspace-index.json.sha256
+          # Upload index files
           curl -X PUT --upload-file workspace-index.json \
             $REPO_ENDPOINT_PUT/${PROJECT_NAME}/workspace-index.json
+          curl -X PUT --upload-file workspace-index.json.sha256 \
+            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/workspace-index.json.sha256
 
       - name: Build Genesis Workspace VM image
         env:
