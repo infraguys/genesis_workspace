@@ -524,6 +524,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     final isMyMessage = message.isMyMessage(state.selfUser?.userId);
 
     final updatedMessages = [...state.messages, message];
+    final updatedUnreadMessages = [...state.unreadMessages];
     List<ChatEntity> updatedChats = [...state.chats];
 
     if (state.chats.any((chat) => chat.id == chatId)) {
@@ -541,6 +542,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         lastMessageDate: messageDate,
       );
       if (message.isUnread && !isMyMessage) {
+        updatedUnreadMessages.add(message);
         //if message is unread and send in topic
         if (updatedChat.topics?.any((topic) => topic.name == message.subject) ?? false) {
           final topic = updatedChat.topics!.firstWhere((topic) => topic.name == message.subject);
@@ -564,7 +566,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       updatedChats.add(chat);
     }
-    emit(state.copyWith(messages: updatedMessages, chats: updatedChats));
+    emit(state.copyWith(messages: updatedMessages, chats: updatedChats, unreadMessages: updatedUnreadMessages));
     _sortChats();
   }
 

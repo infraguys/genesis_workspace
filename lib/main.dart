@@ -14,6 +14,7 @@ class Main {
   static Future<void> startApp() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
+      name: "genesis_workspace",
       options: DefaultFirebaseOptions.currentPlatform,
     );
     await FirebaseMessaging.instance.setAutoInitEnabled(true);
