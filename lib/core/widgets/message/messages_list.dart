@@ -249,6 +249,7 @@ class _MessagesListState extends State<MessagesList> {
                         messageDate.month != prevMessageDate.month ||
                         messageDate.year != prevMessageDate.year;
                   }
+
                   return AutoScrollTag(
                     index: index,
                     key: ValueKey(index),

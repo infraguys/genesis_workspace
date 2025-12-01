@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
@@ -8,18 +9,27 @@ import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
+import 'package:genesis_workspace/core/widgets/message/message_call_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
 import 'package:genesis_workspace/core/widgets/message/message_time.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum MessageUIOrder { first, last, middle, single, lastSingle }
 
@@ -50,6 +60,33 @@ class MessageItem extends StatelessWidget {
   final actionsPopupKey = GlobalKey<CustomPopupState>();
 
   final parser = EmojiParser();
+
+  void joinCall(BuildContext context) async {
+    final String meetingLink = extractMeetingLink(message.content);
+    try {
+      await Permission.camera.request();
+      await Permission.microphone.request();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+    if (platformInfo.isLinux) {
+      launchUrl(Uri.parse(meetingLink));
+      return;
+    }
+    if (currentSize(context) <= ScreenSize.tablet) {
+      context.pushNamed(Routes.call, extra: meetingLink);
+    } else {
+      String meetLocation = '';
+      if (message.isChannelMessage) {
+        meetLocation = message.displayRecipient.streamName;
+      } else {
+        meetLocation = message.displayRecipient.recipients.map((e) => e.fullName).join(', ');
+      }
+      context.read<CallCubit>().openCall(meetUrl: meetingLink, meetLocationName: meetLocation);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +171,15 @@ class MessageItem extends StatelessWidget {
 
     final bool isStarred = message.flags?.contains('starred') ?? false;
 
+    Color messageBgColor = messageColors.background;
+
+    if (isMyMessage) {
+      messageBgColor = messageColors.ownBackground;
+    }
+    if (message.isCall) {
+      messageBgColor = messageColors.activeCallBackground;
+    }
+
     return Skeletonizer(
       enabled: isSkeleton,
       child: Align(
@@ -187,7 +233,7 @@ class MessageItem extends StatelessWidget {
                 if (showAvatar) ...[avatar, const SizedBox(width: 12)],
                 if (!showAvatar && !isMyMessage) const SizedBox(width: 44),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     inspect(message.content);
                   },
                   onSecondaryTap: () {
@@ -231,7 +277,7 @@ class MessageItem extends StatelessWidget {
                           )
                         : null,
                     decoration: BoxDecoration(
-                      color: isMyMessage ? messageColors.ownBackground : messageColors.background,
+                      color: messageBgColor,
                       borderRadius: BorderRadius.circular(8).copyWith(
                         bottomRight: (isMyMessage) ? Radius.zero : null,
                         bottomLeft: (!isMyMessage && showAvatar) ? Radius.zero : null,
@@ -242,24 +288,43 @@ class MessageItem extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment: message.isCall ? .start : .end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            MessageBody(
-                              showSenderName: showSenderName,
-                              isSkeleton: isSkeleton,
-                              message: message,
-                              showTopic: showTopic,
-                              isStarred: isStarred,
-                              actionsPopupKey: actionsPopupKey,
-                              maxMessageWidth: maxMessageWidth,
-                            ),
+                            message.isCall
+                                ? MessageCallBody()
+                                : MessageBody(
+                                    showSenderName: showSenderName,
+                                    isSkeleton: isSkeleton,
+                                    message: message,
+                                    showTopic: showTopic,
+                                    isStarred: isStarred,
+                                    actionsPopupKey: actionsPopupKey,
+                                    maxMessageWidth: maxMessageWidth,
+                                  ),
                             if (message.aggregatedReactions.isEmpty)
-                              MessageTime(
-                                messageTime: messageTime,
-                                isMyMessage: isMyMessage,
-                                isRead: isRead,
-                                isSkeleton: isSkeleton,
+                              Column(
+                                crossAxisAlignment: .end,
+                                children: [
+                                  if (message.isCall)
+                                    IconButton(
+                                      padding: .zero,
+                                      onPressed: () {
+                                        joinCall(context);
+                                      },
+                                      icon: Assets.icons.call.svg(
+                                        width: 32,
+                                        height: 32,
+                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      ),
+                                    ),
+                                  MessageTime(
+                                    messageTime: messageTime,
+                                    isMyMessage: isMyMessage,
+                                    isRead: isRead,
+                                    isSkeleton: isSkeleton,
+                                  ),
+                                ],
                               ),
                           ],
                         ),
@@ -275,11 +340,27 @@ class MessageItem extends StatelessWidget {
                                   maxWidth: maxMessageWidth,
                                 ),
                               ),
-                              MessageTime(
-                                messageTime: messageTime,
-                                isMyMessage: isMyMessage,
-                                isRead: isRead,
-                                isSkeleton: isSkeleton,
+                              Column(
+                                children: [
+                                  if (message.isCall)
+                                    IconButton(
+                                      padding: .zero,
+                                      onPressed: () {
+                                        joinCall(context);
+                                      },
+                                      icon: Assets.icons.call.svg(
+                                        width: 32,
+                                        height: 32,
+                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      ),
+                                    ),
+                                  MessageTime(
+                                    messageTime: messageTime,
+                                    isMyMessage: isMyMessage,
+                                    isRead: isRead,
+                                    isSkeleton: isSkeleton,
+                                  ),
+                                ],
                               ),
                             ],
                           ),

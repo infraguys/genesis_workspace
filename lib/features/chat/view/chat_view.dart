@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
@@ -118,10 +119,11 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   }
 
   @override
-  void didChangeAppLifecycleState(state) async {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
-      case .resumed:
+      case AppLifecycleState.resumed:
         await context.read<ChatCubit>().getUnreadMessages();
+        break;
       default:
         break;
     }
@@ -161,7 +163,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     children: [
                       Text(
                         state.uploadFileErrorName!,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                        style: TextStyle(fontWeight: .w600, fontSize: 20),
                       ),
                       Text(state.uploadFileError!),
                     ],
@@ -193,42 +195,54 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
             appBar: AppBar(
               primary: isTabletOrSmaller,
               backgroundColor: theme.colorScheme.surface,
-              clipBehavior: .hardEdge,
-              centerTitle: false,
+              surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12).copyWith(
-                  topLeft: isTabletOrSmaller ? Radius.zero : null,
-                  topRight: isTabletOrSmaller ? Radius.zero : null,
+                  topLeft: isTabletOrSmaller ? .zero : null,
+                  topRight: isTabletOrSmaller ? .zero : null,
                 ),
               ),
-              actionsPadding: isTabletOrSmaller ? null : .symmetric(horizontal: 20),
+              clipBehavior: .hardEdge,
+              centerTitle: false,
+              actionsPadding: isTabletOrSmaller
+                  ? null
+                  : EdgeInsetsGeometry.symmetric(
+                      horizontal: 20,
+                    ),
               leading: isTabletOrSmaller
                   ? IconButton(
-                      onPressed: () => context.pop(),
-                      icon: Icon(CupertinoIcons.back, color: textColors.text30),
+                      onPressed: () {
+                        context.pop();
+                      },
+                      icon: Icon(
+                        CupertinoIcons.back,
+                        color: textColors.text30,
+                      ),
                     )
                   : IconButton(
                       onPressed: widget.leadingOnPressed,
-                      icon: Assets.icons.moreVert.svg(colorFilter: .mode(textColors.text30, .srcIn)),
+                      icon: Assets.icons.moreVert.svg(
+                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                      ),
                     ),
               actions: [
-                // IconButton(
-                //   onPressed: () {},
-                //   icon: Assets.icons.joinCall.svg(
-                //     width: 28,
-                //     height: 28,
-                //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-                //   ),
-                // ),
                 DownloadFilesButton(),
                 IconButton(
-                  onPressed: () {},
-                  icon: Assets.icons.call.svg(width: 28, height: 28, colorFilter: .mode(textColors.text50, .srcIn)),
+                  onPressed: () {
+                    // context.read<ChatCubit>().createCall();
+                  },
+                  icon: Assets.icons.call.svg(
+                    width: 28,
+                    height: 28,
+                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                  ),
                 ),
                 if (!isTabletOrSmaller)
                   IconButton(
                     onPressed: () {},
-                    icon: Assets.icons.videocam.svg(colorFilter: .mode(textColors.text50, .srcIn)),
+                    icon: Assets.icons.videocam.svg(
+                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                    ),
                   ),
               ],
               title: Builder(
@@ -248,7 +262,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                           BlocBuilder<ChatCubit, ChatState>(
                             builder: (context, state) {
                               return Column(
-                                crossAxisAlignment: .start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     "User Userov",
@@ -276,7 +290,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     final timeAgo = timeAgoText(context, lastSeen);
 
                     Widget userStatus;
-                    if (userEntity.presenceStatus == .active) {
+                    if (userEntity.presenceStatus == PresenceStatus.active) {
                       userStatus = Text(
                         context.t.online,
                         style: subtitleTextStyle,
@@ -362,7 +376,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                       : Expanded(
                           child: GestureDetector(
                             onTap: () {
-                              if (currentSize(context) < .lTablet) {
+                              if (currentSize(context) < ScreenSize.lTablet) {
                                 FocusScope.of(context).unfocus();
                                 context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
                                   false,
@@ -426,16 +440,20 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                         ),
                   DropRegion(
                     formats: Formats.standardFormats,
-                    hitTestBehavior: .opaque,
+                    hitTestBehavior: HitTestBehavior.opaque,
                     onDropOver: (DropOverEvent event) async {
                       if (!isDropOver) {
-                        setState(() => isDropOver = true);
+                        setState(() {
+                          isDropOver = true;
+                        });
                       }
                       return DropOperation.link;
                     },
                     onDropLeave: (_) {
                       if (isDropOver) {
-                        setState(() => isDropOver = false);
+                        setState(() {
+                          isDropOver = false;
+                        });
                       }
                     },
                     onPerformDrop: (PerformDropEvent event) async {

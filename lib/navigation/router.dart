@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/authentication/presentation/view/paste_code_view.dart';
+import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
@@ -52,6 +53,7 @@ class Routes {
   static const String forceUpdate = '/force-update';
   static const String messenger = '/messenger';
   static const String notifications = '/notifications';
+  static const String call = '/call';
 }
 
 final router = GoRouter(
@@ -342,6 +344,17 @@ final router = GoRouter(
             );
           },
         );
+      },
+    ),
+    GoRoute(
+      path: Routes.call,
+      name: Routes.call,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final meetingLink = state.extra as String?;
+        assert(meetingLink != null && meetingLink!.isNotEmpty, 'meeting link required');
+
+        return CallWebViewPage(meetingLink: meetingLink!);
       },
     ),
     GoRoute(

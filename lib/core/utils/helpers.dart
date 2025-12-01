@@ -304,3 +304,14 @@ String formatTime(int timestamp) {
   final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
   return DateFormat('HH:mm').format(date);
 }
+
+String extractMeetingLink(String htmlString) {
+  final RegExp linkRegExp = RegExp(r'href="([^"]+)"');
+  final Match? match = linkRegExp.firstMatch(htmlString);
+
+  if (match == null || match.groupCount < 1) {
+    return '';
+  }
+
+  return match.group(1)!;
+}

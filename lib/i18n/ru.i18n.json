@@ -94,6 +94,16 @@
     "no_starred": "Нет отмеченных сообщений"
   },
   "select_any_chat": "Выберите любой чат",
+  "call": {
+    "title": "Звонок",
+    "minimize": "Свернуть",
+    "restore": "Развернуть",
+    "fullscreen": "На весь экран",
+    "exit_fullscreen": "Выйти из полноэкранного",
+    "active_call_in": "Идёт звонок в \"{name}\"",
+    "active_call": "Идёт звонок",
+    "resume_call": "Вернуться в звонок"
+  },
   "unread_marker": {
     "label": "Непрочитанные сообщения",
     "label_with_count": "Непрочитанные сообщения • {count}",

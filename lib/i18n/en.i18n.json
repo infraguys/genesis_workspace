@@ -88,6 +88,16 @@
     "no_starred": "No starred messages"
   },
   "select_any_chat": "Select any chat",
+  "call": {
+    "title": "Call",
+    "minimize": "Minimize",
+    "restore": "Restore",
+    "fullscreen": "Fullscreen",
+    "exit_fullscreen": "Exit fullscreen",
+    "active_call_in": "Call in \"{name}\"",
+    "active_call": "Active call",
+    "resume_call": "Return to call"
+  },
   "unread_marker": {
     "label": "Unread messages",
     "label_with_count": "Unread messages • {count}",

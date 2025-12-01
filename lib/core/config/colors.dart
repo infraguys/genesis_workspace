@@ -20,6 +20,7 @@ class AppColors {
     ownBackground: Color(0xff47382B),
     timeColor: Color(0xffFFFFFF).withValues(alpha: 0.5),
     senderNameColor: primary,
+    activeCallBackground: Color(0xff1C2B20),
   );
   static final darkCardColors = CardColors(
     base: Color(0xFFFFFFFF).withValues(alpha: 0.02),
@@ -100,12 +101,14 @@ class MessageColors extends ThemeExtension<MessageColors> {
   final Color ownBackground;
   final Color timeColor;
   final Color senderNameColor;
+  final Color activeCallBackground;
 
   const MessageColors({
     required this.background,
     required this.ownBackground,
     required this.timeColor,
     required this.senderNameColor,
+    required this.activeCallBackground,
   });
 
   @override
@@ -114,12 +117,14 @@ class MessageColors extends ThemeExtension<MessageColors> {
     Color? ownBackground,
     Color? timeColor,
     Color? senderNameColor,
+    Color? activeCallBackground,
   }) {
     return MessageColors(
       background: background ?? this.background,
       ownBackground: ownBackground ?? this.ownBackground,
       timeColor: timeColor ?? this.timeColor,
       senderNameColor: senderNameColor ?? this.senderNameColor,
+      activeCallBackground: activeCallBackground ?? this.activeCallBackground,
     );
   }
 
@@ -131,6 +136,7 @@ class MessageColors extends ThemeExtension<MessageColors> {
       ownBackground: Color.lerp(ownBackground, other.ownBackground, t)!,
       timeColor: Color.lerp(timeColor, other.timeColor, t)!,
       senderNameColor: Color.lerp(senderNameColor, other.senderNameColor, t)!,
+      activeCallBackground: Color.lerp(activeCallBackground, other.activeCallBackground, t)!,
     );
   }
 }
