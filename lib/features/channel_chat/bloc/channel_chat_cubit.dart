@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
@@ -35,7 +37,7 @@ import 'package:genesis_workspace/domain/users/usecases/get_channel_members_use_
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
-import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
 part 'channel_chat_state.dart';
@@ -83,11 +85,11 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
-    _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
-    _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
+    _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
+    _messageFlagsSubscription = _realTimeService.messageFlagsEventsStream.listen(
       onMessageFlagsEvents,
     );
-    _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(onReactionEvents);
+    _reactionsSubscription = _realTimeService.reactionEventsStream.listen(onReactionEvents);
     _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(
       onDeleteMessageEvents,
     );
@@ -97,7 +99,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     );
   }
 
-  final RealTimeService _realTimeService;
+  final MultiPollingService _realTimeService;
 
   final GetMessagesUseCase _getMessagesUseCase;
   final SetTypingUseCase _setTypingUseCase;
@@ -267,18 +269,16 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
       if (unreadMessagesCount != null && unreadMessagesCount > 25) {
         numBefore = unreadMessagesCount + 10;
       }
-      final response = await _getMessagesUseCase.call(
-        MessagesRequestEntity(
-          anchor: MessageAnchor.newest(),
-          narrow: [
-            MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
-            if (state.topic != null)
-              MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
-          ],
-          numBefore: numBefore,
-          numAfter: 0,
-        ),
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
+          if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+        ],
+        numBefore: numBefore,
+        numAfter: 0,
       );
+      final response = await _getMessagesUseCase(body);
       final Set<int> channelMembers = {...state.channelMembers};
       final sortedChannelMembers = _sortChannelMembersByRecentMessages(
         channelMembers: channelMembers,
@@ -299,6 +299,32 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     }
   }
 
+  Future<void> getUnreadMessages() async {
+    final organizationId = AppConstants.selectedOrganizationId;
+    final connection = _realTimeService.activeConnections[organizationId];
+    if (connection?.isActive ?? false) return;
+    try {
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread'),
+          MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
+          if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+        ],
+        numBefore: 5000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase(body);
+      final updatedMessages = [...state.messages];
+      updatedMessages.addAll(response.messages);
+      emit(state.copyWith(messages: updatedMessages, lastMessageId: updatedMessages.first.id));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
   Future<void> loadMoreMessages() async {
     if (!state.isAllMessagesLoaded) {
       state.isLoadingMore = true;
@@ -308,11 +334,11 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
           narrow: [
             MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
-            if (state.topic != null)
-              MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+            if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
           ],
           numBefore: 25,
           numAfter: 0,
+          includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;
@@ -395,6 +421,12 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         inspect(e);
       }
     }
+  }
+
+  void clearUploadFileError() {
+    emit(
+      state.copyWith(uploadFileError: null, uploadFileErrorName: null),
+    );
   }
 
   @override

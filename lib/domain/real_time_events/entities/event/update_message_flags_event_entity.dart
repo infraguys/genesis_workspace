@@ -10,6 +10,7 @@ class UpdateMessageFlagsEventEntity extends EventEntity {
   UpdateMessageFlagsEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.op,
     required this.flag,
     required this.messages,

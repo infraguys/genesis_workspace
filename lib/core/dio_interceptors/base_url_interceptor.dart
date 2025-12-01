@@ -10,6 +10,12 @@ class BaseUrlInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final bool skipBaseUrlRewrite = options.extra['skipBaseUrlInterceptor'] == true;
+    if (skipBaseUrlRewrite) {
+      super.onRequest(options, handler);
+      return;
+    }
+
     final String? saved = _prefs.getString(SharedPrefsKeys.baseUrl);
 
     if (saved == null || saved.trim().isEmpty) {

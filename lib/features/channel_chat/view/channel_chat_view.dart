@@ -3,10 +3,12 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -25,24 +27,30 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
+import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChannelChatView extends StatefulWidget {
-  final int channelId;
-  final String? topicName;
-  final int? unreadMessagesCount;
-
   const ChannelChatView({
     super.key,
     required this.channelId,
     this.topicName,
     this.unreadMessagesCount = 0,
+    this.leadingOnPressed,
   });
+
+  final int channelId;
+  final String? topicName;
+  final int? unreadMessagesCount;
+  final VoidCallback? leadingOnPressed;
 
   @override
   State<ChannelChatView> createState() => _ChannelChatViewState();
@@ -121,18 +129,16 @@ class _ChannelChatViewState extends State<ChannelChatView>
       context.read<ChannelChatCubit>().getInitialData(
         streamId: widget.channelId,
         topicName: widget.topicName,
-        didUpdateWidget:
-            (oldWidget.topicName != widget.topicName || oldWidget.channelId != widget.channelId),
+        didUpdateWidget: (oldWidget.topicName != widget.topicName || oldWidget.channelId != widget.channelId),
       );
     } else if (widget.topicName != oldWidget.topicName) {
-      context
-          .read<ChannelChatCubit>()
-          .getChannelTopics(streamId: widget.channelId, topicName: widget.topicName)
-          .then((_) {
-            context.read<ChannelChatCubit>().getChannelMessages(
-              unreadMessagesCount: widget.unreadMessagesCount,
-            );
-          });
+      context.read<ChannelChatCubit>().getChannelTopics(streamId: widget.channelId, topicName: widget.topicName).then((
+        _,
+      ) {
+        context.read<ChannelChatCubit>().getChannelMessages(
+          unreadMessagesCount: widget.unreadMessagesCount,
+        );
+      });
     }
 
     messageController.clear();
@@ -141,7 +147,6 @@ class _ChannelChatViewState extends State<ChannelChatView>
 
   @override
   void dispose() {
-    // _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     messageController
       ..removeListener(onTextChanged)
@@ -149,15 +154,30 @@ class _ChannelChatViewState extends State<ChannelChatView>
     messageController.dispose();
     messageInputFocusNode.dispose();
     removeWebDnD?.call();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        await context.read<ChannelChatCubit>().getUnreadMessages();
+        break;
+      default:
+        break;
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
+    final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocConsumer<ChannelChatCubit, ChannelChatState>(
       listenWhen: (prev, current) =>
-          prev.uploadFileError != current.uploadFileError ||
-          prev.uploadFileErrorName != current.uploadFileErrorName,
+          prev.uploadFileError != current.uploadFileError || prev.uploadFileErrorName != current.uploadFileErrorName,
       listener: (context, state) {
         if (state.uploadFileError != null && state.uploadFileErrorName != null) {
           ScaffoldMessenger.maybeOf(context)
@@ -180,7 +200,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
               .closed
               .then((_) {
                 if (context.mounted) {
-                  context.read<ChannelChatCubit>().clearUploadFileErrorCommon();
+                  context.read<ChannelChatCubit>().clearUploadFileError();
                 }
               });
         }
@@ -193,25 +213,112 @@ class _ChannelChatViewState extends State<ChannelChatView>
         }
       },
       builder: (context, state) {
+        final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
+          fontSize: isTabletOrSmaller ? 14 : 16,
+        );
+        final topicTextStyle = theme.textTheme.bodyLarge?.copyWith(
+          fontSize: isTabletOrSmaller ? 14 : null,
+          color: textColors.text30,
+        );
+        final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
+          color: textColors.text30,
+        );
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            centerTitle: false,
-            title: Skeletonizer(
-              enabled: state.channel == null,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    state.channel?.name ?? 'Channel Name',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  if (widget.topicName != null)
-                    Text(
-                      widget.topicName!,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+          appBar: AppBarContainer(
+            appBar: AppBar(
+              primary: isTabletOrSmaller,
+              backgroundColor: theme.colorScheme.surface,
+              clipBehavior: .hardEdge,
+              centerTitle: false,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12).copyWith(
+                  topLeft: isTabletOrSmaller ? Radius.zero : null,
+                  topRight: isTabletOrSmaller ? Radius.zero : null,
+                ),
+              ),
+              actionsPadding: isTabletOrSmaller ? null : .symmetric(horizontal: 20),
+              leading: isTabletOrSmaller
+                  ? IconButton(
+                      onPressed: () => context.pop(),
+                      icon: Icon(
+                        CupertinoIcons.back,
+                        color: textColors.text30,
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: widget.leadingOnPressed,
+                      icon: Assets.icons.moreVert.svg(
+                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                      ),
                     ),
-                ],
+              actions: [
+                DownloadFilesButton(),
+                IconButton(
+                  onPressed: () {},
+                  icon: Assets.icons.joinCall.svg(
+                    width: 28,
+                    height: 28,
+                    colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: Assets.icons.call.svg(
+                    width: 28,
+                    height: 28,
+                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                  ),
+                ),
+                if (!isTabletOrSmaller)
+                  IconButton(
+                    onPressed: () {},
+                    icon: Assets.icons.videocam.svg(
+                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                    ),
+                  ),
+              ],
+              title: Skeletonizer(
+                enabled: state.channel == null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.channel?.name ?? 'Channel Name',
+                          style: titleTextStyle,
+                        ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        if (widget.topicName != null) ...[
+                          Container(
+                            height: 16,
+                            width: 3,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadiusGeometry.circular(16),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          Text(
+                            '# ${widget.topicName!}',
+                            style: topicTextStyle,
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      context.t.group.membersCount(count: state.channel?.subscriberCount ?? 0),
+                      style: subtitleTextStyle,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -237,9 +344,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                             );
                           }
                         },
-                        child:
-                            (snapshot.connectionState == ConnectionState.waiting ||
-                                state.isMessagesPending)
+                        child: (snapshot.connectionState == ConnectionState.waiting || state.isMessagesPending)
                             ? Skeletonizer(
                                 enabled: true,
                                 child: ListView.separated(
@@ -364,11 +469,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
 
                         final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
                         final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
-                        final bool canSendByTextAndFiles =
-                            hasText && hasFiles && !hasUploadingFiles;
+                        final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
 
-                        final bool isSendEnabled =
-                            canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                        final bool isSendEnabled = canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
 
                         final bool isEditEnabled = isSendEnabled || state.isEdited;
 
@@ -388,20 +491,14 @@ class _ChannelChatViewState extends State<ChannelChatView>
                           child: Shortcuts(
                             shortcuts: state.showMentionPopup
                                 ? <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
-                                        const MentionNavIntent.down(),
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                                        const MentionNavIntent.up(),
-                                    LogicalKeySet(LogicalKeyboardKey.enter):
-                                        const MentionSelectIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter):
-                                        const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowDown): const MentionNavIntent.down(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const MentionNavIntent.up(),
+                                    LogicalKeySet(LogicalKeyboardKey.enter): const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter): const MentionSelectIntent(),
                                   }
                                 : <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                                        const EditLastMessageIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.escape):
-                                        const CancelEditMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const EditLastMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.escape): const CancelEditMessageIntent(),
                                   },
                             child: Actions(
                               actions: <Type, Action<Intent>>{
@@ -432,8 +529,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                 ),
                                 MentionNavIntent: CallbackAction<MentionNavIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       if (intent.direction == TraversalDirection.down) {
                                         st?.moveNext();
@@ -446,8 +542,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                 ),
                                 MentionSelectIntent: CallbackAction<MentionSelectIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                     }
@@ -462,8 +557,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   isMessagePending: state.isMessagePending,
                                   focusNode: messageInputFocusNode,
                                   onSubmitIntercept: () {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                       return true;
@@ -507,12 +601,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                       messageInputFocusNode.requestFocus();
                                     }
                                   },
-                                  onRemoveFile: context
-                                      .read<ChannelChatCubit>()
-                                      .removeUploadedFileCommon,
-                                  onCancelUpload: context
-                                      .read<ChannelChatCubit>()
-                                      .cancelUploadCommon,
+                                  onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
+                                  onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
                                   files: inputState.uploadedFiles,
                                   onUploadImage: () async {
                                     await context.read<ChannelChatCubit>().uploadImagesCommon();
@@ -530,6 +620,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                       attachment,
                                     );
                                   },
+                                  inputTitle: widget.topicName ?? state.channel?.name,
                                 ),
                               ),
                             ),

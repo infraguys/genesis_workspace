@@ -5,6 +5,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
@@ -53,6 +54,7 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(context);
+    final messageColors = theme.extension<MessageColors>()!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -171,13 +173,15 @@ class _MessageActionsOverlayState extends State<MessageActionsOverlay> {
                   Material(
                     color: Colors.transparent,
                     child: Container(
-                      constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.8),
+                      clipBehavior: Clip.hardEdge,
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.sizeOf(context).width * 0.8,
+                        maxHeight: MediaQuery.sizeOf(context).height * 0.7,
+                      ),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: widget.isOwnMessage
-                            ? theme.colorScheme.secondaryContainer.withAlpha(128)
-                            : theme.colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(16),
+                        color: widget.isOwnMessage ? messageColors.ownBackground : messageColors.background,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: widget.messageContent,
                     ),

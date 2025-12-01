@@ -23,7 +23,7 @@ set -o pipefail
 INSTALL_PATH="/opt/"
 WORK_DIR="/opt/genesis_workspace"
 WEB_DIR="/var/www/html"
-UI_BUILD_ENV_WEB_ARCHIVE="${UI_BUILD_ENV_WEB_ARCHIVE:-http://repository.genesis-core.tech:8081/genesis_workspace/latest/workspace-web.tar.gz}"
+UI_BUILD_ENV_WEB_ARCHIVE="${UI_BUILD_ENV_WEB_ARCHIVE:-https://repository.genesis-core.tech/genesis_workspace/latest/workspace-web.tar.gz}"
 
 cd "$WORK_DIR"
 

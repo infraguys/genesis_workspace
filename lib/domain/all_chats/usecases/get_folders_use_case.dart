@@ -12,18 +12,22 @@ class GetFoldersUseCase {
   final PinnedChatsRepository _pinnedChatsRepository;
   GetFoldersUseCase(this._repository, this._pinnedChatsRepository);
 
-  Future<List<FolderItemEntity>> call() async {
-    final List<Folder> rows = await _repository.getFolders();
+  Future<List<FolderItemEntity>> call(int organizationId) async {
+    final List<Folder> rows = await _repository.getFolders(organizationId);
     final List<FolderItemEntity> result = [];
     for (var row in rows) {
-      final folderPinnedChats = await _pinnedChatsRepository.getPinnedChats(row.id);
+      final folderPinnedChats = await _pinnedChatsRepository.getPinnedChats(
+        folderId: row.id,
+        organizationId: organizationId,
+      );
       final folder = FolderItemEntity(
         id: row.id,
         title: row.title,
         iconData: FolderIconsConstants.byCodePoint[row.iconCodePoint] ?? Icons.folder,
-        unreadCount: row.unreadCount,
+        unreadMessages: row.unreadMessages,
         backgroundColor: row.backgroundColorValue != null ? Color(row.backgroundColorValue!) : null,
         pinnedChats: folderPinnedChats,
+        organizationId: row.organizationId,
       );
       result.add(folder);
     }

@@ -15,7 +15,8 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
     required String title,
     required int iconCodePoint,
     int? backgroundColorValue,
-    int unreadCount = 0,
+    Set<int> unreadMessages = const <int>{},
+    required int organizationId,
   }) {
     return into(folders).insert(
       FoldersCompanion.insert(
@@ -23,14 +24,18 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
         title: title,
         iconCodePoint: iconCodePoint,
         backgroundColorValue: Value(backgroundColorValue),
-        unreadCount: Value(unreadCount),
+        unreadMessages: Value(unreadMessages),
+        organizationId: organizationId,
       ),
       mode: InsertMode.insert,
     );
   }
 
-  Future<List<Folder>> getAll() {
-    return (select(folders)..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+  Future<List<Folder>> getAll(int organizationId) {
+    return (select(folders)
+          ..where((tbl) => tbl.organizationId.equals(organizationId))
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get();
   }
 
   Future<void> deleteById(int id) async {
@@ -44,7 +49,7 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
     String? title,
     int? iconCodePoint,
     int? backgroundColorValue,
-    int? unreadCount,
+    Set<int>? unreadMessages,
   }) async {
     final companion = FoldersCompanion(
       title: title != null ? Value(title) : const Value.absent(),
@@ -52,7 +57,7 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
       backgroundColorValue: backgroundColorValue != null
           ? Value(backgroundColorValue)
           : const Value.absent(),
-      unreadCount: unreadCount != null ? Value(unreadCount) : const Value.absent(),
+      unreadMessages: unreadMessages != null ? Value(unreadMessages) : const Value.absent(),
     );
     return (update(folders)..where((tbl) => tbl.id.equals(id))).write(companion);
   }

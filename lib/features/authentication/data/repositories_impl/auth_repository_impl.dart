@@ -23,9 +23,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> saveToken({required String token, required String email}) async {
+  Future<void> saveToken({
+    required String baseUrl,
+    required String token,
+    required String email,
+  }) async {
     try {
-      await tokenStorage.saveToken(token: token, email: email);
+      await tokenStorage.saveToken(baseUrl: baseUrl, token: token, email: email);
     } catch (e) {
       inspect(e);
       rethrow;
@@ -33,9 +37,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> deleteToken() async {
+  Future<void> deleteToken({required String baseUrl}) async {
     try {
-      await tokenStorage.deleteToken();
+      await tokenStorage.deleteToken(baseUrl);
     } catch (e) {
       inspect(e);
       rethrow;
@@ -43,9 +47,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> deleteSessionId() async {
+  Future<void> deleteSessionId({required String baseUrl}) async {
     try {
-      await tokenStorage.deleteSessionId();
+      await tokenStorage.deleteSessionId(baseUrl);
     } catch (e) {
       inspect(e);
       rethrow;
@@ -53,9 +57,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> deleteCsrfToken() async {
+  Future<void> deleteCsrfToken({required String baseUrl}) async {
     try {
-      await tokenStorage.deleteCsrfToken();
+      await tokenStorage.deleteCsrfToken(baseUrl);
     } catch (e) {
       inspect(e);
       rethrow;
@@ -73,9 +77,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> saveSessionId({required String sessionId}) async {
+  Future<void> saveSessionId({
+    required String baseUrl,
+    required String sessionId,
+  }) async {
     try {
-      await tokenStorage.saveSessionIdCookie(sessionId: sessionId);
+      await tokenStorage.saveSessionIdCookie(baseUrl: baseUrl, sessionId: sessionId);
     } catch (e) {
       inspect(e);
       rethrow;
@@ -83,9 +90,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> saveCsrfToken({required String csrftoken}) async {
+  Future<void> saveCsrfToken({
+    required String baseUrl,
+    required String csrftoken,
+  }) async {
     try {
-      await tokenStorage.saveCsrfTokenCookie(csrftoken: csrftoken);
+      await tokenStorage.saveCsrfTokenCookie(baseUrl: baseUrl, csrftoken: csrftoken);
     } catch (e) {
       inspect(e);
       rethrow;

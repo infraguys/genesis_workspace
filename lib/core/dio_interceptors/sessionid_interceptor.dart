@@ -4,14 +4,15 @@ import 'package:genesis_workspace/core/config/constants.dart';
 
 import '../../services/token_storage/token_storage.dart';
 
-class SessionidInterceptor extends Interceptor {
+class SessionIdInterceptor extends Interceptor {
   final TokenStorage _tokenStorage;
-  SessionidInterceptor(this._tokenStorage);
+  SessionIdInterceptor(this._tokenStorage);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final sessionId = await _tokenStorage.getSessionId(); // __Host-sessionid
+      final bool skipBaseUrlRewrite = options.extra['skipBaseUrlInterceptor'] == true;
+      final sessionId = await _tokenStorage.getSessionId(AppConstants.baseUrl); // __Host-sessionid
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
       final existingCookie = (options.headers['Cookie'] as String?)?.trim();
@@ -24,8 +25,10 @@ class SessionidInterceptor extends Interceptor {
       // --- 2) sessionid: добавляем только его (независимо от CSRF) ---
       if (sessionId != null && sessionId.isNotEmpty) {
         cookieParts.add('__Host-sessionid=$sessionId');
-        // Referer полезен и для GET сессии
-        options.baseUrl = '${AppConstants.baseUrl}/json';
+        if (!skipBaseUrlRewrite) {
+          // Referer полезен и для GET сессии
+          options.baseUrl = '${AppConstants.baseUrl}/json';
+        }
       }
       if (cookieParts.isNotEmpty) {
         // Склеиваем без дубликатов и лишних ; ;

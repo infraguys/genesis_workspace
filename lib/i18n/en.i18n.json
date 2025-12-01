@@ -1,5 +1,4 @@
 {
-
   "auth": {
     "email_hint": "email@example.com",
     "email_label": "Email",
@@ -77,18 +76,28 @@
     "channels_tab": "Channels"
   },
   "mentions": {
-   "title": "Mentions",
+    "title": "Mentions",
     "no_mentions": "No mentions"
   },
   "reactions": {
-   "title": "Reactions",
+    "title": "Reactions",
     "no_reactions": "No reactions"
   },
   "starred": {
-   "title": "Starred Messages",
+    "title": "Starred Messages",
     "no_starred": "No starred messages"
   },
   "select_any_chat": "Select any chat",
+  "call": {
+    "title": "Call",
+    "minimize": "Minimize",
+    "restore": "Restore",
+    "fullscreen": "Fullscreen",
+    "exit_fullscreen": "Exit fullscreen",
+    "active_call_in": "Call in \"{name}\"",
+    "active_call": "Active call",
+    "resume_call": "Return to call"
+  },
   "unread_marker": {
     "label": "Unread messages",
     "label_with_count": "Unread messages • {count}",
@@ -101,7 +110,9 @@
   "error": "Error",
   "general": {
     "something_went_wrong": "Something went wrong",
-    "nothing_here_yet": "Nothing here yet"
+    "nothing_here_yet": "Nothing here yet",
+    "find": "Find",
+    "close": "Close"
   },
   "message_actions": {
     "quote": "Quote this message",
@@ -114,6 +125,18 @@
     "image": "Pick an image"
   },
   "drop_files_to_upload": "Drop files here to upload",
+  "download_files": {
+    "no_downloads": "No downloads",
+    "ready": "Ready"
+  },
+  "in_development": {
+    "title": "Work in progress",
+    "subtitle": "This section is currently in development.",
+    "description": "We're polishing this experience right now. Thank you for your patience while we finish it.",
+    "tip_one": "Watch the release notes to be the first to know when it launches.",
+    "tip_two": "Share your feedback so we can prioritize what matters most.",
+    "cta": "Back to previous screen"
+  },
   "cancel_editing": "Cancel editing",
   "folders": {
     "all": "All",
@@ -134,7 +157,18 @@
     "deleteConfirmTitle": "Delete folder?",
     "deleteConfirmText": "Are you sure you want to delete \"{folderName}\"?",
     "folder_is_empty": "Folder is empty"
-
+  },
+  "organizations": {
+    "addDialog": {
+      "title": "Add organization",
+      "description": "Provide the organization link to add it to the list.",
+      "urlLabel": "Organization link",
+      "urlHint": "https://example.com",
+      "urlRequired": "Enter the organization link",
+      "urlInvalid": "Link is not valid",
+      "submit": "Add"
+    },
+    "delete_organization": "Delete organization"
   },
   "channel": {
     "muteChannel": "Mute channel",
@@ -145,7 +179,8 @@
     "unpinChat": "Unpin chat"
   },
   "group": {
-    "members_count": "Members: {count}"
+    "members_count": "{count} members",
+    "members": "Members"
   },
   "group_chat": {
     "create_tooltip": "Create new group chat",
@@ -188,5 +223,31 @@
     "update": "Update",
     "unsupported_platform": "Updates are not supported on this platform yet.",
     "failed_to_start": "Failed to start update: {error}"
+  },
+  "emoji": {
+    "no_recent": "No recent emoji"
+  },
+  "messenger": "Messenger",
+  "notifications": "Notifications",
+  "chats": "Chats",
+  "calendar": "Calendar",
+  "email": "Email",
+  "groups": "Groups",
+  "calls": "Calls",
+  "information": "Information",
+  "username": "Username",
+  "role": "Role",
+  "phone": "Phone",
+  "birthday": "Birthday",
+  "messenger_view": {
+    "chats_and_channels": "Chats and channels",
+    "channelInfo": "Channel information"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "moderator": "Moderator",
+    "member": "Member",
+    "guest": "Guest"
   }
 }

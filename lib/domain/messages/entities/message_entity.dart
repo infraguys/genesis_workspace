@@ -17,6 +17,7 @@ class MessageEntity extends Equatable {
   final String subject;
   final int timestamp;
   final List<ReactionEntity> reactions;
+  final int recipientId;
 
   MessageEntity({
     required this.id,
@@ -32,13 +33,37 @@ class MessageEntity extends Equatable {
     required this.subject,
     required this.timestamp,
     required this.reactions,
+    required this.recipientId,
   });
 
-  bool get hasUnreadMessages => flags != null ? !flags!.contains('read') : true;
+  bool get isUnread => flags != null ? !flags!.contains('read') : true;
+
+  bool get isDirectMessage =>
+      displayRecipient is DirectMessageRecipients &&
+      (displayRecipient as DirectMessageRecipients).recipients.length <= 2;
 
   bool get isGroupChatMessage =>
       displayRecipient is DirectMessageRecipients &&
       (displayRecipient as DirectMessageRecipients).recipients.length > 2;
+
+  bool get isChannelMessage => displayRecipient is StreamDisplayRecipient;
+  bool get isTopicMessage => isChannelMessage && subject.isNotEmpty;
+
+  String get displayTitle {
+    if (isChannelMessage) {
+      return (displayRecipient as StreamDisplayRecipient).streamName;
+    } else if (isGroupChatMessage) {
+      return (displayRecipient as DirectMessageRecipients).recipients.map((user) => user.fullName).join(', ');
+    } else {
+      return senderFullName;
+    }
+  }
+
+  DateTime get messageDate => DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+
+  bool isMyMessage(int? userId) => senderId == userId;
+
+  bool get isCall => content.contains('https://meet.');
 
   Map<String, ReactionDetails> get aggregatedReactions {
     final Map<String, ReactionDetails> map = {};
@@ -74,6 +99,7 @@ class MessageEntity extends Equatable {
     String? subject,
     int? timestamp,
     List<ReactionEntity>? reactions,
+    int? recipientId,
   }) {
     return MessageEntity(
       id: id ?? this.id,
@@ -89,14 +115,15 @@ class MessageEntity extends Equatable {
       subject: subject ?? this.subject,
       timestamp: timestamp ?? this.timestamp,
       reactions: reactions ?? this.reactions,
+      recipientId: recipientId ?? this.recipientId,
     );
   }
 
-  factory MessageEntity.fake({bool isMe = false}) => MessageEntity(
+  factory MessageEntity.fake({bool isMe = false, String? content}) => MessageEntity(
     id: -1,
     isMeMessage: isMe,
     avatarUrl: null,
-    content: 'Loading...',
+    content: content ?? 'Loading...',
     senderId: isMe ? 999 : 123,
     senderFullName: isMe ? 'You' : 'Sender',
     displayRecipient: StreamDisplayRecipient('General'),
@@ -106,10 +133,10 @@ class MessageEntity extends Equatable {
     subject: 'Loading...',
     timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     reactions: const [],
+    recipientId: -1,
   );
 
   @override
-  // TODO: implement props
   List<Object?> get props => [
     id,
     isMeMessage,
@@ -123,5 +150,6 @@ class MessageEntity extends Equatable {
     streamId,
     subject,
     reactions,
+    recipientId,
   ];
 }

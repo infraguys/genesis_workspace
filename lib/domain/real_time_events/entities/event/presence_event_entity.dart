@@ -5,6 +5,7 @@ class PresenceEventEntity extends EventEntity {
   PresenceEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.userId,
     required this.email,
     required this.serverTimestamp,

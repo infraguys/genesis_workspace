@@ -1,33 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/gen/fonts.gen.dart';
 
-final theme = ThemeData(
-  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-  bottomNavigationBarTheme: _bottomNavBarTheme,
+final darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  colorScheme: darkColorScheme,
+  badgeTheme: _badgeTheme,
+  fontFamily: FontFamily.montserrat,
+  scaffoldBackgroundColor: const Color(0xff1B1B1D),
+  inputDecorationTheme: _darkInputDecorationTheme,
+  extensions: [
+    AppColors.darkTextColors,
+    AppColors.darkCardColors,
+    AppColors.darkMessageColors,
+  ],
+  cardTheme: CardThemeData(),
+  progressIndicatorTheme: ProgressIndicatorThemeData(
+    linearTrackColor: const Color(0xff333333),
+    stopIndicatorRadius: 12,
+  ),
+  elevatedButtonTheme: _darkElevatedButtonTheme,
+  dividerColor: Color(0xFFFFFFFF).withValues(alpha: 0.1),
+  appBarTheme: AppBarThemeData(
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
 );
 
-final _bottomNavBarTheme = BottomNavigationBarThemeData(
-  // --- General properties ---
-  backgroundColor: Colors.white, // Background color of the bar
-  elevation: 8.0, // Elevation (shadow)
-  // --- Selected item properties ---
-  selectedItemColor: Colors.deepPurple, // Color of the icon and label of the selected item
-  selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.0),
-  selectedIconTheme: IconThemeData(
-    size: 28.0,
-    // color: Colors.blueAccent, // Usually inherited from selectedItemColor
-  ),
+final darkColorScheme = ColorScheme.dark(
+  primary: AppColors.primary,
+  surface: AppColors.darkSurface,
+  background: AppColors.darkBackground,
+);
 
-  // --- Unselected item properties ---
-  unselectedItemColor: Colors.grey[600], // Color of the icon and label of unselected items
-  unselectedLabelStyle: TextStyle(fontSize: 12.0),
-  unselectedIconTheme: IconThemeData(
-    size: 24.0,
-    // color: Colors.grey[600], // Usually inherited from unselectedItemColor
-  ),
+final _badgeTheme = BadgeThemeData(
+  backgroundColor: AppColors.counterBadge,
+  textColor: AppColors.onBadge,
+  textStyle: TextStyle(fontSize: 12),
+);
 
-  // --- Other properties ---
-  showSelectedLabels: true, // Whether to show labels for selected items
-  showUnselectedLabels: true, // Whether to show labels for unselected items
-  type: BottomNavigationBarType.fixed, // Or .shifting
-  // landscapeLayout: BottomNavigationBarLandscapeLayout.spread, // For landscape orientation
+final _darkInputDecorationTheme = InputDecorationTheme(
+  filled: true,
+  fillColor: const Color(0x1AFFFFFF),
+  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+  enabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8),
+    borderSide: BorderSide.none,
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8),
+    borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.15), width: 1.2),
+  ),
+  hintStyle: const TextStyle(color: Color(0x99FFFFFF)),
+  labelStyle: const TextStyle(color: Color(0xCCFFFFFF)),
+);
+
+final _darkElevatedButtonTheme = ElevatedButtonThemeData(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: AppColors.primary,
+    foregroundColor: AppColors.darkOnPrimary,
+  ),
 );

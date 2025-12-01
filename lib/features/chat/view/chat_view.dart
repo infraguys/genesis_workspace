@@ -3,10 +3,12 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
@@ -27,25 +29,34 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
+import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class ChatView extends StatefulWidget {
+  const ChatView({
+    super.key,
+    required this.userIds,
+    this.unreadMessagesCount = 0,
+    this.leadingOnPressed,
+  });
+
   final List<int> userIds;
   final int? unreadMessagesCount;
-
-  const ChatView({super.key, required this.userIds, this.unreadMessagesCount = 0});
+  final VoidCallback? leadingOnPressed;
 
   @override
   State<ChatView> createState() => _ChatViewState();
 }
 
-class _ChatViewState extends State<ChatView>
-    with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
+class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
@@ -55,7 +66,6 @@ class _ChatViewState extends State<ChatView>
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     _myUser = context.read<ProfileCubit>().state.user!;
-
     _future = context.read<ChatCubit>().getInitialData(
       userIds: widget.userIds,
       myUserId: _myUser.userId,
@@ -109,6 +119,18 @@ class _ChatViewState extends State<ChatView>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        await context.read<ChatCubit>().getUnreadMessages();
+        break;
+      default:
+        break;
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
@@ -125,22 +147,23 @@ class _ChatViewState extends State<ChatView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
+    final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocConsumer<ChatCubit, ChatState>(
       listenWhen: (prev, current) =>
-          prev.uploadFileError != current.uploadFileError ||
-          prev.uploadFileErrorName != current.uploadFileErrorName,
+          prev.uploadFileError != current.uploadFileError || prev.uploadFileErrorName != current.uploadFileErrorName,
       listener: (context, state) {
         if (state.uploadFileError != null && state.uploadFileErrorName != null) {
           ScaffoldMessenger.maybeOf(context)
               ?.showSnackBar(
                 SnackBar(
                   content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     spacing: 8,
                     children: [
                       Text(
                         state.uploadFileErrorName!,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                        style: TextStyle(fontWeight: .w600, fontSize: 20),
                       ),
                       Text(state.uploadFileError!),
                     ],
@@ -151,7 +174,7 @@ class _ChatViewState extends State<ChatView>
               .closed
               .then((_) {
                 if (context.mounted) {
-                  context.read<ChatCubit>().clearUploadFileErrorCommon();
+                  context.read<ChatCubit>().clearUploadFileError();
                 }
               });
         }
@@ -168,103 +191,187 @@ class _ChatViewState extends State<ChatView>
 
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            title: Builder(
-              builder: (context) {
-                if (isLoading) {
-                  return Skeletonizer(
-                    child: Row(
+          appBar: AppBarContainer(
+            appBar: AppBar(
+              primary: isTabletOrSmaller,
+              backgroundColor: theme.colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12).copyWith(
+                  topLeft: isTabletOrSmaller ? .zero : null,
+                  topRight: isTabletOrSmaller ? .zero : null,
+                ),
+              ),
+              clipBehavior: .hardEdge,
+              centerTitle: false,
+              actionsPadding: isTabletOrSmaller
+                  ? null
+                  : EdgeInsetsGeometry.symmetric(
+                      horizontal: 20,
+                    ),
+              leading: isTabletOrSmaller
+                  ? IconButton(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      icon: Icon(
+                        CupertinoIcons.back,
+                        color: textColors.text30,
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: widget.leadingOnPressed,
+                      icon: Assets.icons.moreVert.svg(
+                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                      ),
+                    ),
+              actions: [
+                DownloadFilesButton(),
+                IconButton(
+                  onPressed: () {
+                    // context.read<ChatCubit>().createCall();
+                  },
+                  icon: Assets.icons.call.svg(
+                    width: 28,
+                    height: 28,
+                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                  ),
+                ),
+                if (!isTabletOrSmaller)
+                  IconButton(
+                    onPressed: () {},
+                    icon: Assets.icons.videocam.svg(
+                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                    ),
+                  ),
+              ],
+              title: Builder(
+                builder: (context) {
+                  final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
+                    fontSize: isTabletOrSmaller ? 14 : 16,
+                  );
+                  final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
+                    color: textColors.text30,
+                  );
+                  if (isLoading) {
+                    return Skeletonizer(
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
+                          BlocBuilder<ChatCubit, ChatState>(
+                            builder: (context, state) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "User Userov",
+                                    style: titleTextStyle,
+                                  ),
+                                  Text(
+                                    context.t.online,
+                                    style: subtitleTextStyle,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (state.userEntity != null) {
+                    final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
+
+                    final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+                      (userEntity.presenceTimestamp * 1000).toInt(),
+                    );
+                    final timeAgo = timeAgoText(context, lastSeen);
+
+                    Widget userStatus;
+                    if (userEntity.presenceStatus == PresenceStatus.active) {
+                      userStatus = Text(
+                        context.t.online,
+                        style: subtitleTextStyle,
+                      );
+                    } else {
+                      userStatus = Text(
+                        isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
+                        style: subtitleTextStyle,
+                      );
+                    }
+                    if (state.typingId == userEntity.userId) {
+                      userStatus = Text(context.t.typing, style: subtitleTextStyle);
+                    }
+
+                    return Row(
                       spacing: 8,
                       children: [
-                        UserAvatar(),
+                        if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
                         BlocBuilder<ChatCubit, ChatState>(
                           builder: (context, state) {
                             return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [Text("User Userov"), Text(context.t.online)],
+                              crossAxisAlignment: .start,
+                              children: [
+                                Text(
+                                  userEntity.fullName,
+                                  style: titleTextStyle,
+                                ),
+                                userStatus,
+                              ],
                             );
                           },
                         ),
                       ],
-                    ),
-                  );
-                }
+                    );
+                  } else if (state.groupUsers != null) {
+                    final users = state.groupUsers!;
+                    final names = users.map((u) => u.fullName).join(', ');
 
-                if (state.userEntity != null) {
-                  final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
-
-                  final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-                    (userEntity.presenceTimestamp * 1000).toInt(),
-                  );
-                  final timeAgo = timeAgoText(context, lastSeen);
-
-                  Widget userStatus;
-                  if (userEntity.presenceStatus == PresenceStatus.active) {
-                    userStatus = Text(context.t.online, style: theme.textTheme.labelSmall);
-                  } else {
-                    userStatus = Text(
-                      isJustNow(lastSeen)
-                          ? context.t.wasOnlineJustNow
-                          : context.t.wasOnline(time: timeAgo),
-                      style: theme.textTheme.labelSmall,
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        const CircleAvatar(child: Icon(Icons.groups)),
+                        Column(
+                          crossAxisAlignment: .start,
+                          children: [
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width * 0.55,
+                              ),
+                              child: Text(
+                                names,
+                                style: titleTextStyle,
+                                overflow: .ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                            Text(
+                              context.t.group.membersCount(count: users.length),
+                              style: subtitleTextStyle,
+                            ),
+                          ],
+                        ),
+                      ],
                     );
                   }
-                  if (state.typingId == userEntity.userId) {
-                    userStatus = Text(context.t.typing, style: theme.textTheme.labelSmall);
-                  }
-
-                  return Row(
-                    spacing: 8,
-                    children: [
-                      UserAvatar(avatarUrl: userEntity.avatarUrl),
-                      BlocBuilder<ChatCubit, ChatState>(
-                        builder: (context, state) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [Text(userEntity.fullName), userStatus],
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                } else if (state.groupUsers != null) {
-                  final users = state.groupUsers!;
-                  final names = users.map((u) => u.fullName).join(', ');
-
-                  return Row(
-                    spacing: 8,
-                    children: [
-                      const CircleAvatar(child: Icon(Icons.groups)),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.55,
-                            ),
-                            child: Text(names, overflow: TextOverflow.ellipsis, maxLines: 1),
-                          ),
-                          Text('members: ${users.length}', style: theme.textTheme.labelSmall),
-                        ],
-                      ),
-                    ],
-                  );
-                }
-                return SizedBox.shrink();
-              },
+                  return SizedBox.shrink();
+                },
+              ),
             ),
           ),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.connectionState == .done) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error"));
                 }
               }
               return Column(
                 children: [
-                  state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting
+                  state.messages.isEmpty && snapshot.connectionState != .waiting
                       ? Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
                       : Expanded(
                           child: GestureDetector(
@@ -277,7 +384,7 @@ class _ChatViewState extends State<ChatView>
                                 );
                               }
                             },
-                            child: snapshot.connectionState == ConnectionState.waiting
+                            child: snapshot.connectionState == .waiting
                                 ? Skeletonizer(
                                     enabled: true,
                                     child: ListView.separated(
@@ -322,8 +429,7 @@ class _ChatViewState extends State<ChatView>
                                           showPopup: state.showMentionPopup,
                                           suggestedMentions: state.suggestedMentions,
                                           isSuggestionsPending: state.isSuggestionsPending,
-                                          filteredSuggestedMentions:
-                                              state.filteredSuggestedMentions,
+                                          filteredSuggestedMentions: state.filteredSuggestedMentions,
                                           onSelectMention: onMentionSelected,
                                           inputFocusNode: messageInputFocusNode,
                                         ),
@@ -370,19 +476,22 @@ class _ChatViewState extends State<ChatView>
                           nonImageFiles.add(pf);
                         }
                       }
-
-                      if (nonImageFiles.isNotEmpty) {
-                        unawaited(
-                          context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
-                        );
-                      }
-                      if (imageFiles.isNotEmpty) {
-                        unawaited(
-                          context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
-                        );
-                      }
-                      if (platformInfo.isDesktop) {
-                        messageInputFocusNode.requestFocus();
+                      try {
+                        if (nonImageFiles.isNotEmpty) {
+                          unawaited(
+                            context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
+                          );
+                        }
+                        if (imageFiles.isNotEmpty) {
+                          unawaited(
+                            context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
+                          );
+                        }
+                        if (platformInfo.isDesktop) {
+                          messageInputFocusNode.requestFocus();
+                        }
+                      } catch (e) {
+                        inspect(e);
                       }
                     },
                     child: BlocBuilder<ChatCubit, ChatState>(
@@ -399,11 +508,9 @@ class _ChatViewState extends State<ChatView>
 
                         final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
                         final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
-                        final bool canSendByTextAndFiles =
-                            hasText && hasFiles && !hasUploadingFiles;
+                        final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
 
-                        final bool isSendEnabled =
-                            canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                        final bool isSendEnabled = canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
                         final bool isEditEnabled = isSendEnabled || state.isEdited;
 
                         return Actions(
@@ -422,20 +529,14 @@ class _ChatViewState extends State<ChatView>
                           child: Shortcuts(
                             shortcuts: state.showMentionPopup
                                 ? <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
-                                        const MentionNavIntent.down(),
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                                        const MentionNavIntent.up(),
-                                    LogicalKeySet(LogicalKeyboardKey.enter):
-                                        const MentionSelectIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter):
-                                        const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowDown): const MentionNavIntent.down(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const MentionNavIntent.up(),
+                                    LogicalKeySet(LogicalKeyboardKey.enter): const MentionSelectIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter): const MentionSelectIntent(),
                                   }
                                 : <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                                        const EditLastMessageIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.escape):
-                                        const CancelEditMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const EditLastMessageIntent(),
+                                    LogicalKeySet(LogicalKeyboardKey.escape): const CancelEditMessageIntent(),
                                   },
                             child: Actions(
                               actions: <Type, Action<Intent>>{
@@ -466,8 +567,7 @@ class _ChatViewState extends State<ChatView>
                                 ),
                                 MentionNavIntent: CallbackAction<MentionNavIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       if (intent.direction == TraversalDirection.down) {
                                         st?.moveNext();
@@ -480,8 +580,7 @@ class _ChatViewState extends State<ChatView>
                                 ),
                                 MentionSelectIntent: CallbackAction<MentionSelectIntent>(
                                   onInvoke: (intent) {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                     }
@@ -496,8 +595,7 @@ class _ChatViewState extends State<ChatView>
                                   isMessagePending: state.isMessagePending,
                                   focusNode: messageInputFocusNode,
                                   onSubmitIntercept: () {
-                                    if (state.showMentionPopup &&
-                                        state.filteredSuggestedMentions.isNotEmpty) {
+                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
                                       final st = _mentionKey.currentState as dynamic?;
                                       st?.selectFocused();
                                       return true;
@@ -557,6 +655,7 @@ class _ChatViewState extends State<ChatView>
                                   onRemoveEditingAttachment: (attachment) {
                                     context.read<ChatCubit>().removeEditingAttachment(attachment);
                                   },
+                                  inputTitle: state.userEntity?.fullName,
                                 ),
                               ),
                             ),

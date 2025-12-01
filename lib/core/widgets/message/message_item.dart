@@ -1,23 +1,35 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_popup/flutter_popup.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
+import 'package:genesis_workspace/core/widgets/message/message_call_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
+import 'package:genesis_workspace/core/widgets/message/message_time.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
-import 'package:intl/intl.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum MessageUIOrder { first, last, middle, single, lastSingle }
 
@@ -47,25 +59,51 @@ class MessageItem extends StatelessWidget {
 
   final actionsPopupKey = GlobalKey<CustomPopupState>();
 
-  String _formatTime(int timestamp) {
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    return DateFormat('HH:mm').format(date);
-  }
-
   final parser = EmojiParser();
+
+  void joinCall(BuildContext context) async {
+    final String meetingLink = extractMeetingLink(message.content);
+    try {
+      await Permission.camera.request();
+      await Permission.microphone.request();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+    if (platformInfo.isLinux) {
+      launchUrl(Uri.parse(meetingLink));
+      return;
+    }
+    if (currentSize(context) <= ScreenSize.tablet) {
+      context.pushNamed(Routes.call, extra: meetingLink);
+    } else {
+      String meetLocation = '';
+      if (message.isChannelMessage) {
+        meetLocation = message.displayRecipient.streamName;
+      } else {
+        meetLocation = message.displayRecipient.recipients.map((e) => e.fullName).join(', ');
+      }
+      context.read<CallCubit>().openCall(meetUrl: meetingLink, meetLocationName: meetLocation);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
+    final messageColors = Theme.of(context).extension<MessageColors>()!;
     final isRead = message.flags?.contains('read') ?? false;
     final GlobalObjectKey messageKey = GlobalObjectKey(message);
 
     final avatar = isSkeleton
         ? const CircleAvatar(radius: 20)
-        : UserAvatar(avatarUrl: message.avatarUrl);
+        : UserAvatar(
+            avatarUrl: message.avatarUrl,
+            size: 30,
+          );
 
     final MessagesCubit messagesCubit = context.read<MessagesCubit>();
-    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(context);
 
     Future<void> handleEmojiSelected(String emojiName) async {
       try {
@@ -98,10 +136,9 @@ class MessageItem extends StatelessWidget {
     final messageTime = isSkeleton
         ? Container(height: 10, width: 30, color: theme.colorScheme.surfaceContainerHighest)
         : Text(
-            _formatTime(message.timestamp),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 10,
+            formatTime(message.timestamp),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: messageColors.timeColor,
             ),
           );
 
@@ -125,11 +162,23 @@ class MessageItem extends StatelessWidget {
       case ScreenSize.laptop:
         maxMessageWidth = MediaQuery.of(context).size.width * 0.4;
         break;
+      case ScreenSize.sMobile:
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.55;
+        break;
       default:
-        maxMessageWidth = MediaQuery.of(context).size.width * 0.7;
+        maxMessageWidth = MediaQuery.of(context).size.width * 0.6;
     }
 
     final bool isStarred = message.flags?.contains('starred') ?? false;
+
+    Color messageBgColor = messageColors.background;
+
+    if (isMyMessage) {
+      messageBgColor = messageColors.ownBackground;
+    }
+    if (message.isCall) {
+      messageBgColor = messageColors.activeCallBackground;
+    }
 
     return Skeletonizer(
       enabled: isSkeleton,
@@ -142,7 +191,9 @@ class MessageItem extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           rootNavigator: true,
           isLongPress: true,
-          contentDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+          contentRadius: 12,
+          arrowColor: theme.colorScheme.surface,
+          backgroundColor: theme.colorScheme.surface,
           content: ActionsContextMenu(
             messageId: message.id,
             isMyMessage: isMyMessage,
@@ -179,10 +230,10 @@ class MessageItem extends StatelessWidget {
               mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (showAvatar) ...[avatar, const SizedBox(width: 4)],
+                if (showAvatar) ...[avatar, const SizedBox(width: 12)],
                 if (!showAvatar && !isMyMessage) const SizedBox(width: 44),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     inspect(message.content);
                   },
                   onSecondaryTap: () {
@@ -218,63 +269,101 @@ class MessageItem extends StatelessWidget {
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding: const EdgeInsets.all(12),
                     constraints: (showAvatar)
                         ? BoxConstraints(
                             minHeight: 40,
-                            maxWidth:
-                                (MediaQuery.of(context).size.width * 0.9) - (isMyMessage ? 30 : 0),
+                            maxWidth: (MediaQuery.sizeOf(context).width * 0.9) - (isMyMessage ? 30 : 0),
                           )
                         : null,
                     decoration: BoxDecoration(
-                      color: isMyMessage
-                          ? theme.colorScheme.secondaryContainer.withAlpha(128)
-                          : theme.colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(14).copyWith(
-                        bottomRight: isMyMessage ? Radius.zero : null,
-                        bottomLeft: !isMyMessage ? Radius.zero : null,
+                      color: messageBgColor,
+                      borderRadius: BorderRadius.circular(8).copyWith(
+                        bottomRight: (isMyMessage) ? Radius.zero : null,
+                        bottomLeft: (!isMyMessage && showAvatar) ? Radius.zero : null,
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          crossAxisAlignment: message.isCall ? .start : .end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                MessageBody(
-                                  showSenderName: showSenderName,
-                                  isSkeleton: isSkeleton,
-                                  message: message,
-                                  showTopic: showTopic,
-                                  isStarred: isStarred,
-                                  actionsPopupKey: actionsPopupKey,
-                                  maxMessageWidth: maxMessageWidth,
-                                ),
-                              ],
-                            ),
-                            if (message.aggregatedReactions.isNotEmpty)
-                              MessageReactionsList(
-                                message: message,
-                                myUserId: myUserId,
-                                maxWidth: maxMessageWidth,
+                            message.isCall
+                                ? MessageCallBody()
+                                : MessageBody(
+                                    showSenderName: showSenderName,
+                                    isSkeleton: isSkeleton,
+                                    message: message,
+                                    showTopic: showTopic,
+                                    isStarred: isStarred,
+                                    actionsPopupKey: actionsPopupKey,
+                                    maxMessageWidth: maxMessageWidth,
+                                  ),
+                            if (message.aggregatedReactions.isEmpty)
+                              Column(
+                                crossAxisAlignment: .end,
+                                children: [
+                                  if (message.isCall)
+                                    IconButton(
+                                      padding: .zero,
+                                      onPressed: () {
+                                        joinCall(context);
+                                      },
+                                      icon: Assets.icons.call.svg(
+                                        width: 32,
+                                        height: 32,
+                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      ),
+                                    ),
+                                  MessageTime(
+                                    messageTime: messageTime,
+                                    isMyMessage: isMyMessage,
+                                    isRead: isRead,
+                                    isSkeleton: isSkeleton,
+                                  ),
+                                ],
                               ),
                           ],
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            messageTime,
-                            if (!isMyMessage && !isRead && !isSkeleton) ...[
-                              const SizedBox(width: 4),
-                              Icon(Icons.circle, color: theme.colorScheme.primary, size: 8),
+                        if (message.aggregatedReactions.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: maxMessageWidth),
+                                child: MessageReactionsList(
+                                  message: message,
+                                  myUserId: myUserId,
+                                  maxWidth: maxMessageWidth,
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  if (message.isCall)
+                                    IconButton(
+                                      padding: .zero,
+                                      onPressed: () {
+                                        joinCall(context);
+                                      },
+                                      icon: Assets.icons.call.svg(
+                                        width: 32,
+                                        height: 32,
+                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      ),
+                                    ),
+                                  MessageTime(
+                                    messageTime: messageTime,
+                                    isMyMessage: isMyMessage,
+                                    isRead: isRead,
+                                    isSkeleton: isSkeleton,
+                                  ),
+                                ],
+                              ),
                             ],
-                          ],
-                        ),
+                          ),
                       ],
                     ),
                   ),

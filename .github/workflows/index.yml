@@ -17,7 +17,7 @@ env:
   REPO_ENDPOINT_PUT: http://10.20.0.1:8082
   MIN_DEV_VERSION: ${{ vars.MIN_DEV_VERSION }}
   MIN_STABLE_VERSION: ${{ vars.MIN_STABLE_VERSION }}
-  WORKSPACE_PATH: http://repository.genesis-core.tech:8081/genesis_workspace/
+  WORKSPACE_PATH: https://repository.genesis-core.tech/genesis_workspace/
 
 jobs:
   index:
@@ -36,5 +36,11 @@ jobs:
             --min-stable "${MIN_STABLE_VERSION}" \
             --min-dev "${MIN_DEV_VERSION}" \
             "${WORKSPACE_PATH}" | tee workspace-index.json
+          # Calculate SHA256
+          sha256sum workspace-index.json > workspace-index.json.sha256
+          cat workspace-index.json.sha256
+          # Upload index files
           curl -X PUT --upload-file workspace-index.json \
             $REPO_ENDPOINT_PUT/${PROJECT_NAME}/workspace-index.json
+          curl -X PUT --upload-file workspace-index.json.sha256 \
+            $REPO_ENDPOINT_PUT/${PROJECT_NAME}/workspace-index.json.sha256

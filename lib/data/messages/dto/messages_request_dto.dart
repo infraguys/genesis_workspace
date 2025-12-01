@@ -13,15 +13,29 @@ class MessagesRequestDto {
   final int? numBefore;
   final int? numAfter;
 
-  MessagesRequestDto({required this.anchor, this.narrow, this.numBefore, this.numAfter});
+  final bool applyMarkdown;
+  final bool clientGravatar;
+  final bool includeAnchor;
 
-  factory MessagesRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$MessagesRequestDtoFromJson(json);
+  MessagesRequestDto({
+    required this.anchor,
+    this.narrow,
+    this.numBefore,
+    this.numAfter,
+    this.applyMarkdown = true,
+    this.clientGravatar = false,
+    this.includeAnchor = true,
+  });
+
+  factory MessagesRequestDto.fromJson(Map<String, dynamic> json) => _$MessagesRequestDtoFromJson(json);
 
   Map<String, dynamic> toJson() => {
     "anchor": anchor,
     narrow != null ? "narrow" : '': narrow?.map((e) => e.toJson()).toList(),
     "num_before": numBefore,
     "num_after": numAfter,
+    "apply_markdown": applyMarkdown,
+    "client_gravatar": clientGravatar,
+    "include_anchor": includeAnchor,
   };
 }

@@ -1,6 +1,9 @@
 targets:
   $default:
     builders:
+      flutter_gen_runner:
+        options:
+          line_length: 120
       injectable_generator:injectable_builder:
         generate_for:
           - lib/core/dependency_injection/di.dart
@@ -13,6 +16,8 @@ targets:
           - lib/services/real_time/**.dart
           - lib/services/localization/localization_service.dart
           - lib/services/paste/paste_capture_service.dart
+          - lib/services/organizations/organization_switcher_service.dart
+          - lib/services/download_files/download_files_service.dart
           - lib/data/**/datasources/**.dart
           - lib/data/**/repositories_impl/**.dart
           - lib/data/**/dao/**.dart
@@ -29,6 +34,7 @@ targets:
           - lib/data/database/app_database.dart
           - lib/data/**/tables/**.dart
           - lib/data/**/dao/**.dart
+          - lib/data/**/converters/**.dart
       retrofit_generator:
         generate_for:
           - lib/data/**/api/**.dart

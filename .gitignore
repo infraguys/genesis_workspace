@@ -19,10 +19,8 @@ migrate_working_dir/
 .idea/
 dist/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code related
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -33,6 +31,13 @@ dist/
 .pub-cache/
 .pub/
 /build/
+
+# Flutter generated files
+*.g.dart
+*.gen.dart
+*.freezed.dart
+app_localizations_*.dart
+untranslated.txt
 
 # Symbolication related
 app.*.symbols
@@ -52,3 +57,10 @@ app.*.map.json
 env.json
 
 update_script.sh
+
+# Firebase config that should stay local
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_app_id_file.json
+.firebase/
+firebase-debug.log

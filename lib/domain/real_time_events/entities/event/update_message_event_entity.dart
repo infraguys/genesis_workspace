@@ -8,6 +8,7 @@ class UpdateMessageEventEntity extends EventEntity {
   UpdateMessageEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.content,
     required this.renderedContent,
     required this.messageId,

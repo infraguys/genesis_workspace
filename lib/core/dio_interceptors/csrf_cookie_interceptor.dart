@@ -13,7 +13,7 @@ class CsrfCookieInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final csrfToken = await tokenStorage.getCsrftoken(); // __Host-csrftoken
+      final csrfToken = await tokenStorage.getCsrftoken(AppConstants.baseUrl); // __Host-csrftoken
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
       final existingCookie = (options.headers['Cookie'] as String?)?.trim();

@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 mixin OpenDmChatMixin {
   void openChat(BuildContext context, Set<int> membersIds, {int? unreadMessagesCount}) {
-    final isDesktop = currentSize(context) > ScreenSize.lTablet;
+    final isDesktop = currentSize(context) > ScreenSize.tablet;
 
     if (isDesktop) {
       context.read<AllChatsCubit>().selectGroupChat(membersIds);

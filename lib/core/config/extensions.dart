@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,5 +36,15 @@ extension DmUrl on BuildContext {
 
     // Меняем только query — остаёмся на той же странице
     goNamed(Routes.directMessages, queryParameters: queryParams);
+  }
+}
+
+extension BlocMaybeRead on BuildContext {
+  T? maybeRead<T extends StateStreamableSource<Object?>>() {
+    try {
+      return BlocProvider.of<T>(this, listen: false);
+    } catch (_) {
+      return null;
+    }
   }
 }

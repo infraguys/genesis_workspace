@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
-import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/features/settings/view/settings_view.dart';
 
 class Settings extends StatelessWidget {
@@ -9,6 +6,6 @@ class Settings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => getIt<SettingsCubit>(), child: SettingsView());
+    return SettingsView();
   }
 }

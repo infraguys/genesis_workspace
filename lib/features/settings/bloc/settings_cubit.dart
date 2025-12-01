@@ -1,21 +1,28 @@
-import 'dart:io';
-
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'settings_state.dart';
 
 @injectable
 class SettingsCubit extends Cubit<SettingsState> {
-  SettingsCubit(this._addRecentDmUseCase, this._getRecentDmsUseCase) : super(SettingsState());
+  SettingsCubit(
+    this._addRecentDmUseCase,
+    this._getRecentDmsUseCase,
+    this._appDatabase,
+    this._sharedPreferences,
+  ) : super(SettingsState());
 
   final AddRecentDmUseCase _addRecentDmUseCase;
   final GetRecentDmsUseCase _getRecentDmsUseCase;
+  final AppDatabase _appDatabase;
 
   final Dio _dio = Dio();
+  final SharedPreferences _sharedPreferences;
 
   Future<void> addRecentDm(int userId) async {
     try {
@@ -33,42 +40,15 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
-  Future<String> createHelloWorldFile() async {
+  Future<void> clearLocalDatabase() async {
     try {
-      // Получаем директорию приложения (application documents directory)
-      final appDir = Directory.current;
-
-      // Создаем путь к файлу hello.txt в корне директории приложения
-      final File file = File('${appDir.path}/hello.txt');
-
-      // Записываем текст в файл
-      await file.writeAsString('Hello world!');
-
-      return 'Файл успешно создан: ${file.path}';
-    } catch (error, stackTrace) {
-      print('Ошибка при создании файла: $error');
-      print(stackTrace);
-      throw (Exception('Ошибка при создании файла: $error'));
+      await _appDatabase.clearAllData();
+    } catch (e) {
+      rethrow;
     }
   }
 
-  Future<String> deleteHelloWorldFile() async {
-    try {
-      final Directory appDir = Directory.current;
-      final File file = File('${appDir.path}/hello.txt');
-
-      if (await file.exists()) {
-        await file.delete();
-        print('Файл успешно удалён: ${file.path}');
-        return 'Файл успешно удалён: ${file.path}';
-      } else {
-        print('Файл не найден: ${file.path}');
-        throw (Exception('Файл не найден: ${file.path}'));
-      }
-    } catch (error, stackTrace) {
-      print('Ошибка при удалении файла: $error');
-      print(stackTrace);
-      throw (Exception('Ошибка при удалении файла: $error'));
-    }
+  Future<void> clearSharedPreferences() async {
+    await _sharedPreferences.clear();
   }
 }

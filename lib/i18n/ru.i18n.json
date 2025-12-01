@@ -94,6 +94,16 @@
     "no_starred": "Нет отмеченных сообщений"
   },
   "select_any_chat": "Выберите любой чат",
+  "call": {
+    "title": "Звонок",
+    "minimize": "Свернуть",
+    "restore": "Развернуть",
+    "fullscreen": "На весь экран",
+    "exit_fullscreen": "Выйти из полноэкранного",
+    "active_call_in": "Идёт звонок в \"{name}\"",
+    "active_call": "Идёт звонок",
+    "resume_call": "Вернуться в звонок"
+  },
   "unread_marker": {
     "label": "Непрочитанные сообщения",
     "label_with_count": "Непрочитанные сообщения • {count}",
@@ -106,7 +116,9 @@
   "error": "Ошибка",
   "general": {
     "something_went_wrong": "Что-то пошло не так",
-    "nothing_here_yet": "Здесь пока ничего нет"
+    "nothing_here_yet": "Здесь пока ничего нет",
+    "find": "Найти",
+    "close": "Закрыть"
   },
   "message_actions": {
     "quote": "Цитировать это сообщение",
@@ -119,6 +131,18 @@
     "image": "Выбрать изображение"
   },
   "drop_files_to_upload": "Отпустите файлы, чтобы загрузить",
+  "download_files": {
+    "no_downloads": "Нет загрузок",
+    "ready": "Готово"
+  },
+  "in_development": {
+    "title": "Работы в процессе",
+    "subtitle": "Эта секция пока находится в разработке.",
+    "description": "Мы доводим этот раздел до идеала и скоро откроем его. Спасибо за терпение!",
+    "tip_one": "Следите за обновлениями, чтобы узнать о релизе первыми.",
+    "tip_two": "Поделитесь обратной связью, чтобы мы расставили приоритеты.",
+    "cta": "Вернуться назад"
+  },
   "cancel_editing": "Отменить редактирование",
   "folders": {
     "all": "Все",
@@ -138,7 +162,19 @@
     "delete": "Удалить",
     "deleteConfirmTitle": "Удалить папку?",
     "deleteConfirmText": "Вы уверены, что хотите удалить \"{folderName}\"?",
-   "folder_is_empty": "Папка пустая"
+    "folder_is_empty": "Папка пустая"
+  },
+  "organizations": {
+    "addDialog": {
+      "title": "Добавить организацию",
+      "description": "Укажите ссылку на организацию, чтобы добавить её в список.",
+      "urlLabel": "Ссылка на организацию",
+      "urlHint": "https://example.com",
+      "urlRequired": "Введите ссылку на организацию",
+      "urlInvalid": "Некорректная ссылка",
+      "submit": "Добавить"
+    },
+    "delete_organization": "Удалить организацию"
   },
   "channel": {
     "muteChannel": "Заглушить канал",
@@ -149,7 +185,8 @@
     "unpinChat": "Открепить чат"
   },
   "group": {
-    "members_count": "Участников: {count}"
+    "members_count": "{count} участников",
+    "members": "Участники"
   },
   "group_chat": {
     "create_tooltip": "Создать групповой чат",
@@ -192,5 +229,31 @@
     "update": "Обновить",
     "unsupported_platform": "Обновления на этой платформе пока не поддержаны.",
     "failed_to_start": "Не удалось запустить обновление: {error}"
+  },
+  "emoji": {
+    "no_recent": "Нет недавних эмоджи"
+  },
+  "messenger": "Мессенджер",
+  "notifications": "Уведомления",
+  "chats": "Чаты",
+  "calendar": "Календарь",
+  "email": "Почта",
+  "groups": "Группы",
+  "calls": "Звонки",
+  "information": "Информация",
+  "username": "Имя пользователя",
+  "role": "Роль",
+  "phone": "Телефон",
+  "birthday": "День рождения",
+  "messenger_view": {
+    "chats_and_channels": "Чаты и каналы",
+    "channelInfo": "Информация о канале"
+  },
+  "roles": {
+    "owner": "Владелец",
+    "admin": "Администратор",
+    "moderator": "Модератор",
+    "member": "Участник",
+    "guest": "Гость"
   }
 }

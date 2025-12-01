@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_cubit_mixin.dart';
@@ -33,15 +35,13 @@ import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.
 import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart';
-import 'package:genesis_workspace/services/real_time/real_time_service.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
 part 'chat_state.dart';
 
 @injectable
-class ChatCubit extends Cubit<ChatState>
-    with ChatCubitMixin<ChatState>
-    implements ChatCubitCapable {
+class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implements ChatCubitCapable {
   ChatCubit(
     this._realTimeService,
     this._getMessagesUseCase,
@@ -81,11 +81,11 @@ class ChatCubit extends Cubit<ChatState>
         ),
       ) {
     _typingEventsSubscription = _realTimeService.typingEventsStream.listen(_onTypingEvents);
-    _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
-    _messageFlagsSubscription = _realTimeService.messagesFlagsEventsStream.listen(
+    _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
+    _messageFlagsSubscription = _realTimeService.messageFlagsEventsStream.listen(
       onMessageFlagsEvents,
     );
-    _reactionsSubscription = _realTimeService.reactionsEventsStream.listen(onReactionEvents);
+    _reactionsSubscription = _realTimeService.reactionEventsStream.listen(onReactionEvents);
     _deleteMessageSubscription = _realTimeService.deleteMessageEventsStream.listen(
       onDeleteMessageEvents,
     );
@@ -94,7 +94,7 @@ class ChatCubit extends Cubit<ChatState>
     );
   }
 
-  final RealTimeService _realTimeService;
+  final MultiPollingService _realTimeService;
 
   final GetMessagesUseCase _getMessagesUseCase;
   final SendMessageUseCase _sendMessageUseCase;
@@ -198,9 +198,8 @@ class ChatCubit extends Cubit<ChatState>
     int? unreadMessagesCount,
   }) async {
     state.chatIds = userIds.toSet();
-
-    if (userIds.length == 1) {
-      final userId = userIds.first;
+    if (userIds.length == 2) {
+      final userId = userIds.firstWhere((userId) => userId != myUserId);
       try {
         final UserEntity user = await _getUserByIdUseCase.call(userId);
         final DmUserEntity dmUser = user.toDmUser();
@@ -254,6 +253,31 @@ class ChatCubit extends Cubit<ChatState>
     }
   }
 
+  Future<void> getUnreadMessages() async {
+    final organizationId = AppConstants.selectedOrganizationId;
+    final connection = _realTimeService.activeConnections[organizationId];
+    if (connection?.isActive ?? false) return;
+    try {
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.dm, operand: state.chatIds!.toList()),
+          MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: 'unread'),
+        ],
+        numBefore: 5000,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase(body);
+      final updatedMessages = [...state.messages];
+      updatedMessages.addAll(response.messages);
+      emit(state.copyWith(messages: updatedMessages, lastMessageId: updatedMessages.first.id));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
   Future<void> loadMoreMessages() async {
     if (!state.isAllMessagesLoaded) {
       state.isLoadingMore = true;
@@ -265,6 +289,7 @@ class ChatCubit extends Cubit<ChatState>
           narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
           numBefore: 25,
           numAfter: 0,
+          includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;
@@ -323,10 +348,15 @@ class ChatCubit extends Cubit<ChatState>
     }
   }
 
+  void clearUploadFileError() {
+    emit(
+      state.copyWith(uploadFileError: null, uploadFileErrorName: null),
+    );
+  }
+
   void _onTypingEvents(TypingEventEntity event) {
     final senderId = event.sender.userId;
-    final isWriting =
-        event.op == TypingEventOp.start && (state.chatIds?.any((id) => id == senderId) ?? false);
+    final isWriting = event.op == TypingEventOp.start && (state.chatIds?.any((id) => id == senderId) ?? false);
 
     if (isWriting) {
       state.typingId = senderId;
@@ -340,16 +370,12 @@ class ChatCubit extends Cubit<ChatState>
     bool isThisChatMessage = false;
     if (event.message.isGroupChatMessage) {
       final chatIds = state.chatIds?.toList();
-      final messageRecipients = event.message.displayRecipient.recipients
-          .map((recipient) => recipient.userId)
-          .toList();
+      final messageRecipients = event.message.displayRecipient.recipients.map((recipient) => recipient.userId).toList();
       isThisChatMessage = unorderedEquals(chatIds ?? [], messageRecipients);
     } else {
-      final chatIds = [state.myUserId, ...state.chatIds!];
-      final messageRecipients = event.message.displayRecipient.recipients
-          .map((recipient) => recipient.userId)
-          .toList();
-      isThisChatMessage = unorderedEquals(chatIds, messageRecipients);
+      final chatIds = state.chatIds!;
+      final messageRecipients = event.message.displayRecipient.recipients.map((recipient) => recipient.userId).toList();
+      isThisChatMessage = unorderedEquals(chatIds.toList(), messageRecipients);
     }
     if (isThisChatMessage) {
       state.messages = [...state.messages, event.message];

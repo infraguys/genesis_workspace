@@ -1,5 +1,4 @@
 import 'package:genesis_workspace/data/all_chats/datasources/pinned_chats_local_data_source.dart';
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/pinned_chats_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -11,8 +10,14 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
   PinnedChatsRepositoryImpl(this._localDataSource);
 
   @override
-  Future<List<PinnedChatEntity>> getPinnedChats(int folderId) async {
-    final pinnedChats = await _localDataSource.getPinnedChats(folderId);
+  Future<List<PinnedChatEntity>> getPinnedChats({
+    required int folderId,
+    required int organizationId,
+  }) async {
+    final pinnedChats = await _localDataSource.getPinnedChats(
+      folderId: folderId,
+      organizationId: organizationId,
+    );
     final result = pinnedChats
         .map(
           (chat) => PinnedChatEntity(
@@ -21,7 +26,8 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
             chatId: chat.chatId,
             pinnedAt: chat.pinnedAt,
             orderIndex: chat.orderIndex,
-            type: chat.type,
+            // type: chat.type,
+            organizationId: chat.organizationId,
           ),
         )
         .toList();
@@ -33,13 +39,15 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
     required int folderId,
     required int chatId,
     required int orderIndex,
-    required PinnedChatType type,
+    // required PinnedChatType type,
+    required int organizationId,
   }) async {
     return await _localDataSource.pinChat(
       folderId: folderId,
       chatId: chatId,
       orderIndex: orderIndex,
-      type: type,
+      // type: type,
+      organizationId: organizationId,
     );
   }
 
@@ -54,12 +62,14 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
     required int movedChatId,
     int? previousChatId,
     int? nextChatId,
+    required int organizationId,
   }) async {
     return await _localDataSource.updatePinnedChatOrder(
       folderId: folderId,
       movedChatId: movedChatId,
       previousChatId: previousChatId,
       nextChatId: nextChatId,
+      organizationId: organizationId,
     );
   }
 }

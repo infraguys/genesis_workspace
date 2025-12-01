@@ -3,9 +3,10 @@ import 'package:genesis_workspace/data/real_time_events/dto/get_events_by_queue_
 class EventsByQueueIdRequestBodyEntity {
   final String queueId;
   final int lastEventId;
+  final bool dontBlock;
 
-  EventsByQueueIdRequestBodyEntity({required this.queueId, required this.lastEventId});
+  EventsByQueueIdRequestBodyEntity({required this.queueId, required this.lastEventId, this.dontBlock = false});
 
   GetEventsByQueueIdBodyDto toDto() =>
-      GetEventsByQueueIdBodyDto(queueId: queueId, lastEventId: lastEventId);
+      GetEventsByQueueIdBodyDto(queueId: queueId, lastEventId: lastEventId, dontBlock: dontBlock);
 }

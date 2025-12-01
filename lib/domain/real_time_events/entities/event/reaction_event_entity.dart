@@ -12,6 +12,7 @@ class ReactionEventEntity extends EventEntity {
   ReactionEventEntity({
     required super.id,
     required super.type,
+    super.organizationId,
     required this.op,
     required this.userId,
     required this.messageId,

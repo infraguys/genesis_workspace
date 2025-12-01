@@ -2,6 +2,8 @@
 
 part of 'auth_api_client.dart';
 
+// dart format off
+
 // **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
@@ -109,3 +111,5 @@ class _AuthApiClient implements AuthApiClient {
     return Uri.parse(dioBaseUrl).resolveUri(url).toString();
   }
 }
+
+// dart format on

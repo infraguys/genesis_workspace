@@ -1,17 +1,17 @@
 part of 'real_time_events_data_soure.dart';
 
-@Injectable(as: RealTimeEventsDataSource)
 class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
-  final RealTimeEventsApiClient apiClient = RealTimeEventsApiClient(getIt<Dio>());
+  final RealTimeEventsApiClient _apiClient;
+
+  RealTimeEventsDataSourceImpl(this._apiClient);
 
   @override
   Future<EventByQueueIdResponseDto> getEventsByQueueId(GetEventsByQueueIdBodyDto body) async {
     try {
-      final bool dontBlock = false;
-      final response = await apiClient.getEventsByQueueId(
+      final response = await _apiClient.getEventsByQueueId(
         body.queueId,
         body.lastEventId,
-        dontBlock,
+        body.dontBlock,
       );
       return response;
     } catch (e) {
@@ -24,7 +24,7 @@ class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
     try {
       final bool applyMarkdown = true;
       final bool simplifiedPresenceEvents = true;
-      return await apiClient.registerQueue(requestDto, applyMarkdown, simplifiedPresenceEvents);
+      return await _apiClient.registerQueue(requestDto, applyMarkdown, simplifiedPresenceEvents);
     } catch (e) {
       rethrow;
     }
@@ -33,7 +33,7 @@ class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
   @override
   Future<void> deleteQueue(String queueId) async {
     try {
-      await apiClient.deleteQueue(queueId);
+      await _apiClient.deleteQueue(queueId);
     } catch (e) {
       rethrow;
     }

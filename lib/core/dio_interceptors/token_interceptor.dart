@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 
 import '../../services/token_storage/token_storage.dart';
 
@@ -12,7 +13,7 @@ class TokenInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final token = await _tokenStorage.getToken(); // "email:api_key" (Basic)
+      final token = await _tokenStorage.getToken(AppConstants.baseUrl); // "email:api_key" (Basic)
 
       // --- 1) Basic auth, если доступно — короткий путь, CSRF не нужен ---
       if (token != null && token.contains(':')) {

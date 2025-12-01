@@ -47,9 +47,7 @@ abstract class CoreModule {
 
   @lazySingleton
   TokenStorage tokenStorage(FlutterSecureStorage secureStorage) {
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS ||
-        kIsWeb) {
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS || kIsWeb) {
       return SecureTokenStorage(secureStorage);
     } else {
       return FileTokenStorage();
@@ -82,7 +80,7 @@ class DioFactory {
     dio.interceptors
       ..add(BaseUrlInterceptor(sharedPreferences))
       ..add(TokenInterceptor(tokenStorage))
-      ..add(SessionidInterceptor(tokenStorage))
+      ..add(SessionIdInterceptor(tokenStorage))
       ..add(CsrfCookieInterceptor(tokenStorage))
       ..add(EnumInterceptor());
 

@@ -7,7 +7,7 @@ class GetCsrftokenUseCase {
 
   GetCsrftokenUseCase(this._tokenStorage);
 
-  Future<String?> call() async {
-    return _tokenStorage.getCsrftoken();
+  Future<String?> call(String baseUrl) async {
+    return _tokenStorage.getCsrftoken(baseUrl);
   }
 }

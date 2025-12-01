@@ -15,6 +15,8 @@ class PlatformInfo {
   }
 
   bool get isDesktop => !isMobile;
+
+  bool get isLinux => false;
 }
 
 const platformInfo = PlatformInfo();

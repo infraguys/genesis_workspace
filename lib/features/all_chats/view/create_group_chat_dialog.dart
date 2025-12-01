@@ -123,7 +123,7 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
                                 },
                               ),
                               const SizedBox(width: 4),
-                              UserAvatar(avatarUrl: user.avatarUrl, radius: 16),
+                              UserAvatar(avatarUrl: user.avatarUrl, size: 32),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(

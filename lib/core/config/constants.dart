@@ -4,15 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppConstants {
   static const String legacyPath = String.fromEnvironment('legacy_ui');
+  static const String firebaseApiKey = String.fromEnvironment('firebase_api_key');
 
   static const String appName = 'genesis_workspace';
 
   static const String tusVersion = '1.0.0';
 
   static late String baseUrl;
+  static int? selectedOrganizationId;
 
   static const String versionConfigUrl =
-      'http://repository.genesis-core.tech:8081/genesis_workspace/workspace-index.json';
+      'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
 
   static final popularEmojis = [
     UnicodeEmojiDisplay(emojiName: ":thumbs_up:", emojiUnicode: "1F44D"),
@@ -27,16 +29,22 @@ class AppConstants {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final String? savedBaseUrl = prefs.getString(SharedPrefsKeys.baseUrl);
+    final int? savedOrganizationId = prefs.getInt(SharedPrefsKeys.selectedOrganizationId);
 
     if (savedBaseUrl != null && savedBaseUrl.trim().isNotEmpty) {
       baseUrl = savedBaseUrl.trim();
     } else {
       baseUrl = '';
     }
+    selectedOrganizationId = savedOrganizationId;
   }
 
   static setBaseUrl(String url) {
     baseUrl = url;
+  }
+
+  static void setSelectedOrganizationId(int? id) {
+    selectedOrganizationId = id;
   }
 
   static const List<String> kImageExtensions = [
@@ -82,6 +90,7 @@ class AppConstants {
 class SharedPrefsKeys {
   static const String locale = 'locale';
   static const String isWebAuth = 'isWebAuth';
+  static const String selectedOrganizationId = 'selectedOrganizationId';
   static const String baseUrl = 'baseUrl';
   static const String notificationSound = 'notificationSound';
 }

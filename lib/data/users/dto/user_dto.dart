@@ -16,7 +16,8 @@ class UserDto {
   final bool isOwner;
   @JsonKey(name: 'is_guest')
   final bool isGuest;
-  final int role;
+  @JsonKey(name: 'role', fromJson: _fromJsonToUserRole)
+  final UserRole role;
   @JsonKey(name: 'is_bot')
   final bool isBot;
   @JsonKey(name: 'full_name')
@@ -46,16 +47,30 @@ class UserDto {
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) => _$UserDtoFromJson(json);
+
   Map<String, dynamic> toJson() => _$UserDtoToJson(this);
 
   UserEntity toEntity() => UserEntity(
     email: email,
     userId: userId,
     role: role,
+    isOwner: isOwner,
+    isGuest: isGuest,
+    isAdmin: isAdmin,
     isBot: isBot,
     fullName: fullName,
     timezone: timezone,
     isActive: isActive,
     avatarUrl: avatarUrl,
   );
+
+  static UserRole _fromJsonToUserRole(int json) {
+    return switch (json) {
+      100 => UserRole.admin,
+      200 => UserRole.owner,
+      300 => UserRole.moderator,
+      400 => UserRole.member,
+      _ => UserRole.guest,
+    };
+  }
 }

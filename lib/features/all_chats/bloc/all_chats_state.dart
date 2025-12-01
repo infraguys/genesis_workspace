@@ -7,16 +7,11 @@ class AllChatsState {
   Set<int>? selectedGroupChat;
   final List<FolderItemEntity> folders;
   final int selectedFolderIndex;
-  Set<int>? filterDmUserIds;
-  Set<int>? filterChannelIds;
-  Set<int>? filterGroupChatIds;
   final Map<int, FolderMembers> folderMembersById;
+  Set<int>? filterChatIds;
+  final bool isInitialDataPending;
 
-  bool get isEmptyFolder =>
-      ((filterChannelIds?.isEmpty ?? false) &&
-          (filterDmUserIds?.isEmpty ?? false) &&
-          (filterGroupChatIds?.isEmpty ?? false)) &&
-      selectedFolderIndex != 0;
+  bool get isEmptyFolder => (filterChatIds?.isEmpty ?? false) && selectedFolderIndex != 0;
 
   AllChatsState({
     this.selectedDmChat,
@@ -25,10 +20,9 @@ class AllChatsState {
     this.selectedGroupChat,
     required this.folders,
     required this.selectedFolderIndex,
-    this.filterDmUserIds,
-    this.filterChannelIds,
-    this.filterGroupChatIds,
+    this.filterChatIds,
     required this.folderMembersById,
+    required this.isInitialDataPending,
   });
 
   AllChatsState copyWith({
@@ -38,10 +32,9 @@ class AllChatsState {
     Set<int>? selectedGroupChat,
     List<FolderItemEntity>? folders,
     int? selectedFolderIndex,
-    Set<int>? filterDmUserIds,
-    Set<int>? filterChannelIds,
-    Set<int>? filterGroupChatIds,
+    Set<int>? filterChatIds,
     Map<int, FolderMembers>? folderMembersById,
+    bool? isInitialDataPending,
   }) {
     return AllChatsState(
       selectedDmChat: selectedDmChat ?? this.selectedDmChat,
@@ -49,11 +42,10 @@ class AllChatsState {
       selectedTopic: selectedTopic ?? this.selectedTopic,
       folders: folders ?? this.folders,
       selectedFolderIndex: selectedFolderIndex ?? this.selectedFolderIndex,
-      filterDmUserIds: filterDmUserIds ?? this.filterDmUserIds,
-      filterChannelIds: filterChannelIds ?? this.filterChannelIds,
-      filterGroupChatIds: filterGroupChatIds ?? this.filterGroupChatIds,
+      filterChatIds: filterChatIds ?? this.filterChatIds,
       folderMembersById: folderMembersById ?? this.folderMembersById,
       selectedGroupChat: selectedGroupChat ?? this.selectedGroupChat,
+      isInitialDataPending: isInitialDataPending ?? this.isInitialDataPending,
     );
   }
 
