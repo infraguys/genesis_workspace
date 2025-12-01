@@ -32,6 +32,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -224,105 +225,100 @@ class _ChannelChatViewState extends State<ChannelChatView>
         );
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            primary: isTabletOrSmaller,
-            backgroundColor: theme.colorScheme.surface,
-            surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12).copyWith(
-                topLeft: isTabletOrSmaller ? Radius.zero : null,
-                topRight: isTabletOrSmaller ? Radius.zero : null,
-              ),
-            ),
-            clipBehavior: Clip.hardEdge,
-            centerTitle: false,
-            actionsPadding: isTabletOrSmaller
-                ? null
-                : EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
-            leading: isTabletOrSmaller
-                ? IconButton(
-                    onPressed: () {
-                      context.pop();
-                    },
-                    icon: Icon(
-                      CupertinoIcons.back,
-                      color: textColors.text30,
-                    ),
-                  )
-                : IconButton(
-                    onPressed: widget.leadingOnPressed,
-                    icon: Assets.icons.moreVert.svg(
-                      colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
-                    ),
-                  ),
-            actions: [
-              DownloadFilesButton(),
-              IconButton(
-                onPressed: () {},
-                icon: Assets.icons.joinCall.svg(
-                  width: 28,
-                  height: 28,
-                  colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+          appBar: AppBarContainer(
+            appBar: AppBar(
+              primary: isTabletOrSmaller,
+              backgroundColor: theme.colorScheme.surface,
+              clipBehavior: .hardEdge,
+              centerTitle: false,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12).copyWith(
+                  topLeft: isTabletOrSmaller ? Radius.zero : null,
+                  topRight: isTabletOrSmaller ? Radius.zero : null,
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: Assets.icons.call.svg(
-                  width: 28,
-                  height: 28,
-                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
-                ),
-              ),
-              if (!isTabletOrSmaller)
+              actionsPadding: isTabletOrSmaller ? null : .symmetric(horizontal: 20),
+              leading: isTabletOrSmaller
+                  ? IconButton(
+                      onPressed: () => context.pop(),
+                      icon: Icon(
+                        CupertinoIcons.back,
+                        color: textColors.text30,
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: widget.leadingOnPressed,
+                      icon: Assets.icons.moreVert.svg(
+                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                      ),
+                    ),
+              actions: [
+                DownloadFilesButton(),
                 IconButton(
                   onPressed: () {},
-                  icon: Assets.icons.videocam.svg(
+                  icon: Assets.icons.joinCall.svg(
+                    width: 28,
+                    height: 28,
+                    colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: Assets.icons.call.svg(
+                    width: 28,
+                    height: 28,
                     colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
                 ),
-            ],
-            title: Skeletonizer(
-              enabled: state.channel == null,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        state.channel?.name ?? 'Channel Name',
-                        style: titleTextStyle,
-                      ),
-                      SizedBox(
-                        width: 12,
-                      ),
-                      if (widget.topicName != null) ...[
-                        Container(
-                          height: 16,
-                          width: 3,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadiusGeometry.circular(16),
-                          ),
+                if (!isTabletOrSmaller)
+                  IconButton(
+                    onPressed: () {},
+                    icon: Assets.icons.videocam.svg(
+                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                    ),
+                  ),
+              ],
+              title: Skeletonizer(
+                enabled: state.channel == null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.channel?.name ?? 'Channel Name',
+                          style: titleTextStyle,
                         ),
                         SizedBox(
-                          width: 8,
+                          width: 12,
                         ),
-                        Text(
-                          '# ${widget.topicName!}',
-                          style: topicTextStyle,
-                        ),
+                        if (widget.topicName != null) ...[
+                          Container(
+                            height: 16,
+                            width: 3,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadiusGeometry.circular(16),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          Text(
+                            '# ${widget.topicName!}',
+                            style: topicTextStyle,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  Text(
-                    context.t.group.membersCount(count: state.channel?.subscriberCount ?? 0),
-                    style: subtitleTextStyle,
-                  ),
-                ],
+                    ),
+                    Text(
+                      context.t.group.membersCount(count: state.channel?.subscriberCount ?? 0),
+                      style: subtitleTextStyle,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
