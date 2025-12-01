@@ -6,8 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/firebase_options.dart';
 
 /// Controls Firebase bootstrapping for supported platforms only.
-final bool isFirebaseSupported =
-    kIsWeb || Platform.isAndroid || Platform.isIOS;
+final bool isFirebaseSupported = kIsWeb || Platform.isAndroid || Platform.isIOS;
 
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
@@ -17,7 +16,7 @@ class FirebaseService {
 
   FirebaseService._internal();
 
-  Future<void> initialize() async {
+  static Future<void> initialize() async {
     if (!isFirebaseSupported || _initialized) return;
 
     await Firebase.initializeApp(

@@ -11,7 +11,7 @@ import 'core/dependency_injection/di.dart';
 class Main {
   static Future<void> startApp() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await FirebaseService().initialize();
+    await FirebaseService.initialize();
     await AppConstants.init();
     await configureDependencies();
     usePathUrlStrategy();
