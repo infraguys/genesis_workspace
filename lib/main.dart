@@ -14,7 +14,6 @@ class Main {
   static Future<void> startApp() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
-      name: "genesis_workspace_dev",
       options: DefaultFirebaseOptions.currentPlatform,
     );
     await FirebaseMessaging.instance.setAutoInitEnabled(true);
@@ -23,6 +22,7 @@ class Main {
     usePathUrlStrategy();
     final LocalizationService localizationService = getIt<LocalizationService>();
     await localizationService.init();
+
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }
 }
