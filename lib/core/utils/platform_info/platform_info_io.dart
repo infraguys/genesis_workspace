@@ -8,6 +8,8 @@ class PlatformInfo {
   bool get isMobile => io.Platform.isAndroid || io.Platform.isIOS;
 
   bool get isDesktop => io.Platform.isWindows || io.Platform.isLinux || io.Platform.isMacOS;
+
+  bool get isLinux => io.Platform.isLinux;
 }
 
 const platformInfo = PlatformInfo();
