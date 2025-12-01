@@ -21,6 +21,12 @@ final darkTheme = ThemeData(
   ),
   elevatedButtonTheme: _darkElevatedButtonTheme,
   dividerColor: Color(0xFFFFFFFF).withValues(alpha: 0.1),
+  appBarTheme: AppBarThemeData(
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
 );
 
 final darkColorScheme = ColorScheme.dark(
