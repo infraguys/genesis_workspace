@@ -34,6 +34,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -190,172 +191,174 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
 
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            primary: isTabletOrSmaller,
-            backgroundColor: theme.colorScheme.surface,
-            surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12).copyWith(
-                topLeft: isTabletOrSmaller ? Radius.zero : null,
-                topRight: isTabletOrSmaller ? Radius.zero : null,
-              ),
-            ),
-            clipBehavior: Clip.hardEdge,
-            centerTitle: false,
-            actionsPadding: isTabletOrSmaller
-                ? null
-                : EdgeInsetsGeometry.symmetric(
-                    horizontal: 20,
-                  ),
-            leading: isTabletOrSmaller
-                ? IconButton(
-                    onPressed: () {
-                      context.pop();
-                    },
-                    icon: Icon(
-                      CupertinoIcons.back,
-                      color: textColors.text30,
-                    ),
-                  )
-                : IconButton(
-                    onPressed: widget.leadingOnPressed,
-                    icon: Assets.icons.moreVert.svg(
-                      colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
-                    ),
-                  ),
-            actions: [
-              DownloadFilesButton(),
-              IconButton(
-                onPressed: () {
-                  context.read<ChatCubit>().createCall();
-                },
-                icon: Assets.icons.call.svg(
-                  width: 28,
-                  height: 28,
-                  colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+          appBar: AppBarContainer(
+            appBar: AppBar(
+              primary: isTabletOrSmaller,
+              backgroundColor: theme.colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12).copyWith(
+                  topLeft: isTabletOrSmaller ? Radius.zero : null,
+                  topRight: isTabletOrSmaller ? Radius.zero : null,
                 ),
               ),
-              if (!isTabletOrSmaller)
+              clipBehavior: Clip.hardEdge,
+              centerTitle: false,
+              actionsPadding: isTabletOrSmaller
+                  ? null
+                  : EdgeInsetsGeometry.symmetric(
+                      horizontal: 20,
+                    ),
+              leading: isTabletOrSmaller
+                  ? IconButton(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      icon: Icon(
+                        CupertinoIcons.back,
+                        color: textColors.text30,
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: widget.leadingOnPressed,
+                      icon: Assets.icons.moreVert.svg(
+                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                      ),
+                    ),
+              actions: [
+                DownloadFilesButton(),
                 IconButton(
-                  onPressed: () {},
-                  icon: Assets.icons.videocam.svg(
+                  onPressed: () {
+                    context.read<ChatCubit>().createCall();
+                  },
+                  icon: Assets.icons.call.svg(
+                    width: 28,
+                    height: 28,
                     colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
                 ),
-            ],
-            title: Builder(
-              builder: (context) {
-                final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
-                  fontSize: isTabletOrSmaller ? 14 : 16,
-                );
-                final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
-                  color: textColors.text30,
-                );
-                if (isLoading) {
-                  return Skeletonizer(
-                    child: Row(
+                if (!isTabletOrSmaller)
+                  IconButton(
+                    onPressed: () {},
+                    icon: Assets.icons.videocam.svg(
+                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                    ),
+                  ),
+              ],
+              title: Builder(
+                builder: (context) {
+                  final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
+                    fontSize: isTabletOrSmaller ? 14 : 16,
+                  );
+                  final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
+                    color: textColors.text30,
+                  );
+                  if (isLoading) {
+                    return Skeletonizer(
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
+                          BlocBuilder<ChatCubit, ChatState>(
+                            builder: (context, state) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "User Userov",
+                                    style: titleTextStyle,
+                                  ),
+                                  Text(
+                                    context.t.online,
+                                    style: subtitleTextStyle,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (state.userEntity != null) {
+                    final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
+
+                    final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+                      (userEntity.presenceTimestamp * 1000).toInt(),
+                    );
+                    final timeAgo = timeAgoText(context, lastSeen);
+
+                    Widget userStatus;
+                    if (userEntity.presenceStatus == PresenceStatus.active) {
+                      userStatus = Text(
+                        context.t.online,
+                        style: subtitleTextStyle,
+                      );
+                    } else {
+                      userStatus = Text(
+                        isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
+                        style: subtitleTextStyle,
+                      );
+                    }
+                    if (state.typingId == userEntity.userId) {
+                      userStatus = Text(context.t.typing, style: subtitleTextStyle);
+                    }
+
+                    return Row(
                       spacing: 8,
                       children: [
-                        if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
+                        if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
                         BlocBuilder<ChatCubit, ChatState>(
                           builder: (context, state) {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "User Userov",
+                                  userEntity.fullName,
                                   style: titleTextStyle,
                                 ),
-                                Text(
-                                  context.t.online,
-                                  style: subtitleTextStyle,
-                                ),
+                                userStatus,
                               ],
                             );
                           },
                         ),
                       ],
-                    ),
-                  );
-                }
-
-                if (state.userEntity != null) {
-                  final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
-
-                  final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-                    (userEntity.presenceTimestamp * 1000).toInt(),
-                  );
-                  final timeAgo = timeAgoText(context, lastSeen);
-
-                  Widget userStatus;
-                  if (userEntity.presenceStatus == PresenceStatus.active) {
-                    userStatus = Text(
-                      context.t.online,
-                      style: subtitleTextStyle,
                     );
-                  } else {
-                    userStatus = Text(
-                      isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
-                      style: subtitleTextStyle,
-                    );
-                  }
-                  if (state.typingId == userEntity.userId) {
-                    userStatus = Text(context.t.typing, style: subtitleTextStyle);
-                  }
+                  } else if (state.groupUsers != null) {
+                    final users = state.groupUsers!;
+                    final names = users.map((u) => u.fullName).join(', ');
 
-                  return Row(
-                    spacing: 8,
-                    children: [
-                      if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
-                      BlocBuilder<ChatCubit, ChatState>(
-                        builder: (context, state) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                userEntity.fullName,
-                                style: titleTextStyle,
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        const CircleAvatar(child: Icon(Icons.groups)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width * 0.55,
                               ),
-                              userStatus,
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                } else if (state.groupUsers != null) {
-                  final users = state.groupUsers!;
-                  final names = users.map((u) => u.fullName).join(', ');
-
-                  return Row(
-                    spacing: 8,
-                    children: [
-                      const CircleAvatar(child: Icon(Icons.groups)),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.55,
+                              child: Text(
+                                names,
+                                style: titleTextStyle,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                             ),
-                            child: Text(
-                              names,
-                              style: titleTextStyle,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                            Text(
+                              context.t.group.membersCount(count: users.length),
+                              style: subtitleTextStyle,
                             ),
-                          ),
-                          Text(
-                            context.t.group.membersCount(count: users.length),
-                            style: subtitleTextStyle,
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                }
-                return SizedBox.shrink();
-              },
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                  return SizedBox.shrink();
+                },
+              ),
             ),
           ),
           body: FutureBuilder(
