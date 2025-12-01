@@ -275,143 +275,148 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                       ),
                     Expanded(
-                      child: Container(
-                        constraints: BoxConstraints(
-                          minHeight: isTabletOrSmaller ? 44 : 88,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.background,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Stack(
-                          children: [
-                            Column(
-                              children: [
-                                if (!isTabletOrSmaller)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                                    child: Row(
-                                      spacing: 8,
-                                      children: [
-                                        Container(
-                                          height: 16,
-                                          width: 3,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary,
-                                            borderRadius: BorderRadius.circular(16),
+                      child: GestureDetector(
+                        onTap: () {
+                          widget.focusNode.requestFocus();
+                        },
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minHeight: isTabletOrSmaller ? 44 : 88,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.background,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Stack(
+                            children: [
+                              Column(
+                                children: [
+                                  if (!isTabletOrSmaller)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                      child: Row(
+                                        spacing: 8,
+                                        children: [
+                                          Container(
+                                            height: 16,
+                                            width: 3,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary,
+                                              borderRadius: BorderRadius.circular(16),
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          "# ${widget.inputTitle ?? ''}",
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            color: textColors.text30,
+                                          Text(
+                                            "# ${widget.inputTitle ?? ''}",
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: textColors.text30,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 150),
-                                  clipBehavior: Clip.hardEdge,
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.background,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: TextField(
-                                    controller: widget.controller,
-                                    focusNode: widget.focusNode,
-                                    minLines: 1,
-                                    maxLines: 4,
-                                    autofocus: platformInfo.isDesktop,
-                                    clipBehavior: Clip.none,
-                                    onTap: () {
-                                      if (currentSize(context) < ScreenSize.lTablet) {
-                                        context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                          false,
-                                        );
-                                      }
-                                    },
-                                    textInputAction: TextInputAction.send,
-                                    onSubmitted: (value) {
-                                      if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 150),
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.background,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: TextField(
+                                      controller: widget.controller,
+                                      focusNode: widget.focusNode,
+                                      minLines: 1,
+                                      maxLines: 4,
+                                      autofocus: platformInfo.isDesktop,
+                                      clipBehavior: Clip.none,
+                                      onTap: () {
+                                        if (currentSize(context) < ScreenSize.lTablet) {
+                                          context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                            false,
+                                          );
+                                        }
+                                      },
+                                      textInputAction: TextInputAction.send,
+                                      onSubmitted: (value) {
+                                        if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
+                                          if (platformInfo.isDesktop) {
+                                            widget.focusNode.requestFocus();
+                                          }
+                                          return;
+                                        }
+                                        if (widget.isEdit) {
+                                          if (widget.onEdit != null) {
+                                            widget.onEdit!();
+                                          }
+                                        } else {
+                                          if (widget.onSend != null) {
+                                            widget.onSend!();
+                                          }
+                                        }
                                         if (platformInfo.isDesktop) {
                                           widget.focusNode.requestFocus();
                                         }
-                                        return;
-                                      }
-                                      if (widget.isEdit) {
-                                        if (widget.onEdit != null) {
-                                          widget.onEdit!();
-                                        }
-                                      } else {
-                                        if (widget.onSend != null) {
-                                          widget.onSend!();
-                                        }
-                                      }
-                                      if (platformInfo.isDesktop) {
-                                        widget.focusNode.requestFocus();
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      filled: true,
-                                      fillColor: theme.colorScheme.background,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      focusedBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      hintText: widget.isDropOver ? "" : "Message",
-                                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                        color: textColors.text30,
-                                      ),
-                                      prefixIcon: isTabletOrSmaller
-                                          ? AttachFilesButton(
-                                              attachmentsKey: attachmentsKey,
-                                              onUploadFile: widget.onUploadFile,
-                                              onUploadImage: widget.onUploadImage,
-                                            )
-                                          : null,
-                                      suffixIcon: isTabletOrSmaller
-                                          ? ToggleEmojiKeyboardButton(
-                                              emojiState: emojiState,
-                                              focusNode: widget.focusNode,
-                                            )
-                                          : null,
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 12,
+                                      },
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        filled: true,
+                                        fillColor: theme.colorScheme.background,
+                                        focusColor: Colors.transparent,
+                                        hoverColor: Colors.transparent,
+                                        focusedBorder: InputBorder.none,
+                                        disabledBorder: InputBorder.none,
+                                        enabledBorder: InputBorder.none,
+                                        hintText: widget.isDropOver ? "" : "Message",
+                                        hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                          color: textColors.text30,
+                                        ),
+                                        prefixIcon: isTabletOrSmaller
+                                            ? AttachFilesButton(
+                                                attachmentsKey: attachmentsKey,
+                                                onUploadFile: widget.onUploadFile,
+                                                onUploadImage: widget.onUploadImage,
+                                              )
+                                            : null,
+                                        suffixIcon: isTabletOrSmaller
+                                            ? ToggleEmojiKeyboardButton(
+                                                emojiState: emojiState,
+                                                focusNode: widget.focusNode,
+                                              )
+                                            : null,
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            if (widget.isDropOver)
-                              Positioned.fill(
-                                child: IgnorePointer(
-                                  child: AnimatedOpacity(
-                                    duration: const Duration(milliseconds: 120),
-                                    opacity: 1.0,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.primary.withOpacity(0.06),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        context.t.dropFilesToUpload,
-                                        textAlign: TextAlign.center,
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          color: theme.colorScheme.primary,
-                                          fontWeight: FontWeight.w600,
+                                ],
+                              ),
+                              if (widget.isDropOver)
+                                Positioned.fill(
+                                  child: IgnorePointer(
+                                    child: AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 120),
+                                      opacity: 1.0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary.withOpacity(0.06),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          context.t.dropFilesToUpload,
+                                          textAlign: TextAlign.center,
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
