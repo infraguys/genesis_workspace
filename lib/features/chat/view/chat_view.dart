@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
@@ -34,6 +33,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -118,11 +118,10 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
+  void didChangeAppLifecycleState(state) async {
     switch (state) {
-      case AppLifecycleState.resumed:
+      case .resumed:
         await context.read<ChatCubit>().getUnreadMessages();
-        break;
       default:
         break;
     }
@@ -157,7 +156,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               ?.showSnackBar(
                 SnackBar(
                   content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     spacing: 8,
                     children: [
                       Text(
@@ -190,205 +189,180 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
 
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: PreferredSize(preferredSize: Size.fromHeight(76), child: Column(
-            children: [
-              Container(
-                height: 20.0,
-                width: double.infinity,
-                color: theme.colorScheme.surface,
+          appBar: AppBarContainer(
+            appBar: AppBar(
+              primary: isTabletOrSmaller,
+              backgroundColor: theme.colorScheme.surface,
+              clipBehavior: .hardEdge,
+              centerTitle: false,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12).copyWith(
+                  topLeft: isTabletOrSmaller ? Radius.zero : null,
+                  topRight: isTabletOrSmaller ? Radius.zero : null,
+                ),
               ),
-              AppBar(
-                primary: isTabletOrSmaller,
-                backgroundColor: theme.colorScheme.surface,
-                surfaceTintColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12).copyWith(
-                    topLeft: isTabletOrSmaller ? Radius.zero : null,
-                    topRight: isTabletOrSmaller ? Radius.zero : null,
-                  ),
+              actionsPadding: isTabletOrSmaller ? null : .symmetric(horizontal: 20),
+              leading: isTabletOrSmaller
+                  ? IconButton(
+                      onPressed: () => context.pop(),
+                      icon: Icon(CupertinoIcons.back, color: textColors.text30),
+                    )
+                  : IconButton(
+                      onPressed: widget.leadingOnPressed,
+                      icon: Assets.icons.moreVert.svg(colorFilter: .mode(textColors.text30, .srcIn)),
+                    ),
+              actions: [
+                // IconButton(
+                //   onPressed: () {},
+                //   icon: Assets.icons.joinCall.svg(
+                //     width: 28,
+                //     height: 28,
+                //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                //   ),
+                // ),
+                DownloadFilesButton(),
+                IconButton(
+                  onPressed: () {},
+                  icon: Assets.icons.call.svg(width: 28, height: 28, colorFilter: .mode(textColors.text50, .srcIn)),
                 ),
-                clipBehavior: Clip.hardEdge,
-                centerTitle: false,
-                actionsPadding: isTabletOrSmaller
-                    ? null
-                    : EdgeInsetsGeometry.symmetric(
-                  horizontal: 20,
-                ),
-                leading: isTabletOrSmaller
-                    ? IconButton(
-                  onPressed: () {
-                    context.pop();
-                  },
-                  icon: Icon(
-                    CupertinoIcons.back,
-                    color: textColors.text30,
-                  ),
-                )
-                    : IconButton(
-                  onPressed: widget.leadingOnPressed,
-                  icon: Assets.icons.moreVert.svg(
-                    colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
-                  ),
-                ),
-                actions: [
-                  // IconButton(
-                  //   onPressed: () {},
-                  //   icon: Assets.icons.joinCall.svg(
-                  //     width: 28,
-                  //     height: 28,
-                  //     colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-                  //   ),
-                  // ),
-                  DownloadFilesButton(),
+                if (!isTabletOrSmaller)
                   IconButton(
                     onPressed: () {},
-                    icon: Assets.icons.call.svg(
-                      width: 28,
-                      height: 28,
-                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
-                    ),
+                    icon: Assets.icons.videocam.svg(colorFilter: .mode(textColors.text50, .srcIn)),
                   ),
-                  if (!isTabletOrSmaller)
-                    IconButton(
-                      onPressed: () {},
-                      icon: Assets.icons.videocam.svg(
-                        colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
-                      ),
-                    ),
-                ],
-                title: Builder(
-                  builder: (context) {
-                    final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
-                      fontSize: isTabletOrSmaller ? 14 : 16,
-                    );
-                    final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
-                      color: textColors.text30,
-                    );
-                    if (isLoading) {
-                      return Skeletonizer(
-                        child: Row(
-                          spacing: 8,
-                          children: [
-                            if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
-                            BlocBuilder<ChatCubit, ChatState>(
-                              builder: (context, state) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "User Userov",
-                                      style: titleTextStyle,
-                                    ),
-                                    Text(
-                                      context.t.online,
-                                      style: subtitleTextStyle,
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    if (state.userEntity != null) {
-                      final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
-
-                      final lastSeen = DateTime.fromMillisecondsSinceEpoch(
-                        (userEntity.presenceTimestamp * 1000).toInt(),
-                      );
-                      final timeAgo = timeAgoText(context, lastSeen);
-
-                      Widget userStatus;
-                      if (userEntity.presenceStatus == PresenceStatus.active) {
-                        userStatus = Text(
-                          context.t.online,
-                          style: subtitleTextStyle,
-                        );
-                      } else {
-                        userStatus = Text(
-                          isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
-                          style: subtitleTextStyle,
-                        );
-                      }
-                      if (state.typingId == userEntity.userId) {
-                        userStatus = Text(context.t.typing, style: subtitleTextStyle);
-                      }
-
-                      return Row(
+              ],
+              title: Builder(
+                builder: (context) {
+                  final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
+                    fontSize: isTabletOrSmaller ? 14 : 16,
+                  );
+                  final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
+                    color: textColors.text30,
+                  );
+                  if (isLoading) {
+                    return Skeletonizer(
+                      child: Row(
                         spacing: 8,
                         children: [
-                          if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
+                          if (currentSize(context) > ScreenSize.tablet) UserAvatar(),
                           BlocBuilder<ChatCubit, ChatState>(
                             builder: (context, state) {
                               return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: .start,
                                 children: [
                                   Text(
-                                    userEntity.fullName,
+                                    "User Userov",
                                     style: titleTextStyle,
                                   ),
-                                  userStatus,
+                                  Text(
+                                    context.t.online,
+                                    style: subtitleTextStyle,
+                                  ),
                                 ],
                               );
                             },
                           ),
                         ],
-                      );
-                    } else if (state.groupUsers != null) {
-                      final users = state.groupUsers!;
-                      final names = users.map((u) => u.fullName).join(', ');
+                      ),
+                    );
+                  }
 
-                      return Row(
-                        spacing: 8,
-                        children: [
-                          const CircleAvatar(child: Icon(Icons.groups)),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth: MediaQuery.of(context).size.width * 0.55,
-                                ),
-                                child: Text(
-                                  names,
-                                  style: titleTextStyle,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ),
-                              Text(
-                                context.t.group.membersCount(count: users.length),
-                                style: subtitleTextStyle,
-                              ),
-                            ],
-                          ),
-                        ],
+                  if (state.userEntity != null) {
+                    final userEntity = state.userEntity ?? UserEntity.fake().toDmUser();
+
+                    final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+                      (userEntity.presenceTimestamp * 1000).toInt(),
+                    );
+                    final timeAgo = timeAgoText(context, lastSeen);
+
+                    Widget userStatus;
+                    if (userEntity.presenceStatus == .active) {
+                      userStatus = Text(
+                        context.t.online,
+                        style: subtitleTextStyle,
+                      );
+                    } else {
+                      userStatus = Text(
+                        isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo),
+                        style: subtitleTextStyle,
                       );
                     }
-                    return SizedBox.shrink();
-                  },
-                ),
-              )
-            ],
-          ),),
+                    if (state.typingId == userEntity.userId) {
+                      userStatus = Text(context.t.typing, style: subtitleTextStyle);
+                    }
+
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
+                        BlocBuilder<ChatCubit, ChatState>(
+                          builder: (context, state) {
+                            return Column(
+                              crossAxisAlignment: .start,
+                              children: [
+                                Text(
+                                  userEntity.fullName,
+                                  style: titleTextStyle,
+                                ),
+                                userStatus,
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  } else if (state.groupUsers != null) {
+                    final users = state.groupUsers!;
+                    final names = users.map((u) => u.fullName).join(', ');
+
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        const CircleAvatar(child: Icon(Icons.groups)),
+                        Column(
+                          crossAxisAlignment: .start,
+                          children: [
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width * 0.55,
+                              ),
+                              child: Text(
+                                names,
+                                style: titleTextStyle,
+                                overflow: .ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                            Text(
+                              context.t.group.membersCount(count: users.length),
+                              style: subtitleTextStyle,
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                  return SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.connectionState == .done) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error"));
                 }
               }
               return Column(
                 children: [
-                  state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting
+                  state.messages.isEmpty && snapshot.connectionState != .waiting
                       ? Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
                       : Expanded(
                           child: GestureDetector(
                             onTap: () {
-                              if (currentSize(context) < ScreenSize.lTablet) {
+                              if (currentSize(context) < .lTablet) {
                                 FocusScope.of(context).unfocus();
                                 context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
                                   false,
@@ -396,7 +370,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                 );
                               }
                             },
-                            child: snapshot.connectionState == ConnectionState.waiting
+                            child: snapshot.connectionState == .waiting
                                 ? Skeletonizer(
                                     enabled: true,
                                     child: ListView.separated(
@@ -452,20 +426,16 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                         ),
                   DropRegion(
                     formats: Formats.standardFormats,
-                    hitTestBehavior: HitTestBehavior.opaque,
+                    hitTestBehavior: .opaque,
                     onDropOver: (DropOverEvent event) async {
                       if (!isDropOver) {
-                        setState(() {
-                          isDropOver = true;
-                        });
+                        setState(() => isDropOver = true);
                       }
                       return DropOperation.link;
                     },
                     onDropLeave: (_) {
                       if (isDropOver) {
-                        setState(() {
-                          isDropOver = false;
-                        });
+                        setState(() => isDropOver = false);
                       }
                     },
                     onPerformDrop: (PerformDropEvent event) async {
