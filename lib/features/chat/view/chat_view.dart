@@ -158,12 +158,12 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               ?.showSnackBar(
                 SnackBar(
                   content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     spacing: 8,
                     children: [
                       Text(
                         state.uploadFileErrorName!,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                        style: TextStyle(fontWeight: .w600, fontSize: 20),
                       ),
                       Text(state.uploadFileError!),
                     ],
@@ -198,11 +198,11 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12).copyWith(
-                  topLeft: isTabletOrSmaller ? Radius.zero : null,
-                  topRight: isTabletOrSmaller ? Radius.zero : null,
+                  topLeft: isTabletOrSmaller ? .zero : null,
+                  topRight: isTabletOrSmaller ? .zero : null,
                 ),
               ),
-              clipBehavior: Clip.hardEdge,
+              clipBehavior: .hardEdge,
               centerTitle: false,
               actionsPadding: isTabletOrSmaller
                   ? null
@@ -312,7 +312,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                         BlocBuilder<ChatCubit, ChatState>(
                           builder: (context, state) {
                             return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: .start,
                               children: [
                                 Text(
                                   userEntity.fullName,
@@ -334,7 +334,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                       children: [
                         const CircleAvatar(child: Icon(Icons.groups)),
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: .start,
                           children: [
                             ConstrainedBox(
                               constraints: BoxConstraints(
@@ -343,7 +343,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                               child: Text(
                                 names,
                                 style: titleTextStyle,
-                                overflow: TextOverflow.ellipsis,
+                                overflow: .ellipsis,
                                 maxLines: 1,
                               ),
                             ),
@@ -364,14 +364,14 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.connectionState == .done) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error"));
                 }
               }
               return Column(
                 children: [
-                  state.messages.isEmpty && snapshot.connectionState != ConnectionState.waiting
+                  state.messages.isEmpty && snapshot.connectionState != .waiting
                       ? Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
                       : Expanded(
                           child: GestureDetector(
@@ -384,7 +384,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                 );
                               }
                             },
-                            child: snapshot.connectionState == ConnectionState.waiting
+                            child: snapshot.connectionState == .waiting
                                 ? Skeletonizer(
                                     enabled: true,
                                     child: ListView.separated(

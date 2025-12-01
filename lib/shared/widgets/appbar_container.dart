@@ -11,8 +11,6 @@ class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(76);
 
-
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -20,11 +18,12 @@ class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
 
     return Column(
       children: [
-        if (Platform.isMacOS && isTabletOrSmaller) Container(
-          height: 20.0,
-          width: double.infinity,
-          color: theme.colorScheme.surface,
-        ),
+        if (Platform.isMacOS && isTabletOrSmaller)
+          Container(
+            height: 20.0,
+            width: double.infinity,
+            color: theme.colorScheme.surface,
+          ),
         appBar,
       ],
     );

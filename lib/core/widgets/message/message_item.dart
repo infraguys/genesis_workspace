@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
@@ -66,7 +67,9 @@ class MessageItem extends StatelessWidget {
       await Permission.camera.request();
       await Permission.microphone.request();
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
     if (Platform.isLinux) {
       launchUrl(Uri.parse(meetingLink));
