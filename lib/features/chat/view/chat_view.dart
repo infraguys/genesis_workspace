@@ -229,7 +229,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                 DownloadFilesButton(),
                 IconButton(
                   onPressed: () {
-                    context.read<ChatCubit>().createCall();
+                    // context.read<ChatCubit>().createCall();
                   },
                   icon: Assets.icons.call.svg(
                     width: 28,

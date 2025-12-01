@@ -1,12 +1,11 @@
-import 'dart:io' show Platform;
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/firebase_options.dart';
 
 /// Controls Firebase bootstrapping for supported platforms only.
-final bool isFirebaseSupported = kIsWeb || Platform.isAndroid || Platform.isIOS;
+final bool isFirebaseSupported = kIsWeb || platformInfo.isMobile;
 
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
-import 'package:genesis_workspace/domain/messages/entities/big_blue_button_call_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/delete_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/emoji_reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
@@ -108,16 +107,6 @@ class MessagesRepositoryImpl implements MessagesRepository {
   Future<UpdateMessageResponseEntity> updateMessage(UpdateMessageRequestEntity body) async {
     try {
       final response = await dataSource.updateMessage(body.toDto());
-      return response.toEntity();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<BigBlueButtonCallResponseEntity> createBigBlueButtonCall(BigBlueButtonCallRequestEntity body) async {
-    try {
-      final response = await dataSource.createBigBlueButtonCall(body.toDto());
       return response.toEntity();
     } catch (e) {
       rethrow;

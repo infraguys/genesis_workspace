@@ -90,8 +90,6 @@ import 'package:genesis_workspace/domain/messages/repositories/messages_reposito
     as _i857;
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
     as _i276;
-import 'package:genesis_workspace/domain/messages/usecases/create_big_blue_button_call_use_case.dart'
-    as _i1013;
 import 'package:genesis_workspace/domain/messages/usecases/delete_message_use_case.dart'
     as _i455;
 import 'package:genesis_workspace/domain/messages/usecases/get_message_by_id_use_case.dart'
@@ -325,10 +323,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
-    );
-    gh.factory<_i1013.CreateBigBlueButtonCallUseCase>(
-      () =>
-          _i1013.CreateBigBlueButtonCallUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i455.DeleteMessageUseCase>(
       () => _i455.DeleteMessageUseCase(gh<_i857.MessagesRepository>()),
@@ -644,6 +638,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i725.PinnedChatsRepository>(),
       ),
     );
+    gh.factory<_i739.ChannelChatCubit>(
+      () => _i739.ChannelChatCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i720.GetChannelByIdUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+        gh<_i771.GetChannelMembersUseCase>(),
+      ),
+    );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(
         gh<_i82.RealTimeService>(),
@@ -693,6 +702,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i823.MultiPollingService>(),
       ),
     );
+    gh.factory<_i277.ChatCubit>(
+      () => _i277.ChatCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i773.GetUserByIdUseCase>(),
+        gh<_i394.GetUserPresenceUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+      ),
+    );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
         gh<_i82.RealTimeService>(),
@@ -700,22 +723,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
-      ),
-    );
-    gh.factory<_i739.ChannelChatCubit>(
-      () => _i739.ChannelChatCubit(
-        gh<_i823.MultiPollingService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i720.GetChannelByIdUseCase>(),
-        gh<_i699.GetTopicsUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-        gh<_i1005.UpdateMessageUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-        gh<_i771.GetChannelMembersUseCase>(),
-        gh<_i1013.CreateBigBlueButtonCallUseCase>(),
       ),
     );
     gh.lazySingleton<_i862.AuthCubit>(
@@ -783,21 +790,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i247.GetFolderIdsForChatUseCase>(),
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
         gh<_i766.ProfileCubit>(),
-      ),
-    );
-    gh.factory<_i277.ChatCubit>(
-      () => _i277.ChatCubit(
-        gh<_i823.MultiPollingService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i773.GetUserByIdUseCase>(),
-        gh<_i394.GetUserPresenceUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-        gh<_i1005.UpdateMessageUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-        gh<_i1013.CreateBigBlueButtonCallUseCase>(),
       ),
     );
     return this;

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:genesis_workspace/data/messages/dto/big_blue_button_call_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
@@ -24,5 +23,4 @@ abstract class MessagesDataSource {
     Function(int sent, int total)? onProgress,
     CancelToken? cancelToken,
   });
-  Future<BigBlueButtonCallResponseDto> createBigBlueButtonCall(BigBlueButtonCallRequestDto body);
 }

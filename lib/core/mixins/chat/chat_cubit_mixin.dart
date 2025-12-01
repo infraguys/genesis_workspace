@@ -11,13 +11,11 @@ import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/reaction_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
-import 'package:genesis_workspace/domain/messages/entities/big_blue_button_call_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
-import 'package:genesis_workspace/domain/messages/usecases/create_big_blue_button_call_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_message_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart';
@@ -36,7 +34,6 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   UpdateMessagesFlagsUseCase get updateMessagesFlagsUseCase;
   UpdateMessageUseCase get updateMessageUseCase;
   GetUsersUseCase get getUsersUseCase;
-  CreateBigBlueButtonCallUseCase get createBigBlueButtonCallUseCase;
 
   List<UploadFileEntity> getUploadedFiles(S state);
   String getUploadedFilesString(S state);
@@ -525,18 +522,6 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
         inspect(e);
       } finally {
         emit(copyWithCommon(isSuggestionsPending: false));
-      }
-    }
-  }
-
-  Future<void> createCall() async {
-    try {
-      final body = BigBlueButtonCallRequestEntity(callName: "call name");
-      final response = await createBigBlueButtonCallUseCase(body);
-      print("${AppConstants.baseUrl}${response.url}");
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
       }
     }
   }
