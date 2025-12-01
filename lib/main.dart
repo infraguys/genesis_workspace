@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +17,7 @@ class Main {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
       name: "genesis_workspace",
-      options: DefaultFirebaseOptions.currentPlatform,
+      options: Platform.isLinux ?  DefaultFirebaseOptions.web : DefaultFirebaseOptions.currentPlatform,
     );
     await FirebaseMessaging.instance.setAutoInitEnabled(true);
     await AppConstants.init();
