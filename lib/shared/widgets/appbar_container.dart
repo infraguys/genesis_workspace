@@ -17,6 +17,7 @@ class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
 
     return Column(
+      mainAxisSize: .min,
       children: [
         if (Platform.isMacOS && isTabletOrSmaller)
           Container(
