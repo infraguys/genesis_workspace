@@ -284,12 +284,12 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> muteChannel(ChatEntity chat) async {
-    if (chat.type != ChatType.channel) {
+    if (chat.type != ChatType.channel || chat.streamId == null) {
       return;
     }
     try {
       final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
-        updates: [SubscriptionUpdateEntity(streamId: chat.streamId ?? -1, isMuted: true)],
+        updates: [SubscriptionUpdateEntity(streamId: chat.streamId!, isMuted: true)],
       );
       await _updateSubscriptionSettingsUseCase.call(body);
     } catch (e) {
@@ -300,12 +300,12 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> unmuteChannel(ChatEntity chat) async {
-    if (chat.type != ChatType.channel) {
+    if (chat.type != ChatType.channel || chat.streamId == null) {
       return;
     }
     try {
       final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
-        updates: [SubscriptionUpdateEntity(streamId: chat.streamId ?? -1, isMuted: false)],
+        updates: [SubscriptionUpdateEntity(streamId: chat.streamId!, isMuted: false)],
       );
       await _updateSubscriptionSettingsUseCase.call(body);
     } catch (e) {
