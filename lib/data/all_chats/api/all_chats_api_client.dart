@@ -9,5 +9,5 @@ abstract class AllChatsApiClient {
   factory AllChatsApiClient(Dio dio, {String? baseUrl}) = _AllChatsApiClient;
 
   @POST('folders/')
-  Future<void> createFolder(@Body() CreateFolderDto body);
+  Future<FolderDto> createFolder(@Body() CreateFolderDto body);
 }

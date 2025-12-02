@@ -16,3 +16,27 @@ class CreateFolderEntity {
     systemType: systemType,
   );
 }
+
+class FolderEntity {
+  final int? id;
+  final String uuid;
+  final String createdAt;
+  final String updatedAt;
+  final String title;
+  final int backgroundColorValue;
+  final List<int> unreadMessages;
+  final FolderSystemType systemType;
+  final int organizationId;
+
+  FolderEntity({
+    this.id,
+    required this.uuid,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.title,
+    required this.backgroundColorValue,
+    required this.unreadMessages,
+    required this.systemType,
+    required this.organizationId,
+  });
+}

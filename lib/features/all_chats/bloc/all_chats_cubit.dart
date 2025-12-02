@@ -87,22 +87,22 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         return;
       }
 
-      final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call(organizationId);
-      if (dbFolders.isEmpty) {
-        // final initFolder = FolderItemEntity(
-        //   id: 0,
-        //   title: 'All',
-        //   systemType: SystemFolderType.all,
-        //   iconData: Icons.markunread,
-        //   unreadMessages: const <int>{},
-        //   pinnedChats: [],
-        //   organizationId: organizationId,
-        // );
-        // await addFolder(initFolder);
-        return;
-      }
-      final List<FolderItemEntity> initialFolders = [...dbFolders];
-      emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
+      // final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call(organizationId);
+      // if (dbFolders.isEmpty) {
+      // final initFolder = FolderItemEntity(
+      //   id: 0,
+      //   title: 'All',
+      //   systemType: SystemFolderType.all,
+      //   iconData: Icons.markunread,
+      //   unreadMessages: const <int>{},
+      //   pinnedChats: [],
+      //   organizationId: organizationId,
+      // );
+      // await addFolder(initFolder);
+      // return;
+      // }
+      // final List<FolderItemEntity> initialFolders = [...dbFolders];
+      // emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
       await _refreshAllFolderMembers();
     } catch (e) {
       inspect(e);

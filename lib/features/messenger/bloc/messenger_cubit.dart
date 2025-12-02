@@ -271,7 +271,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         return;
       }
 
-      final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call(organizationId);
+      final List<FolderEntity> dbFolders = await _getFoldersUseCase.call(organizationId);
       if (dbFolders.isEmpty) {
         // final initFolder = CreateFolderEntity(
         //   title: 'All',
@@ -284,8 +284,8 @@ class MessengerCubit extends Cubit<MessengerState> {
         // await addFolder(initFolder);
         return;
       }
-      final List<FolderItemEntity> initialFolders = [...dbFolders];
-      emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
+      // final List<FolderItemEntity> initialFolders = [...dbFolders];
+      // emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
     } catch (e) {
       inspect(e);
     }

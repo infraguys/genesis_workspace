@@ -13,19 +13,19 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
   Future<int> insertFolder({
     int? id,
     required String title,
-    required int iconCodePoint,
     int? backgroundColorValue,
     Set<int> unreadMessages = const <int>{},
     required int organizationId,
+    required String remoteUUID,
   }) {
     return into(folders).insert(
       FoldersCompanion.insert(
         id: id != null ? Value(id) : const Value.absent(),
         title: title,
-        iconCodePoint: iconCodePoint,
         backgroundColorValue: Value(backgroundColorValue),
         unreadMessages: Value(unreadMessages),
         organizationId: organizationId,
+        remoteUUID: remoteUUID,
       ),
       mode: InsertMode.insert,
     );
@@ -47,16 +47,12 @@ class FolderDao extends DatabaseAccessor<AppDatabase> with _$FolderDaoMixin {
   Future<int> updateFolder({
     required int id,
     String? title,
-    int? iconCodePoint,
     int? backgroundColorValue,
     Set<int>? unreadMessages,
   }) async {
     final companion = FoldersCompanion(
       title: title != null ? Value(title) : const Value.absent(),
-      iconCodePoint: iconCodePoint != null ? Value(iconCodePoint) : const Value.absent(),
-      backgroundColorValue: backgroundColorValue != null
-          ? Value(backgroundColorValue)
-          : const Value.absent(),
+      backgroundColorValue: backgroundColorValue != null ? Value(backgroundColorValue) : const Value.absent(),
       unreadMessages: unreadMessages != null ? Value(unreadMessages) : const Value.absent(),
     );
     return (update(folders)..where((tbl) => tbl.id.equals(id))).write(companion);

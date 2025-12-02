@@ -7,15 +7,29 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class FoldersRemoteDataSource {
-  final AllChatsApiClient _apiClient = AllChatsApiClient(
-    getIt<Dio>(),
-    baseUrl: "${AppConstants.baseUrl}/workspace/api/v1/",
-  );
   FoldersRemoteDataSource();
 
-  Future<void> add(CreateFolderDto folder) async {
+  AllChatsApiClient? _apiClient;
+  String? _cachedBaseUrl;
+
+  AllChatsApiClient get _apiClientForCurrentOrg {
+    final String currentBaseUrl = AppConstants.baseUrl;
+
+    // Пересоздаем клиента только если сменился baseUrl (смена организации).
+    if (_apiClient == null || _cachedBaseUrl != currentBaseUrl) {
+      _cachedBaseUrl = currentBaseUrl;
+      _apiClient = AllChatsApiClient(
+        getIt<Dio>(),
+        baseUrl: "$currentBaseUrl/workspace/v1/",
+      );
+    }
+
+    return _apiClient!;
+  }
+
+  Future<FolderDto> add(CreateFolderDto folder) async {
     try {
-      final response = await _apiClient.createFolder(folder);
+      final response = await _apiClientForCurrentOrg.createFolder(folder);
       return response;
     } catch (e) {
       rethrow;

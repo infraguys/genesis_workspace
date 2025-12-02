@@ -15,7 +15,8 @@ class FolderRepositoryImpl implements FolderRepository {
   @override
   Future<void> addFolder(CreateFolderEntity folder) async {
     final response = await _remoteDataSource.add(folder.toDto());
-    // await _localDataSource.add(folder);
+    final entity = response.toEntity(null);
+    await _localDataSource.add(entity);
   }
 
   @override

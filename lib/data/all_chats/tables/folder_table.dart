@@ -6,13 +6,11 @@ class Folders extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
 
-  IntColumn get iconCodePoint => integer()();
+  TextColumn get remoteUUID => text()();
 
   IntColumn get backgroundColorValue => integer().nullable()();
 
-  TextColumn get unreadMessages =>
-      text().map(const UnreadMessagesConverter()).withDefault(const Constant('[]'))();
+  TextColumn get unreadMessages => text().map(const UnreadMessagesConverter()).withDefault(const Constant('[]'))();
   TextColumn get systemType => text().nullable()();
-  IntColumn get organizationId =>
-      integer().references(Organizations, #id, onDelete: KeyAction.cascade)();
+  IntColumn get organizationId => integer().references(Organizations, #id, onDelete: KeyAction.cascade)();
 }
