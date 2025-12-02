@@ -771,7 +771,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     });
 
     regularChats.sort((a, b) {
-      // if (a.isMuted != b.isMuted) return a.isMuted ? 1 : -1;
       final aHasUnread = a.unreadMessages.isNotEmpty;
       final bHasUnread = b.unreadMessages.isNotEmpty;
       if (aHasUnread && !bHasUnread) return -1;
