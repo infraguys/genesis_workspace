@@ -20,8 +20,8 @@ import 'package:genesis_workspace/features/messenger/view/chat_item.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
-import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
+import 'package:genesis_workspace/features/messenger/view/right_side_panel/right_side_panel.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
@@ -591,7 +591,7 @@ class _MessengerViewState extends State<MessengerView>
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
                             width: value ? 315 : 0,
-                            child: InfoPanel(
+                            child: RightSidePanel(
                               isChannel: state.selectedChat?.streamId != null,
                               onClose: () => _isOpenNotifier.value = false,
                             ),

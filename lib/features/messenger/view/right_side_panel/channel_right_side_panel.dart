@@ -7,27 +7,11 @@ import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 
-class ChannelInfoPage extends StatefulWidget {
-  const ChannelInfoPage({super.key});
+class ChannelRightSidePanel extends StatelessWidget {
+  const ChannelRightSidePanel({super.key, required this.onClose});
 
-  @override
-  State<ChannelInfoPage> createState() => _ChannelInfoPageState();
-}
-
-class _ChannelInfoPageState extends State<ChannelInfoPage> {
-  @override
-  void initState() {
-    super.initState();
-
-    final chatState = context.read<ChannelChatCubit>().state;
-    if (chatState.channelMembers.isNotEmpty) {
-      context
-          .read<ChannelMembersInfoCubit>()
-          .getUsers(chatState.channelMembers);
-    }
-  }
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -35,18 +19,14 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
     final textColors = Theme.of(context).extension<TextColors>()!;
     final cardColors = Theme.of(context).extension<CardColors>()!;
 
-    return Scaffold(
-      appBar: AppBarContainer(
-        appBar: AppBar(
-          title: Text(
-            context.t.messengerView.channelInfo,
-            style: TextStyle(fontSize: 16, fontWeight: .w500),
-          ),
-          shape: RoundedRectangleBorder(borderRadius: .all(.zero)),
-        ),
-      ),
-      body: SizedBox(
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 315),
+      child: Container(
         width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: .circular(12.0),
+          color: theme.colorScheme.surface,
+        ),
         child: Column(
           crossAxisAlignment: .start,
           spacing: 20.0,
@@ -57,10 +37,28 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                 spacing: 12,
                 children: [
                   Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Text(
+                        context.t.messengerView.channelInfo,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      IconButton(
+                        onPressed: onClose,
+                        icon: Assets.icons.close.svg(),
+                      ),
+                    ],
+                  ),
+                  Row(
                     spacing: 16.0,
                     children: [
                       UserAvatar.group(size: 64),
-                      BlocBuilder<ChannelChatCubit, ChannelChatState>(
+                      BlocConsumer<ChannelChatCubit, ChannelChatState>(
+                        listener: (context, state) {
+                          if (state.channelMembers.isNotEmpty) {
+                            context.read<ChannelMembersInfoCubit>().getUsers(state.channelMembers);
+                          }
+                        },
                         builder: (context, state) {
                           final length = state.channelMembers.length;
                           return Column(

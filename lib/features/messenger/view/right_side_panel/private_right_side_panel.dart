@@ -6,12 +6,14 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 
-class PrivateInfoPage extends StatelessWidget {
-  const PrivateInfoPage({
+class PrivateRightSidePanel extends StatelessWidget {
+  const PrivateRightSidePanel({
     super.key, // ignore: unused_element_parameter
+    required this.onClose,
   });
+
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -19,17 +21,14 @@ class PrivateInfoPage extends StatelessWidget {
     final textColors = Theme.of(context).extension<TextColors>()!;
     final cardColors = Theme.of(context).extension<CardColors>()!;
 
-    return Scaffold(
-      appBar: AppBarContainer(
-        appBar: AppBar(
-          title: Text(context.t.information, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.zero)
-          ),
-        ),
-      ),
-      body: SizedBox(
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 315),
+      child: Container(
         width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: .circular(12.0),
+          color: theme.colorScheme.surface,
+        ),
         child: Column(
           crossAxisAlignment: .start,
           spacing: 20.0,
@@ -40,6 +39,16 @@ class PrivateInfoPage extends StatelessWidget {
                 crossAxisAlignment: .start,
                 spacing: 12,
                 children: [
+                  Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Text(
+                        context.t.information,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      IconButton(onPressed: onClose, icon: Assets.icons.close.svg()),
+                    ],
+                  ),
                   BlocBuilder<ChatCubit, ChatState>(
                     builder: (context, state) {
                       if (state.userEntity != null) {

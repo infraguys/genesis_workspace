@@ -34,7 +34,6 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -312,23 +311,15 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                         if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
                         BlocBuilder<ChatCubit, ChatState>(
                           builder: (context, state) {
-                            return GestureDetector(
-                              onTap: () {
-                                context.pushNamed(
-                                  Routes.chatInfo,
-                                  pathParameters: GoRouterState.of(context).pathParameters,
-                                );
-                              },
-                              child: Column(
-                                crossAxisAlignment: .start,
-                                children: [
-                                  Text(
-                                    userEntity.fullName,
-                                    style: titleTextStyle,
-                                  ),
-                                  userStatus,
-                                ],
-                              ),
+                            return Column(
+                              crossAxisAlignment: .start,
+                              children: [
+                                Text(
+                                  userEntity.fullName,
+                                  style: titleTextStyle,
+                                ),
+                                userStatus,
+                              ],
                             );
                           },
                         ),

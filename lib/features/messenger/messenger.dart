@@ -16,6 +16,12 @@ class Messenger extends StatelessWidget {
         BlocProvider(
           create: (context) => getIt<MessengerCubit>(),
         ),
+        BlocProvider(
+          create: (context) => getIt<ChannelChatCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<ChatCubit>(),
+        ),
       ],
       child: MessengerView(),
     );
