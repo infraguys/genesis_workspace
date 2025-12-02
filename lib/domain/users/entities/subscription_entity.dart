@@ -17,6 +17,22 @@ class SubscriptionEntity {
     required this.isMuted,
   });
 
+  factory SubscriptionEntity.fake({
+    String name = '-1',
+    List<int>? subscribers,
+    int streamId = 0,
+    String description = 'Mock subscription',
+    String color = '#CCCCCC',
+    bool isMuted = false,
+  }) => SubscriptionEntity(
+    name: name,
+    subscribers: subscribers ?? const <int>[1, 2, 3],
+    streamId: streamId,
+    description: description,
+    color: color,
+    isMuted: isMuted,
+  );
+
   ChannelEntity toChannelEntity() => ChannelEntity(
     name: name,
     subscribers: subscribers,

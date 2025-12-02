@@ -790,6 +790,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i247.GetFolderIdsForChatUseCase>(),
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
         gh<_i766.ProfileCubit>(),
+        gh<_i988.GetSubscribedChannelsUseCase>(),
+        gh<_i541.UpdateSubscriptionSettingsUseCase>(),
       ),
     );
     return this;

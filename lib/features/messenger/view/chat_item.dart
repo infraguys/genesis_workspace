@@ -134,6 +134,21 @@ class _ChatItemState extends State<ChatItem> {
               },
               child: Text(widget.chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat),
             ),
+            (widget.chat.type == ChatType.channel && widget.chat.isMuted)
+                ? TextButton(
+                    child: Text(context.t.channel.unmuteChannel),
+                    onPressed: () async {
+                      context.pop();
+                      await context.read<MessengerCubit>().unmuteChannel(widget.chat);
+                    },
+                  )
+                : TextButton(
+                    child: Text(context.t.channel.muteChannel),
+                    onPressed: () async {
+                      context.pop();
+                      await context.read<MessengerCubit>().muteChannel(widget.chat);
+                    },
+                  ),
           ],
         ),
       ),
@@ -185,16 +200,32 @@ class _ChatItemState extends State<ChatItem> {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      widget.chat.displayTitle,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: textColors.text100,
-                                        fontWeight: currentSize(context) <= ScreenSize.tablet
-                                            ? FontWeight.w500
-                                            : FontWeight.w400,
-                                      ),
+                                    Row(
+                                      spacing: 4,
+                                      children: [
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: 185,
+                                          ),
+                                          child: Text(
+                                            widget.chat.displayTitle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: textColors.text100,
+                                              fontWeight: currentSize(context) <= ScreenSize.tablet
+                                                  ? FontWeight.w500
+                                                  : FontWeight.w400,
+                                            ),
+                                          ),
+                                        ),
+                                        if (widget.chat.isMuted)
+                                          Icon(
+                                            Icons.headset_off,
+                                            size: 14,
+                                            color: AppColors.noticeDisabled,
+                                          ),
+                                      ],
                                     ),
                                     if (widget.chat.type == ChatType.channel)
                                       Text(
@@ -234,7 +265,10 @@ class _ChatItemState extends State<ChatItem> {
                                               ),
                                       ],
                                     ),
-                                    UnreadBadge(count: widget.chat.unreadMessages.length),
+                                    UnreadBadge(
+                                      count: widget.chat.unreadMessages.length,
+                                      isMuted: widget.chat.isMuted,
+                                    ),
                                   ],
                                 ),
                               ),

@@ -5,9 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
+import 'package:genesis_workspace/core/enums/subscription_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
@@ -27,11 +30,16 @@ import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/subscription_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/update_subscription_settings_use_case.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
@@ -54,6 +62,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   final SetFoldersForChatUseCase _setFoldersForChatUseCase;
   final GetFolderIdsForChatUseCase _getFolderIdsForChatUseCase;
   final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
+  final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
+  final UpdateSubscriptionSettingsUseCase _updateSubscriptionSettingsUseCase;
 
   final MultiPollingService _realTimeService;
   final ProfileCubit _profileCubit;
@@ -61,6 +71,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsEventsSubscription;
   late final StreamSubscription<ProfileState> _profileStateSubscription;
+  late final StreamSubscription<SubscriptionEventEntity> _subscriptionEventsSubscription;
   String _searchQuery = '';
   int _lastMessageId = 0;
   int _loadingTimes = 0;
@@ -82,6 +93,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getFolderIdsForChatUseCase,
     this._updatePinnedChatOrderUseCase,
     this._profileCubit,
+    this._getSubscribedChannelsUseCase,
+    this._updateSubscriptionSettingsUseCase,
   ) : super(
         MessengerState(
           selfUser: null,
@@ -95,6 +108,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           filteredChatIds: null,
           filteredChats: null,
           foundOldestMessage: false,
+          subscribedChannels: [],
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -102,6 +116,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       _onMessageFlagsEvents,
     );
     _profileStateSubscription = _profileCubit.stream.listen(_onProfileStateChanged);
+    _subscriptionEventsSubscription = _realTimeService.subscriptionEventsStream.listen(
+      _onSubscriptionEvents,
+    );
   }
 
   void _onProfileStateChanged(ProfileState profileState) {
@@ -127,10 +144,20 @@ class MessengerCubit extends Cubit<MessengerState> {
         chat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
         chats[indexOfChat] = chat;
       } else {
-        final chat = ChatEntity.createChatFromMessage(
+        ChatEntity chat = ChatEntity.createChatFromMessage(
           message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),
           isMyMessage: isMyMessage,
         );
+        if (chat.type == ChatType.channel) {
+          //API zulip does not return the ID in get subscribed channels, so we need to find it by name
+          final subscription = state.subscribedChannels.firstWhere(
+            (subscription) => subscription.name == chat.displayTitle,
+            orElse: SubscriptionEntity.fake,
+          );
+          if (subscription.isMuted) {
+            chat = chat.copyWith(isMuted: true);
+          }
+        }
         chats.add(chat);
       }
     }
@@ -154,6 +181,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         clientGravatar: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      final channelsResponse = await _getSubscribedChannelsUseCase.call(false);
       _lastMessageId = response.messages.first.id;
       final messages = response.messages;
       final foundOldest = response.foundOldest;
@@ -161,6 +189,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         state.copyWith(
           messages: messages,
           foundOldestMessage: foundOldest,
+          subscribedChannels: channelsResponse,
         ),
       );
       _createChatsFromMessages(messages);
@@ -253,6 +282,34 @@ class MessengerCubit extends Cubit<MessengerState> {
       }
     }
     emit(state.copyWith(pinnedChats: response, chats: updatedChats));
+  }
+
+  Future<void> muteChannel(ChatEntity chat) async {
+    if (chat.type != ChatType.channel) {
+      return;
+    }
+    try {
+      final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
+        updates: [SubscriptionUpdateEntity(streamId: chat.streamId ?? -1, isMuted: true)],
+      );
+      await _updateSubscriptionSettingsUseCase.call(body);
+    } catch (e) {
+      inspect(e);
+    }
+  }
+
+  Future<void> unmuteChannel(ChatEntity chat) async {
+    if (chat.type != ChatType.channel) {
+      return;
+    }
+    try {
+      final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
+        updates: [SubscriptionUpdateEntity(streamId: chat.streamId ?? -1, isMuted: false)],
+      );
+      await _updateSubscriptionSettingsUseCase.call(body);
+    } catch (e) {
+      inspect(e);
+    }
   }
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
@@ -591,11 +648,24 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
   }
 
+  void _onSubscriptionEvents(SubscriptionEventEntity event) {
+    if (event.op == SubscriptionOp.update && event.property == SubscriptionProperty.isMuted) {
+      List<ChatEntity> updatedChats = [...state.chats];
+      ChatEntity chat = updatedChats.firstWhere((chat) => chat.streamId == event.streamId);
+      final indexOfChat = updatedChats.indexOf(chat);
+      chat = chat.copyWith(isMuted: event.value.raw == true ? true : false);
+      updatedChats[indexOfChat] = chat;
+      emit(state.copyWith(chats: updatedChats));
+      _sortChats();
+    }
+  }
+
   @override
   Future<void> close() {
     _messagesEventsSubscription.cancel();
     _messageFlagsEventsSubscription.cancel();
     _profileStateSubscription.cancel();
+    _subscriptionEventsSubscription.cancel();
     return super.close();
   }
 
