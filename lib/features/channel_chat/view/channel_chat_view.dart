@@ -32,6 +32,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -283,35 +284,36 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          state.channel?.name ?? 'Channel Name',
-                          style: titleTextStyle,
-                        ),
-                        SizedBox(
-                          width: 12,
-                        ),
-                        if (widget.topicName != null) ...[
-                          Container(
-                            height: 16,
-                            width: 3,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadiusGeometry.circular(16),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 8,
-                          ),
+                    GestureDetector(
+                      onTap: () {
+                        context.pushNamed(
+                          Routes.channelInfo,
+                          pathParameters: GoRouterState.of(context).pathParameters,
+                        );
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
                           Text(
-                            '# ${widget.topicName!}',
-                            style: topicTextStyle,
+                            state.channel?.name ?? context.t.channel.channelName,
+                            style: titleTextStyle,
                           ),
+                          SizedBox(width: 12),
+                          if (widget.topicName != null) ...[
+                            Container(
+                              height: 16,
+                              width: 3,
+                              decoration: BoxDecoration(color: AppColors.primary, borderRadius: .circular(16)),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              '# ${widget.topicName!}',
+                              style: topicTextStyle,
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                     Text(
                       context.t.group.membersCount(count: state.channel?.subscriberCount ?? 0),

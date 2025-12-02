@@ -171,6 +171,7 @@
     "delete_organization": "Delete organization"
   },
   "channel": {
+    "channelName": "Channel name",
     "muteChannel": "Mute channel",
     "unmuteChannel": "Unmute channel"
   },

@@ -177,6 +177,7 @@
     "delete_organization": "Удалить организацию"
   },
   "channel": {
+    "channelName": "Название канала",
     "muteChannel": "Заглушить канал",
     "unmuteChannel": "Включить уведомления канала"
   },

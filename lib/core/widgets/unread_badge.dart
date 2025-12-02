@@ -22,7 +22,7 @@ class UnreadBadge extends StatelessWidget {
       child: Container(
         padding: EdgeInsetsGeometry.symmetric(horizontal: 6, vertical: 1),
         decoration: BoxDecoration(
-          color: isMuted ? colorScheme.outlineVariant : AppColors.counterBadge,
+          color: isMuted ? AppColors.noticeDisabled : AppColors.counterBadge,
           borderRadius: BorderRadius.circular(999),
         ),
         alignment: Alignment.center,
