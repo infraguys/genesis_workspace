@@ -55,8 +55,8 @@ class Routes {
   static const String messenger = '/messenger';
   static const String notifications = '/notifications';
   static const String call = '/call';
-  static const String chatInfo = 'chat_info';
-  static const String channelInfo = 'channel_info';
+  static const String chatInfo = 'chat-info';
+  static const String channelInfo = 'channel-info';
 }
 
 final router = GoRouter(
