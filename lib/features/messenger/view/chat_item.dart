@@ -134,21 +134,18 @@ class _ChatItemState extends State<ChatItem> {
               },
               child: Text(widget.chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat),
             ),
-            (widget.chat.type == ChatType.channel && widget.chat.isMuted)
-                ? TextButton(
-                    child: Text(context.t.channel.unmuteChannel),
-                    onPressed: () async {
-                      context.pop();
-                      await context.read<MessengerCubit>().unmuteChannel(widget.chat);
-                    },
-                  )
-                : TextButton(
-                    child: Text(context.t.channel.muteChannel),
-                    onPressed: () async {
-                      context.pop();
-                      await context.read<MessengerCubit>().muteChannel(widget.chat);
-                    },
-                  ),
+            if (widget.chat.type == ChatType.channel)
+              TextButton(
+                child: Text(widget.chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel),
+                onPressed: () async {
+                  context.pop();
+                  if (widget.chat.isMuted) {
+                    await context.read<MessengerCubit>().unmuteChannel(widget.chat);
+                  } else {
+                    await context.read<MessengerCubit>().muteChannel(widget.chat);
+                  }
+                },
+              ),
           ],
         ),
       ),
