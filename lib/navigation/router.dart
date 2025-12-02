@@ -16,6 +16,7 @@ import 'package:genesis_workspace/features/feed/feed.dart';
 import 'package:genesis_workspace/features/inbox/inbox.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
+import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/settings/settings.dart';
@@ -54,6 +55,8 @@ class Routes {
   static const String messenger = '/messenger';
   static const String notifications = '/notifications';
   static const String call = '/call';
+  static const String chatInfo = 'chat_info';
+  static const String channelInfo = 'channel_info';
 }
 
 final router = GoRouter(
@@ -231,6 +234,15 @@ final router = GoRouter(
             return Chat(userIds: userIds, unreadMessagesCount: unread);
           }
         },
+        routes: [
+          GoRoute(
+            path: 'chat_info',
+            name: Routes.chatInfo,
+            builder: (context, state) {
+              return InfoPage(isChannel: false);
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: '${Routes.channels}/:channelId',
@@ -276,6 +288,15 @@ final router = GoRouter(
             );
           }
         },
+        routes: [
+          GoRoute(
+            path: 'channel_info',
+            name: Routes.channelInfo,
+            builder: (context, state) {
+              return InfoPage(isChannel: true);
+            },
+          ),
+        ]
       ),
     ],
     GoRoute(
