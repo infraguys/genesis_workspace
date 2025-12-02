@@ -294,7 +294,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       await _updateSubscriptionSettingsUseCase.call(body);
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
@@ -308,7 +310,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       await _updateSubscriptionSettingsUseCase.call(body);
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
