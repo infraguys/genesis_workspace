@@ -78,7 +78,7 @@ class _MessengerViewState extends State<MessengerView>
       builder: (dialogContext) => CreateFolderDialog(
         initial: folder,
         onSubmit: (updated) async {
-          await context.read<MessengerCubit>().updateFolder(updated);
+          // await context.read<MessengerCubit>().updateFolder(updated);
           Navigator.of(dialogContext).pop();
         },
       ),
@@ -483,8 +483,8 @@ class _MessengerViewState extends State<MessengerView>
                                 final String titleText = (chatTitle?.isNotEmpty ?? false)
                                     ? context.t.call.activeCallIn(name: chatTitle!)
                                     : (callState.meetLocationName.isNotEmpty
-                                        ? context.t.call.activeCallIn(name: callState.meetLocationName)
-                                        : context.t.call.activeCall);
+                                          ? context.t.call.activeCallIn(name: callState.meetLocationName)
+                                          : context.t.call.activeCall);
 
                                 return AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 200),

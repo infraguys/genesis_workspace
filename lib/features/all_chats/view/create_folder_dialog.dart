@@ -2,11 +2,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/enums/folder_system_type.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class CreateFolderDialog extends StatefulWidget {
-  final Function(FolderItemEntity folder) onSubmit;
+  final Function(CreateFolderEntity folder) onSubmit;
   final FolderItemEntity? initial;
   const CreateFolderDialog({super.key, required this.onSubmit, this.initial});
 
@@ -41,18 +43,15 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     super.dispose();
   }
 
-  FolderItemEntity onSubmitPressed() {
+  CreateFolderEntity onSubmitPressed() {
     final int? organizationId = widget.initial?.organizationId ?? AppConstants.selectedOrganizationId;
     if (organizationId == null) {
       throw StateError('Organization is not selected');
     }
-    final FolderItemEntity folder = FolderItemEntity(
-      id: widget.initial?.id,
+    final CreateFolderEntity folder = CreateFolderEntity(
       title: titleController.text.trim(),
-      iconData: selectedIconData!,
-      backgroundColor: selectedColor,
-      pinnedChats: widget.initial?.pinnedChats ?? [],
-      organizationId: organizationId,
+      backgroundColor: selectedColor!,
+      systemType: FolderSystemType.created,
     );
     return folder;
   }
@@ -91,7 +90,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                     TextButton(
                       onPressed: isCreateEnabled
                           ? () {
-                              final FolderItemEntity folder = onSubmitPressed();
+                              final CreateFolderEntity folder = onSubmitPressed();
                               widget.onSubmit(folder);
                             }
                           : null,
@@ -196,9 +195,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.black12,
+                              color: isSelected ? Theme.of(context).colorScheme.primary : Colors.black12,
                               width: isSelected ? 2 : 1,
                             ),
                           ),

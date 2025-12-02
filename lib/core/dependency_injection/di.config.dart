@@ -22,6 +22,8 @@ import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_s
     as _i277;
 import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart'
     as _i180;
+import 'package:genesis_workspace/data/all_chats/datasources/folders_remote_data_source.dart'
+    as _i570;
 import 'package:genesis_workspace/data/all_chats/datasources/pinned_chats_local_data_source.dart'
     as _i796;
 import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_membership_repository_impl.dart'
@@ -264,6 +266,9 @@ extension GetItInjectableX on _i174.GetIt {
     final coreModule = _$CoreModule();
     final realTimeModule = _$RealTimeModule();
     gh.factory<_i440.DioFactory>(() => _i440.DioFactory());
+    gh.factory<_i570.FoldersRemoteDataSource>(
+      () => _i570.FoldersRemoteDataSource(),
+    );
     gh.factory<_i419.OrganizationsDataSource>(
       () => _i419.OrganizationsDataSource(),
     );
@@ -448,6 +453,12 @@ extension GetItInjectableX on _i174.GetIt {
         getUsersUseCase: gh<_i194.GetUsersUseCase>(),
       ),
     );
+    gh.factory<_i48.FolderRepository>(
+      () => _i957.FolderRepositoryImpl(
+        gh<_i277.FolderLocalDataSource>(),
+        gh<_i570.FoldersRemoteDataSource>(),
+      ),
+    );
     gh.factory<_i758.MentionsCubit>(
       () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
     );
@@ -481,9 +492,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i477.RegisterQueueUseCase>(
       () => _i477.RegisterQueueUseCase(gh<_i703.RealTimeEventsRepository>()),
-    );
-    gh.factory<_i48.FolderRepository>(
-      () => _i957.FolderRepositoryImpl(gh<_i277.FolderLocalDataSource>()),
     );
     gh.factory<_i796.PinnedChatsLocalDataSource>(
       () => _i796.PinnedChatsLocalDataSource(gh<_i691.PinnedChatsDao>()),

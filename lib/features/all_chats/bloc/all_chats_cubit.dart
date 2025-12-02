@@ -1,9 +1,9 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
@@ -68,13 +68,13 @@ class AllChatsCubit extends Cubit<AllChatsState> {
         ),
       );
 
-  Future<void> addFolder(FolderItemEntity folder) async {
+  Future<void> addFolder(CreateFolderEntity folder) async {
     try {
       await _addFolderUseCase.call(folder);
-      final updatedFolders = [...state.folders];
-      updatedFolders.add(folder.copyWith(id: updatedFolders.length));
-      emit(state.copyWith(folders: updatedFolders));
-      await _refreshAllFolderMembers();
+      // final updatedFolders = [...state.folders];
+      // updatedFolders.add(folder.copyWith(id: updatedFolders.length));
+      // emit(state.copyWith(folders: updatedFolders));
+      // await _refreshAllFolderMembers();
     } catch (e) {
       inspect(e);
     }
@@ -89,16 +89,16 @@ class AllChatsCubit extends Cubit<AllChatsState> {
 
       final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call(organizationId);
       if (dbFolders.isEmpty) {
-        final initFolder = FolderItemEntity(
-          id: 0,
-          title: 'All',
-          systemType: SystemFolderType.all,
-          iconData: Icons.markunread,
-          unreadMessages: const <int>{},
-          pinnedChats: [],
-          organizationId: organizationId,
-        );
-        await addFolder(initFolder);
+        // final initFolder = FolderItemEntity(
+        //   id: 0,
+        //   title: 'All',
+        //   systemType: SystemFolderType.all,
+        //   iconData: Icons.markunread,
+        //   unreadMessages: const <int>{},
+        //   pinnedChats: [],
+        //   organizationId: organizationId,
+        // );
+        // await addFolder(initFolder);
         return;
       }
       final List<FolderItemEntity> initialFolders = [...dbFolders];

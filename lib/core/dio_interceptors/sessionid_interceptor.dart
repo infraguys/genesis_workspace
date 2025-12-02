@@ -25,7 +25,7 @@ class SessionIdInterceptor extends Interceptor {
       // --- 2) sessionid: добавляем только его (независимо от CSRF) ---
       if (sessionId != null && sessionId.isNotEmpty) {
         cookieParts.add('__Host-sessionid=$sessionId');
-        if (!skipBaseUrlRewrite) {
+        if (!skipBaseUrlRewrite && !options.baseUrl.contains('/workspace/')) {
           // Referer полезен и для GET сессии
           options.baseUrl = '${AppConstants.baseUrl}/json';
         }

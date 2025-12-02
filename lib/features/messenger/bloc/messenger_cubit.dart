@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
@@ -273,15 +273,15 @@ class MessengerCubit extends Cubit<MessengerState> {
 
       final List<FolderItemEntity> dbFolders = await _getFoldersUseCase.call(organizationId);
       if (dbFolders.isEmpty) {
-        final initFolder = FolderItemEntity(
-          title: 'All',
-          systemType: SystemFolderType.all,
-          iconData: Icons.markunread,
-          unreadMessages: const <int>{},
-          pinnedChats: [],
-          organizationId: organizationId,
-        );
-        await addFolder(initFolder);
+        // final initFolder = CreateFolderEntity(
+        //   title: 'All',
+        //   systemType: SystemFolderType.all,
+        //   iconData: Icons.markunread,
+        //   unreadMessages: const <int>{},
+        //   pinnedChats: [],
+        //   organizationId: organizationId,
+        // );
+        // await addFolder(initFolder);
         return;
       }
       final List<FolderItemEntity> initialFolders = [...dbFolders];
@@ -291,12 +291,12 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  Future<void> addFolder(FolderItemEntity folder) async {
+  Future<void> addFolder(CreateFolderEntity folder) async {
     try {
       await _addFolderUseCase.call(folder);
-      final updatedFolders = [...state.folders];
-      updatedFolders.add(folder.copyWith(id: updatedFolders.length));
-      emit(state.copyWith(folders: updatedFolders));
+      // final updatedFolders = [...state.folders];
+      // updatedFolders.add(folder.copyWith(id: updatedFolders.length));
+      // emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
       inspect(e);
     }

@@ -1,0 +1,4 @@
+enum FolderSystemType {
+  all,
+  created,
+}

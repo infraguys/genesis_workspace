@@ -16,6 +16,12 @@ class BaseUrlInterceptor extends Interceptor {
       return;
     }
 
+    // Не трогаем кастомные workspace-endpoint'ы.
+    if (options.baseUrl.contains('/workspace/')) {
+      super.onRequest(options, handler);
+      return;
+    }
+
     final String? saved = _prefs.getString(SharedPrefsKeys.baseUrl);
 
     if (saved == null || saved.trim().isEmpty) {
