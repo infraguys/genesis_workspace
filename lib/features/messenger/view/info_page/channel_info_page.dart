@@ -192,67 +192,60 @@ class _MemberItem extends StatelessWidget {
     return Material(
       shape: RoundedRectangleBorder(borderRadius: .circular(8.0)),
       color: cardColors.base,
-      child: InkWell(
-        onTap: () {},
-        borderRadius: .circular(8),
-        overlayColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.hovered) ? cardColors.active : null,
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 65),
-          child: Stack(
-            alignment: .centerLeft,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 65),
-                child: Padding(
-                  padding: const .symmetric(horizontal: 8),
-                  child: Row(
-                    crossAxisAlignment: .center,
-                    children: [
-                      UserAvatar(
-                        avatarUrl: user.avatarUrl,
-                        // size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: .min,
-                          crossAxisAlignment: .start,
-                          children: [
-                            Text(
-                              user.fullName,
-                              maxLines: 1,
-                              overflow: .ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: textColors.text100,
-                                fontSize: 14,
-                                // fontWeight: currentSize(context) <= ScreenSize.tablet
-                                //     ? FontWeight.w500
-                                //     : FontWeight.w400,
-                              ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 65),
+        child: Stack(
+          alignment: .centerLeft,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 65),
+              child: Padding(
+                padding: const .symmetric(horizontal: 8),
+                child: Row(
+                  crossAxisAlignment: .center,
+                  children: [
+                    UserAvatar(
+                      avatarUrl: user.avatarUrl,
+                      // size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: .min,
+                        crossAxisAlignment: .start,
+                        children: [
+                          Text(
+                            user.fullName,
+                            maxLines: 1,
+                            overflow: .ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: textColors.text100,
+                              fontSize: 14,
+                              // fontWeight: currentSize(context) <= ScreenSize.tablet
+                              //     ? FontWeight.w500
+                              //     : FontWeight.w400,
                             ),
-                            Text(
-                              'Был 45 минут назад',
-                              maxLines: 1,
-                              overflow: .ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: textColors.text30,
-                                fontSize: 12.0,
-                                // fontWeight: currentSize(context) <= ScreenSize.tablet
-                                //     ? FontWeight.w500
-                                //     : FontWeight.w400,
-                              ),
+                          ),
+                          Text(
+                            'Был 45 минут назад',
+                            maxLines: 1,
+                            overflow: .ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: textColors.text30,
+                              fontSize: 12.0,
+                              // fontWeight: currentSize(context) <= ScreenSize.tablet
+                              //     ? FontWeight.w500
+                              //     : FontWeight.w400,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
