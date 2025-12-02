@@ -656,7 +656,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       List<ChatEntity> updatedChats = [...state.chats];
       ChatEntity chat = updatedChats.firstWhere((chat) => chat.streamId == event.streamId);
       final indexOfChat = updatedChats.indexOf(chat);
-      chat = chat.copyWith(isMuted: event.value.raw == true ? true : false);
+      chat = chat.copyWith(isMuted: event.value.raw == true);
       updatedChats[indexOfChat] = chat;
       emit(state.copyWith(chats: updatedChats));
       _sortChats();
