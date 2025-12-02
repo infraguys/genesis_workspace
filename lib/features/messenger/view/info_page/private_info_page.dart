@@ -15,7 +15,6 @@ class PrivateInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
     final cardColors = Theme.of(context).extension<CardColors>()!;
 
