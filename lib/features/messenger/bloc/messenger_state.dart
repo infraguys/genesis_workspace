@@ -13,6 +13,7 @@ class MessengerState {
   Set<int>? filteredChatIds;
   List<ChatEntity>? filteredChats;
   final bool foundOldestMessage;
+  final List<SubscriptionEntity> subscribedChannels;
 
   MessengerState({
     this.selfUser,
@@ -27,6 +28,7 @@ class MessengerState {
     this.filteredChatIds,
     this.filteredChats,
     required this.foundOldestMessage,
+    required this.subscribedChannels,
   });
 
   MessengerState copyWith({
@@ -42,6 +44,7 @@ class MessengerState {
     Set<int>? filteredChatIds,
     List<ChatEntity>? filteredChats,
     bool? foundOldestMessage,
+    List<SubscriptionEntity>? subscribedChannels,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -56,6 +59,7 @@ class MessengerState {
       filteredChatIds: filteredChatIds ?? this.filteredChatIds,
       filteredChats: filteredChats ?? this.filteredChats,
       foundOldestMessage: foundOldestMessage ?? this.foundOldestMessage,
+      subscribedChannels: subscribedChannels ?? this.subscribedChannels,
     );
   }
 }
