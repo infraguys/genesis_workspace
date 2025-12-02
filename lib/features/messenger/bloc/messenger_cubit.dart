@@ -149,9 +149,8 @@ class MessengerCubit extends Cubit<MessengerState> {
           isMyMessage: isMyMessage,
         );
         if (chat.type == ChatType.channel) {
-          //API zulip does not return the ID in get subscribed channels, so we need to find it by name
           final subscription = state.subscribedChannels.firstWhere(
-            (subscription) => subscription.name == chat.displayTitle,
+            (subscription) => subscription.streamId == chat.streamId,
             orElse: SubscriptionEntity.fake,
           );
           if (subscription.isMuted) {
