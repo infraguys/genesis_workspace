@@ -76,7 +76,6 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                       final f = userFolders[index];
                       final id = f.uuid;
                       final selected = _selectedIds.contains(id);
-                      print(f.title);
                       return CheckboxListTile(
                         value: selected,
                         onChanged: (value) {

@@ -104,6 +104,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       _onMessageFlagsEvents,
     );
     _profileStateSubscription = _profileCubit.stream.listen(_onProfileStateChanged);
+    _onProfileStateChanged(_profileCubit.state);
     _subscriptionEventsSubscription = _realTimeService.subscriptionEventsStream.listen(
       _onSubscriptionEvents,
     );
@@ -120,7 +121,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _createChatsFromMessages(List<MessageEntity> messages) {
     final chats = [...state.chats];
     final unreadMessages = [...state.unreadMessages];
-    inspect(state.selfUser?.userId);
     for (var message in messages.reversed) {
       final recipientId = message.recipientId;
       final isMyMessage = message.isMyMessage(state.selfUser?.userId);
@@ -536,6 +536,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   void resetState() {
     _searchQuery = '';
     emit(MessengerState.initial);
+    _onProfileStateChanged(_profileCubit.state);
   }
 
   void _onMessageEvents(MessageEventEntity event) {
