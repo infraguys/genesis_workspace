@@ -1,19 +1,20 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
-import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
-import 'package:genesis_workspace/core/widgets/message/actions_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_call_body.dart';
+import 'package:genesis_workspace/core/widgets/message/message_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
 import 'package:genesis_workspace/core/widgets/message/message_time.dart';
@@ -62,8 +63,8 @@ class MessageItem extends StatefulWidget {
 }
 
 class _MessageItemState extends State<MessageItem> {
-  final actionsPopupKey = GlobalKey<CustomPopupState>();
   late final GlobalObjectKey messageKey;
+  late final MenuController _menuController;
 
   late final MessagesCubit messagesCubit;
 
@@ -75,10 +76,17 @@ class _MessageItemState extends State<MessageItem> {
   void initState() {
     messageKey = GlobalObjectKey(widget.message);
     messagesCubit = context.read<MessagesCubit>();
+    _menuController = MenuController();
     super.initState();
   }
 
   final parser = EmojiParser();
+
+  @override
+  void dispose() {
+    _menuController.close();
+    super.dispose();
+  }
 
   void joinCall(BuildContext context) async {
     final String meetingLink = extractMeetingLink(widget.message.content);
@@ -135,6 +143,70 @@ class _MessageItemState extends State<MessageItem> {
     }
   }
 
+  Future<void> openEmojiPicker() async {
+    _menuController.close();
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          backgroundColor: theme.colorScheme.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          contentPadding: EdgeInsets.zero,
+          content: SizedBox(
+            width: 340,
+            height: 360,
+            child: EmojiPicker(
+              onEmojiSelected: (category, emoji) {
+                final selected = parser.getEmoji(emoji.emoji);
+                handleEmojiSelected(selected.name);
+                Navigator.of(context).pop();
+              },
+              config: Config(
+                height: 360,
+                emojiViewConfig: const EmojiViewConfig(emojiSizeMax: 22, backgroundColor: Colors.transparent),
+                categoryViewConfig: CategoryViewConfig(
+                  backgroundColor: theme.colorScheme.surface,
+                  iconColorSelected: theme.colorScheme.primary,
+                  iconColor: theme.colorScheme.outline,
+                ),
+                bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void openMobileOverlay() {
+    final renderBox = messageKey.currentContext?.findRenderObject() as RenderBox?;
+    final position = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+
+    late OverlayEntry overlay;
+    overlay = OverlayEntry(
+      builder: (_) => MessageActionsOverlay(
+        message: widget.message,
+        position: position,
+        onTapQuote: () {
+          widget.onTapQuote(widget.message.id);
+        },
+        onClose: () => overlay.remove(),
+        onEdit: () {
+          final body = UpdateMessageRequestEntity(
+            messageId: widget.message.id,
+            content: widget.message.content,
+          );
+          widget.onTapEditMessage(body);
+        },
+        messageContent: MessageHtml(content: widget.message.content),
+        isOwnMessage: widget.isMyMessage,
+      ),
+    );
+
+    Overlay.of(context).insert(overlay);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -177,194 +249,181 @@ class _MessageItemState extends State<MessageItem> {
 
     return Skeletonizer(
       enabled: widget.isSkeleton,
-      child: Align(
-        alignment: widget.isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-        child: CustomPopup(
-          key: actionsPopupKey,
-          position: PopupPosition.auto,
-          animationCurve: Curves.bounceInOut,
-          contentPadding: EdgeInsets.zero,
-          rootNavigator: true,
-          isLongPress: true,
-          contentRadius: 8,
-          arrowColor: theme.colorScheme.surface,
-          backgroundColor: theme.colorScheme.surface,
-          content: ActionsContextMenu(
-            messageId: widget.message.id,
-            isMyMessage: widget.isMyMessage,
-            onEmojiSelected: (emojiName) async {
-              await handleEmojiSelected(emojiName);
-            },
+      child: MenuAnchor(
+        controller: _menuController,
+        menuChildren: [
+          MessageContextMenu(
             isStarred: isStarred,
-            popupKey: actionsPopupKey,
-            onTapStarred: () async {
-              await handleToggleIsStarred(isStarred);
-            },
-            onTapDelete: () async {
-              await handleDeleteMessage();
-            },
-            onTapQuote: () {
+            onReply: () {
+              _menuController.close();
               widget.onTapQuote(widget.message.id);
             },
-            onTapEdit: () async {
-              final body = UpdateMessageRequestEntity(
-                messageId: widget.message.id,
-                content: widget.message.content,
-              );
-              // print(message.content);
-              widget.onTapEditMessage(body);
+            onEdit: widget.isMyMessage
+                ? () {
+                    _menuController.close();
+                    final body = UpdateMessageRequestEntity(
+                      messageId: widget.message.id,
+                      content: widget.message.content,
+                    );
+                    widget.onTapEditMessage(body);
+                  }
+                : null,
+            onCopy: () async {
+              _menuController.close();
             },
+            onToggleStar: () async {
+              _menuController.close();
+              await handleToggleIsStarred(isStarred);
+            },
+            onDelete: widget.isMyMessage
+                ? () async {
+                    _menuController.close();
+                    await handleDeleteMessage();
+                  }
+                : null,
+            onEmojiSelected: (emoji) async {
+              _menuController.close();
+              await handleEmojiSelected(emoji);
+            },
+            onOpenEmojiPicker: openEmojiPicker,
           ),
-          child: ConstrainedBox(
-            key: messageKey,
-            constraints: BoxConstraints(
-              maxWidth: (MediaQuery.of(context).size.width * 0.9) - (widget.isMyMessage ? 30 : 0),
+        ],
+        builder: (context, controller, child) {
+          return Align(
+            alignment: widget.isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
+            child: ConstrainedBox(
+              key: messageKey,
+              constraints: BoxConstraints(
+                maxWidth: (MediaQuery.of(context).size.width * 0.9) - (widget.isMyMessage ? 30 : 0),
+              ),
+              child: Row(
+                mainAxisSize: .min,
+                mainAxisAlignment: widget.isMyMessage ? .end : .start,
+                crossAxisAlignment: .end,
+                children: [
+                  if (showAvatar) ...[
+                    avatar,
+                    const SizedBox(width: 12),
+                  ],
+                  if (!showAvatar && !widget.isMyMessage) const SizedBox(width: 44),
+                  GestureDetector(
+                    onSecondaryTapDown: (details) {
+                      if (controller.isOpen) {
+                        controller.close();
+                      }
+                      controller.open(position: details.localPosition);
+                    },
+                    onLongPress: () {
+                      if (currentSize(context) <= ScreenSize.tablet) {
+                        openMobileOverlay();
+                      } else {
+                        controller.close();
+                        controller.open();
+                      }
+                    },
+                    child: child,
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: widget.isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (showAvatar) ...[avatar, const SizedBox(width: 12)],
-                if (!showAvatar && !widget.isMyMessage) const SizedBox(width: 44),
-                GestureDetector(
-                  onTap: () async {
-                    inspect(widget.message.content);
-                  },
-                  onSecondaryTap: () {
-                    actionsPopupKey.currentState?.show();
-                  },
-                  onLongPress: () {
-                    if (currentSize(context) <= ScreenSize.tablet) {
-                      final renderBox = context.findRenderObject() as RenderBox;
-                      final position = renderBox.localToGlobal(Offset.zero);
-
-                      late OverlayEntry overlay;
-                      overlay = OverlayEntry(
-                        builder: (_) => MessageActionsOverlay(
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          constraints: (showAvatar)
+              ? BoxConstraints(
+                  minHeight: 40,
+                  maxWidth: (MediaQuery.sizeOf(context).width * 0.9) - (widget.isMyMessage ? 30 : 0),
+                )
+              : null,
+          decoration: BoxDecoration(
+            color: messageBgColor,
+            borderRadius: BorderRadius.circular(8).copyWith(
+              bottomRight: (widget.isMyMessage) ? Radius.zero : null,
+              bottomLeft: (!widget.isMyMessage && showAvatar) ? Radius.zero : null,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                crossAxisAlignment: widget.message.isCall ? .start : .end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  widget.message.isCall
+                      ? MessageCallBody()
+                      : MessageBody(
+                          showSenderName: showSenderName,
+                          isSkeleton: widget.isSkeleton,
                           message: widget.message,
-                          position: position,
-                          onTapQuote: () {
-                            widget.onTapQuote(widget.message.id);
-                          },
-                          onClose: () => overlay.remove(),
-                          onEdit: () {
-                            final body = UpdateMessageRequestEntity(
-                              messageId: widget.message.id,
-                              content: widget.message.content,
-                            );
-                            widget.onTapEditMessage(body);
-                          },
-                          messageContent: MessageHtml(content: widget.message.content),
-                          isOwnMessage: widget.isMyMessage,
+                          showTopic: widget.showTopic,
+                          isStarred: isStarred,
+                          maxMessageWidth: maxMessageWidth,
                         ),
-                      );
-
-                      Overlay.of(context).insert(overlay);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    constraints: (showAvatar)
-                        ? BoxConstraints(
-                            minHeight: 40,
-                            maxWidth: (MediaQuery.sizeOf(context).width * 0.9) - (widget.isMyMessage ? 30 : 0),
-                          )
-                        : null,
-                    decoration: BoxDecoration(
-                      color: messageBgColor,
-                      borderRadius: BorderRadius.circular(8).copyWith(
-                        bottomRight: (widget.isMyMessage) ? Radius.zero : null,
-                        bottomLeft: (!widget.isMyMessage && showAvatar) ? Radius.zero : null,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+                  if (widget.message.aggregatedReactions.isEmpty)
+                    Column(
+                      crossAxisAlignment: .end,
                       children: [
-                        Row(
-                          crossAxisAlignment: widget.message.isCall ? .start : .end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            widget.message.isCall
-                                ? MessageCallBody()
-                                : MessageBody(
-                                    showSenderName: showSenderName,
-                                    isSkeleton: widget.isSkeleton,
-                                    message: widget.message,
-                                    showTopic: widget.showTopic,
-                                    isStarred: isStarred,
-                                    actionsPopupKey: actionsPopupKey,
-                                    maxMessageWidth: maxMessageWidth,
-                                  ),
-                            if (widget.message.aggregatedReactions.isEmpty)
-                              Column(
-                                crossAxisAlignment: .end,
-                                children: [
-                                  if (widget.message.isCall)
-                                    IconButton(
-                                      padding: .zero,
-                                      onPressed: () {
-                                        joinCall(context);
-                                      },
-                                      icon: Assets.icons.call.svg(
-                                        width: 32,
-                                        height: 32,
-                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-                                      ),
-                                    ),
-                                  MessageTime(
-                                    messageTime: messageTime,
-                                    isMyMessage: widget.isMyMessage,
-                                    isRead: isRead,
-                                    isSkeleton: widget.isSkeleton,
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                        if (widget.message.aggregatedReactions.isNotEmpty)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(maxWidth: maxMessageWidth),
-                                child: MessageReactionsList(
-                                  message: widget.message,
-                                  myUserId: widget.myUserId,
-                                  maxWidth: maxMessageWidth,
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  if (widget.message.isCall)
-                                    IconButton(
-                                      padding: .zero,
-                                      onPressed: () {
-                                        joinCall(context);
-                                      },
-                                      icon: Assets.icons.call.svg(
-                                        width: 32,
-                                        height: 32,
-                                        colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
-                                      ),
-                                    ),
-                                  MessageTime(
-                                    messageTime: messageTime,
-                                    isMyMessage: widget.isMyMessage,
-                                    isRead: isRead,
-                                    isSkeleton: widget.isSkeleton,
-                                  ),
-                                ],
-                              ),
-                            ],
+                        if (widget.message.isCall)
+                          IconButton(
+                            padding: .zero,
+                            onPressed: () {
+                              joinCall(context);
+                            },
+                            icon: Assets.icons.call.svg(
+                              width: 32,
+                              height: 32,
+                              colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                            ),
                           ),
+                        MessageTime(
+                          messageTime: messageTime,
+                          isMyMessage: widget.isMyMessage,
+                          isRead: isRead,
+                          isSkeleton: widget.isSkeleton,
+                        ),
                       ],
                     ),
-                  ),
+                ],
+              ),
+              if (widget.message.aggregatedReactions.isNotEmpty)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxMessageWidth),
+                      child: MessageReactionsList(
+                        message: widget.message,
+                        myUserId: widget.myUserId,
+                        maxWidth: maxMessageWidth,
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        if (widget.message.isCall)
+                          IconButton(
+                            padding: .zero,
+                            onPressed: () {
+                              joinCall(context);
+                            },
+                            icon: Assets.icons.call.svg(
+                              width: 32,
+                              height: 32,
+                              colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                            ),
+                          ),
+                        MessageTime(
+                          messageTime: messageTime,
+                          isMyMessage: widget.isMyMessage,
+                          isRead: isRead,
+                          isSkeleton: widget.isSkeleton,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

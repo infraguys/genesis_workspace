@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 
@@ -70,18 +71,12 @@ class MessageContextMenu extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: 260,
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        width: 240,
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 14,
-              offset: Offset(0, 8),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(8.0),
+
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -90,12 +85,7 @@ class MessageContextMenu extends StatelessWidget {
               onEmojiSelected: onEmojiSelected,
               onOpenEmojiPicker: onOpenEmojiPicker,
             ),
-            const SizedBox(height: 8),
-            Divider(
-              color: colors.outlineVariant.withOpacity(0.4),
-              height: 1,
-            ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 10),
             ...actions.map(
               (action) => _ActionTile(
                 data: action,
@@ -137,24 +127,24 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
     final iconColor = data.destructive
         ? theme.colorScheme.error
         : textColor.withOpacity(data.disabled ? 0.4 : 0.9);
 
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8),
       onTap: data.disabled ? null : data.onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Icon(data.icon, color: iconColor, size: 20),
+            Icon(data.icon, color: textColors.text50, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 data.label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: iconColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -179,6 +169,7 @@ class _ReactionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Row(
+      mainAxisAlignment: .spaceBetween,
       children: [
         for (final emoji in AppConstants.popularEmojis)
           Padding(
@@ -186,14 +177,13 @@ class _ReactionsRow extends StatelessWidget {
             child: InkResponse(
               radius: 18,
               onTap: () => onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
-              child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 24),
+              child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 20),
             ),
           ),
-        const Spacer(),
         IconButton(
           tooltip: 'Еще реакции',
           onPressed: onOpenEmojiPicker,
-          icon: const Icon(Icons.add_reaction_outlined),
+          icon: const Icon(Icons.add),
           color: theme.colorScheme.primary,
           splashRadius: 18,
           padding: EdgeInsets.zero,
