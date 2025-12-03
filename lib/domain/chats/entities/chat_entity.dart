@@ -25,7 +25,17 @@ class ChatEntity {
 
   bool get isTopicsLoading => topics == null;
 
-  Color? get backgroundColor => colorString != null ? parseColor(colorString!) : null;
+  Color? get backgroundColor {
+    final color = colorString;
+    if (color != null) {
+      try {
+        return parseColor(color);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
 
   ChatEntity updateLastMessage(MessageEntity message, {bool isMyMessage = false}) {
     ChatEntity updatedChat = this;
