@@ -326,16 +326,16 @@ class MessengerCubit extends Cubit<MessengerState> {
       }
 
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
-      final allFolder = FolderEntity(
-        uuid: "",
-        createdAt: '',
-        updatedAt: '',
-        title: '',
-        backgroundColor: AppColors.primary,
-        unreadMessages: [],
-        systemType: FolderSystemType.all,
-      );
-      final List<FolderEntity> initialFolders = [allFolder, ...folders];
+      List<FolderEntity> initialFolders = [...folders];
+      if (folders.isEmpty) {
+        final allFolderBody = CreateFolderEntity(
+          title: "All",
+          backgroundColor: AppColors.primary,
+          systemType: FolderSystemType.all,
+        );
+        final allFolder = await _addFolderUseCase.call(allFolderBody);
+        initialFolders = [allFolder, ...folders];
+      }
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
     } catch (e) {
       inspect(e);

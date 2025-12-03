@@ -312,7 +312,7 @@ class _MessengerViewState extends State<MessengerView>
                                                       title: Text(context.t.folders.deleteConfirmTitle),
                                                       content: Text(
                                                         context.t.folders.deleteConfirmText(
-                                                          folderName: folder.title ?? '',
+                                                          folderName: folder.title,
                                                         ),
                                                       ),
                                                       actions: [

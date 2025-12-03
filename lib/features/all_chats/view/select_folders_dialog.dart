@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 
 class SelectFoldersDialog extends StatefulWidget {
   final Future<List<String>> Function() loadSelectedFolderIds;
@@ -44,6 +45,11 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
         child: FutureBuilder(
           future: _initFuture,
           builder: (_, snapshot) {
+            // if (snapshot.connectionState == ConnectionState.waiting) {
+            //   return Center(
+            //     child: CircularProgressIndicator(),
+            //   );
+            // }
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -70,14 +76,12 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                     shrinkWrap: true,
                     itemCount: userFolders.length,
                     itemBuilder: (context, index) {
-                      // if (index == 0) {
-                      //   return SizedBox.shrink();
-                      // }
                       final f = userFolders[index];
                       final id = f.uuid;
                       final selected = _selectedIds.contains(id);
                       return CheckboxListTile(
                         value: selected,
+                        enabled: snapshot.connectionState != .waiting,
                         onChanged: (value) {
                           setState(() {
                             if (value == true) {
@@ -117,14 +121,14 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.pop(),
                         child: Text(context.t.folders.cancel),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
                         onPressed: () async {
+                          if (mounted) context.pop();
                           await widget.onSave(_selectedIds);
-                          if (mounted) Navigator.of(context).pop();
                         },
                         child: Text(context.t.folders.save),
                       ),
