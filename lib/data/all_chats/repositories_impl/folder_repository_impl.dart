@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_source.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folders_remote_data_source.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
@@ -12,17 +13,21 @@ class FolderRepositoryImpl implements FolderRepository {
   FolderRepositoryImpl(this._localDataSource, this._remoteDataSource);
 
   @override
-  Future<void> addFolder(CreateFolderEntity folder) async {
+  Future<FolderEntity> addFolder(CreateFolderEntity folder) async {
     final response = await _remoteDataSource.add(folder.toDto());
+    return response.toEntity();
     // final entity = response;
     // await _localDataSource.add(entity);
   }
 
   @override
   Future<List<FolderEntity>> getFolders(int organizationId) async {
-    final list = <FolderEntity>[];
     final response = await _remoteDataSource.getAll();
-    return list;
+    final organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != null) {
+      return response.map((folder) => folder.toEntity()).toList();
+    }
+    return [];
   }
 
   @override

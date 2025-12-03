@@ -26,7 +26,6 @@ class FolderEntity {
   final Color backgroundColor;
   final List<int> unreadMessages;
   final FolderSystemType systemType;
-  final int organizationId;
 
   FolderEntity({
     this.id,
@@ -37,7 +36,6 @@ class FolderEntity {
     required this.backgroundColor,
     required this.unreadMessages,
     required this.systemType,
-    required this.organizationId,
   });
 
   FolderEntity copyWith({
@@ -59,6 +57,5 @@ class FolderEntity {
     backgroundColor: backgroundColor ?? this.backgroundColor,
     unreadMessages: unreadMessages ?? this.unreadMessages,
     systemType: systemType ?? this.systemType,
-    organizationId: organizationId ?? this.organizationId,
   );
 }

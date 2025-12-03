@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
@@ -265,23 +266,23 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> getPinnedChats() async {
-    final organizationId = AppConstants.selectedOrganizationId!;
-    final response = await _getPinnedChatsUseCase.call(
-      folderId: state.folders[state.selectedFolderIndex].id!,
-      organizationId: organizationId,
-    );
-    final updatedChats = [...state.chats];
-    for (var pinnedChat in response) {
-      if (updatedChats.any(
-        (chat) => chat.id == pinnedChat.chatId && state.folders[state.selectedFolderIndex].id == pinnedChat.folderId,
-      )) {
-        final chat = updatedChats.firstWhere((chat) => chat.id == pinnedChat.chatId);
-        final indexOfChat = updatedChats.indexOf(chat);
-        final updatedChat = chat.copyWith(isPinned: true);
-        updatedChats[indexOfChat] = updatedChat;
-      }
-    }
-    emit(state.copyWith(pinnedChats: response, chats: updatedChats));
+    // final organizationId = AppConstants.selectedOrganizationId!;
+    // final response = await _getPinnedChatsUseCase.call(
+    //   folderId: state.folders[state.selectedFolderIndex].id!,
+    //   organizationId: organizationId,
+    // );
+    // final updatedChats = [...state.chats];
+    // for (var pinnedChat in response) {
+    //   if (updatedChats.any(
+    //     (chat) => chat.id == pinnedChat.chatId && state.folders[state.selectedFolderIndex].id == pinnedChat.folderId,
+    //   )) {
+    //     final chat = updatedChats.firstWhere((chat) => chat.id == pinnedChat.chatId);
+    //     final indexOfChat = updatedChats.indexOf(chat);
+    //     final updatedChat = chat.copyWith(isPinned: true);
+    //     updatedChats[indexOfChat] = updatedChat;
+    //   }
+    // }
+    // emit(state.copyWith(pinnedChats: response, chats: updatedChats));
   }
 
   Future<void> muteChannel(ChatEntity chat) async {
@@ -333,19 +334,16 @@ class MessengerCubit extends Cubit<MessengerState> {
       }
 
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
-      // if (dbFolders.isEmpty) {
-      //   final initFolder = FolderItemEntity(
-      //     title: 'All',
-      //     systemType: SystemFolderType.all,
-      //     iconData: Icons.markunread,
-      //     unreadMessages: const <int>{},
-      //     pinnedChats: [],
-      //     organizationId: organizationId,
-      //   );
-      //   await addFolder(initFolder);
-      //   return;
-      // }
-      final List<FolderEntity> initialFolders = [...folders];
+      final allFolder = FolderEntity(
+        uuid: "",
+        createdAt: '',
+        updatedAt: '',
+        title: '',
+        backgroundColor: AppColors.primary,
+        unreadMessages: [],
+        systemType: FolderSystemType.all,
+      );
+      final List<FolderEntity> initialFolders = [allFolder, ...folders];
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
     } catch (e) {
       inspect(e);
@@ -354,10 +352,10 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> addFolder(CreateFolderEntity folder) async {
     try {
-      await _addFolderUseCase.call(folder);
-      // final updatedFolders = [...state.folders];
-      // updatedFolders.add(folder.copyWith(id: updatedFolders.length));
-      // emit(state.copyWith(folders: updatedFolders));
+      final createdFolder = await _addFolderUseCase.call(folder);
+      final updatedFolders = [...state.folders];
+      updatedFolders.add(createdFolder);
+      emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
       inspect(e);
     }

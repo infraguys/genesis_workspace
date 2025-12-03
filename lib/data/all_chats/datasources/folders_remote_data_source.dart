@@ -36,7 +36,7 @@ class FoldersRemoteDataSource {
     }
   }
 
-  Future<void> getAll() async {
+  Future<List<FolderDto>> getAll() async {
     try {
       final response = await _apiClientForCurrentOrg.getFolders();
       return response;

@@ -12,5 +12,5 @@ abstract class AllChatsApiClient {
   Future<FolderDto> createFolder(@Body() CreateFolderDto body);
 
   @GET('folders/')
-  Future<void> getFolders();
+  Future<List<FolderDto>> getFolders();
 }

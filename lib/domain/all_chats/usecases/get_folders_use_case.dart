@@ -11,7 +11,7 @@ class GetFoldersUseCase {
   GetFoldersUseCase(this._repository, this._pinnedChatsRepository);
 
   Future<List<FolderEntity>> call(int organizationId) async {
-    final List<FolderEntity> rows = await _repository.getFolders(organizationId);
+    final List<FolderEntity> response = await _repository.getFolders(organizationId);
     final List<FolderEntity> result = [];
     // for (var row in rows) {
     //   final folderPinnedChats = await _pinnedChatsRepository.getPinnedChats(
@@ -31,6 +31,6 @@ class GetFoldersUseCase {
     //   );
     //   result.add(folder);
     // }
-    return result;
+    return response;
   }
 }

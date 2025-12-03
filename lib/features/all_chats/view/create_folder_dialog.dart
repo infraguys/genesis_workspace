@@ -27,7 +27,6 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   @override
   void initState() {
     super.initState();
-    // selectedIconData = widget.initial?.iconData ?? Icons.folder;
     selectedColor = widget.initial?.backgroundColor ?? AppConstants.folderColors.first;
     if (widget.initial?.title != null) {
       titleController.text = widget.initial!.title!;
@@ -43,10 +42,10 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   }
 
   CreateFolderEntity onSubmitPressed() {
-    final int? organizationId = widget.initial?.organizationId ?? AppConstants.selectedOrganizationId;
-    if (organizationId == null) {
-      throw StateError('Organization is not selected');
-    }
+    // final int? organizationId = widget.initial?.organizationId ?? AppConstants.selectedOrganizationId;
+    // if (organizationId == null) {
+    //   throw StateError('Organization is not selected');
+    // }
     final CreateFolderEntity folder = CreateFolderEntity(
       title: titleController.text.trim(),
       backgroundColor: selectedColor!,

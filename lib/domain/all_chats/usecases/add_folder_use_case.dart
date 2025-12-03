@@ -7,7 +7,7 @@ class AddFolderUseCase {
   final FolderRepository _repository;
   AddFolderUseCase(this._repository);
 
-  Future<void> call(CreateFolderEntity folder) async {
-    await _repository.addFolder(folder);
+  Future<FolderEntity> call(CreateFolderEntity folder) async {
+    return await _repository.addFolder(folder);
   }
 }

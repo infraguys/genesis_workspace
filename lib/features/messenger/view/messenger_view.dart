@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
+import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/group_avatars.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
@@ -23,7 +24,6 @@ import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
-import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -115,10 +115,7 @@ class _MessengerViewState extends State<MessengerView>
 
   void _checkUser() {
     if (context.read<MessengerCubit>().state.selfUser == null) {
-      final user = context.read<ProfileCubit>().state.user;
-      if (user != null) {
-        // context.read<MessengerCubit>().setSelfUser(user);
-      }
+      context.read<MessengerCubit>().getUser();
     }
   }
 
@@ -204,7 +201,7 @@ class _MessengerViewState extends State<MessengerView>
       listenWhen: (previous, current) => previous.selectedOrganizationId != current.selectedOrganizationId,
       listener: (context, state) {
         context.read<MessengerCubit>().resetState();
-        context.read<MessengerCubit>().getUser();
+        // context.read<MessengerCubit>().getUser();
         context.read<MessengerCubit>().searchChats('');
         setState(() {
           _searchQuery = '';
@@ -243,77 +240,78 @@ class _MessengerViewState extends State<MessengerView>
                         width: 60,
                         child: Column(
                           children: [
-                            Expanded(
-                              child: ScrollConfiguration(
-                                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                child: ListView.separated(
-                                  padding: EdgeInsets.zero,
-                                  itemCount: state.folders.length,
-                                  separatorBuilder: (_, __) => SizedBox(height: 28),
-                                  itemBuilder: (BuildContext context, int index) {
-                                    final FolderEntity folder = state.folders[index];
-                                    final bool isSelected = state.selectedFolderIndex == index;
-                                    Widget icon;
-                                    final String title = index == 0 ? context.t.folders.all : folder.title!;
-                                    if (index == 0) {
-                                      icon = Assets.icons.allChats.svg(
-                                        colorFilter: isSelected
-                                            ? ColorFilter.mode(textColors.text100, BlendMode.srcIn)
-                                            : null,
-                                      );
-                                    } else if (isSelected) {
-                                      icon = Assets.icons.folderOpen.svg();
-                                    } else {
-                                      icon = Assets.icons.folder.svg();
-                                    }
-                                    return FolderItem(
-                                      title: title,
-                                      folder: folder,
-                                      isSelected: isSelected,
-                                      icon: icon,
-                                      onTap: () {
-                                        context.read<MessengerCubit>().selectFolder(index);
-                                      },
-                                      onEdit: (folder.systemType == null) ? () => editFolder(context, folder) : null,
-                                      onOrderPinning: () {
-                                        context.pop();
-                                        context.read<MessengerCubit>().selectFolder(index);
-                                        editPinning();
-                                      },
-                                      onDelete: (folder.systemType == null)
-                                          ? () async {
-                                              context.pop();
-                                              final confirmed = await showDialog<bool>(
-                                                context: context,
-                                                builder: (dialogContext) => AlertDialog(
-                                                  title: Text(context.t.folders.deleteConfirmTitle),
-                                                  content: Text(
-                                                    context.t.folders.deleteConfirmText(
-                                                      folderName: folder.title ?? '',
-                                                    ),
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () => Navigator.of(dialogContext).pop(false),
-                                                      child: Text(context.t.folders.cancel),
-                                                    ),
-                                                    FilledButton(
-                                                      onPressed: () => Navigator.of(dialogContext).pop(true),
-                                                      child: Text(context.t.folders.delete),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                              if (confirmed == true) {
-                                                await context.read<MessengerCubit>().deleteFolder(
-                                                  folder,
-                                                );
-                                              }
-                                            }
+                            ScrollConfiguration(
+                              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                itemCount: state.folders.length,
+                                separatorBuilder: (_, __) => SizedBox(height: 28),
+                                itemBuilder: (BuildContext context, int index) {
+                                  final FolderEntity folder = state.folders[index];
+                                  final bool isSelected = state.selectedFolderIndex == index;
+                                  Widget icon;
+                                  final String title = index == 0 ? context.t.folders.all : folder.title!;
+                                  if (index == 0) {
+                                    icon = Assets.icons.allChats.svg(
+                                      colorFilter: isSelected
+                                          ? ColorFilter.mode(textColors.text100, BlendMode.srcIn)
                                           : null,
                                     );
-                                  },
-                                ),
+                                  } else if (isSelected) {
+                                    icon = Assets.icons.folderOpen.svg();
+                                  } else {
+                                    icon = Assets.icons.folder.svg();
+                                  }
+                                  return FolderItem(
+                                    title: title,
+                                    folder: folder,
+                                    isSelected: isSelected,
+                                    icon: icon,
+                                    onTap: () {
+                                      context.read<MessengerCubit>().selectFolder(index);
+                                    },
+                                    onEdit: (folder.systemType != FolderSystemType.all)
+                                        ? () => editFolder(context, folder)
+                                        : null,
+                                    onOrderPinning: () {
+                                      context.pop();
+                                      context.read<MessengerCubit>().selectFolder(index);
+                                      editPinning();
+                                    },
+                                    onDelete: (folder.systemType != FolderSystemType.all)
+                                        ? () async {
+                                            context.pop();
+                                            final confirmed = await showDialog<bool>(
+                                              context: context,
+                                              builder: (dialogContext) => AlertDialog(
+                                                title: Text(context.t.folders.deleteConfirmTitle),
+                                                content: Text(
+                                                  context.t.folders.deleteConfirmText(
+                                                    folderName: folder.title ?? '',
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                                                    child: Text(context.t.folders.cancel),
+                                                  ),
+                                                  FilledButton(
+                                                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                                                    child: Text(context.t.folders.delete),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            if (confirmed == true) {
+                                              await context.read<MessengerCubit>().deleteFolder(
+                                                folder,
+                                              );
+                                            }
+                                          }
+                                        : null,
+                                  );
+                                },
                               ),
                             ),
                             SizedBox(height: 28),

@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'folder_dto.g.dart';
@@ -54,4 +57,14 @@ class FolderDto {
   });
 
   factory FolderDto.fromJson(Map<String, dynamic> json) => _$FolderDtoFromJson(json);
+
+  FolderEntity toEntity() => FolderEntity(
+    uuid: uuid,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    title: title,
+    backgroundColor: Color(backgroundColorValue),
+    unreadMessages: unreadMessages,
+    systemType: systemType,
+  );
 }

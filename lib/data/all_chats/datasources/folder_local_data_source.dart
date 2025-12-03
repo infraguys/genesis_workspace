@@ -15,7 +15,7 @@ class FolderLocalDataSource {
       title: entity.title,
       backgroundColorValue: entity.backgroundColor.toARGB32(),
       unreadMessages: entity.unreadMessages.toSet(),
-      organizationId: entity.organizationId,
+      organizationId: -1,
       remoteUUID: entity.uuid,
     );
   }
