@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
@@ -109,34 +108,34 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     }
   }
 
-  Future<void> pinChat({required int chatId, required PinnedChatType type}) async {
-    // try {
-    //   final int? organizationId = AppConstants.selectedOrganizationId;
-    //   if (organizationId == null) return;
-    //
-    //   final int folderId = state.folders[state.selectedFolderIndex].id!;
-    //   List<FolderItemEntity> updatedFolders = [...state.folders];
-    //   FolderItemEntity folder = updatedFolders.firstWhere((folder) => folder.id == folderId);
-    //   await _pinChatUseCase.call(
-    //     folderId: folderId,
-    //     chatId: chatId,
-    //     orderIndex: folder.pinnedChats.length,
-    //     // type: type,
-    //     organizationId: organizationId,
-    //   );
-    //   final int indexOfFolder = updatedFolders.indexOf(folder);
-    //   final pinnedChats = await _getPinnedChatsUseCase.call(
-    //     folderId: folderId,
-    //     organizationId: organizationId,
-    //   );
-    //   folder = folder.copyWith(pinnedChats: pinnedChats);
-    //   updatedFolders[indexOfFolder] = folder;
-    //   emit(state.copyWith(folders: updatedFolders));
-    //   // No membership change here; only pin order. No need to refresh members.
-    // } catch (e) {
-    //   inspect(e);
-    // }
-  }
+  // Future<void> pinChat({required int chatId, required PinnedChatType type}) async {
+  // try {
+  //   final int? organizationId = AppConstants.selectedOrganizationId;
+  //   if (organizationId == null) return;
+  //
+  //   final int folderId = state.folders[state.selectedFolderIndex].id!;
+  //   List<FolderItemEntity> updatedFolders = [...state.folders];
+  //   FolderItemEntity folder = updatedFolders.firstWhere((folder) => folder.id == folderId);
+  //   await _pinChatUseCase.call(
+  //     folderId: folderId,
+  //     chatId: chatId,
+  //     orderIndex: folder.pinnedChats.length,
+  //     // type: type,
+  //     organizationId: organizationId,
+  //   );
+  //   final int indexOfFolder = updatedFolders.indexOf(folder);
+  //   final pinnedChats = await _getPinnedChatsUseCase.call(
+  //     folderId: folderId,
+  //     organizationId: organizationId,
+  //   );
+  //   folder = folder.copyWith(pinnedChats: pinnedChats);
+  //   updatedFolders[indexOfFolder] = folder;
+  //   emit(state.copyWith(folders: updatedFolders));
+  //   // No membership change here; only pin order. No need to refresh members.
+  // } catch (e) {
+  //   inspect(e);
+  // }
+  // }
 
   Future<void> unpinChat(int pinnedChatId) async {
     // try {

@@ -14,28 +14,31 @@ class FolderRepositoryImpl implements FolderRepository {
   @override
   Future<FolderEntity> addFolder(CreateFolderEntity folder) async {
     final response = await _remoteDataSource.add(folder.toDto());
-    return response.toEntity();
-    // final entity = response;
-    // await _localDataSource.add(entity);
+    final entity = response.toEntity();
+    final orgId = AppConstants.selectedOrganizationId ?? -1;
+    await _localDataSource.add(entity, organizationId: orgId);
+    return entity;
   }
 
   @override
   Future<List<FolderEntity>> getFolders(int organizationId) async {
     final response = await _remoteDataSource.getAll();
-    final organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId != null) {
-      return response.map((folder) => folder.toEntity()).toList();
-    }
-    return [];
+    final entities = response.map((folder) => folder.toEntity()).toList();
+    await _localDataSource.replaceAll(entities, organizationId: organizationId);
+    return entities;
   }
 
   @override
   Future<FolderEntity> updateFolder(UpdateFolderEntity folder) async {
-    return await _remoteDataSource.update(folder.uuid, folder: folder.toDto());
+    final updated = await _remoteDataSource.update(folder.uuid, folder: folder.toDto());
+    final orgId = AppConstants.selectedOrganizationId ?? -1;
+    await _localDataSource.add(updated, organizationId: orgId);
+    return updated;
   }
 
   @override
   Future<void> deleteFolder(DeleteFolderEntity folder) async {
     await _remoteDataSource.delete(folder.folderId);
+    await _localDataSource.delete(int.tryParse(folder.folderId) ?? -1);
   }
 }

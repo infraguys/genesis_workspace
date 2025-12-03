@@ -220,7 +220,6 @@ class _MessengerViewState extends State<MessengerView>
       listenWhen: (previous, current) => previous.selectedOrganizationId != current.selectedOrganizationId,
       listener: (context, state) {
         context.read<MessengerCubit>().resetState();
-        // context.read<MessengerCubit>().getUser();
         context.read<MessengerCubit>().searchChats('');
         setState(() {
           _searchQuery = '';

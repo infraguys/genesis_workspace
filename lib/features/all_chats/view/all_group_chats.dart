@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/group_chat_entity.dart';
@@ -313,10 +312,10 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
                                                 onTap: () async {
                                                   context.pop();
 
-                                                  await context.read<AllChatsCubit>().pinChat(
-                                                    chatId: group.id,
-                                                    type: PinnedChatType.group,
-                                                  );
+                                                  // await context.read<AllChatsCubit>().pinChat(
+                                                  //   chatId: group.id,
+                                                  //   type: PinnedChatType.group,
+                                                  // );
                                                 },
                                               ),
                                         ListTile(

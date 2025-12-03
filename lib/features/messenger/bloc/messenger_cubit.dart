@@ -111,6 +111,7 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void _onProfileStateChanged(ProfileState profileState) {
     final user = profileState.user;
+    inspect(profileState);
     if (user == null) return;
     if (state.selfUser?.userId == user.userId) return;
     emit(state.copyWith(selfUser: user));
@@ -119,6 +120,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _createChatsFromMessages(List<MessageEntity> messages) {
     final chats = [...state.chats];
     final unreadMessages = [...state.unreadMessages];
+    inspect(state.selfUser?.userId);
     for (var message in messages.reversed) {
       final recipientId = message.recipientId;
       final isMyMessage = message.isMyMessage(state.selfUser?.userId);

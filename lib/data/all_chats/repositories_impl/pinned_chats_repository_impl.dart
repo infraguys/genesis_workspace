@@ -1,4 +1,6 @@
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folder_items_remote_data_source.dart';
+import 'package:genesis_workspace/data/all_chats/datasources/pinned_chats_local_data_source.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_item.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/pinned_chats_repository.dart';
@@ -7,13 +9,14 @@ import 'package:injectable/injectable.dart';
 @LazySingleton(as: PinnedChatsRepository)
 class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
   final FolderItemsRemoteDataSource _remoteDataSource;
+  final PinnedChatsLocalDataSource _localDataSource;
 
-  PinnedChatsRepositoryImpl(this._remoteDataSource);
+  PinnedChatsRepositoryImpl(this._remoteDataSource, this._localDataSource);
 
   @override
   Future<List<PinnedChatEntity>> getPinnedChats({required String folderUuid}) async {
     final List<FolderItem> items = await _remoteDataSource.getFolderItems(folderUuid);
-    return items
+    final pins = items
         .where((item) => item.pinnedAt != null)
         .map(
           (item) => PinnedChatEntity(
@@ -26,6 +29,9 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
           ),
         )
         .toList();
+    final orgId = AppConstants.selectedOrganizationId ?? -1;
+    await _localDataSource.syncFolderPins(folderUuid: folderUuid, organizationId: orgId, pins: pins);
+    return pins;
   }
 
   @override
@@ -36,6 +42,7 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
   }) async {
     final FolderItem item = await _remoteDataSource.ensureFolderItem(folderUuid, chatId);
     await _remoteDataSource.pinFolderItem(folderUuid: folderUuid, folderItemUuid: item.uuid);
+    await getPinnedChats(folderUuid: folderUuid);
   }
 
   @override
@@ -46,6 +53,7 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
     final FolderItem? item = await _remoteDataSource.findFolderItem(folderUuid, chatId);
     if (item == null) return;
     await _remoteDataSource.unpinFolderItem(folderUuid: folderUuid, folderItemUuid: item.uuid);
+    await getPinnedChats(folderUuid: folderUuid);
   }
 
   @override
@@ -60,5 +68,6 @@ class PinnedChatsRepositoryImpl implements PinnedChatsRepository {
       folderItemUuid: folderItemUuid,
       orderIndex: orderIndex,
     );
+    await getPinnedChats(folderUuid: folderUuid);
   }
 }

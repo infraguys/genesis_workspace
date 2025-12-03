@@ -9,15 +9,22 @@ class FolderLocalDataSource {
   final FolderDao _dao;
   FolderLocalDataSource(this._dao);
 
-  Future<void> add(FolderEntity entity) async {
+  Future<void> add(FolderEntity entity, {required int organizationId}) async {
     await _dao.insertFolder(
-      id: entity.id,
       title: entity.title,
       backgroundColorValue: entity.backgroundColor.toARGB32(),
       unreadMessages: entity.unreadMessages.toSet(),
-      organizationId: -1,
-      remoteUUID: entity.uuid,
+      organizationId: organizationId,
+      uuid: entity.uuid,
+      systemType: entity.systemType.name,
     );
+  }
+
+  Future<void> replaceAll(List<FolderEntity> folders, {required int organizationId}) async {
+    await _dao.deleteByOrganization(organizationId);
+    for (final f in folders) {
+      await add(f, organizationId: organizationId);
+    }
   }
 
   Future<List<Folder>> getAll(int organizationId) async {
@@ -26,9 +33,9 @@ class FolderLocalDataSource {
   }
 
   Future<void> update(FolderItemEntity folder) async {
-    if (folder.id == null) return;
+    if (folder.title == null) return;
     await _dao.updateFolder(
-      id: folder.id!,
+      uuid: folder.id?.toString() ?? '',
       title: folder.title,
       backgroundColorValue: folder.backgroundColor?.value,
       unreadMessages: folder.unreadMessages,
@@ -36,6 +43,6 @@ class FolderLocalDataSource {
   }
 
   Future<void> delete(int id) async {
-    await _dao.deleteById(id);
+    await _dao.deleteByUuid(id.toString());
   }
 }

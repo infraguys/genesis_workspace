@@ -1,4 +1,6 @@
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folder_items_remote_data_source.dart';
+import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folders_remote_data_source.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
@@ -9,13 +11,15 @@ import 'package:injectable/injectable.dart';
 class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
   final FolderItemsRemoteDataSource _remoteDataSource;
   final FoldersRemoteDataSource _foldersRemoteDataSource;
-  FolderMembershipRepositoryImpl(this._remoteDataSource, this._foldersRemoteDataSource);
+  final FolderMembershipLocalDataSource _localDataSource;
+  FolderMembershipRepositoryImpl(this._remoteDataSource, this._foldersRemoteDataSource, this._localDataSource);
 
   @override
   Future<void> setFoldersForChat(
     int chatId,
     List<String> folderUuids,
   ) async {
+    final organizationId = AppConstants.selectedOrganizationId ?? -1;
     final folders = await _foldersRemoteDataSource.getAll();
     final allFolderUuids = folders.where((f) => f.systemType != FolderSystemType.all).map((f) => f.uuid).toList();
 
@@ -34,12 +38,17 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
         );
       }
     }
+    await _localDataSource.setChatFolders(chatId: chatId, folderUuids: folderUuids, organizationId: organizationId);
   }
 
   @override
   Future<List<String>> getFolderIdsForChat(
     int chatId,
   ) async {
+    final organizationId = AppConstants.selectedOrganizationId ?? -1;
+    final local = await _localDataSource.getFolderUuidsForChat(chatId: chatId, organizationId: organizationId);
+    if (local.isNotEmpty) return local;
+
     final folders = await _foldersRemoteDataSource.getAll();
     final result = <String>[];
     for (final folder in folders.where((f) => f.systemType != FolderSystemType.all)) {
@@ -48,6 +57,7 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
         result.add(folder.uuid);
       }
     }
+    await _localDataSource.setChatFolders(chatId: chatId, folderUuids: result, organizationId: organizationId);
     return result;
   }
 
@@ -57,12 +67,26 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
     for (final item in items) {
       await _remoteDataSource.deleteFolderItem(folderUuid: folderUuid, folderItemUuid: item.uuid);
     }
+    final organizationId = AppConstants.selectedOrganizationId ?? -1;
+    await _localDataSource.deleteByFolderUuid(folderUuid, organizationId);
   }
 
   @override
   Future<FolderMembers> getMembersForFolder(String folderUuid) async {
+    final organizationId = AppConstants.selectedOrganizationId ?? -1;
+    final localItems = await _localDataSource.getItemsForFolder(folderUuid, organizationId);
+    if (localItems.isNotEmpty) {
+      final chatIdsLocal = localItems.map((r) => r.chatId).toList(growable: false);
+      return FolderMembers(chatIds: chatIdsLocal);
+    }
+
     final items = await _remoteDataSource.getFolderItems(folderUuid);
     final chatIds = items.map((r) => r.chatId).toList(growable: false);
+    await _localDataSource.setChatFolders(
+      chatId: -1,
+      folderUuids: [],
+      organizationId: organizationId,
+    );
     return FolderMembers(chatIds: chatIds);
   }
 }

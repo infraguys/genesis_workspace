@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -171,16 +171,14 @@ class AppDatabase extends _$AppDatabase {
           await customStatement('DROP TABLE organizations_old;');
         });
       }
-      if (from < 16) {
+      if (from < 17) {
         await transaction(() async {
-          await customStatement('ALTER TABLE folders RENAME TO folders_old;');
+          await migrator.deleteTable('folder_items');
+          await migrator.deleteTable('pinned_chats');
+          await migrator.deleteTable('folders');
           await migrator.createTable(folders);
-          await customStatement(
-            'INSERT INTO folders '
-            '(id, title, icon_code_point, background_color_value, unread_messages, system_type, organization_id) '
-            "SELECT id, title, icon_code_point, background_color_value, '[]', system_type, organization_id FROM folders_old;",
-          );
-          await customStatement('DROP TABLE folders_old;');
+          await migrator.createTable(folderItems);
+          await migrator.createTable(pinnedChats);
         });
       }
     },
