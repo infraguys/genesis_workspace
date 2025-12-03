@@ -153,6 +153,7 @@ class MessengerCubit extends Cubit<MessengerState> {
             (subscription) => subscription.streamId == chat.streamId,
             orElse: SubscriptionEntity.fake,
           );
+          chat = chat.copyWith(colorString: subscription.color);
           if (subscription.isMuted) {
             chat = chat.copyWith(isMuted: true);
           }

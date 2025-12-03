@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 
 class UserAvatar extends StatelessWidget {
-  const UserAvatar({super.key, this.avatarUrl, this.size}) : _defaultIcons = Icons.person;
+  const UserAvatar({
+    super.key,
+    this.avatarUrl,
+    this.size,
+    this.backgroundColor,
+  }) : _defaultIcons = Icons.person;
 
-  const UserAvatar.group({super.key, this.avatarUrl, this.size}) : _defaultIcons = Icons.groups;
+  const UserAvatar.group({
+    super.key,
+    this.avatarUrl,
+    this.size,
+    this.backgroundColor,
+  }) : _defaultIcons = Icons.groups;
 
   final String? avatarUrl;
   final double? size;
+  final Color? backgroundColor;
 
   final IconData _defaultIcons;
 
@@ -27,6 +38,7 @@ class UserAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: radius,
+      backgroundColor: backgroundColor,
       child: Icon(_defaultIcons),
     );
   }
