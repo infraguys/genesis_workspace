@@ -110,6 +110,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           filteredChats: null,
           foundOldestMessage: false,
           subscribedChannels: [],
+          isFolderSaving: false,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -351,12 +352,14 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> addFolder(CreateFolderEntity folder) async {
     try {
+      emit(state.copyWith(isFolderSaving: true));
       final createdFolder = await _addFolderUseCase.call(folder);
       final updatedFolders = [...state.folders];
       updatedFolders.add(createdFolder);
-      emit(state.copyWith(folders: updatedFolders));
+      emit(state.copyWith(folders: updatedFolders, isFolderSaving: false));
     } catch (e) {
       inspect(e);
+      emit(state.copyWith(isFolderSaving: false));
     }
   }
 
@@ -393,20 +396,27 @@ class MessengerCubit extends Cubit<MessengerState> {
     // if (folder.systemType == FolderSystemType.all) return;
     final updatedFolders = [...state.folders];
     final index = updatedFolders.indexWhere((element) => element.uuid == folder.uuid);
-    final updatedFolder = await _updateFolderUseCase.call(folder);
-    updatedFolders[index] = updatedFolder;
-    emit(state.copyWith(folders: updatedFolders));
+    if (index == -1) return;
+
+    emit(state.copyWith(isFolderSaving: true));
+    try {
+      final updatedFolder = await _updateFolderUseCase.call(folder);
+      updatedFolders[index] = updatedFolder;
+      emit(state.copyWith(folders: updatedFolders, isFolderSaving: false));
+    } catch (e) {
+      inspect(e);
+      emit(state.copyWith(isFolderSaving: false));
+    }
   }
 
   Future<void> deleteFolder(FolderEntity folder) async {
-    if (folder.id == 0) return;
-    if (folder.systemType != FolderSystemType.all || folder.id == null) return;
-    final int? organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId == null) return;
+    if (folder.systemType == FolderSystemType.all) return;
+
     final updatedFolders = [...state.folders];
-    final index = updatedFolders.indexWhere((element) => element.id == folder.id);
-    await _removeAllMembershipsForFolderUseCase.call(folder.id!, organizationId: organizationId);
-    await _deleteFolderUseCase.call(folder.id!);
+    final index = updatedFolders.indexWhere((element) => element.uuid == folder.uuid);
+    if (index == -1) return;
+
+    await _deleteFolderUseCase.call(DeleteFolderEntity(folderId: folder.uuid));
     updatedFolders.removeAt(index);
     emit(
       state.copyWith(
@@ -414,7 +424,6 @@ class MessengerCubit extends Cubit<MessengerState> {
         selectedFolderIndex: 0,
       ),
     );
-    _filterChatsByFolder();
   }
 
   Future<List<int>> getFolderIdsForChat(int chatId) async {

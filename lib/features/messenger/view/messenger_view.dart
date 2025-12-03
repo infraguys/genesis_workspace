@@ -61,27 +61,45 @@ class _MessengerViewState extends State<MessengerView>
   final _isOpenNotifier = ValueNotifier(false);
 
   Future<void> createNewFolder(BuildContext context) {
+    final messengerCubit = context.read<MessengerCubit>();
     return showDialog(
       context: context,
-      builder: (dialogContext) => CreateFolderDialog(
-        onSubmit: (folder) async {
-          await context.read<MessengerCubit>().addFolder(folder);
-          Navigator.of(dialogContext).pop();
-        },
+      builder: (dialogContext) => BlocProvider.value(
+        value: messengerCubit,
+        child: BlocBuilder<MessengerCubit, MessengerState>(
+          builder: (context, state) => CreateFolderDialog(
+            isSaving: state.isFolderSaving,
+            onSubmit: (folder) async {
+              await context.read<MessengerCubit>().addFolder(folder);
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop();
+              }
+            },
+          ),
+        ),
       ),
     );
   }
 
   Future<void> editFolder(BuildContext context, FolderEntity folder) {
+    final messengerCubit = context.read<MessengerCubit>();
     context.pop();
     return showDialog(
       context: context,
-      builder: (dialogContext) => UpdateFolderDialog(
-        initial: folder,
-        onUpdate: (updated) async {
-          await context.read<MessengerCubit>().updateFolder(updated);
-          Navigator.of(dialogContext).pop();
-        },
+      builder: (dialogContext) => BlocProvider.value(
+        value: messengerCubit,
+        child: BlocBuilder<MessengerCubit, MessengerState>(
+          builder: (context, state) => UpdateFolderDialog(
+            initial: folder,
+            isSaving: state.isFolderSaving,
+            onUpdate: (updated) async {
+              await context.read<MessengerCubit>().updateFolder(updated);
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop();
+              }
+            },
+          ),
+        ),
       ),
     );
   }

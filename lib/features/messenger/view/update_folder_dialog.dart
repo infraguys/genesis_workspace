@@ -8,8 +8,14 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 class UpdateFolderDialog extends StatefulWidget {
   final FolderEntity initial;
   final Future<void> Function(UpdateFolderEntity folder) onUpdate;
+  final bool isSaving;
 
-  const UpdateFolderDialog({super.key, required this.initial, required this.onUpdate});
+  const UpdateFolderDialog({
+    super.key,
+    required this.initial,
+    required this.onUpdate,
+    this.isSaving = false,
+  });
 
   @override
   State<UpdateFolderDialog> createState() => _UpdateFolderDialogState();
@@ -21,7 +27,7 @@ class _UpdateFolderDialogState extends State<UpdateFolderDialog> {
 
   late Color selectedColor;
 
-  bool get isSaveEnabled => titleController.text.trim().isNotEmpty;
+  bool get isSaveEnabled => titleController.text.trim().isNotEmpty && !widget.isSaving;
 
   @override
   void initState() {
@@ -85,7 +91,13 @@ class _UpdateFolderDialogState extends State<UpdateFolderDialog> {
                     const SizedBox(width: 4),
                     TextButton(
                       onPressed: isSaveEnabled ? _submitIfValid : null,
-                      child: Text(context.t.folders.save),
+                      child: widget.isSaving
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(context.t.folders.save),
                     ),
                     const SizedBox(width: 8),
                   ],

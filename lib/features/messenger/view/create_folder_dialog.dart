@@ -9,7 +9,8 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 class CreateFolderDialog extends StatefulWidget {
   final Function(CreateFolderEntity folder) onSubmit;
   final FolderEntity? initial;
-  const CreateFolderDialog({super.key, required this.onSubmit, this.initial});
+  final bool isSaving;
+  const CreateFolderDialog({super.key, required this.onSubmit, this.initial, this.isSaving = false});
 
   @override
   State<CreateFolderDialog> createState() => _CreateFolderDialogState();
@@ -21,7 +22,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
 
   Color? selectedColor;
 
-  bool get isCreateEnabled => titleController.text.trim().isNotEmpty;
+  bool get isCreateEnabled => titleController.text.trim().isNotEmpty && !widget.isSaving;
 
   @override
   void initState() {
@@ -91,9 +92,15 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                               widget.onSubmit(folder);
                             }
                           : null,
-                      child: Text(
-                        widget.initial == null ? context.t.folders.create : context.t.folders.save,
-                      ),
+                      child: widget.isSaving
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              widget.initial == null ? context.t.folders.create : context.t.folders.save,
+                            ),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -120,7 +127,12 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                           ),
                         ),
                       ),
-                      onSubmitted: (_) => onSubmitPressed(),
+                      onSubmitted: (_) {
+                        if (isCreateEnabled) {
+                          final CreateFolderEntity folder = onSubmitPressed();
+                          widget.onSubmit(folder);
+                        }
+                      },
                     ),
                   ),
                 ),

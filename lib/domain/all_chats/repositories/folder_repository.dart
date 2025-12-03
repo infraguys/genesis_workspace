@@ -4,5 +4,5 @@ abstract class FolderRepository {
   Future<FolderEntity> addFolder(CreateFolderEntity folder);
   Future<List<FolderEntity>> getFolders(int organizationId);
   Future<FolderEntity> updateFolder(UpdateFolderEntity folder);
-  Future<void> deleteFolder(int id);
+  Future<void> deleteFolder(DeleteFolderEntity folder);
 }

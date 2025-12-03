@@ -252,7 +252,7 @@ class AllChatsCubit extends Cubit<AllChatsState> {
     final updatedFolders = [...state.folders];
     final index = updatedFolders.indexWhere((element) => element.id == folder.id);
     await _removeAllMembershipsForFolderUseCase.call(folder.id!, organizationId: organizationId);
-    await _deleteFolderUseCase.call(folder.id!);
+    await _deleteFolderUseCase.call(DeleteFolderEntity(folderId: folder.id!.toString()));
     updatedFolders.removeAt(index);
     final updatedMap = Map<int, FolderMembers>.from(state.folderMembersById);
     updatedMap.remove(folder.id!);

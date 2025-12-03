@@ -54,4 +54,12 @@ class FoldersRemoteDataSource {
       rethrow;
     }
   }
+
+  Future<void> delete(String folderId) async {
+    try {
+      await _apiClientForCurrentOrg.deleteFolder(folderId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

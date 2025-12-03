@@ -16,4 +16,7 @@ abstract class AllChatsApiClient {
 
   @GET('folders/')
   Future<List<FolderDto>> getFolders();
+
+  @DELETE('folders/{folder_id}')
+  Future<void> deleteFolder(@Path('folder_id') String folderId);
 }

@@ -30,6 +30,12 @@ class UpdateFolderEntity {
   );
 }
 
+class DeleteFolderEntity {
+  final String folderId;
+
+  DeleteFolderEntity({required this.folderId});
+}
+
 class FolderEntity {
   final int? id;
   final String uuid;
