@@ -192,7 +192,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> lazyLoadAllMessages() async {
-    if (!state.foundOldestMessage && _loadingTimes < 6) {
+    if (!state.foundOldestMessage && _loadingTimes < 5) {
       try {
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(_lastMessageId),
