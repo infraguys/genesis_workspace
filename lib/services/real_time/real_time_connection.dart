@@ -102,16 +102,21 @@ class RealTimeConnection {
       await _deleteQueueUseCase.call(_queueId);
     }
     await _pollingTask;
+    _queueId = null;
     await _closeControllers();
   }
 
   Future<bool> checkConnection() async {
     if (_isActive && _queueId != null) {
-      final body = EventsByQueueIdRequestBodyEntity(queueId: _queueId!, lastEventId: _lastEventId, dontBlock: true);
-      final response = await _getEventsByQueueIdUseCase.call(body);
-      if (response.result == 'success') {
-        return true;
-      } else {
+      try {
+        final body = EventsByQueueIdRequestBodyEntity(queueId: _queueId!, lastEventId: _lastEventId, dontBlock: true);
+        final response = await _getEventsByQueueIdUseCase.call(body);
+        if (response.result == 'success') {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (e) {
         return false;
       }
     }
