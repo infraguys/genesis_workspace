@@ -1,6 +1,5 @@
 import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_source.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folders_remote_data_source.dart';
-import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_repository.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
@@ -15,13 +14,15 @@ class FolderRepositoryImpl implements FolderRepository {
   @override
   Future<void> addFolder(CreateFolderEntity folder) async {
     final response = await _remoteDataSource.add(folder.toDto());
-    final entity = response.toEntity(null);
-    await _localDataSource.add(entity);
+    // final entity = response;
+    // await _localDataSource.add(entity);
   }
 
   @override
-  Future<List<Folder>> getFolders(int organizationId) async {
-    return _localDataSource.getAll(organizationId);
+  Future<List<FolderEntity>> getFolders(int organizationId) async {
+    final list = <FolderEntity>[];
+    final response = await _remoteDataSource.getAll();
+    return list;
   }
 
   @override

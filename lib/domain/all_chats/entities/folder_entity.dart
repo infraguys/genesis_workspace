@@ -23,7 +23,7 @@ class FolderEntity {
   final String createdAt;
   final String updatedAt;
   final String title;
-  final int backgroundColorValue;
+  final Color backgroundColor;
   final List<int> unreadMessages;
   final FolderSystemType systemType;
   final int organizationId;
@@ -34,9 +34,31 @@ class FolderEntity {
     required this.createdAt,
     required this.updatedAt,
     required this.title,
-    required this.backgroundColorValue,
+    required this.backgroundColor,
     required this.unreadMessages,
     required this.systemType,
     required this.organizationId,
   });
+
+  FolderEntity copyWith({
+    int? id,
+    String? uuid,
+    String? createdAt,
+    String? updatedAt,
+    String? title,
+    Color? backgroundColor,
+    List<int>? unreadMessages,
+    FolderSystemType? systemType,
+    int? organizationId,
+  }) => FolderEntity(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    title: title ?? this.title,
+    backgroundColor: backgroundColor ?? this.backgroundColor,
+    unreadMessages: unreadMessages ?? this.unreadMessages,
+    systemType: systemType ?? this.systemType,
+    organizationId: organizationId ?? this.organizationId,
+  );
 }

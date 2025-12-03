@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
@@ -82,17 +83,17 @@ class _AllChatsViewState extends State<AllChatsView> {
     );
   }
 
-  Future<void> editFolder(BuildContext context, FolderItemEntity folder) {
-    return showDialog(
-      context: context,
-      builder: (dialogContext) => CreateFolderDialog(
-        initial: folder,
-        onSubmit: (updated) async {
-          // await context.read<AllChatsCubit>().updateFolder(updated);
-          Navigator.of(dialogContext).pop();
-        },
-      ),
-    );
+  Future<void> editFolder(BuildContext context, FolderEntity folder) async {
+    // return showDialog(
+    //   context: context,
+    //   builder: (dialogContext) => CreateFolderDialog(
+    //     initial: folder,
+    //     onSubmit: (updated) async {
+    //       // await context.read<AllChatsCubit>().updateFolder(updated);
+    //       Navigator.of(dialogContext).pop();
+    //     },
+    //   ),
+    // );
   }
 
   void editPinning() {

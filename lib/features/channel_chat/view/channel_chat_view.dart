@@ -296,7 +296,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            state.channel?.name ?? context.t.channel.channelName,
+                            state.channel?.name ?? "context.t.channel.channelName",
                             style: titleTextStyle,
                           ),
                           SizedBox(width: 12),

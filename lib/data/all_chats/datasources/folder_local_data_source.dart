@@ -13,7 +13,7 @@ class FolderLocalDataSource {
     await _dao.insertFolder(
       id: entity.id,
       title: entity.title,
-      backgroundColorValue: entity.backgroundColorValue,
+      backgroundColorValue: entity.backgroundColor.toARGB32(),
       unreadMessages: entity.unreadMessages.toSet(),
       organizationId: entity.organizationId,
       remoteUUID: entity.uuid,

@@ -3,11 +3,11 @@ import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class FolderItem extends StatefulWidget {
-  final FolderItemEntity folder;
+  final FolderEntity folder;
   final bool isSelected;
   final String title;
   final Widget? icon;

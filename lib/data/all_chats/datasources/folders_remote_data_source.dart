@@ -35,4 +35,13 @@ class FoldersRemoteDataSource {
       rethrow;
     }
   }
+
+  Future<void> getAll() async {
+    try {
+      final response = await _apiClientForCurrentOrg.getFolders();
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

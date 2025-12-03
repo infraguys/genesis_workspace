@@ -8,9 +8,9 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/group_avatars.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
@@ -71,7 +71,7 @@ class _MessengerViewState extends State<MessengerView>
     );
   }
 
-  Future<void> editFolder(BuildContext context, FolderItemEntity folder) {
+  Future<void> editFolder(BuildContext context, FolderEntity folder) {
     context.pop();
     return showDialog(
       context: context,
@@ -251,7 +251,7 @@ class _MessengerViewState extends State<MessengerView>
                                   itemCount: state.folders.length,
                                   separatorBuilder: (_, __) => SizedBox(height: 28),
                                   itemBuilder: (BuildContext context, int index) {
-                                    final FolderItemEntity folder = state.folders[index];
+                                    final FolderEntity folder = state.folders[index];
                                     final bool isSelected = state.selectedFolderIndex == index;
                                     Widget icon;
                                     final String title = index == 0 ? context.t.folders.all : folder.title!;
@@ -630,7 +630,7 @@ class _MessengerViewState extends State<MessengerView>
     editPinning();
   }
 
-  Future<void> _handleFolderDelete(BuildContext popupContext, FolderItemEntity folder) async {
+  Future<void> _handleFolderDelete(BuildContext popupContext, FolderEntity folder) async {
     popupContext.pop();
     final confirmed = await showDialog<bool>(
       context: popupContext,

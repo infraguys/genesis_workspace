@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class CreateFolderDialog extends StatefulWidget {
   final Function(CreateFolderEntity folder) onSubmit;
-  final FolderItemEntity? initial;
+  final FolderEntity? initial;
   const CreateFolderDialog({super.key, required this.onSubmit, this.initial});
 
   @override
@@ -28,7 +27,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   @override
   void initState() {
     super.initState();
-    selectedIconData = widget.initial?.iconData ?? Icons.folder;
+    // selectedIconData = widget.initial?.iconData ?? Icons.folder;
     selectedColor = widget.initial?.backgroundColor ?? AppConstants.folderColors.first;
     if (widget.initial?.title != null) {
       titleController.text = widget.initial!.title!;

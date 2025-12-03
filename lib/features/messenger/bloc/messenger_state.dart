@@ -2,7 +2,7 @@ part of 'messenger_cubit.dart';
 
 class MessengerState {
   final UserEntity? selfUser;
-  final List<FolderItemEntity> folders;
+  final List<FolderEntity> folders;
   final int selectedFolderIndex;
   final List<MessageEntity> messages;
   final List<MessageEntity> unreadMessages;
@@ -33,7 +33,7 @@ class MessengerState {
 
   MessengerState copyWith({
     UserEntity? selfUser,
-    List<FolderItemEntity>? folders,
+    List<FolderEntity>? folders,
     int? selectedFolderIndex,
     List<MessageEntity>? messages,
     List<MessageEntity>? unreadMessages,

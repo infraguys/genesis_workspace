@@ -3,8 +3,9 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -38,13 +39,13 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
 
   final bool isLargeScreen;
   final double searchVisibility;
-  final List<FolderItemEntity> folders;
+  final List<FolderEntity> folders;
   final int selectedFolderIndex;
   final void Function(int index) onSelectFolder;
   final VoidCallback onCreateFolder;
-  final Future<void> Function(FolderItemEntity folder)? onEditFolder;
+  final Future<void> Function(FolderEntity folder)? onEditFolder;
   final void Function(BuildContext context, int index) onOrderPinning;
-  final Future<void> Function(BuildContext context, FolderItemEntity folder)? onDeleteFolder;
+  final Future<void> Function(BuildContext context, FolderEntity folder)? onDeleteFolder;
   final bool isEditPinning;
   final VoidCallback onStopEditingPins;
   final bool showSearchField;
@@ -307,9 +308,11 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                     folder: folder,
                     isSelected: isSelected,
                     onTap: () => onSelectFolder(index),
-                    onEdit: (folder.systemType == null && onEditFolder != null) ? () => onEditFolder!(folder) : null,
+                    onEdit: (folder.systemType == FolderSystemType.all && onEditFolder != null)
+                        ? () => onEditFolder!(folder)
+                        : null,
                     onOrderPinning: () => onOrderPinning(context, index),
-                    onDelete: (folder.systemType == null && onDeleteFolder != null)
+                    onDelete: (folder.systemType == FolderSystemType.all && onDeleteFolder != null)
                         ? () => onDeleteFolder!(context, folder)
                         : null,
                     icon: const SizedBox.shrink(),

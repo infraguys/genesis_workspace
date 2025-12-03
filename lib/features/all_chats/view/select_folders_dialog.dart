@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:genesis_workspace/core/enums/folder_system_type.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class SelectFoldersDialog extends StatefulWidget {
   final Future<List<int>> Function() loadSelectedFolderIds;
   final Future<void> Function(List<int> folderIds) onSave;
-  final List<FolderItemEntity> folders;
+  final List<FolderEntity> folders;
 
   const SelectFoldersDialog({
     super.key,
@@ -36,8 +37,8 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final List<FolderItemEntity> userFolders = widget.folders
-        .where((f) => f.systemType == null && f.id != null)
+    final List<FolderEntity> userFolders = widget.folders
+        .where((f) => f.systemType != FolderSystemType.all && f.id != null)
         .toList();
     return Dialog(
       child: SizedBox(
@@ -101,7 +102,7 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                                 shape: BoxShape.circle,
                                 border: Border.all(color: Colors.black12),
                               ),
-                              child: Icon(f.iconData, size: 16, color: f.backgroundColor),
+                              // child: Icon(f.iconData, size: 16, color: f.backgroundColor),
                             ),
                             const SizedBox(width: 8),
                             Text(f.title ?? ''),
