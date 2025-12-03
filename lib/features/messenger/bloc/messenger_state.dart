@@ -35,6 +35,23 @@ class MessengerState {
     this.isFolderDeleting = false,
   });
 
+  static MessengerState initial = MessengerState(
+    selfUser: null,
+    folders: [],
+    selectedFolderIndex: 0,
+    messages: [],
+    unreadMessages: [],
+    chats: [],
+    selectedChat: null,
+    pinnedChats: [],
+    filteredChatIds: null,
+    filteredChats: null,
+    foundOldestMessage: false,
+    subscribedChannels: [],
+    isFolderSaving: false,
+    isFolderDeleting: false,
+  );
+
   MessengerState copyWith({
     UserEntity? selfUser,
     List<FolderEntity>? folders,

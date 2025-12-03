@@ -97,22 +97,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getSubscribedChannelsUseCase,
     this._updateSubscriptionSettingsUseCase,
   ) : super(
-        MessengerState(
-          selfUser: null,
-          folders: [],
-          selectedFolderIndex: 0,
-          messages: [],
-          unreadMessages: [],
-          chats: [],
-          selectedChat: null,
-          pinnedChats: [],
-          filteredChatIds: null,
-          filteredChats: null,
-          foundOldestMessage: false,
-          subscribedChannels: [],
-          isFolderSaving: false,
-          isFolderDeleting: false,
-        ),
+        MessengerState.initial,
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
     _messageFlagsEventsSubscription = _realTimeService.messageFlagsEventsStream.listen(
@@ -548,16 +533,7 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void resetState() {
     _searchQuery = '';
-    emit(
-      state.copyWith(
-        folders: [],
-        selectedFolderIndex: 0,
-        messages: [],
-        chats: [],
-        filteredChatIds: null,
-        filteredChats: null,
-      ),
-    );
+    emit(MessengerState.initial);
   }
 
   void _onMessageEvents(MessageEventEntity event) {
