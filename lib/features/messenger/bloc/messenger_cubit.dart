@@ -34,7 +34,6 @@ import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/subscription_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
@@ -390,12 +389,12 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  Future<void> updateFolder(FolderItemEntity folder) async {
-    if (folder.systemType != null || folder.id == null) return;
+  Future<void> updateFolder(UpdateFolderEntity folder) async {
+    // if (folder.systemType == FolderSystemType.all) return;
     final updatedFolders = [...state.folders];
-    final index = updatedFolders.indexWhere((element) => element.id == folder.id);
-    await _updateFolderUseCase.call(folder);
-    // updatedFolders[index] = folder;
+    final index = updatedFolders.indexWhere((element) => element.uuid == folder.uuid);
+    final updatedFolder = await _updateFolderUseCase.call(folder);
+    updatedFolders[index] = updatedFolder;
     emit(state.copyWith(folders: updatedFolders));
   }
 

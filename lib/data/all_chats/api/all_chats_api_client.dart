@@ -11,6 +11,9 @@ abstract class AllChatsApiClient {
   @POST('folders/')
   Future<FolderDto> createFolder(@Body() CreateFolderDto body);
 
+  @PUT('folders/{folder_id}')
+  Future<FolderDto> updateFolder(@Path('folder_id') String folderId, @Body() UpdateFolderDto body);
+
   @GET('folders/')
   Future<List<FolderDto>> getFolders();
 }

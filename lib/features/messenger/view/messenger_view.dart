@@ -12,7 +12,6 @@ import 'package:genesis_workspace/core/widgets/group_avatars.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
-import 'package:genesis_workspace/features/all_chats/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
@@ -20,7 +19,9 @@ import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_item.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
+import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
+import 'package:genesis_workspace/features/messenger/view/update_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
@@ -75,10 +76,10 @@ class _MessengerViewState extends State<MessengerView>
     context.pop();
     return showDialog(
       context: context,
-      builder: (dialogContext) => CreateFolderDialog(
+      builder: (dialogContext) => UpdateFolderDialog(
         initial: folder,
-        onSubmit: (updated) async {
-          // await context.read<MessengerCubit>().updateFolder(updated);
+        onUpdate: (updated) async {
+          await context.read<MessengerCubit>().updateFolder(updated);
           Navigator.of(dialogContext).pop();
         },
       ),

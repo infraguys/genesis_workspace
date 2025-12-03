@@ -17,6 +17,19 @@ class CreateFolderEntity {
   );
 }
 
+class UpdateFolderEntity {
+  final String uuid;
+  final String? title;
+  final Color? backgroundColor;
+
+  UpdateFolderEntity({required this.uuid, this.title, this.backgroundColor});
+
+  UpdateFolderDto toDto() => UpdateFolderDto(
+    title: title,
+    backgroundColorValue: backgroundColor?.toARGB32(),
+  );
+}
+
 class FolderEntity {
   final int? id;
   final String uuid;

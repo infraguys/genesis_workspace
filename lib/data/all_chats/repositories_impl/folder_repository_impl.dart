@@ -3,7 +3,6 @@ import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_s
 import 'package:genesis_workspace/data/all_chats/datasources/folders_remote_data_source.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_repository.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:injectable/injectable.dart';
 
 @Injectable(as: FolderRepository)
@@ -31,8 +30,8 @@ class FolderRepositoryImpl implements FolderRepository {
   }
 
   @override
-  Future<void> updateFolder(FolderItemEntity folder) async {
-    await _localDataSource.update(folder);
+  Future<FolderEntity> updateFolder(UpdateFolderEntity folder) async {
+    return await _remoteDataSource.update(folder.uuid, folder: folder.toDto());
   }
 
   @override

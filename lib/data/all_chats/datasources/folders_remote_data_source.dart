@@ -3,6 +3,7 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/all_chats/api/all_chats_api_client.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_dto.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
@@ -40,6 +41,15 @@ class FoldersRemoteDataSource {
     try {
       final response = await _apiClientForCurrentOrg.getFolders();
       return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<FolderEntity> update(String folderId, {required UpdateFolderDto folder}) async {
+    try {
+      final response = await _apiClientForCurrentOrg.updateFolder(folderId, folder);
+      return response.toEntity();
     } catch (e) {
       rethrow;
     }

@@ -32,6 +32,21 @@ class CreateFolderDto {
 }
 
 @JsonSerializable()
+class UpdateFolderDto {
+  final String? title;
+
+  @JsonKey(name: 'background_color_value')
+  final int? backgroundColorValue;
+
+  const UpdateFolderDto({
+    this.title,
+    this.backgroundColorValue,
+  });
+
+  Map<String, dynamic> toJson() => _$UpdateFolderDtoToJson(this);
+}
+
+@JsonSerializable()
 class FolderDto {
   final String uuid;
   @JsonKey(name: 'created_at')
