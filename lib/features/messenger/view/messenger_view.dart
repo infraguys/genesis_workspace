@@ -301,32 +301,51 @@ class _MessengerViewState extends State<MessengerView>
                                     onDelete: (folder.systemType != FolderSystemType.all)
                                         ? () async {
                                             context.pop();
-                                            final confirmed = await showDialog<bool>(
+                                            final messengerCubit = context.read<MessengerCubit>();
+                                            await showDialog<void>(
                                               context: context,
-                                              builder: (dialogContext) => AlertDialog(
-                                                title: Text(context.t.folders.deleteConfirmTitle),
-                                                content: Text(
-                                                  context.t.folders.deleteConfirmText(
-                                                    folderName: folder.title ?? '',
-                                                  ),
+                                              builder: (dialogContext) => BlocProvider.value(
+                                                value: messengerCubit,
+                                                child: BlocBuilder<MessengerCubit, MessengerState>(
+                                                  builder: (ctx, state) {
+                                                    final bool isDeleting = state.isFolderDeleting;
+                                                    return AlertDialog(
+                                                      title: Text(context.t.folders.deleteConfirmTitle),
+                                                      content: Text(
+                                                        context.t.folders.deleteConfirmText(
+                                                          folderName: folder.title ?? '',
+                                                        ),
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: isDeleting
+                                                              ? null
+                                                              : () => Navigator.of(dialogContext).pop(),
+                                                          child: Text(context.t.folders.cancel),
+                                                        ),
+                                                        FilledButton(
+                                                          onPressed: isDeleting
+                                                              ? null
+                                                              : () async {
+                                                                  await ctx.read<MessengerCubit>().deleteFolder(folder);
+                                                                  if (dialogContext.mounted) {
+                                                                    Navigator.of(dialogContext).pop();
+                                                                  }
+                                                                },
+                                                          child: isDeleting
+                                                              ? const SizedBox(
+                                                                  height: 18,
+                                                                  width: 18,
+                                                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                                                )
+                                                              : Text(context.t.folders.delete),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
                                                 ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Navigator.of(dialogContext).pop(false),
-                                                    child: Text(context.t.folders.cancel),
-                                                  ),
-                                                  FilledButton(
-                                                    onPressed: () => Navigator.of(dialogContext).pop(true),
-                                                    child: Text(context.t.folders.delete),
-                                                  ),
-                                                ],
                                               ),
                                             );
-                                            if (confirmed == true) {
-                                              await context.read<MessengerCubit>().deleteFolder(
-                                                folder,
-                                              );
-                                            }
                                           }
                                         : null,
                                   );
@@ -649,30 +668,49 @@ class _MessengerViewState extends State<MessengerView>
 
   Future<void> _handleFolderDelete(BuildContext popupContext, FolderEntity folder) async {
     popupContext.pop();
-    final confirmed = await showDialog<bool>(
+    final messengerCubit = popupContext.read<MessengerCubit>();
+    await showDialog<void>(
       context: popupContext,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(popupContext.t.folders.deleteConfirmTitle),
-        content: Text(
-          popupContext.t.folders.deleteConfirmText(
-            folderName: folder.title ?? '',
-          ),
+      builder: (dialogContext) => BlocProvider.value(
+        value: messengerCubit,
+        child: BlocBuilder<MessengerCubit, MessengerState>(
+          builder: (ctx, state) {
+            final bool isDeleting = state.isFolderDeleting;
+            return AlertDialog(
+              title: Text(popupContext.t.folders.deleteConfirmTitle),
+              content: Text(
+                popupContext.t.folders.deleteConfirmText(
+                  folderName: folder.title ?? '',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isDeleting ? null : () => Navigator.of(dialogContext).pop(),
+                  child: Text(popupContext.t.folders.cancel),
+                ),
+                FilledButton(
+                  onPressed: isDeleting
+                      ? null
+                      : () async {
+                          await ctx.read<MessengerCubit>().deleteFolder(folder);
+                          if (dialogContext.mounted) {
+                            Navigator.of(dialogContext).pop();
+                          }
+                        },
+                  child: isDeleting
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(popupContext.t.folders.delete),
+                ),
+              ],
+            );
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(popupContext.t.folders.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(popupContext.t.folders.delete),
-          ),
-        ],
       ),
     );
-    if (confirmed == true) {
-      await popupContext.read<MessengerCubit>().deleteFolder(folder);
-    }
   }
 
   List<ChatEntity> _pinnedChatsForEdit(List<ChatEntity> chats, List<PinnedChatEntity> pinnedMeta) {

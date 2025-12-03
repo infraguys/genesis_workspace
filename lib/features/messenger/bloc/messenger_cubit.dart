@@ -111,6 +111,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           foundOldestMessage: false,
           subscribedChannels: [],
           isFolderSaving: false,
+          isFolderDeleting: false,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -356,9 +357,10 @@ class MessengerCubit extends Cubit<MessengerState> {
       final createdFolder = await _addFolderUseCase.call(folder);
       final updatedFolders = [...state.folders];
       updatedFolders.add(createdFolder);
-      emit(state.copyWith(folders: updatedFolders, isFolderSaving: false));
+      emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
       inspect(e);
+    } finally {
       emit(state.copyWith(isFolderSaving: false));
     }
   }
@@ -402,9 +404,10 @@ class MessengerCubit extends Cubit<MessengerState> {
     try {
       final updatedFolder = await _updateFolderUseCase.call(folder);
       updatedFolders[index] = updatedFolder;
-      emit(state.copyWith(folders: updatedFolders, isFolderSaving: false));
+      emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
       inspect(e);
+    } finally {
       emit(state.copyWith(isFolderSaving: false));
     }
   }
@@ -416,14 +419,21 @@ class MessengerCubit extends Cubit<MessengerState> {
     final index = updatedFolders.indexWhere((element) => element.uuid == folder.uuid);
     if (index == -1) return;
 
-    await _deleteFolderUseCase.call(DeleteFolderEntity(folderId: folder.uuid));
-    updatedFolders.removeAt(index);
-    emit(
-      state.copyWith(
-        folders: updatedFolders,
-        selectedFolderIndex: 0,
-      ),
-    );
+    emit(state.copyWith(isFolderDeleting: true));
+    try {
+      await _deleteFolderUseCase.call(DeleteFolderEntity(folderId: folder.uuid));
+      updatedFolders.removeAt(index);
+      emit(
+        state.copyWith(
+          folders: updatedFolders,
+          selectedFolderIndex: 0,
+        ),
+      );
+    } catch (e) {
+      inspect(e);
+    } finally {
+      emit(state.copyWith(isFolderDeleting: false));
+    }
   }
 
   Future<List<int>> getFolderIdsForChat(int chatId) async {

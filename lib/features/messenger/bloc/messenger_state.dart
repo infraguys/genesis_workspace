@@ -15,6 +15,7 @@ class MessengerState {
   final bool foundOldestMessage;
   final List<SubscriptionEntity> subscribedChannels;
   final bool isFolderSaving;
+  final bool isFolderDeleting;
 
   MessengerState({
     this.selfUser,
@@ -31,6 +32,7 @@ class MessengerState {
     required this.foundOldestMessage,
     required this.subscribedChannels,
     this.isFolderSaving = false,
+    this.isFolderDeleting = false,
   });
 
   MessengerState copyWith({
@@ -48,6 +50,7 @@ class MessengerState {
     bool? foundOldestMessage,
     List<SubscriptionEntity>? subscribedChannels,
     bool? isFolderSaving,
+    bool? isFolderDeleting,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -64,6 +67,7 @@ class MessengerState {
       foundOldestMessage: foundOldestMessage ?? this.foundOldestMessage,
       subscribedChannels: subscribedChannels ?? this.subscribedChannels,
       isFolderSaving: isFolderSaving ?? this.isFolderSaving,
+      isFolderDeleting: isFolderDeleting ?? this.isFolderDeleting,
     );
   }
 }
