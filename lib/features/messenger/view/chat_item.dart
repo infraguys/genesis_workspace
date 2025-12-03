@@ -190,6 +190,7 @@ class _ChatItemState extends State<ChatItem> {
                               UserAvatar(
                                 avatarUrl: widget.chat.avatarUrl,
                                 size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
+                                backgroundColor: widget.chat.backgroundColor,
                               ),
                               const SizedBox(width: 12),
                               Expanded(

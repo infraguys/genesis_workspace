@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:genesis_workspace/core/enums/chat_type.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
@@ -18,8 +21,11 @@ class ChatEntity {
   final List<TopicEntity>? topics;
   final int? streamId;
   final List<int>? dmIds;
+  final String? colorString;
 
   bool get isTopicsLoading => topics == null;
+
+  Color? get backgroundColor => colorString != null ? parseColor(colorString!) : null;
 
   ChatEntity updateLastMessage(MessageEntity message, {bool isMyMessage = false}) {
     ChatEntity updatedChat = this;
@@ -94,6 +100,7 @@ class ChatEntity {
     this.topics,
     this.streamId,
     this.dmIds,
+    this.colorString,
   });
 
   ChatEntity copyWith({
@@ -111,6 +118,7 @@ class ChatEntity {
     List<TopicEntity>? topics,
     int? streamId,
     List<int>? dmIds,
+    String? colorString,
   }) {
     return ChatEntity(
       id: id ?? this.id,
@@ -127,6 +135,7 @@ class ChatEntity {
       topics: topics ?? this.topics,
       streamId: streamId ?? this.streamId,
       dmIds: dmIds ?? this.dmIds,
+      colorString: colorString ?? this.colorString,
     );
   }
 }
