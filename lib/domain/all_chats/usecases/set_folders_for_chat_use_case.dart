@@ -8,13 +8,11 @@ class SetFoldersForChatUseCase {
 
   Future<void> call(
     int chatId,
-    List<int> folderIds, {
-    required int organizationId,
-  }) async {
+    List<String> folderUuids,
+  ) async {
     await _repository.setFoldersForChat(
       chatId,
-      folderIds,
-      organizationId: organizationId,
+      folderUuids,
     );
   }
 }

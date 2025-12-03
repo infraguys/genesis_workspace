@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_dto.dart';
+import 'package:genesis_workspace/data/all_chats/dto/folder_item_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'all_chats_api_client.g.dart';
@@ -19,4 +20,38 @@ abstract class AllChatsApiClient {
 
   @DELETE('folders/{folder_id}')
   Future<void> deleteFolder(@Path('folder_id') String folderId);
+
+  @GET('folders/{folder_uuid}/items/')
+  Future<List<FolderItemDto>> getFolderItems(@Path('folder_uuid') String folderUuid);
+
+  @POST('folders/{folder_uuid}/items/')
+  Future<FolderItemDto> createFolderItem(
+    @Path('folder_uuid') String folderUuid,
+    @Body() CreateFolderItemRequest body,
+  );
+
+  @DELETE('folders/{folder_uuid}/items/{item_uuid}')
+  Future<void> deleteFolderItem(
+    @Path('folder_uuid') String folderUuid,
+    @Path('item_uuid') String itemUuid,
+  );
+
+  @PUT('folders/{folder_uuid}/items/{item_uuid}')
+  Future<FolderItemDto> updateFolderItem(
+    @Path('folder_uuid') String folderUuid,
+    @Path('item_uuid') String itemUuid,
+    @Body() UpdateFolderItemRequest body,
+  );
+
+  @POST('folders/{folder_uuid}/items/{item_uuid}/actions/pin/invoke')
+  Future<void> pinFolderItem(
+    @Path('folder_uuid') String folderUuid,
+    @Path('item_uuid') String itemUuid,
+  );
+
+  @POST('folders/{folder_uuid}/items/{item_uuid}/actions/unpin/invoke')
+  Future<void> unpinFolderItem(
+    @Path('folder_uuid') String folderUuid,
+    @Path('item_uuid') String itemUuid,
+  );
 }

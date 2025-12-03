@@ -302,17 +302,17 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                   }
                   final folder = folders[index];
                   final bool isSelected = selectedFolderIndex == index;
-                  final String title = index == 0 ? t.folders.all : folder.title ?? '';
+                  final String title = index == 0 ? t.folders.all : folder.title;
                   return FolderItem(
                     title: title,
                     folder: folder,
                     isSelected: isSelected,
                     onTap: () => onSelectFolder(index),
-                    onEdit: (folder.systemType == FolderSystemType.all && onEditFolder != null)
+                    onEdit: (folder.systemType != FolderSystemType.all && onEditFolder != null)
                         ? () => onEditFolder!(folder)
                         : null,
                     onOrderPinning: () => onOrderPinning(context, index),
-                    onDelete: (folder.systemType == FolderSystemType.all && onDeleteFolder != null)
+                    onDelete: (folder.systemType != FolderSystemType.all && onDeleteFolder != null)
                         ? () => onDeleteFolder!(context, folder)
                         : null,
                     icon: const SizedBox.shrink(),

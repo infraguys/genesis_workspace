@@ -21,9 +21,9 @@ import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
-import 'package:genesis_workspace/features/messenger/view/update_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
+import 'package:genesis_workspace/features/messenger/view/update_folder_dialog.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -290,7 +290,7 @@ class _MessengerViewState extends State<MessengerView>
                                     onTap: () {
                                       context.read<MessengerCubit>().selectFolder(index);
                                     },
-                                    onEdit: (folder.systemType != FolderSystemType.all)
+                                    onEdit: folder.systemType != FolderSystemType.all
                                         ? () => editFolder(context, folder)
                                         : null,
                                     onOrderPinning: () {
@@ -298,7 +298,7 @@ class _MessengerViewState extends State<MessengerView>
                                       context.read<MessengerCubit>().selectFolder(index);
                                       editPinning();
                                     },
-                                    onDelete: (folder.systemType != FolderSystemType.all)
+                                    onDelete: folder.systemType != FolderSystemType.all
                                         ? () async {
                                             context.pop();
                                             final messengerCubit = context.read<MessengerCubit>();
@@ -420,38 +420,41 @@ class _MessengerViewState extends State<MessengerView>
                                   NotificationListener<UserScrollNotification>(
                                     onNotification: _onUserScroll,
                                     child: _isEditPinning
-                                        ? ReorderableListView.builder(
-                                            padding: listPadding,
-                                            itemCount: pinnedChatsForEdit.length,
-                                            buildDefaultDragHandles: false,
-                                            onReorder: (oldIndex, newIndex) => _handlePinnedChatReorder(
-                                              currentState: state,
-                                              pinnedChats: pinnedChatsForEdit,
-                                              oldIndex: oldIndex,
-                                              newIndex: newIndex,
+                                        ? AbsorbPointer(
+                                            absorbing: _isPinnedReorderInProgress,
+                                            child: ReorderableListView.builder(
+                                              padding: listPadding,
+                                              itemCount: pinnedChatsForEdit.length,
+                                              buildDefaultDragHandles: false,
+                                              onReorder: (oldIndex, newIndex) => _handlePinnedChatReorder(
+                                                currentState: state,
+                                                pinnedChats: pinnedChatsForEdit,
+                                                oldIndex: oldIndex,
+                                                newIndex: newIndex,
+                                              ),
+                                              proxyDecorator: (child, index, animation) {
+                                                return Material(
+                                                  elevation: 4,
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  child: child,
+                                                );
+                                              },
+                                              itemBuilder: (context, index) {
+                                                final chat = pinnedChatsForEdit[index];
+                                                return KeyedSubtree(
+                                                  key: ValueKey('pinned-chat-${chat.id}'),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(
+                                                      bottom: index == pinnedChatsForEdit.length - 1 ? 0 : 4,
+                                                    ),
+                                                    child: ChatReorderItem(
+                                                      chat: chat,
+                                                      index: index,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                             ),
-                                            proxyDecorator: (child, index, animation) {
-                                              return Material(
-                                                elevation: 4,
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: child,
-                                              );
-                                            },
-                                            itemBuilder: (context, index) {
-                                              final chat = pinnedChatsForEdit[index];
-                                              return KeyedSubtree(
-                                                key: ValueKey('pinned-chat-${chat.id}'),
-                                                child: Padding(
-                                                  padding: EdgeInsets.only(
-                                                    bottom: index == pinnedChatsForEdit.length - 1 ? 0 : 4,
-                                                  ),
-                                                  child: ChatReorderItem(
-                                                    chat: chat,
-                                                    index: index,
-                                                  ),
-                                                ),
-                                              );
-                                            },
                                           )
                                         : ListView.separated(
                                             padding: listPadding,
@@ -728,8 +731,8 @@ class _MessengerViewState extends State<MessengerView>
       if (!aPinned && bPinned) return 1;
       if (!aPinned && !bPinned) return 0;
 
-      final int? aOrder = a!.orderIndex;
-      final int? bOrder = b!.orderIndex;
+      final int? aOrder = a?.orderIndex;
+      final int? bOrder = b?.orderIndex;
 
       if (aOrder != null && bOrder != null && aOrder != bOrder) {
         return aOrder.compareTo(bOrder);
@@ -737,7 +740,9 @@ class _MessengerViewState extends State<MessengerView>
       if (aOrder != null && bOrder == null) return -1;
       if (aOrder == null && bOrder != null) return 1;
 
-      return b!.pinnedAt.compareTo(a.pinnedAt);
+      final DateTime aUpdatedAt = a?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final DateTime bUpdatedAt = b?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bUpdatedAt.compareTo(aUpdatedAt);
     }
 
     final List<ChatEntity> pinnedChats = chats.where((chat) => pinnedByChatId.containsKey(chat.id)).toList()
@@ -771,26 +776,13 @@ class _MessengerViewState extends State<MessengerView>
       });
       return;
     }
-    final int? folderId = currentState.folders[currentState.selectedFolderIndex].id;
-    if (folderId == null) {
-      if (!mounted) return;
-      setState(() {
-        _isPinnedReorderInProgress = false;
-        _optimisticPinnedChats = null;
-      });
-      return;
-    }
-
+    final folderUuid = currentState.folders[currentState.selectedFolderIndex].uuid;
     final int movedChatId = moved.id;
-    final int? previousChatId = adjustedNewIndex > 0 ? local[adjustedNewIndex - 1].id : null;
-    final int? nextChatId = (adjustedNewIndex + 1) < local.length ? local[adjustedNewIndex + 1].id : null;
-
     try {
       await context.read<MessengerCubit>().reorderPinnedChats(
-        folderId: folderId,
+        folderUuid: folderUuid,
         movedChatId: movedChatId,
-        previousChatId: previousChatId,
-        nextChatId: nextChatId,
+        newOrderIndex: adjustedNewIndex,
       );
     } finally {
       if (!mounted) return;

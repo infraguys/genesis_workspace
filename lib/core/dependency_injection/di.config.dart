@@ -18,6 +18,8 @@ import 'package:genesis_workspace/data/all_chats/dao/folder_item_dao.dart'
     as _i909;
 import 'package:genesis_workspace/data/all_chats/dao/pinned_chats_dao.dart'
     as _i691;
+import 'package:genesis_workspace/data/all_chats/datasources/folder_items_remote_data_source.dart'
+    as _i467;
 import 'package:genesis_workspace/data/all_chats/datasources/folder_local_data_source.dart'
     as _i277;
 import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart'
@@ -266,6 +268,9 @@ extension GetItInjectableX on _i174.GetIt {
     final coreModule = _$CoreModule();
     final realTimeModule = _$RealTimeModule();
     gh.factory<_i440.DioFactory>(() => _i440.DioFactory());
+    gh.factory<_i467.FolderItemsRemoteDataSource>(
+      () => _i467.FolderItemsRemoteDataSource(),
+    );
     gh.factory<_i570.FoldersRemoteDataSource>(
       () => _i570.FoldersRemoteDataSource(),
     );
@@ -316,6 +321,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i571.RecentDmDao>(
       () => _i571.RecentDmDao(gh<_i606.AppDatabase>()),
     );
+    gh.lazySingleton<_i725.PinnedChatsRepository>(
+      () => _i835.PinnedChatsRepositoryImpl(
+        gh<_i467.FolderItemsRemoteDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i958.TokenStorage>(
       () => coreModule.tokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
@@ -362,6 +372,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i500.OrganizationsDao>(
       () => _i500.OrganizationsDao(gh<_i606.AppDatabase>()),
+    );
+    gh.factory<_i915.FolderMembershipRepository>(
+      () => _i770.FolderMembershipRepositoryImpl(
+        gh<_i467.FolderItemsRemoteDataSource>(),
+        gh<_i570.FoldersRemoteDataSource>(),
+      ),
     );
     gh.factory<_i862.GetCsrftokenUseCase>(
       () => _i862.GetCsrftokenUseCase(gh<_i958.TokenStorage>()),
@@ -438,11 +454,45 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i541.UpdateSubscriptionSettingsUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i126.GetPinnedChatsUseCase>(
+      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i1012.PinChatUseCase>(
+      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i631.UnpinChatUseCase>(
+      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
+    );
+    gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
+      () => _i1057.UpdatePinnedChatOrderUseCase(
+        gh<_i725.PinnedChatsRepository>(),
+      ),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => coreModule.dio(
         gh<_i460.SharedPreferences>(),
         gh<_i958.TokenStorage>(),
         gh<_i440.DioFactory>(),
+      ),
+    );
+    gh.factory<_i247.GetFolderIdsForChatUseCase>(
+      () => _i247.GetFolderIdsForChatUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i438.GetMembersForFolderUseCase>(
+      () => _i438.GetMembersForFolderUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i744.RemoveAllMembershipsForFolderUseCase>(
+      () => _i744.RemoveAllMembershipsForFolderUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
+    gh.factory<_i1004.SetFoldersForChatUseCase>(
+      () => _i1004.SetFoldersForChatUseCase(
+        gh<_i915.FolderMembershipRepository>(),
       ),
     );
     gh.factory<_i38.RecentDmLocalDataSource>(
@@ -469,11 +519,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i44.AuthRepositoryImpl(
         gh<_i672.AuthRemoteDataSource>(),
         gh<_i958.TokenStorage>(),
-      ),
-    );
-    gh.factory<_i915.FolderMembershipRepository>(
-      () => _i770.FolderMembershipRepositoryImpl(
-        gh<_i180.FolderMembershipLocalDataSource>(),
       ),
     );
     gh.lazySingleton<_i703.RealTimeEventsRepository>(
@@ -504,6 +549,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i445.GetRecentDmsUseCase>(
       () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
+    );
+    gh.factory<_i815.GetFoldersUseCase>(
+      () => _i815.GetFoldersUseCase(
+        gh<_i48.FolderRepository>(),
+        gh<_i725.PinnedChatsRepository>(),
+      ),
     );
     gh.factory<_i183.AddOrganizationUseCase>(
       () => _i183.AddOrganizationUseCase(gh<_i654.OrganizationsRepository>()),
@@ -552,26 +603,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
-    gh.factory<_i247.GetFolderIdsForChatUseCase>(
-      () => _i247.GetFolderIdsForChatUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
-    gh.factory<_i438.GetMembersForFolderUseCase>(
-      () => _i438.GetMembersForFolderUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
-    gh.factory<_i744.RemoveAllMembershipsForFolderUseCase>(
-      () => _i744.RemoveAllMembershipsForFolderUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
-    gh.factory<_i1004.SetFoldersForChatUseCase>(
-      () => _i1004.SetFoldersForChatUseCase(
-        gh<_i915.FolderMembershipRepository>(),
-      ),
-    );
     gh.factory<_i433.DeleteTokenUseCase>(
       () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
@@ -608,11 +639,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.GetEventsByQueueIdUseCase>(),
       ),
     );
-    gh.lazySingleton<_i725.PinnedChatsRepository>(
-      () => _i835.PinnedChatsRepositoryImpl(
-        gh<_i796.PinnedChatsLocalDataSource>(),
-      ),
-    );
     gh.lazySingleton<_i766.ProfileCubit>(
       () => _i766.ProfileCubit(
         gh<_i82.RealTimeService>(),
@@ -631,6 +657,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
       ),
     );
+    gh.factory<_i404.AllChatsCubit>(
+      () => _i404.AllChatsCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+        gh<_i7.UpdateFolderUseCase>(),
+        gh<_i849.DeleteFolderUseCase>(),
+        gh<_i1004.SetFoldersForChatUseCase>(),
+        gh<_i247.GetFolderIdsForChatUseCase>(),
+        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
+        gh<_i438.GetMembersForFolderUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
+        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i823.MultiPollingService>(
       () => _i823.MultiPollingService(
         gh<_i535.GetAllOrganizationsUseCase>(),
@@ -638,12 +680,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i862.GetCsrftokenUseCase>(),
         gh<_i350.GetSessionIdUseCase>(),
         gh<_i951.RealTimeConnectionFactory>(),
-      ),
-    );
-    gh.factory<_i815.GetFoldersUseCase>(
-      () => _i815.GetFoldersUseCase(
-        gh<_i48.FolderRepository>(),
-        gh<_i725.PinnedChatsRepository>(),
       ),
     );
     gh.factory<_i739.ChannelChatCubit>(
@@ -671,20 +707,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1068.StarredCubit(
         gh<_i82.RealTimeService>(),
         gh<_i207.GetMessagesUseCase>(),
-      ),
-    );
-    gh.factory<_i126.GetPinnedChatsUseCase>(
-      () => _i126.GetPinnedChatsUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i1012.PinChatUseCase>(
-      () => _i1012.PinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i631.UnpinChatUseCase>(
-      () => _i631.UnpinChatUseCase(gh<_i725.PinnedChatsRepository>()),
-    );
-    gh.factory<_i1057.UpdatePinnedChatOrderUseCase>(
-      () => _i1057.UpdatePinnedChatOrderUseCase(
-        gh<_i725.PinnedChatsRepository>(),
       ),
     );
     gh.lazySingleton<_i592.MessagesCubit>(
@@ -762,22 +784,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i573.RealTimeCubit(
         gh<_i823.MultiPollingService>(),
         gh<_i214.OrganizationsCubit>(),
-      ),
-    );
-    gh.factory<_i404.AllChatsCubit>(
-      () => _i404.AllChatsCubit(
-        gh<_i125.AddFolderUseCase>(),
-        gh<_i815.GetFoldersUseCase>(),
-        gh<_i7.UpdateFolderUseCase>(),
-        gh<_i849.DeleteFolderUseCase>(),
-        gh<_i1004.SetFoldersForChatUseCase>(),
-        gh<_i247.GetFolderIdsForChatUseCase>(),
-        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
-        gh<_i438.GetMembersForFolderUseCase>(),
-        gh<_i126.GetPinnedChatsUseCase>(),
-        gh<_i1012.PinChatUseCase>(),
-        gh<_i631.UnpinChatUseCase>(),
-        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
       ),
     );
     gh.factory<_i49.MessengerCubit>(

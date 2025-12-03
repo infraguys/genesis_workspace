@@ -6,6 +6,5 @@ class RemoveAllMembershipsForFolderUseCase {
   final FolderMembershipRepository _repository;
   RemoveAllMembershipsForFolderUseCase(this._repository);
 
-  Future<void> call(int folderId, {required int organizationId}) =>
-      _repository.removeAllForFolder(folderId, organizationId: organizationId);
+  Future<void> call(String folderUuid) => _repository.removeAllForFolder(folderUuid);
 }

@@ -7,18 +7,14 @@ class PinChatUseCase {
   PinChatUseCase(this._repository);
 
   Future<void> call({
-    required int folderId,
+    required String folderUuid,
     required int chatId,
-    required int orderIndex,
-    // required PinnedChatType type,
-    required int organizationId,
+    int? orderIndex,
   }) async {
     return await _repository.pinChat(
-      folderId: folderId,
+      folderUuid: folderUuid,
       chatId: chatId,
       orderIndex: orderIndex,
-      // type: type,
-      organizationId: organizationId,
     );
   }
 }

@@ -4,8 +4,8 @@ import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class SelectFoldersDialog extends StatefulWidget {
-  final Future<List<int>> Function() loadSelectedFolderIds;
-  final Future<void> Function(List<int> folderIds) onSave;
+  final Future<List<String>> Function() loadSelectedFolderIds;
+  final Future<void> Function(List<String> folderIds) onSave;
   final List<FolderEntity> folders;
 
   const SelectFoldersDialog({
@@ -20,7 +20,7 @@ class SelectFoldersDialog extends StatefulWidget {
 }
 
 class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
-  List<int> _selectedIds = [];
+  List<String> _selectedIds = [];
   late Future<void> _initFuture;
 
   @override
@@ -32,14 +32,12 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
   Future<void> _load() async {
     final ids = await widget.loadSelectedFolderIds();
     if (!mounted) return;
-    setState(() => _selectedIds = List<int>.from(ids));
+    setState(() => _selectedIds = List<String>.from(ids));
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<FolderEntity> userFolders = widget.folders
-        .where((f) => f.systemType != FolderSystemType.all && f.id != null)
-        .toList();
+    final List<FolderEntity> userFolders = widget.folders.where((f) => f.systemType != FolderSystemType.all).toList();
     return Dialog(
       child: SizedBox(
         width: 420,
@@ -72,12 +70,13 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                     shrinkWrap: true,
                     itemCount: userFolders.length,
                     itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return SizedBox.shrink();
-                      }
+                      // if (index == 0) {
+                      //   return SizedBox.shrink();
+                      // }
                       final f = userFolders[index];
-                      final id = f.id!;
+                      final id = f.uuid;
                       final selected = _selectedIds.contains(id);
+                      print(f.title);
                       return CheckboxListTile(
                         value: selected,
                         onChanged: (value) {
@@ -98,7 +97,7 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: f.backgroundColor?.withOpacity(0.2),
+                                color: f.backgroundColor.withOpacity(0.2),
                                 shape: BoxShape.circle,
                                 border: Border.all(color: Colors.black12),
                               ),

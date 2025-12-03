@@ -77,8 +77,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
   }
 
   List<DmUserEntity> filterUsers(List<DmUserEntity> usersList) {
-    final List<DmUserEntity> baseList =
-        (widget.filteredDms == null || widget.selectedFolder.id == 0)
+    final List<DmUserEntity> baseList = (widget.filteredDms == null || widget.selectedFolder.id == 0)
         ? usersList
         : usersList.where((user) => widget.filteredDms!.contains(user.userId)).toList();
 
@@ -101,19 +100,20 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
 
       if (aOrder != null && bOrder != null) {
         if (aOrder != bOrder) return aOrder.compareTo(bOrder);
-        return b.pinnedAt.compareTo(a.pinnedAt);
+        // return b.pinnedAt.compareTo(a.pinnedAt);
       }
       if (aOrder != null && bOrder == null) return -1;
       if (aOrder == null && bOrder != null) return 1;
 
-      return b.pinnedAt.compareTo(a.pinnedAt);
+      // return b.pinnedAt.compareTo(a.pinnedAt);
+      return 1;
     }
 
     if (widget.isEditPinning) {
-      final List<DmUserEntity> onlyPinned =
-          baseList.where((u) => pinnedByChatId.containsKey(u.userId)).toList()..sort(
-            (a, b) => compareByOrderAndPinnedAt(pinnedByChatId[a.userId], pinnedByChatId[b.userId]),
-          );
+      final List<DmUserEntity> onlyPinned = baseList.where((u) => pinnedByChatId.containsKey(u.userId)).toList()
+        ..sort(
+          (a, b) => compareByOrderAndPinnedAt(pinnedByChatId[a.userId], pinnedByChatId[b.userId]),
+        );
       return onlyPinned;
     }
 
@@ -193,9 +193,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                     tooltip: context.t.groupChat.createTooltip,
                   ),
                   Tooltip(
-                    message: directMessagesState.showAllUsers
-                        ? context.t.showRecentDialogs
-                        : context.t.showAllUsers,
+                    message: directMessagesState.showAllUsers ? context.t.showRecentDialogs : context.t.showAllUsers,
                     child: IconButton(
                       splashRadius: 22,
                       onPressed: context.read<DirectMessagesCubit>().toggleShowAllUsers,
@@ -254,9 +252,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                   });
 
                                   final int movedChatId = moved.userId;
-                                  final int? previousChatId = (newIndex - 1) >= 0
-                                      ? local[newIndex - 1].userId
-                                      : null;
+                                  final int? previousChatId = (newIndex - 1) >= 0 ? local[newIndex - 1].userId : null;
                                   final int? nextChatId = (newIndex + 1) < local.length
                                       ? local[newIndex + 1].userId
                                       : null;
@@ -311,8 +307,7 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                 itemCount: users.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   final DmUserEntity user = users[index];
-                                  final GlobalKey<CustomPopupState> popupKey =
-                                      GlobalKey<CustomPopupState>();
+                                  final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
                                   final bool isPinned = widget.selectedFolder.pinnedChats.any(
                                     (chat) => chat.chatId == user.userId,
                                   );
@@ -345,16 +340,16 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                                                     title: Text(context.t.chat.unpinChat),
                                                     onTap: () async {
                                                       context.pop();
-                                                      final pinnedChatId = widget
-                                                          .selectedFolder
-                                                          .pinnedChats
-                                                          .firstWhere(
-                                                            (chat) => chat.chatId == user.userId,
-                                                          )
-                                                          .id;
-                                                      await context.read<AllChatsCubit>().unpinChat(
-                                                        pinnedChatId,
-                                                      );
+                                                      // final pinnedChatId = widget
+                                                      //     .selectedFolder
+                                                      //     .pinnedChats
+                                                      //     .firstWhere(
+                                                      //       (chat) => chat.chatId == user.userId,
+                                                      //     )
+                                                      //     .id;
+                                                      // await context.read<AllChatsCubit>().unpinChat(
+                                                      //   pinnedChatId,
+                                                      // );
                                                     },
                                                   )
                                                 : ListTile(
