@@ -165,7 +165,7 @@ class RealTimeConnection {
         }
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
-      } catch (_) {
+      } catch (e) {
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
       }
@@ -173,11 +173,11 @@ class RealTimeConnection {
   }
 
   Future<void> _fetchAndDispatch() async {
+    if (_queueId == null) {
+      await _registerQueue();
+    }
+    final String queueIdValue = _queueId!;
     try {
-      if (_queueId == null) {
-        await _registerQueue();
-      }
-      final String queueIdValue = _queueId!;
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueIdValue, lastEventId: _lastEventId),
       );

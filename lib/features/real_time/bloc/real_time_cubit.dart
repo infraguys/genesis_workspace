@@ -9,6 +9,7 @@ import 'package:genesis_workspace/services/firebase/firebase_service.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:genesis_workspace/services/real_time/real_time_service.dart';
 import 'package:injectable/injectable.dart';
+
 part 'real_time_state.dart';
 
 @lazySingleton
