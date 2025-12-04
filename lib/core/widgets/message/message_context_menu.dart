@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 
 class MessageContextMenu extends StatelessWidget {
   final bool isStarred;
@@ -31,42 +32,6 @@ class MessageContextMenu extends StatelessWidget {
     final colors = theme.colorScheme;
     final textColor = colors.onSurface.withOpacity(0.9);
 
-    final actions = <_ActionTileData>[
-      _ActionTileData(
-        icon: Icons.reply_outlined,
-        label: 'Ответить',
-        onTap: onReply,
-      ),
-      if (onEdit != null)
-        _ActionTileData(
-          icon: Icons.edit_outlined,
-          label: 'Изменить',
-          onTap: onEdit!,
-        ),
-      _ActionTileData(
-        icon: Icons.copy_outlined,
-        label: 'Копировать текст',
-        onTap: onCopy,
-      ),
-      _ActionTileData(
-        icon: isStarred ? Icons.bookmark : Icons.bookmark_border,
-        label: isStarred ? 'Убрать из важного' : 'Пометить как важное',
-        onTap: onToggleStar,
-      ),
-      if (onDelete != null)
-        _ActionTileData(
-          icon: Icons.delete_outline,
-          label: 'Удалить',
-          onTap: onDelete!,
-          destructive: true,
-        ),
-      _ActionTileData(
-        icon: Icons.check_circle_outline,
-        label: 'Выбрать',
-        onTap: () {},
-        disabled: true,
-      ),
-    ];
 
     return Material(
       color: Colors.transparent,
@@ -76,7 +41,6 @@ class MessageContextMenu extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(8.0),
-
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -86,11 +50,41 @@ class MessageContextMenu extends StatelessWidget {
               onOpenEmojiPicker: onOpenEmojiPicker,
             ),
             const SizedBox(height: 10),
-            ...actions.map(
-              (action) => _ActionTile(
-                data: action,
-                textColor: textColor,
-              ),
+            _ActionTile(
+              textColor: textColor,
+              icon: Assets.icons.replay,
+              label: 'Ответить',
+              onTap: onReply,
+            ),
+            if (onEdit != null) _ActionTile(
+              textColor: textColor,
+              icon: Assets.icons.edit,
+              label: 'Изменить',
+              onTap: onEdit,
+            ),
+            _ActionTile(
+              textColor: textColor,
+              icon: Assets.icons.fileCopy,
+              label: 'Копировать',
+              onTap: onCopy,
+            ),
+            _ActionTile(
+              textColor: textColor,
+              icon: Assets.icons.bookmark,
+              label: isStarred ? 'Убрать из важного' : 'Пометить как важное',
+              onTap: onToggleStar,
+            ),
+            if (onDelete != null) _ActionTile(
+              textColor: textColor,
+              icon: Assets.icons.delete,
+              label: 'Удалить',
+              onTap: onDelete,
+            ),
+            _ActionTile(
+              textColor: textColor,
+              icon: Assets.icons.checkCircle,
+              label: 'Выбрать',
+              onTap: () {},
             ),
           ],
         ),
@@ -99,51 +93,37 @@ class MessageContextMenu extends StatelessWidget {
   }
 }
 
-class _ActionTileData {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool destructive;
-  final bool disabled;
-
-  _ActionTileData({
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({
+    required this.textColor,
     required this.icon,
     required this.label,
-    required this.onTap,
-    this.destructive = false,
-    this.disabled = false,
+    this.onTap,
   });
-}
 
-class _ActionTile extends StatelessWidget {
-  final _ActionTileData data;
   final Color textColor;
-
-  const _ActionTile({
-    required this.data,
-    required this.textColor,
-  });
+  final SvgGenImage icon;
+  final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
-    final iconColor = data.destructive
-        ? theme.colorScheme.error
-        : textColor.withOpacity(data.disabled ? 0.4 : 0.9);
+    final iconColor = textColor.withOpacity(onTap == null ? 0.4 : 0.9);
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
-      onTap: data.disabled ? null : data.onTap,
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Icon(data.icon, color: textColors.text50, size: 20),
+            icon.svg(width: 20, height: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                data.label,
+                label,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
