@@ -42,7 +42,7 @@ class FolderLocalDataSource {
     );
   }
 
-  Future<void> delete(int id) async {
-    await _dao.deleteByUuid(id.toString());
+  Future<void> delete(String id) async {
+    await _dao.deleteByUuid(id);
   }
 }
