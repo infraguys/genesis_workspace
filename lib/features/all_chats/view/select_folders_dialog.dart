@@ -127,8 +127,10 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                       const SizedBox(width: 8),
                       FilledButton(
                         onPressed: () async {
-                          if (mounted) context.pop();
                           await widget.onSave(_selectedIds);
+                          if (mounted) {
+                            context.pop();
+                          }
                         },
                         child: Text(context.t.folders.save),
                       ),
