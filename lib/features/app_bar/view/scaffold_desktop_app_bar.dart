@@ -216,8 +216,10 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
 
                                 IconButton(
                                   onPressed: () async {
+                                    if (kDebugMode) {
+                                      context.read<RealTimeCubit>().setUnvalidQueueId();
+                                    }
                                     // await context.read<RealTimeCubit>().ensureConnection();
-                                    await context.read<RealTimeCubit>().disconnect();
                                   },
                                   icon: Assets.icons.arrowDown.svg(),
                                 ),

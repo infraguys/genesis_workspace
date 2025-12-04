@@ -157,6 +157,8 @@ class RealTimeConnection {
         await _fetchAndDispatch();
         retryDelay = _initialRetryDelay;
       } on DioException catch (error) {
+        print("dio error");
+        inspect(error);
         final bool isBadQueueId =
             error.response?.statusCode == 400 && error.response?.data?['code'] == 'BAD_EVENT_QUEUE_ID';
         if (isBadQueueId) {
@@ -165,7 +167,9 @@ class RealTimeConnection {
         }
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
-      } catch (_) {
+      } catch (e) {
+        print('171 error');
+        inspect(e);
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
       }
@@ -173,17 +177,17 @@ class RealTimeConnection {
   }
 
   Future<void> _fetchAndDispatch() async {
+    if (_queueId == null) {
+      await _registerQueue();
+    }
+    final String queueIdValue = _queueId!;
     try {
-      if (_queueId == null) {
-        await _registerQueue();
-      }
-      final String queueIdValue = _queueId!;
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueIdValue, lastEventId: _lastEventId),
       );
 
       if (response.queueId != null) {
-        _queueId = response.queueId;
+        // _queueId = response.queueId;
       }
 
       if (response.events.isEmpty) return;
@@ -224,6 +228,10 @@ class RealTimeConnection {
     } catch (e) {
       rethrow;
     }
+  }
+
+  setQueueId(String queueId) {
+    _queueId = queueId;
   }
 
   Future<void> _sleepWithJitter(Duration baseDelay, Random random) async {

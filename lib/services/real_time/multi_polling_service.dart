@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer';
 
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
@@ -160,6 +162,15 @@ class MultiPollingService {
     _activeConnections.clear();
     await Future.wait(tasks);
     await _closeAggregatedControllers();
+  }
+
+  void setUnvalidQueueId() {
+    final selectedOrganizationId = AppConstants.selectedOrganizationId;
+    if (selectedOrganizationId != null) {
+      RealTimeConnection? connection = _activeConnections[selectedOrganizationId];
+      connection?.setQueueId('123123');
+    }
+    inspect(activeConnections);
   }
 
   Future<void> _closeAggregatedControllers() async {

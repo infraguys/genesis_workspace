@@ -424,6 +424,7 @@ class AuthCubit extends Cubit<AuthState> {
       if (token != null) {
         isAuthorized = true;
         emit(state.copyWith(isPending: false, isAuthorized: isAuthorized, errorMessage: null));
+        return;
       } else {
         if (kIsWeb) {
           final isAuth = _sharedPreferences.getBool(SharedPrefsKeys.isWebAuth) ?? false;
