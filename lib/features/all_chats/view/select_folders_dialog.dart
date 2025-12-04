@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
+import 'package:genesis_workspace/core/enums/folder_system_type.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 
 class SelectFoldersDialog extends StatefulWidget {
-  final Future<List<int>> Function() loadSelectedFolderIds;
-  final Future<void> Function(List<int> folderIds) onSave;
-  final List<FolderItemEntity> folders;
+  final Future<List<String>> Function() loadSelectedFolderIds;
+  final Future<void> Function(List<String> folderIds) onSave;
+  final List<FolderEntity> folders;
 
   const SelectFoldersDialog({
     super.key,
@@ -19,7 +21,7 @@ class SelectFoldersDialog extends StatefulWidget {
 }
 
 class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
-  List<int> _selectedIds = [];
+  List<String> _selectedIds = [];
   late Future<void> _initFuture;
 
   @override
@@ -31,20 +33,23 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
   Future<void> _load() async {
     final ids = await widget.loadSelectedFolderIds();
     if (!mounted) return;
-    setState(() => _selectedIds = List<int>.from(ids));
+    setState(() => _selectedIds = List<String>.from(ids));
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<FolderItemEntity> userFolders = widget.folders
-        .where((f) => f.systemType == null && f.id != null)
-        .toList();
+    final List<FolderEntity> userFolders = widget.folders.where((f) => f.systemType != FolderSystemType.all).toList();
     return Dialog(
       child: SizedBox(
         width: 420,
         child: FutureBuilder(
           future: _initFuture,
           builder: (_, snapshot) {
+            // if (snapshot.connectionState == ConnectionState.waiting) {
+            //   return Center(
+            //     child: CircularProgressIndicator(),
+            //   );
+            // }
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -71,14 +76,12 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                     shrinkWrap: true,
                     itemCount: userFolders.length,
                     itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return SizedBox.shrink();
-                      }
                       final f = userFolders[index];
-                      final id = f.id!;
+                      final id = f.uuid;
                       final selected = _selectedIds.contains(id);
                       return CheckboxListTile(
                         value: selected,
+                        enabled: snapshot.connectionState != .waiting,
                         onChanged: (value) {
                           setState(() {
                             if (value == true) {
@@ -97,11 +100,11 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: f.backgroundColor?.withOpacity(0.2),
+                                color: f.backgroundColor.withOpacity(0.2),
                                 shape: BoxShape.circle,
                                 border: Border.all(color: Colors.black12),
                               ),
-                              child: Icon(f.iconData, size: 16, color: f.backgroundColor),
+                              // child: Icon(f.iconData, size: 16, color: f.backgroundColor),
                             ),
                             const SizedBox(width: 8),
                             Text(f.title ?? ''),
@@ -118,14 +121,16 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.pop(),
                         child: Text(context.t.folders.cancel),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
                         onPressed: () async {
                           await widget.onSave(_selectedIds);
-                          if (mounted) Navigator.of(context).pop();
+                          if (mounted) {
+                            context.pop();
+                          }
                         },
                         child: Text(context.t.folders.save),
                       ),

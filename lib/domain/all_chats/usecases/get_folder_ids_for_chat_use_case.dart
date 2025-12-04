@@ -6,7 +6,7 @@ class GetFolderIdsForChatUseCase {
   final FolderMembershipRepository _repository;
   GetFolderIdsForChatUseCase(this._repository);
 
-  Future<List<int>> call(int chatId, {required int organizationId}) async {
-    return _repository.getFolderIdsForChat(chatId, organizationId: organizationId);
+  Future<List<String>> call(int chatId) async {
+    return _repository.getFolderIdsForChat(chatId);
   }
 }

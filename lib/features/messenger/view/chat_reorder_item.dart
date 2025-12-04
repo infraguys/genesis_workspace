@@ -33,7 +33,11 @@ class ChatReorderItem extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    UserAvatar(avatarUrl: chat.avatarUrl, size: 30),
+                    UserAvatar(
+                      avatarUrl: chat.avatarUrl,
+                      size: 30,
+                      backgroundColor: chat.backgroundColor,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

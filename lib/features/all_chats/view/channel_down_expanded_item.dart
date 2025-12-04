@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
@@ -241,10 +240,10 @@ class _ChannelDownExpandedItemState extends State<ChannelDownExpandedItem> {
                     title: Text(context.t.chat.pinChat),
                     onTap: () async {
                       Navigator.of(context).pop();
-                      await context.read<AllChatsCubit>().pinChat(
-                        chatId: widget.channel.streamId,
-                        type: PinnedChatType.channel,
-                      );
+                      // await context.read<AllChatsCubit>().pinChat(
+                      //   chatId: widget.channel.streamId,
+                      //   type: PinnedChatType.channel,
+                      // );
                     },
                   ),
                 ListTile(

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
-import 'package:genesis_workspace/data/all_chats/tables/pinned_chats_table.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/group_chat_entity.dart';
@@ -31,8 +30,7 @@ class AllGroupChats extends StatefulWidget {
   State<AllGroupChats> createState() => _AllGroupChatsState();
 }
 
-class _AllGroupChatsState extends State<AllGroupChats>
-    with TickerProviderStateMixin, OpenDmChatMixin {
+class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateMixin, OpenDmChatMixin {
   late final AnimationController expandController;
   late final Animation<double> expandAnimation;
   bool isExpanded = true;
@@ -78,8 +76,7 @@ class _AllGroupChatsState extends State<AllGroupChats>
     return BlocBuilder<DirectMessagesCubit, DirectMessagesState>(
       buildWhen: (_, __) => !isReorderingInProgress,
       builder: (context, dmsState) {
-        final List<GroupChatEntity> baseList =
-            (widget.filteredGroupChatIds == null || widget.selectedFolder.id == 0)
+        final List<GroupChatEntity> baseList = (widget.filteredGroupChatIds == null || widget.selectedFolder.id == 0)
             ? [...dmsState.groupChats]
             : [
                 ...dmsState.groupChats,
@@ -104,12 +101,13 @@ class _AllGroupChatsState extends State<AllGroupChats>
 
           if (aOrder != null && bOrder != null) {
             if (aOrder != bOrder) return aOrder.compareTo(bOrder);
-            return b.pinnedAt.compareTo(a.pinnedAt);
+            // return b.pinnedAt.compareTo(a.pinnedAt);
           }
           if (aOrder != null && bOrder == null) return -1;
           if (aOrder == null && bOrder != null) return 1;
 
-          return b.pinnedAt.compareTo(a.pinnedAt);
+          // return b.pinnedAt.compareTo(a.pinnedAt);
+          return 1;
         }
 
         List<GroupChatEntity> filtered;
@@ -266,8 +264,7 @@ class _AllGroupChatsState extends State<AllGroupChats>
                             itemBuilder: (context, index) {
                               final group = groups[index];
                               final bool isPinned = pinnedByChatId.containsKey(group.id);
-                              final GlobalKey<CustomPopupState> popupKey =
-                                  GlobalKey<CustomPopupState>();
+                              final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
                               return CustomPopup(
                                 key: popupKey,
                                 position: PopupPosition.auto,
@@ -299,14 +296,14 @@ class _AllGroupChatsState extends State<AllGroupChats>
                                                 title: Text(context.t.chat.unpinChat),
                                                 onTap: () async {
                                                   context.pop();
-                                                  final pinnedChatId = widget
-                                                      .selectedFolder
-                                                      .pinnedChats
-                                                      .firstWhere((chat) => chat.chatId == group.id)
-                                                      .id;
-                                                  await context.read<AllChatsCubit>().unpinChat(
-                                                    pinnedChatId,
-                                                  );
+                                                  // final pinnedChatId = widget
+                                                  //     .selectedFolder
+                                                  //     .pinnedChats
+                                                  //     .firstWhere((chat) => chat.chatId == group.id)
+                                                  //     .id;
+                                                  // await context.read<AllChatsCubit>().unpinChat(
+                                                  //   pinnedChatId,
+                                                  // );
                                                 },
                                               )
                                             : ListTile(
@@ -315,10 +312,10 @@ class _AllGroupChatsState extends State<AllGroupChats>
                                                 onTap: () async {
                                                   context.pop();
 
-                                                  await context.read<AllChatsCubit>().pinChat(
-                                                    chatId: group.id,
-                                                    type: PinnedChatType.group,
-                                                  );
+                                                  // await context.read<AllChatsCubit>().pinChat(
+                                                  //   chatId: group.id,
+                                                  //   type: PinnedChatType.group,
+                                                  // );
                                                 },
                                               ),
                                         ListTile(

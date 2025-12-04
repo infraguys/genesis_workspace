@@ -7,7 +7,7 @@ class GetMembersForFolderUseCase {
   final FolderMembershipRepository _repository;
   GetMembersForFolderUseCase(this._repository);
 
-  Future<FolderMembers> call(int folderId, {required int organizationId}) async {
-    return _repository.getMembersForFolder(folderId, organizationId: organizationId);
+  Future<FolderMembers> call(String folderUuid) async {
+    return _repository.getMembersForFolder(folderUuid);
   }
 }
