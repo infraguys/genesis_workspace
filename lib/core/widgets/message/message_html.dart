@@ -41,6 +41,9 @@ class MessageHtml extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SelectionArea(
+      contextMenuBuilder: (BuildContext context, SelectableRegionState state) {
+        return const SizedBox.shrink();
+      },
       child: HtmlWidget(
         content,
         customStylesBuilder: (element) {

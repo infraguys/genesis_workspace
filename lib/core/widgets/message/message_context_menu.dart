@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -33,61 +32,57 @@ class MessageContextMenu extends StatelessWidget {
     final textColor = colors.onSurface.withOpacity(0.9);
 
 
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 240,
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _ReactionsRow(
-              onEmojiSelected: onEmojiSelected,
-              onOpenEmojiPicker: onOpenEmojiPicker,
-            ),
-            const SizedBox(height: 10),
-            _ActionTile(
-              textColor: textColor,
-              icon: Assets.icons.replay,
-              label: 'Ответить',
-              onTap: onReply,
-            ),
-            if (onEdit != null) _ActionTile(
-              textColor: textColor,
-              icon: Assets.icons.edit,
-              label: 'Изменить',
-              onTap: onEdit,
-            ),
-            _ActionTile(
-              textColor: textColor,
-              icon: Assets.icons.fileCopy,
-              label: 'Копировать',
-              onTap: onCopy,
-            ),
-            _ActionTile(
-              textColor: textColor,
-              icon: Assets.icons.bookmark,
-              label: isStarred ? 'Убрать из важного' : 'Пометить как важное',
-              onTap: onToggleStar,
-            ),
-            if (onDelete != null) _ActionTile(
-              textColor: textColor,
-              icon: Assets.icons.delete,
-              label: 'Удалить',
-              onTap: onDelete,
-            ),
-            _ActionTile(
-              textColor: textColor,
-              icon: Assets.icons.checkCircle,
-              label: 'Выбрать',
-              onTap: () {},
-            ),
-          ],
-        ),
+    return Container(
+      width: 240,
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ReactionsRow(
+            onEmojiSelected: onEmojiSelected,
+            onOpenEmojiPicker: onOpenEmojiPicker,
+          ),
+          const SizedBox(height: 10),
+          _ActionTile(
+            textColor: textColor,
+            icon: Assets.icons.replay,
+            label: 'Ответить',
+            onTap: onReply,
+          ),
+          if (onEdit != null) _ActionTile(
+            textColor: textColor,
+            icon: Assets.icons.edit,
+            label: 'Изменить',
+            onTap: onEdit,
+          ),
+          _ActionTile(
+            textColor: textColor,
+            icon: Assets.icons.fileCopy,
+            label: 'Копировать',
+            onTap: onCopy,
+          ),
+          _ActionTile(
+            textColor: textColor,
+            icon: Assets.icons.bookmark,
+            label: isStarred ? 'Убрать из важного' : 'Пометить как важное',
+            onTap: onToggleStar,
+          ),
+          if (onDelete != null) _ActionTile(
+            textColor: textColor,
+            icon: Assets.icons.delete,
+            label: 'Удалить',
+            onTap: onDelete,
+          ),
+          _ActionTile(
+            textColor: textColor,
+            icon: Assets.icons.checkCircle,
+            label: 'Выбрать',
+            onTap: () {},
+          ),
+        ],
       ),
     );
   }
@@ -109,29 +104,32 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = Theme.of(context).extension<TextColors>()!;
-    final iconColor = textColor.withOpacity(onTap == null ? 0.4 : 0.9);
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            icon.svg(width: 20, height: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+    return SizedBox(
+      height: 36.0,
+      child: Material(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: Padding(
+              padding: const .symmetric(horizontal: 12.0),
+              child: Row(
+              children: [
+              icon.svg(width: 20, height: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
               ),
             ),
+          ),
           ],
         ),
       ),
+    ),)
+    ,
     );
   }
 }
@@ -148,28 +146,39 @@ class _ReactionsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      mainAxisAlignment: .spaceBetween,
-      children: [
-        for (final emoji in AppConstants.popularEmojis)
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: InkResponse(
-              radius: 18,
-              onTap: () => onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
-              child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 20),
+    return SizedBox(
+      height: 36.0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Row(
+          mainAxisAlignment: .spaceBetween,
+          children: [
+            for (final emoji in AppConstants.popularEmojis)
+              Material(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () =>
+                      onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 20),
+                  ),
+                ),
+              ),
+            Material(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: onOpenEmojiPicker,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(Icons.add, size: 20,
+                      color: theme.colorScheme.onSurface.withValues(alpha: .3)),
+                ),
+              ),
             ),
-          ),
-        IconButton(
-          tooltip: 'Еще реакции',
-          onPressed: onOpenEmojiPicker,
-          icon: const Icon(Icons.add),
-          color: theme.colorScheme.primary,
-          splashRadius: 18,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
