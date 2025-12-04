@@ -183,7 +183,7 @@ class RealTimeConnection {
       );
 
       if (response.queueId != null) {
-        // _queueId = response.queueId;
+        _queueId = response.queueId;
       }
 
       if (response.events.isEmpty) return;
