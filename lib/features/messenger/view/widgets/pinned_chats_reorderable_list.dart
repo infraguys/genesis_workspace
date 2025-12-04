@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
+import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_reorder_item.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 
 class PinnedChatsReorderableList extends StatelessWidget {
   const PinnedChatsReorderableList({

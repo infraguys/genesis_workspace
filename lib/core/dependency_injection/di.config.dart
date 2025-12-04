@@ -542,6 +542,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i849.DeleteFolderUseCase>(
       () => _i849.DeleteFolderUseCase(gh<_i48.FolderRepository>()),
     );
+    gh.factory<_i815.GetFoldersUseCase>(
+      () => _i815.GetFoldersUseCase(gh<_i48.FolderRepository>()),
+    );
     gh.factory<_i7.UpdateFolderUseCase>(
       () => _i7.UpdateFolderUseCase(gh<_i48.FolderRepository>()),
     );
@@ -646,12 +649,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i862.GetCsrftokenUseCase>(),
         gh<_i350.GetSessionIdUseCase>(),
         gh<_i951.RealTimeConnectionFactory>(),
-      ),
-    );
-    gh.factory<_i815.GetFoldersUseCase>(
-      () => _i815.GetFoldersUseCase(
-        gh<_i48.FolderRepository>(),
-        gh<_i725.PinnedChatsRepository>(),
       ),
     );
     gh.factory<_i739.ChannelChatCubit>(

@@ -31,6 +31,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/subscription_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
@@ -46,16 +47,6 @@ import 'package:genesis_workspace/services/real_time/multi_polling_service.dart'
 import 'package:injectable/injectable.dart';
 
 part 'messenger_state.dart';
-
-class PinnedChatOrderUpdate {
-  final String folderItemUuid;
-  final int orderIndex;
-
-  const PinnedChatOrderUpdate({
-    required this.folderItemUuid,
-    required this.orderIndex,
-  });
-}
 
 @injectable
 class MessengerCubit extends Cubit<MessengerState> {
@@ -122,7 +113,6 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void _onProfileStateChanged(ProfileState profileState) {
     final user = profileState.user;
-    inspect(profileState);
     if (user == null) return;
     if (state.selfUser?.userId == user.userId) return;
     emit(state.copyWith(selfUser: user));
@@ -390,7 +380,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> updateFolder(UpdateFolderEntity folder) async {
-    // if (folder.systemType == FolderSystemType.all) return;
     final updatedFolders = [...state.folders];
     final index = updatedFolders.indexWhere((element) => element.uuid == folder.uuid);
     if (index == -1) return;

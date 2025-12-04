@@ -16,7 +16,7 @@ class BaseUrlInterceptor extends Interceptor {
       return;
     }
 
-    // Не трогаем кастомные workspace-endpoint'ы.
+    //skip base endpoints
     if (options.baseUrl.contains('/workspace/')) {
       super.onRequest(options, handler);
       return;

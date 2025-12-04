@@ -90,23 +90,3 @@ class FolderItemsRemoteDataSource {
     return await createFolderItem(folderUuid: folderUuid, chatId: chatId);
   }
 }
-
-// class CreateFolderItemRequest {
-//   final int chatId;
-//   final int? orderIndex;
-//   CreateFolderItemRequest({required this.chatId, this.orderIndex});
-//
-//   Map<String, dynamic> toJson() => {
-//         'chat_id': chatId,
-//         if (orderIndex != null) 'order_index': orderIndex,
-//       };
-// }
-
-// class UpdateFolderItemRequest {
-//   final int? orderIndex;
-//   UpdateFolderItemRequest({this.orderIndex});
-//
-//   Map<String, dynamic> toJson() => {
-//         if (orderIndex != null) 'order_index': orderIndex,
-//       };
-// }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
+import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/chat_list_view.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/pinned_chats_reorderable_list.dart';
@@ -144,9 +145,9 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
 
     try {
       await context.read<MessengerCubit>().reorderPinnedChats(
-            folderUuid: widget.folderUuid!,
-            updates: _pendingPinnedOrders,
-          );
+        folderUuid: widget.folderUuid!,
+        updates: _pendingPinnedOrders,
+      );
       if (!mounted) return;
       _setEditing(false);
       setState(() {
