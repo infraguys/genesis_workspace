@@ -157,8 +157,6 @@ class RealTimeConnection {
         await _fetchAndDispatch();
         retryDelay = _initialRetryDelay;
       } on DioException catch (error) {
-        print("dio error");
-        inspect(error);
         final bool isBadQueueId =
             error.response?.statusCode == 400 && error.response?.data?['code'] == 'BAD_EVENT_QUEUE_ID';
         if (isBadQueueId) {
@@ -168,8 +166,6 @@ class RealTimeConnection {
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
       } catch (e) {
-        print('171 error');
-        inspect(e);
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
       }
@@ -228,10 +224,6 @@ class RealTimeConnection {
     } catch (e) {
       rethrow;
     }
-  }
-
-  setQueueId(String queueId) {
-    _queueId = queueId;
   }
 
   Future<void> _sleepWithJitter(Duration baseDelay, Random random) async {

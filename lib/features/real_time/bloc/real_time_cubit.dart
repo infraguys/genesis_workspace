@@ -73,10 +73,6 @@ class RealTimeCubit extends Cubit<RealTimeState> {
     }
   }
 
-  void setUnvalidQueueId() {
-    _multiPollingService.setUnvalidQueueId();
-  }
-
   Future<void> dispose() async {
     await _realTimeService.stopPolling();
   }
