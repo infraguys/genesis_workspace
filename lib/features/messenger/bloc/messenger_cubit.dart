@@ -47,6 +47,16 @@ import 'package:injectable/injectable.dart';
 
 part 'messenger_state.dart';
 
+class PinnedChatOrderUpdate {
+  final String folderItemUuid;
+  final int orderIndex;
+
+  const PinnedChatOrderUpdate({
+    required this.folderItemUuid,
+    required this.orderIndex,
+  });
+}
+
 @injectable
 class MessengerCubit extends Cubit<MessengerState> {
   final AddFolderUseCase _addFolderUseCase;
@@ -265,10 +275,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
 
     final folder = state.folders[state.selectedFolderIndex];
-    if (folder.systemType == FolderSystemType.all) {
-      emit(state.copyWith(pinnedChats: []));
-      return;
-    }
 
     try {
       final pins = await _getPinnedChatsUseCase.call(folder.uuid);
@@ -338,6 +344,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         initialFolders = [allFolder, ...folders];
       }
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
+      await _loadPinnedForCurrentFolder();
     } catch (e) {
       inspect(e);
     }
@@ -414,9 +421,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       emit(
         state.copyWith(
           folders: updatedFolders,
-          selectedFolderIndex: 0,
         ),
       );
+      selectFolder(0);
     } catch (e) {
       inspect(e);
     } finally {
@@ -508,25 +515,19 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> reorderPinnedChats({
     required String folderUuid,
-    required int movedChatId,
-    required int newOrderIndex,
+    required List<PinnedChatOrderUpdate> updates,
   }) async {
+    if (updates.isEmpty) return;
     try {
-      PinnedChatEntity? pinnedMeta;
-      try {
-        pinnedMeta = state.pinnedChats.firstWhere((p) => p.chatId == movedChatId);
-      } catch (_) {
-        pinnedMeta = null;
+      for (final update in updates) {
+        await _updatePinnedChatOrderUseCase.call(
+          folderUuid: folderUuid,
+          folderItemUuid: update.folderItemUuid,
+          orderIndex: update.orderIndex,
+        );
       }
-      if (pinnedMeta == null) return;
 
-      await _updatePinnedChatOrderUseCase.call(
-        folderUuid: folderUuid,
-        folderItemUuid: pinnedMeta.folderItemUuid,
-        orderIndex: newOrderIndex,
-      );
-
-      final List<PinnedChatEntity> refreshedPins = await _getPinnedChatsUseCase.call(folderUuid);
+      final refreshedPins = await _getPinnedChatsUseCase.call(folderUuid);
       emit(state.copyWith(pinnedChats: refreshedPins));
       _sortChats();
     } catch (e, s) {

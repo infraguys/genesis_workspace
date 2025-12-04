@@ -24,6 +24,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     required this.onOrderPinning,
     required this.onDeleteFolder,
     required this.isEditPinning,
+    required this.isSavingPinnedOrder,
     required this.onStopEditingPins,
     required this.showSearchField,
     required this.selfUserId,
@@ -47,6 +48,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   final void Function(BuildContext context, int index) onOrderPinning;
   final Future<void> Function(BuildContext context, FolderEntity folder)? onDeleteFolder;
   final bool isEditPinning;
+  final bool isSavingPinnedOrder;
   final VoidCallback onStopEditingPins;
   final bool showSearchField;
   final int selfUserId;
@@ -108,13 +110,19 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     }
     if (isEditPinning) {
       actions.add(
-        IconButton(
-          onPressed: onStopEditingPins,
-          icon: Icon(
-            Icons.check,
-            color: Colors.green,
-          ),
-        ),
+        isSavingPinnedOrder
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : IconButton(
+                onPressed: onStopEditingPins,
+                icon: Icon(
+                  Icons.check,
+                  color: Colors.green,
+                ),
+              ),
       );
     }
 

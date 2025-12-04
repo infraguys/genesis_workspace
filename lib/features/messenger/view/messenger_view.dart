@@ -45,7 +45,9 @@ class _MessengerViewState extends State<MessengerView>
 
   bool _isEditPinning = false;
   List<ChatEntity>? _optimisticPinnedChats;
+  List<PinnedChatOrderUpdate> _pendingPinnedOrders = [];
   bool _isPinnedReorderInProgress = false;
+  bool _isSavingPinnedOrder = false;
   bool _isSearchVisible = true;
   late final AnimationController _searchBarController;
   late final Animation<double> _searchBarAnimation;
@@ -107,6 +109,10 @@ class _MessengerViewState extends State<MessengerView>
   void editPinning() {
     setState(() {
       _isEditPinning = true;
+      _optimisticPinnedChats = null;
+      _pendingPinnedOrders = [];
+      _isPinnedReorderInProgress = false;
+      _isSavingPinnedOrder = false;
     });
   }
 
@@ -397,7 +403,8 @@ class _MessengerViewState extends State<MessengerView>
                               onOrderPinning: _handleOrderPinning,
                               onDeleteFolder: _handleFolderDelete,
                               isEditPinning: _isEditPinning,
-                              onStopEditingPins: () => setState(() => _isEditPinning = false),
+                              isSavingPinnedOrder: _isSavingPinnedOrder,
+                              onStopEditingPins: _savePinnedChatOrder,
                               showSearchField: _isSearchVisible,
                               selfUserId: state.selfUser?.userId ?? -1,
                               onSearchChanged: _onSearchChanged,
@@ -420,7 +427,7 @@ class _MessengerViewState extends State<MessengerView>
                                     onNotification: _onUserScroll,
                                     child: _isEditPinning
                                         ? AbsorbPointer(
-                                            absorbing: _isPinnedReorderInProgress,
+                                            absorbing: _isPinnedReorderInProgress || _isSavingPinnedOrder,
                                             child: ReorderableListView.builder(
                                               padding: listPadding,
                                               itemCount: pinnedChatsForEdit.length,
@@ -749,46 +756,99 @@ class _MessengerViewState extends State<MessengerView>
     return pinnedChats;
   }
 
+  List<PinnedChatOrderUpdate> _buildPinnedOrderUpdates(
+    List<ChatEntity> orderedChats,
+    List<PinnedChatEntity> pinnedMeta,
+  ) {
+    if (orderedChats.isEmpty || pinnedMeta.isEmpty) return [];
+    final Map<int, PinnedChatEntity> pinnedByChatId = {
+      for (final pinned in pinnedMeta) pinned.chatId: pinned,
+    };
+    final List<PinnedChatOrderUpdate> updates = [];
+    for (int index = 0; index < orderedChats.length; index++) {
+      final chat = orderedChats[index];
+      final pinned = pinnedByChatId[chat.id];
+      if (pinned == null) continue;
+      updates.add(
+        PinnedChatOrderUpdate(
+          folderItemUuid: pinned.folderItemUuid,
+          orderIndex: index,
+        ),
+      );
+    }
+    return updates;
+  }
+
+  Future<void> _savePinnedChatOrder() async {
+    if (_isSavingPinnedOrder) return;
+    final messengerCubit = context.read<MessengerCubit>();
+    final currentState = messengerCubit.state;
+
+    if (_pendingPinnedOrders.isEmpty) {
+      setState(() {
+        _isEditPinning = false;
+        _optimisticPinnedChats = null;
+      });
+      return;
+    }
+
+    if (currentState.folders.isEmpty || currentState.selectedFolderIndex >= currentState.folders.length) {
+      setState(() {
+        _isEditPinning = false;
+      });
+      return;
+    }
+
+    final folderUuid = currentState.folders[currentState.selectedFolderIndex].uuid;
+
+    setState(() {
+      _isSavingPinnedOrder = true;
+      _isPinnedReorderInProgress = true;
+    });
+
+    try {
+      await messengerCubit.reorderPinnedChats(
+        folderUuid: folderUuid,
+        updates: _pendingPinnedOrders,
+      );
+      if (!mounted) return;
+      setState(() {
+        _isEditPinning = false;
+        _optimisticPinnedChats = null;
+        _pendingPinnedOrders = [];
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isSavingPinnedOrder = false;
+        _isPinnedReorderInProgress = false;
+      });
+    }
+  }
+
   Future<void> _handlePinnedChatReorder({
     required MessengerState currentState,
     required List<ChatEntity> pinnedChats,
     required int oldIndex,
     required int newIndex,
   }) async {
-    if (_isPinnedReorderInProgress) return;
+    if (_isPinnedReorderInProgress || _isSavingPinnedOrder) return;
+    setState(() {
+      _isPinnedReorderInProgress = true;
+    });
     int adjustedNewIndex = newIndex;
     if (adjustedNewIndex > oldIndex) adjustedNewIndex -= 1;
     final List<ChatEntity> local = List<ChatEntity>.from(pinnedChats);
     final ChatEntity moved = local.removeAt(oldIndex);
     local.insert(adjustedNewIndex, moved);
 
-    setState(() {
-      _isPinnedReorderInProgress = true;
-      _optimisticPinnedChats = local;
-    });
+    final pendingUpdates = _buildPinnedOrderUpdates(local, currentState.pinnedChats);
 
-    if (currentState.folders.isEmpty || currentState.selectedFolderIndex >= currentState.folders.length) {
-      if (!mounted) return;
-      setState(() {
-        _isPinnedReorderInProgress = false;
-        _optimisticPinnedChats = null;
-      });
-      return;
-    }
-    final folderUuid = currentState.folders[currentState.selectedFolderIndex].uuid;
-    final int movedChatId = moved.id;
-    try {
-      await context.read<MessengerCubit>().reorderPinnedChats(
-        folderUuid: folderUuid,
-        movedChatId: movedChatId,
-        newOrderIndex: adjustedNewIndex,
-      );
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isPinnedReorderInProgress = false;
-        _optimisticPinnedChats = null;
-      });
-    }
+    if (!mounted) return;
+    setState(() {
+      _optimisticPinnedChats = local;
+      _pendingPinnedOrders = pendingUpdates;
+      _isPinnedReorderInProgress = false;
+    });
   }
 }
