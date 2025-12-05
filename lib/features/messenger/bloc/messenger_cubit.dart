@@ -35,6 +35,7 @@ import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_up
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/subscription_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
@@ -76,6 +77,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<ProfileState> _profileStateSubscription;
   late final StreamSubscription<SubscriptionEventEntity> _subscriptionEventsSubscription;
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
+  late final StreamSubscription<UpdateMessageEventEntity> _updateMessageEventsSubscription;
 
   String _searchQuery = '';
   int _lastMessageId = 0;
@@ -113,6 +115,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       _onSubscriptionEvents,
     );
     _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(_onDeleteEvents);
+    _updateMessageEventsSubscription = _realTimeService.updateMessageEventsStream.listen(_onUpdateMessageEvents);
   }
 
   void _onProfileStateChanged(ProfileState profileState) {
@@ -674,12 +677,48 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
   }
 
+  void _onUpdateMessageEvents(UpdateMessageEventEntity event) {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != event.organizationId) return;
+
+    final messageId = event.messageId;
+    final message = state.messages.firstWhere((message) => message.id == messageId);
+
+    final updatedChats = [...state.chats];
+    ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
+    final indexOfChat = updatedChats.indexOf(updatedChat);
+    if (updatedChat.lastMessageId == messageId) {
+      updatedChat = updatedChat.copyWith(
+        lastMessageId: message.id,
+        lastMessageDate: message.messageDate,
+        lastMessageSenderName: message.senderFullName,
+        lastMessagePreview: event.content,
+      );
+      updatedChats[indexOfChat] = updatedChat;
+    }
+
+    List<MessageEntity> updatedMessages = [...state.messages];
+    List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
+
+    final updatedMessage = message.copyWith(content: event.content);
+
+    final indexOfMessage = state.messages.indexOf(message);
+    updatedMessages[indexOfMessage] = updatedMessage;
+    if (message.isUnread) {
+      final indexOfUnreadMessage = state.unreadMessages.indexOf(message);
+      updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
+    }
+    emit(state.copyWith(messages: updatedMessages, unreadMessages: updatedUnreadMessages, chats: updatedChats));
+  }
+
   @override
   Future<void> close() {
     _messagesEventsSubscription.cancel();
     _messageFlagsEventsSubscription.cancel();
     _profileStateSubscription.cancel();
     _subscriptionEventsSubscription.cancel();
+    _deleteMessageEventsSubscription.cancel();
+    _updateMessageEventsSubscription.cancel();
     return super.close();
   }
 
