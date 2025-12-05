@@ -2,6 +2,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
+import 'package:flutter/services.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
@@ -68,6 +69,26 @@ class MessageInput extends StatefulWidget {
 class _MessageInputState extends State<MessageInput> {
   final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
   final GlobalKey<CustomPopupState> attachmentsKey = GlobalKey<CustomPopupState>();
+
+  bool _isShiftPressed() {
+    final keyboard = HardwareKeyboard.instance;
+    return keyboard.isLogicalKeyPressed(LogicalKeyboardKey.shiftLeft) ||
+        keyboard.isLogicalKeyPressed(LogicalKeyboardKey.shiftRight) ||
+        keyboard.isLogicalKeyPressed(LogicalKeyboardKey.shift);
+  }
+
+  void _insertNewLine() {
+    final selection = widget.controller.selection;
+    final text = widget.controller.text;
+    final newText = selection.isValid ? text.replaceRange(selection.start, selection.end, '\n') : '$text\n';
+    final offset = selection.isValid ? selection.start + 1 : newText.length;
+
+    widget.controller.value = widget.controller.value.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: offset),
+      composing: TextRange.empty,
+    );
+  }
 
   @override
   void initState() {
@@ -337,6 +358,11 @@ class _MessageInputState extends State<MessageInput> {
                                       },
                                       textInputAction: TextInputAction.send,
                                       onSubmitted: (value) {
+                                        if (_isShiftPressed()) {
+                                          _insertNewLine();
+                                          widget.focusNode.requestFocus();
+                                          return;
+                                        }
                                         if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
                                           if (platformInfo.isDesktop) {
                                             widget.focusNode.requestFocus();

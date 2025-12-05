@@ -495,8 +495,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                 ? <ShortcutActivator, Intent>{
                                     LogicalKeySet(LogicalKeyboardKey.arrowDown): const MentionNavIntent.down(),
                                     LogicalKeySet(LogicalKeyboardKey.arrowUp): const MentionNavIntent.up(),
-                                    LogicalKeySet(LogicalKeyboardKey.enter): const MentionSelectIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.numpadEnter): const MentionSelectIntent(),
+                                    const SingleActivator(LogicalKeyboardKey.enter): const MentionSelectIntent(),
+                                    const SingleActivator(LogicalKeyboardKey.numpadEnter): const MentionSelectIntent(),
                                   }
                                 : <ShortcutActivator, Intent>{
                                     LogicalKeySet(LogicalKeyboardKey.arrowUp): const EditLastMessageIntent(),
