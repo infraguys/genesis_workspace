@@ -4,6 +4,7 @@ import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
 class MessageContextMenu extends StatefulWidget {
@@ -16,7 +17,6 @@ class MessageContextMenu extends StatefulWidget {
     required this.onEmojiSelected,
     this.onEdit,
     this.onDelete,
-    // this.onOpenEmojiPicker,
   });
 
   final bool isStarred;
@@ -40,7 +40,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final textColor = colors.onSurface.withOpacity(0.9);
+    final textColor = colors.onSurface.withValues(alpha: 0.9);
 
     return ValueListenableBuilder(
       valueListenable: isEmoji,
@@ -80,53 +80,51 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                 children: [
                   _ReactionsRow(
                     onEmojiSelected: widget.onEmojiSelected,
-                    onOpenEmojiPicker: () {
-                      isEmoji.value = !isEmoji.value;
-                    },
+                    onOpenEmojiPicker: () => isEmoji.value = !isEmoji.value,
                   ),
                   const SizedBox(height: 10),
                   _ActionTile(
                     textColor: textColor,
                     icon: Assets.icons.replay,
-                    label: 'Ответить',
+                    label: context.t.contextMenu.reply,
                     onTap: widget.onReply,
                   ),
                   if (widget.onEdit != null)
                     _ActionTile(
                       textColor: textColor,
                       icon: Assets.icons.edit,
-                      label: 'Изменить',
+                      label: context.t.contextMenu.edit,
                       onTap: widget.onEdit,
                     ),
                   _ActionTile(
                     textColor: textColor,
                     icon: Assets.icons.fileCopy,
-                    label: 'Копировать',
+                    label: context.t.contextMenu.copy,
                     onTap: widget.onCopy,
                   ),
                   _ActionTile(
                     textColor: textColor,
                     icon: Assets.icons.reSend,
-                    label: 'Переслать',
+                    label: context.t.contextMenu.forward,
                     onTap: () {},
                   ),
                   _ActionTile(
                     textColor: textColor,
                     icon: Assets.icons.bookmark,
-                    label: widget.isStarred ? 'Убрать из важного' : 'Пометить как важное',
+                    label: widget.isStarred ? context.t.contextMenu.unmarkAsImportant : context.t.contextMenu.markAsImportant,
                     onTap: widget.onToggleStar,
                   ),
                   if (widget.onDelete != null)
                     _ActionTile(
                       textColor: textColor,
                       icon: Assets.icons.delete,
-                      label: 'Удалить',
+                      label: context.t.contextMenu.delete,
                       onTap: widget.onDelete,
                     ),
                   _ActionTile(
                     textColor: textColor,
                     icon: Assets.icons.checkCircle,
-                    label: 'Выбрать',
+                    label: context.t.contextMenu.select,
                     onTap: () {},
                   ),
                 ],
@@ -186,13 +184,14 @@ class _ActionTile extends StatelessWidget {
 }
 
 class _ReactionsRow extends StatelessWidget {
-  final ValueChanged<String> onEmojiSelected;
-  final VoidCallback? onOpenEmojiPicker;
-
   const _ReactionsRow({
     required this.onEmojiSelected,
     required this.onOpenEmojiPicker,
   });
+
+  final ValueChanged<String> onEmojiSelected;
+  final VoidCallback? onOpenEmojiPicker;
+
 
   @override
   Widget build(BuildContext context) {
@@ -200,27 +199,27 @@ class _ReactionsRow extends StatelessWidget {
     return SizedBox(
       height: 36.0,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        padding: const .symmetric(horizontal: 12.0),
         child: Row(
           mainAxisAlignment: .spaceBetween,
           children: [
             for (final emoji in AppConstants.popularEmojis)
               Material(
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: .circular(20),
                   onTap: () => onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
                   child: Padding(
-                    padding: const EdgeInsets.all(4.0),
+                    padding: const .all(4.0),
                     child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 20),
                   ),
                 ),
               ),
             Material(
               child: InkWell(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: .circular(20),
                 onTap: onOpenEmojiPicker,
                 child: Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  padding: const .all(4.0),
                   child: Icon(Icons.add, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: .3)),
                 ),
               ),
