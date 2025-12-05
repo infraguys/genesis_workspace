@@ -660,6 +660,16 @@ class MessengerCubit extends Cubit<MessengerState> {
       isMyMessage: prevMessage.isMyMessage(state.selfUser?.userId),
       forceUpdateLastMessage: true,
     );
+    if (updatedChat.topics?.any((topic) => topic.name == message.subject) ?? false) {
+      final topic = updatedChat.topics!.firstWhere((topic) => topic.name == message.subject);
+      final indexOfTopic = updatedChat.topics!.indexOf(topic);
+      updatedChat.topics![indexOfTopic].unreadMessages.remove(message.id);
+      final updatedTopic = updatedChat.topics![indexOfTopic].copyWith(
+        lastMessageSenderName: prevMessage.senderFullName,
+        lastMessagePreview: prevMessage.content,
+      );
+      updatedChat.topics![indexOfTopic] = updatedTopic;
+    }
     updatedChats[indexOfChat] = updatedChat;
     emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
   }
