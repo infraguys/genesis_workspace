@@ -125,8 +125,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(selfUser: user));
   }
 
-  void _createChatsFromMessages() {
-    final messages = [...state.messages];
+  void _createChatsFromMessages(List<MessageEntity> messages) {
+    // final messages = [...state.messages];
     final chats = [...state.chats];
     final unreadMessages = [...state.unreadMessages];
 
@@ -191,7 +191,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           subscribedChannels: channelsResponse,
         ),
       );
-      _createChatsFromMessages();
+      _createChatsFromMessages(messages);
       await getPinnedChats();
       _sortChats();
     } catch (e) {
@@ -221,7 +221,7 @@ class MessengerCubit extends Cubit<MessengerState> {
             foundOldestMessage: _loadingTimes == 5 ? true : foundOldest,
           ),
         );
-        _createChatsFromMessages();
+        _createChatsFromMessages(messages);
         await getPinnedChats();
         _sortChats();
         _loadingTimes += 1;
@@ -257,7 +257,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       final updatedMessages = response.messages.isEmpty ? <MessageEntity>[] : [...state.unreadMessages];
       updatedMessages.addAll(response.messages);
       emit(state.copyWith(unreadMessages: updatedMessages));
-      _createChatsFromMessages();
+      _createChatsFromMessages(updatedMessages);
     } catch (e) {
       inspect(e);
     }
@@ -643,13 +643,14 @@ class MessengerCubit extends Cubit<MessengerState> {
 
     ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
 
+    updatedMessages.removeWhere((message) => message.id == messageId);
+    emit(state.copyWith(messages: updatedMessages));
+
     final List<MessageEntity> chatMessages =
         state.messages.where((message) => message.recipientId == updatedChat.id).toList()
           ..sort((firstMessage, secondMessage) => firstMessage.timestamp.compareTo(secondMessage.timestamp));
 
     updatedUnreadMessages.removeWhere((message) => message.id == messageId);
-
-    updatedMessages.removeWhere((message) => message.id == messageId);
 
     if (chatMessages.length == 1) {
       updatedChats.removeWhere((chat) => chat.id == updatedChat.id);
@@ -657,9 +658,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       return;
     }
 
-    emit(state.copyWith(messages: updatedMessages));
-
     final prevMessage = chatMessages[chatMessages.length - 1];
+
+    inspect(prevMessage);
 
     final indexOfChat = state.chats.indexOf(updatedChat);
     updatedChat.unreadMessages.remove(messageId);
