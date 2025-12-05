@@ -52,14 +52,14 @@ class ChatEntity {
         updatedChat = copyWith(unreadMessages: {...updatedChat.unreadMessages, messageId});
       }
     }
-    if (messageDate.isAfter(lastMessageDate)) {
-      updatedChat = copyWith(
-        lastMessageId: messageId,
-        lastMessageDate: messageDate,
-        lastMessagePreview: messagePreview,
-        lastMessageSenderName: messageSenderName,
-      );
-    }
+    // if (messageDate.isAfter(lastMessageDate)) {
+    updatedChat = copyWith(
+      lastMessageId: messageId,
+      lastMessageDate: messageDate,
+      lastMessagePreview: messagePreview,
+      lastMessageSenderName: messageSenderName,
+    );
+    // }
     return updatedChat;
   }
 

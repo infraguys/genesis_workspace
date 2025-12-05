@@ -32,6 +32,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/subscription_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
@@ -74,6 +75,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsEventsSubscription;
   late final StreamSubscription<ProfileState> _profileStateSubscription;
   late final StreamSubscription<SubscriptionEventEntity> _subscriptionEventsSubscription;
+  late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
+
   String _searchQuery = '';
   int _lastMessageId = 0;
   int _loadingTimes = 0;
@@ -109,6 +112,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     _subscriptionEventsSubscription = _realTimeService.subscriptionEventsStream.listen(
       _onSubscriptionEvents,
     );
+    _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(_onDeleteEvents);
   }
 
   void _onProfileStateChanged(ProfileState profileState) {
@@ -118,9 +122,11 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(selfUser: user));
   }
 
-  void _createChatsFromMessages(List<MessageEntity> messages) {
+  void _createChatsFromMessages() {
+    final messages = [...state.messages];
     final chats = [...state.chats];
     final unreadMessages = [...state.unreadMessages];
+
     for (var message in messages.reversed) {
       final recipientId = message.recipientId;
       final isMyMessage = message.isMyMessage(state.selfUser?.userId);
@@ -182,7 +188,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           subscribedChannels: channelsResponse,
         ),
       );
-      _createChatsFromMessages(messages);
+      _createChatsFromMessages();
       await getPinnedChats();
       _sortChats();
     } catch (e) {
@@ -212,7 +218,7 @@ class MessengerCubit extends Cubit<MessengerState> {
             foundOldestMessage: _loadingTimes == 5 ? true : foundOldest,
           ),
         );
-        _createChatsFromMessages(response.messages);
+        _createChatsFromMessages();
         await getPinnedChats();
         _sortChats();
         _loadingTimes += 1;
@@ -248,7 +254,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       final updatedMessages = response.messages.isEmpty ? <MessageEntity>[] : [...state.unreadMessages];
       updatedMessages.addAll(response.messages);
       emit(state.copyWith(unreadMessages: updatedMessages));
-      _createChatsFromMessages(response.messages);
+      _createChatsFromMessages();
     } catch (e) {
       inspect(e);
     }
@@ -607,6 +613,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   void _onSubscriptionEvents(SubscriptionEventEntity event) {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != event.organizationId) return;
     if (event.op == SubscriptionOp.update && event.property == SubscriptionProperty.isMuted) {
       List<ChatEntity> updatedChats = [...state.chats];
       ChatEntity chat = updatedChats.firstWhere((chat) => chat.streamId == event.streamId);
@@ -616,6 +624,39 @@ class MessengerCubit extends Cubit<MessengerState> {
       emit(state.copyWith(chats: updatedChats));
       _sortChats();
     }
+  }
+
+  void _onDeleteEvents(DeleteMessageEventEntity event) {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != event.organizationId) return;
+
+    final messageId = event.messageId;
+
+    List<ChatEntity> updatedChats = [...state.chats];
+    List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
+
+    final message = state.unreadMessages.firstWhere((message) => message.id == messageId);
+
+    updatedUnreadMessages.removeWhere((message) => message.id == messageId);
+    ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
+
+    final List<MessageEntity> chatMessages = state.messages
+        .where((message) => message.recipientId == updatedChat.id)
+        .toList();
+
+    final prevMessage = chatMessages[chatMessages.length - 2];
+
+    final indexOfChat = state.chats.indexOf(updatedChat);
+    updatedChat.unreadMessages.remove(messageId);
+    updatedChat.topics?.forEach((topic) {
+      topic.unreadMessages.remove(messageId);
+    });
+    updatedChat = updatedChat.updateLastMessage(
+      prevMessage,
+      isMyMessage: prevMessage.isMyMessage(state.selfUser?.userId),
+    );
+    updatedChats[indexOfChat] = updatedChat;
+    emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
   }
 
   @override
@@ -720,13 +761,13 @@ class MessengerCubit extends Cubit<MessengerState> {
       return b.lastMessageDate.compareTo(a.lastMessageDate);
     });
 
-    regularChats.sort((a, b) {
-      final aHasUnread = a.unreadMessages.isNotEmpty;
-      final bHasUnread = b.unreadMessages.isNotEmpty;
-      if (aHasUnread && !bHasUnread) return -1;
-      if (bHasUnread && !aHasUnread) return 1;
-      return b.lastMessageDate.compareTo(a.lastMessageDate);
-    });
+    // regularChats.sort((a, b) {
+    //   final aHasUnread = a.unreadMessages.isNotEmpty;
+    //   final bHasUnread = b.unreadMessages.isNotEmpty;
+    //   if (aHasUnread && !bHasUnread) return -1;
+    //   if (bHasUnread && !aHasUnread) return 1;
+    //   return b.lastMessageDate.compareTo(a.lastMessageDate);
+    // });
     final result = [...pinnedChats, ...regularChats];
     emit(state.copyWith(chats: result));
     _applySearchFilter();
