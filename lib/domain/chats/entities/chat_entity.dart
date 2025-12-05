@@ -37,7 +37,11 @@ class ChatEntity {
     return null;
   }
 
-  ChatEntity updateLastMessage(MessageEntity message, {bool isMyMessage = false}) {
+  ChatEntity updateLastMessage(
+    MessageEntity message, {
+    bool isMyMessage = false,
+    bool forceUpdateLastMessage = false,
+  }) {
     ChatEntity updatedChat = this;
     final messageDate = message.messageDate;
     final messageId = message.id;
@@ -52,14 +56,14 @@ class ChatEntity {
         updatedChat = copyWith(unreadMessages: {...updatedChat.unreadMessages, messageId});
       }
     }
-    // if (messageDate.isAfter(lastMessageDate)) {
-    updatedChat = copyWith(
-      lastMessageId: messageId,
-      lastMessageDate: messageDate,
-      lastMessagePreview: messagePreview,
-      lastMessageSenderName: messageSenderName,
-    );
-    // }
+    if (messageDate.isAfter(lastMessageDate) || forceUpdateLastMessage) {
+      updatedChat = copyWith(
+        lastMessageId: messageId,
+        lastMessageDate: messageDate,
+        lastMessagePreview: messagePreview,
+        lastMessageSenderName: messageSenderName,
+      );
+    }
     return updatedChat;
   }
 

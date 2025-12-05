@@ -633,18 +633,22 @@ class MessengerCubit extends Cubit<MessengerState> {
     final messageId = event.messageId;
 
     List<ChatEntity> updatedChats = [...state.chats];
+    List<MessageEntity> updatedMessages = [...state.messages];
     List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
 
-    final message = state.unreadMessages.firstWhere((message) => message.id == messageId);
+    final message = state.messages.firstWhere((message) => message.id == messageId);
 
     updatedUnreadMessages.removeWhere((message) => message.id == messageId);
     ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
 
-    final List<MessageEntity> chatMessages = state.messages
-        .where((message) => message.recipientId == updatedChat.id)
-        .toList();
+    updatedMessages.removeWhere((message) => message.id == messageId);
+    emit(state.copyWith(messages: updatedMessages));
 
-    final prevMessage = chatMessages[chatMessages.length - 2];
+    final List<MessageEntity> chatMessages =
+        state.messages.where((message) => message.recipientId == updatedChat.id).toList()
+          ..sort((firstMessage, secondMessage) => firstMessage.timestamp.compareTo(secondMessage.timestamp));
+
+    final prevMessage = chatMessages[chatMessages.length - 1];
 
     final indexOfChat = state.chats.indexOf(updatedChat);
     updatedChat.unreadMessages.remove(messageId);
@@ -654,6 +658,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     updatedChat = updatedChat.updateLastMessage(
       prevMessage,
       isMyMessage: prevMessage.isMyMessage(state.selfUser?.userId),
+      forceUpdateLastMessage: true,
     );
     updatedChats[indexOfChat] = updatedChat;
     emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
@@ -761,13 +766,13 @@ class MessengerCubit extends Cubit<MessengerState> {
       return b.lastMessageDate.compareTo(a.lastMessageDate);
     });
 
-    // regularChats.sort((a, b) {
-    //   final aHasUnread = a.unreadMessages.isNotEmpty;
-    //   final bHasUnread = b.unreadMessages.isNotEmpty;
-    //   if (aHasUnread && !bHasUnread) return -1;
-    //   if (bHasUnread && !aHasUnread) return 1;
-    //   return b.lastMessageDate.compareTo(a.lastMessageDate);
-    // });
+    regularChats.sort((a, b) {
+      // final aHasUnread = a.unreadMessages.isNotEmpty;
+      // final bHasUnread = b.unreadMessages.isNotEmpty;
+      // if (aHasUnread && !bHasUnread) return -1;
+      // if (bHasUnread && !aHasUnread) return 1;
+      return b.lastMessageDate.compareTo(a.lastMessageDate);
+    });
     final result = [...pinnedChats, ...regularChats];
     emit(state.copyWith(chats: result));
     _applySearchFilter();
