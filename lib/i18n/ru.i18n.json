@@ -256,5 +256,15 @@
     "moderator": "Модератор",
     "member": "Участник",
     "guest": "Гость"
+  },
+  "context_menu": {
+    "reply": "Ответить",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "copy": "Копировать",
+    "mark_as_important": "Пометить как важное",
+    "unmark_as_important": "Убрать из важного",
+    "forward": "Переслать",
+    "select": "Выбрать"
   }
 }
