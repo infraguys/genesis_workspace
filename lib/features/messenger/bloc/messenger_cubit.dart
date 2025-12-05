@@ -639,17 +639,25 @@ class MessengerCubit extends Cubit<MessengerState> {
     List<MessageEntity> updatedMessages = [...state.messages];
     List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
 
-    final message = state.messages.firstWhere((message) => message.id == messageId);
+    final message = state.messages.firstWhere((message) => message.id == messageId, orElse: MessageEntity.fake);
 
-    updatedUnreadMessages.removeWhere((message) => message.id == messageId);
     ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
-
-    updatedMessages.removeWhere((message) => message.id == messageId);
-    emit(state.copyWith(messages: updatedMessages));
 
     final List<MessageEntity> chatMessages =
         state.messages.where((message) => message.recipientId == updatedChat.id).toList()
           ..sort((firstMessage, secondMessage) => firstMessage.timestamp.compareTo(secondMessage.timestamp));
+
+    updatedUnreadMessages.removeWhere((message) => message.id == messageId);
+
+    updatedMessages.removeWhere((message) => message.id == messageId);
+
+    if (chatMessages.length == 1) {
+      updatedChats.removeWhere((chat) => chat.id == updatedChat.id);
+      emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages, messages: updatedMessages));
+      return;
+    }
+
+    emit(state.copyWith(messages: updatedMessages));
 
     final prevMessage = chatMessages[chatMessages.length - 1];
 
@@ -682,7 +690,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (organizationId != event.organizationId) return;
 
     final messageId = event.messageId;
-    final message = state.messages.firstWhere((message) => message.id == messageId);
+    final message = state.messages.firstWhere((message) => message.id == messageId, orElse: () => MessageEntity.fake());
 
     final updatedChats = [...state.chats];
     ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
@@ -706,7 +714,9 @@ class MessengerCubit extends Cubit<MessengerState> {
     updatedMessages[indexOfMessage] = updatedMessage;
     if (message.isUnread) {
       final indexOfUnreadMessage = state.unreadMessages.indexOf(message);
-      updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
+      if (indexOfUnreadMessage != -1) {
+        updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
+      }
     }
     emit(state.copyWith(messages: updatedMessages, unreadMessages: updatedUnreadMessages, chats: updatedChats));
   }
