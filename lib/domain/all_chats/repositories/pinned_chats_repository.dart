@@ -1,23 +1,22 @@
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 
 abstract class PinnedChatsRepository {
+  Future<List<PinnedChatEntity>> getPinnedChats({required String folderUuid});
+
   Future<void> pinChat({
-    required int folderId,
+    required String folderUuid,
     required int chatId,
-    required int orderIndex,
-    // required PinnedChatType type,
-    required int organizationId,
+    int? orderIndex,
   });
-  Future<void> unpinChat(int id);
-  Future<List<PinnedChatEntity>> getPinnedChats({
-    required int folderId,
-    required int organizationId,
+
+  Future<void> unpinChat({
+    required String folderUuid,
+    required int chatId,
   });
+
   Future<void> updatePinnedChatOrder({
-    required int folderId,
-    required int movedChatId,
-    int? previousChatId,
-    int? nextChatId,
-    required int organizationId,
+    required String folderUuid,
+    required String folderItemUuid,
+    int? orderIndex,
   });
 }

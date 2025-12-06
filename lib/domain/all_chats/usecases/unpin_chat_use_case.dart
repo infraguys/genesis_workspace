@@ -6,7 +6,10 @@ class UnpinChatUseCase {
   final PinnedChatsRepository _repository;
   UnpinChatUseCase(this._repository);
 
-  Future<void> call(int id) async {
-    return await _repository.unpinChat(id);
+  Future<void> call({
+    required String folderUuid,
+    required int chatId,
+  }) async {
+    return await _repository.unpinChat(folderUuid: folderUuid, chatId: chatId);
   }
 }

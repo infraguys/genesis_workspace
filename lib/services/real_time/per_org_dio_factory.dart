@@ -26,8 +26,8 @@ class PerOrganizationDioFactory {
 
     final BaseOptions baseOptions = BaseOptions(
       baseUrl: resolvedBaseUrl,
-      validateStatus: (int? statusCode) =>
-          statusCode != null && statusCode >= 200 && statusCode < 600,
+      // validateStatus: (int? statusCode) =>
+      //     statusCode != null && statusCode >= 200 && statusCode < 600,
     );
 
     final Dio dio = Dio(baseOptions);

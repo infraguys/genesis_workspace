@@ -150,7 +150,6 @@
     "newFolderTitle": "Новая папка",
     "nameLabel": "Название папки",
     "colorLabel": "Цвет папки",
-    "iconLabel": "Иконка",
     "preview": "Предпросмотр",
     "create": "Создать",
     "cancel": "Отмена",
@@ -177,6 +176,7 @@
     "delete_organization": "Удалить организацию"
   },
   "channel": {
+    "channelName": "Название канала",
     "muteChannel": "Заглушить канал",
     "unmuteChannel": "Включить уведомления канала"
   },
@@ -255,5 +255,15 @@
     "moderator": "Модератор",
     "member": "Участник",
     "guest": "Гость"
+  },
+  "context_menu": {
+    "reply": "Ответить",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "copy": "Копировать",
+    "mark_as_important": "Пометить как важное",
+    "unmark_as_important": "Убрать из важного",
+    "forward": "Переслать",
+    "select": "Выбрать"
   }
 }

@@ -80,8 +80,7 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
     return BlocBuilder<ChannelsCubit, ChannelsState>(
       buildWhen: (_, _) => !isReorderingInProgress,
       builder: (context, state) {
-        final List<ChannelEntity> baseList =
-            (widget.filterChannelIds == null || widget.selectedFolder.id == 0)
+        final List<ChannelEntity> baseList = (widget.filterChannelIds == null || widget.selectedFolder.id == 0)
             ? [...state.channels]
             : [
                 ...state.channels,
@@ -106,20 +105,20 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
 
           if (aOrder != null && bOrder != null) {
             if (aOrder != bOrder) return aOrder.compareTo(bOrder);
-            return b.pinnedAt.compareTo(a.pinnedAt);
+            // return b.pinnedAt.compareTo(a.pinnedAt);
           }
           if (aOrder != null && bOrder == null) return -1;
           if (aOrder == null && bOrder != null) return 1;
 
-          return b.pinnedAt.compareTo(a.pinnedAt);
+          // return b.pinnedAt.compareTo(a.pinnedAt);
+          return 1;
         }
 
         List<ChannelEntity> filtered;
         if (widget.isEditPinning) {
           filtered = baseList.where((c) => pinnedByChatId.containsKey(c.streamId)).toList()
             ..sort(
-              (a, b) =>
-                  compareByOrderAndPinnedAt(pinnedByChatId[a.streamId], pinnedByChatId[b.streamId]),
+              (a, b) => compareByOrderAndPinnedAt(pinnedByChatId[a.streamId], pinnedByChatId[b.streamId]),
             );
         } else {
           if (pinnedByChatId.isEmpty) {
@@ -201,12 +200,8 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
                             });
 
                             final int movedChatId = moved.streamId;
-                            final int? previousChatId = (newIndex - 1) >= 0
-                                ? local[newIndex - 1].streamId
-                                : null;
-                            final int? nextChatId = (newIndex + 1) < local.length
-                                ? local[newIndex + 1].streamId
-                                : null;
+                            final int? previousChatId = (newIndex - 1) >= 0 ? local[newIndex - 1].streamId : null;
+                            final int? nextChatId = (newIndex + 1) < local.length ? local[newIndex + 1].streamId : null;
 
                             try {
                               await context.read<AllChatsCubit>().reorderPinnedChats(
@@ -224,8 +219,7 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
                               }
                             }
                           },
-                          proxyDecorator: (child, index, animation) =>
-                              Material(elevation: 3, child: child),
+                          proxyDecorator: (child, index, animation) => Material(elevation: 3, child: child),
                           itemBuilder: (context, index) {
                             final ChannelEntity channel = channels[index];
                             final PinnedChatEntity? pinned = pinnedByChatId[channel.streamId];
@@ -263,7 +257,7 @@ class _AllChatsChannelsState extends State<AllChatsChannels> with TickerProvider
                               key: ValueKey('channel-${channel.streamId}'),
                               channel: channel,
                               isPinned: pinned != null,
-                              pinnedChatId: pinned?.id,
+                              // pinnedChatId: pinned?.id,
                               onTap: () async {
                                 context.read<AllChatsCubit>().selectChannel(channel: channel);
                                 unawaited(

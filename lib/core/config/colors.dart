@@ -5,6 +5,7 @@ class AppColors {
   static const Color onBadge = Color(0xffFFFFFF);
   static const Color primary = Color(0xffFF8438);
   static const Color callGreen = Color(0xff26C038);
+  static const Color noticeDisabled = Color(0xff5C5855);
 
   static const Color darkOnPrimary = Color(0xff1B1B1D);
   static const Color darkBackground = Color(0xff1B1B1D);

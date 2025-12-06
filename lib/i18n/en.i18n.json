@@ -144,7 +144,6 @@
     "newFolderTitle": "New folder",
     "nameLabel": "Folder name",
     "colorLabel": "Folder color",
-    "iconLabel": "Icon",
     "preview": "Preview",
     "create": "Create",
     "cancel": "Cancel",
@@ -171,6 +170,7 @@
     "delete_organization": "Delete organization"
   },
   "channel": {
+    "channelName": "Channel name",
     "muteChannel": "Mute channel",
     "unmuteChannel": "Unmute channel"
   },
@@ -249,5 +249,15 @@
     "moderator": "Moderator",
     "member": "Member",
     "guest": "Guest"
+  },
+  "context_menu": {
+    "reply": "Reply",
+    "edit": "Edit",
+    "delete": "Delete",
+    "copy": "Copy",
+    "mark_as_important": "Mark as important",
+    "unmark_as_important": "Unmark as important",
+    "forward": "Forward",
+    "select": "Select"
   }
 }

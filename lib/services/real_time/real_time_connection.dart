@@ -102,16 +102,21 @@ class RealTimeConnection {
       await _deleteQueueUseCase.call(_queueId);
     }
     await _pollingTask;
+    _queueId = null;
     await _closeControllers();
   }
 
   Future<bool> checkConnection() async {
     if (_isActive && _queueId != null) {
-      final body = EventsByQueueIdRequestBodyEntity(queueId: _queueId!, lastEventId: _lastEventId, dontBlock: true);
-      final response = await _getEventsByQueueIdUseCase.call(body);
-      if (response.result == 'success') {
-        return true;
-      } else {
+      try {
+        final body = EventsByQueueIdRequestBodyEntity(queueId: _queueId!, lastEventId: _lastEventId, dontBlock: true);
+        final response = await _getEventsByQueueIdUseCase.call(body);
+        if (response.result == 'success') {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (e) {
         return false;
       }
     }
@@ -160,7 +165,7 @@ class RealTimeConnection {
         }
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
-      } catch (_) {
+      } catch (e) {
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
       }
@@ -168,11 +173,11 @@ class RealTimeConnection {
   }
 
   Future<void> _fetchAndDispatch() async {
+    if (_queueId == null) {
+      await _registerQueue();
+    }
+    final String queueIdValue = _queueId!;
     try {
-      if (_queueId == null) {
-        await _registerQueue();
-      }
-      final String queueIdValue = _queueId!;
       final EventsByQueueIdResponseEntity response = await _getEventsByQueueIdUseCase.call(
         EventsByQueueIdRequestBodyEntity(queueId: queueIdValue, lastEventId: _lastEventId),
       );

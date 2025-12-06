@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:genesis_workspace/core/enums/chat_type.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
@@ -18,10 +21,27 @@ class ChatEntity {
   final List<TopicEntity>? topics;
   final int? streamId;
   final List<int>? dmIds;
+  final String? colorString;
 
   bool get isTopicsLoading => topics == null;
 
-  ChatEntity updateLastMessage(MessageEntity message, {bool isMyMessage = false}) {
+  Color? get backgroundColor {
+    final color = colorString;
+    if (color != null) {
+      try {
+        return parseColor(color);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  ChatEntity updateLastMessage(
+    MessageEntity message, {
+    bool isMyMessage = false,
+    bool forceUpdateLastMessage = false,
+  }) {
     ChatEntity updatedChat = this;
     final messageDate = message.messageDate;
     final messageId = message.id;
@@ -36,7 +56,7 @@ class ChatEntity {
         updatedChat = copyWith(unreadMessages: {...updatedChat.unreadMessages, messageId});
       }
     }
-    if (messageDate.isAfter(lastMessageDate)) {
+    if (messageDate.isAfter(lastMessageDate) || forceUpdateLastMessage) {
       updatedChat = copyWith(
         lastMessageId: messageId,
         lastMessageDate: messageDate,
@@ -94,6 +114,7 @@ class ChatEntity {
     this.topics,
     this.streamId,
     this.dmIds,
+    this.colorString,
   });
 
   ChatEntity copyWith({
@@ -111,6 +132,7 @@ class ChatEntity {
     List<TopicEntity>? topics,
     int? streamId,
     List<int>? dmIds,
+    String? colorString,
   }) {
     return ChatEntity(
       id: id ?? this.id,
@@ -127,6 +149,7 @@ class ChatEntity {
       topics: topics ?? this.topics,
       streamId: streamId ?? this.streamId,
       dmIds: dmIds ?? this.dmIds,
+      colorString: colorString ?? this.colorString,
     );
   }
 }

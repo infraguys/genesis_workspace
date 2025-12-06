@@ -1,5 +1,6 @@
 import 'package:genesis_workspace/data/all_chats/dao/folder_dao.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:injectable/injectable.dart';
 
@@ -8,15 +9,22 @@ class FolderLocalDataSource {
   final FolderDao _dao;
   FolderLocalDataSource(this._dao);
 
-  Future<void> add(FolderItemEntity entity) async {
+  Future<void> add(FolderEntity entity, {required int organizationId}) async {
     await _dao.insertFolder(
-      id: entity.id,
-      title: entity.title ?? '',
-      iconCodePoint: entity.iconData.codePoint,
-      backgroundColorValue: entity.backgroundColor?.value,
-      unreadMessages: entity.unreadMessages,
-      organizationId: entity.organizationId,
+      title: entity.title,
+      backgroundColorValue: entity.backgroundColor.toARGB32(),
+      unreadMessages: entity.unreadMessages.toSet(),
+      organizationId: organizationId,
+      uuid: entity.uuid,
+      systemType: entity.systemType.name,
     );
+  }
+
+  Future<void> replaceAll(List<FolderEntity> folders, {required int organizationId}) async {
+    await _dao.deleteByOrganization(organizationId);
+    for (final f in folders) {
+      await add(f, organizationId: organizationId);
+    }
   }
 
   Future<List<Folder>> getAll(int organizationId) async {
@@ -25,17 +33,16 @@ class FolderLocalDataSource {
   }
 
   Future<void> update(FolderItemEntity folder) async {
-    if (folder.id == null) return;
+    if (folder.title == null) return;
     await _dao.updateFolder(
-      id: folder.id!,
+      uuid: folder.id?.toString() ?? '',
       title: folder.title,
-      iconCodePoint: folder.iconData.codePoint,
       backgroundColorValue: folder.backgroundColor?.value,
       unreadMessages: folder.unreadMessages,
     );
   }
 
-  Future<void> delete(int id) async {
-    await _dao.deleteById(id);
+  Future<void> delete(String id) async {
+    await _dao.deleteByUuid(id);
   }
 }

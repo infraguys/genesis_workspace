@@ -1,19 +1,17 @@
 class PinnedChatEntity {
-  final int id;
-  final int folderId;
+  final String folderItemUuid;
+  final String folderUuid;
   final int chatId;
   final int? orderIndex;
-  final DateTime pinnedAt;
-  // final PinnedChatType type;
-  final int organizationId;
+  final DateTime? pinnedAt;
+  final DateTime? updatedAt;
 
   PinnedChatEntity({
-    required this.id,
-    required this.folderId,
+    required this.folderItemUuid,
+    required this.folderUuid,
     required this.chatId,
-    required this.pinnedAt,
     this.orderIndex,
-    // required this.type,
-    required this.organizationId,
+    this.pinnedAt,
+    this.updatedAt,
   });
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -11,7 +10,6 @@ class MessageBody extends StatelessWidget {
   final MessageEntity message;
   final bool showTopic;
   final bool isStarred;
-  final GlobalKey<CustomPopupState> actionsPopupKey;
   final double maxMessageWidth;
   const MessageBody({
     super.key,
@@ -20,7 +18,6 @@ class MessageBody extends StatelessWidget {
     required this.message,
     required this.showTopic,
     required this.isStarred,
-    required this.actionsPopupKey,
     required this.maxMessageWidth,
   });
 
@@ -84,7 +81,6 @@ class MessageBody extends StatelessWidget {
               //   _MessageActions(
               //     isStarred: isStarred,
               //     messageId: message.id,
-              //     actionsPopupKey: actionsPopupKey,
               //   ),
               // ],
             ],
@@ -110,45 +106,8 @@ class MessageBody extends StatelessWidget {
             //   _MessageActions(
             //     isStarred: isStarred,
             //     messageId: message.id,
-            //     actionsPopupKey: actionsPopupKey,
             //   ),
           ],
-        ),
-      ],
-    );
-  }
-}
-
-class _MessageActions extends StatelessWidget {
-  final bool isStarred;
-  final int messageId;
-  final GlobalKey<CustomPopupState> actionsPopupKey;
-  const _MessageActions({
-    super.key,
-    required this.isStarred,
-    required this.messageId,
-    required this.actionsPopupKey,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(6),
-            onTap: () async {
-              actionsPopupKey.currentState?.show();
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: Icon(Icons.menu, color: theme.unselectedWidgetColor, size: 16),
-            ),
-          ),
         ),
       ],
     );

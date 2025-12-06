@@ -2,7 +2,7 @@ part of 'messenger_cubit.dart';
 
 class MessengerState {
   final UserEntity? selfUser;
-  final List<FolderItemEntity> folders;
+  final List<FolderEntity> folders;
   final int selectedFolderIndex;
   final List<MessageEntity> messages;
   final List<MessageEntity> unreadMessages;
@@ -13,6 +13,9 @@ class MessengerState {
   Set<int>? filteredChatIds;
   List<ChatEntity>? filteredChats;
   final bool foundOldestMessage;
+  final List<SubscriptionEntity> subscribedChannels;
+  final bool isFolderSaving;
+  final bool isFolderDeleting;
 
   MessengerState({
     this.selfUser,
@@ -27,11 +30,31 @@ class MessengerState {
     this.filteredChatIds,
     this.filteredChats,
     required this.foundOldestMessage,
+    required this.subscribedChannels,
+    this.isFolderSaving = false,
+    this.isFolderDeleting = false,
   });
+
+  static MessengerState initial = MessengerState(
+    selfUser: null,
+    folders: [],
+    selectedFolderIndex: 0,
+    messages: [],
+    unreadMessages: [],
+    chats: [],
+    selectedChat: null,
+    pinnedChats: [],
+    filteredChatIds: null,
+    filteredChats: null,
+    foundOldestMessage: false,
+    subscribedChannels: [],
+    isFolderSaving: false,
+    isFolderDeleting: false,
+  );
 
   MessengerState copyWith({
     UserEntity? selfUser,
-    List<FolderItemEntity>? folders,
+    List<FolderEntity>? folders,
     int? selectedFolderIndex,
     List<MessageEntity>? messages,
     List<MessageEntity>? unreadMessages,
@@ -42,6 +65,9 @@ class MessengerState {
     Set<int>? filteredChatIds,
     List<ChatEntity>? filteredChats,
     bool? foundOldestMessage,
+    List<SubscriptionEntity>? subscribedChannels,
+    bool? isFolderSaving,
+    bool? isFolderDeleting,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -56,6 +82,9 @@ class MessengerState {
       filteredChatIds: filteredChatIds ?? this.filteredChatIds,
       filteredChats: filteredChats ?? this.filteredChats,
       foundOldestMessage: foundOldestMessage ?? this.foundOldestMessage,
+      subscribedChannels: subscribedChannels ?? this.subscribedChannels,
+      isFolderSaving: isFolderSaving ?? this.isFolderSaving,
+      isFolderDeleting: isFolderDeleting ?? this.isFolderDeleting,
     );
   }
 }

@@ -47,9 +47,7 @@ class _UpdateViewState extends State<UpdateView> {
 
   Widget _buildVersionList(BuildContext context, ThemeData theme, UpdateState state) {
     final versionsEntity = state.versionConfigEntity?.versions;
-    final versionEntries = Flavor.isStage
-        ? (versionsEntity?.dev ?? [])
-        : (versionsEntity?.stable ?? []);
+    final versionEntries = versionsEntity?.dev ?? [];
 
     if (state.status == UpdateStatus.loading && versionEntries.isEmpty) {
       return const Center(child: CircularProgressIndicator());

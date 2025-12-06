@@ -9,28 +9,28 @@ class FolderMembershipLocalDataSource {
 
   Future<void> setChatFolders({
     required int chatId,
-    required List<int> folderIds,
+    required List<String> folderUuids,
     required int organizationId,
   }) async {
     await _dao.setChatFolders(
       chatId: chatId,
-      folderIds: folderIds,
+      folderUuids: folderUuids,
       organizationId: organizationId,
     );
   }
 
-  Future<List<int>> getFolderIdsForChat({
+  Future<List<String>> getFolderUuidsForChat({
     required int chatId,
     required int organizationId,
   }) =>
-      _dao.getFolderIdsForChat(
+      _dao.getFolderUuidsForChat(
         chatId: chatId,
         organizationId: organizationId,
       );
 
-  Future<void> deleteByFolderId(int folderId, int organizationId) =>
-      _dao.deleteByFolderId(folderId, organizationId);
+  Future<void> deleteByFolderUuid(String folderUuid, int organizationId) =>
+      _dao.deleteByFolderUuid(folderUuid, organizationId);
 
-  Future<List<FolderItem>> getItemsForFolder(int folderId, int organizationId) =>
-      _dao.getItemsForFolder(folderId, organizationId);
+  Future<List<FolderItem>> getItemsForFolder(String folderUuid, int organizationId) =>
+      _dao.getItemsForFolder(folderUuid, organizationId);
 }
