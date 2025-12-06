@@ -3,6 +3,7 @@
 ## 1.5.2
 - Added a rich message context menu with quick reactions, emoji picker, and actions (reply, edit, copy, forward, mark/unmark important, delete, select) using new SVG icons.
 - Refactored message items to StatefulWidget with desktop right-click support and in-context handlers for replies, edits, starring, deletions, and emoji reactions via messenger cubit.
+- Message input now treats Shift+Enter as a newline (keeps focus) while Enter continues to send, matching desktop chat shortcuts.
 - Messenger now processes real-time edit/delete events, keeping chat previews, unread counters, and topics in sync while scoping updates to the active organization.
 - ChatEntity can force last-message refresh to keep previews correct after removals, and HTML message selection suppresses the default context menu to avoid conflicts.
 - Localized all new context menu labels for English and Russian.
