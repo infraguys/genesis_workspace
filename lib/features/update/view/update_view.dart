@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
+import 'package:genesis_workspace/domain/common/entities/version_config_entity.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
-import 'package:genesis_workspace/flavor.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+
+enum _ReleaseChannel { dev, stable }
 
 class UpdateView extends StatefulWidget {
   const UpdateView({super.key});
@@ -14,6 +16,8 @@ class UpdateView extends StatefulWidget {
 }
 
 class _UpdateViewState extends State<UpdateView> {
+  var _selectedChannel = _ReleaseChannel.dev;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -47,112 +51,145 @@ class _UpdateViewState extends State<UpdateView> {
 
   Widget _buildVersionList(BuildContext context, ThemeData theme, UpdateState state) {
     final versionsEntity = state.versionConfigEntity?.versions;
-    final versionEntries = versionsEntity?.dev ?? [];
+    final devEntries = versionsEntity?.dev ?? <VersionEntryEntity>[];
+    final stableEntries = versionsEntity?.stable ?? <VersionEntryEntity>[];
+    final versionEntries = _selectedChannel == _ReleaseChannel.dev ? devEntries : stableEntries;
 
-    if (state.status == UpdateStatus.loading && versionEntries.isEmpty) {
+    if (state.status == UpdateStatus.loading && devEntries.isEmpty && stableEntries.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (versionEntries.isEmpty) {
-      final message = state.errorMessage ?? context.t.general.nothingHereYet;
-      return Center(
-        child: Text(message, style: theme.textTheme.bodyMedium, textAlign: TextAlign.center),
-      );
-    }
-
-    final showOperationError =
-        state.operationStatus == UpdateOperationStatus.failure && state.updateError != null;
+    final showOperationError = state.operationStatus == UpdateOperationStatus.failure && state.updateError != null;
     final isBusy =
         state.operationStatus == UpdateOperationStatus.downloading ||
         state.operationStatus == UpdateOperationStatus.installing;
+    final selectedLatest = _selectedChannel == _ReleaseChannel.dev
+        ? state.versionConfigEntity?.latest.dev
+        : state.versionConfigEntity?.latest.stable;
+    final latestVersionCandidates = <String>{};
+    if (selectedLatest != null) {
+      if (selectedLatest.version.isNotEmpty) {
+        latestVersionCandidates.add(selectedLatest.version);
+      }
+      if (selectedLatest.shortVersion.isNotEmpty) {
+        latestVersionCandidates.add(selectedLatest.shortVersion);
+      }
+    }
+    if (latestVersionCandidates.isEmpty && state.actualVersion.isNotEmpty) {
+      latestVersionCandidates.add(state.actualVersion);
+    }
+
+    final hasAnyEntries = devEntries.isNotEmpty || stableEntries.isNotEmpty;
+    final listContent = !hasAnyEntries
+        ? Center(
+            child: Text(
+              state.errorMessage ?? context.t.general.nothingHereYet,
+              style: theme.textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          )
+        : versionEntries.isEmpty
+            ? Center(
+                child: Text(
+                  context.t.general.nothingHereYet,
+                  style: theme.textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              )
+            : ListView.separated(
+                itemBuilder: (context, index) {
+                  final version = versionEntries[index];
+                  final isSelected = state.selectedVersion?.version == version.version;
+                  final isLatest = latestVersionCandidates.contains(version.version) ||
+                      latestVersionCandidates.contains(version.shortVersion);
+                  final subtitleChildren = <Widget>[];
+                  if (version.shortVersion != version.version) {
+                    subtitleChildren.add(
+                      Text(
+                        version.shortVersion,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    );
+                  }
+                  if (isLatest) {
+                    if (subtitleChildren.isNotEmpty) {
+                      subtitleChildren.add(const SizedBox(height: 4));
+                    }
+                    subtitleChildren.add(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.workspace_premium, size: 16, color: theme.colorScheme.primary),
+                          const SizedBox(width: 6),
+                          Text(
+                            context.t.updateView.latestHint,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final trailing = isSelected && isBusy
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : isSelected && state.operationStatus == UpdateOperationStatus.readyToRestart
+                          ? Icon(Icons.check, color: theme.colorScheme.primary)
+                          : null;
+
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            version.version,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: isLatest ? FontWeight.bold : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        if (isLatest) ...[
+                          const SizedBox(width: 8),
+                          _LatestBadge(label: context.t.updateView.latestBadge),
+                        ],
+                      ],
+                    ),
+                    subtitle: subtitleChildren.isEmpty
+                        ? null
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: subtitleChildren,
+                          ),
+                    trailing: trailing,
+                    enabled: !isBusy,
+                    onTap: isBusy ? null : () => context.read<UpdateCubit>().installVersion(version),
+                  );
+                },
+                separatorBuilder: (_, __) => const Divider(),
+                itemCount: versionEntries.length,
+              );
 
     return Column(
       children: [
+        _ReleaseChannelToggle(
+          selectedChannel: _selectedChannel,
+          onChanged: (channel) => setState(() => _selectedChannel = channel),
+          devLabel: context.t.updateView.devChannel,
+          stableLabel: context.t.updateView.stableChannel,
+        ),
+        const SizedBox(height: 12),
         if (showOperationError) ...[
           _ErrorBanner(message: state.updateError!),
           const SizedBox(height: 12),
         ],
-        Expanded(
-          child: ListView.separated(
-            itemBuilder: (context, index) {
-              final version = versionEntries[index];
-              final isSelected = state.selectedVersion?.version == version.version;
-              final isLatest = version.version == state.actualVersion ||
-                  version.shortVersion == state.actualVersion;
-              final subtitleChildren = <Widget>[];
-              if (version.shortVersion != version.version) {
-                subtitleChildren.add(
-                  Text(
-                    version.shortVersion,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                );
-              }
-              if (isLatest) {
-                if (subtitleChildren.isNotEmpty) {
-                  subtitleChildren.add(const SizedBox(height: 4));
-                }
-                subtitleChildren.add(
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.workspace_premium, size: 16, color: theme.colorScheme.primary),
-                      const SizedBox(width: 6),
-                      Text(
-                        context.t.updateView.latestHint,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final trailing = isSelected && isBusy
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : isSelected && state.operationStatus == UpdateOperationStatus.readyToRestart
-                  ? Icon(Icons.check, color: theme.colorScheme.primary)
-                  : null;
-
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        version.version,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: isLatest ? FontWeight.bold : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    if (isLatest) ...[
-                      const SizedBox(width: 8),
-                      _LatestBadge(label: context.t.updateView.latestBadge),
-                    ],
-                  ],
-                ),
-                subtitle: subtitleChildren.isEmpty
-                    ? null
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: subtitleChildren,
-                      ),
-                trailing: trailing,
-                enabled: !isBusy,
-                onTap: isBusy ? null : () => context.read<UpdateCubit>().installVersion(version),
-              );
-            },
-            separatorBuilder: (_, __) => const Divider(),
-            itemCount: versionEntries.length,
-          ),
-        ),
+        Expanded(child: listContent),
       ],
     );
   }
@@ -237,6 +274,36 @@ class _UpdateViewState extends State<UpdateView> {
   }
 }
 
+class _ReleaseChannelToggle extends StatelessWidget {
+  const _ReleaseChannelToggle({
+    required this.selectedChannel,
+    required this.onChanged,
+    required this.devLabel,
+    required this.stableLabel,
+  });
+
+  final _ReleaseChannel selectedChannel;
+  final ValueChanged<_ReleaseChannel> onChanged;
+  final String devLabel;
+  final String stableLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<_ReleaseChannel>(
+      segments: [
+        ButtonSegment(value: _ReleaseChannel.dev, label: Text(devLabel)),
+        ButtonSegment(value: _ReleaseChannel.stable, label: Text(stableLabel)),
+      ],
+      selected: <_ReleaseChannel>{selectedChannel},
+      onSelectionChanged: (selection) {
+        if (selection.isNotEmpty) {
+          onChanged(selection.first);
+        }
+      },
+    );
+  }
+}
+
 class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner({required this.message});
 
@@ -278,12 +345,12 @@ class _LatestBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.flash_on, size: 16, color: theme.colorScheme.primary),
+          Icon(Icons.flash_on, size: 16, color: theme.colorScheme.onPrimary),
           const SizedBox(width: 4),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.primary,
+              color: theme.colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.4,
             ),

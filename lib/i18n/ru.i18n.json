@@ -215,7 +215,9 @@
     "open_selector_cta": "Выбрать сборку",
     "open_selector_subtitle": "Выберите версию для установки или отката.",
     "latest_badge": "Актуальная",
-    "latest_hint": "Рекомендуемая сборка"
+    "latest_hint": "Рекомендуемая сборка",
+    "dev_channel": "Dev",
+    "stable_channel": "Стабильные"
   },
   "update_widget": {
     "update_available": "Доступно обновление",
