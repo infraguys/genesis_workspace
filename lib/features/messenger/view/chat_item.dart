@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -37,6 +38,7 @@ class ChatItem extends StatefulWidget {
 
 class _ChatItemState extends State<ChatItem> {
   bool _isExpanded = false;
+  bool _isPinPending = false;
 
   static const Duration _animationDuration = Duration(milliseconds: 220);
   static const Curve _animationCurve = Curves.easeInOut;
@@ -122,14 +124,20 @@ class _ChatItemState extends State<ChatItem> {
             ),
             TextButton(
               onPressed: () async {
+                if (mounted) {
+                  context.pop();
+                }
+                setState(() {
+                  _isPinPending = true;
+                });
                 if (widget.chat.isPinned) {
                   await context.read<MessengerCubit>().unpinChat(widget.chat.id);
                 } else {
                   await context.read<MessengerCubit>().pinChat(chatId: widget.chat.id);
                 }
-                if (mounted) {
-                  context.pop();
-                }
+                setState(() {
+                  _isPinPending = false;
+                });
               },
               child: Text(widget.chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat),
             ),
@@ -216,6 +224,10 @@ class _ChatItemState extends State<ChatItem> {
                                             ),
                                           ),
                                         ),
+                                        if (_isPinPending)
+                                          CupertinoActivityIndicator(
+                                            radius: 6,
+                                          ),
                                         if (widget.chat.isMuted)
                                           Icon(
                                             Icons.headset_off,
@@ -246,13 +258,17 @@ class _ChatItemState extends State<ChatItem> {
                                         if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
                                         (widget.chat.type == ChatType.channel &&
                                                 currentSize(context) >= ScreenSize.tablet)
-                                            ? AnimatedRotation(
-                                                duration: const Duration(milliseconds: 200),
-                                                turns: _isExpanded ? 0.5 : 0.0,
-                                                child: Assets.icons.arrowDown.svg(),
+                                            ? SizedBox(
+                                                width: 35,
+                                                child: AnimatedRotation(
+                                                  duration: const Duration(milliseconds: 200),
+                                                  turns: _isExpanded ? 0.5 : 0.0,
+                                                  child: Assets.icons.arrowDown.svg(),
+                                                ),
                                               )
                                             : SizedBox(
                                                 height: 20,
+                                                width: 35,
                                                 child: Text(
                                                   DateFormat('HH:mm').format(widget.chat.lastMessageDate),
                                                   style: theme.textTheme.bodySmall?.copyWith(
