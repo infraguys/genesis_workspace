@@ -65,8 +65,12 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                   },
                   config: Config(
                     height: 360,
-                    emojiViewConfig: const EmojiViewConfig(emojiSizeMax: 22, backgroundColor: Colors.transparent),
+                    emojiViewConfig: const EmojiViewConfig(
+                      emojiSizeMax: 22,
+                      backgroundColor: Colors.transparent,
+                    ),
                     categoryViewConfig: CategoryViewConfig(
+                      tabIndicatorAnimDuration: const Duration(milliseconds: 500),
                       backgroundColor: theme.colorScheme.surface,
                       iconColorSelected: theme.colorScheme.primary,
                       iconColor: theme.colorScheme.outline,
@@ -111,7 +115,9 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                   _ActionTile(
                     textColor: textColor,
                     icon: Assets.icons.bookmark,
-                    label: widget.isStarred ? context.t.contextMenu.unmarkAsImportant : context.t.contextMenu.markAsImportant,
+                    label: widget.isStarred
+                        ? context.t.contextMenu.unmarkAsImportant
+                        : context.t.contextMenu.markAsImportant,
                     onTap: widget.onToggleStar,
                   ),
                   if (widget.onDelete != null)
@@ -191,7 +197,6 @@ class _ReactionsRow extends StatelessWidget {
 
   final ValueChanged<String> onEmojiSelected;
   final VoidCallback? onOpenEmojiPicker;
-
 
   @override
   Widget build(BuildContext context) {

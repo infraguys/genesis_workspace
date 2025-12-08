@@ -9,6 +9,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/core/widgets/message/animated_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_call_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_context_menu.dart';
@@ -183,7 +184,6 @@ class _MessageItemState extends State<MessageItem> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = Theme.of(context).extension<TextColors>()!;
     final messageColors = Theme.of(context).extension<MessageColors>()!;
 
     final avatar = widget.isSkeleton
@@ -232,26 +232,28 @@ class _MessageItemState extends State<MessageItem> {
         child: MenuAnchor(
           controller: _menuController,
           menuChildren: [
-            MessageContextMenu(
-              isStarred: isStarred,
-              onReply: onReplay,
-              onEdit: widget.isMyMessage ? onEditMessage : null,
-              onCopy: onCopy,
-              onToggleStar: () async {
-                await handleToggleIsStarred(isStarred);
-                _menuController.close();
-              },
-              onDelete: widget.isMyMessage
-                  ? () async {
-                      await handleDeleteMessage();
-                      _menuController.close();
-                    }
-                  : null,
-              onEmojiSelected: (emoji) async {
-                await handleEmojiSelected(emoji);
-                _menuController.close();
-              },
-              // onOpenEmojiPicker: openEmojiPicker,
+            AnimatedMenu(
+              child: MessageContextMenu(
+                isStarred: isStarred,
+                onReply: onReplay,
+                onEdit: widget.isMyMessage ? onEditMessage : null,
+                onCopy: onCopy,
+                onToggleStar: () async {
+                  await handleToggleIsStarred(isStarred);
+                  _menuController.close();
+                },
+                onDelete: widget.isMyMessage
+                    ? () async {
+                        await handleDeleteMessage();
+                        _menuController.close();
+                      }
+                    : null,
+                onEmojiSelected: (emoji) async {
+                  await handleEmojiSelected(emoji);
+                  _menuController.close();
+                },
+                // onOpenEmojiPicker: openEmojiPicker,
+              ),
             ),
           ],
           builder: (context, controller, child) {
