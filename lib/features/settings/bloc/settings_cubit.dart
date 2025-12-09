@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_recent_dms_use_case.dart';
@@ -14,8 +15,15 @@ class SettingsCubit extends Cubit<SettingsState> {
     this._addRecentDmUseCase,
     this._getRecentDmsUseCase,
     this._appDatabase,
-    this._sharedPreferences,
-  ) : super(SettingsState());
+    SharedPreferences sharedPreferences,
+  ) : _sharedPreferences = sharedPreferences,
+      super(
+        SettingsState(
+          prioritizePersonalUnread: sharedPreferences.getBool(SharedPrefsKeys.prioritizePersonalUnread) ?? false,
+          prioritizeUnmutedUnreadChannels:
+              sharedPreferences.getBool(SharedPrefsKeys.prioritizeUnmutedUnreadChannels) ?? false,
+        ),
+      );
 
   final AddRecentDmUseCase _addRecentDmUseCase;
   final GetRecentDmsUseCase _getRecentDmsUseCase;
@@ -50,5 +58,23 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> clearSharedPreferences() async {
     await _sharedPreferences.clear();
+    emit(const SettingsState());
+  }
+
+  Future<void> saveChatSortingSettings({
+    required bool prioritizePersonalUnread,
+    required bool prioritizeUnmutedUnreadChannels,
+  }) async {
+    await _sharedPreferences.setBool(SharedPrefsKeys.prioritizePersonalUnread, prioritizePersonalUnread);
+    await _sharedPreferences.setBool(
+      SharedPrefsKeys.prioritizeUnmutedUnreadChannels,
+      prioritizeUnmutedUnreadChannels,
+    );
+    emit(
+      state.copyWith(
+        prioritizePersonalUnread: prioritizePersonalUnread,
+        prioritizeUnmutedUnreadChannels: prioritizeUnmutedUnreadChannels,
+      ),
+    );
   }
 }

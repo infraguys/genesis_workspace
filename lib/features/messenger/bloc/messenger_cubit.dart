@@ -82,6 +82,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   String _searchQuery = '';
   int _lastMessageId = 0;
   int _loadingTimes = 0;
+  bool _prioritizePersonalUnread = false;
+  bool _prioritizeUnmutedUnreadChannels = false;
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -539,6 +541,20 @@ class MessengerCubit extends Cubit<MessengerState> {
     _onProfileStateChanged(_profileCubit.state);
   }
 
+  void applyChatSortingPreferences({
+    required bool prioritizePersonalUnread,
+    required bool prioritizeUnmutedUnreadChannels,
+  }) {
+    final bool hasChanges =
+        _prioritizePersonalUnread != prioritizePersonalUnread ||
+        _prioritizeUnmutedUnreadChannels != prioritizeUnmutedUnreadChannels;
+    _prioritizePersonalUnread = prioritizePersonalUnread;
+    _prioritizeUnmutedUnreadChannels = prioritizeUnmutedUnreadChannels;
+    if (hasChanges) {
+      _sortChats();
+    }
+  }
+
   void _onMessageEvents(MessageEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
@@ -780,6 +796,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(state.copyWith(filteredChats: filtered));
   }
 
+  bool _isPersonalChat(ChatEntity chat) => chat.type == ChatType.direct || chat.type == ChatType.groupDirect;
+
   void _sortChats() {
     final chats = [...state.chats];
     final pinnedByChatId = {
@@ -814,7 +832,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (aOrder != null && bOrder == null) return -1;
       if (aOrder == null && bOrder != null) return 1;
 
-      // Если orderIndex равны или отсутствуют, сортируем по updatedAt
       final DateTime aUpdatedAt = a?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
       final DateTime bUpdatedAt = b?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
       return bUpdatedAt.compareTo(aUpdatedAt);
@@ -827,10 +844,24 @@ class MessengerCubit extends Cubit<MessengerState> {
     });
 
     regularChats.sort((a, b) {
-      // final aHasUnread = a.unreadMessages.isNotEmpty;
-      // final bHasUnread = b.unreadMessages.isNotEmpty;
-      // if (aHasUnread && !bHasUnread) return -1;
-      // if (bHasUnread && !aHasUnread) return 1;
+      final bool aHasUnread = a.unreadMessages.isNotEmpty;
+      final bool bHasUnread = b.unreadMessages.isNotEmpty;
+
+      if (_prioritizePersonalUnread && aHasUnread && bHasUnread) {
+        final bool aIsPersonal = _isPersonalChat(a);
+        final bool bIsPersonal = _isPersonalChat(b);
+        if (aIsPersonal && !bIsPersonal) return -1;
+        if (bIsPersonal && !aIsPersonal) return 1;
+      }
+
+      if (_prioritizeUnmutedUnreadChannels && aHasUnread && bHasUnread) {
+        final bool aIsChannel = a.type == ChatType.channel;
+        final bool bIsChannel = b.type == ChatType.channel;
+        if (aIsChannel && bIsChannel && a.isMuted != b.isMuted) {
+          return a.isMuted ? 1 : -1;
+        }
+      }
+
       return b.lastMessageDate.compareTo(a.lastMessageDate);
     });
     final result = [...pinnedChats, ...regularChats];
