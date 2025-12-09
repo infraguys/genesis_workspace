@@ -10,10 +10,9 @@ import 'package:genesis_workspace/domain/users/entities/update_presence_request_
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
+import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../services/real_time/real_time_service.dart';
 
 part 'profile_state.dart';
 
@@ -21,10 +20,10 @@ part 'profile_state.dart';
 class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit(this._realTimeService, this._getOwnUserUseCase, this._updatePresenceUseCase)
     : super(ProfileState(user: null, lastPresenceUpdateId: -1, myPresence: PresenceStatus.idle)) {
-    _messagesEventsSubscription = _realTimeService.messagesEventsStream.listen(_onMessageEvents);
+    _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
   }
 
-  final RealTimeService _realTimeService;
+  final MultiPollingService _realTimeService;
   final GetOwnUserUseCase _getOwnUserUseCase;
   final UpdatePresenceUseCase _updatePresenceUseCase;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
@@ -56,6 +55,8 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   _onMessageEvents(MessageEventEntity event) async {
+    inspect(event);
+    inspect(state.user?.userId);
     if (event.message.senderId != state.user?.userId) {
       final prefs = await SharedPreferences.getInstance();
       final selected = prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
