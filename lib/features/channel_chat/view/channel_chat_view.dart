@@ -34,6 +34,7 @@ import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
+import 'package:genesis_workspace/shared/widgets/input_placeholder.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -164,9 +165,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     switch (state) {
       case AppLifecycleState.resumed:
         await context.read<ChannelChatCubit>().getUnreadMessages();
-        break;
       default:
-        break;
     }
     super.didChangeAppLifecycleState(state);
   }
@@ -185,12 +184,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
               ?.showSnackBar(
                 SnackBar(
                   content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     spacing: 8,
                     children: [
                       Text(
                         state.uploadFileErrorName!,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                        style: TextStyle(fontWeight: .w600, fontSize: 20),
                       ),
                       Text(state.uploadFileError!),
                     ],
@@ -209,9 +208,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
       buildWhen: (prev, current) {
         if (prev.uploadedFiles != current.uploadedFiles) {
           return false;
-        } else {
-          return true;
         }
+        return true;
       },
       builder: (context, state) {
         final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
@@ -234,23 +232,20 @@ class _ChannelChatViewState extends State<ChannelChatView>
               centerTitle: false,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12).copyWith(
-                  topLeft: isTabletOrSmaller ? Radius.zero : null,
-                  topRight: isTabletOrSmaller ? Radius.zero : null,
+                  topLeft: isTabletOrSmaller ? .zero : null,
+                  topRight: isTabletOrSmaller ? .zero : null,
                 ),
               ),
               actionsPadding: isTabletOrSmaller ? null : .symmetric(horizontal: 20),
               leading: isTabletOrSmaller
                   ? IconButton(
-                      onPressed: () => context.pop(),
-                      icon: Icon(
-                        CupertinoIcons.back,
-                        color: textColors.text30,
-                      ),
+                      onPressed: context.pop,
+                      icon: Icon(CupertinoIcons.back, color: textColors.text30),
                     )
                   : IconButton(
                       onPressed: widget.leadingOnPressed,
                       icon: Assets.icons.moreVert.svg(
-                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                        colorFilter: ColorFilter.mode(textColors.text30, .srcIn),
                       ),
                     ),
               actions: [
@@ -260,7 +255,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                   icon: Assets.icons.joinCall.svg(
                     width: 28,
                     height: 28,
-                    colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                    colorFilter: ColorFilter.mode(AppColors.callGreen, .srcIn),
                   ),
                 ),
                 IconButton(
@@ -554,7 +549,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                               },
                               child: Container(
                                 key: dropAreaKey,
-                                child: MessageInput(
+                                child: widget.topicName != null ? MessageInput(
                                   controller: messageController,
                                   isMessagePending: state.isMessagePending,
                                   focusNode: messageInputFocusNode,
@@ -623,7 +618,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     );
                                   },
                                   inputTitle: widget.topicName ?? state.channel?.name,
-                                ),
+                                ) : InputPlaceholder(),
                               ),
                             ),
                           ),

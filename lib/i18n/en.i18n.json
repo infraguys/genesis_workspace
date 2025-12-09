@@ -266,5 +266,6 @@
     "unmark_as_important": "Unmark as important",
     "forward": "Forward",
     "select": "Select"
-  }
+  },
+  "input_placeholder": "Select a topic to send messages to the channel"
 }
