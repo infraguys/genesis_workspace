@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/utils/platform_info/platform_info_io.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 
 class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
   const AppBarContainer({super.key, required this.appBar});
