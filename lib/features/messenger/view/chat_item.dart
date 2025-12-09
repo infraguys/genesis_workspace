@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -37,6 +38,7 @@ class ChatItem extends StatefulWidget {
 
 class _ChatItemState extends State<ChatItem> {
   bool _isExpanded = false;
+  bool _isPinPending = false;
 
   static const Duration _animationDuration = Duration(milliseconds: 220);
   static const Curve _animationCurve = Curves.easeInOut;
@@ -58,6 +60,19 @@ class _ChatItemState extends State<ChatItem> {
       }
     }
     widget.onTap();
+  }
+
+  onTogglePin() async {
+    setState(() => _isPinPending = true);
+    try {
+      if (widget.chat.isPinned) {
+        await context.read<MessengerCubit>().unpinChat(widget.chat.id);
+      } else {
+        await context.read<MessengerCubit>().pinChat(chatId: widget.chat.id);
+      }
+    } finally {
+      setState(() => _isPinPending = false);
+    }
   }
 
   @override
@@ -122,14 +137,8 @@ class _ChatItemState extends State<ChatItem> {
             ),
             TextButton(
               onPressed: () async {
-                if (widget.chat.isPinned) {
-                  await context.read<MessengerCubit>().unpinChat(widget.chat.id);
-                } else {
-                  await context.read<MessengerCubit>().pinChat(chatId: widget.chat.id);
-                }
-                if (mounted) {
-                  context.pop();
-                }
+                onTogglePin();
+                context.pop();
               },
               child: Text(widget.chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat),
             ),
@@ -216,6 +225,10 @@ class _ChatItemState extends State<ChatItem> {
                                             ),
                                           ),
                                         ),
+                                        if (_isPinPending)
+                                          CupertinoActivityIndicator(
+                                            radius: 6,
+                                          ),
                                         if (widget.chat.isMuted)
                                           Icon(
                                             Icons.headset_off,
