@@ -5,15 +5,14 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:go_router/go_router.dart';
 
 class MessageContextMenu extends StatefulWidget {
   const MessageContextMenu({
     super.key,
     required this.isStarred,
-    required this.onReply,
-    required this.onCopy,
-    required this.onToggleStar,
+    this.onReply,
+    this.onCopy,
+    this.onToggleStar,
     required this.onEmojiSelected,
     this.onEdit,
     this.onDelete,
@@ -23,10 +22,10 @@ class MessageContextMenu extends StatefulWidget {
   });
 
   final bool isStarred;
-  final VoidCallback onReply;
+  final VoidCallback? onReply;
   final VoidCallback? onEdit;
-  final VoidCallback onCopy;
-  final VoidCallback onToggleStar;
+  final VoidCallback? onCopy;
+  final VoidCallback? onToggleStar;
   final VoidCallback? onDelete;
   final ValueChanged<String> onEmojiSelected;
   final VoidCallback? onClose;
@@ -58,12 +57,39 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
       parent: _controller,
       curve: Curves.easeOutCubic,
     );
-    _opacity = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    );
+    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
     _controller.forward();
+  }
+
+  void _onReplay() {
+    widget.onReply?.call();
+    _close();
+  }
+
+  void _onEdit() {
+    widget.onEdit?.call();
+    _close();
+  }
+
+  void _onDelete() {
+    widget.onDelete?.call();
+    _close();
+  }
+
+  void _onCopy() {
+    widget.onCopy?.call();
+    _close();
+  }
+
+  void _onToggleStar() {
+    widget.onToggleStar?.call();
+    _close();
+  }
+
+  void _onEmojiSelected(String value) {
+    widget.onEmojiSelected(value);
+    _close();
   }
 
   Future<void> _close() async {
@@ -123,8 +149,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                             return EmojiPicker(
                               onEmojiSelected: (category, emoji) {
                                 final selected = parser.getEmoji(emoji.emoji);
-                                widget.onEmojiSelected(selected.name);
-                                context.pop();
+                                _onEmojiSelected(selected.name);
                               },
                               config: Config(
                                 height: 360,
@@ -146,7 +171,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               _ReactionsRow(
-                                onEmojiSelected: widget.onEmojiSelected,
+                                onEmojiSelected: _onEmojiSelected,
                                 onOpenEmojiPicker: () => isEmoji.value = !isEmoji.value,
                               ),
                               const SizedBox(height: 10),
@@ -154,26 +179,25 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                                 textColor: textColor,
                                 icon: Assets.icons.replay,
                                 label: context.t.contextMenu.reply,
-                                onTap: widget.onReply,
+                                onTap: _onReplay,
                               ),
                               if (widget.onEdit != null)
                                 _ActionTile(
                                   textColor: textColor,
                                   icon: Assets.icons.edit,
                                   label: context.t.contextMenu.edit,
-                                  onTap: widget.onEdit,
+                                  onTap: _onEdit,
                                 ),
                               _ActionTile(
                                 textColor: textColor,
                                 icon: Assets.icons.fileCopy,
                                 label: context.t.contextMenu.copy,
-                                onTap: widget.onCopy,
+                                onTap: _onCopy,
                               ),
                               _ActionTile(
                                 textColor: textColor,
                                 icon: Assets.icons.reSend,
                                 label: context.t.contextMenu.forward,
-                                onTap: () {},
                               ),
                               _ActionTile(
                                 textColor: textColor,
@@ -181,20 +205,19 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                                 label: widget.isStarred
                                     ? context.t.contextMenu.unmarkAsImportant
                                     : context.t.contextMenu.markAsImportant,
-                                onTap: widget.onToggleStar,
+                                onTap: _onToggleStar,
                               ),
                               if (widget.onDelete != null)
                                 _ActionTile(
                                   textColor: textColor,
                                   icon: Assets.icons.delete,
                                   label: context.t.contextMenu.delete,
-                                  onTap: widget.onDelete,
+                                  onTap: _onDelete,
                                 ),
                               _ActionTile(
                                 textColor: textColor,
                                 icon: Assets.icons.checkCircle,
                                 label: context.t.contextMenu.select,
-                                onTap: () {},
                               ),
                             ],
                           );
@@ -281,7 +304,9 @@ class _ReactionsRow extends StatelessWidget {
               Material(
                 child: InkWell(
                   borderRadius: .circular(20),
-                  onTap: () => onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
+                  onTap: () {
+                    onEmojiSelected(emoji.emojiName.replaceAll(':', ''));
+                  },
                   child: Padding(
                     padding: const .all(4.0),
                     child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 20),
