@@ -5,6 +5,7 @@ class PlatformInfo {
   bool get isMobile => false;
   bool get isDesktop => false;
   bool get isLinux => false;
+  bool get isMacos => false;
 }
 
 const platformInfo = PlatformInfo();

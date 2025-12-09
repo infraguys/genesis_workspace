@@ -16,6 +16,8 @@ import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_
 import 'package:genesis_workspace/core/utils/message_input_intents/mention_navigation_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
+import 'package:genesis_workspace/core/widgets/appbar_container.dart';
+import 'package:genesis_workspace/core/widgets/input_placeholder.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -33,8 +35,6 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
-import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
-import 'package:genesis_workspace/shared/widgets/input_placeholder.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -549,76 +549,78 @@ class _ChannelChatViewState extends State<ChannelChatView>
                               },
                               child: Container(
                                 key: dropAreaKey,
-                                child: widget.topicName != null ? MessageInput(
-                                  controller: messageController,
-                                  isMessagePending: state.isMessagePending,
-                                  focusNode: messageInputFocusNode,
-                                  onSubmitIntercept: () {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
-                                      final st = _mentionKey.currentState as dynamic?;
-                                      st?.selectFocused();
-                                      return true;
-                                    }
-                                    return false;
-                                  },
-                                  onSend: isSendEnabled
-                                      ? () async {
-                                          final content = messageController.text;
-                                          messageController.clear();
-                                          try {
-                                            await context.read<ChannelChatCubit>().sendMessage(
-                                              streamId: state.channel!.streamId,
-                                              content: content,
-                                              topic: state.topic?.name,
-                                            );
-                                          } catch (e) {
-                                          } finally {
-                                            if (platformInfo.isDesktop) {
-                                              messageInputFocusNode.requestFocus();
-                                            }
+                                child: widget.topicName != null
+                                    ? MessageInput(
+                                        controller: messageController,
+                                        isMessagePending: state.isMessagePending,
+                                        focusNode: messageInputFocusNode,
+                                        onSubmitIntercept: () {
+                                          if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                            final st = _mentionKey.currentState as dynamic?;
+                                            st?.selectFocused();
+                                            return true;
                                           }
-                                        }
-                                      : null,
-                                  onEdit: isEditEnabled
-                                      ? () async {
-                                          try {
-                                            await submitEdit();
-                                          } on DioException catch (e) {
-                                            showErrorSnackBar(context, exception: e);
-                                          } finally {
-                                            if (platformInfo.isDesktop) {
-                                              messageInputFocusNode.requestFocus();
-                                            }
+                                          return false;
+                                        },
+                                        onSend: isSendEnabled
+                                            ? () async {
+                                                final content = messageController.text;
+                                                messageController.clear();
+                                                try {
+                                                  await context.read<ChannelChatCubit>().sendMessage(
+                                                    streamId: state.channel!.streamId,
+                                                    content: content,
+                                                    topic: state.topic?.name,
+                                                  );
+                                                } catch (e) {
+                                                } finally {
+                                                  if (platformInfo.isDesktop) {
+                                                    messageInputFocusNode.requestFocus();
+                                                  }
+                                                }
+                                              }
+                                            : null,
+                                        onEdit: isEditEnabled
+                                            ? () async {
+                                                try {
+                                                  await submitEdit();
+                                                } on DioException catch (e) {
+                                                  showErrorSnackBar(context, exception: e);
+                                                } finally {
+                                                  if (platformInfo.isDesktop) {
+                                                    messageInputFocusNode.requestFocus();
+                                                  }
+                                                }
+                                              }
+                                            : null,
+                                        onUploadFile: () async {
+                                          await context.read<ChannelChatCubit>().uploadFilesCommon();
+                                          if (platformInfo.isDesktop) {
+                                            messageInputFocusNode.requestFocus();
                                           }
-                                        }
-                                      : null,
-                                  onUploadFile: () async {
-                                    await context.read<ChannelChatCubit>().uploadFilesCommon();
-                                    if (platformInfo.isDesktop) {
-                                      messageInputFocusNode.requestFocus();
-                                    }
-                                  },
-                                  onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
-                                  onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
-                                  files: inputState.uploadedFiles,
-                                  onUploadImage: () async {
-                                    await context.read<ChannelChatCubit>().uploadImagesCommon();
-                                    if (platformInfo.isDesktop) {
-                                      messageInputFocusNode.requestFocus();
-                                    }
-                                  },
-                                  isDropOver: isDropOver,
-                                  onCancelEdit: onCancelEdit,
-                                  isEdit: isEditMode,
-                                  editingMessage: editingMessage,
-                                  editingFiles: state.editingAttachments,
-                                  onRemoveEditingAttachment: (attachment) {
-                                    context.read<ChannelChatCubit>().removeEditingAttachment(
-                                      attachment,
-                                    );
-                                  },
-                                  inputTitle: widget.topicName ?? state.channel?.name,
-                                ) : InputPlaceholder(),
+                                        },
+                                        onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
+                                        onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
+                                        files: inputState.uploadedFiles,
+                                        onUploadImage: () async {
+                                          await context.read<ChannelChatCubit>().uploadImagesCommon();
+                                          if (platformInfo.isDesktop) {
+                                            messageInputFocusNode.requestFocus();
+                                          }
+                                        },
+                                        isDropOver: isDropOver,
+                                        onCancelEdit: onCancelEdit,
+                                        isEdit: isEditMode,
+                                        editingMessage: editingMessage,
+                                        editingFiles: state.editingAttachments,
+                                        onRemoveEditingAttachment: (attachment) {
+                                          context.read<ChannelChatCubit>().removeEditingAttachment(
+                                            attachment,
+                                          );
+                                        },
+                                        inputTitle: widget.topicName ?? state.channel?.name,
+                                      )
+                                    : InputPlaceholder(),
                               ),
                             ),
                           ),
