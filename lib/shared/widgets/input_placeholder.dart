@@ -12,7 +12,8 @@ class InputPlaceholder extends StatelessWidget {
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          border: BoxBorder.fromLTRB(top: BorderSide(color: Colors.white10))
+          // todo: вынести в Colors.scheme
+          border: BoxBorder.fromLTRB(top: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: .1)))
         ),
         child:  Center(
           child:  Text(context.t.inputPlaceholder, style: textTheme.bodySmall!.copyWith(
