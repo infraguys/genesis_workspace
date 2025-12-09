@@ -384,7 +384,10 @@ class _ChatItemState extends State<ChatItem> {
                                     Skeleton.ignore(
                                       child: SizedBox(
                                         height: 21,
-                                        child: UnreadBadge(count: topic.unreadMessages.length),
+                                        child: UnreadBadge(
+                                          count: topic.unreadMessages.length,
+                                          isMuted: widget.chat.isMuted,
+                                        ),
                                       ),
                                     ),
                                   ],

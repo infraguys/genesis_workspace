@@ -38,6 +38,8 @@ class RealTimeConnection {
   Future<void>? _pollingTask;
 
   bool get isActive => _isActive;
+  int get lastEventId => _lastEventId;
+  String? get queueId => _queueId;
 
   RealTimeConnection({
     required this.organizationId,

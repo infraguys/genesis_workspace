@@ -69,7 +69,12 @@
     "language": "Язык",
     "logout": "Выйти",
     "app_version": "Версия приложения",
-    "notification_sound": "Звук уведомлений"
+    "notification_sound": "Звук уведомлений",
+    "chat_sorting_action": "Настройки сортировки чатов",
+    "chat_sorting_description": "Настройте приоритет непрочитанных чатов.",
+    "chat_sorting_title": "Настройки сортировки чатов",
+    "chat_sorting_prioritize_directs": "Показывать личные непрочитанные чаты выше других непрочитанных чатов",
+    "chat_sorting_prioritize_unmuted": "Показывать непрочитанные незаглушенные каналы выше заглушенных непрочитанных"
   },
   "date_labels": {
     "today": "Сегодня",

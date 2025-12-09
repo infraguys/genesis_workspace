@@ -14,6 +14,7 @@ import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/feed/feed.dart';
 import 'package:genesis_workspace/features/inbox/inbox.dart';
+import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
@@ -75,7 +76,7 @@ final router = GoRouter(
               path: Routes.notifications,
               name: Routes.notifications,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return Logs();
               },
             ),
           ],
@@ -296,7 +297,7 @@ final router = GoRouter(
               return InfoPage(isChannel: true);
             },
           ),
-        ]
+        ],
       ),
     ],
     GoRoute(
