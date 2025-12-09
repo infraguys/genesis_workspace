@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateFolderDialog extends StatefulWidget {
   final Function(CreateFolderEntity folder) onSubmit;
@@ -83,7 +84,9 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                         ),
                       ),
                       TextButton(
-                        onPressed: Navigator.of(context).pop,
+                        onPressed: () {
+                          context.pop();
+                        },
                         child: Text(context.t.folders.cancel),
                       ),
                       const SizedBox(width: 4),
