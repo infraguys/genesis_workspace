@@ -456,7 +456,6 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
 
   Future<void> _sendMarkAsReadCommon() async {
     final Set<int> pending = getPendingToMarkAsRead(state);
-    inspect(pending);
     if (pending.isEmpty) return;
 
     final List<int> ids = pending.toList();

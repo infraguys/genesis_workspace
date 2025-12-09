@@ -55,8 +55,6 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   _onMessageEvents(MessageEventEntity event) async {
-    inspect(event);
-    inspect(state.user?.userId);
     if (event.message.senderId != state.user?.userId) {
       final prefs = await SharedPreferences.getInstance();
       final selected = prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
