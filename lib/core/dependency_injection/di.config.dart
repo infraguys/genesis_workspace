@@ -624,13 +624,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.GetEventsByQueueIdUseCase>(),
       ),
     );
-    gh.lazySingleton<_i766.ProfileCubit>(
-      () => _i766.ProfileCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i547.GetOwnUserUseCase>(),
-        gh<_i832.UpdatePresenceUseCase>(),
-      ),
-    );
     gh.factory<_i1004.DownloadFilesCubit>(
       () => _i1004.DownloadFilesCubit(gh<_i124.DownloadFilesService>()),
     );
@@ -705,16 +698,6 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: _i592.disposeMessagesCubit,
     );
-    gh.factory<_i214.OrganizationsCubit>(
-      () => _i214.OrganizationsCubit(
-        gh<_i724.WatchOrganizationsUseCase>(),
-        gh<_i183.AddOrganizationUseCase>(),
-        gh<_i286.GetOrganizationSettingsUseCase>(),
-        gh<_i240.RemoveOrganizationUseCase>(),
-        gh<_i377.OrganizationSwitcherService>(),
-        gh<_i823.MultiPollingService>(),
-      ),
-    );
     gh.factory<_i277.ChatCubit>(
       () => _i277.ChatCubit(
         gh<_i823.MultiPollingService>(),
@@ -763,10 +746,11 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: _i862.disposeAuthCubit,
     );
-    gh.lazySingleton<_i573.RealTimeCubit>(
-      () => _i573.RealTimeCubit(
+    gh.lazySingleton<_i766.ProfileCubit>(
+      () => _i766.ProfileCubit(
         gh<_i823.MultiPollingService>(),
-        gh<_i214.OrganizationsCubit>(),
+        gh<_i547.GetOwnUserUseCase>(),
+        gh<_i832.UpdatePresenceUseCase>(),
       ),
     );
     gh.factory<_i404.AllChatsCubit>(
@@ -805,6 +789,23 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i766.ProfileCubit>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
+      ),
+    );
+    gh.factory<_i214.OrganizationsCubit>(
+      () => _i214.OrganizationsCubit(
+        gh<_i724.WatchOrganizationsUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
+        gh<_i286.GetOrganizationSettingsUseCase>(),
+        gh<_i240.RemoveOrganizationUseCase>(),
+        gh<_i377.OrganizationSwitcherService>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i766.ProfileCubit>(),
+      ),
+    );
+    gh.lazySingleton<_i573.RealTimeCubit>(
+      () => _i573.RealTimeCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i214.OrganizationsCubit>(),
       ),
     );
     return this;
