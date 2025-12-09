@@ -62,6 +62,8 @@ class _MessageItemState extends State<MessageItem> {
   late final GlobalObjectKey messageKey;
   late final MenuController _menuController;
 
+  static OverlayEntry? _menuEntry;
+
   late final MessagesCubit messagesCubit;
 
   bool get isRead => widget.message.flags?.contains('read') ?? false;
@@ -152,6 +154,42 @@ class _MessageItemState extends State<MessageItem> {
 
   void onCopy() {}
 
+  void _closeOverlay() {
+    _menuEntry?.remove();
+    _menuEntry = null;
+  }
+
+  void _openContextMenu(BuildContext context, Offset globalPosition) {
+    _closeOverlay();
+
+    final overlay = Overlay.of(context, rootOverlay: true);
+
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    if (overlayBox == null) {
+      return;
+    }
+
+    final localInOverlay = overlayBox.globalToLocal(globalPosition);
+    _menuEntry = OverlayEntry(
+      builder: (context) {
+        return MessageContextMenu(
+          offset: localInOverlay,
+          isStarred: isStarred,
+          isMyMessage: widget.isMyMessage,
+          onReply: onReplay,
+          onEdit: widget.isMyMessage ? onEditMessage : null,
+          onCopy: onCopy,
+          onToggleStar: () async => await handleToggleIsStarred(isStarred),
+          onDelete: widget.isMyMessage ? handleDeleteMessage : null,
+          onEmojiSelected: (emoji) async => await handleEmojiSelected(emoji),
+          onClose: _closeOverlay,
+        );
+      },
+    );
+
+    overlay.insert(_menuEntry!);
+  }
+
   // void openMobileOverlay() {
   //   final renderBox = messageKey.currentContext?.findRenderObject() as RenderBox?;
   //   final position = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
@@ -183,7 +221,6 @@ class _MessageItemState extends State<MessageItem> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = Theme.of(context).extension<TextColors>()!;
     final messageColors = Theme.of(context).extension<MessageColors>()!;
 
     final avatar = widget.isSkeleton
@@ -226,58 +263,11 @@ class _MessageItemState extends State<MessageItem> {
         behavior: HitTestBehavior.deferToChild,
         onPointerDown: (event) {
           if (event.kind == .mouse && event.buttons == kSecondaryMouseButton) {
-            _menuController.open(position: event.localPosition);
+            _openContextMenu(context, event.position);
           }
         },
-        child: MenuAnchor(
-          controller: _menuController,
-          menuChildren: [
-            MessageContextMenu(
-              isStarred: isStarred,
-              onReply: onReplay,
-              onEdit: widget.isMyMessage ? onEditMessage : null,
-              onCopy: onCopy,
-              onToggleStar: () async {
-                await handleToggleIsStarred(isStarred);
-                _menuController.close();
-              },
-              onDelete: widget.isMyMessage
-                  ? () async {
-                      await handleDeleteMessage();
-                      _menuController.close();
-                    }
-                  : null,
-              onEmojiSelected: (emoji) async {
-                await handleEmojiSelected(emoji);
-                _menuController.close();
-              },
-              // onOpenEmojiPicker: openEmojiPicker,
-            ),
-          ],
-          builder: (context, controller, child) {
-            return Align(
-              alignment: widget.isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-              child: ConstrainedBox(
-                key: messageKey,
-                constraints: BoxConstraints(
-                  maxWidth: (MediaQuery.of(context).size.width * 0.9) - (widget.isMyMessage ? 30 : 0),
-                ),
-                child: Row(
-                  mainAxisSize: .min,
-                  mainAxisAlignment: widget.isMyMessage ? .end : .start,
-                  crossAxisAlignment: .end,
-                  children: [
-                    if (showAvatar) ...[
-                      avatar,
-                      const SizedBox(width: 12),
-                    ],
-                    if (!showAvatar && !widget.isMyMessage) const SizedBox(width: 44),
-                    child!,
-                  ],
-                ),
-              ),
-            );
-          },
+        child: Align(
+          alignment: widget.isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
             padding: const EdgeInsets.all(12),
             constraints: (showAvatar)

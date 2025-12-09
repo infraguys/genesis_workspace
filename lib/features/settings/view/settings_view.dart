@@ -26,6 +26,8 @@ class _SettingsViewState extends State<SettingsView> {
   String _selectedSound = AssetsConstants.audioPop;
   SharedPreferences? _prefs;
   late final AudioPlayer _player;
+  bool _prioritizePersonalUnread = false;
+  bool _prioritizeUnmutedUnreadChannels = false;
 
   @override
   void initState() {
@@ -37,9 +39,12 @@ class _SettingsViewState extends State<SettingsView> {
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(SharedPrefsKeys.notificationSound);
+    final settings = context.read<SettingsCubit>().state;
     setState(() {
       _prefs = prefs;
       _selectedSound = saved ?? AssetsConstants.audioPop;
+      _prioritizePersonalUnread = settings.prioritizePersonalUnread;
+      _prioritizeUnmutedUnreadChannels = settings.prioritizeUnmutedUnreadChannels;
     });
   }
 
@@ -48,6 +53,73 @@ class _SettingsViewState extends State<SettingsView> {
       await _player.stop();
       await _player.play(AssetSource(_selectedSound));
     } catch (_) {}
+  }
+
+  Future<void> _openChatSortingDialog() async {
+    bool prioritizePersonalUnread = _prioritizePersonalUnread;
+    bool prioritizeUnmutedUnreadChannels = _prioritizeUnmutedUnreadChannels;
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(context.t.settings.chatSortingTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CheckboxListTile(
+                    value: prioritizePersonalUnread,
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: Text(context.t.settings.chatSortingPrioritizeDirects),
+                    onChanged: (value) {
+                      setState(() => prioritizePersonalUnread = value ?? false);
+                    },
+                  ),
+                  CheckboxListTile(
+                    value: prioritizeUnmutedUnreadChannels,
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: Text(context.t.settings.chatSortingPrioritizeUnmuted),
+                    onChanged: (value) {
+                      setState(() => prioritizeUnmutedUnreadChannels = value ?? false);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: Text(context.t.folders.cancel),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await dialogContext.read<SettingsCubit>().saveChatSortingSettings(
+                      prioritizePersonalUnread: prioritizePersonalUnread,
+                      prioritizeUnmutedUnreadChannels: prioritizeUnmutedUnreadChannels,
+                    );
+                    if (dialogContext.mounted) {
+                      Navigator.of(dialogContext).pop(true);
+                    }
+                  },
+                  child: Text(context.t.folders.save),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (mounted && (saved ?? false)) {
+      final state = context.read<SettingsCubit>().state;
+      setState(() {
+        _prioritizePersonalUnread = state.prioritizePersonalUnread;
+        _prioritizeUnmutedUnreadChannels = state.prioritizeUnmutedUnreadChannels;
+      });
+    }
   }
 
   @override
@@ -62,10 +134,6 @@ class _SettingsViewState extends State<SettingsView> {
     final localizationService = getIt<LocalizationService>();
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: theme.colorScheme.inversePrimary,
-        title: Text(context.t.navBar.settings),
-      ),
       body: ListView(
         children: [
           BlocBuilder<UpdateCubit, UpdateState>(
@@ -84,7 +152,7 @@ class _SettingsViewState extends State<SettingsView> {
                       borderRadius: BorderRadius.circular(18),
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.secondaryContainer,
+                          color: theme.colorScheme.surface,
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
                             color: theme.colorScheme.outlineVariant.withOpacity(0.4),
@@ -102,7 +170,7 @@ class _SettingsViewState extends State<SettingsView> {
                                 padding: const EdgeInsets.all(12),
                                 child: Icon(
                                   Icons.system_update_alt_rounded,
-                                  color: theme.colorScheme.primary,
+                                  color: theme.colorScheme.onPrimary,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -120,7 +188,7 @@ class _SettingsViewState extends State<SettingsView> {
                                     Text(
                                       context.t.updateView.openSelectorSubtitle,
                                       style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSecondaryContainer.withOpacity(
+                                        color: theme.colorScheme.onSurface.withOpacity(
                                           0.8,
                                         ),
                                       ),
@@ -131,7 +199,7 @@ class _SettingsViewState extends State<SettingsView> {
                               Icon(
                                 Icons.arrow_forward_ios_rounded,
                                 size: 16,
-                                color: theme.colorScheme.onSecondaryContainer,
+                                color: theme.colorScheme.onSurface,
                               ),
                             ],
                           ),
@@ -178,6 +246,18 @@ class _SettingsViewState extends State<SettingsView> {
           if (_prefs == null) const SizedBox.shrink(),
           const Divider(),
           ListTile(
+            leading: const Icon(Icons.sort),
+            title: Text(context.t.settings.chatSortingAction),
+            subtitle: Text(context.t.settings.chatSortingDescription),
+            trailing: Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            onTap: _openChatSortingDialog,
+          ),
+          const Divider(),
+          ListTile(
             leading: const Icon(Icons.language),
             title: Text(context.t.settings.language),
             trailing: DropdownButton<Locale>(
@@ -195,14 +275,6 @@ class _SettingsViewState extends State<SettingsView> {
               ],
             ),
           ),
-
-          // const Divider(),
-          // ElevatedButton(
-          //   onPressed: () {
-          //     context.pushNamed(Routes.forceUpdate);
-          //   },
-          //   child: Text("force update"),
-          // ),
           const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -228,11 +300,14 @@ class _SettingsViewState extends State<SettingsView> {
             ),
           ),
           if (kDebugMode) ...[
-            ElevatedButton(
-              onPressed: () {
-                context.read<SettingsCubit>().clearLocalDatabase();
-              },
-              child: Text("Clear db"),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: ElevatedButton(
+                onPressed: () {
+                  context.read<SettingsCubit>().clearLocalDatabase();
+                },
+                child: Text("Clear db"),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

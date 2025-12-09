@@ -16,6 +16,8 @@ import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_
 import 'package:genesis_workspace/core/utils/message_input_intents/mention_navigation_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
+import 'package:genesis_workspace/core/widgets/appbar_container.dart';
+import 'package:genesis_workspace/core/widgets/input_placeholder.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -33,7 +35,6 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
-import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -164,9 +165,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     switch (state) {
       case AppLifecycleState.resumed:
         await context.read<ChannelChatCubit>().getUnreadMessages();
-        break;
       default:
-        break;
     }
     super.didChangeAppLifecycleState(state);
   }
@@ -185,12 +184,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
               ?.showSnackBar(
                 SnackBar(
                   content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     spacing: 8,
                     children: [
                       Text(
                         state.uploadFileErrorName!,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                        style: TextStyle(fontWeight: .w600, fontSize: 20),
                       ),
                       Text(state.uploadFileError!),
                     ],
@@ -209,9 +208,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
       buildWhen: (prev, current) {
         if (prev.uploadedFiles != current.uploadedFiles) {
           return false;
-        } else {
-          return true;
         }
+        return true;
       },
       builder: (context, state) {
         final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
@@ -234,23 +232,20 @@ class _ChannelChatViewState extends State<ChannelChatView>
               centerTitle: false,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12).copyWith(
-                  topLeft: isTabletOrSmaller ? Radius.zero : null,
-                  topRight: isTabletOrSmaller ? Radius.zero : null,
+                  topLeft: isTabletOrSmaller ? .zero : null,
+                  topRight: isTabletOrSmaller ? .zero : null,
                 ),
               ),
               actionsPadding: isTabletOrSmaller ? null : .symmetric(horizontal: 20),
               leading: isTabletOrSmaller
                   ? IconButton(
-                      onPressed: () => context.pop(),
-                      icon: Icon(
-                        CupertinoIcons.back,
-                        color: textColors.text30,
-                      ),
+                      onPressed: context.pop,
+                      icon: Icon(CupertinoIcons.back, color: textColors.text30),
                     )
                   : IconButton(
                       onPressed: widget.leadingOnPressed,
                       icon: Assets.icons.moreVert.svg(
-                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                        colorFilter: ColorFilter.mode(textColors.text30, .srcIn),
                       ),
                     ),
               actions: [
@@ -260,7 +255,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                   icon: Assets.icons.joinCall.svg(
                     width: 28,
                     height: 28,
-                    colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                    colorFilter: ColorFilter.mode(AppColors.callGreen, .srcIn),
                   ),
                 ),
                 IconButton(
@@ -554,76 +549,78 @@ class _ChannelChatViewState extends State<ChannelChatView>
                               },
                               child: Container(
                                 key: dropAreaKey,
-                                child: MessageInput(
-                                  controller: messageController,
-                                  isMessagePending: state.isMessagePending,
-                                  focusNode: messageInputFocusNode,
-                                  onSubmitIntercept: () {
-                                    if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
-                                      final st = _mentionKey.currentState as dynamic?;
-                                      st?.selectFocused();
-                                      return true;
-                                    }
-                                    return false;
-                                  },
-                                  onSend: isSendEnabled
-                                      ? () async {
-                                          final content = messageController.text;
-                                          messageController.clear();
-                                          try {
-                                            await context.read<ChannelChatCubit>().sendMessage(
-                                              streamId: state.channel!.streamId,
-                                              content: content,
-                                              topic: state.topic?.name,
-                                            );
-                                          } catch (e) {
-                                          } finally {
-                                            if (platformInfo.isDesktop) {
-                                              messageInputFocusNode.requestFocus();
-                                            }
+                                child: widget.topicName != null
+                                    ? MessageInput(
+                                        controller: messageController,
+                                        isMessagePending: state.isMessagePending,
+                                        focusNode: messageInputFocusNode,
+                                        onSubmitIntercept: () {
+                                          if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                            final st = _mentionKey.currentState as dynamic?;
+                                            st?.selectFocused();
+                                            return true;
                                           }
-                                        }
-                                      : null,
-                                  onEdit: isEditEnabled
-                                      ? () async {
-                                          try {
-                                            await submitEdit();
-                                          } on DioException catch (e) {
-                                            showErrorSnackBar(context, exception: e);
-                                          } finally {
-                                            if (platformInfo.isDesktop) {
-                                              messageInputFocusNode.requestFocus();
-                                            }
+                                          return false;
+                                        },
+                                        onSend: isSendEnabled
+                                            ? () async {
+                                                final content = messageController.text;
+                                                messageController.clear();
+                                                try {
+                                                  await context.read<ChannelChatCubit>().sendMessage(
+                                                    streamId: state.channel!.streamId,
+                                                    content: content,
+                                                    topic: state.topic?.name,
+                                                  );
+                                                } catch (e) {
+                                                } finally {
+                                                  if (platformInfo.isDesktop) {
+                                                    messageInputFocusNode.requestFocus();
+                                                  }
+                                                }
+                                              }
+                                            : null,
+                                        onEdit: isEditEnabled
+                                            ? () async {
+                                                try {
+                                                  await submitEdit();
+                                                } on DioException catch (e) {
+                                                  showErrorSnackBar(context, exception: e);
+                                                } finally {
+                                                  if (platformInfo.isDesktop) {
+                                                    messageInputFocusNode.requestFocus();
+                                                  }
+                                                }
+                                              }
+                                            : null,
+                                        onUploadFile: () async {
+                                          await context.read<ChannelChatCubit>().uploadFilesCommon();
+                                          if (platformInfo.isDesktop) {
+                                            messageInputFocusNode.requestFocus();
                                           }
-                                        }
-                                      : null,
-                                  onUploadFile: () async {
-                                    await context.read<ChannelChatCubit>().uploadFilesCommon();
-                                    if (platformInfo.isDesktop) {
-                                      messageInputFocusNode.requestFocus();
-                                    }
-                                  },
-                                  onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
-                                  onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
-                                  files: inputState.uploadedFiles,
-                                  onUploadImage: () async {
-                                    await context.read<ChannelChatCubit>().uploadImagesCommon();
-                                    if (platformInfo.isDesktop) {
-                                      messageInputFocusNode.requestFocus();
-                                    }
-                                  },
-                                  isDropOver: isDropOver,
-                                  onCancelEdit: onCancelEdit,
-                                  isEdit: isEditMode,
-                                  editingMessage: editingMessage,
-                                  editingFiles: state.editingAttachments,
-                                  onRemoveEditingAttachment: (attachment) {
-                                    context.read<ChannelChatCubit>().removeEditingAttachment(
-                                      attachment,
-                                    );
-                                  },
-                                  inputTitle: widget.topicName ?? state.channel?.name,
-                                ),
+                                        },
+                                        onRemoveFile: context.read<ChannelChatCubit>().removeUploadedFileCommon,
+                                        onCancelUpload: context.read<ChannelChatCubit>().cancelUploadCommon,
+                                        files: inputState.uploadedFiles,
+                                        onUploadImage: () async {
+                                          await context.read<ChannelChatCubit>().uploadImagesCommon();
+                                          if (platformInfo.isDesktop) {
+                                            messageInputFocusNode.requestFocus();
+                                          }
+                                        },
+                                        isDropOver: isDropOver,
+                                        onCancelEdit: onCancelEdit,
+                                        isEdit: isEditMode,
+                                        editingMessage: editingMessage,
+                                        editingFiles: state.editingAttachments,
+                                        onRemoveEditingAttachment: (attachment) {
+                                          context.read<ChannelChatCubit>().removeEditingAttachment(
+                                            attachment,
+                                          );
+                                        },
+                                        inputTitle: widget.topicName ?? state.channel?.name,
+                                      )
+                                    : InputPlaceholder(),
                               ),
                             ),
                           ),

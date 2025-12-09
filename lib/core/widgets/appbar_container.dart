@@ -1,8 +1,6 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 
 class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
   const AppBarContainer({super.key, required this.appBar});
@@ -13,11 +11,7 @@ class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(76);
 
   bool get isMacOsSafe {
-    if (kIsWeb) {
-      return false;
-    }
-
-    return Platform.isMacOS;
+    return platformInfo.isMacos;
   }
 
   @override

@@ -17,6 +17,7 @@ import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_
 import 'package:genesis_workspace/core/utils/message_input_intents/mention_navigation_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
+import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -35,7 +36,6 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
-import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';

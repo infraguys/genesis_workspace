@@ -69,7 +69,12 @@
     "language": "Язык",
     "logout": "Выйти",
     "app_version": "Версия приложения",
-    "notification_sound": "Звук уведомлений"
+    "notification_sound": "Звук уведомлений",
+    "chat_sorting_action": "Настройки сортировки чатов",
+    "chat_sorting_description": "Настройте приоритет непрочитанных чатов.",
+    "chat_sorting_title": "Настройки сортировки чатов",
+    "chat_sorting_prioritize_directs": "Показывать личные непрочитанные чаты выше других непрочитанных чатов",
+    "chat_sorting_prioritize_unmuted": "Показывать непрочитанные незаглушенные каналы выше заглушенных непрочитанных"
   },
   "date_labels": {
     "today": "Сегодня",
@@ -210,7 +215,9 @@
     "open_selector_cta": "Выбрать сборку",
     "open_selector_subtitle": "Выберите версию для установки или отката.",
     "latest_badge": "Актуальная",
-    "latest_hint": "Рекомендуемая сборка"
+    "latest_hint": "Рекомендуемая сборка",
+    "dev_channel": "Dev",
+    "stable_channel": "Стабильные"
   },
   "update_widget": {
     "update_available": "Доступно обновление",
@@ -265,5 +272,6 @@
     "unmark_as_important": "Убрать из важного",
     "forward": "Переслать",
     "select": "Выбрать"
-  }
+  },
+  "input_placeholder": "Выберите тему для отправки сообщений в канал"
 }

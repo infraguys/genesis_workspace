@@ -63,7 +63,12 @@
     "language": "Language",
     "logout": "Logout",
     "app_version": "App version",
-    "notification_sound": "Notification sound"
+    "notification_sound": "Notification sound",
+    "chat_sorting_action": "Chat sorting settings",
+    "chat_sorting_description": "Choose how unread chats are prioritized.",
+    "chat_sorting_title": "Chat sorting settings",
+    "chat_sorting_prioritize_directs": "Show unread personal chats above other unread chats",
+    "chat_sorting_prioritize_unmuted": "Show unread unmuted channels above muted unread ones"
   },
   "date_labels": {
     "today": "Today",
@@ -204,7 +209,9 @@
     "open_selector_cta": "Browse builds",
     "open_selector_subtitle": "Pick a version to install or downgrade.",
     "latest_badge": "Latest",
-    "latest_hint": "Recommended build"
+    "latest_hint": "Recommended build",
+    "dev_channel": "Dev",
+    "stable_channel": "Stable"
   },
   "update_widget": {
     "update_available": "Update available",
@@ -259,5 +266,6 @@
     "unmark_as_important": "Unmark as important",
     "forward": "Forward",
     "select": "Select"
-  }
+  },
+  "input_placeholder": "Select a topic to send messages to the channel"
 }

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 
 class PrivateInfoPage extends StatelessWidget {
   const PrivateInfoPage({
@@ -23,9 +23,7 @@ class PrivateInfoPage extends StatelessWidget {
       appBar: AppBarContainer(
         appBar: AppBar(
           title: Text(context.t.information, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.zero)
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero)),
         ),
       ),
       body: SizedBox(
@@ -62,19 +60,14 @@ class PrivateInfoPage extends StatelessWidget {
                                     children: [
                                       Text(
                                         state.userEntity!.fullName,
-                                        style: TextStyle(
-                                            fontWeight: .w500, fontSize: 20),
+                                        style: TextStyle(fontWeight: .w500, fontSize: 20),
                                       ),
                                       Text(
                                         isJustNow(lastSeen)
                                             ? context.t.wasOnlineJustNow
-                                            : context.t.wasOnline(
-                                            time: timeAgoText(
-                                                context, lastSeen)),
+                                            : context.t.wasOnline(time: timeAgoText(context, lastSeen)),
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontSize: 14.0,
-                                            color: textColors.text30,
-                                            fontWeight: .w400),
+                                        style: TextStyle(fontSize: 14.0, color: textColors.text30, fontWeight: .w400),
                                       ),
                                     ],
                                   ),
@@ -106,8 +99,7 @@ class PrivateInfoPage extends StatelessWidget {
                             _InfoWidget(
                               iconData: Icons.account_circle,
                               title: context.t.role,
-                              value: state.userEntity!.role.humanReadable(
-                                  context),
+                              value: state.userEntity!.role.humanReadable(context),
                             ),
                             _InfoWidget(
                               iconData: Icons.date_range,

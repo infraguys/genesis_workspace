@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:genesis_workspace/shared/widgets/appbar_container.dart';
 
 class ChannelInfoPage extends StatefulWidget {
   const ChannelInfoPage({super.key});
@@ -23,9 +23,7 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
 
     final chatState = context.read<ChannelChatCubit>().state;
     if (chatState.channelMembers.isNotEmpty) {
-      context
-          .read<ChannelMembersInfoCubit>()
-          .getUsers(chatState.channelMembers);
+      context.read<ChannelMembersInfoCubit>().getUsers(chatState.channelMembers);
     }
   }
 

@@ -13,8 +13,7 @@ class AppConstants {
   static late String baseUrl;
   static int? selectedOrganizationId;
 
-  static const String versionConfigUrl =
-      'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
+  static const String versionConfigUrl = 'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
 
   static final popularEmojis = [
     UnicodeEmojiDisplay(emojiName: ":thumbs_up:", emojiUnicode: "1F44D"),
@@ -93,6 +92,8 @@ class SharedPrefsKeys {
   static const String selectedOrganizationId = 'selectedOrganizationId';
   static const String baseUrl = 'baseUrl';
   static const String notificationSound = 'notificationSound';
+  static const String prioritizePersonalUnread = 'prioritizePersonalUnread';
+  static const String prioritizeUnmutedUnreadChannels = 'prioritizeUnmutedUnreadChannels';
 }
 
 class AssetsConstants {
