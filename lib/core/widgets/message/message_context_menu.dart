@@ -108,7 +108,28 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final textColor = colors.onSurface.withValues(alpha: 0.9);
-    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenSize = MediaQuery.sizeOf(context);
+
+    const padding = 8.0;
+    const maxMenuWidth = 300.0;
+
+    final spaceBelow = screenSize.height - widget.offset.dy - padding;
+    final openDown = spaceBelow > 300.0;
+
+    double? left;
+    double? right;
+
+    if (widget.isMyMessage) {
+      right = (screenSize.width - widget.offset.dx).clamp(
+        padding,
+        screenSize.width - maxMenuWidth - padding,
+      );
+    } else {
+      left = widget.offset.dx.clamp(
+        padding,
+        screenSize.width - maxMenuWidth - padding,
+      );
+    }
 
     return Stack(
       children: [
@@ -116,18 +137,24 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: _close,
-            onSecondaryTapDown: (_) => _close,
+            onSecondaryTapDown: (_) => _close(),
           ),
         ),
         Positioned(
-          left: !widget.isMyMessage ? widget.offset.dx : null,
-          right: widget.isMyMessage ? screenWidth - widget.offset.dx : null,
-          top: widget.offset.dy,
+          left: left,
+          right: right,
+          top: openDown ? widget.offset.dy : null,
+          bottom: openDown ? null : (screenSize.height - widget.offset.dy),
           child: FadeTransition(
             opacity: _opacity,
             child: ScaleTransition(
               scale: _scale,
-              alignment: widget.isMyMessage ? .topRight : .topLeft,
+              alignment: switch (openDown) {
+                true when widget.isMyMessage => Alignment.topRight,
+                true => Alignment.topLeft,
+                false when widget.isMyMessage => Alignment.bottomRight,
+                false => Alignment.bottomLeft,
+              },
               child: Material(
                 elevation: 4,
                 borderRadius: .circular(8),
@@ -152,7 +179,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                                 _onEmojiSelected(selected.name);
                               },
                               config: Config(
-                                height: 360,
+                                height: 300,
                                 emojiViewConfig: const EmojiViewConfig(
                                   emojiSizeMax: 22,
                                   backgroundColor: Colors.transparent,
