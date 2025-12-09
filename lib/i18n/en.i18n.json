@@ -209,7 +209,9 @@
     "open_selector_cta": "Browse builds",
     "open_selector_subtitle": "Pick a version to install or downgrade.",
     "latest_badge": "Latest",
-    "latest_hint": "Recommended build"
+    "latest_hint": "Recommended build",
+    "dev_channel": "Dev",
+    "stable_channel": "Stable"
   },
   "update_widget": {
     "update_available": "Update available",
