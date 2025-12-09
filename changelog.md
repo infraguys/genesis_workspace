@@ -7,6 +7,7 @@
 - Channel chats now show a localized input placeholder until a topic is selected, preventing sending messages without choosing a topic.
 - Pin/unpin actions display inline progress and the folder dialog layout was simplified to avoid accidental repeat actions.
 - Unread counters are more reliable: muted chats use dimmed badges, unread fetches no longer skip when a real-time connection is active, self-sent messages are ignored for badges, and a logs view is available from Notifications for connection diagnostics.
+- Add avatars on messages
 
 ## 1.5.2
 - Added a rich message context menu with quick reactions, emoji picker, and actions (reply, edit, copy, forward, mark/unmark important, delete, select) using new SVG icons.
