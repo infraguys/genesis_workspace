@@ -507,6 +507,13 @@ class _MessengerViewState extends State<MessengerView>
                       Expanded(
                         child: Builder(
                           builder: (context) {
+                            if (state.usersIds.isNotEmpty && state.selectedChat == null) {
+                              return Chat(
+                                key: ObjectKey(state.usersIds),
+                                userIds: state.usersIds.toList(),
+                                leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
+                              );
+                            }
                             if (state.selectedChat?.dmIds != null) {
                               return Chat(
                                 key: ObjectKey(

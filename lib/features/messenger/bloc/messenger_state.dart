@@ -16,6 +16,7 @@ class MessengerState {
   final List<SubscriptionEntity> subscribedChannels;
   final bool isFolderSaving;
   final bool isFolderDeleting;
+  final Set<int> usersIds;
 
   MessengerState({
     this.selfUser,
@@ -33,7 +34,8 @@ class MessengerState {
     required this.subscribedChannels,
     this.isFolderSaving = false,
     this.isFolderDeleting = false,
-  });
+    Set<int>? usersIds,
+  }) : usersIds = usersIds ?? {};
 
   static MessengerState initial = MessengerState(
     selfUser: null,
@@ -68,6 +70,7 @@ class MessengerState {
     List<SubscriptionEntity>? subscribedChannels,
     bool? isFolderSaving,
     bool? isFolderDeleting,
+    Set<int>? usersIds,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -85,6 +88,7 @@ class MessengerState {
       subscribedChannels: subscribedChannels ?? this.subscribedChannels,
       isFolderSaving: isFolderSaving ?? this.isFolderSaving,
       isFolderDeleting: isFolderDeleting ?? this.isFolderDeleting,
+      usersIds: usersIds ?? this.usersIds,
     );
   }
 }
