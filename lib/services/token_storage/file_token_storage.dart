@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'token_storage.dart';
 
+@Deprecated('Use SecureTokenStorage backed by flutter_secure_storage instead')
 class FileTokenStorage implements TokenStorage {
   static const String _storageFolder = 'token_storage';
   static const String _tokenPrefix = 'auth_token';

@@ -12,7 +12,6 @@ import 'package:genesis_workspace/core/dio_interceptors/sessionid_interceptor.da
 import 'package:genesis_workspace/core/dio_interceptors/token_interceptor.dart';
 import 'package:genesis_workspace/data/database/app_database.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
-import 'package:genesis_workspace/services/token_storage/file_token_storage.dart';
 import 'package:genesis_workspace/services/token_storage/secure_token_storage.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
@@ -47,11 +46,7 @@ abstract class CoreModule {
 
   @lazySingleton
   TokenStorage tokenStorage(FlutterSecureStorage secureStorage) {
-    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS || kIsWeb) {
-      return SecureTokenStorage(secureStorage);
-    } else {
-      return FileTokenStorage();
-    }
+    return SecureTokenStorage(secureStorage);
   }
 }
 
