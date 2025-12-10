@@ -100,7 +100,9 @@ class _MessageInputState extends State<MessageInput> {
     } else {
       context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false, closeKeyboard: true);
       final height = MediaQuery.of(context).viewInsets.bottom;
-      context.read<EmojiKeyboardCubit>().setHeight(height);
+      if (height > 0) {
+        context.read<EmojiKeyboardCubit>().setHeight(height);
+      }
     }
     super.didChangeDependencies();
   }
