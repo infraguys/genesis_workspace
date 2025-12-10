@@ -9,12 +9,10 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/genesis_logo.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
-import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
-import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -29,7 +27,6 @@ class _AuthViewState extends State<AuthView> {
   final _formKey = GlobalKey<FormState>();
   final _passwordFocus = FocusNode();
 
-  final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
   bool _obscureText = true;
 
   void _toggleVisibility() => setState(() => _obscureText = !_obscureText);
@@ -49,12 +46,6 @@ class _AuthViewState extends State<AuthView> {
     _future = getInitialData();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
-
-    _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
-      if (height != 0) {
-        context.read<EmojiKeyboardCubit>().setHeight(height);
-      }
-    });
   }
 
   @override
@@ -62,7 +53,6 @@ class _AuthViewState extends State<AuthView> {
     _usernameController.dispose();
     _passwordController.dispose();
     _passwordFocus.dispose();
-    _keyboardHeightPlugin.dispose();
     super.dispose();
   }
 

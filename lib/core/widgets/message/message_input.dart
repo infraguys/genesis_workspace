@@ -1,8 +1,8 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
-import 'package:flutter/services.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
@@ -18,7 +18,6 @@ import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.da
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:keyboard_height_plugin/keyboard_height_plugin.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
@@ -67,7 +66,6 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
   final GlobalKey<CustomPopupState> attachmentsKey = GlobalKey<CustomPopupState>();
 
   bool _isShiftPressed() {
@@ -101,18 +99,14 @@ class _MessageInputState extends State<MessageInput> {
       context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
     } else {
       context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false, closeKeyboard: true);
-      _keyboardHeightPlugin.onKeyboardHeightChanged((double height) {
-        if (height != 0) {
-          context.read<EmojiKeyboardCubit>().setHeight(height);
-        }
-      });
+      final height = MediaQuery.of(context).viewInsets.bottom;
+      context.read<EmojiKeyboardCubit>().setHeight(height);
     }
     super.didChangeDependencies();
   }
 
   @override
   void dispose() {
-    _keyboardHeightPlugin.dispose();
     super.dispose();
   }
 
@@ -489,7 +483,7 @@ class _MessageInputState extends State<MessageInput> {
                     onEmojiSelected: (_, _) {
                       widget.focusNode.requestFocus();
                     },
-                    config: emojiPickerConfig(context, emojiState: emojiState, theme: theme),
+                    config: emojiPickerConfig(context, theme: theme),
                   ),
                 ),
               ],
