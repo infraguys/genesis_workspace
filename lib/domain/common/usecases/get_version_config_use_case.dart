@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/common/dto/version_config_dto.dart';
 import 'package:genesis_workspace/domain/common/entities/version_config_entity.dart';
@@ -14,23 +15,29 @@ class GetVersionConfigUseCase {
 
   Future<VersionConfigEntity> call() async {
     try {
-      final response = await _dio.get(AppConstants.versionConfigUrl);
-      final responseData = response.data;
+      final Response<List<int>> response = await _dio.get<List<int>>(
+        AppConstants.versionConfigUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
 
-      final String jsonString = jsonEncode(responseData);
-      final List<int> utf8Bytes = utf8.encode(jsonString);
-      final Digest sha256Digest = sha256.convert(utf8Bytes);
+      final List<int> rawBytes = response.data!;
+      final String sha256Hash = sha256.convert(rawBytes).toString();
 
-      final String sha256Hash = sha256Digest.toString();
+      // Для парсинга JSON:
+      final String jsonString = utf8.decode(rawBytes);
+      final dynamic jsonData = jsonDecode(jsonString);
 
-      final VersionConfigDto dto = VersionConfigDto.fromJson(responseData);
-      final VersionConfigEntity entity = dto.toEntity();
-
-      return entity.copyWith(
+      final VersionConfigDto dto = VersionConfigDto.fromJson(jsonData);
+      final VersionConfigEntity entity = dto.toEntity().copyWith(
         sha256: sha256Hash,
       );
-    } catch (e) {
-      inspect(e);
+
+      return entity;
+    } catch (error, stackTrace) {
+      if (kDebugMode) {
+        inspect(error);
+        inspect(stackTrace);
+      }
       rethrow;
     }
   }

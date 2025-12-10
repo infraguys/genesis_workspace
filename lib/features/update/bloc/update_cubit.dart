@@ -35,6 +35,7 @@ class UpdateCubit extends Cubit<UpdateState> {
           totalBytes: 0,
           selectedVersion: null,
           updateError: null,
+          isUpdateSecured: false,
         ),
       );
 
@@ -58,12 +59,11 @@ class UpdateCubit extends Cubit<UpdateState> {
       final currentVersion = packageInfo.version;
 
       final shaResponse = await _getVersionConfigShaUseCase.call();
-
-      print(shaResponse);
-
       final response = await _getVersionConfigUseCase.call();
 
-      print(response.sha256);
+      final String sha256 = response.sha256.trim().split(RegExp(r'\s+')).first;
+
+      final bool isSecured = shaResponse == sha256;
 
       final releaseChannel = Flavor.isStage ? response.latest.dev : response.latest.stable;
       final minSupportedShortVersion = Flavor.isStage
@@ -84,6 +84,7 @@ class UpdateCubit extends Cubit<UpdateState> {
           isUpdateRequired: isUpdateRequired,
           currentVersion: currentVersion,
           actualVersion: actualVersionString,
+          isUpdateSecured: isSecured,
         ),
       );
     } catch (error, stackTrace) {
@@ -94,6 +95,15 @@ class UpdateCubit extends Cubit<UpdateState> {
   }
 
   Future<void> installVersion(VersionEntryEntity version) async {
+    if (!state.isUpdateSecured) {
+      emit(
+        state.copyWith(
+          operationStatus: UpdateOperationStatus.failure,
+          updateError: 'Could not install unsecured update.',
+        ),
+      );
+      return;
+    }
     if (state.operationStatus == UpdateOperationStatus.downloading ||
         state.operationStatus == UpdateOperationStatus.installing) {
       return;
