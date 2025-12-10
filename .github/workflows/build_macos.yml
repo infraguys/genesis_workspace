@@ -1,0 +1,67 @@
+name: build & deploy
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  ARTIFACTS_PATH: artifacts
+  PROJECT_NAME: genesis_workspace
+  REPO_ENDPOINT: http://10.20.0.1:8081
+  REPO_ENDPOINT_PUT: http://10.20.0.1:8082
+  CORE_ENDPOINT: http://10.20.0.2:11010
+  NODE_NS_UUID: 3ea35d89-fc3c-43d1-82fe-40980edbf617
+  PROJECT_ID: d4ef38ee-2667-4931-90fd-c858d4bc5f1c
+  MIN_DEV_VERSION: ${{ vars.MIN_DEV_VERSION }}
+  MIN_STABLE_VERSION: ${{ vars.MIN_STABLE_VERSION }}
+  WORKSPACE_PATH: https://repository.genesis-core.tech/genesis_workspace/
+  # All vars you need to pass to build the flutter app goes here with prefix "UI_BUILD_ENV_".
+  # There is a build python script `make_ui_build_env.py` that handles these variables and
+  # form a json file. For instance, if you need to pass `api_url="https://console.genesis-core.tech/api"`
+  # variable, you need to set `UI_BUILD_ENV_api_url` environment variable and the result file will be:
+  # {
+  #   "api_url": "https://console.genesis-core.tech/api"
+  # }
+  UI_BUILD_ENV_legacy_ui: "/legacy"
+
+
+jobs:
+  main:
+    runs-on: macos-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Build Genesis Workspace for MacOS
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+        env:
+            DEV_KEYS: ${{ secrets.DEV_KEYS }}
+            UI_BUILD_ENV_BUILD_TARGET: ${{ github.event.inputs.build_target }}
+            PROD_URL: ${{ secrets.PROD_URL }}
+            DEV_URL: ${{ secrets.DEV_URL }}
+            MIN_DEV_VERSION: ${{ env.MIN_DEV_VERSION }}
+            MIN_STABLE_VERSION: ${{ env.MIN_STABLE_VERSION }}
+            FB_GOOGLE_SERVICES_ANDROID: ${{ secrets.FB_GOOGLE_SERVICES_ANDROID }}
+            FB_GOOGLE_SERVICES_IOS: ${{ secrets.FB_GOOGLE_SERVICES_IOS }}
+            UI_BUILD_ENV_firebase_api_key: ${{ secrets.FB_API_KEY }}
+      - run: |
+          set -eux
+
+          echo "${FB_GOOGLE_SERVICES_ANDROID}" | \
+            base64 --decode > android/app/google-services.json
+          echo "${FB_GOOGLE_SERVICES_IOS}" | \
+            base64 --decode > ios/Runner/GoogleService-Info.plist
+
+          mkdir -p ${ARTIFACTS_PATH}
+          BUILD_TARGET="${UI_BUILD_ENV_BUILD_TARGET:-ci_stage}"
+
+          python3 genesis/images/make_ui_build_env.py
+
+          make build-macos
+          ls build/
+          ls build/*/
+      - uses: actions/upload-artifact@v4
+        with:
+            name: build
+            path: build/
