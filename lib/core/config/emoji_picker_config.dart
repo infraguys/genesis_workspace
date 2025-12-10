@@ -1,15 +1,16 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 Config emojiPickerConfig(
   BuildContext context, {
-  required EmojiKeyboardState emojiState,
   required ThemeData theme,
 }) {
+  final height = context.read<EmojiKeyboardCubit>().state.keyboardHeight;
   return Config(
-    height: emojiState.keyboardHeight,
+    height: height,
     skinToneConfig: SkinToneConfig(
       dialogBackgroundColor: theme.colorScheme.surface,
     ),
