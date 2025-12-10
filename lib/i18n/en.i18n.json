@@ -267,7 +267,10 @@
     "forward": "Forward",
     "select": "Select"
   },
-  "input_placeholder": "Select a topic to send messages to the channel",
+  "input": {
+    "banner": "Select a topic to send messages to the channel",
+    "placeholder": "Message..."
+  },
   "bot": "Bot",
   "external_link_dialog": {
     "title": "Open external link?",
