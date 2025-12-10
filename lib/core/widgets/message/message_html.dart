@@ -20,7 +20,6 @@ import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class WorkspaceHtmlFactory extends WidgetFactory {}
 
@@ -79,12 +78,24 @@ class MessageHtml extends StatelessWidget {
         textStyle: TextStyle(overflow: TextOverflow.ellipsis),
         factoryBuilder: () => WorkspaceHtmlFactory(),
         onTapUrl: (String? url) async {
-          final Uri _url = Uri.parse(url ?? '');
-          if (_url.path.startsWith("/user_uploads/")) {
-            final pathToFile = _url.path;
-            await context.read<DownloadFilesCubit>().download(pathToFile);
-          } else {
-            await launchUrl(_url);
+          final String rawUrl = url?.trim() ?? '';
+          if (rawUrl.isEmpty) return true;
+
+          if (rawUrl.startsWith('/user_uploads/')) {
+            await context.read<DownloadFilesCubit>().download(rawUrl);
+            return true;
+          }
+
+          final Uri? targetUri = parseUrlWithBase(rawUrl);
+          if (targetUri == null) return true;
+
+          if (targetUri.path.startsWith('/user_uploads/') && !isExternalToBase(targetUri)) {
+            await context.read<DownloadFilesCubit>().download(targetUri.path);
+            return true;
+          }
+
+          if (isAllowedUrlScheme(targetUri)) {
+            await launchUrlSafely(context, targetUri);
           }
           return true;
         },

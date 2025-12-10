@@ -26,7 +26,6 @@ import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 enum MessageUIOrder { first, last, middle, single, lastSingle }
 
@@ -86,6 +85,12 @@ class _MessageItemState extends State<MessageItem> {
 
   void joinCall(BuildContext context) async {
     final String meetingLink = extractMeetingLink(widget.message.content);
+    final Uri? meetingUri = parseUrlWithBase(meetingLink);
+    if (meetingUri == null || !isAllowedUrlScheme(meetingUri, allowContactSchemes: false)) {
+      return;
+    }
+
+    final String normalizedMeetingLink = meetingUri.toString();
     final screenSize = currentSize(context);
     final router = GoRouter.of(context);
     try {
@@ -97,11 +102,11 @@ class _MessageItemState extends State<MessageItem> {
       }
     }
     if (platformInfo.isLinux) {
-      launchUrl(Uri.parse(meetingLink));
+      await launchUrlSafely(context, meetingUri, allowContactSchemes: false);
       return;
     }
     if (screenSize <= .tablet) {
-      router.pushNamed(Routes.call, extra: meetingLink);
+      router.pushNamed(Routes.call, extra: normalizedMeetingLink);
     } else {
       String meetLocation = '';
       if (widget.message.isChannelMessage) {
@@ -109,7 +114,7 @@ class _MessageItemState extends State<MessageItem> {
       } else {
         meetLocation = widget.message.displayRecipient.recipients.map((e) => e.fullName).join(', ');
       }
-      context.read<CallCubit>().openCall(meetUrl: meetingLink, meetLocationName: meetLocation);
+      context.read<CallCubit>().openCall(meetUrl: normalizedMeetingLink, meetLocationName: meetLocation);
     }
   }
 
