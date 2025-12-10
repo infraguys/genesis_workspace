@@ -1,12 +1,13 @@
 import 'dart:ui';
 
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 
-class ChatEntity {
+class ChatEntity extends Equatable {
   final int id;
   final ChatType type;
   final String displayTitle;
@@ -152,4 +153,23 @@ class ChatEntity {
       colorString: colorString ?? this.colorString,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    type,
+    displayTitle,
+    avatarUrl,
+    lastMessageId,
+    lastMessagePreview,
+    lastMessageDate,
+    unreadMessages,
+    isPinned,
+    isMuted,
+    lastMessageSenderName,
+    topics,
+    streamId,
+    dmIds,
+    colorString,
+  ];
 }
