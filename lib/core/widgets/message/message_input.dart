@@ -356,7 +356,11 @@ class _MessageInputState extends State<MessageInput> {
                                           left: 8.0,
                                           top: 0.0,
                                           bottom: 0.0,
-                                          child: _AttachButton(),
+                                          child: AttachFilesButton(
+                                            attachmentsKey: attachmentsKey,
+                                            onUploadFile: widget.onUploadFile,
+                                            onUploadImage: widget.onUploadImage,
+                                          ),
                                         ),
                                         Positioned(
                                           right: 8.0,
