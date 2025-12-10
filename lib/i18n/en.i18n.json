@@ -267,5 +267,6 @@
     "forward": "Forward",
     "select": "Select"
   },
-  "input_placeholder": "Select a topic to send messages to the channel"
+  "input_placeholder": "Select a topic to send messages to the channel",
+  "bot": "Bot"
 }

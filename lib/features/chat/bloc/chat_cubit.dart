@@ -214,6 +214,14 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
       } catch (e) {
         inspect(e);
       }
+    } else if (userIds.length == 1 && myUserId == userIds.first) {
+      try {
+        final UserEntity user = await _getUserByIdUseCase.call(userIds.first);
+        final DmUserEntity dmUser = user.toDmUser();
+        emit(state.copyWith(userEntity: dmUser));
+      } catch (e) {
+        inspect(e);
+      }
     } else {
       try {
         final ids = [...userIds, myUserId];
