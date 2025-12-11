@@ -556,7 +556,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _onMessageEvents(MessageEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
-    final message = event.message;
+    final message = event.message.copyWith(flags: event.flags);
 
     final chatId = message.recipientId;
     final isMyMessage = message.isMyMessage(state.selfUser?.userId);
@@ -866,5 +866,10 @@ class MessengerCubit extends Cubit<MessengerState> {
     final result = [...pinnedChats, ...regularChats];
     emit(state.copyWith(chats: result));
     _applySearchFilter();
+  }
+
+  void createEmptyChat(Set<int> membersIds) async {
+    final newState = state.copyWith(usersIds: membersIds);
+    emit(newState);
   }
 }

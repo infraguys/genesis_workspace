@@ -27,6 +27,11 @@ final darkTheme = ThemeData(
       borderRadius: BorderRadius.circular(12),
     ),
   ),
+  dialogTheme: DialogThemeData(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadiusGeometry.circular(12.0)
+    )
+  )
 );
 
 final darkColorScheme = ColorScheme.dark(

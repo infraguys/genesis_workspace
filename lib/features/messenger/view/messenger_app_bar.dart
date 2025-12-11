@@ -2,14 +2,18 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
+import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 
 class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   const MessengerAppBar({
@@ -69,7 +73,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     final textColors = theme.extension<TextColors>()!;
     final t = context.t;
     final String largeScreenTitle = selectedFolderIndex != 0
-        ? folders[selectedFolderIndex].title ?? ''
+        ? folders[selectedFolderIndex].title
         : t.messengerView.chatsAndChannels;
 
     final Widget titleWidget = isLargeScreen
@@ -92,11 +96,14 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
               await showDialog(
                 context: context,
                 builder: (BuildContext dialogContext) {
-                  return CreateGroupChatDialog(
-                    onCreate: (membersIds) {
-                      Navigator.of(dialogContext).pop();
-                      openChat(context, {...membersIds, selfUserId});
-                    },
+                  return BlocProvider(
+                    create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
+                    child: CreateGroupChatDialog(
+                      onCreate: (membersIds) {
+                        context.pop();
+                        openChat(context, {...membersIds, selfUserId});
+                      },
+                    ),
                   );
                 },
               );
@@ -265,7 +272,22 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                           width: 32,
                           child: IconButton(
                             padding: EdgeInsets.zero,
-                            onPressed: onCreateFolder,
+                            onPressed: () async {
+                              await showDialog(
+                              context: context,
+                              builder: (BuildContext dialogContext) {
+                                return BlocProvider(
+                                  create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
+                                  child: CreateGroupChatDialog(
+                                    onCreate: (membersIds) {
+                                      context.pop();
+                                      openChat(context, {...membersIds, selfUserId});
+                                    },
+                                  ),
+                                );
+                              },
+                              );
+                            },
                             icon: Assets.icons.newWindow.svg(),
                           ),
                         ),
