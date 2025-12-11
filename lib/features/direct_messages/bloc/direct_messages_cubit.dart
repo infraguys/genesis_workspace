@@ -170,8 +170,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       final List<UserEntity> users = response;
       final mappedUsers = users.map((user) => user.toDmUser()).toList();
 
-      state.users = mappedUsers;
-      state.filteredUsers = mappedUsers;
+      emit(state.copyWith(users: mappedUsers, filteredUsers: mappedUsers));
 
       await Future.wait([getInitialMessages(), getAllPresences()]);
       await getRecentDms();
@@ -210,13 +209,11 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
 
     final lowerQuery = query.toLowerCase();
     final filtered = state.users.where((user) {
-      return user.fullName.toLowerCase().contains(lowerQuery) ||
-          user.email.toLowerCase().contains(lowerQuery);
+      return user.fullName.toLowerCase().contains(lowerQuery) || user.email.toLowerCase().contains(lowerQuery);
     }).toList();
 
     final filteredDms = state.recentDmsUsers.where((user) {
-      return user.fullName.toLowerCase().contains(lowerQuery) ||
-          user.email.toLowerCase().contains(lowerQuery);
+      return user.fullName.toLowerCase().contains(lowerQuery) || user.email.toLowerCase().contains(lowerQuery);
     }).toList();
 
     emit(state.copyWith(filteredUsers: filtered, filteredRecentDmsUsers: filteredDms));
@@ -443,9 +440,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   }
 
   void _onDeleteMessageEvents(DeleteMessageEventEntity event) {
-    final updatedMessages = state.allMessages
-        .where((message) => message.id != event.messageId)
-        .toList();
+    final updatedMessages = state.allMessages.where((message) => message.id != event.messageId).toList();
     final updatedUnreadMessages = updatedMessages.where((message) => message.isUnread).toList();
     final updatedUsers = _mapUnreadToUsers(users: [...state.users], allMessages: updatedMessages);
     final updatedGroupChats = _buildGroupChatsFromMessages(updatedMessages);
