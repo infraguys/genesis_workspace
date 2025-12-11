@@ -33,22 +33,25 @@ class _TapEffectIconState extends State<TapEffectIcon> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: widget.onTap,
-      onTapDown: _onTapDown,
-      onTapUp: (_) => _onTapUp(),
-      onTapCancel: () => _onTapCancel(),
-      child: AnimatedScale(
-        scale: _pressed ? scale : 1.0,
-        duration: duration,
-        curve: Curves.easeOut,
-        child: AnimatedOpacity(
-          opacity: _pressed ? 0.6 : 1.0,
+    return MouseRegion(
+      cursor:  SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: widget.onTap,
+        onTapDown: _onTapDown,
+        onTapUp: (_) => _onTapUp(),
+        onTapCancel: () => _onTapCancel(),
+        child: AnimatedScale(
+          scale: _pressed ? scale : 1.0,
           duration: duration,
-          child: Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: widget.child,
+          curve: Curves.easeOut,
+          child: AnimatedOpacity(
+            opacity: _pressed ? 0.6 : 1.0,
+            duration: duration,
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: widget.child,
+            ),
           ),
         ),
       ),
