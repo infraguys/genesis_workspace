@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,7 +50,6 @@ class MessageHtml extends StatelessWidget {
       },
       child: HtmlWidget(
         content,
-        // buildAsync: true,
         customStylesBuilder: (element) {
           return null;
         },
@@ -69,15 +66,27 @@ class MessageHtml extends StatelessWidget {
           return true;
         },
         customWidgetBuilder: (element) {
+          if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
+            final src = element.parentNode?.attributes['href'];
+            final size = extractDimensionsFromUrl(src ?? '');
+            final thumbnailSrc = element.attributes['src'];
+            return AuthorizedImage(
+              url: '${AppConstants.baseUrl}$src',
+              thumbnailSrc: '${AppConstants.baseUrl}$thumbnailSrc',
+              width: size?.width,
+              height: size?.height,
+              fit: BoxFit.contain,
+            );
+          }
           if (element.attributes.containsKey('href') &&
-              element.attributes.values.any((value) => value.contains('/user_uploads/'))) {
+              element.attributes.values.any((value) => value.contains('/user_uploads/')) &&
+              !element.attributes.containsKey('title')) {
             final String fileUrl = element.attributes['href'] ?? '';
             final String rawFileName = element.nodes.first.parentNode?.text ?? 'File';
 
             return BlocBuilder<DownloadFilesCubit, DownloadFilesState>(
               builder: (context, state) {
                 final file = state.files.firstWhereOrNull((file) => file.pathToFile == fileUrl);
-                inspect(file);
                 final bool isDownloaded = file is DownloadedFileEntity;
                 final bool isDownloading = file is DownloadingFileEntity;
                 return InkWell(
@@ -136,16 +145,6 @@ class MessageHtml extends StatelessWidget {
                   ),
                 );
               },
-            );
-          }
-          if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
-            final src = element.parentNode?.attributes['href'];
-            final size = extractDimensionsFromUrl(src ?? '');
-            return AuthorizedImage(
-              url: '${AppConstants.baseUrl}$src',
-              width: size?.width,
-              height: size?.height,
-              fit: BoxFit.contain,
             );
           }
           if (element.classes.contains('emoji')) {
