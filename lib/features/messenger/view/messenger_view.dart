@@ -191,7 +191,7 @@ class _MessengerViewState extends State<MessengerView>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
       case AppLifecycleState.resumed:
-        await context.read<MessengerCubit>().getUnreadMessages();
+        // await context.read<MessengerCubit>().getUnreadMessages();
         break;
       default:
         break;

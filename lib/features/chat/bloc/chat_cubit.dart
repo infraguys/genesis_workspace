@@ -375,6 +375,8 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
   }
 
   void _onMessageEvents(MessageEventEntity event) {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != event.organizationId) return;
     bool isThisChatMessage = false;
     if (event.message.isGroupChatMessage) {
       final chatIds = state.chatIds?.toList();
