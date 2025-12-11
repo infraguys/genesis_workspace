@@ -344,11 +344,9 @@ class _MessageInputState extends State<MessageInput> {
                                               focusNode: widget.focusNode,
                                             ),
                                             TapEffectIcon(
-                                              onTap: () {},
+                                              onTap: widget.isEdit ? widget.onEdit : widget.onSend,
                                               child: _SubmitButton(
                                                 isEdit: widget.isEdit,
-                                                onPressed: widget.onSend,
-                                                isMessagePending: widget.isMessagePending,
                                               ),
                                             ),
                                           ],
@@ -412,14 +410,10 @@ class _MessageInputState extends State<MessageInput> {
 class _SubmitButton extends StatelessWidget {
   const _SubmitButton({
     super.key, // ignore: unused_element_parameter
-    required this.isMessagePending,
     required this.isEdit,
-    this.onPressed,
   });
 
-  final VoidCallback? onPressed;
   final bool isEdit;
-  final bool isMessagePending;
 
   @override
   Widget build(BuildContext context) {
