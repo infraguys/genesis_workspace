@@ -97,7 +97,9 @@ dependency_overrides:
   flutter_secure_storage_linux:
     git:
       url: https://github.com/m-berto/flutter_secure_storage.git
-      ref: patch-2
+#      commit: f076cbb65b075afd6e3b648122987a67306dc298
+#      ref: patch-2
+      ref: f076cbb65b075afd6e3b648122987a67306dc298
       path: flutter_secure_storage_linux
   flutter_secure_storage_platform_interface: 2.0.0
 
