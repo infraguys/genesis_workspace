@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -23,6 +24,7 @@ class SelectFoldersDialog extends StatefulWidget {
 class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
   List<String> _selectedIds = [];
   late Future<void> _initFuture;
+  bool _isSavePending = false;
 
   @override
   void initState() {
@@ -45,11 +47,16 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
         child: FutureBuilder(
           future: _initFuture,
           builder: (_, snapshot) {
-            // if (snapshot.connectionState == ConnectionState.waiting) {
-            //   return Center(
-            //     child: CircularProgressIndicator(),
-            //   );
-            // }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Column(
+                mainAxisSize: .min,
+                children: [
+                  Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ],
+              );
+            }
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -127,13 +134,19 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                       const SizedBox(width: 8),
                       FilledButton(
                         onPressed: () async {
+                          setState(() {
+                            _isSavePending = true;
+                          });
                           await widget.onSave(_selectedIds);
+                          setState(() {
+                            _isSavePending = false;
+                          });
                           if (mounted) {
                             context.pop();
                           }
                         },
                         child: Text(context.t.folders.save),
-                      ),
+                      ).pending(_isSavePending),
                     ],
                   ),
                 ),

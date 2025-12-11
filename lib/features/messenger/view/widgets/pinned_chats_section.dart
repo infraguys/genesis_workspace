@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/chat_list_view.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/pinned_chats_reorderable_list.dart';
 
@@ -17,9 +15,9 @@ class PinnedChatsSection extends StatefulWidget {
     required this.selectedChatId,
     required this.showTopics,
     required this.onChatTap,
-    required this.onEditingChanged,
-    required this.onSavingChanged,
+    required this.onPinningSaved,
     required this.folderUuid,
+    required this.isEditPinning,
   });
 
   final List<ChatEntity> visibleChats;
@@ -29,16 +27,15 @@ class PinnedChatsSection extends StatefulWidget {
   final int? selectedChatId;
   final bool showTopics;
   final void Function(ChatEntity chat) onChatTap;
-  final ValueChanged<bool> onEditingChanged;
-  final ValueChanged<bool> onSavingChanged;
+  final Function(List<PinnedChatOrderUpdate> chats) onPinningSaved;
   final String? folderUuid;
+  final bool isEditPinning;
 
   @override
   State<PinnedChatsSection> createState() => PinnedChatsSectionState();
 }
 
 class PinnedChatsSectionState extends State<PinnedChatsSection> {
-  bool _isEditPinning = false;
   List<ChatEntity>? _optimisticPinnedChats;
   List<PinnedChatOrderUpdate> _pendingPinnedOrders = [];
   bool _isPinnedReorderInProgress = false;
@@ -78,18 +75,7 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
     return pinnedChats;
   }
 
-  void enterEditMode() {
-    _setEditing(true);
-    setState(() {
-      _optimisticPinnedChats = null;
-      _pendingPinnedOrders = [];
-      _isPinnedReorderInProgress = false;
-      _isSavingPinnedOrder = false;
-    });
-  }
-
   void cancelEditing() {
-    _setEditing(false);
     _setSaving(false);
     setState(() {
       _optimisticPinnedChats = null;
@@ -99,14 +85,11 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
     });
   }
 
-  void _setEditing(bool value) {
-    _isEditPinning = value;
-    widget.onEditingChanged(value);
-  }
-
   void _setSaving(bool value) {
     _isSavingPinnedOrder = value;
-    widget.onSavingChanged(value);
+    if (value == false) {
+      widget.onPinningSaved(_pendingPinnedOrders);
+    }
   }
 
   @override
@@ -117,57 +100,11 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
     }
   }
 
-  Future<void> savePinnedChatOrder() async {
-    if (_isSavingPinnedOrder) return;
-
-    if (_pendingPinnedOrders.isEmpty) {
-      _setEditing(false);
-      setState(() {
-        _optimisticPinnedChats = null;
-      });
-      return;
-    }
-
-    if (widget.folderUuid == null) {
-      _setEditing(false);
-      _setSaving(false);
-      setState(() {
-        _pendingPinnedOrders = [];
-        _optimisticPinnedChats = null;
-      });
-      return;
-    }
-
-    _setSaving(true);
-    setState(() {
-      _isPinnedReorderInProgress = true;
-    });
-
-    try {
-      await context.read<MessengerCubit>().reorderPinnedChats(
-        folderUuid: widget.folderUuid!,
-        updates: _pendingPinnedOrders,
-      );
-      if (!mounted) return;
-      _setEditing(false);
-      setState(() {
-        _optimisticPinnedChats = null;
-        _pendingPinnedOrders = [];
-      });
-    } finally {
-      if (!mounted) return;
-      _setSaving(false);
-      setState(() {
-        _isPinnedReorderInProgress = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final pinnedChatsForEdit = _optimisticPinnedChats ?? _pinnedChatsForEdit(widget.visibleChats, widget.pinnedMeta);
 
-    if (_isEditPinning) {
+    if (widget.isEditPinning) {
       return PinnedChatsReorderableList(
         pinnedChats: pinnedChatsForEdit,
         pinnedMeta: widget.pinnedMeta,
@@ -183,6 +120,7 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
             _pendingPinnedOrders = updates;
             _isPinnedReorderInProgress = false;
           });
+          widget.onPinningSaved(updates);
         },
       );
     }
