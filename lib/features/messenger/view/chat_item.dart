@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -92,6 +94,8 @@ class _ChatItemState extends State<ChatItem> {
         break;
     }
     final bool shouldShowLeftBorder = widget.showTopics && widget.chat.id == widget.selectedChatId;
+    final bool isSelected = widget.chat.id == widget.selectedChatId;
+
     return CustomPopup(
       key: popupKey,
       backgroundColor: theme.colorScheme.surfaceDim,
@@ -188,7 +192,7 @@ class _ChatItemState extends State<ChatItem> {
                             bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
                             bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
                           ),
-                          color: widget.showTopics ? Colors.transparent : cardColors.base,
+                          color: isSelected ? cardColors.active : cardColors.base,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -259,12 +263,29 @@ class _ChatItemState extends State<ChatItem> {
                                         if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
                                         (widget.chat.type == ChatType.channel &&
                                                 currentSize(context) >= ScreenSize.tablet)
-                                            ? SizedBox(
-                                                width: 35,
-                                                child: AnimatedRotation(
-                                                  duration: const Duration(milliseconds: 200),
-                                                  turns: _isExpanded ? 0.5 : 0.0,
-                                                  child: Assets.icons.arrowDown.svg(),
+                                            ? InkWell(
+                                                borderRadius: BorderRadius.circular(35),
+                                                onTap: () {
+                                                  setState(() {
+                                                    _isExpanded = !_isExpanded;
+                                                  });
+                                                  if (_isExpanded && (widget.chat.topics?.isEmpty ?? true)) {
+                                                    unawaited(
+                                                      context.read<MessengerCubit>().getChannelTopics(
+                                                        widget.chat.streamId!,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                                child: Container(
+                                                  width: 35,
+                                                  height: 20,
+                                                  padding: EdgeInsets.symmetric(vertical: 6),
+                                                  child: AnimatedRotation(
+                                                    duration: const Duration(milliseconds: 200),
+                                                    turns: _isExpanded ? 0.5 : 0.0,
+                                                    child: Assets.icons.arrowDown.svg(height: 8),
+                                                  ),
                                                 ),
                                               )
                                             : SizedBox(

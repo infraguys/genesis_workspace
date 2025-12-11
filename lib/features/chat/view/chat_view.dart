@@ -629,7 +629,9 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                               content: content,
                                             );
                                           } catch (e) {
-                                            inspect(e);
+                                            if (kDebugMode) {
+                                              inspect(e);
+                                            }
                                           } finally {
                                             if (platformInfo.isDesktop) {
                                               messageInputFocusNode.requestFocus();

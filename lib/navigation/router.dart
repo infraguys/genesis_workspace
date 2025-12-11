@@ -358,7 +358,7 @@ final router = GoRouter(
       pageBuilder: (context, state) {
         return CustomTransitionPage(
           key: state.pageKey,
-          child: ImageFullScreen(imageBytes: state.extra as Uint8List),
+          child: ImageFullScreen(imageUrl: state.extra as String),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),

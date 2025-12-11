@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -42,22 +43,16 @@ class _AttachmentTileState extends State<AttachmentTile> {
   @override
   void initState() {
     super.initState();
-    if (widget.file.type == UploadFileType.image &&
-        widget.file.path != null &&
-        widget.file.path!.isNotEmpty) {
+    if (widget.file.type == UploadFileType.image && widget.file.path != null && widget.file.path!.isNotEmpty) {
       _cachedPreviewPath = widget.file.path!;
     }
     isImage = widget.file.type == UploadFileType.image;
 
     effectivePath = isImage
-        ? ((widget.file.path != null && widget.file.path!.isNotEmpty)
-              ? widget.file.path
-              : _cachedPreviewPath)
+        ? ((widget.file.path != null && widget.file.path!.isNotEmpty) ? widget.file.path : _cachedPreviewPath)
         : null;
 
-    previewImage =
-        (isImage &&
-            ((effectivePath != null && effectivePath!.isNotEmpty) || widget.file.bytes.isNotEmpty))
+    previewImage = (isImage && ((effectivePath != null && effectivePath!.isNotEmpty) || widget.file.bytes.isNotEmpty))
         ? createAttachmentImageProvider(path: effectivePath, bytes: widget.file.bytes)
         : null;
   }
@@ -89,8 +84,9 @@ class _AttachmentTileState extends State<AttachmentTile> {
 
     return GestureDetector(
       onTap: () {
-        if (isImage) {
-          context.pushNamed(Routes.imageFullScreen, extra: widget.file.bytes);
+        if (isImage && widget.file is UploadedFileEntity) {
+          final UploadedFileEntity file = widget.file as UploadedFileEntity;
+          context.pushNamed(Routes.imageFullScreen, extra: '${AppConstants.baseUrl}${file.url}');
         }
       },
       child: MouseRegion(
@@ -227,9 +223,7 @@ class _AttachmentTileState extends State<AttachmentTile> {
                     child: Icon(
                       widget.isUploading ? Icons.stop_rounded : Icons.close_rounded,
                       size: 14,
-                      color: widget.isUploading
-                          ? theme.colorScheme.error
-                          : theme.colorScheme.onSurfaceVariant,
+                      color: widget.isUploading ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),

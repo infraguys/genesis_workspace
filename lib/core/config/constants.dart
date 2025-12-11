@@ -60,22 +60,6 @@ class AppConstants {
     'svg',
   ];
 
-  static const List<String> kNonImageAllowedExtensions = [
-    'pdf',
-    'txt',
-    'md',
-    'doc',
-    'docx',
-    'xls',
-    'xlsx',
-    'csv',
-    'zip',
-    'rar',
-    '7z',
-    'json',
-    'xml',
-  ];
-
   static const List<Color> folderColors = <Color>[
     Color(0xFF2563EB),
     Color(0xFF4F46E5),
