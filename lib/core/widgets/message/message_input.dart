@@ -2,8 +2,6 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -67,7 +65,6 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
 
   bool _isShiftPressed() {
     final keyboard = HardwareKeyboard.instance;
