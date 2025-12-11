@@ -15,10 +15,10 @@
     "clear": "Очистить",
     "paste_base_url_here": "Вставьте Base URL",
     "enter_or_paste_base_url_title": "Введите или вставьте адрес сервера",
-    "base_url_usage_hint": "Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживаются только http/https.",
+    "base_url_usage_hint": "Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживается только https.",
     "base_url_label": "Base URL",
     "base_url_hint": "https://your-domain.com",
-    "base_url_invalid": "Некорректный адрес. Используйте http или https.",
+    "base_url_invalid": "Некорректный адрес. Используйте https.",
     "save_and_continue": "Сохранить и продолжить",
     "logout_from_organization": "Выйти из организации",
     "current_base_url": "Текущий сервер"
@@ -273,5 +273,11 @@
     "forward": "Переслать",
     "select": "Выбрать"
   },
-  "input_placeholder": "Выберите тему для отправки сообщений в канал"
+  "input_placeholder": "Выберите тему для отправки сообщений в канал",
+  "bot": "Бот",
+  "external_link_dialog": {
+    "title": "Открыть внешнюю ссылку?",
+    "confirm": "Открыть",
+    "cancel": "Отмена"
+  }
 }

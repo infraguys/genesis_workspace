@@ -20,7 +20,6 @@ import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class WorkspaceHtmlFactory extends WidgetFactory {}
 
@@ -37,6 +36,60 @@ class MessageHtml extends StatelessWidget {
 
   final AppShellController appShellController = getIt<AppShellController>();
 
+  String? _buildImageUrl(String? raw) {
+    if (raw == null) return null;
+    final String trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+
+    if (trimmed.startsWith('/user_uploads/')) {
+      if (AppConstants.baseUrl.isEmpty) return null;
+      return '${AppConstants.baseUrl}$trimmed';
+    }
+
+    final Uri? parsed = Uri.tryParse(trimmed);
+    if (parsed == null) return null;
+
+    if (!parsed.hasScheme && !parsed.hasAuthority) {
+      final Uri? baseUri = Uri.tryParse(AppConstants.baseUrl);
+      if (baseUri == null) return null;
+      final Uri resolved = baseUri.resolveUri(parsed);
+      return resolved.path.startsWith('/user_uploads/') ? resolved.toString() : null;
+    }
+
+    if (parsed.scheme == 'http' || parsed.scheme == 'https') {
+      return parsed.toString();
+    }
+
+    return null;
+  }
+
+  String? _buildThumbnailUrl(String? raw) {
+    if (raw == null) return null;
+    final String trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+
+    if (trimmed.startsWith('/user_uploads/')) {
+      if (AppConstants.baseUrl.isEmpty) return null;
+      return '${AppConstants.baseUrl}$trimmed';
+    }
+
+    final Uri? parsed = Uri.tryParse(trimmed);
+    if (parsed == null) return null;
+
+    if (!parsed.hasScheme && !parsed.hasAuthority) {
+      final Uri? baseUri = Uri.tryParse(AppConstants.baseUrl);
+      if (baseUri == null) return null;
+      final Uri resolved = baseUri.resolveUri(parsed);
+      return resolved.path.startsWith('/user_uploads/') ? resolved.toString() : null;
+    }
+
+    if (parsed.scheme == 'http' || parsed.scheme == 'https') {
+      return parsed.toString();
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,21 +105,38 @@ class MessageHtml extends StatelessWidget {
         textStyle: TextStyle(overflow: TextOverflow.ellipsis),
         factoryBuilder: () => WorkspaceHtmlFactory(),
         onTapUrl: (String? url) async {
-          final Uri _url = Uri.parse(url ?? '');
-          if (_url.path.startsWith("/user_uploads/")) {
-            final pathToFile = _url.path;
-            await context.read<DownloadFilesCubit>().download(pathToFile);
-          } else {
-            await launchUrl(_url);
+          final String rawUrl = url?.trim() ?? '';
+          if (rawUrl.isEmpty) return true;
+
+          if (rawUrl.startsWith('/user_uploads/')) {
+            await context.read<DownloadFilesCubit>().download(rawUrl);
+            return true;
+          }
+
+          final Uri? targetUri = parseUrlWithBase(rawUrl);
+          if (targetUri == null) return true;
+
+          if (targetUri.path.startsWith('/user_uploads/') && !isExternalToBase(targetUri)) {
+            await context.read<DownloadFilesCubit>().download(targetUri.path);
+            return true;
+          }
+
+          if (isAllowedUrlScheme(targetUri)) {
+            await launchUrlSafely(context, targetUri);
           }
           return true;
         },
         customWidgetBuilder: (element) {
           if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
             final src = element.parentNode?.attributes['href'];
+            final thumbnailSrc = element.attributes['src'];
             final size = extractDimensionsFromUrl(src ?? '');
+            final String? imageUrl = _buildImageUrl(src);
+            final String thumbnailUrl = _buildThumbnailUrl(thumbnailSrc) ?? '';
+            if (imageUrl == null) return const SizedBox.shrink();
             return AuthorizedImage(
-              url: '${AppConstants.baseUrl}$src',
+              url: imageUrl,
+              thumbnailUrl: thumbnailUrl,
               width: size?.width,
               height: size?.height,
               fit: BoxFit.contain,

@@ -14,6 +14,8 @@ class AppConstants {
   static int? selectedOrganizationId;
 
   static const String versionConfigUrl = 'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
+  static const String versionConfigShaUrl =
+      'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json.sha256';
 
   static final popularEmojis = [
     UnicodeEmojiDisplay(emojiName: ":thumbs_up:", emojiUnicode: "1F44D"),
@@ -56,22 +58,6 @@ class AppConstants {
     'heic',
     'heif',
     'svg',
-  ];
-
-  static const List<String> kNonImageAllowedExtensions = [
-    'pdf',
-    'txt',
-    'md',
-    'doc',
-    'docx',
-    'xls',
-    'xlsx',
-    'csv',
-    'zip',
-    'rar',
-    '7z',
-    'json',
-    'xml',
   ];
 
   static const List<Color> folderColors = <Color>[

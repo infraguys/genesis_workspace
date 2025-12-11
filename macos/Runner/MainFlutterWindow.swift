@@ -10,7 +10,7 @@ class MainFlutterWindow: NSWindow {
 
     self.titleVisibility = .hidden
     self.titlebarAppearsTransparent = true
-    self.isMovableByWindowBackground = true
+    self.isMovableByWindowBackground = false
     self.styleMask.insert(.fullSizeContentView)
     self.backgroundColor = NSColor.clear
 

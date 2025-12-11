@@ -25,6 +25,7 @@ class VersionConfigDto {
     policy: policy.toEntity(),
     latest: latest.toEntity(),
     versions: versions.toEntity(),
+    sha256: '',
   );
 }
 
@@ -138,8 +139,7 @@ class ReleaseChannelDto {
 
   ReleaseChannelDto({required this.version, required this.shortVersion, required this.linux});
 
-  factory ReleaseChannelDto.fromJson(Map<String, dynamic> json) =>
-      _$ReleaseChannelDtoFromJson(json);
+  factory ReleaseChannelDto.fromJson(Map<String, dynamic> json) => _$ReleaseChannelDtoFromJson(json);
   Map<String, dynamic> toJson() => _$ReleaseChannelDtoToJson(this);
 
   ReleaseChannelEntity toEntity() =>

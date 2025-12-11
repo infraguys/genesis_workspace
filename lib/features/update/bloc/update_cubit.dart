@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/common/entities/version_config_entity.dart';
+import 'package:genesis_workspace/domain/common/usecases/get_version_config_sha_use_case.dart';
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart';
 import 'package:genesis_workspace/flavor.dart';
 import 'package:injectable/injectable.dart';
@@ -17,8 +18,10 @@ part 'update_state.dart';
 
 @LazySingleton(dispose: disposeUpdateCubit)
 class UpdateCubit extends Cubit<UpdateState> {
-  UpdateCubit(this._getVersionConfigUseCase)
-    : super(
+  UpdateCubit(
+    this._getVersionConfigUseCase,
+    this._getVersionConfigShaUseCase,
+  ) : super(
         const UpdateState(
           status: UpdateStatus.initial,
           isUpdateRequired: false,
@@ -32,10 +35,12 @@ class UpdateCubit extends Cubit<UpdateState> {
           totalBytes: 0,
           selectedVersion: null,
           updateError: null,
+          isUpdateSecured: false,
         ),
       );
 
   final GetVersionConfigUseCase _getVersionConfigUseCase;
+  final GetVersionConfigShaUseCase _getVersionConfigShaUseCase;
   final Dio _dio = Dio();
 
   Future<void> checkUpdateNeed() async {
@@ -53,7 +58,12 @@ class UpdateCubit extends Cubit<UpdateState> {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
 
+      final shaResponse = await _getVersionConfigShaUseCase.call();
       final response = await _getVersionConfigUseCase.call();
+
+      final String sha256 = response.sha256.trim().split(RegExp(r'\s+')).first;
+
+      final bool isSecured = shaResponse == sha256;
 
       final releaseChannel = Flavor.isStage ? response.latest.dev : response.latest.stable;
       final minSupportedShortVersion = Flavor.isStage
@@ -74,6 +84,7 @@ class UpdateCubit extends Cubit<UpdateState> {
           isUpdateRequired: isUpdateRequired,
           currentVersion: currentVersion,
           actualVersion: actualVersionString,
+          isUpdateSecured: isSecured,
         ),
       );
     } catch (error, stackTrace) {
@@ -84,6 +95,15 @@ class UpdateCubit extends Cubit<UpdateState> {
   }
 
   Future<void> installVersion(VersionEntryEntity version) async {
+    if (!state.isUpdateSecured) {
+      emit(
+        state.copyWith(
+          operationStatus: UpdateOperationStatus.failure,
+          updateError: 'Could not install unsecured update.',
+        ),
+      );
+      return;
+    }
     if (state.operationStatus == UpdateOperationStatus.downloading ||
         state.operationStatus == UpdateOperationStatus.installing) {
       return;

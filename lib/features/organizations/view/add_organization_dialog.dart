@@ -37,27 +37,19 @@ class _AddOrganizationDialogState extends State<AddOrganizationDialog> {
     }
   }
 
-  void _validateUrl(String? value) {
-    final t = context.t.organizations.addDialog;
-    final String trimmed = value?.trim() ?? '';
-    if (trimmed.isEmpty) {
-      _urlError = t.urlRequired;
+  void _validateUrl(String input) {
+    final String value = input.trim();
+
+    if (value.isEmpty) {
+      _urlError = null;
       setState(() {});
       return;
     }
 
-    Uri? uri;
-    try {
-      uri = Uri.tryParse(trimmed);
-    } catch (_) {
-      uri = null;
-    }
+    final Uri? uri = Uri.tryParse(value);
+    final bool isValidHttps = uri != null && uri.hasAuthority && uri.isScheme('https');
 
-    if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
-      _urlError = t.urlInvalid;
-    } else {
-      _urlError = null;
-    }
+    _urlError = isValidHttps ? null : context.t.auth.baseUrlInvalid;
     setState(() {});
   }
 
