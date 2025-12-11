@@ -168,8 +168,7 @@ Future<List<PlatformFile>?> pickNonImageFiles() async {
   final FilePickerResult? result = await FilePicker.platform.pickFiles(
     allowMultiple: true,
     withData: kIsWeb,
-    type: FileType.custom,
-    allowedExtensions: AppConstants.kNonImageAllowedExtensions,
+    type: FileType.any,
   );
 
   if (result == null) return null;
