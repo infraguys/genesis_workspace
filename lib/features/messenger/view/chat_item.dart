@@ -148,7 +148,10 @@ class _ChatItemState extends State<ChatItem> {
             ),
             if (widget.chat.type == ChatType.channel)
               TextButton(
-                child: Text(widget.chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel),
+                child: Text(
+                  widget.chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
+                  textAlign: TextAlign.center,
+                ),
                 onPressed: () async {
                   context.pop();
                   if (widget.chat.isMuted) {
