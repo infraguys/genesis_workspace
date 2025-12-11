@@ -43,6 +43,7 @@ class _PasteCodeViewState extends State<PasteCodeView> {
           _controller.selection = TextSelection.collapsed(offset: text.length);
         });
       }
+      await Clipboard.setData(ClipboardData(text: ""));
     } catch (_) {}
   }
 

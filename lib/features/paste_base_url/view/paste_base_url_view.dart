@@ -57,18 +57,10 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
       return;
     }
 
-    Uri? uri;
-    try {
-      uri = Uri.tryParse(value);
-    } catch (_) {
-      uri = null;
-    }
+    final Uri? uri = Uri.tryParse(value);
+    final bool isValidHttps = uri != null && uri.hasAuthority && uri.isScheme('https');
 
-    if (uri == null || !uri.hasAuthority || !(uri.isScheme('http') || uri.isScheme('https'))) {
-      _validationError = context.t.auth.baseUrlInvalid;
-    } else {
-      _validationError = null;
-    }
+    _validationError = isValidHttps ? null : context.t.auth.baseUrlInvalid;
     setState(() {});
   }
 
