@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 
 class AuthorizedImage extends StatefulWidget {
   final String url;
+  final String thumbnailUrl;
   final BoxFit fit;
   final double? width;
   final double? height;
@@ -21,6 +22,7 @@ class AuthorizedImage extends StatefulWidget {
   const AuthorizedImage({
     super.key,
     required this.url,
+    required this.thumbnailUrl,
     this.fit = BoxFit.contain,
     this.width,
     this.height,
@@ -108,7 +110,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   }
 
   Future<void> _loadImage() async {
-    final Uri? targetUri = _resolveUri(widget.url);
+    final Uri? targetUri = _resolveUri(widget.thumbnailUrl);
 
     if (targetUri == null || !_isHttpScheme(targetUri)) {
       setState(() {
@@ -167,7 +169,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
     return GestureDetector(
       onTap: () {
         if (_imageBytes != null) {
-          context.pushNamed(Routes.imageFullScreen, extra: _imageBytes);
+          context.pushNamed(Routes.imageFullScreen, extra: widget.url);
         }
       },
       child: Hero(

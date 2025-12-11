@@ -63,6 +63,33 @@ class MessageHtml extends StatelessWidget {
     return null;
   }
 
+  String? _buildThumbnailUrl(String? raw) {
+    if (raw == null) return null;
+    final String trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+
+    if (trimmed.startsWith('/user_uploads/')) {
+      if (AppConstants.baseUrl.isEmpty) return null;
+      return '${AppConstants.baseUrl}$trimmed';
+    }
+
+    final Uri? parsed = Uri.tryParse(trimmed);
+    if (parsed == null) return null;
+
+    if (!parsed.hasScheme && !parsed.hasAuthority) {
+      final Uri? baseUri = Uri.tryParse(AppConstants.baseUrl);
+      if (baseUri == null) return null;
+      final Uri resolved = baseUri.resolveUri(parsed);
+      return resolved.path.startsWith('/user_uploads/') ? resolved.toString() : null;
+    }
+
+    if (parsed.scheme == 'http' || parsed.scheme == 'https') {
+      return parsed.toString();
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -102,11 +129,14 @@ class MessageHtml extends StatelessWidget {
         customWidgetBuilder: (element) {
           if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
             final src = element.parentNode?.attributes['href'];
+            final thumbnailSrc = element.attributes['src'];
             final size = extractDimensionsFromUrl(src ?? '');
             final String? imageUrl = _buildImageUrl(src);
+            final String thumbnailUrl = _buildThumbnailUrl(thumbnailSrc) ?? '';
             if (imageUrl == null) return const SizedBox.shrink();
             return AuthorizedImage(
               url: imageUrl,
+              thumbnailUrl: thumbnailUrl,
               width: size?.width,
               height: size?.height,
               fit: BoxFit.contain,
