@@ -14,6 +14,7 @@ class UpdateState {
     required this.totalBytes,
     this.selectedVersion,
     this.updateError,
+    required this.isUpdateSecured,
   });
 
   final UpdateStatus status;
@@ -28,6 +29,7 @@ class UpdateState {
   final int totalBytes;
   final VersionEntryEntity? selectedVersion;
   final String? updateError;
+  final bool isUpdateSecured;
 
   UpdateState copyWith({
     UpdateStatus? status,
@@ -42,6 +44,7 @@ class UpdateState {
     int? totalBytes,
     Object? selectedVersion = _sentinel,
     Object? updateError = _sentinel,
+    bool? isUpdateSecured,
   }) {
     return UpdateState(
       status: status ?? this.status,
@@ -49,8 +52,7 @@ class UpdateState {
       isNewUpdateAvailable: isNewUpdateAvailable ?? this.isNewUpdateAvailable,
       currentVersion: currentVersion ?? this.currentVersion,
       actualVersion: actualVersion ?? this.actualVersion,
-      errorMessage:
-          identical(errorMessage, _sentinel) ? this.errorMessage : errorMessage as String?,
+      errorMessage: identical(errorMessage, _sentinel) ? this.errorMessage : errorMessage as String?,
       versionConfigEntity: identical(versionConfigEntity, _sentinel)
           ? this.versionConfigEntity
           : versionConfigEntity as VersionConfigEntity?,
@@ -60,8 +62,8 @@ class UpdateState {
       selectedVersion: identical(selectedVersion, _sentinel)
           ? this.selectedVersion
           : selectedVersion as VersionEntryEntity?,
-      updateError:
-          identical(updateError, _sentinel) ? this.updateError : updateError as String?,
+      updateError: identical(updateError, _sentinel) ? this.updateError : updateError as String?,
+      isUpdateSecured: isUpdateSecured ?? this.isUpdateSecured,
     );
   }
 

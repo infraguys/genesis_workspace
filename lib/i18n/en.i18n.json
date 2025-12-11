@@ -15,10 +15,10 @@
     "clear": "Clear",
     "paste_base_url_here": "Paste Base URL",
     "enter_or_paste_base_url_title": "Enter or paste the server address",
-    "base_url_usage_hint": "Specify your server URL (for example, https://zulip.example.com). Only http/https are supported.",
+    "base_url_usage_hint": "Specify your server URL (for example, https://zulip.example.com). Only https is supported.",
     "base_url_label": "Base URL",
     "base_url_hint": "https://your-domain.com",
-    "base_url_invalid": "Invalid address. Use http or https.",
+    "base_url_invalid": "Invalid address. Use https.",
     "save_and_continue": "Save and continue",
     "logout_from_organization": "Logout from organization",
     "current_base_url": "Current server"
@@ -268,5 +268,10 @@
     "select": "Select"
   },
   "input_placeholder": "Select a topic to send messages to the channel",
-  "bot": "Bot"
+  "bot": "Bot",
+  "external_link_dialog": {
+    "title": "Open external link?",
+    "confirm": "Open",
+    "cancel": "Cancel"
+  }
 }

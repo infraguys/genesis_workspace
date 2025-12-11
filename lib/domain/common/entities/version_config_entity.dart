@@ -3,13 +3,25 @@ class VersionConfigEntity {
   final PolicyEntity policy;
   final LatestEntity latest;
   final VersionsEntity versions;
+  final String sha256;
 
   VersionConfigEntity({
     required this.spec,
     required this.policy,
     required this.latest,
     required this.versions,
+    required this.sha256,
   });
+
+  VersionConfigEntity copyWith({String? sha256}) {
+    return VersionConfigEntity(
+      spec: spec,
+      policy: policy,
+      latest: latest,
+      versions: versions,
+      sha256: sha256 ?? this.sha256,
+    );
+  }
 }
 
 class SpecEntity {

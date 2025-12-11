@@ -29,7 +29,7 @@ class EditingAttachmentTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: AuthorizedImage(
                   url: '${AppConstants.baseUrl}${attachment.url}',
-                  thumbnailSrc: '${AppConstants.baseUrl}${attachment.url}',
+                  thumbnailUrl: '${AppConstants.baseUrl}${attachment.url}',
                   fit: BoxFit.cover,
                 ),
               ),

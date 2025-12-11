@@ -88,6 +88,8 @@ import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_ca
     as _i7;
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart'
     as _i1057;
+import 'package:genesis_workspace/domain/common/usecases/get_version_config_sha_use_case.dart'
+    as _i690;
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart'
     as _i397;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
@@ -277,6 +279,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i419.OrganizationsDataSource>(
       () => _i419.OrganizationsDataSource(),
     );
+    gh.factory<_i690.GetVersionConfigShaUseCase>(
+      () => _i690.GetVersionConfigShaUseCase(),
+    );
     gh.factory<_i397.GetVersionConfigUseCase>(
       () => _i397.GetVersionConfigUseCase(),
     );
@@ -327,10 +332,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i125.UsersRepository>(
       () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
     );
-    gh.lazySingleton<_i326.UpdateCubit>(
-      () => _i326.UpdateCubit(gh<_i397.GetVersionConfigUseCase>()),
-      dispose: _i326.disposeUpdateCubit,
-    );
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
@@ -357,6 +358,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i42.UploadFileUseCase>(
       () => _i42.UploadFileUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.lazySingleton<_i326.UpdateCubit>(
+      () => _i326.UpdateCubit(
+        gh<_i397.GetVersionConfigUseCase>(),
+        gh<_i690.GetVersionConfigShaUseCase>(),
+      ),
+      dispose: _i326.disposeUpdateCubit,
     );
     gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
     gh.factory<_i909.FolderItemDao>(

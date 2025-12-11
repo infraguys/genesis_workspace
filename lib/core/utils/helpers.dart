@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 String? validateEmail(String? value) {
   final emailRegex = RegExp(r'^[\w.+-]+@([\w-]+\.)+[\w-]{2,}$');
@@ -304,13 +305,109 @@ String formatTime(int timestamp) {
   return DateFormat('HH:mm').format(date);
 }
 
-String extractMeetingLink(String htmlString) {
-  final RegExp linkRegExp = RegExp(r'href="([^"]+)"');
-  final Match? match = linkRegExp.firstMatch(htmlString);
+Uri? parseUrlWithBase(String? raw) {
+  if (raw == null) return null;
+  final String trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
 
-  if (match == null || match.groupCount < 1) {
-    return '';
+  final Uri? parsed = Uri.tryParse(trimmed);
+  if (parsed == null) return null;
+
+  if (parsed.hasScheme) {
+    return parsed;
   }
 
-  return match.group(1)!;
+  final Uri? baseUri = Uri.tryParse(AppConstants.baseUrl);
+  if (baseUri == null || !baseUri.hasScheme) return null;
+
+  return baseUri.resolveUri(parsed);
+}
+
+bool isAllowedUrlScheme(Uri uri, {bool allowContactSchemes = true}) {
+  const baseSchemes = {'http', 'https'};
+  const contactSchemes = {'mailto', 'tel'};
+
+  if (baseSchemes.contains(uri.scheme)) return true;
+  if (allowContactSchemes && contactSchemes.contains(uri.scheme)) return true;
+
+  return false;
+}
+
+int _effectivePort(Uri uri) {
+  if (uri.hasPort) return uri.port;
+  return uri.scheme == 'https' ? 443 : 80;
+}
+
+bool isExternalToBase(Uri uri) {
+  if (uri.scheme != 'http' && uri.scheme != 'https') return false;
+
+  final Uri? baseUri = Uri.tryParse(AppConstants.baseUrl);
+  if (baseUri == null || baseUri.host.isEmpty || !baseUri.hasScheme) {
+    return true;
+  }
+
+  final bool sameHost = uri.host == baseUri.host;
+  final bool samePort = _effectivePort(uri) == _effectivePort(baseUri);
+
+  return !(sameHost && samePort);
+}
+
+Future<bool> confirmExternalLaunch(BuildContext context, Uri uri) async {
+  final String hostLabel = uri.host.isNotEmpty ? uri.host : uri.toString();
+
+  final bool? shouldProceed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(context.t.externalLinkDialog.title),
+      content: Text(hostLabel),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(context.t.externalLinkDialog.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(context.t.externalLinkDialog.confirm),
+        ),
+      ],
+    ),
+  );
+
+  return shouldProceed ?? false;
+}
+
+Future<bool> launchUrlSafely(
+  BuildContext context,
+  Uri uri, {
+  bool allowContactSchemes = true,
+  bool confirmExternal = true,
+}) async {
+  if (!isAllowedUrlScheme(uri, allowContactSchemes: allowContactSchemes)) {
+    return false;
+  }
+
+  if (!await canLaunchUrl(uri)) {
+    return false;
+  }
+
+  if (confirmExternal && isExternalToBase(uri)) {
+    final shouldLaunch = await confirmExternalLaunch(context, uri);
+    if (!shouldLaunch || !context.mounted) return false;
+  }
+
+  return launchUrl(uri);
+}
+
+String extractMeetingLink(String htmlString) {
+  final RegExp linkRegExp = RegExp(r'href=\"([^\"]+)\"');
+
+  for (final Match match in linkRegExp.allMatches(htmlString)) {
+    if (match.groupCount < 1) continue;
+    final Uri? uri = parseUrlWithBase(match.group(1));
+    if (uri != null && isAllowedUrlScheme(uri, allowContactSchemes: false)) {
+      return uri.toString();
+    }
+  }
+
+  return '';
 }
