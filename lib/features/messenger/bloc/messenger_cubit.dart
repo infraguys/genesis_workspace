@@ -558,8 +558,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (organizationId != event.organizationId) return;
     final message = event.message.copyWith(flags: event.flags);
 
-    inspect(event);
-
     final chatId = message.recipientId;
     final isMyMessage = message.isMyMessage(state.selfUser?.userId);
 

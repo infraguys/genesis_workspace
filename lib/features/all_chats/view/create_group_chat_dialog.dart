@@ -79,6 +79,9 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
                     ...users.where((u) => _selectedIds.contains(u.userId)),
                     ...users.where((u) => !_selectedIds.contains(u.userId)),
                   ];
+                  if (state.isUsersPending) {
+                    return Center(child: CircularProgressIndicator());
+                  }
                   if (users.isEmpty) {
                     return Center(child: Text(context.t.groupChat.createDialog.noUsers));
                   }
