@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
@@ -610,6 +611,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
+
     List<ChatEntity> updatedChats = [...state.chats];
     List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
@@ -673,8 +675,6 @@ class MessengerCubit extends Cubit<MessengerState> {
 
     final prevMessage = chatMessages[chatMessages.length - 1];
 
-    inspect(prevMessage);
-
     final indexOfChat = state.chats.indexOf(updatedChat);
     updatedChat.unreadMessages.remove(messageId);
     updatedChat.topics?.forEach((topic) {
@@ -704,35 +704,37 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (organizationId != event.organizationId) return;
 
     final messageId = event.messageId;
-    final message = state.messages.firstWhere((message) => message.id == messageId, orElse: () => MessageEntity.fake());
+    final message = state.messages.firstWhereOrNull((message) => message.id == messageId);
 
-    final updatedChats = [...state.chats];
-    ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
-    final indexOfChat = updatedChats.indexOf(updatedChat);
-    if (updatedChat.lastMessageId == messageId) {
-      updatedChat = updatedChat.copyWith(
-        lastMessageId: message.id,
-        lastMessageDate: message.messageDate,
-        lastMessageSenderName: message.senderFullName,
-        lastMessagePreview: event.content,
-      );
-      updatedChats[indexOfChat] = updatedChat;
-    }
-
-    List<MessageEntity> updatedMessages = [...state.messages];
-    List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
-
-    final updatedMessage = message.copyWith(content: event.content);
-
-    final indexOfMessage = state.messages.indexOf(message);
-    updatedMessages[indexOfMessage] = updatedMessage;
-    if (message.isUnread) {
-      final indexOfUnreadMessage = state.unreadMessages.indexOf(message);
-      if (indexOfUnreadMessage != -1) {
-        updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
+    if (message != null) {
+      final updatedChats = [...state.chats];
+      ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
+      final indexOfChat = updatedChats.indexOf(updatedChat);
+      if (updatedChat.lastMessageId == messageId) {
+        updatedChat = updatedChat.copyWith(
+          lastMessageId: message.id,
+          lastMessageDate: message.messageDate,
+          lastMessageSenderName: message.senderFullName,
+          lastMessagePreview: event.content,
+        );
+        updatedChats[indexOfChat] = updatedChat;
       }
+
+      List<MessageEntity> updatedMessages = [...state.messages];
+      List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
+
+      final updatedMessage = message.copyWith(content: event.content);
+
+      final indexOfMessage = state.messages.indexOf(message);
+      updatedMessages[indexOfMessage] = updatedMessage;
+      if (message.isUnread) {
+        final indexOfUnreadMessage = state.unreadMessages.indexOf(message);
+        if (indexOfUnreadMessage != -1) {
+          updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
+        }
+      }
+      emit(state.copyWith(messages: updatedMessages, unreadMessages: updatedUnreadMessages, chats: updatedChats));
     }
-    emit(state.copyWith(messages: updatedMessages, unreadMessages: updatedUnreadMessages, chats: updatedChats));
   }
 
   @override

@@ -1,7 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
@@ -10,6 +12,7 @@ import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
@@ -140,6 +143,76 @@ class MessageHtml extends StatelessWidget {
               width: size?.width,
               height: size?.height,
               fit: BoxFit.contain,
+            );
+          }
+
+          if (element.attributes.containsKey('href') &&
+              element.attributes.values.any((value) => value.contains('/user_uploads/')) &&
+              !element.attributes.containsKey('title')) {
+            final String fileUrl = element.attributes['href'] ?? '';
+            final String rawFileName = element.nodes.first.parentNode?.text ?? 'File';
+
+            return BlocBuilder<DownloadFilesCubit, DownloadFilesState>(
+              builder: (context, state) {
+                final file = state.files.firstWhereOrNull((file) => file.pathToFile == fileUrl);
+                final bool isDownloaded = file is DownloadedFileEntity;
+                final bool isDownloading = file is DownloadingFileEntity;
+                return InkWell(
+                  onTap: () async {
+                    if (isDownloaded) {
+                      await context.read<DownloadFilesCubit>().openFile(file.localFilePath);
+                    } else if (!isDownloading) {
+                      await context.read<DownloadFilesCubit>().download(fileUrl);
+                    }
+                  },
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      maxWidth: 220,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.insert_drive_file_outlined,
+                          color: isDownloaded ? AppColors.callGreen : theme.colorScheme.primary,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            rawFileName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        isDownloading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  value: file.progress / file.total,
+                                ),
+                              )
+                            : Icon(
+                                isDownloaded ? Icons.check : Icons.arrow_downward_rounded,
+                                size: 18,
+                                color: isDownloaded ? AppColors.callGreen : theme.colorScheme.primary,
+                              ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           }
           if (element.classes.contains('emoji')) {
