@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -265,6 +267,13 @@ class _ChatItemState extends State<ChatItem> {
                                                   setState(() {
                                                     _isExpanded = !_isExpanded;
                                                   });
+                                                  if (_isExpanded && (widget.chat.topics?.isEmpty ?? true)) {
+                                                    unawaited(
+                                                      context.read<MessengerCubit>().getChannelTopics(
+                                                        widget.chat.streamId!,
+                                                      ),
+                                                    );
+                                                  }
                                                 },
                                                 child: Container(
                                                   width: 35,
