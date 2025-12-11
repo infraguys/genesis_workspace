@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_action.dart';
+import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -143,7 +144,7 @@ class _AttachFilesButtonState extends State<AttachFilesButton> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapEffectIcon(
       onTapDown: (details) => _openContextMenu(details.globalPosition),
       child: Assets.icons.attachFile.svg(),
     );

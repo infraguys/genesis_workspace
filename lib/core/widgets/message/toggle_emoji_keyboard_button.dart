@@ -1,9 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 
 class ToggleEmojiKeyboardButton extends StatelessWidget {
   final EmojiKeyboardState emojiState;
@@ -14,8 +15,8 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
-    return IconButton(
-      onPressed: () {
+    return TapEffectIcon(
+      onTapDown: (_) {
         if (currentSize(context) >= ScreenSize.lTablet) {
           if (emojiState.showEmojiKeyboard) {
             context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
@@ -41,7 +42,7 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
           }
         }
       },
-      icon: AnimatedSwitcher(
+      child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) => RotationTransition(
           turns: child.key == const ValueKey('emoji')
@@ -55,11 +56,7 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
                 color: textColors.text30,
                 key: ValueKey('keyboard'),
               )
-            : Icon(
-                CupertinoIcons.smiley,
-                color: textColors.text30,
-                key: ValueKey('emoji'),
-              ),
+            : Assets.icons.sentimentSatisfied.svg(),
       ),
     );
   }

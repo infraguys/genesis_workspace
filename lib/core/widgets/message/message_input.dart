@@ -2,6 +2,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
@@ -11,6 +12,8 @@ import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
+import 'package:genesis_workspace/core/widgets/message/toggle_emoji_keyboard_button.dart';
+import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -246,187 +249,147 @@ class _MessageInputState extends State<MessageInput> {
                   spacing: 8,
                   children: [
                     Expanded(
-                      child: GestureDetector(
-                        onTap: widget.focusNode.requestFocus,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.background,
-                            borderRadius: .circular(12),
-                          ),
-                          child: Stack(
-                            children: [
-                              Column(
-                                children: [
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 150),
-                                    clipBehavior: .hardEdge,
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.background,
-                                      borderRadius: .circular(12),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        TextField(
-                                          textAlignVertical: .center,
-                                          controller: widget.controller,
-                                          focusNode: widget.focusNode,
-                                          minLines: 1,
-                                          maxLines: 4,
-                                          autofocus: platformInfo.isDesktop,
-                                          clipBehavior: .none,
-                                          onTap: () {
-                                            if (currentSize(context) < ScreenSize.lTablet) {
-                                              context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                                false,
-                                              );
-                                            }
-                                          },
-                                          textInputAction: .send,
-                                          onSubmitted: (_) {
-                                            if (_isShiftPressed()) {
-                                              _insertNewLine();
-                                              widget.focusNode.requestFocus();
-                                              return;
-                                            }
-                                            if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
-                                              if (platformInfo.isDesktop) {
-                                                widget.focusNode.requestFocus();
-                                              }
-                                              return;
-                                            }
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.background,
+                          borderRadius: .circular(12),
+                        ),
+                        child: Stack(
+                          children: [
+                            Column(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  clipBehavior: .hardEdge,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.background,
+                                    borderRadius: .circular(12),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      TextField(
 
-                                            switch (widget.isEdit) {
-                                              case true:
-                                                widget.onEdit?.call();
-                                              default:
-                                                widget.onSend?.call();
-                                            }
-
+                                        enableInteractiveSelection: true,
+                                        textAlignVertical: .center,
+                                        controller: widget.controller,
+                                        focusNode: widget.focusNode,
+                                        minLines: 1,
+                                        maxLines: 4,
+                                        autofocus: platformInfo.isDesktop,
+                                        clipBehavior: .none,
+                                        onTap: () {
+                                          if (currentSize(context) < ScreenSize.lTablet) {
+                                            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                              false,
+                                            );
+                                          }
+                                        },
+                                        textInputAction: .send,
+                                        onSubmitted: (_) {
+                                          if (_isShiftPressed()) {
+                                            _insertNewLine();
+                                            widget.focusNode.requestFocus();
+                                            return;
+                                          }
+                                          if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
                                             if (platformInfo.isDesktop) {
                                               widget.focusNode.requestFocus();
                                             }
-                                          },
-                                          decoration: InputDecoration(
-                                            isCollapsed: true,
-                                            border: InputBorder.none,
-                                            fillColor: theme.colorScheme.background,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            focusedBorder: InputBorder.none,
-                                            disabledBorder: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            hintText: widget.isDropOver ? "" : context.t.input.placeholder,
-                                            contentPadding: const EdgeInsets.fromLTRB(48, 14, 86, 14),
-                                            hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                              color: textColors.text30,
+                                            return;
+                                          }
+
+                                          switch (widget.isEdit) {
+                                            case true:
+                                              widget.onEdit?.call();
+                                            default:
+                                              widget.onSend?.call();
+                                          }
+
+                                          if (platformInfo.isDesktop) {
+                                            widget.focusNode.requestFocus();
+                                          }
+                                        },
+                                        decoration: InputDecoration(
+                                          isCollapsed: true,
+                                          border: InputBorder.none,
+                                          fillColor: theme.colorScheme.background,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          focusedBorder: InputBorder.none,
+                                          disabledBorder: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          hintText: widget.isDropOver ? "" : context.t.input.placeholder,
+                                          contentPadding: const EdgeInsets.fromLTRB(48, 14, 86, 14),
+                                          hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                            color: textColors.text30,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        left: 8.0,
+                                        top: 0.0,
+                                        bottom: 0.0,
+                                        child: AttachFilesButton(
+                                          onUploadFile: widget.onUploadFile,
+                                          onUploadImage: widget.onUploadImage,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 8.0,
+                                        top: 0.0,
+                                        bottom: 0.0,
+                                        child: Row(
+                                          mainAxisSize: .min,
+                                          spacing: 24,
+                                          children: [
+                                            ToggleEmojiKeyboardButton(
+                                              emojiState: emojiState,
+                                              focusNode: widget.focusNode,
                                             ),
-                                            // prefixIcon: isTabletOrSmaller
-                                            //     ? AttachFilesButton(
-                                            //         attachmentsKey: attachmentsKey,
-                                            //         onUploadFile: widget.onUploadFile,
-                                            //         onUploadImage: widget.onUploadImage,
-                                            //       )
-                                            //     : null,
-                                            // suffixIcon: isTabletOrSmaller
-                                            //     ? ToggleEmojiKeyboardButton(
-                                            //         emojiState: emojiState,
-                                            //         focusNode: widget.focusNode,
-                                            //       )
-                                            //     : null,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          left: 8.0,
-                                          top: 0.0,
-                                          bottom: 0.0,
-                                          child: AttachFilesButton(
-                                            onUploadFile: widget.onUploadFile,
-                                            onUploadImage: widget.onUploadImage,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          right: 8.0,
-                                          top: 0.0,
-                                          bottom: 0.0,
-                                          child: Row(
-                                            mainAxisSize: .min,
-                                            spacing: 24,
-                                            children: [
-                                              _EmogiButton(
-                                                onPressed: () {},
-                                              ),
-                                              _SubmitButton(
+                                            TapEffectIcon(
+                                              onTap: () {},
+                                              child: _SubmitButton(
                                                 isEdit: widget.isEdit,
                                                 onPressed: widget.onSend,
                                                 isMessagePending: widget.isMessagePending,
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (widget.isDropOver)
+                              Positioned.fill(
+                                child: IgnorePointer(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 120),
+                                    opacity: 1.0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.primary.withOpacity(0.06),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        context.t.dropFilesToUpload,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                              // if (widget.isDropOver)
-                              //   Positioned.fill(
-                              //     child: IgnorePointer(
-                              //       child: AnimatedOpacity(
-                              //         duration: const Duration(milliseconds: 120),
-                              //         opacity: 1.0,
-                              //         child: Container(
-                              //           decoration: BoxDecoration(
-                              //             color: theme.colorScheme.primary.withOpacity(0.06),
-                              //             borderRadius: BorderRadius.circular(12),
-                              //           ),
-                              //           alignment: Alignment.center,
-                              //           child: Text(
-                              //             context.t.dropFilesToUpload,
-                              //             textAlign: TextAlign.center,
-                              //             style: theme.textTheme.bodyMedium?.copyWith(
-                              //               color: theme.colorScheme.primary,
-                              //               fontWeight: FontWeight.w600,
-                              //             ),
-                              //           ),
-                              //         ),
-                              //       ),
-                              //     ),
-                              //   ),
-                            ],
-                          ),
+                          ],
                         ),
                       ),
                     ),
-                    // Column(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   spacing: 12,
-                    //   children: [
-                    //     IconButton.filled(
-                    //       onPressed: widget.isEdit ? widget.onEdit : widget.onSend,
-                    //       style: IconButton.styleFrom(
-                    //         fixedSize: const Size(46, 46),
-                    //         shape: RoundedRectangleBorder(
-                    //           borderRadius: BorderRadius.circular(12),
-                    //         ),
-                    //       ),
-                    //       icon: widget.isEdit
-                    //           ? Icon(Icons.check, color: theme.colorScheme.onPrimary)
-                    //           : Assets.icons.send.svg(
-                    //               width: 23,
-                    //               height: 20,
-                    //               colorFilter: ColorFilter.mode(
-                    //                 theme.colorScheme.onPrimary,
-                    //                 .srcIn,
-                    //               ),
-                    //             ),
-                    //     ).pending(widget.isMessagePending),
-                    //     if (!isTabletOrSmaller)
-                    //       ToggleEmojiKeyboardButton(
-                    //         emojiState: emojiState,
-                    //         focusNode: widget.focusNode,
-                    //       ),
-                    //   ],
-                    // ),
                   ],
                 ),
                 AnimatedContainer(
@@ -463,28 +426,9 @@ class _SubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: isEdit
-          ? Icon(Icons.edit, color: Colors.white30)
-          : Assets.icons.send.svg(colorFilter: .mode(Colors.white30, .srcIn)),
-    );
+    return isEdit
+        ? Icon(Icons.edit, color: Colors.white30)
+        : Assets.icons.send.svg(colorFilter: .mode(Colors.white30, .srcIn));
   }
 }
 
-class _EmogiButton extends StatelessWidget {
-  const _EmogiButton({
-    super.key, // ignore: unused_element_parameter
-    this.onPressed,
-  });
-
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Assets.icons.sentimentSatisfied.svg(),
-    );
-  }
-}
