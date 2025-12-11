@@ -259,12 +259,22 @@ class _ChatItemState extends State<ChatItem> {
                                         if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
                                         (widget.chat.type == ChatType.channel &&
                                                 currentSize(context) >= ScreenSize.tablet)
-                                            ? SizedBox(
-                                                width: 35,
-                                                child: AnimatedRotation(
-                                                  duration: const Duration(milliseconds: 200),
-                                                  turns: _isExpanded ? 0.5 : 0.0,
-                                                  child: Assets.icons.arrowDown.svg(),
+                                            ? InkWell(
+                                                borderRadius: BorderRadius.circular(35),
+                                                onTap: () {
+                                                  setState(() {
+                                                    _isExpanded = !_isExpanded;
+                                                  });
+                                                },
+                                                child: Container(
+                                                  width: 35,
+                                                  height: 20,
+                                                  padding: EdgeInsets.symmetric(vertical: 6),
+                                                  child: AnimatedRotation(
+                                                    duration: const Duration(milliseconds: 200),
+                                                    turns: _isExpanded ? 0.5 : 0.0,
+                                                    child: Assets.icons.arrowDown.svg(height: 8),
+                                                  ),
                                                 ),
                                               )
                                             : SizedBox(
