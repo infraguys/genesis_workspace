@@ -94,6 +94,8 @@ class _ChatItemState extends State<ChatItem> {
         break;
     }
     final bool shouldShowLeftBorder = widget.showTopics && widget.chat.id == widget.selectedChatId;
+    final bool isSelected = widget.chat.id == widget.selectedChatId;
+
     return CustomPopup(
       key: popupKey,
       backgroundColor: theme.colorScheme.surfaceDim,
@@ -190,7 +192,7 @@ class _ChatItemState extends State<ChatItem> {
                             bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
                             bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
                           ),
-                          color: widget.showTopics ? Colors.transparent : cardColors.base,
+                          color: isSelected ? cardColors.active : cardColors.base,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
