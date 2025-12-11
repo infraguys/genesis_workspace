@@ -302,6 +302,15 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                         style: subtitleTextStyle,
                       );
                     }
+                    if (userEntity.userId == _myUser.userId) {
+                      userStatus = SizedBox.shrink();
+                    }
+                    if (userEntity.isBot) {
+                      userStatus = Text(
+                        context.t.bot,
+                        style: subtitleTextStyle,
+                      );
+                    }
                     if (state.typingId == userEntity.userId) {
                       userStatus = Text(context.t.typing, style: subtitleTextStyle);
                     }

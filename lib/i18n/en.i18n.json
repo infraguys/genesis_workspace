@@ -268,10 +268,5 @@
     "select": "Select"
   },
   "input_placeholder": "Select a topic to send messages to the channel",
-  "external_link_dialog": {
-    "title": "Open external link?",
-    "body": "You are about to open {host}.",
-    "confirm": "Open",
-    "cancel": "Cancel"
-  }
+  "bot": "Bot"
 }
