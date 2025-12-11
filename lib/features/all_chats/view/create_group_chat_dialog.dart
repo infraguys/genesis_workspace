@@ -82,7 +82,7 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
                   if (state.isUsersPending) {
                     return Center(child: CircularProgressIndicator());
                   }
-                  if (users.isEmpty) {
+                  if (users.isEmpty && !state.isUsersPending) {
                     return Center(child: Text(context.t.groupChat.createDialog.noUsers));
                   }
                   return ListView.builder(

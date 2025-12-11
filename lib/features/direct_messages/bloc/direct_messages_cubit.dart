@@ -165,6 +165,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
   Future<void> getUsers() async {
     try {
       final body = UsersRequestEntity();
+      emit(state.copyWith(isUsersPending: true));
       final response = await _getUsersUseCase.call(body);
       final List<UserEntity> users = response;
       final mappedUsers = users.map((user) => user.toDmUser()).toList();
@@ -175,6 +176,7 @@ class DirectMessagesCubit extends Cubit<DirectMessagesState> {
       await Future.wait([getInitialMessages(), getAllPresences()]);
       await getRecentDms();
       _sortUsers();
+      emit(state.copyWith(isUsersPending: false));
     } catch (e) {
       inspect(e);
     }
