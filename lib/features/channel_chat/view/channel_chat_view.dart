@@ -133,6 +133,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         topicName: widget.topicName,
         didUpdateWidget: (oldWidget.topicName != widget.topicName || oldWidget.channelId != widget.channelId),
       );
+      messageController.clear();
     } else if (widget.topicName != oldWidget.topicName) {
       context.read<ChannelChatCubit>().getChannelTopics(streamId: widget.channelId, topicName: widget.topicName).then((
         _,
@@ -141,9 +142,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
           unreadMessagesCount: widget.unreadMessagesCount,
         );
       });
+      messageController.clear();
     }
 
-    messageController.clear();
     super.didUpdateWidget(oldWidget);
   }
 
@@ -573,6 +574,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                                     topic: state.topic?.name,
                                                   );
                                                 } catch (e) {
+                                                  if (kDebugMode) {
+                                                    inspect(e);
+                                                  }
                                                 } finally {
                                                   if (platformInfo.isDesktop) {
                                                     messageInputFocusNode.requestFocus();

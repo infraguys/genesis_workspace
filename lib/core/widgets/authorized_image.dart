@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 class AuthorizedImage extends StatefulWidget {
   final String url;
+  final String thumbnailSrc;
   final BoxFit fit;
   final double? width;
   final double? height;
@@ -19,6 +20,7 @@ class AuthorizedImage extends StatefulWidget {
   const AuthorizedImage({
     super.key,
     required this.url,
+    required this.thumbnailSrc,
     this.fit = BoxFit.contain,
     this.width,
     this.height,
@@ -48,9 +50,9 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   }
 
   Future<void> _loadImage() async {
-    if (_cache.containsKey(widget.url)) {
+    if (_cache.containsKey(widget.thumbnailSrc)) {
       setState(() {
-        _imageBytes = _cache[widget.url];
+        _imageBytes = _cache[widget.thumbnailSrc];
         _loading = false;
       });
       return;
@@ -58,12 +60,12 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
 
     try {
       final response = await _dio.get<List<int>>(
-        widget.url,
+        widget.thumbnailSrc,
         options: Options(responseType: ResponseType.bytes),
       );
       if (!mounted) return;
       final bytes = Uint8List.fromList(response.data!);
-      _cache[widget.url] = bytes;
+      _cache[widget.thumbnailSrc] = bytes;
       setState(() {
         _imageBytes = bytes;
         _loading = false;
@@ -82,7 +84,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
     return GestureDetector(
       onTap: () {
         if (_imageBytes != null) {
-          context.pushNamed(Routes.imageFullScreen, extra: _imageBytes);
+          context.pushNamed(Routes.imageFullScreen, extra: widget.url);
         }
       },
       child: Hero(
