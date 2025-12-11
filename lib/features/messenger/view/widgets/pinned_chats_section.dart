@@ -96,7 +96,7 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
   void didUpdateWidget(covariant PinnedChatsSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.folderUuid != widget.folderUuid) {
-      cancelEditing();
+      // cancelEditing();
     }
   }
 

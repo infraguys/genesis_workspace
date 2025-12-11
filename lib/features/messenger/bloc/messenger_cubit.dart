@@ -763,7 +763,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
 
     state.filteredChatIds = filteredIds;
-
     emit(state.copyWith(filteredChatIds: state.filteredChatIds));
     _applySearchFilter();
   }
