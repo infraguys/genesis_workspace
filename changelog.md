@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.4
+- Inline images now resolve `/user_uploads` links through the base URL, show cached thumbnails, and open the full file via an authorized fetch; attachment downloads reuse the same resolver for safer link handling.
+- Update checks now verify the manifest SHA-256 from the repository, exposing a checksum endpoint and blocking installation when the config is not trusted.
+- Base URL entry requires HTTPS across onboarding/add-organization flows; tokens are stored only via secure storage, and external links go through an allowlist with a confirmation dialog before leaving the workspace.
+- Chat/topic UX tweaks: channel arrows are clickable to expand and fetch topics, active chat highlighting is fixed, message inputs clear on topic change, and real-time events from other organizations are ignored.
+- Messaging polish: bot badge shown in chat header, tightened avatar/time layout and safer call links, emoji keyboard height now relies on system insets (plugin removed), and macOS windows no longer drag by clicking the background.
+- Fixed keyboard height on mobile devices
+- Fixed message disappear when other user sent a message
+
 ## 1.5.3
 - Added chat sorting preferences (prioritize unread personal chats and unmuted channels) in Settings; messenger now reorders chats accordingly and persists choices.
 - Update selector now switches between Dev and Stable channels via a segmented toggle, marking "Latest" per channel and handling empty/error states more clearly.
