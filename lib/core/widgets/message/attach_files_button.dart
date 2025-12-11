@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_popup/flutter_popup.dart';
-import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_action.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -8,12 +6,10 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 class AttachFilesButton extends StatefulWidget {
   const AttachFilesButton({
     super.key,
-    required this.attachmentsKey,
     required this.onUploadFile,
     required this.onUploadImage,
   });
 
-  final GlobalKey<CustomPopupState> attachmentsKey;
   final VoidCallback onUploadFile;
   final VoidCallback onUploadImage;
 
@@ -21,40 +17,62 @@ class AttachFilesButton extends StatefulWidget {
   State<AttachFilesButton> createState() => _AttachFilesButtonState();
 }
 
-class _AttachFilesButtonState extends State<AttachFilesButton> {
+class _AttachFilesButtonState extends State<AttachFilesButton> with SingleTickerProviderStateMixin {
   static OverlayEntry? _menuEntry;
 
-  void _closeOverlay() {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 160),
+    );
+
+    _scale = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+
+    _opacity = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+  }
+
+  Future<void> _closeOverlay() async {
+    await _controller.reverse();
     _menuEntry?.remove();
     _menuEntry = null;
   }
 
-  void _openContextMenu(BuildContext context, Offset globalPosition) {
-    _closeOverlay();
+  void _openContextMenu(Offset globalPosition) async {
+    if (_menuEntry != null) {
+      await _closeOverlay();
+    }
+
+    if (!mounted) {
+      return;
+    }
 
     final overlay = Overlay.of(context, rootOverlay: true);
+
 
     final overlayBox = overlay.context.findRenderObject() as RenderBox?;
     if (overlayBox == null) {
       return;
     }
-
     final localInOverlay = overlayBox.globalToLocal(globalPosition);
 
     const horizontalOffset = 8.0; // shift slightly to the right
-    const verticalOffset = 8.0;   // place slightly below the tap
+    const verticalOffset = -16.0; // place slightly below the tap
 
     final left = localInOverlay.dx + horizontalOffset;
 
-    // сначала пробуем открыть меню под кнопкой
-    double top = localInOverlay.dy + verticalOffset;
-    const menuHeight = 100.0;
-    final screenHeight = overlayBox.size.height;
-
-    // если меню не влезает снизу — открываем его над кнопкой
-    if (top + menuHeight > screenHeight) {
-      top = localInOverlay.dy - menuHeight - verticalOffset;
-    }
+    double top = localInOverlay.dy - 100 + verticalOffset;
 
     _menuEntry = OverlayEntry(
       builder: (context) {
@@ -62,7 +80,7 @@ class _AttachFilesButtonState extends State<AttachFilesButton> {
           children: [
             Positioned.fill(
               child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
+                behavior: .translucent,
                 onTap: _closeOverlay,
                 onSecondaryTapDown: (_) => _closeOverlay(),
               ),
@@ -70,37 +88,47 @@ class _AttachFilesButtonState extends State<AttachFilesButton> {
             Positioned(
               left: left,
               top: top,
-              child: Container(
-                width: 220,
-                height: 100,
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                // constraints: const BoxConstraints(minWidth: 220, maxWidth: 280),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    AttachmentAction(
-                      iconData: Icons.insert_drive_file_rounded,
-                      label: context.t.attachmentButton.file,
-                      onTap: () {
-                        widget.onUploadFile();
-                        _closeOverlay();
-                      },
+              child: FadeTransition(
+                opacity: _opacity,
+                child: ScaleTransition(
+                  scale: _scale,
+                  alignment: .bottomLeft,
+                  child: Material(
+                    elevation: 4.0,
+                    borderRadius: .circular(8),
+                    clipBehavior: .antiAlias,
+                    child: Container(
+                      width: 220,
+                      height: 100,
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                      ),
+                      child: Column(
+                        mainAxisSize: .min,
+                        crossAxisAlignment: .stretch,
+                        children: [
+                          AttachmentAction(
+                            iconData: Icons.insert_drive_file_rounded,
+                            label: context.t.attachmentButton.file,
+                            onTap: () {
+                              widget.onUploadFile();
+                              _closeOverlay();
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          AttachmentAction(
+                            iconData: Icons.image_outlined,
+                            label: context.t.attachmentButton.image,
+                            onTap: () {
+                              widget.onUploadImage();
+                              _closeOverlay();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    AttachmentAction(
-                      iconData: Icons.image_outlined,
-                      label: context.t.attachmentButton.image,
-                      onTap: () {
-                        widget.onUploadImage();
-                        _closeOverlay();
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -110,16 +138,20 @@ class _AttachFilesButtonState extends State<AttachFilesButton> {
     );
 
     overlay.insert(_menuEntry!);
+    _controller.forward(from: 0);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
     return GestureDetector(
-      onTapDown: (details) => _openContextMenu(context, details.globalPosition),
+      onTapDown: (details) => _openContextMenu(details.globalPosition),
       child: Assets.icons.attachFile.svg(),
     );
-    ;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

@@ -5,14 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
-import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
-import 'package:genesis_workspace/core/widgets/message/toggle_emoji_keyboard_button.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -20,25 +18,6 @@ import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageInput extends StatefulWidget {
-  final TextEditingController controller;
-  final VoidCallback? onSend;
-  final VoidCallback? onEdit;
-  final VoidCallback? onCancelEdit;
-  final bool isEdit;
-  final VoidCallback onUploadFile;
-  final VoidCallback onUploadImage;
-  final Function(String localId) onRemoveFile;
-  final Function(String localId) onCancelUpload;
-  final bool isMessagePending;
-  final FocusNode focusNode;
-  final List<UploadFileEntity>? files;
-  final List<EditingAttachment>? editingFiles;
-  final bool isDropOver;
-  final MessageEntity? editingMessage;
-  final Function(EditingAttachment)? onRemoveEditingAttachment;
-  final bool Function()? onSubmitIntercept;
-  final String? inputTitle;
-
   const MessageInput({
     super.key,
     required this.controller,
@@ -61,12 +40,31 @@ class MessageInput extends StatefulWidget {
     this.inputTitle,
   });
 
+  final TextEditingController controller;
+  final VoidCallback? onSend;
+  final VoidCallback? onEdit;
+  final VoidCallback? onCancelEdit;
+  final bool isEdit;
+  final VoidCallback onUploadFile;
+  final VoidCallback onUploadImage;
+  final Function(String localId) onRemoveFile;
+  final Function(String localId) onCancelUpload;
+  final bool isMessagePending;
+  final FocusNode focusNode;
+  final List<UploadFileEntity>? files;
+  final List<EditingAttachment>? editingFiles;
+  final bool isDropOver;
+  final MessageEntity? editingMessage;
+  final Function(EditingAttachment)? onRemoveEditingAttachment;
+  final bool Function()? onSubmitIntercept;
+  final String? inputTitle;
+
   @override
   State<MessageInput> createState() => _MessageInputState();
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final GlobalKey<CustomPopupState> attachmentsKey = GlobalKey<CustomPopupState>();
+  final KeyboardHeightPlugin _keyboardHeightPlugin = KeyboardHeightPlugin();
 
   bool _isShiftPressed() {
     final keyboard = HardwareKeyboard.instance;
@@ -130,13 +128,13 @@ class _MessageInputState extends State<MessageInput> {
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12).copyWith(
-                bottomLeft: isTabletOrSmaller ? Radius.zero : null,
-                bottomRight: isTabletOrSmaller ? Radius.zero : null,
+                bottomLeft: isTabletOrSmaller ? .zero : null,
+                bottomRight: isTabletOrSmaller ? .zero : null,
               ),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: .start,
+              mainAxisSize: .min,
               children: [
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
@@ -152,18 +150,18 @@ class _MessageInputState extends State<MessageInput> {
                       ? Material(
                           color: Colors.transparent,
                           child: Container(
-                            margin: const EdgeInsets.fromLTRB(6, 6, 6, 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            margin: const .fromLTRB(6, 6, 6, 8),
+                            padding: const .symmetric(horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: theme.colorScheme.primary, width: 2),
+                              borderRadius: .circular(12),
+                              border: .all(color: theme.colorScheme.primary, width: 2),
                             ),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: .start,
                               children: [
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment: .center,
                                   children: [
                                     Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
                                     const SizedBox(width: 10),
@@ -171,14 +169,14 @@ class _MessageInputState extends State<MessageInput> {
                                       child: Text(
                                         widget.editingMessage?.content ?? '',
                                         maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                        overflow: .ellipsis,
                                         style: theme.textTheme.bodyMedium,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     IconButton(
                                       tooltip: context.t.cancelEditing,
-                                      visualDensity: VisualDensity.compact,
+                                      visualDensity: .compact,
                                       icon: const Icon(Icons.close_rounded, size: 20),
                                       onPressed: widget.onCancelEdit,
                                     ),
@@ -189,18 +187,16 @@ class _MessageInputState extends State<MessageInput> {
                                   SizedBox(
                                     height: 96,
                                     child: ListView.separated(
-                                      scrollDirection: Axis.horizontal,
+                                      scrollDirection: .horizontal,
                                       itemCount: widget.editingFiles!.length,
                                       separatorBuilder: (_, __) => const SizedBox(width: 10),
-                                      itemBuilder: (context, index) {
-                                        final EditingAttachment attachment = widget.editingFiles![index];
+                                      itemBuilder: (_, index) {
+                                        final attachment = widget.editingFiles![index];
                                         return EditingAttachmentTile(
                                           attachment: attachment,
                                           onRemove: widget.onRemoveEditingAttachment == null
                                               ? null
-                                              : () {
-                                                  widget.onRemoveEditingAttachment!(attachment);
-                                                },
+                                              : () => widget.onRemoveEditingAttachment!(attachment),
                                         );
                                       },
                                     ),
@@ -216,11 +212,11 @@ class _MessageInputState extends State<MessageInput> {
                   SizedBox(
                     height: 92,
                     child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      scrollDirection: .horizontal,
+                      padding: const .symmetric(horizontal: 6),
                       itemCount: widget.files!.length,
                       separatorBuilder: (_, _) => const SizedBox(width: 8),
-                      itemBuilder: (context, index) {
+                      itemBuilder: (_, index) {
                         final UploadFileEntity entity = widget.files![index];
                         final String fileExtension = extensionOf(entity.filename);
                         return switch (entity) {
@@ -231,43 +227,31 @@ class _MessageInputState extends State<MessageInput> {
                             isUploading: true,
                             bytesSent: bytesSent,
                             bytesTotal: bytesTotal,
-                            onCancelUploading: () {
-                              if (widget.onCancelUpload != null) {
-                                widget.onCancelUpload(entity.localId);
-                              }
-                            },
+                            onCancelUploading: () => widget.onCancelUpload(entity.localId),
                           ),
                           UploadedFileEntity(:final size) => AttachmentTile(
                             file: entity,
                             extension: fileExtension,
                             fileSize: size,
                             isUploading: false,
-                            onRemove: () {
-                              if (widget.onRemoveFile != null) {
-                                widget.onRemoveFile(entity.localId);
-                              }
-                            },
+                            onRemove: () => widget.onRemoveFile(entity.localId),
                           ),
                         };
                       },
                     ),
                   ),
-                  SizedBox(
-                    height: 8,
-                  ),
+                  SizedBox(height: 8),
                 ],
                 Row(
                   spacing: 8,
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          widget.focusNode.requestFocus();
-                        },
+                        onTap: widget.focusNode.requestFocus,
                         child: Container(
                           decoration: BoxDecoration(
                             color: theme.colorScheme.background,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: .circular(12),
                           ),
                           child: Stack(
                             children: [
@@ -278,12 +262,12 @@ class _MessageInputState extends State<MessageInput> {
                                     clipBehavior: .hardEdge,
                                     decoration: BoxDecoration(
                                       color: theme.colorScheme.background,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: .circular(12),
                                     ),
                                     child: Stack(
                                       children: [
                                         TextField(
-                                          textAlignVertical: TextAlignVertical.center,
+                                          textAlignVertical: .center,
                                           controller: widget.controller,
                                           focusNode: widget.focusNode,
                                           minLines: 1,
@@ -298,7 +282,7 @@ class _MessageInputState extends State<MessageInput> {
                                             }
                                           },
                                           textInputAction: .send,
-                                          onSubmitted: (value) {
+                                          onSubmitted: (_) {
                                             if (_isShiftPressed()) {
                                               _insertNewLine();
                                               widget.focusNode.requestFocus();
@@ -310,15 +294,14 @@ class _MessageInputState extends State<MessageInput> {
                                               }
                                               return;
                                             }
-                                            if (widget.isEdit) {
-                                              if (widget.onEdit != null) {
-                                                widget.onEdit!();
-                                              }
-                                            } else {
-                                              if (widget.onSend != null) {
-                                                widget.onSend!();
-                                              }
+
+                                            switch (widget.isEdit) {
+                                              case true:
+                                                widget.onEdit?.call();
+                                              default:
+                                                widget.onSend?.call();
                                             }
+
                                             if (platformInfo.isDesktop) {
                                               widget.focusNode.requestFocus();
                                             }
@@ -333,6 +316,7 @@ class _MessageInputState extends State<MessageInput> {
                                             disabledBorder: InputBorder.none,
                                             enabledBorder: InputBorder.none,
                                             hintText: widget.isDropOver ? "" : context.t.input.placeholder,
+                                            contentPadding: const EdgeInsets.fromLTRB(48, 14, 86, 14),
                                             hintStyle: theme.textTheme.bodyLarge?.copyWith(
                                               color: textColors.text30,
                                             ),
@@ -349,7 +333,6 @@ class _MessageInputState extends State<MessageInput> {
                                             //         focusNode: widget.focusNode,
                                             //       )
                                             //     : null,
-                                            contentPadding: const EdgeInsets.fromLTRB(48, 14, 86, 14),
                                           ),
                                         ),
                                         Positioned(
@@ -357,7 +340,6 @@ class _MessageInputState extends State<MessageInput> {
                                           top: 0.0,
                                           bottom: 0.0,
                                           child: AttachFilesButton(
-                                            attachmentsKey: attachmentsKey,
                                             onUploadFile: widget.onUploadFile,
                                             onUploadImage: widget.onUploadImage,
                                           ),
@@ -375,7 +357,7 @@ class _MessageInputState extends State<MessageInput> {
                                               ),
                                               _SubmitButton(
                                                 isEdit: widget.isEdit,
-                                                onPressed: () {},
+                                                onPressed: widget.onSend,
                                                 isMessagePending: widget.isMessagePending,
                                               ),
                                             ],
@@ -469,7 +451,7 @@ class _MessageInputState extends State<MessageInput> {
 
 class _SubmitButton extends StatelessWidget {
   const _SubmitButton({
-    super.key,
+    super.key, // ignore: unused_element_parameter
     required this.isMessagePending,
     required this.isEdit,
     this.onPressed,
@@ -492,7 +474,7 @@ class _SubmitButton extends StatelessWidget {
 
 class _EmogiButton extends StatelessWidget {
   const _EmogiButton({
-    super.key,
+    super.key, // ignore: unused_element_parameter
     this.onPressed,
   });
 
@@ -503,23 +485,6 @@ class _EmogiButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Assets.icons.sentimentSatisfied.svg(),
-    );
-  }
-}
-
-class _AttachButton extends StatelessWidget {
-  const _AttachButton({
-    super.key,
-    this.onPressed,
-  });
-
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Assets.icons.attachFile.svg(),
     );
   }
 }
