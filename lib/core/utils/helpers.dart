@@ -359,16 +359,16 @@ Future<bool> confirmExternalLaunch(BuildContext context, Uri uri) async {
   final bool? shouldProceed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Open external link?'),
+      title: Text(context.t.externalLinkDialog.title),
       content: Text(hostLabel),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(context.t.externalLinkDialog.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Open'),
+          child: Text(context.t.externalLinkDialog.confirm),
         ),
       ],
     ),
