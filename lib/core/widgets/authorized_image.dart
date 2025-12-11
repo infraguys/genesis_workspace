@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -30,7 +31,8 @@ class AuthorizedImage extends StatefulWidget {
 }
 
 class _AuthorizedImageState extends State<AuthorizedImage> {
-  static final Map<String, Uint8List> _cache = {};
+  static const int _maxCacheEntries = 50;
+  static final Map<String, Uint8List> _cache = LinkedHashMap();
   static final Dio _publicDio = Dio();
   Uint8List? _imageBytes;
   bool _loading = true;
@@ -95,6 +97,16 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
     return sameScheme && sameHost && samePort && _isUserUploadPath(uri);
   }
 
+  void _putInCache(String key, Uint8List value) {
+    if (_cache.length >= _maxCacheEntries) {
+      final String oldestKey = _cache.keys.first;
+      _cache.remove(oldestKey);
+    }
+    _cache
+      ..remove(key)
+      ..[key] = value;
+  }
+
   Future<void> _loadImage() async {
     final Uri? targetUri = _resolveUri(widget.url);
 
@@ -107,9 +119,13 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
     }
 
     final String cacheKey = targetUri.toString();
-    if (_cache.containsKey(cacheKey)) {
+    final Uint8List? cached = _cache[cacheKey];
+    if (cached != null) {
+      // Refresh order to approximate LRU
+      _cache.remove(cacheKey);
+      _cache[cacheKey] = cached;
       setState(() {
-        _imageBytes = _cache[cacheKey];
+        _imageBytes = cached;
         _loading = false;
       });
       return;
@@ -132,7 +148,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
         throw const FormatException('Empty image response');
       }
       final bytes = Uint8List.fromList(data);
-      _cache[cacheKey] = bytes;
+      _putInCache(cacheKey, bytes);
       setState(() {
         _imageBytes = bytes;
         _loading = false;
