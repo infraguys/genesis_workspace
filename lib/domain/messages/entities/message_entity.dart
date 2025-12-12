@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 
@@ -64,6 +65,7 @@ class MessageEntity extends Equatable {
   bool isMyMessage(int? userId) => senderId == userId;
 
   bool get isCall => content.contains('https://meet.');
+  String? get callName => isCall ? extractMeetingName(content) : null;
 
   Map<String, ReactionDetails> get aggregatedReactions {
     final Map<String, ReactionDetails> map = {};

@@ -101,7 +101,15 @@
     "exit_fullscreen": "Exit fullscreen",
     "active_call_in": "Call in \"{name}\"",
     "active_call": "Active call",
-    "resume_call": "Return to call"
+    "resume_call": "Return to call",
+    "create_call_dialog": {
+      "title": "Create call",
+      "video_title": "Create video call",
+      "name_label": "Call name",
+      "name_required": "Call name cannot be empty",
+      "cancel": "Cancel",
+      "create": "Create"
+    }
   },
   "unread_marker": {
     "label": "Unread messages",

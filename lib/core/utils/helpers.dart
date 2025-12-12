@@ -411,3 +411,13 @@ String extractMeetingLink(String htmlString) {
 
   return '';
 }
+
+String extractMeetingName(String htmlString) {
+  final uriMatch = RegExp(r'href="([^"]+)"').firstMatch(htmlString);
+  if (uriMatch == null) {
+    return '';
+  }
+
+  final Uri uri = Uri.parse(uriMatch.group(1)!);
+  return uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
+}
