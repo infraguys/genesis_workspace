@@ -65,7 +65,6 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-
   bool _isShiftPressed() {
     final keyboard = HardwareKeyboard.instance;
     return keyboard.isLogicalKeyPressed(LogicalKeyboardKey.shiftLeft) ||
@@ -253,109 +252,98 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         child: Stack(
                           children: [
-                            Column(
-                              children: [
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 150),
-                                  clipBehavior: .hardEdge,
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.background,
-                                    borderRadius: .circular(12),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              clipBehavior: .hardEdge,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.background,
+                                borderRadius: .circular(12),
+                              ),
+                              child: Stack(
+                                children: [
+                                  TextField(
+                                    enableInteractiveSelection: true,
+                                    textAlignVertical: .center,
+                                    controller: widget.controller,
+                                    focusNode: widget.focusNode,
+                                    minLines: 1,
+                                    maxLines: 4,
+                                    autofocus: platformInfo.isDesktop,
+                                    clipBehavior: .none,
+                                    onTap: () {
+                                      if (currentSize(context) < ScreenSize.lTablet) {
+                                        context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                          false,
+                                        );
+                                      }
+                                    },
+                                    textInputAction: .send,
+                                    onSubmitted: (_) {
+                                      if (_isShiftPressed()) {
+                                        _insertNewLine();
+                                        widget.focusNode.requestFocus();
+                                        return;
+                                      }
+                                      if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
+                                        if (platformInfo.isDesktop) {
+                                          widget.focusNode.requestFocus();
+                                        }
+                                        return;
+                                      }
+
+                                      switch (widget.isEdit) {
+                                        case true:
+                                          widget.onEdit?.call();
+                                        default:
+                                          widget.onSend?.call();
+                                      }
+
+                                      if (platformInfo.isDesktop) {
+                                        widget.focusNode.requestFocus();
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      isCollapsed: true,
+                                      border: InputBorder.none,
+                                      fillColor: theme.colorScheme.background,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      focusedBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      hintText: widget.isDropOver ? "" : context.t.input.placeholder,
+                                      contentPadding: const EdgeInsets.fromLTRB(48, 14, 46, 14),
+                                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                        color: textColors.text30,
+                                      ),
+                                    ),
                                   ),
-                                  child: Stack(
-                                    children: [
-                                      TextField(
-
-                                        enableInteractiveSelection: true,
-                                        textAlignVertical: .center,
-                                        controller: widget.controller,
-                                        focusNode: widget.focusNode,
-                                        minLines: 1,
-                                        maxLines: 4,
-                                        autofocus: platformInfo.isDesktop,
-                                        clipBehavior: .none,
-                                        onTap: () {
-                                          if (currentSize(context) < ScreenSize.lTablet) {
-                                            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                              false,
-                                            );
-                                          }
-                                        },
-                                        textInputAction: .send,
-                                        onSubmitted: (_) {
-                                          if (_isShiftPressed()) {
-                                            _insertNewLine();
-                                            widget.focusNode.requestFocus();
-                                            return;
-                                          }
-                                          if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
-                                            if (platformInfo.isDesktop) {
-                                              widget.focusNode.requestFocus();
-                                            }
-                                            return;
-                                          }
-
-                                          switch (widget.isEdit) {
-                                            case true:
-                                              widget.onEdit?.call();
-                                            default:
-                                              widget.onSend?.call();
-                                          }
-
-                                          if (platformInfo.isDesktop) {
-                                            widget.focusNode.requestFocus();
-                                          }
-                                        },
-                                        decoration: InputDecoration(
-                                          isCollapsed: true,
-                                          border: InputBorder.none,
-                                          fillColor: theme.colorScheme.background,
-                                          focusColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          focusedBorder: InputBorder.none,
-                                          disabledBorder: InputBorder.none,
-                                          enabledBorder: InputBorder.none,
-                                          hintText: widget.isDropOver ? "" : context.t.input.placeholder,
-                                          contentPadding: const EdgeInsets.fromLTRB(48, 14, 86, 14),
-                                          hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                            color: textColors.text30,
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 8.0,
-                                        top: 0.0,
-                                        bottom: 0.0,
-                                        child: AttachFilesButton(
-                                          onUploadFile: widget.onUploadFile,
-                                          onUploadImage: widget.onUploadImage,
-                                        ),
-                                      ),
-                                      Positioned(
-                                        right: 8.0,
-                                        top: 0.0,
-                                        bottom: 0.0,
-                                        child: Row(
-                                          mainAxisSize: .min,
-                                          spacing: 24,
-                                          children: [
-                                            ToggleEmojiKeyboardButton(
-                                              emojiState: emojiState,
-                                              focusNode: widget.focusNode,
-                                            ),
-                                            TapEffectIcon(
-                                              onTap: widget.isEdit ? widget.onEdit : widget.onSend,
-                                              child: _SubmitButton(
-                                                isEdit: widget.isEdit,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                  Positioned(
+                                    left: 8.0,
+                                    top: 0.0,
+                                    bottom: 0.0,
+                                    child: AttachFilesButton(
+                                      onUploadFile: widget.onUploadFile,
+                                      onUploadImage: widget.onUploadImage,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  Positioned(
+                                    right: 8.0,
+                                    top: 0.0,
+                                    bottom: 0.0,
+                                    child: Row(
+                                      mainAxisSize: .min,
+                                      spacing: 24,
+                                      children: [
+                                        ToggleEmojiKeyboardButton(
+                                          emojiState: emojiState,
+                                          focusNode: widget.focusNode,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                             if (widget.isDropOver)
                               Positioned.fill(
@@ -385,6 +373,10 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                       ),
                     ),
+                    _SubmitButton(
+                      isEdit: widget.isEdit,
+                      onTap: widget.isEdit ? widget.onEdit : widget.onSend,
+                    ),
                   ],
                 ),
                 AnimatedContainer(
@@ -411,15 +403,32 @@ class _SubmitButton extends StatelessWidget {
   const _SubmitButton({
     super.key, // ignore: unused_element_parameter
     required this.isEdit,
+    this.onTap,
   });
 
   final bool isEdit;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return isEdit
-        ? Icon(Icons.edit, color: Colors.white30)
-        : Assets.icons.send.svg(colorFilter: .mode(Colors.white30, .srcIn));
+    final theme = Theme.of(context);
+    return TapEffectIcon(
+      onTap: onTap,
+      child: SizedBox.square(
+        dimension: 44.0,
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(12.0)),
+          child: Center(
+            child: isEdit
+                ? Icon(Icons.edit, color: theme.colorScheme.onPrimary)
+                : Assets.icons.send.svg(
+                    height: 20,
+                    width: 24,
+                    colorFilter: .mode(theme.colorScheme.onPrimary, .srcIn),
+                  ),
+          ),
+        ),
+      ),
+    );
   }
 }
-
