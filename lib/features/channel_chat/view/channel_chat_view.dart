@@ -251,29 +251,47 @@ class _ChannelChatViewState extends State<ChannelChatView>
                     ),
               actions: [
                 DownloadFilesButton(),
+                // IconButton(
+                //   onPressed: () {},
+                //   icon: Assets.icons.joinCall.svg(
+                //     width: 28,
+                //     height: 28,
+                //     colorFilter: ColorFilter.mode(AppColors.callGreen, .srcIn),
+                //   ),
+                // ),
                 IconButton(
-                  onPressed: () {},
-                  icon: Assets.icons.joinCall.svg(
-                    width: 28,
-                    height: 28,
-                    colorFilter: ColorFilter.mode(AppColors.callGreen, .srcIn),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final meetingLink = await createCall(context, startWithVideMuted: true);
+                    if (meetingLink.isNotEmpty) {
+                      await context.read<ChannelChatCubit>().sendMessage(
+                        streamId: widget.channelId,
+                        topic: widget.topicName,
+                        content: meetingLink,
+                      );
+                    }
+                  },
                   icon: Assets.icons.call.svg(
                     width: 28,
                     height: 28,
                     colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
                 ),
-                if (!isTabletOrSmaller)
-                  IconButton(
-                    onPressed: () {},
-                    icon: Assets.icons.videocam.svg(
-                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
-                    ),
+                // if (!isTabletOrSmaller)
+                IconButton(
+                  onPressed: () async {
+                    final meetingLink = await createCall(context, startWithVideMuted: false);
+                    if (meetingLink.isNotEmpty) {
+                      await context.read<ChannelChatCubit>().sendMessage(
+                        streamId: widget.channelId,
+                        topic: widget.topicName,
+                        content: meetingLink,
+                      );
+                    }
+                  },
+                  icon: Assets.icons.videocam.svg(
+                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
+                ),
               ],
               title: Skeletonizer(
                 enabled: state.channel == null,

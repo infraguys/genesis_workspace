@@ -241,18 +241,18 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                     colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
                 ),
-                if (!isTabletOrSmaller)
-                  IconButton(
-                    onPressed: () async {
-                      final meetingLink = await createCall(context, startWithVideMuted: false);
-                      if (meetingLink.isNotEmpty) {
-                        await context.read<ChatCubit>().sendMessage(content: meetingLink);
-                      }
-                    },
-                    icon: Assets.icons.videocam.svg(
-                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
-                    ),
+                // if (!isTabletOrSmaller)
+                IconButton(
+                  onPressed: () async {
+                    final meetingLink = await createCall(context, startWithVideMuted: false);
+                    if (meetingLink.isNotEmpty) {
+                      await context.read<ChatCubit>().sendMessage(content: meetingLink);
+                    }
+                  },
+                  icon: Assets.icons.videocam.svg(
+                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
+                ),
               ],
               title: Builder(
                 builder: (context) {
