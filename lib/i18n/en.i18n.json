@@ -102,11 +102,11 @@
     "active_call_in": "Call in \"{name}\"",
     "active_call": "Active call",
     "resume_call": "Return to call",
-    "createDialog": {
+    "create_call_dialog": {
       "title": "Create call",
-      "videoTitle": "Create video call",
-      "nameLabel": "Call name",
-      "nameRequired": "Call name cannot be empty",
+      "video_title": "Create video call",
+      "name_label": "Call name",
+      "name_required": "Call name cannot be empty",
       "cancel": "Cancel",
       "create": "Create"
     }

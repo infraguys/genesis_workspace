@@ -261,7 +261,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 // ),
                 IconButton(
                   onPressed: () async {
-                    final meetingLink = await createCall(context, startWithVideMuted: true);
+                    final meetingLink = await createCall(context, startWithVideoMuted: true);
                     if (meetingLink.isNotEmpty) {
                       await context.read<ChannelChatCubit>().sendMessage(
                         streamId: widget.channelId,
@@ -279,7 +279,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 // if (!isTabletOrSmaller)
                 IconButton(
                   onPressed: () async {
-                    final meetingLink = await createCall(context, startWithVideMuted: false);
+                    final meetingLink = await createCall(context, startWithVideoMuted: false);
                     if (meetingLink.isNotEmpty) {
                       await context.read<ChannelChatCubit>().sendMessage(
                         streamId: widget.channelId,

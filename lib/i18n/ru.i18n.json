@@ -108,11 +108,11 @@
     "active_call_in": "Идёт звонок в \"{name}\"",
     "active_call": "Идёт звонок",
     "resume_call": "Вернуться в звонок",
-    "createDialog": {
+    "create_call_dialog": {
       "title": "Создать звонок",
-      "videoTitle": "Создать видеозвонок",
-      "nameLabel": "Название звонка",
-      "nameRequired": "Название звонка не должно быть пустым",
+      "video_title": "Создать видеозвонок",
+      "name_label": "Название звонка",
+      "name_required": "Название звонка не должно быть пустым",
       "cancel": "Отменить",
       "create": "Создать"
     }

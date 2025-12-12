@@ -230,7 +230,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                 DownloadFilesButton(),
                 IconButton(
                   onPressed: () async {
-                    final meetingLink = await createCall(context, startWithVideMuted: true);
+                    final meetingLink = await createCall(context, startWithVideoMuted: true);
                     if (meetingLink.isNotEmpty) {
                       await context.read<ChatCubit>().sendMessage(content: meetingLink);
                     }
@@ -244,7 +244,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                 // if (!isTabletOrSmaller)
                 IconButton(
                   onPressed: () async {
-                    final meetingLink = await createCall(context, startWithVideMuted: false);
+                    final meetingLink = await createCall(context, startWithVideoMuted: false);
                     if (meetingLink.isNotEmpty) {
                       await context.read<ChatCubit>().sendMessage(content: meetingLink);
                     }
