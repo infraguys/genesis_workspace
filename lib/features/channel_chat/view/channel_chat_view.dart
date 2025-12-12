@@ -17,7 +17,7 @@ import 'package:genesis_workspace/core/utils/message_input_intents/mention_navig
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
-import 'package:genesis_workspace/core/widgets/input_placeholder.dart';
+import 'package:genesis_workspace/core/widgets/input_banner.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -624,7 +624,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                         },
                                         inputTitle: widget.topicName ?? state.channel?.name,
                                       )
-                                    : InputPlaceholder(),
+                                    : InputBanner(),
                               ),
                             ),
                           ),
