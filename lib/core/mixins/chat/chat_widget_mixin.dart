@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -12,6 +14,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -43,8 +46,7 @@ class ChatPasteAction extends Action<PasteTextIntent> {
   }
 }
 
-mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends StatefulWidget>
-    on State<TWidget> {
+mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends StatefulWidget> on State<TWidget> {
   late final TextEditingController messageController;
   final FocusNode messageInputFocusNode = FocusNode();
   final FocusNode mentionFocusNode = FocusNode(debugLabel: 'MentionSuggestionsFocus');
@@ -181,9 +183,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
 
   void insertQuoteAndFocus({required String textToInsert, bool append = false}) {
     final String existingText = messageController.text;
-    final String nextText = append && existingText.isNotEmpty
-        ? '$existingText\n$textToInsert'
-        : textToInsert;
+    final String nextText = append && existingText.isNotEmpty ? '$existingText\n$textToInsert' : textToInsert;
 
     messageController.text = nextText;
     messageController.selection = TextSelection.collapsed(offset: nextText.length);
@@ -297,5 +297,73 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
       default:
         print('Unknown type: ${captured.runtimeType}');
     }
+  }
+
+  Future<String> createCall(BuildContext context, {required bool startWithVideMuted}) async {
+    final TextEditingController callNameController = TextEditingController();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String? meetingLink;
+
+    try {
+      meetingLink = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) {
+          final translations = dialogContext.t.call.createDialog;
+          return AlertDialog(
+            title: Text(startWithVideMuted ? translations.title : translations.videoTitle),
+            constraints: BoxConstraints(
+              minWidth: 350,
+              maxWidth: 350,
+            ),
+            content: Form(
+              key: formKey,
+              child: TextFormField(
+                controller: callNameController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: translations.nameLabel,
+                ),
+                textInputAction: TextInputAction.done,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return translations.nameRequired;
+                  }
+                  return null;
+                },
+                onFieldSubmitted: (_) {
+                  if (!(formKey.currentState?.validate() ?? false)) return;
+                  final sanitizedName = callNameController.text.trim().replaceAll(RegExp(r'\s+'), '-');
+                  final link =
+                      '${AppConstants.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=$startWithVideMuted';
+                  Navigator.of(dialogContext).pop(link);
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(translations.cancel),
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (!(formKey.currentState?.validate() ?? false)) return;
+                  final sanitizedName = callNameController.text.trim().replaceAll(RegExp(r'\s+'), '-');
+                  final link =
+                      '${AppConstants.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=$startWithVideMuted';
+                  Navigator.of(dialogContext).pop(link);
+                },
+                child: Text(translations.create),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+      rethrow;
+    }
+    return meetingLink ?? '';
   }
 }

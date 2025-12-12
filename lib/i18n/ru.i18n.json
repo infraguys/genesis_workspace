@@ -107,7 +107,15 @@
     "exit_fullscreen": "Выйти из полноэкранного",
     "active_call_in": "Идёт звонок в \"{name}\"",
     "active_call": "Идёт звонок",
-    "resume_call": "Вернуться в звонок"
+    "resume_call": "Вернуться в звонок",
+    "createDialog": {
+      "title": "Создать звонок",
+      "videoTitle": "Создать видеозвонок",
+      "nameLabel": "Название звонка",
+      "nameRequired": "Название звонка не должно быть пустым",
+      "cancel": "Отменить",
+      "create": "Создать"
+    }
   },
   "unread_marker": {
     "label": "Непрочитанные сообщения",

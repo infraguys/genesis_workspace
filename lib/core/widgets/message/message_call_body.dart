@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/group_avatars.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageCallBody extends StatelessWidget {
-  const MessageCallBody({super.key});
+  final MessageEntity message;
+  const MessageCallBody({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +30,7 @@ class MessageCallBody extends StatelessWidget {
               ),
             ),
             Text(
-              //This will be replaced with data from server
-              "Название звонка",
+              message.callName!,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
                 letterSpacing: 0,

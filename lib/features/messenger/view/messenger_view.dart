@@ -480,13 +480,9 @@ class _MessengerViewState extends State<MessengerView>
                               ),
                               BlocBuilder<CallCubit, CallState>(
                                 builder: (context, callState) {
-                                  final String? chatTitle = state.selectedChat?.displayTitle;
-                                  final String titleText = (chatTitle?.isNotEmpty ?? false)
-                                      ? context.t.call.activeCallIn(name: chatTitle!)
-                                      : (callState.meetLocationName.isNotEmpty
-                                            ? context.t.call.activeCallIn(name: callState.meetLocationName)
-                                            : context.t.call.activeCall);
-
+                                  final String titleText = callState.meetLocationName.isNotEmpty
+                                      ? context.t.call.activeCallIn(name: callState.meetLocationName)
+                                      : context.t.call.activeCall;
                                   return ActiveCallPanel(
                                     callState: callState,
                                     titleText: titleText,

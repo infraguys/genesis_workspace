@@ -229,8 +229,11 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
               actions: [
                 DownloadFilesButton(),
                 IconButton(
-                  onPressed: () {
-                    // context.read<ChatCubit>().createCall();
+                  onPressed: () async {
+                    final meetingLink = await createCall(context, startWithVideMuted: true);
+                    if (meetingLink.isNotEmpty) {
+                      await context.read<ChatCubit>().sendMessage(content: meetingLink);
+                    }
                   },
                   icon: Assets.icons.call.svg(
                     width: 28,
@@ -240,7 +243,12 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                 ),
                 if (!isTabletOrSmaller)
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final meetingLink = await createCall(context, startWithVideMuted: false);
+                      if (meetingLink.isNotEmpty) {
+                        await context.read<ChatCubit>().sendMessage(content: meetingLink);
+                      }
+                    },
                     icon: Assets.icons.videocam.svg(
                       colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                     ),
