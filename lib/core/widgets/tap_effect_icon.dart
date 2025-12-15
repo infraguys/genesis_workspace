@@ -6,11 +6,13 @@ class TapEffectIcon extends StatefulWidget {
     required this.child,
     this.onTap,
     this.onTapDown,
+    this.padding = const EdgeInsets.all(6.0),
   });
 
   final Widget child;
   final void Function(TapDownDetails)? onTapDown;
   final VoidCallback? onTap;
+  final EdgeInsets padding;
 
   @override
   State<TapEffectIcon> createState() => _TapEffectIconState();
@@ -38,16 +40,16 @@ class _TapEffectIconState extends State<TapEffectIcon> {
     final double targetScale = _pressed
         ? scale
         : _hovered
-            ? hoverScale
-            : 1.0;
+        ? hoverScale
+        : 1.0;
     final double targetOpacity = _pressed
         ? 0.6
         : _hovered
-            ? 0.85
-            : 1.0;
+        ? 0.85
+        : 1.0;
 
     return MouseRegion(
-      cursor:  SystemMouseCursors.click,
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
@@ -63,8 +65,8 @@ class _TapEffectIconState extends State<TapEffectIcon> {
           child: AnimatedOpacity(
             opacity: targetOpacity,
             duration: duration,
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
+            child: Container(
+              padding: widget.padding,
               child: widget.child,
             ),
           ),

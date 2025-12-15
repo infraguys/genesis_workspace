@@ -102,3 +102,27 @@ extension BlocMaybeRead on BuildContext {
     }
   }
 }
+
+extension TextThemeLetterSpacingX on TextTheme {
+  TextTheme withLetterSpacing(double letterSpacing) {
+    TextStyle? applyTo(TextStyle? style) => style?.copyWith(letterSpacing: letterSpacing);
+
+    return copyWith(
+      displayLarge: applyTo(displayLarge),
+      displayMedium: applyTo(displayMedium),
+      displaySmall: applyTo(displaySmall),
+      headlineLarge: applyTo(headlineLarge),
+      headlineMedium: applyTo(headlineMedium),
+      headlineSmall: applyTo(headlineSmall),
+      titleLarge: applyTo(titleLarge),
+      titleMedium: applyTo(titleMedium),
+      titleSmall: applyTo(titleSmall),
+      bodyLarge: applyTo(bodyLarge),
+      bodyMedium: applyTo(bodyMedium),
+      bodySmall: applyTo(bodySmall),
+      labelLarge: applyTo(labelLarge),
+      labelMedium: applyTo(labelMedium),
+      labelSmall: applyTo(labelSmall),
+    );
+  }
+}

@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/app_bar/view/branch_item.dart';
 import 'package:genesis_workspace/features/app_bar/view/organization_item.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -194,14 +195,30 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                             return Row(
                               spacing: 12.0,
                               children: [
-                                UserAvatar(avatarUrl: state.user?.avatarUrl ?? ''),
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      context.read<InfoPanelCubit>().toggleProfilePanel();
+                                    },
+                                    child: UserAvatar(avatarUrl: state.user?.avatarUrl ?? ''),
+                                  ),
+                                ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      state.user?.fullName ?? '',
-                                      style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
+                                    MouseRegion(
+                                      cursor: SystemMouseCursors.click,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          context.read<InfoPanelCubit>().toggleProfilePanel();
+                                        },
+                                        child: Text(
+                                          state.user?.fullName ?? '',
+                                          style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
+                                        ),
+                                      ),
                                     ),
                                     Text(
                                       'Администратор',
@@ -211,11 +228,6 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                       ),
                                     ),
                                   ],
-                                ),
-
-                                IconButton(
-                                  onPressed: () async {},
-                                  icon: Assets.icons.arrowDown.svg(),
                                 ),
                               ],
                             );

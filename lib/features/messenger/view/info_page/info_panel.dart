@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
@@ -7,6 +5,7 @@ import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_inf
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/channel_info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/private_info_panel.dart';
+import 'package:genesis_workspace/features/messenger/view/info_page/profile_panel.dart';
 
 class InfoPanel extends StatelessWidget {
   final VoidCallback onClose;
@@ -23,14 +22,13 @@ class InfoPanel extends StatelessWidget {
       ],
       child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
         builder: (BuildContext context, state) {
-          inspect(state.status.name);
           switch (state.status) {
             case .channelInfo:
               return ChannelInfoPanel(onClose: onClose);
             case .dmInfo:
               return PrivateInfoPanel(onClose: onClose);
             case .profileInfo:
-              return Container();
+              return ProfilePanel();
             default:
               return Container(
                 decoration: BoxDecoration(

@@ -64,7 +64,7 @@
     "logout": "Logout",
     "app_version": "App version",
     "notification_sound": "Notification sound",
-    "chat_sorting_action": "Chat sorting settings",
+    "chat_sorting_action": "Chat sorting",
     "chat_sorting_description": "Choose how unread chats are prioritized.",
     "chat_sorting_title": "Chat sorting settings",
     "chat_sorting_prioritize_directs": "Show unread personal chats above other unread chats",
