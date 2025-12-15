@@ -21,5 +21,7 @@ class DmUserEntity extends UserEntity {
     required super.isAdmin,
     required super.isOwner,
     required super.isGuest,
+    required super.jobTitle,
+    required super.bossName,
   });
 }

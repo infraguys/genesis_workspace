@@ -24,7 +24,7 @@ class MessageCallBody extends StatelessWidget {
             Text(
               context.t.call.title,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: AppColors.callGreen,
+                color: AppColors.green,
                 fontSize: 14,
                 letterSpacing: 0,
               ),

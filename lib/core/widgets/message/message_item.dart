@@ -337,7 +337,7 @@ class _MessageItemState extends State<MessageItem> {
                                     icon: Assets.icons.call.svg(
                                       width: 32,
                                       height: 32,
-                                      colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      colorFilter: ColorFilter.mode(AppColors.green, BlendMode.srcIn),
                                     ),
                                   ),
                                 MessageTime(
@@ -373,7 +373,7 @@ class _MessageItemState extends State<MessageItem> {
                                     icon: Assets.icons.call.svg(
                                       width: 32,
                                       height: 32,
-                                      colorFilter: ColorFilter.mode(AppColors.callGreen, BlendMode.srcIn),
+                                      colorFilter: ColorFilter.mode(AppColors.green, BlendMode.srcIn),
                                     ),
                                   ),
                                 MessageTime(

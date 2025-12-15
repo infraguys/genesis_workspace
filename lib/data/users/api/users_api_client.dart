@@ -29,7 +29,10 @@ abstract class UsersApiClient {
   );
 
   @GET('/users/{user_id}')
-  Future<UserByIdResponseDto> getUserById(@Path('user_id') int userId);
+  Future<UserByIdResponseDto> getUserById(
+    @Path('user_id') int userId,
+    @Query('include_custom_profile_fields') bool includeCustomProfileFields,
+  );
 
   @GET('/realm/presence')
   Future<PresencesResponseDto> getAllPresences();

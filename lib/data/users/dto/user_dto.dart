@@ -29,6 +29,8 @@ class UserDto {
   final String dateJoined;
   @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
+  @JsonKey(name: "profile_data")
+  final Map<int, Map<String, dynamic>> profileData;
 
   UserDto({
     required this.email,
@@ -44,6 +46,7 @@ class UserDto {
     required this.isActive,
     required this.dateJoined,
     required this.avatarUrl,
+    required this.profileData,
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) => _$UserDtoFromJson(json);
@@ -62,6 +65,8 @@ class UserDto {
     timezone: timezone,
     isActive: isActive,
     avatarUrl: avatarUrl,
+    jobTitle: profileData[1]?["value"] ?? '',
+    bossName: profileData[2]?["value"] ?? '',
   );
 
   static UserRole _fromJsonToUserRole(int json) {
