@@ -13,24 +13,7 @@ class InfoPanelCubit extends Cubit<InfoPanelState> {
   InfoPanelCubit() : super(InfoPanelState(.closed));
 
   void setInfoPanelState(InfoPanelStatus status) {
-    if (state.status != .closed) {
-      emit(state.copyWith(status: .closed));
-      return;
-    }
-    switch (status) {
-      case InfoPanelStatus.closed:
-        emit(state.copyWith(status: .closed));
-        break;
-      case InfoPanelStatus.channelInfo:
-        emit(state.copyWith(status: .channelInfo));
-        break;
-      case InfoPanelStatus.dmInfo:
-        emit(state.copyWith(status: .dmInfo));
-        break;
-      case InfoPanelStatus.profileInfo:
-        emit(state.copyWith(status: .profileInfo));
-        break;
-    }
+    emit(state.copyWith(status: status));
   }
 }
 

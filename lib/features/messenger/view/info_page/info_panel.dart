@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
@@ -21,6 +23,7 @@ class InfoPanel extends StatelessWidget {
       ],
       child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
         builder: (BuildContext context, state) {
+          inspect(state.status.name);
           switch (state.status) {
             case .channelInfo:
               return ChannelInfoPanel(onClose: onClose);
