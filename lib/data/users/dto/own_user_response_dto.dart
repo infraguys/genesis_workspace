@@ -26,6 +26,8 @@ class OwnUserResponseDto extends ResponseDto {
   final UserRole role;
   @JsonKey(name: "is_active")
   final bool isActive;
+  @JsonKey(name: "profile_data")
+  final Map<int, Map<String, dynamic>> profileData;
 
   OwnUserResponseDto({
     required super.result,
@@ -41,10 +43,10 @@ class OwnUserResponseDto extends ResponseDto {
     required this.isOwner,
     required this.isAdmin,
     required this.isGuest,
+    required this.profileData,
   });
 
-  factory OwnUserResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$OwnUserResponseDtoFromJson(json);
+  factory OwnUserResponseDto.fromJson(Map<String, dynamic> json) => _$OwnUserResponseDtoFromJson(json);
 
   UserEntity toEntity() => UserEntity(
     userId: userId,
@@ -58,6 +60,8 @@ class OwnUserResponseDto extends ResponseDto {
     isAdmin: isAdmin,
     isOwner: isOwner,
     isGuest: isGuest,
+    jobTitle: profileData[1]?["value"] ?? '',
+    bossName: profileData[2]?["value"] ?? '',
   );
 
   static UserRole _fromJsonToUserRole(int json) {

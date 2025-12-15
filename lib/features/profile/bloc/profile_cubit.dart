@@ -33,6 +33,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> getOwnUser() async {
     try {
       final response = await _getOwnUserUseCase.call();
+      inspect(response);
       emit(state.copyWith(user: response));
     } catch (e) {
       inspect(e);

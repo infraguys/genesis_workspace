@@ -182,7 +182,7 @@ class MessageHtml extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.insert_drive_file_outlined,
-                          color: isDownloaded ? AppColors.callGreen : theme.colorScheme.primary,
+                          color: isDownloaded ? AppColors.green : theme.colorScheme.primary,
                           size: 22,
                         ),
                         const SizedBox(width: 10),
@@ -206,7 +206,7 @@ class MessageHtml extends StatelessWidget {
                             : Icon(
                                 isDownloaded ? Icons.check : Icons.arrow_downward_rounded,
                                 size: 18,
-                                color: isDownloaded ? AppColors.callGreen : theme.colorScheme.primary,
+                                color: isDownloaded ? AppColors.green : theme.colorScheme.primary,
                               ),
                       ],
                     ),

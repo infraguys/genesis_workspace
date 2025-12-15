@@ -150,12 +150,12 @@ class _DownloadFilesButtonState extends State<DownloadFilesButton> with SingleTi
                           ? Icon(
                               Icons.check,
                               key: const ValueKey('downloadFinished'),
-                              color: AppColors.callGreen,
+                              color: AppColors.green,
                             )
                           : Icon(
                               Icons.file_download_outlined,
                               key: const ValueKey('downloadInProgress'),
-                              color: state.isFinished ? AppColors.callGreen : textColors.text30,
+                              color: state.isFinished ? AppColors.green : textColors.text30,
                             ),
                     ),
                   ),
@@ -217,8 +217,8 @@ class _DownloadFilesPopupContent extends StatelessWidget {
                             )
                           : CircleAvatar(
                               radius: 16,
-                              backgroundColor: AppColors.callGreen.withValues(alpha: 0.15),
-                              child: Icon(Icons.check, size: 18, color: AppColors.callGreen),
+                              backgroundColor: AppColors.green.withValues(alpha: 0.15),
+                              child: Icon(Icons.check, size: 18, color: AppColors.green),
                             ),
                       onTap: () async {
                         if (file is DownloadedFileEntity && !kIsWeb) {

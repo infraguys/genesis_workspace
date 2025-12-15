@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/core/widgets/group_avatars.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -46,12 +46,13 @@ class ActiveCallPanel extends StatelessWidget {
       switchOutCurve: Curves.easeInCubic,
       child: Container(
         key: activeCallKey,
-        padding: EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
-        ).copyWith(
-          top: 20,
-        ),
+        padding:
+            EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 16,
+            ).copyWith(
+              top: 20,
+            ),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
         ),
@@ -62,7 +63,7 @@ class ActiveCallPanel extends StatelessWidget {
             Text(
               titleText,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: AppColors.callGreen,
+                color: AppColors.green,
                 fontSize: 14,
               ),
             ),
