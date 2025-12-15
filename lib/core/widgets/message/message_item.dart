@@ -58,6 +58,9 @@ class MessageItem extends StatefulWidget {
 }
 
 class _MessageItemState extends State<MessageItem> {
+  late final GlobalObjectKey messageKey;
+  late final MenuController _menuController;
+
   static OverlayEntry? _menuEntry;
 
   late final MessagesCubit messagesCubit;
@@ -68,8 +71,16 @@ class _MessageItemState extends State<MessageItem> {
 
   @override
   void initState() {
+    messageKey = GlobalObjectKey(widget.message);
     messagesCubit = context.read<MessagesCubit>();
+    _menuController = MenuController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _menuController.close();
+    super.dispose();
   }
 
   void joinCall(BuildContext context) async {
@@ -138,10 +149,12 @@ class _MessageItemState extends State<MessageItem> {
   void onEditMessage() {
     final body = UpdateMessageRequestEntity(messageId: widget.message.id, content: widget.message.content);
     widget.onTapEditMessage(body);
+    _menuController.close();
   }
 
   void onReplay() {
     widget.onTapQuote(widget.message.id);
+    _menuController.close();
   }
 
   void onCopy() {}
@@ -151,7 +164,7 @@ class _MessageItemState extends State<MessageItem> {
     _menuEntry = null;
   }
 
-  void _openContextMenu(Offset globalPosition) {
+  void _openContextMenu(BuildContext context, Offset globalPosition) {
     _closeOverlay();
 
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -255,13 +268,13 @@ class _MessageItemState extends State<MessageItem> {
         behavior: HitTestBehavior.deferToChild,
         onPointerDown: (event) {
           if (event.kind == .mouse && event.buttons == kSecondaryMouseButton) {
-            _openContextMenu(event.position);
+            _openContextMenu(context, event.position);
           }
         },
         child: GestureDetector(
           onLongPressStart: (details) {
             if (platformInfo.isMobile) {
-              _openContextMenu(details.globalPosition);
+              _openContextMenu(context, details.globalPosition);
             }
           },
           child: Align(
@@ -300,7 +313,9 @@ class _MessageItemState extends State<MessageItem> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           widget.message.isCall
-                              ? MessageCallBody()
+                              ? MessageCallBody(
+                                  message: widget.message,
+                                )
                               : MessageBody(
                                   showSenderName: showSenderName,
                                   isSkeleton: widget.isSkeleton,
