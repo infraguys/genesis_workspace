@@ -274,7 +274,7 @@ class _MessageItemState extends State<MessageItem> {
         child: GestureDetector(
           onLongPressStart: (details) {
             if (platformInfo.isMobile) {
-            _openContextMenu(context, details.globalPosition);
+              _openContextMenu(context, details.globalPosition);
             }
           },
           child: Align(
@@ -313,7 +313,9 @@ class _MessageItemState extends State<MessageItem> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           widget.message.isCall
-                              ? MessageCallBody()
+                              ? MessageCallBody(
+                                  message: widget.message,
+                                )
                               : MessageBody(
                                   showSenderName: showSenderName,
                                   isSkeleton: widget.isSkeleton,
