@@ -528,7 +528,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       final refreshedPins = await _getPinnedChatsUseCase.call(folderUuid);
       emit(state.copyWith(pinnedChats: refreshedPins));
       _sortChats();
-    } catch (e, s) {
+    } catch (e, _) {
       // обработка/логирование
     }
   }
@@ -573,11 +573,24 @@ class MessengerCubit extends Cubit<MessengerState> {
       final messagePreview = message.content;
       final messageDate = message.messageDate;
 
+
+      /// Update lasMessagePreview for topic
+      var copiedTopicList = chat.topics == null ? null : List.of(chat.topics!);
+      if (copiedTopicList != null) {
+        final targetIndexInTopics = chat.topics!.indexWhere((it) => it.name == event.message.subject);
+        if (targetIndexInTopics != -1) {
+          final targetTopic = chat.topics![targetIndexInTopics];
+          final updatedTopic = targetTopic.copyWith(lastMessagePreview: messagePreview);
+          copiedTopicList[targetIndexInTopics] = updatedTopic;
+        }
+      }
+
       updatedChat = updatedChat.copyWith(
         lastMessageId: message.id,
         lastMessageSenderName: messageSenderName,
         lastMessagePreview: messagePreview,
         lastMessageDate: messageDate,
+        topics: copiedTopicList,
       );
       if (message.isUnread && !isMyMessage) {
         updatedUnreadMessages.add(message);
