@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/gen/fonts.gen.dart';
 
 final darkTheme = ThemeData(
   brightness: Brightness.dark,
   colorScheme: darkColorScheme,
   badgeTheme: _badgeTheme,
-  fontFamily: FontFamily.montserrat,
+  // fontFamily: FontFamily.montserrat,
   scaffoldBackgroundColor: const Color(0xff1B1B1D),
   inputDecorationTheme: _darkInputDecorationTheme,
+  textTheme: ThemeData.dark().textTheme
+      .withLetterSpacing(0)
+      .apply(
+        fontFamily: FontFamily.montserrat,
+      ),
   extensions: [
     AppColors.darkTextColors,
     AppColors.darkCardColors,
@@ -27,11 +33,7 @@ final darkTheme = ThemeData(
       borderRadius: BorderRadius.circular(12),
     ),
   ),
-  dialogTheme: DialogThemeData(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadiusGeometry.circular(12.0)
-    )
-  )
+  dialogTheme: DialogThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12.0))),
 );
 
 final darkColorScheme = ColorScheme.dark(

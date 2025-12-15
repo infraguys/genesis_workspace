@@ -15,6 +15,14 @@ class InfoPanelCubit extends Cubit<InfoPanelState> {
   void setInfoPanelState(InfoPanelStatus status) {
     emit(state.copyWith(status: status));
   }
+
+  void toggleProfilePanel() {
+    if (state.status == .profileInfo) {
+      setInfoPanelState(.closed);
+    } else {
+      setInfoPanelState(.profileInfo);
+    }
+  }
 }
 
 class InfoPanelState {

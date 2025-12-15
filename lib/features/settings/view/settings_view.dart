@@ -133,149 +133,181 @@ class _SettingsViewState extends State<SettingsView> {
     final theme = Theme.of(context);
     final localizationService = getIt<LocalizationService>();
 
-    return Scaffold(
-      body: ListView(
-        children: [
-          BlocBuilder<UpdateCubit, UpdateState>(
-            builder: (context, state) {
-              return Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.info_outline),
-                    title: Text(context.t.settings.appVersion),
-                    subtitle: Text(state.currentVersion),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: InkWell(
-                      onTap: () => context.pushNamed(Routes.forceUpdate),
-                      borderRadius: BorderRadius.circular(18),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: theme.colorScheme.outlineVariant.withOpacity(0.4),
-                          ),
+    return ListView(
+      children: [
+        BlocBuilder<UpdateCubit, UpdateState>(
+          builder: (context, state) {
+            return Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: Text(context.t.settings.appVersion),
+                  subtitle: Text(state.currentVersion),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: InkWell(
+                    onTap: () => context.pushNamed(Routes.forceUpdate),
+                    borderRadius: BorderRadius.circular(18),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withOpacity(0.4),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-                          child: Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                child: Icon(
-                                  Icons.system_update_alt_rounded,
-                                  color: theme.colorScheme.onPrimary,
-                                ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                        child: Row(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(14),
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      context.t.updateView.openSelectorCta,
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.system_update_alt_rounded,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    context.t.updateView.openSelectorCta,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    context.t.updateView.openSelectorSubtitle,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface.withOpacity(
+                                        0.8,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      context.t.updateView.openSelectorSubtitle,
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurface.withOpacity(
-                                          0.8,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 16,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ],
-                          ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 16,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ],
-              );
-            },
-          ),
-          const Divider(),
-          if (_prefs != null)
-            ListTile(
-              leading: const Icon(Icons.notifications_active_outlined),
-              title: Text(context.t.settings.notificationSound),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButton<String>(
-                    value: _selectedSound,
-                    onChanged: (value) async {
-                      if (value == null) return;
-                      await _prefs!.setString(SharedPrefsKeys.notificationSound, value);
-                      setState(() {
-                        _selectedSound = value;
-                      });
-                      _playSelected();
-                    },
-                    items: const [
-                      DropdownMenuItem(value: AssetsConstants.audioPop, child: Text('Pop')),
-                      DropdownMenuItem(value: AssetsConstants.audioWhoop, child: Text('Whoop')),
-                    ],
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    tooltip: 'Play',
-                    icon: const Icon(Icons.play_arrow),
-                    onPressed: _playSelected,
-                  ),
-                ],
-              ),
-            ),
-          if (_prefs == null) const SizedBox.shrink(),
-          const Divider(),
+                ),
+              ],
+            );
+          },
+        ),
+        const Divider(),
+        if (_prefs != null)
           ListTile(
-            leading: const Icon(Icons.sort),
-            title: Text(context.t.settings.chatSortingAction),
-            subtitle: Text(context.t.settings.chatSortingDescription),
-            trailing: Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            onTap: _openChatSortingDialog,
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text(context.t.settings.language),
-            trailing: DropdownButton<Locale>(
-              value: localizationService.locale.flutterLocale,
-              onChanged: (locale) {
-                if (locale != null) {
-                  localizationService.setLocale(
-                    AppLocale.values.firstWhere((l) => l.languageCode == locale.languageCode),
-                  );
-                }
-              },
-              items: [
-                DropdownMenuItem(value: const Locale('en'), child: Text('English')),
-                DropdownMenuItem(value: const Locale('ru'), child: Text('Русский')),
+            leading: const Icon(Icons.notifications_active_outlined),
+            title: Text(context.t.settings.notificationSound),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButton<String>(
+                  value: _selectedSound,
+                  onChanged: (value) async {
+                    if (value == null) return;
+                    await _prefs!.setString(SharedPrefsKeys.notificationSound, value);
+                    setState(() {
+                      _selectedSound = value;
+                    });
+                    _playSelected();
+                  },
+                  items: const [
+                    DropdownMenuItem(value: AssetsConstants.audioPop, child: Text('Pop')),
+                    DropdownMenuItem(value: AssetsConstants.audioWhoop, child: Text('Whoop')),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  tooltip: 'Play',
+                  icon: const Icon(Icons.play_arrow),
+                  onPressed: _playSelected,
+                ),
               ],
             ),
           ),
-          const Divider(),
+        if (_prefs == null) const SizedBox.shrink(),
+        const Divider(),
+        ListTile(
+          leading: const Icon(Icons.sort),
+          title: Text(context.t.settings.chatSortingAction),
+          subtitle: Text(context.t.settings.chatSortingDescription),
+          trailing: Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 16,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          onTap: _openChatSortingDialog,
+        ),
+        const Divider(),
+        ListTile(
+          leading: const Icon(Icons.language),
+          title: Text(context.t.settings.language),
+          trailing: DropdownButton<Locale>(
+            value: localizationService.locale.flutterLocale,
+            onChanged: (locale) {
+              if (locale != null) {
+                localizationService.setLocale(
+                  AppLocale.values.firstWhere((l) => l.languageCode == locale.languageCode),
+                );
+              }
+            },
+            items: [
+              DropdownMenuItem(value: const Locale('en'), child: Text('English')),
+              DropdownMenuItem(value: const Locale('ru'), child: Text('Русский')),
+            ],
+          ),
+        ),
+        const Divider(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              await context.read<AuthCubit>().logout();
+              // context.go(Routes.auth);
+            },
+            icon: const Icon(Icons.logout),
+            label: Text(
+              context.t.settings.logout,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onError,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        if (kDebugMode) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: ElevatedButton(
+              onPressed: () {
+                context.read<SettingsCubit>().clearLocalDatabase();
+              },
+              child: Text("Clear db"),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ElevatedButton.icon(
@@ -286,12 +318,12 @@ class _SettingsViewState extends State<SettingsView> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () async {
-                await context.read<AuthCubit>().logout();
+                await context.read<AuthCubit>().devLogout();
                 // context.go(Routes.auth);
               },
               icon: const Icon(Icons.logout),
               label: Text(
-                context.t.settings.logout,
+                "Dev logout",
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onError,
                   fontWeight: FontWeight.bold,
@@ -299,42 +331,8 @@ class _SettingsViewState extends State<SettingsView> {
               ),
             ),
           ),
-          if (kDebugMode) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: ElevatedButton(
-                onPressed: () {
-                  context.read<SettingsCubit>().clearLocalDatabase();
-                },
-                child: Text("Clear db"),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.error,
-                  foregroundColor: theme.colorScheme.onError,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () async {
-                  await context.read<AuthCubit>().devLogout();
-                  // context.go(Routes.auth);
-                },
-                icon: const Icon(Icons.logout),
-                label: Text(
-                  "Dev logout",
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onError,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
-      ),
+      ],
     );
   }
 }
