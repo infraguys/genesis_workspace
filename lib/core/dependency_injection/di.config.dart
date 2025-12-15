@@ -216,6 +216,8 @@ import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
     as _i758;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
+import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart'
+    as _i398;
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart'
     as _i49;
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart'
@@ -286,6 +288,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i397.GetVersionConfigUseCase(),
     );
     gh.factory<_i274.CallCubit>(() => _i274.CallCubit());
+    gh.factory<_i398.InfoPanelCubit>(() => _i398.InfoPanelCubit());
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
     );

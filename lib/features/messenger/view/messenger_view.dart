@@ -14,6 +14,7 @@ import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_up
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
@@ -56,7 +57,7 @@ class _MessengerViewState extends State<MessengerView>
 
   late final ScrollController _chatsController;
 
-  final _isOpenNotifier = ValueNotifier(false);
+  // final _isOpenNotifier = ValueNotifier<InfoPanelState>(.closed);
 
   Future<void> createNewFolder(BuildContext context) {
     final messengerCubit = context.read<MessengerCubit>();
@@ -501,13 +502,20 @@ class _MessengerViewState extends State<MessengerView>
                     if (isLargeScreen) ...[
                       const SizedBox(width: 4.0),
                       Expanded(
-                        child: Builder(
-                          builder: (context) {
+                        child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
+                          builder: (context, panelState) {
                             if (state.usersIds.isNotEmpty && state.selectedChat == null) {
                               return Chat(
                                 key: ObjectKey(state.usersIds),
                                 userIds: state.usersIds.toList(),
-                                leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
+                                leadingOnPressed: () {
+                                  context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  // if (_isOpenNotifier.value != .closed) {
+                                  //   _isOpenNotifier.value = .closed;
+                                  // } else {
+                                  //   _isOpenNotifier.value = .dmInfo;
+                                  // }
+                                },
                               );
                             }
                             if (state.selectedChat?.dmIds != null) {
@@ -517,7 +525,14 @@ class _MessengerViewState extends State<MessengerView>
                                 ),
                                 userIds: state.selectedChat!.dmIds!,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
+                                leadingOnPressed: () {
+                                  context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  // if (_isOpenNotifier.value != .closed) {
+                                  //   _isOpenNotifier.value = .closed;
+                                  // } else {
+                                  //   _isOpenNotifier.value = .dmInfo;
+                                  // }
+                                },
                               );
                             }
                             if (state.selectedChat?.streamId != null) {
@@ -528,7 +543,14 @@ class _MessengerViewState extends State<MessengerView>
                                 channelId: state.selectedChat!.streamId!,
                                 topicName: state.selectedTopic,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
+                                leadingOnPressed: () {
+                                  context.read<InfoPanelCubit>().setInfoPanelState(.channelInfo);
+                                  // if (_isOpenNotifier.value != .closed) {
+                                  //   _isOpenNotifier.value = .closed;
+                                  // } else {
+                                  //   _isOpenNotifier.value = .channelInfo;
+                                  // }
+                                },
                               );
                             }
                             return Center(child: Text(context.t.selectAnyChat));
@@ -536,17 +558,18 @@ class _MessengerViewState extends State<MessengerView>
                         ),
                       ),
                       const SizedBox(width: 4.0),
-                      ValueListenableBuilder(
-                        valueListenable: _isOpenNotifier,
-                        builder: (context, value, _) {
+                      BlocBuilder<InfoPanelCubit, InfoPanelState>(
+                        // valueListenable: _isOpenNotifier,
+                        builder: (context, panelState) {
                           if (state.selectedChat?.dmIds != null || state.selectedChat?.streamId != null) {
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
-                              width: value ? 315 : 0,
+                              width: panelState.status != .closed ? 315 : 0,
                               child: InfoPanel(
-                                isChannel: state.selectedChat?.streamId != null,
-                                onClose: () => _isOpenNotifier.value = false,
+                                onClose: () {
+                                  context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                },
                               ),
                             );
                           }
