@@ -509,7 +509,11 @@ class _MessengerViewState extends State<MessengerView>
                                 key: ObjectKey(state.usersIds),
                                 userIds: state.usersIds.toList(),
                                 leadingOnPressed: () {
-                                  context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  if (panelState.status != .closed) {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                  } else {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  }
                                   // if (_isOpenNotifier.value != .closed) {
                                   //   _isOpenNotifier.value = .closed;
                                   // } else {
@@ -526,7 +530,11 @@ class _MessengerViewState extends State<MessengerView>
                                 userIds: state.selectedChat!.dmIds!,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,
                                 leadingOnPressed: () {
-                                  context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  if (panelState.status != .closed) {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                  } else {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  }
                                   // if (_isOpenNotifier.value != .closed) {
                                   //   _isOpenNotifier.value = .closed;
                                   // } else {
@@ -544,7 +552,11 @@ class _MessengerViewState extends State<MessengerView>
                                 topicName: state.selectedTopic,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,
                                 leadingOnPressed: () {
-                                  context.read<InfoPanelCubit>().setInfoPanelState(.channelInfo);
+                                  if (panelState.status != .closed) {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                  } else {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.channelInfo);
+                                  }
                                   // if (_isOpenNotifier.value != .closed) {
                                   //   _isOpenNotifier.value = .closed;
                                   // } else {
