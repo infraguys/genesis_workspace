@@ -2,10 +2,8 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
-import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
@@ -13,6 +11,7 @@ import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart'
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/toggle_emoji_keyboard_button.dart';
+import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
@@ -20,25 +19,6 @@ import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageInput extends StatefulWidget {
-  final TextEditingController controller;
-  final VoidCallback? onSend;
-  final VoidCallback? onEdit;
-  final VoidCallback? onCancelEdit;
-  final bool isEdit;
-  final VoidCallback onUploadFile;
-  final VoidCallback onUploadImage;
-  final Function(String localId) onRemoveFile;
-  final Function(String localId) onCancelUpload;
-  final bool isMessagePending;
-  final FocusNode focusNode;
-  final List<UploadFileEntity>? files;
-  final List<EditingAttachment>? editingFiles;
-  final bool isDropOver;
-  final MessageEntity? editingMessage;
-  final Function(EditingAttachment)? onRemoveEditingAttachment;
-  final bool Function()? onSubmitIntercept;
-  final String? inputTitle;
-
   const MessageInput({
     super.key,
     required this.controller,
@@ -61,13 +41,30 @@ class MessageInput extends StatefulWidget {
     this.inputTitle,
   });
 
+  final TextEditingController controller;
+  final VoidCallback? onSend;
+  final VoidCallback? onEdit;
+  final VoidCallback? onCancelEdit;
+  final bool isEdit;
+  final VoidCallback onUploadFile;
+  final VoidCallback onUploadImage;
+  final Function(String localId) onRemoveFile;
+  final Function(String localId) onCancelUpload;
+  final bool isMessagePending;
+  final FocusNode focusNode;
+  final List<UploadFileEntity>? files;
+  final List<EditingAttachment>? editingFiles;
+  final bool isDropOver;
+  final MessageEntity? editingMessage;
+  final Function(EditingAttachment)? onRemoveEditingAttachment;
+  final bool Function()? onSubmitIntercept;
+  final String? inputTitle;
+
   @override
   State<MessageInput> createState() => _MessageInputState();
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final GlobalKey<CustomPopupState> attachmentsKey = GlobalKey<CustomPopupState>();
-
   bool _isShiftPressed() {
     final keyboard = HardwareKeyboard.instance;
     return keyboard.isLogicalKeyPressed(LogicalKeyboardKey.shiftLeft) ||
@@ -86,11 +83,6 @@ class _MessageInputState extends State<MessageInput> {
       selection: TextSelection.collapsed(offset: offset),
       composing: TextRange.empty,
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -131,19 +123,17 @@ class _MessageInputState extends State<MessageInput> {
           duration: const Duration(milliseconds: 200),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.all(12).copyWith(
-              bottom: bottomPadding,
-            ),
+            padding: EdgeInsets.all(12).copyWith(bottom: bottomPadding),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12).copyWith(
-                bottomLeft: isTabletOrSmaller ? Radius.zero : null,
-                bottomRight: isTabletOrSmaller ? Radius.zero : null,
+                bottomLeft: isTabletOrSmaller ? .zero : null,
+                bottomRight: isTabletOrSmaller ? .zero : null,
               ),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: .start,
+              mainAxisSize: .min,
               children: [
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
@@ -159,18 +149,18 @@ class _MessageInputState extends State<MessageInput> {
                       ? Material(
                           color: Colors.transparent,
                           child: Container(
-                            margin: const EdgeInsets.fromLTRB(6, 6, 6, 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            margin: const .fromLTRB(6, 6, 6, 8),
+                            padding: const .symmetric(horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: theme.colorScheme.primary, width: 2),
+                              borderRadius: .circular(12),
+                              border: .all(color: theme.colorScheme.primary, width: 2),
                             ),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: .start,
                               children: [
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment: .center,
                                   children: [
                                     Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
                                     const SizedBox(width: 10),
@@ -178,14 +168,14 @@ class _MessageInputState extends State<MessageInput> {
                                       child: Text(
                                         widget.editingMessage?.content ?? '',
                                         maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                        overflow: .ellipsis,
                                         style: theme.textTheme.bodyMedium,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     IconButton(
                                       tooltip: context.t.cancelEditing,
-                                      visualDensity: VisualDensity.compact,
+                                      visualDensity: .compact,
                                       icon: const Icon(Icons.close_rounded, size: 20),
                                       onPressed: widget.onCancelEdit,
                                     ),
@@ -196,18 +186,16 @@ class _MessageInputState extends State<MessageInput> {
                                   SizedBox(
                                     height: 96,
                                     child: ListView.separated(
-                                      scrollDirection: Axis.horizontal,
+                                      scrollDirection: .horizontal,
                                       itemCount: widget.editingFiles!.length,
                                       separatorBuilder: (_, __) => const SizedBox(width: 10),
-                                      itemBuilder: (context, index) {
-                                        final EditingAttachment attachment = widget.editingFiles![index];
+                                      itemBuilder: (_, index) {
+                                        final attachment = widget.editingFiles![index];
                                         return EditingAttachmentTile(
                                           attachment: attachment,
                                           onRemove: widget.onRemoveEditingAttachment == null
                                               ? null
-                                              : () {
-                                                  widget.onRemoveEditingAttachment!(attachment);
-                                                },
+                                              : () => widget.onRemoveEditingAttachment!(attachment),
                                         );
                                       },
                                     ),
@@ -223,11 +211,11 @@ class _MessageInputState extends State<MessageInput> {
                   SizedBox(
                     height: 92,
                     child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      scrollDirection: .horizontal,
+                      padding: const .symmetric(horizontal: 6),
                       itemCount: widget.files!.length,
                       separatorBuilder: (_, _) => const SizedBox(width: 8),
-                      itemBuilder: (context, index) {
+                      itemBuilder: (_, index) {
                         final UploadFileEntity entity = widget.files![index];
                         final String fileExtension = extensionOf(entity.filename);
                         return switch (entity) {
@@ -238,242 +226,156 @@ class _MessageInputState extends State<MessageInput> {
                             isUploading: true,
                             bytesSent: bytesSent,
                             bytesTotal: bytesTotal,
-                            onCancelUploading: () {
-                              if (widget.onCancelUpload != null) {
-                                widget.onCancelUpload(entity.localId);
-                              }
-                            },
+                            onCancelUploading: () => widget.onCancelUpload(entity.localId),
                           ),
                           UploadedFileEntity(:final size) => AttachmentTile(
                             file: entity,
                             extension: fileExtension,
                             fileSize: size,
                             isUploading: false,
-                            onRemove: () {
-                              if (widget.onRemoveFile != null) {
-                                widget.onRemoveFile(entity.localId);
-                              }
-                            },
+                            onRemove: () => widget.onRemoveFile(entity.localId),
                           ),
                         };
                       },
                     ),
                   ),
-                  SizedBox(
-                    height: 8,
-                  ),
+                  SizedBox(height: 8),
                 ],
                 Row(
                   spacing: 8,
                   children: [
-                    if (!isTabletOrSmaller)
-                      Material(
-                        child: Column(
-                          spacing: 12,
-                          children: [
-                            IconButton(
-                              iconSize: 28,
-                              onPressed: () {},
-                              icon: Assets.icons.moreVert.svg(
-                                width: 28,
-                                height: 28,
-                                colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
-                              ),
-                            ),
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: AttachFilesButton(
-                                attachmentsKey: attachmentsKey,
-                                onUploadFile: widget.onUploadFile,
-                                onUploadImage: widget.onUploadImage,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          widget.focusNode.requestFocus();
-                        },
-                        child: Container(
-                          constraints: BoxConstraints(
-                            minHeight: isTabletOrSmaller ? 44 : 88,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.background,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Stack(
-                            children: [
-                              Column(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.background,
+                          borderRadius: .circular(12),
+                        ),
+                        child: Stack(
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              clipBehavior: .hardEdge,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.background,
+                                borderRadius: .circular(12),
+                              ),
+                              child: Stack(
                                 children: [
-                                  if (!isTabletOrSmaller)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                                      child: Row(
-                                        spacing: 8,
-                                        children: [
-                                          Container(
-                                            height: 16,
-                                            width: 3,
-                                            decoration: BoxDecoration(
-                                              color: AppColors.primary,
-                                              borderRadius: BorderRadius.circular(16),
-                                            ),
-                                          ),
-                                          Text(
-                                            "# ${widget.inputTitle ?? ''}",
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: textColors.text30,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 150),
-                                    clipBehavior: Clip.hardEdge,
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.background,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: TextField(
-                                      controller: widget.controller,
-                                      focusNode: widget.focusNode,
-                                      minLines: 1,
-                                      maxLines: 4,
-                                      autofocus: platformInfo.isDesktop,
-                                      clipBehavior: Clip.none,
-                                      onTap: () {
-                                        if (currentSize(context) < ScreenSize.lTablet) {
-                                          context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                            false,
-                                          );
-                                        }
-                                      },
-                                      textInputAction: TextInputAction.send,
-                                      onSubmitted: (value) {
-                                        if (_isShiftPressed()) {
-                                          _insertNewLine();
-                                          widget.focusNode.requestFocus();
-                                          return;
-                                        }
-                                        if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
-                                          if (platformInfo.isDesktop) {
-                                            widget.focusNode.requestFocus();
-                                          }
-                                          return;
-                                        }
-                                        if (widget.isEdit) {
-                                          if (widget.onEdit != null) {
-                                            widget.onEdit!();
-                                          }
-                                        } else {
-                                          if (widget.onSend != null) {
-                                            widget.onSend!();
-                                          }
-                                        }
+                                  TextField(
+                                    enableInteractiveSelection: true,
+                                    textAlignVertical: .center,
+                                    controller: widget.controller,
+                                    focusNode: widget.focusNode,
+                                    minLines: 1,
+                                    maxLines: 4,
+                                    autofocus: platformInfo.isDesktop,
+                                    clipBehavior: .none,
+                                    onTap: () {
+                                      if (currentSize(context) < ScreenSize.lTablet) {
+                                        context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                          false,
+                                        );
+                                      }
+                                    },
+                                    textInputAction: .send,
+                                    onSubmitted: (_) {
+                                      if (_isShiftPressed()) {
+                                        _insertNewLine();
+                                        widget.focusNode.requestFocus();
+                                        return;
+                                      }
+                                      if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
                                         if (platformInfo.isDesktop) {
                                           widget.focusNode.requestFocus();
                                         }
-                                      },
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        filled: true,
-                                        fillColor: theme.colorScheme.background,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        focusedBorder: InputBorder.none,
-                                        disabledBorder: InputBorder.none,
-                                        enabledBorder: InputBorder.none,
-                                        hintText: widget.isDropOver ? "" : "Message",
-                                        hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                          color: textColors.text30,
-                                        ),
-                                        prefixIcon: isTabletOrSmaller
-                                            ? AttachFilesButton(
-                                                attachmentsKey: attachmentsKey,
-                                                onUploadFile: widget.onUploadFile,
-                                                onUploadImage: widget.onUploadImage,
-                                              )
-                                            : null,
-                                        suffixIcon: isTabletOrSmaller
-                                            ? ToggleEmojiKeyboardButton(
-                                                emojiState: emojiState,
-                                                focusNode: widget.focusNode,
-                                              )
-                                            : null,
-                                        contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 12,
-                                        ),
+                                        return;
+                                      }
+
+                                      switch (widget.isEdit) {
+                                        case true:
+                                          widget.onEdit?.call();
+                                        default:
+                                          widget.onSend?.call();
+                                      }
+
+                                      if (platformInfo.isDesktop) {
+                                        widget.focusNode.requestFocus();
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      isCollapsed: true,
+                                      border: InputBorder.none,
+                                      fillColor: theme.colorScheme.background,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      focusedBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      hintText: widget.isDropOver ? "" : context.t.input.placeholder,
+                                      contentPadding: const EdgeInsets.fromLTRB(48, 14, 46, 14),
+                                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                        color: textColors.text30,
                                       ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 8.0,
+                                    top: 0.0,
+                                    bottom: 0.0,
+                                    child: AttachFilesButton(
+                                      onUploadFile: widget.onUploadFile,
+                                      onUploadImage: widget.onUploadImage,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 8.0,
+                                    top: 0.0,
+                                    bottom: 0.0,
+                                    child: Row(
+                                      mainAxisSize: .min,
+                                      spacing: 24,
+                                      children: [
+                                        ToggleEmojiKeyboardButton(
+                                          emojiState: emojiState,
+                                          focusNode: widget.focusNode,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                              if (widget.isDropOver)
-                                Positioned.fill(
-                                  child: IgnorePointer(
-                                    child: AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 120),
-                                      opacity: 1.0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: theme.colorScheme.primary.withOpacity(0.06),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          context.t.dropFilesToUpload,
-                                          textAlign: TextAlign.center,
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            color: theme.colorScheme.primary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                            ),
+                            if (widget.isDropOver)
+                              Positioned.fill(
+                                child: IgnorePointer(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 120),
+                                    opacity: 1.0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.primary.withOpacity(0.06),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        context.t.dropFilesToUpload,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 12,
-                      children: [
-                        IconButton.filled(
-                          onPressed: widget.isEdit ? widget.onEdit : widget.onSend,
-                          style: IconButton.styleFrom(
-                            fixedSize: const Size(46, 46),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          icon: widget.isEdit
-                              ? Icon(
-                                  Icons.check,
-                                  color: theme.colorScheme.onPrimary,
-                                )
-                              : Assets.icons.send.svg(
-                                  width: 23,
-                                  height: 20,
-                                  colorFilter: ColorFilter.mode(
-                                    theme.colorScheme.onPrimary,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                        ).pending(widget.isMessagePending),
-                        if (!isTabletOrSmaller)
-                          ToggleEmojiKeyboardButton(
-                            emojiState: emojiState,
-                            focusNode: widget.focusNode,
-                          ),
-                      ],
+                    _SubmitButton(
+                      isEdit: widget.isEdit,
+                      onTap: widget.isEdit ? widget.onEdit : widget.onSend,
                     ),
                   ],
                 ),
@@ -493,6 +395,40 @@ class _MessageInputState extends State<MessageInput> {
           ),
         );
       },
+    );
+  }
+}
+
+class _SubmitButton extends StatelessWidget {
+  const _SubmitButton({
+    super.key, // ignore: unused_element_parameter
+    required this.isEdit,
+    this.onTap,
+  });
+
+  final bool isEdit;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return TapEffectIcon(
+      onTap: onTap,
+      child: SizedBox.square(
+        dimension: 44.0,
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(12.0)),
+          child: Center(
+            child: isEdit
+                ? Icon(Icons.edit, color: theme.colorScheme.onPrimary)
+                : Assets.icons.send.svg(
+                    height: 20,
+                    width: 24,
+                    colorFilter: .mode(theme.colorScheme.onPrimary, .srcIn),
+                  ),
+          ),
+        ),
+      ),
     );
   }
 }

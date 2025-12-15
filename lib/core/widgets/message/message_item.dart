@@ -112,7 +112,7 @@ class _MessageItemState extends State<MessageItem> {
       if (widget.message.isChannelMessage) {
         meetLocation = widget.message.displayRecipient.streamName;
       } else {
-        meetLocation = widget.message.callName!;
+        meetLocation = widget.message.displayRecipient.recipients.map((e) => e.fullName).join(', ');
       }
       context.read<CallCubit>().openCall(meetUrl: normalizedMeetingLink, meetLocationName: meetLocation);
     }
@@ -274,7 +274,7 @@ class _MessageItemState extends State<MessageItem> {
         child: GestureDetector(
           onLongPressStart: (details) {
             if (platformInfo.isMobile) {
-              _openContextMenu(context, details.globalPosition);
+            _openContextMenu(context, details.globalPosition);
             }
           },
           child: Align(
@@ -313,9 +313,7 @@ class _MessageItemState extends State<MessageItem> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           widget.message.isCall
-                              ? MessageCallBody(
-                                  message: widget.message,
-                                )
+                              ? MessageCallBody()
                               : MessageBody(
                                   showSenderName: showSenderName,
                                   isSkeleton: widget.isSkeleton,
