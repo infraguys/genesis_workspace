@@ -7,6 +7,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/message
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/services/notifications/local_notifications_service.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +21,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     this._profileCubit,
     this._messengerCubit,
     this._prefs,
+    this._localNotificationsService,
   ) : super(
         NotificationsState(
           user: null,
@@ -43,6 +45,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   final MultiPollingService _realTimeService;
   final SharedPreferences _prefs;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
+  final LocalNotificationsService _localNotificationsService;
 
   void _onProfileStateChanged(ProfileState profileState) {
     final user = profileState.user;
@@ -60,6 +63,12 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     if (event.message.senderId != state.user?.userId && !state.mutedChatsIds.contains(event.message.recipientId)) {
       final selected = _prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
       _player.play(AssetSource(selected));
+      final message = event.message;
+      await _localNotificationsService.showNotification(
+        messageId: message.id,
+        title: message.displayTitle,
+        body: "New message",
+      );
     }
   }
 
