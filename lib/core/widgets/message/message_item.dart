@@ -178,6 +178,7 @@ class _MessageItemState extends State<MessageItem> {
     _menuEntry = OverlayEntry(
       builder: (context) {
         return MessageContextMenu(
+          messageId: widget.message.id,
           offset: localInOverlay,
           isStarred: isStarred,
           isMyMessage: widget.isMyMessage,

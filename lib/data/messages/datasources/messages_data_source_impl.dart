@@ -10,6 +10,7 @@ import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
+import 'package:genesis_workspace/data/messages/dto/message_readers_response.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/send_message_request_dto.dart';
@@ -294,6 +295,15 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       if (mimeType != null) 'type ${b64(mimeType)}',
     ];
     return parts.join(',');
+  }
+
+  @override
+  Future<MessageReadersResponse> getMessageReaders(int messageId) async {
+    try {
+      return await apiClient.getMessageReaders(messageId);
+    } catch (e) {
+      rethrow;
+    }
   }
 }
 

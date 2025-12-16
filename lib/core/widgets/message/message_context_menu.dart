@@ -4,6 +4,7 @@ import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/core/widgets/message/message_readers_modal.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -20,6 +21,7 @@ class MessageContextMenu extends StatefulWidget {
     this.onClose,
     required this.offset,
     required this.isMyMessage,
+    required this.messageId,
   });
 
   final bool isStarred;
@@ -32,6 +34,7 @@ class MessageContextMenu extends StatefulWidget {
   final VoidCallback? onClose;
   final Offset offset;
   final bool isMyMessage;
+  final int messageId;
 
   @override
   State<MessageContextMenu> createState() => _MessageContextMenuState();
@@ -72,6 +75,16 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
     _close();
   }
 
+  void _showMessageReaders() async {
+    _close();
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return MessageReadersModal(messageId: widget.messageId);
+      },
+    );
+  }
+
   void _close() async {
     widget.onClose?.call();
   }
@@ -87,7 +100,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
     const maxMenuWidth = 300.0;
 
     final spaceBelow = screenSize.height - widget.offset.dy - padding;
-    final openDown = spaceBelow > 300.0;
+    final openDown = spaceBelow > 340.0;
 
     double? left;
     double? right;
@@ -185,7 +198,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                     ),
                     _ActionTile(
                       textColor: textColor,
-                      icon: Assets.icons.bookmark,
+                      icon: widget.isStarred ? Assets.icons.bookmarkMarked : Assets.icons.bookmark,
                       label: widget.isStarred
                           ? context.t.contextMenu.unmarkAsImportant
                           : context.t.contextMenu.markAsImportant,
@@ -198,6 +211,12 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                         label: context.t.contextMenu.delete,
                         onTap: _onDelete,
                       ),
+                    _ActionTile(
+                      textColor: textColor,
+                      icon: Assets.icons.checkCircle,
+                      label: context.t.contextMenu.readBy,
+                      onTap: _showMessageReaders,
+                    ),
                     _ActionTile(
                       textColor: textColor,
                       icon: Assets.icons.checkCircle,

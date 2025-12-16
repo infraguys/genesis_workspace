@@ -102,6 +102,8 @@ import 'package:genesis_workspace/domain/messages/usecases/delete_message_use_ca
     as _i455;
 import 'package:genesis_workspace/domain/messages/usecases/get_message_by_id_use_case.dart'
     as _i699;
+import 'package:genesis_workspace/domain/messages/usecases/get_message_readers.dart'
+    as _i90;
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart'
     as _i207;
 import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart'
@@ -216,6 +218,8 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
     as _i144;
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
     as _i758;
+import 'package:genesis_workspace/features/messages/bloc/message_readers_cubit.dart'
+    as _i311;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart'
@@ -358,6 +362,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i699.GetMessageByIdUseCase>(
       () => _i699.GetMessageByIdUseCase(gh<_i857.MessagesRepository>()),
     );
+    gh.factory<_i90.GetMessageReadersUseCase>(
+      () => _i90.GetMessageReadersUseCase(gh<_i857.MessagesRepository>()),
+    );
     gh.factory<_i207.GetMessagesUseCase>(
       () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
     );
@@ -467,6 +474,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i541.UpdateSubscriptionSettingsUseCase>(
       () =>
           _i541.UpdateSubscriptionSettingsUseCase(gh<_i125.UsersRepository>()),
+    );
+    gh.factory<_i311.MessageReadersCubit>(
+      () => _i311.MessageReadersCubit(
+        getMessageReadersUseCase: gh<_i90.GetMessageReadersUseCase>(),
+      ),
     );
     gh.lazySingleton<_i361.Dio>(
       () => coreModule.dio(
