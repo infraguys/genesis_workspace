@@ -46,6 +46,9 @@ class LocalNotificationsService {
         category: LinuxNotificationCategory.email,
       ),
       macOS: DarwinNotificationDetails(),
+      windows: WindowsNotificationDetails(
+        duration: WindowsNotificationDuration.short,
+      ),
     );
     await _flutterLocalNotificationsPlugin.show(messageId, title, body, notificationDetails);
   }
