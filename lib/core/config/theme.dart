@@ -14,6 +14,7 @@ final darkTheme = ThemeData(
       .withLetterSpacing(0)
       .apply(
         fontFamily: FontFamily.montserrat,
+        bodyColor: Color(0xFFFFFFFF),
       ),
   extensions: [
     AppColors.darkTextColors,

@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
@@ -17,7 +18,7 @@ import 'package:genesis_workspace/features/call/view/draggable_resizable_call_mo
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
-import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -75,69 +76,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     InAppIdleDetector.pause();
   }
 
-  Widget _buildMobileBottomNavigationBar(
-    BuildContext context,
-    ThemeData theme,
-    TextColors textColors,
-  ) {
-    final Color selectedIconColor = textColors.text100;
-    final Color unselectedIconColor = textColors.text30;
-    final Color selectedBackgroundColor = theme.colorScheme.onSurface.withOpacity(0.05);
-
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(12),
-        topRight: Radius.circular(12),
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: theme.colorScheme.surface,
-        currentIndex: widget.navigationShell.currentIndex,
-        onTap: _goBranch,
-        selectedItemColor: selectedIconColor,
-        unselectedItemColor: unselectedIconColor,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: [
-          for (final model in branchModels)
-            BottomNavigationBarItem(
-              label: model.title(context),
-              icon: _buildNavigationIcon(
-                icon: model.icon,
-                iconColor: unselectedIconColor,
-                backgroundColor: Colors.transparent,
-              ),
-              activeIcon: _buildNavigationIcon(
-                icon: model.icon,
-                iconColor: selectedIconColor,
-                backgroundColor: selectedBackgroundColor,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavigationIcon({
-    required SvgGenImage icon,
-    required Color iconColor,
-    required Color backgroundColor,
-  }) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: icon.svg(
-          colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-        ),
-      ),
-    );
-  }
-
   Future<void> getInitialData() async {
     await context.read<RealTimeCubit>().init();
 
@@ -186,6 +124,9 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final Color selectedIconColor = textColors.text100;
+    final Color unselectedIconColor = textColors.text30;
+    final Color selectedBackgroundColor = theme.colorScheme.onSurface.withOpacity(0.05);
     final screenSize = currentSize(context);
     final bool isTabletOrSmaller = screenSize <= ScreenSize.tablet;
     return BlocListener<AuthCubit, AuthState>(
@@ -210,7 +151,82 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                   children: [
                     Scaffold(
                       bottomNavigationBar: isTabletOrSmaller
-                          ? _buildMobileBottomNavigationBar(context, theme, textColors)
+                          ? ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                              ),
+                              child: BottomNavigationBar(
+                                type: BottomNavigationBarType.fixed,
+                                backgroundColor: theme.colorScheme.surface,
+                                currentIndex: widget.navigationShell.currentIndex,
+                                onTap: _goBranch,
+                                selectedItemColor: selectedIconColor,
+                                unselectedItemColor: unselectedIconColor,
+                                showSelectedLabels: false,
+                                showUnselectedLabels: false,
+                                items: [
+                                  for (final model in branchModels)
+                                    BottomNavigationBarItem(
+                                      label: model.title(context),
+                                      icon: Container(
+                                        width: 56,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Center(
+                                          child: model.icon.svg(
+                                            colorFilter: ColorFilter.mode(unselectedIconColor, BlendMode.srcIn),
+                                          ),
+                                        ),
+                                      ),
+                                      activeIcon: Container(
+                                        width: 56,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          color: selectedBackgroundColor,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Center(
+                                          child: model.icon.svg(
+                                            colorFilter: ColorFilter.mode(selectedIconColor, BlendMode.srcIn),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  BottomNavigationBarItem(
+                                    label: context.t.profile,
+                                    icon: BlocBuilder<ProfileCubit, ProfileState>(
+                                      builder: (context, profileState) {
+                                        return UserAvatar(
+                                          size: 36,
+                                          avatarUrl: profileState.user?.avatarUrl,
+                                        );
+                                      },
+                                    ),
+                                    activeIcon: BlocBuilder<ProfileCubit, ProfileState>(
+                                      builder: (context, profileState) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: theme.colorScheme.onSurface,
+                                              width: 1,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: UserAvatar(
+                                            size: 36,
+                                            avatarUrl: profileState.user?.avatarUrl,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                           : null,
                       body: snapshot.connectionState == .waiting
                           ? Center(child: CircularProgressIndicator())

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/app_bar/view/branch_item.dart';
 import 'package:genesis_workspace/features/app_bar/view/organization_item.dart';
@@ -190,48 +191,44 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                             ),
                           ),
                         ),
-                        BlocBuilder<ProfileCubit, ProfileState>(
-                          builder: (context, state) {
-                            return Row(
-                              spacing: 12.0,
-                              children: [
-                                MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      context.read<InfoPanelCubit>().toggleProfilePanel();
-                                    },
-                                    child: UserAvatar(avatarUrl: state.user?.avatarUrl ?? ''),
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
+                        TapEffectIcon(
+                          onTap: () {},
+                          child: Assets.icons.notif.svg(),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            context.read<InfoPanelCubit>().toggleProfilePanel();
+                          },
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: BlocBuilder<ProfileCubit, ProfileState>(
+                              builder: (context, state) {
+                                return Row(
+                                  spacing: 12.0,
                                   children: [
-                                    MouseRegion(
-                                      cursor: SystemMouseCursors.click,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          context.read<InfoPanelCubit>().toggleProfilePanel();
-                                        },
-                                        child: Text(
+                                    UserAvatar(avatarUrl: state.user?.avatarUrl ?? ''),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
                                           state.user?.fullName ?? '',
                                           style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
                                         ),
-                                      ),
-                                    ),
-                                    Text(
-                                      'Администратор',
-                                      style: theme.textTheme.labelSmall?.copyWith(
-                                        color: textColors.text30,
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                        Text(
+                                          state.user?.role.humanReadable(context) ?? '',
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            color: textColors.text30,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
-                                ),
-                              ],
-                            );
-                          },
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -247,7 +244,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
 }
 
 final List<({SvgGenImage icon, String Function(BuildContext) title})> branchModels = [
-  (icon: Assets.icons.notif, title: (BuildContext context) => context.t.notifications),
+  // (icon: Assets.icons.notif, title: (BuildContext context) => context.t.notifications),
   (icon: Assets.icons.chatBubble, title: (BuildContext context) => context.t.chats),
   (icon: Assets.icons.calendarMonth, title: (BuildContext context) => context.t.calendar),
   (icon: Assets.icons.mail, title: (BuildContext context) => context.t.email),

@@ -4,27 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
+import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
-import 'package:genesis_workspace/features/messenger/view/info_page/profile_personal_info_page.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfilePanel extends StatefulWidget {
-  const ProfilePanel({super.key});
+class ProfileView extends StatefulWidget {
+  const ProfileView({super.key});
 
   @override
-  State<ProfilePanel> createState() => _ProfilePanelState();
+  State<ProfileView> createState() => _ProfileViewState();
 }
 
-class _ProfilePanelState extends State<ProfilePanel> {
+class _ProfileViewState extends State<ProfileView> {
   static const String _personalInfoRoute = '/personal-info';
   static const String _versionChooseRoute = '/version-choose';
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
@@ -236,37 +241,75 @@ class _ProfileSettingsView extends StatelessWidget {
     final localizationService = getIt<LocalizationService>();
     final textColors = theme.extension<TextColors>()!;
     final cardColors = theme.extension<CardColors>()!;
+    final isMobile = currentSize(context) <= .tablet;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
       appBar: AppBar(
-        centerTitle: false,
+        centerTitle: isMobile,
+        backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
         title: Text(
           "Профиль",
           style: theme.textTheme.labelLarge,
         ),
         actions: [
-          IconButton(
-            onPressed: onClosePanel,
-            icon: Assets.icons.close.svg(),
-          ),
+          if (!isMobile)
+            IconButton(
+              onPressed: onClosePanel,
+              icon: Assets.icons.close.svg(),
+            ),
         ],
       ),
       body: ListView(
         children: [
-          BlocBuilder<UpdateCubit, UpdateState>(
-            builder: (context, state) {
-              return Column(
-                children: [
-                  ListTile(
-                    leading: Assets.icons.accountCircle.svg(),
-                    title: Text(
-                      "Личная информация",
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    onTap: onOpenPersonalInfo,
-                  ),
-                  ListTile(
+          Column(
+            children: [
+              if (isMobile) ...[
+                BlocBuilder<ProfileCubit, ProfileState>(
+                  builder: (context, state) {
+                    return Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+                      child: Row(
+                        spacing: 16,
+                        children: [
+                          UserAvatar(
+                            avatarUrl: state.user?.avatarUrl ?? '',
+                            size: 64,
+                          ),
+                          Text(
+                            state.user?.fullName ?? '',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontSize: 20,
+                              fontWeight: .w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(
+                  height: 12,
+                ),
+              ],
+              ListTile(
+                leading: Assets.icons.accountCircle.svg(),
+                title: Text(
+                  "Личная информация",
+                  style: theme.textTheme.bodyMedium,
+                ),
+                trailing: isMobile ? Assets.icons.arrowRight.svg() : null,
+                onTap: () {
+                  if (isMobile) {
+                    context.pushNamed(Routes.profileInfo);
+                  } else {
+                    onOpenPersonalInfo();
+                  }
+                },
+              ),
+              BlocBuilder<UpdateCubit, UpdateState>(
+                builder: (context, state) {
+                  return ListTile(
                     leading: Assets.icons.info.svg(),
                     title: Text(
                       context.t.settings.appVersion,
@@ -278,52 +321,58 @@ class _ProfileSettingsView extends StatelessWidget {
                         color: textColors.text30,
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                    child: InkWell(
-                      onTap: onOpenVersionChoose,
+                  );
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                child: InkWell(
+                  onTap: () {
+                    if (isMobile) {
+                      context.pushNamed(Routes.forceUpdate);
+                    } else {
+                      onOpenVersionChoose();
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: cardColors.base,
                       borderRadius: BorderRadius.circular(8),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: cardColors.base,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      context.t.updateView.openSelectorCta,
-                                      style: theme.textTheme.bodyMedium,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      context.t.updateView.openSelectorSubtitle,
-                                      maxLines: 1,
-                                      overflow: .ellipsis,
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: textColors.text30,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.t.updateView.openSelectorCta,
+                                  style: theme.textTheme.bodyMedium,
                                 ),
-                              ),
-                              Assets.icons.arrowRight.svg(),
-                            ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  context.t.updateView.openSelectorSubtitle,
+                                  maxLines: 1,
+                                  overflow: .ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: textColors.text30,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          Assets.icons.arrowRight.svg(),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              );
-            },
+                ),
+              ),
+            ],
           ),
           if (showSoundSettings)
             ListTile(
@@ -410,10 +459,17 @@ class _ProfileSettingsView extends StatelessWidget {
             onTap: onOpenChatSorting,
           ),
           ListTile(
-            leading: Assets.icons.logout.svg(),
+            leading: Assets.icons.logout.svg(
+              colorFilter: ColorFilter.mode(
+                AppColors.noticeBase,
+                BlendMode.srcIn,
+              ),
+            ),
             title: Text(
               context.t.settings.logout,
-              style: theme.textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.noticeBase,
+              ),
             ),
             onTap: () async {
               await context.read<AuthCubit>().logout();
