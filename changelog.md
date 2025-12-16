@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.6.0
+- Fixed update feature on linux
+- Added profile panel
+- Fixed channel grey colors
+- Remove sound notification if channel is muted
+- Added notifications for desktop platforms
+- Fixed last message preview in topics
+
 ## 1.5.5
 - Fixed mute/unmute channel text in context menu actions on russian language
 - Fixed folders sync between devices on the same account
