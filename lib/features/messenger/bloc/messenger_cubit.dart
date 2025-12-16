@@ -638,14 +638,16 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       for (final messageId in event.messages) {
         updatedUnreadMessages.removeWhere((message) => message.id == messageId);
-        final message = state.unreadMessages.firstWhere((message) => message.id == messageId);
-        ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
-        final indexOfChat = state.chats.indexOf(updatedChat);
-        updatedChat.unreadMessages.remove(messageId);
-        updatedChat.topics?.forEach((topic) {
-          topic.unreadMessages.remove(messageId);
-        });
-        updatedChats[indexOfChat] = updatedChat;
+        final message = state.messages.firstWhereOrNull((message) => message.id == messageId);
+        ChatEntity? updatedChat = updatedChats.firstWhereOrNull((chat) => chat.id == message?.recipientId);
+        if (updatedChat != null) {
+          final indexOfChat = state.chats.indexOf(updatedChat);
+          updatedChat.unreadMessages.remove(messageId);
+          updatedChat.topics?.forEach((topic) {
+            topic.unreadMessages.remove(messageId);
+          });
+          updatedChats[indexOfChat] = updatedChat;
+        }
       }
     }
     emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
