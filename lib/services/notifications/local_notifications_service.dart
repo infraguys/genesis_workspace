@@ -40,7 +40,13 @@ class LocalNotificationsService {
   }
 
   Future<void> showNotification({required int messageId, required String title, required String body}) async {
-    const NotificationDetails notificationDetails = NotificationDetails();
+    NotificationDetails notificationDetails = NotificationDetails(
+      linux: LinuxNotificationDetails(
+        timeout: LinuxNotificationTimeout.fromDuration(Duration(milliseconds: 800)),
+        category: LinuxNotificationCategory.email,
+      ),
+      macOS: DarwinNotificationDetails(),
+    );
     await _flutterLocalNotificationsPlugin.show(messageId, title, body, notificationDetails);
   }
 }
