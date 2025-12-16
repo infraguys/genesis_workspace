@@ -261,6 +261,7 @@ class _ProfileSettingsView extends StatelessWidget {
         ],
       ),
       body: ListView(
+        padding: .zero,
         children: [
           Column(
             children: [
@@ -309,23 +310,60 @@ class _ProfileSettingsView extends StatelessWidget {
               ),
               BlocBuilder<UpdateCubit, UpdateState>(
                 builder: (context, state) {
-                  return ListTile(
-                    leading: Assets.icons.info.svg(),
-                    title: Text(
-                      context.t.settings.appVersion,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    subtitle: Text(
-                      state.currentVersion,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: textColors.text30,
+                  return Column(
+                    crossAxisAlignment: .stretch,
+                    children: [
+                      ListTile(
+                        leading: Assets.icons.info.svg(),
+                        title: Text(
+                          context.t.settings.appVersion,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        subtitle: Text(
+                          state.currentVersion,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: textColors.text30,
+                          ),
+                        ),
                       ),
-                    ),
+                      if (state.isNewUpdateAvailable) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainer,
+                              borderRadius: BorderRadiusGeometry.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: .start,
+                              children: [
+                                Text(
+                                  context.t.updateView.newVersionAvailable,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                Text(
+                                  context.t.updateView.downloadNewVersionRn,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: textColors.text30,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                      ],
+                    ],
                   );
                 },
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                 child: InkWell(
                   onTap: () {
                     if (isMobile) {
@@ -349,12 +387,12 @@ class _ProfileSettingsView extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  context.t.updateView.openSelectorCta,
+                                  context.t.updateView.browseBuilds,
                                   style: theme.textTheme.bodyMedium,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  context.t.updateView.openSelectorSubtitle,
+                                  context.t.updateView.browseBuildsSubtitle,
                                   maxLines: 1,
                                   overflow: .ellipsis,
                                   style: theme.textTheme.bodySmall?.copyWith(

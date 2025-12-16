@@ -220,12 +220,14 @@
     "progress_with_total": "{downloaded} / {total}",
     "installed": "Обновление установлено",
     "installed_message": "Версия {version} готова к использованию.",
-    "open_selector_cta": "Выбрать сборку",
-    "open_selector_subtitle": "Выберите версию для установки или отката",
+    "browse_builds": "Выбрать сборку",
+    "browse_builds_subtitle": "Выберите версию для установки или отката",
     "latest_badge": "Актуальная",
     "latest_hint": "Рекомендуемая сборка",
     "dev_channel": "Dev",
-    "stable_channel": "Стабильные"
+    "stable_channel": "Стабильные",
+    "new_version_available": "Вышла новая версия",
+    "download_new_version_rn": "Установите новую версию прямо сейчас"
   },
   "update_widget": {
     "update_available": "Доступно обновление",

@@ -178,14 +178,14 @@ class _SettingsViewState extends State<SettingsView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    context.t.updateView.openSelectorCta,
+                                    context.t.updateView.browseBuilds,
                                     style: theme.textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    context.t.updateView.openSelectorSubtitle,
+                                    context.t.updateView.browseBuildsSubtitle,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurface.withOpacity(
                                         0.8,

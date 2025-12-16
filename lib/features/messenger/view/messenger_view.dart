@@ -57,8 +57,6 @@ class _MessengerViewState extends State<MessengerView>
 
   late final ScrollController _chatsController;
 
-  // final _isOpenNotifier = ValueNotifier<InfoPanelState>(.closed);
-
   Future<void> createNewFolder(BuildContext context) {
     final messengerCubit = context.read<MessengerCubit>();
     return showDialog(
@@ -514,11 +512,6 @@ class _MessengerViewState extends State<MessengerView>
                                   } else {
                                     context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
                                   }
-                                  // if (_isOpenNotifier.value != .closed) {
-                                  //   _isOpenNotifier.value = .closed;
-                                  // } else {
-                                  //   _isOpenNotifier.value = .dmInfo;
-                                  // }
                                 },
                               );
                             }
@@ -535,11 +528,6 @@ class _MessengerViewState extends State<MessengerView>
                                   } else {
                                     context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
                                   }
-                                  // if (_isOpenNotifier.value != .closed) {
-                                  //   _isOpenNotifier.value = .closed;
-                                  // } else {
-                                  //   _isOpenNotifier.value = .dmInfo;
-                                  // }
                                 },
                               );
                             }
@@ -557,11 +545,6 @@ class _MessengerViewState extends State<MessengerView>
                                   } else {
                                     context.read<InfoPanelCubit>().setInfoPanelState(.channelInfo);
                                   }
-                                  // if (_isOpenNotifier.value != .closed) {
-                                  //   _isOpenNotifier.value = .closed;
-                                  // } else {
-                                  //   _isOpenNotifier.value = .channelInfo;
-                                  // }
                                 },
                               );
                             }
@@ -571,7 +554,6 @@ class _MessengerViewState extends State<MessengerView>
                       ),
                       const SizedBox(width: 4.0),
                       BlocBuilder<InfoPanelCubit, InfoPanelState>(
-                        // valueListenable: _isOpenNotifier,
                         builder: (context, panelState) {
                           if (state.selectedChat?.dmIds != null ||
                               state.selectedChat?.streamId != null ||

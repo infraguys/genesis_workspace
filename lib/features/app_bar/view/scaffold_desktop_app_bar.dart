@@ -244,7 +244,6 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
 }
 
 final List<({SvgGenImage icon, String Function(BuildContext) title})> branchModels = [
-  // (icon: Assets.icons.notif, title: (BuildContext context) => context.t.notifications),
   (icon: Assets.icons.chatBubble, title: (BuildContext context) => context.t.chats),
   (icon: Assets.icons.calendarMonth, title: (BuildContext context) => context.t.calendar),
   (icon: Assets.icons.mail, title: (BuildContext context) => context.t.email),
