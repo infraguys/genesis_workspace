@@ -42,7 +42,7 @@ class LocalNotificationsService {
   Future<void> showNotification({required int messageId, required String title, required String body}) async {
     NotificationDetails notificationDetails = NotificationDetails(
       linux: LinuxNotificationDetails(
-        timeout: LinuxNotificationTimeout.fromDuration(Duration(milliseconds: 800)),
+        timeout: LinuxNotificationTimeout.fromDuration(Duration(seconds: 5)),
         category: LinuxNotificationCategory.email,
       ),
       macOS: DarwinNotificationDetails(),
