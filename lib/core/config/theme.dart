@@ -7,7 +7,6 @@ final darkTheme = ThemeData(
   brightness: Brightness.dark,
   colorScheme: darkColorScheme,
   badgeTheme: _badgeTheme,
-  // fontFamily: FontFamily.montserrat,
   scaffoldBackgroundColor: const Color(0xff1B1B1D),
   inputDecorationTheme: _darkInputDecorationTheme,
   textTheme: ThemeData.dark().textTheme
@@ -40,6 +39,7 @@ final darkTheme = ThemeData(
 final darkColorScheme = ColorScheme.dark(
   primary: AppColors.primary,
   surface: AppColors.darkSurface,
+  surfaceContainer: Color(0xFF1C1B1F),
   background: AppColors.darkBackground,
 );
 

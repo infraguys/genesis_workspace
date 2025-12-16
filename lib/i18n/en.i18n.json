@@ -214,12 +214,14 @@
     "progress_with_total": "{downloaded} / {total}",
     "installed": "Update installed",
     "installed_message": "Version {version} is ready to use.",
-    "open_selector_cta": "Browse builds",
-    "open_selector_subtitle": "Pick a version to install or downgrade",
+    "browse_builds": "Browse builds",
+    "browse_builds_subtitle": "Pick a version to install or downgrade",
     "latest_badge": "Latest",
     "latest_hint": "Recommended build",
     "dev_channel": "Dev",
-    "stable_channel": "Stable"
+    "stable_channel": "Stable",
+    "new_version_available": "New version available",
+    "download_new_version_rn": "Download new version right now"
   },
   "update_widget": {
     "update_available": "Update available",
