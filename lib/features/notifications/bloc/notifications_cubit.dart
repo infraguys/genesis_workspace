@@ -19,6 +19,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     this._realTimeService,
     this._profileCubit,
     this._messengerCubit,
+    this._prefs,
   ) : super(
         NotificationsState(
           user: null,
@@ -40,6 +41,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   final ProfileCubit _profileCubit;
   final MessengerCubit _messengerCubit;
   final MultiPollingService _realTimeService;
+  final SharedPreferences _prefs;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
 
   void _onProfileStateChanged(ProfileState profileState) {
@@ -56,8 +58,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
   _onMessageEvents(MessageEventEntity event) async {
     if (event.message.senderId != state.user?.userId && !state.mutedChatsIds.contains(event.message.recipientId)) {
-      final prefs = await SharedPreferences.getInstance();
-      final selected = prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
+      final selected = _prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
       _player.play(AssetSource(selected));
     }
   }

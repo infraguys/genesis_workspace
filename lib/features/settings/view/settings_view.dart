@@ -37,7 +37,7 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = getIt<SharedPreferences>();
     final saved = prefs.getString(SharedPrefsKeys.notificationSound);
     final settings = context.read<SettingsCubit>().state;
     setState(() {

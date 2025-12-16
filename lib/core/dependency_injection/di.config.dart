@@ -678,17 +678,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i771.GetChannelMembersUseCase>(),
       ),
     );
-    gh.factory<_i214.OrganizationsCubit>(
-      () => _i214.OrganizationsCubit(
-        gh<_i724.WatchOrganizationsUseCase>(),
-        gh<_i183.AddOrganizationUseCase>(),
-        gh<_i286.GetOrganizationSettingsUseCase>(),
-        gh<_i240.RemoveOrganizationUseCase>(),
-        gh<_i377.OrganizationSwitcherService>(),
-        gh<_i823.MultiPollingService>(),
-        gh<_i766.ProfileCubit>(),
-      ),
-    );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(
         gh<_i82.RealTimeService>(),
@@ -749,6 +738,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
+      ),
+    );
+    gh.factory<_i214.OrganizationsCubit>(
+      () => _i214.OrganizationsCubit(
+        gh<_i724.WatchOrganizationsUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
+        gh<_i286.GetOrganizationSettingsUseCase>(),
+        gh<_i240.RemoveOrganizationUseCase>(),
+        gh<_i377.OrganizationSwitcherService>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i766.ProfileCubit>(),
+        gh<_i460.SharedPreferences>(),
       ),
     );
     gh.lazySingleton<_i862.AuthCubit>(
@@ -825,6 +826,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i823.MultiPollingService>(),
         gh<_i766.ProfileCubit>(),
         gh<_i49.MessengerCubit>(),
+        gh<_i460.SharedPreferences>(),
       ),
     );
     return this;

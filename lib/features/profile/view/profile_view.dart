@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
 import 'package:genesis_workspace/features/profile/view/profile_settings_view.dart';
@@ -41,7 +42,7 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = getIt<SharedPreferences>();
     final saved = prefs.getString(SharedPrefsKeys.notificationSound);
     final settings = context.read<SettingsCubit>().state;
     setState(() {
