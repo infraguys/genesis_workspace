@@ -8,6 +8,7 @@ import 'package:genesis_workspace/domain/messages/entities/single_message_entity
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 
 abstract class MessagesRepository {
   Future<MessagesResponseEntity> getMessages(MessagesRequestEntity body);
@@ -23,4 +24,5 @@ abstract class MessagesRepository {
     Function(int sent, int total)? onProgress,
     CancelToken? cancelToken,
   });
+  Future<List<UserEntity>> getMessageReaders(int messageId);
 }
