@@ -152,8 +152,8 @@ class MessengerCubit extends Cubit<MessengerState> {
             isMuted: subscription.isMuted,
           );
         }
-        chat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
-        chats[indexOfChat] = chat;
+        final updatedChat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
+        chats[indexOfChat] = updatedChat;
       } else {
         ChatEntity chat = ChatEntity.createChatFromMessage(
           message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),
