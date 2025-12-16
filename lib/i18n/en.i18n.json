@@ -285,5 +285,23 @@
     "confirm": "Open",
     "cancel": "Cancel"
   },
+  "profile_view": {
+    "personal_info": "Personal information",
+    "notification_sound_pop": "Pop",
+    "notification_sound_whoop": "Whoop",
+    "language_english": "English",
+    "language_russian": "Russian",
+    "clear_db": "Clear DB",
+    "dev_logout": "Dev logout"
+  },
+  "profile_personal_info": {
+    "title": "Personal information",
+    "share_profile": "Share profile",
+    "link_copied": "Profile link copied to clipboard",
+    "user_id": "User ID",
+    "timezone": "Time zone",
+    "team_and_position": "Team > Position",
+    "manager": "Manager"
+  },
   "profile": "Profile"
 }

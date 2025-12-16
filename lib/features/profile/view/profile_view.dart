@@ -249,7 +249,7 @@ class _ProfileSettingsView extends StatelessWidget {
         centerTitle: isMobile,
         backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
         title: Text(
-          "Профиль",
+          context.t.profile,
           style: theme.textTheme.labelLarge,
         ),
         actions: [
@@ -295,7 +295,7 @@ class _ProfileSettingsView extends StatelessWidget {
               ListTile(
                 leading: Assets.icons.accountCircle.svg(),
                 title: Text(
-                  "Личная информация",
+                  context.t.profilePersonalInfo.title,
                   style: theme.textTheme.bodyMedium,
                 ),
                 trailing: isMobile ? Assets.icons.arrowRight.svg() : null,
@@ -403,9 +403,15 @@ class _ProfileSettingsView extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: textColors.text30,
                     ),
-                    items: const [
-                      DropdownMenuItem(value: AssetsConstants.audioPop, child: Text('Pop')),
-                      DropdownMenuItem(value: AssetsConstants.audioWhoop, child: Text('Whoop')),
+                    items: [
+                      DropdownMenuItem(
+                        value: AssetsConstants.audioPop,
+                        child: Text(context.t.profileView.notificationSoundPop),
+                      ),
+                      DropdownMenuItem(
+                        value: AssetsConstants.audioWhoop,
+                        child: Text(context.t.profileView.notificationSoundWhoop),
+                      ),
                     ],
                   ),
                 ],
@@ -435,8 +441,8 @@ class _ProfileSettingsView extends StatelessWidget {
                 }
               },
               items: [
-                DropdownMenuItem(value: const Locale('en'), child: Text('English')),
-                DropdownMenuItem(value: const Locale('ru'), child: Text('Русский')),
+                DropdownMenuItem(value: const Locale('en'), child: Text(context.t.profileView.languageEnglish)),
+                DropdownMenuItem(value: const Locale('ru'), child: Text(context.t.profileView.languageRussian)),
               ],
             ),
           ),
@@ -476,37 +482,21 @@ class _ProfileSettingsView extends StatelessWidget {
             },
           ),
           if (kDebugMode) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: ElevatedButton(
-                onPressed: () {
-                  context.read<SettingsCubit>().clearLocalDatabase();
-                },
-                child: const Text("Clear db"),
-              ),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.delete),
+              title: Text(context.t.profileView.clearDb),
+              onTap: () {
+                context.read<SettingsCubit>().clearLocalDatabase();
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.error,
-                  foregroundColor: theme.colorScheme.onError,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () async {
-                  await context.read<AuthCubit>().devLogout();
-                  // context.go(Routes.auth);
-                },
-                icon: const Icon(Icons.logout),
-                label: Text(
-                  "Dev logout",
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onError,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+            ListTile(
+              leading: Assets.icons.logout.svg(),
+              title: Text(context.t.profileView.devLogout),
+              onTap: () async {
+                await context.read<AuthCubit>().devLogout();
+                // context.go(Routes.auth);
+              },
             ),
           ],
         ],

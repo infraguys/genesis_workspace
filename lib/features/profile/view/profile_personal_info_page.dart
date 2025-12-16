@@ -25,7 +25,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          "Ссылка на профиль скопирована в буфер обмена",
+          context.t.profilePersonalInfo.linkCopied,
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onPrimary,
           ),
@@ -57,7 +57,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
             backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
             centerTitle: isMobile,
             title: Text(
-              "Личная информация",
+              context.t.profilePersonalInfo.title,
               style: theme.textTheme.labelLarge,
             ),
             actions: [
@@ -119,7 +119,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                         await shareProfile(context, userId: user.userId);
                       },
                       title: Text(
-                        "Поделиться профилем",
+                        context.t.profilePersonalInfo.shareProfile,
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -146,7 +146,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                     height: 12,
                   ),
                   _InfoTile(
-                    label: "ID пользователя",
+                    label: context.t.profilePersonalInfo.userId,
                     value: user.userId.toString(),
                     icon: Assets.icons.alternateEmail.svg(),
                   ),
@@ -154,7 +154,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                     height: 12,
                   ),
                   _InfoTile(
-                    label: "Часовой пояс",
+                    label: context.t.profilePersonalInfo.timezone,
                     value: user.timezone,
                     icon: Assets.icons.schedule.svg(),
                   ),
@@ -162,7 +162,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                     height: 12,
                   ),
                   _InfoTile(
-                    label: "Команда > Должность",
+                    label: context.t.profilePersonalInfo.teamAndPosition,
                     value: user.jobTitle,
                     icon: Assets.icons.businessCenter.svg(),
                   ),
@@ -170,7 +170,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                     height: 12,
                   ),
                   _InfoTile(
-                    label: "Руководитель",
+                    label: context.t.profilePersonalInfo.manager,
                     value: user.bossName,
                     icon: Assets.icons.handshake.svg(),
                   ),
