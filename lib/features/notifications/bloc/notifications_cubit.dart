@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -51,13 +50,11 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   }
 
   void _onMessengerStateChanged(MessengerState messengerState) {
-    inspect(messengerState);
     final mutedChatsIds = messengerState.chats.where((chat) => chat.isMuted).map((chat) => chat.id).toSet();
     emit(state.copyWith(mutedChatsIds: mutedChatsIds));
   }
 
   _onMessageEvents(MessageEventEntity event) async {
-    inspect(state);
     if (event.message.senderId != state.user?.userId && !state.mutedChatsIds.contains(event.message.recipientId)) {
       final prefs = await SharedPreferences.getInstance();
       final selected = prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
@@ -70,6 +67,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     _messagesEventsSubscription.cancel();
     _profileStateSubscription.cancel();
     _messengerStateSubscription.cancel();
+    _player.dispose();
     return super.close();
   }
 }
