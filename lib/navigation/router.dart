@@ -12,31 +12,36 @@ import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
-import 'package:genesis_workspace/features/feed/feed.dart';
-import 'package:genesis_workspace/features/inbox/inbox.dart';
-import 'package:genesis_workspace/features/logs/logs.dart';
-import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
-import 'package:genesis_workspace/features/reactions/reactions.dart';
-import 'package:genesis_workspace/features/settings/settings.dart';
+import 'package:genesis_workspace/features/profile/profile.dart';
+import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
-import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:go_router/go_router.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final shellNavigatorChannelsKey = GlobalKey<NavigatorState>(debugLabel: 'shellChannels');
-final _shellNavigationInDevelopment = GlobalKey<NavigatorState>(debugLabel: 'shellInDevelopment');
 final _shellNavigatorMessengerKey = GlobalKey<NavigatorState>(debugLabel: 'shellMessenger');
-final _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
-final _shellNavigatorMenuKey = GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
+final _shellNavigatorCalendarKey = GlobalKey<NavigatorState>(debugLabel: 'shellCalendar');
+final _shellNavigatorMailKey = GlobalKey<NavigatorState>(debugLabel: 'shellMail');
+final _shellNavigatorGroupsKey = GlobalKey<NavigatorState>(debugLabel: 'shellGroups');
+final _shellNavigatorCallsKey = GlobalKey<NavigatorState>(debugLabel: 'shellCalls');
+final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
 class Routes {
   static const String splashScreen = '/';
   static const String auth = '/auth';
   static const String pasteToken = '/paste-token';
+
+  static const String messenger = '/messenger';
+  static const String calendar = '/calendar';
+  static const String mail = '/mail';
+  static const String groups = '/groups';
+  static const String calls = '/calls';
+  static const String profile = '/profile';
+  static const String profileInfo = '/profile-info';
+
   static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
   static const String groupChat = '/group-chat';
@@ -53,7 +58,6 @@ class Routes {
   static const String imageFullScreen = '/image-full-screen';
   static const String pasteBaseUrl = '/paste-base-url';
   static const String forceUpdate = '/force-update';
-  static const String messenger = '/messenger';
   static const String notifications = '/notifications';
   static const String call = '/call';
   static const String chatInfo = 'chat-info';
@@ -70,29 +74,11 @@ final router = GoRouter(
       },
       branches: [
         StatefulShellBranch(
-          navigatorKey: _shellNavigationInDevelopment,
-          routes: [
-            GoRoute(
-              path: Routes.notifications,
-              name: Routes.notifications,
-              builder: (context, state) {
-                return Logs();
-              },
-            ),
-          ],
-        ),
-        StatefulShellBranch(
           navigatorKey: _shellNavigatorMessengerKey,
           routes: [
             GoRoute(
               path: Routes.messenger,
               name: Routes.messenger,
-              redirect: (BuildContext context, GoRouterState state) {
-                // if (!context.read<AuthCubit>().state.isAuthorized) {
-                //   return Routes.auth;
-                // }
-                return null;
-              },
               builder: (context, state) {
                 return Messenger();
               },
@@ -100,105 +86,73 @@ final router = GoRouter(
           ],
         ),
         StatefulShellBranch(
-          navigatorKey: shellNavigatorChannelsKey,
+          navigatorKey: _shellNavigatorCalendarKey,
           routes: [
             GoRoute(
-              path: Routes.channels,
-              name: Routes.channels,
-              // pageBuilder: (context, state) => const NoTransitionPage(child: Channels()),
-              pageBuilder: (context, state) => const NoTransitionPage(child: InDevelopmentWidget()),
-            ),
-            if (kIsWeb) ...[
-              GoRoute(
-                path: '${Routes.channels}/:channelId',
-                name: 'allChatsChannelChat',
-                pageBuilder: (context, state) {
-                  final channelIdString = state.pathParameters['channelId'];
-                  final channelId = int.tryParse(channelIdString ?? '');
-                  assert(channelId != null, 'channelId must be int');
-
-                  final extra = state.extra as Map<String, dynamic>?;
-                  final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
-
-                  if (currentSize(context) > ScreenSize.lTablet) {
-                    return NoTransitionPage(
-                      child: Channels(initialChannelId: channelId, initialTopicName: null),
-                    );
-                  } else {
-                    return NoTransitionPage(
-                      child: ChannelChat(
-                        channelId: channelId!,
-                        unreadMessagesCount: unreadMessagesCount,
-                      ),
-                    );
-                  }
-                },
-              ),
-              GoRoute(
-                path: '${Routes.channels}/:channelId/:topicName',
-                name: 'allChatsChannelChatTopic',
-                pageBuilder: (context, state) {
-                  final channelIdString = state.pathParameters['channelId'];
-                  final topicName = state.pathParameters['topicName'];
-                  final channelId = int.tryParse(channelIdString ?? '');
-                  assert(channelId != null, 'channelId must be int');
-
-                  final extra = state.extra as Map<String, dynamic>?;
-                  final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
-
-                  if (currentSize(context) > ScreenSize.lTablet) {
-                    return NoTransitionPage(
-                      child: Channels(initialChannelId: channelId, initialTopicName: topicName),
-                    );
-                  } else {
-                    return NoTransitionPage(
-                      child: ChannelChat(
-                        channelId: channelId!,
-                        topicName: topicName,
-                        unreadMessagesCount: unreadMessagesCount,
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorMenuKey,
-          routes: [
-            GoRoute(
-              path: Routes.feed,
-              builder: (context, state) => const InDevelopmentWidget(),
-              routes: [
-                GoRoute(path: Routes.feed, name: Routes.feed, builder: (context, state) => Feed()),
-                GoRoute(
-                  path: Routes.inbox,
-                  name: Routes.inbox,
-                  builder: (context, state) => Inbox(),
-                ),
-                GoRoute(
-                  path: Routes.mentions,
-                  name: Routes.mentions,
-                  builder: (context, state) => Mentions(),
-                ),
-                GoRoute(
-                  path: Routes.reactions,
-                  name: Routes.reactions,
-                  builder: (context, state) => Reactions(),
-                ),
-                GoRoute(
-                  path: Routes.starred,
-                  name: Routes.starred,
-                  builder: (context, state) => Starred(),
-                ),
-              ],
+              path: Routes.calendar,
+              name: Routes.calendar,
+              builder: (context, state) {
+                return InDevelopmentWidget();
+              },
             ),
           ],
         ),
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorSettingsKey,
-          routes: [GoRoute(path: Routes.settings, builder: (context, state) => const Settings())],
+          navigatorKey: _shellNavigatorMailKey,
+          routes: [
+            GoRoute(
+              path: Routes.mail,
+              name: Routes.mail,
+              builder: (context, state) {
+                return InDevelopmentWidget();
+              },
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorGroupsKey,
+          routes: [
+            GoRoute(
+              path: Routes.groups,
+              name: Routes.groups,
+              builder: (context, state) {
+                return InDevelopmentWidget();
+              },
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorCallsKey,
+          routes: [
+            GoRoute(
+              path: Routes.calls,
+              name: Routes.calls,
+              builder: (context, state) {
+                return InDevelopmentWidget();
+              },
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorProfileKey,
+          routes: [
+            GoRoute(
+              path: Routes.profile,
+              name: Routes.profile,
+              builder: (context, state) {
+                return Profile();
+              },
+            ),
+            GoRoute(
+              path: Routes.profileInfo,
+              name: Routes.profileInfo,
+              builder: (context, state) {
+                return ProfilePersonalInfoPage(
+                  onBack: () => _shellNavigatorProfileKey.currentState?.maybePop(),
+                );
+              },
+            ),
+          ],
         ),
       ],
     ),

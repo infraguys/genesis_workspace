@@ -215,7 +215,7 @@
     "installed": "Update installed",
     "installed_message": "Version {version} is ready to use.",
     "open_selector_cta": "Browse builds",
-    "open_selector_subtitle": "Pick a version to install or downgrade.",
+    "open_selector_subtitle": "Pick a version to install or downgrade",
     "latest_badge": "Latest",
     "latest_hint": "Recommended build",
     "dev_channel": "Dev",
@@ -284,5 +284,6 @@
     "title": "Open external link?",
     "confirm": "Open",
     "cancel": "Cancel"
-  }
+  },
+  "profile": "Profile"
 }

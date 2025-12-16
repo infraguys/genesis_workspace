@@ -10,7 +10,6 @@ import 'package:genesis_workspace/features/channels/view/channel_topics.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
-import 'package:go_router/go_router.dart';
 
 class ChannelsView extends StatefulWidget {
   final int? initialChannelId;
@@ -58,7 +57,7 @@ class ChannelsViewState extends State<ChannelsView> {
       //     prev.selectedChannelId != next.selectedChannelId ||
       //     prev.selectedTopic?.name != next.selectedTopic?.name,
       listener: (context, state) {
-        final router = GoRouter.of(shellNavigatorChannelsKey.currentContext!);
+        // final router = GoRouter.of(shellNavigatorChannelsKey.currentContext!);
         final currentLocation = router.routeInformationProvider.value.location;
 
         String target;
@@ -115,12 +114,9 @@ class ChannelsViewState extends State<ChannelsView> {
 
                   final channelsWidth = currentSize(context) > ScreenSize.lTablet
                       ? desktopChannelsWidth
-                      : (MediaQuery.sizeOf(context).width -
-                            (currentSize(context) > ScreenSize.tablet ? 114 : 0));
+                      : (MediaQuery.sizeOf(context).width - (currentSize(context) > ScreenSize.tablet ? 114 : 0));
 
-                  final double topicsWidth = state.selectedChannelId != null
-                      ? channelsWidth - _measuredWidth
-                      : 0;
+                  final double topicsWidth = state.selectedChannelId != null ? channelsWidth - _measuredWidth : 0;
 
                   return Row(
                     mainAxisSize: MainAxisSize.min,
@@ -159,8 +155,7 @@ class ChannelsViewState extends State<ChannelsView> {
                                   right: BorderSide(
                                     color: Theme.of(context).dividerColor.withValues(
                                       alpha:
-                                          (currentSize(context) > ScreenSize.lTablet &&
-                                              state.selectedChannelId != null)
+                                          (currentSize(context) > ScreenSize.lTablet && state.selectedChannelId != null)
                                           ? 0.3
                                           : 0,
                                     ),

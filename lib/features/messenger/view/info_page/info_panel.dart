@@ -5,7 +5,7 @@ import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_inf
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/channel_info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/private_info_panel.dart';
-import 'package:genesis_workspace/features/messenger/view/info_page/profile_panel.dart';
+import 'package:genesis_workspace/features/profile/profile.dart';
 
 class InfoPanel extends StatelessWidget {
   final VoidCallback onClose;
@@ -28,7 +28,7 @@ class InfoPanel extends StatelessWidget {
             case .dmInfo:
               return PrivateInfoPanel(onClose: onClose);
             case .profileInfo:
-              return ProfilePanel();
+              return Profile();
             default:
               return Container(
                 decoration: BoxDecoration(
@@ -40,26 +40,6 @@ class InfoPanel extends StatelessWidget {
           }
         },
       ),
-      // child: Builder(
-      //   builder: (BuildContext context) {
-      //     switch (panelState) {
-      //       case .channelInfo:
-      //         return ChannelInfoPanel(onClose: onClose);
-      //       case .dmInfo:
-      //         return PrivateInfoPanel(onClose: onClose);
-      //       case .profile:
-      //         return Container();
-      //       default:
-      //         return Container(
-      //           decoration: BoxDecoration(
-      //             borderRadius: .circular(12.0),
-      //             color: theme.colorScheme.surface,
-      //           ),
-      //           child: SizedBox.expand(),
-      //         );
-      //     }
-      //   },
-      // ),
     );
   }
 }

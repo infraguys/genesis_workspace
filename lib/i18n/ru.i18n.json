@@ -221,7 +221,7 @@
     "installed": "Обновление установлено",
     "installed_message": "Версия {version} готова к использованию.",
     "open_selector_cta": "Выбрать сборку",
-    "open_selector_subtitle": "Выберите версию для установки или отката.",
+    "open_selector_subtitle": "Выберите версию для установки или отката",
     "latest_badge": "Актуальная",
     "latest_hint": "Рекомендуемая сборка",
     "dev_channel": "Dev",
@@ -290,5 +290,6 @@
     "title": "Открыть внешнюю ссылку?",
     "confirm": "Открыть",
     "cancel": "Отмена"
-  }
+  },
+  "profile": "Профиль"
 }
