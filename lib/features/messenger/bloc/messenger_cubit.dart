@@ -51,7 +51,7 @@ import 'package:injectable/injectable.dart';
 
 part 'messenger_state.dart';
 
-@injectable
+@LazySingleton()
 class MessengerCubit extends Cubit<MessengerState> {
   final AddFolderUseCase _addFolderUseCase;
   final GetFoldersUseCase _getFoldersUseCase;
@@ -152,8 +152,8 @@ class MessengerCubit extends Cubit<MessengerState> {
             isMuted: subscription.isMuted,
           );
         }
-        final updatedChat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
-        chats[indexOfChat] = updatedChat;
+        chat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
+        chats[indexOfChat] = chat;
       } else {
         ChatEntity chat = ChatEntity.createChatFromMessage(
           message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),

@@ -1,34 +1,23 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
-import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'profile_state.dart';
 
 @LazySingleton()
 class ProfileCubit extends Cubit<ProfileState> {
-  ProfileCubit(this._realTimeService, this._getOwnUserUseCase, this._updatePresenceUseCase)
-    : super(ProfileState(user: null, lastPresenceUpdateId: -1, myPresence: PresenceStatus.idle)) {
-    _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
-  }
+  ProfileCubit(this._getOwnUserUseCase, this._updatePresenceUseCase)
+    : super(ProfileState(user: null, lastPresenceUpdateId: -1, myPresence: PresenceStatus.idle));
 
-  final MultiPollingService _realTimeService;
   final GetOwnUserUseCase _getOwnUserUseCase;
   final UpdatePresenceUseCase _updatePresenceUseCase;
-  late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-
-  final player = AudioPlayer();
 
   Future<void> getOwnUser() async {
     try {
@@ -52,19 +41,5 @@ class ProfileCubit extends Cubit<ProfileState> {
         inspect(e);
       }
     }
-  }
-
-  _onMessageEvents(MessageEventEntity event) async {
-    if (event.message.senderId != state.user?.userId) {
-      final prefs = await SharedPreferences.getInstance();
-      final selected = prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
-      player.play(AssetSource(selected));
-    }
-  }
-
-  @override
-  Future<void> close() {
-    _messagesEventsSubscription.cancel();
-    return super.close();
   }
 }
