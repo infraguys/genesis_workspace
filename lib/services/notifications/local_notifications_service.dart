@@ -8,7 +8,9 @@ class LocalNotificationsService {
   LocalNotificationsService(this._flutterLocalNotificationsPlugin);
 
   Future<void> init() async {
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     final DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings();
     final LinuxInitializationSettings initializationSettingsLinux = LinuxInitializationSettings(
       defaultActionName: 'Open notification',
