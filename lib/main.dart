@@ -6,6 +6,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/services/firebase/firebase_service.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
+import 'package:genesis_workspace/services/notifications/local_notifications_service.dart';
 
 class Main {
   static Future<void> startApp() async {
@@ -16,6 +17,7 @@ class Main {
     usePathUrlStrategy();
     final LocalizationService localizationService = getIt<LocalizationService>();
     await localizationService.init();
+    await getIt<LocalNotificationsService>().init();
 
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }

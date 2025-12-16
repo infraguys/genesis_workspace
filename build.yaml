@@ -18,6 +18,7 @@ targets:
           - lib/services/paste/paste_capture_service.dart
           - lib/services/organizations/organization_switcher_service.dart
           - lib/services/download_files/download_files_service.dart
+          - lib/services/notifications/local_notifications_service.dart
           - lib/data/**/datasources/**.dart
           - lib/data/**/repositories_impl/**.dart
           - lib/data/**/dao/**.dart

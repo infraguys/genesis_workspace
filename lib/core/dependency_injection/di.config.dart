@@ -10,6 +10,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    as _i163;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
@@ -242,6 +244,8 @@ import 'package:genesis_workspace/services/download_files/download_files_service
     as _i124;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
+import 'package:genesis_workspace/services/notifications/local_notifications_service.dart'
+    as _i1031;
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart'
     as _i377;
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart'
@@ -305,6 +309,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
     );
+    gh.lazySingleton<_i163.FlutterLocalNotificationsPlugin>(
+      () => coreModule.flutterLocalNotificationsPlugin(),
+    );
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
     );
@@ -327,6 +334,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i253.MessagesDataSource>(() => _i695.MessagesDataSourceImpl());
     gh.factory<_i672.AuthRemoteDataSource>(
       () => _i672.AuthRemoteDataSourceImpl(),
+    );
+    gh.factory<_i1031.LocalNotificationsService>(
+      () => _i1031.LocalNotificationsService(
+        gh<_i163.FlutterLocalNotificationsPlugin>(),
+      ),
     );
     gh.factory<_i571.RecentDmDao>(
       () => _i571.RecentDmDao(gh<_i606.AppDatabase>()),
@@ -827,6 +839,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i766.ProfileCubit>(),
         gh<_i49.MessengerCubit>(),
         gh<_i460.SharedPreferences>(),
+        gh<_i1031.LocalNotificationsService>(),
       ),
     );
     return this;
