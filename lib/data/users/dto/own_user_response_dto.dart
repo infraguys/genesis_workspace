@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/common/dto/response_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -60,8 +61,8 @@ class OwnUserResponseDto extends ResponseDto {
     isAdmin: isAdmin,
     isOwner: isOwner,
     isGuest: isGuest,
-    jobTitle: profileData[1]?["value"] ?? '',
-    bossName: profileData[2]?["value"] ?? '',
+    jobTitle: profileData[AppConstants.jobTitleProfileDataIndex]?["value"] ?? '',
+    bossName: profileData[AppConstants.bossNameProfileDataIndex]?["value"] ?? '',
   );
 
   static UserRole _fromJsonToUserRole(int json) {

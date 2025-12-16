@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+part 'info_panel_state.dart';
+
 enum InfoPanelStatus {
   closed,
   channelInfo,
@@ -22,18 +24,5 @@ class InfoPanelCubit extends Cubit<InfoPanelState> {
     } else {
       setInfoPanelState(.profileInfo);
     }
-  }
-}
-
-class InfoPanelState {
-  final InfoPanelStatus status;
-  const InfoPanelState(this.status);
-
-  InfoPanelState copyWith({
-    InfoPanelStatus? status,
-  }) {
-    return InfoPanelState(
-      status ?? this.status,
-    );
   }
 }

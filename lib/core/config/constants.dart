@@ -11,6 +11,9 @@ class AppConstants {
 
   static const String tusVersion = '1.0.0';
 
+  static const int jobTitleProfileDataIndex = 1;
+  static const int bossNameProfileDataIndex = 2;
+
   static late String baseUrl;
   static int? selectedOrganizationId;
 
