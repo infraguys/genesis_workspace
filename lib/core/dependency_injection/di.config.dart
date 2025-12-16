@@ -10,6 +10,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    as _i163;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:genesis_workspace/core/dependency_injection/core_module.dart'
     as _i440;
@@ -216,8 +218,12 @@ import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
     as _i758;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
+import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart'
+    as _i398;
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart'
     as _i49;
+import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart'
+    as _i388;
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart'
     as _i214;
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart'
@@ -238,6 +244,8 @@ import 'package:genesis_workspace/services/download_files/download_files_service
     as _i124;
 import 'package:genesis_workspace/services/localization/localization_service.dart'
     as _i435;
+import 'package:genesis_workspace/services/notifications/local_notifications_service.dart'
+    as _i1031;
 import 'package:genesis_workspace/services/organizations/organization_switcher_service.dart'
     as _i377;
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart'
@@ -286,6 +294,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i397.GetVersionConfigUseCase(),
     );
     gh.factory<_i274.CallCubit>(() => _i274.CallCubit());
+    gh.factory<_i398.InfoPanelCubit>(() => _i398.InfoPanelCubit());
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
     );
@@ -299,6 +308,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => coreModule.secureStorage(),
+    );
+    gh.lazySingleton<_i163.FlutterLocalNotificationsPlugin>(
+      () => coreModule.flutterLocalNotificationsPlugin(),
     );
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
@@ -322,6 +334,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i253.MessagesDataSource>(() => _i695.MessagesDataSourceImpl());
     gh.factory<_i672.AuthRemoteDataSource>(
       () => _i672.AuthRemoteDataSourceImpl(),
+    );
+    gh.factory<_i1031.LocalNotificationsService>(
+      () => _i1031.LocalNotificationsService(
+        gh<_i163.FlutterLocalNotificationsPlugin>(),
+      ),
     );
     gh.factory<_i571.RecentDmDao>(
       () => _i571.RecentDmDao(gh<_i606.AppDatabase>()),
@@ -506,6 +523,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
+    );
+    gh.lazySingleton<_i766.ProfileCubit>(
+      () => _i766.ProfileCubit(
+        gh<_i547.GetOwnUserUseCase>(),
+        gh<_i832.UpdatePresenceUseCase>(),
+      ),
     );
     gh.factory<_i812.AddRecentDmUseCase>(
       () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
@@ -729,6 +752,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
       ),
     );
+    gh.factory<_i214.OrganizationsCubit>(
+      () => _i214.OrganizationsCubit(
+        gh<_i724.WatchOrganizationsUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
+        gh<_i286.GetOrganizationSettingsUseCase>(),
+        gh<_i240.RemoveOrganizationUseCase>(),
+        gh<_i377.OrganizationSwitcherService>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i766.ProfileCubit>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+    );
     gh.lazySingleton<_i862.AuthCubit>(
       () => _i862.AuthCubit(
         gh<_i460.SharedPreferences>(),
@@ -754,11 +789,10 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: _i862.disposeAuthCubit,
     );
-    gh.lazySingleton<_i766.ProfileCubit>(
-      () => _i766.ProfileCubit(
+    gh.lazySingleton<_i573.RealTimeCubit>(
+      () => _i573.RealTimeCubit(
         gh<_i823.MultiPollingService>(),
-        gh<_i547.GetOwnUserUseCase>(),
-        gh<_i832.UpdatePresenceUseCase>(),
+        gh<_i214.OrganizationsCubit>(),
       ),
     );
     gh.factory<_i404.AllChatsCubit>(
@@ -777,7 +811,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
       ),
     );
-    gh.factory<_i49.MessengerCubit>(
+    gh.lazySingleton<_i49.MessengerCubit>(
       () => _i49.MessengerCubit(
         gh<_i125.AddFolderUseCase>(),
         gh<_i815.GetFoldersUseCase>(),
@@ -799,21 +833,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
       ),
     );
-    gh.factory<_i214.OrganizationsCubit>(
-      () => _i214.OrganizationsCubit(
-        gh<_i724.WatchOrganizationsUseCase>(),
-        gh<_i183.AddOrganizationUseCase>(),
-        gh<_i286.GetOrganizationSettingsUseCase>(),
-        gh<_i240.RemoveOrganizationUseCase>(),
-        gh<_i377.OrganizationSwitcherService>(),
+    gh.singleton<_i388.NotificationsCubit>(
+      () => _i388.NotificationsCubit(
         gh<_i823.MultiPollingService>(),
         gh<_i766.ProfileCubit>(),
-      ),
-    );
-    gh.lazySingleton<_i573.RealTimeCubit>(
-      () => _i573.RealTimeCubit(
-        gh<_i823.MultiPollingService>(),
-        gh<_i214.OrganizationsCubit>(),
+        gh<_i49.MessengerCubit>(),
+        gh<_i460.SharedPreferences>(),
+        gh<_i1031.LocalNotificationsService>(),
       ),
     );
     return this;

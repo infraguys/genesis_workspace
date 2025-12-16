@@ -70,7 +70,7 @@
     "logout": "Выйти",
     "app_version": "Версия приложения",
     "notification_sound": "Звук уведомлений",
-    "chat_sorting_action": "Настройки сортировки чатов",
+    "chat_sorting_action": "Сортировка чатов",
     "chat_sorting_description": "Настройте приоритет непрочитанных чатов.",
     "chat_sorting_title": "Настройки сортировки чатов",
     "chat_sorting_prioritize_directs": "Показывать личные непрочитанные чаты выше других непрочитанных чатов",
@@ -107,7 +107,15 @@
     "exit_fullscreen": "Выйти из полноэкранного",
     "active_call_in": "Идёт звонок в \"{name}\"",
     "active_call": "Идёт звонок",
-    "resume_call": "Вернуться в звонок"
+    "resume_call": "Вернуться в звонок",
+    "create_call_dialog": {
+      "title": "Создать звонок",
+      "video_title": "Создать видеозвонок",
+      "name_label": "Название звонка",
+      "name_required": "Название звонка не должно быть пустым",
+      "cancel": "Отменить",
+      "create": "Создать"
+    }
   },
   "unread_marker": {
     "label": "Непрочитанные сообщения",
@@ -212,12 +220,14 @@
     "progress_with_total": "{downloaded} / {total}",
     "installed": "Обновление установлено",
     "installed_message": "Версия {version} готова к использованию.",
-    "open_selector_cta": "Выбрать сборку",
-    "open_selector_subtitle": "Выберите версию для установки или отката.",
+    "browse_builds": "Выбрать сборку",
+    "browse_builds_subtitle": "Выберите версию для установки или отката",
     "latest_badge": "Актуальная",
     "latest_hint": "Рекомендуемая сборка",
     "dev_channel": "Dev",
-    "stable_channel": "Стабильные"
+    "stable_channel": "Стабильные",
+    "new_version_available": "Вышла новая версия",
+    "download_new_version_rn": "Установите новую версию прямо сейчас"
   },
   "update_widget": {
     "update_available": "Доступно обновление",
@@ -273,11 +283,33 @@
     "forward": "Переслать",
     "select": "Выбрать"
   },
-  "input_placeholder": "Выберите тему для отправки сообщений в канал",
+  "input": {
+    "banner": "Выберите тему для отправки сообщений в канал",
+    "placeholder": "Сообщение..."
+  },
   "bot": "Бот",
   "external_link_dialog": {
     "title": "Открыть внешнюю ссылку?",
     "confirm": "Открыть",
     "cancel": "Отмена"
-  }
+  },
+  "profile_view": {
+    "personal_info": "Личная информация",
+    "notification_sound_pop": "Pop",
+    "notification_sound_whoop": "Whoop",
+    "language_english": "Английский",
+    "language_russian": "Русский",
+    "clear_db": "Очистить БД",
+    "dev_logout": "Выход (dev)"
+  },
+  "profile_personal_info": {
+    "title": "Личная информация",
+    "share_profile": "Поделиться профилем",
+    "link_copied": "Ссылка на профиль скопирована в буфер обмена",
+    "user_id": "ID пользователя",
+    "timezone": "Часовой пояс",
+    "team_and_position": "Команда > Должность",
+    "manager": "Руководитель"
+  },
+  "profile": "Профиль"
 }

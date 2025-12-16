@@ -62,8 +62,9 @@ class UpdateCubit extends Cubit<UpdateState> {
       final response = await _getVersionConfigUseCase.call();
 
       final String sha256 = response.sha256.trim().split(RegExp(r'\s+')).first;
+      final String shaResponseTrimmed = shaResponse.trim().split(RegExp(r'\s+')).first;
 
-      final bool isSecured = shaResponse == sha256;
+      final bool isSecured = shaResponseTrimmed == sha256;
 
       final releaseChannel = Flavor.isStage ? response.latest.dev : response.latest.stable;
       final minSupportedShortVersion = Flavor.isStage

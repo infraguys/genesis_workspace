@@ -5,10 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppConstants {
   static const String legacyPath = String.fromEnvironment('legacy_ui');
   static const String firebaseApiKey = String.fromEnvironment('firebase_api_key');
+  static const String meetingBaseUrl = String.fromEnvironment('meeting_base_url');
 
   static const String appName = 'genesis_workspace';
 
   static const String tusVersion = '1.0.0';
+
+  static const int jobTitleProfileDataIndex = 1;
+  static const int bossNameProfileDataIndex = 2;
 
   static late String baseUrl;
   static int? selectedOrganizationId;
@@ -85,49 +89,4 @@ class SharedPrefsKeys {
 class AssetsConstants {
   static const String audioPop = 'audio/pop.wav';
   static const String audioWhoop = 'audio/whoop.wav';
-}
-
-class FolderIconsConstants {
-  static const Map<int, IconData> byCodePoint = <int, IconData>{
-    0xe2c7: Icons.folder, // Icons.folder.codePoint
-    0xe838: Icons.star, // Icons.star.codePoint
-    0xe6f3: Icons.work, // Icons.work.codePoint
-    0xe0ca: Icons.chat_bubble, // Icons.chat_bubble.codePoint
-    0xe158: Icons.mail, // Icons.mail.codePoint
-    0xe7ef: Icons.groups, // Icons.groups.codePoint
-    0xe86f: Icons.code, // Icons.code.codePoint
-    0xf1af: Icons.task_alt, // Icons.task_alt.codePoint
-    0xf10d: Icons.push_pin, // Icons.push_pin.codePoint
-    0xe866: Icons.bookmark, // Icons.bookmark.codePoint
-    0xea0b: Icons.bolt, // Icons.bolt.codePoint
-    0xe935: Icons.calendar_today, // Icons.calendar_today.codePoint
-    0xe873: Icons.description, // Icons.description.codePoint
-    0xe96a: Icons.campaign, // Icons.campaign.codePoint
-    0xe868: Icons.bug_report, // Icons.bug_report.codePoint
-    0xe32a: Icons.security, // Icons.security.codePoint
-  };
-
-  static const List<IconData> folderIcons = <IconData>[
-    Icons.folder,
-    Icons.star,
-    Icons.work,
-    Icons.chat_bubble,
-    Icons.mail,
-    Icons.groups,
-    Icons.code,
-    Icons.task_alt,
-    Icons.push_pin,
-    Icons.bookmark,
-    Icons.bolt,
-    Icons.calendar_today,
-    Icons.description,
-    Icons.campaign,
-    Icons.bug_report,
-    Icons.security,
-  ];
-
-  static IconData resolve(int? codePoint, {IconData fallback = Icons.folder}) {
-    if (codePoint == null) return fallback;
-    return byCodePoint[codePoint] ?? fallback;
-  }
 }

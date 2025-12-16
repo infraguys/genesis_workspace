@@ -4,6 +4,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateGroupChatDialog extends StatefulWidget {
   final void Function(Set<int> membersIds) onCreate;
@@ -16,24 +17,26 @@ class CreateGroupChatDialog extends StatefulWidget {
 
 class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
   final TextEditingController _searchController = TextEditingController();
+  late final DirectMessagesCubit directMessageCubit;
   final Set<int> _selectedIds = <int>{};
 
   @override
   void initState() {
     super.initState();
-    context.read<DirectMessagesCubit>().searchUsers('');
+    directMessageCubit = context.read<DirectMessagesCubit>();
+    directMessageCubit.searchUsers('');
     _searchController.addListener(_onSearchChanged);
   }
 
   void _onSearchChanged() {
-    context.read<DirectMessagesCubit>().searchUsers(_searchController.text);
+    directMessageCubit.searchUsers(_searchController.text);
   }
 
   @override
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
-    context.read<DirectMessagesCubit>().searchUsers('');
+    directMessageCubit.searchUsers('');
     super.dispose();
   }
 
@@ -46,25 +49,14 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.t.groupChat.createDialog.title,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
+              padding: const .fromLTRB(16, 16, 8, 8),
+              child: Text(
+                context.t.groupChat.createDialog.title,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              padding: const .fromLTRB(12, 12, 12, 8),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
@@ -87,12 +79,14 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
                     ...users.where((u) => _selectedIds.contains(u.userId)),
                     ...users.where((u) => !_selectedIds.contains(u.userId)),
                   ];
-                  if (users.isEmpty) {
+                  if (state.isUsersPending) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (users.isEmpty && !state.isUsersPending) {
                     return Center(child: Text(context.t.groupChat.createDialog.noUsers));
                   }
-                  return ListView.separated(
+                  return ListView.builder(
                     itemCount: displayUsers.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final user = displayUsers[index];
                       final bool selected = _selectedIds.contains(user.userId);
@@ -107,7 +101,7 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
                           });
                         },
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                          padding: const .symmetric(horizontal: 8, vertical: 6),
                           child: Row(
                             children: [
                               Checkbox(
@@ -127,16 +121,16 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: .start,
                                   children: [
                                     Text(
                                       user.fullName,
-                                      overflow: TextOverflow.ellipsis,
+                                      overflow: .ellipsis,
                                       style: Theme.of(context).textTheme.bodyMedium,
                                     ),
                                     Text(
                                       user.email,
-                                      overflow: TextOverflow.ellipsis,
+                                      overflow: .ellipsis,
                                       style: Theme.of(context).textTheme.labelSmall,
                                     ),
                                   ],
@@ -151,21 +145,18 @@ class _CreateGroupChatDialogState extends State<CreateGroupChatDialog> {
                 },
               ),
             ),
-            const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const .all(12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: .end,
+                spacing: 8.0,
                 children: [
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: context.pop,
                     child: Text(context.t.groupChat.createDialog.cancel),
                   ),
-                  const SizedBox(width: 8),
                   FilledButton(
-                    onPressed: _selectedIds.length >= 2
-                        ? () => widget.onCreate(_selectedIds)
-                        : null,
+                    onPressed: _selectedIds.isNotEmpty ? () => widget.onCreate(_selectedIds) : null,
                     child: Text(context.t.groupChat.createDialog.create),
                   ),
                 ],

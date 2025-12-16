@@ -17,7 +17,7 @@ import 'package:genesis_workspace/core/utils/message_input_intents/mention_navig
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
-import 'package:genesis_workspace/core/widgets/input_placeholder.dart';
+import 'package:genesis_workspace/core/widgets/input_banner.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -251,29 +251,47 @@ class _ChannelChatViewState extends State<ChannelChatView>
                     ),
               actions: [
                 DownloadFilesButton(),
+                // IconButton(
+                //   onPressed: () {},
+                //   icon: Assets.icons.joinCall.svg(
+                //     width: 28,
+                //     height: 28,
+                //     colorFilter: ColorFilter.mode(AppColors.callGreen, .srcIn),
+                //   ),
+                // ),
                 IconButton(
-                  onPressed: () {},
-                  icon: Assets.icons.joinCall.svg(
-                    width: 28,
-                    height: 28,
-                    colorFilter: ColorFilter.mode(AppColors.callGreen, .srcIn),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final meetingLink = await createCall(context, startWithVideoMuted: true);
+                    if (meetingLink.isNotEmpty) {
+                      await context.read<ChannelChatCubit>().sendMessage(
+                        streamId: widget.channelId,
+                        topic: widget.topicName,
+                        content: meetingLink,
+                      );
+                    }
+                  },
                   icon: Assets.icons.call.svg(
                     width: 28,
                     height: 28,
                     colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
                 ),
-                if (!isTabletOrSmaller)
-                  IconButton(
-                    onPressed: () {},
-                    icon: Assets.icons.videocam.svg(
-                      colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
-                    ),
+                // if (!isTabletOrSmaller)
+                IconButton(
+                  onPressed: () async {
+                    final meetingLink = await createCall(context, startWithVideoMuted: false);
+                    if (meetingLink.isNotEmpty) {
+                      await context.read<ChannelChatCubit>().sendMessage(
+                        streamId: widget.channelId,
+                        topic: widget.topicName,
+                        content: meetingLink,
+                      );
+                    }
+                  },
+                  icon: Assets.icons.videocam.svg(
+                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
                   ),
+                ),
               ],
               title: Skeletonizer(
                 enabled: state.channel == null,
@@ -624,7 +642,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                         },
                                         inputTitle: widget.topicName ?? state.channel?.name,
                                       )
-                                    : InputPlaceholder(),
+                                    : InputBanner(),
                               ),
                             ),
                           ),

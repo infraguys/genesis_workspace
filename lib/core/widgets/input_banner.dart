@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
-class InputPlaceholder extends StatelessWidget {
-  const InputPlaceholder({super.key});
+class InputBanner extends StatelessWidget {
+  const InputBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class InputPlaceholder extends StatelessWidget {
           border: BoxBorder.fromLTRB(top: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: .1)))
         ),
         child:  Center(
-          child:  Text(context.t.inputPlaceholder, style: textTheme.bodySmall!.copyWith(
+          child:  Text(context.t.input.banner, style: textTheme.bodySmall!.copyWith(
             fontSize: 16
           ),),
         ),

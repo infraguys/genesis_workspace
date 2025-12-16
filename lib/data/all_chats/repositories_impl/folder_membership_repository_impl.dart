@@ -1,8 +1,8 @@
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folder_items_remote_data_source.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folders_remote_data_source.dart';
-import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_membership_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -73,20 +73,8 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
 
   @override
   Future<FolderMembers> getMembersForFolder(String folderUuid) async {
-    final organizationId = AppConstants.selectedOrganizationId ?? -1;
-    final localItems = await _localDataSource.getItemsForFolder(folderUuid, organizationId);
-    if (localItems.isNotEmpty) {
-      final chatIdsLocal = localItems.map((r) => r.chatId).toList(growable: false);
-      return FolderMembers(chatIds: chatIdsLocal);
-    }
-
     final items = await _remoteDataSource.getFolderItems(folderUuid);
     final chatIds = items.map((r) => r.chatId).toList(growable: false);
-    await _localDataSource.setChatFolders(
-      chatId: -1,
-      folderUuids: [],
-      organizationId: organizationId,
-    );
     return FolderMembers(chatIds: chatIds);
   }
 }

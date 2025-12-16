@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
-import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/common/entities/version_config_entity.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -24,7 +23,8 @@ class _UpdateViewState extends State<UpdateView> {
     return BlocBuilder<UpdateCubit, UpdateState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: context.t.updateView.title),
+          appBar: AppBar(title: Text(context.t.updateView.title)),
+          backgroundColor: theme.colorScheme.surface,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -89,92 +89,93 @@ class _UpdateViewState extends State<UpdateView> {
             ),
           )
         : versionEntries.isEmpty
-            ? Center(
-                child: Text(
-                  context.t.general.nothingHereYet,
-                  style: theme.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-              )
-            : ListView.separated(
-                itemBuilder: (context, index) {
-                  final version = versionEntries[index];
-                  final isSelected = state.selectedVersion?.version == version.version;
-                  final isLatest = latestVersionCandidates.contains(version.version) ||
-                      latestVersionCandidates.contains(version.shortVersion);
-                  final subtitleChildren = <Widget>[];
-                  if (version.shortVersion != version.version) {
-                    subtitleChildren.add(
+        ? Center(
+            child: Text(
+              context.t.general.nothingHereYet,
+              style: theme.textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          )
+        : ListView.separated(
+            itemBuilder: (context, index) {
+              final version = versionEntries[index];
+              final isSelected = state.selectedVersion?.version == version.version;
+              final isLatest =
+                  latestVersionCandidates.contains(version.version) ||
+                  latestVersionCandidates.contains(version.shortVersion);
+              final subtitleChildren = <Widget>[];
+              if (version.shortVersion != version.version) {
+                subtitleChildren.add(
+                  Text(
+                    version.shortVersion,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                );
+              }
+              if (isLatest) {
+                if (subtitleChildren.isNotEmpty) {
+                  subtitleChildren.add(const SizedBox(height: 4));
+                }
+                subtitleChildren.add(
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.workspace_premium, size: 16, color: theme.colorScheme.primary),
+                      const SizedBox(width: 6),
                       Text(
-                        version.shortVersion,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    );
-                  }
-                  if (isLatest) {
-                    if (subtitleChildren.isNotEmpty) {
-                      subtitleChildren.add(const SizedBox(height: 4));
-                    }
-                    subtitleChildren.add(
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.workspace_premium, size: 16, color: theme.colorScheme.primary),
-                          const SizedBox(width: 6),
-                          Text(
-                            context.t.updateView.latestHint,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  final trailing = isSelected && isBusy
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : isSelected && state.operationStatus == UpdateOperationStatus.readyToRestart
-                          ? Icon(Icons.check, color: theme.colorScheme.primary)
-                          : null;
-
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            version.version,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: isLatest ? FontWeight.bold : FontWeight.w500,
-                            ),
-                          ),
+                        context.t.updateView.latestHint,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
                         ),
-                        if (isLatest) ...[
-                          const SizedBox(width: 8),
-                          _LatestBadge(label: context.t.updateView.latestBadge),
-                        ],
-                      ],
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final trailing = isSelected && isBusy
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : isSelected && state.operationStatus == UpdateOperationStatus.readyToRestart
+                  ? Icon(Icons.check, color: theme.colorScheme.primary)
+                  : null;
+
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        version.version,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: isLatest ? FontWeight.bold : FontWeight.w500,
+                        ),
+                      ),
                     ),
-                    subtitle: subtitleChildren.isEmpty
-                        ? null
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: subtitleChildren,
-                          ),
-                    trailing: trailing,
-                    enabled: !isBusy,
-                    onTap: isBusy ? null : () => context.read<UpdateCubit>().installVersion(version),
-                  );
-                },
-                separatorBuilder: (_, __) => const Divider(),
-                itemCount: versionEntries.length,
+                    if (isLatest) ...[
+                      const SizedBox(width: 8),
+                      _LatestBadge(label: context.t.updateView.latestBadge),
+                    ],
+                  ],
+                ),
+                subtitle: subtitleChildren.isEmpty
+                    ? null
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: subtitleChildren,
+                      ),
+                trailing: trailing,
+                enabled: !isBusy,
+                onTap: isBusy ? null : () => context.read<UpdateCubit>().installVersion(version),
               );
+            },
+            separatorBuilder: (_, __) => const Divider(),
+            itemCount: versionEntries.length,
+          );
 
     return Column(
       children: [

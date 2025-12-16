@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,9 +10,11 @@ import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
+import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
@@ -38,22 +42,20 @@ class _MessengerViewState extends State<MessengerView>
   static const Duration _searchAnimationDuration = Duration(milliseconds: 220);
   Future<void>? _future;
   final TextEditingController _searchController = TextEditingController();
-
-  final GlobalKey<PinnedChatsSectionState> _pinnedSectionKey = GlobalKey<PinnedChatsSectionState>();
-  final ValueNotifier<bool> _isEditingPinsNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> _isSavingPinsNotifier = ValueNotifier(false);
   bool _isSearchVisible = true;
   late final AnimationController _searchBarController;
   late final Animation<double> _searchBarAnimation;
   String _searchQuery = '';
+
+  bool _isEditPinning = false;
+  bool _isSavingPins = false;
+  List<PinnedChatOrderUpdate> _updatedPinnedChats = [];
 
   bool _showTopics = false;
   final GlobalKey _activeCallKey = GlobalKey();
   Rect? _lastReportedDockRect;
 
   late final ScrollController _chatsController;
-
-  final _isOpenNotifier = ValueNotifier(false);
 
   Future<void> createNewFolder(BuildContext context) {
     final messengerCubit = context.read<MessengerCubit>();
@@ -155,6 +157,97 @@ class _MessengerViewState extends State<MessengerView>
     );
   }
 
+  bool _onUserScroll(UserScrollNotification notification) {
+    if (notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+    if (notification.direction == ScrollDirection.reverse && _isSearchVisible) {
+      setState(() => _isSearchVisible = false);
+      _searchBarController.reverse();
+    } else if (notification.direction == ScrollDirection.forward && !_isSearchVisible) {
+      setState(() => _isSearchVisible = true);
+      _searchBarController.forward();
+    }
+    return false;
+  }
+
+  void _handleOrderPinning(BuildContext popupContext, int index) {
+    popupContext.pop();
+    popupContext.read<MessengerCubit>().selectFolder(index);
+    setState(() {
+      _isEditPinning = true;
+    });
+  }
+
+  Future<void> savePinnedChatOrder(String folderUuid, List<PinnedChatOrderUpdate> chats) async {
+    setState(() {
+      _isSavingPins = true;
+    });
+    try {
+      await context.read<MessengerCubit>().reorderPinnedChats(
+        folderUuid: folderUuid,
+        updates: chats,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    } finally {
+      setState(() {
+        _isEditPinning = false;
+        _isSavingPins = false;
+        _updatedPinnedChats = [];
+      });
+    }
+  }
+
+  Future<void> _handleFolderDelete(BuildContext popupContext, FolderEntity folder) async {
+    popupContext.pop();
+    final messengerCubit = popupContext.read<MessengerCubit>();
+    await showDialog<void>(
+      context: popupContext,
+      builder: (dialogContext) => BlocProvider.value(
+        value: messengerCubit,
+        child: BlocBuilder<MessengerCubit, MessengerState>(
+          builder: (ctx, state) {
+            final bool isDeleting = state.isFolderDeleting;
+            return AlertDialog(
+              title: Text(popupContext.t.folders.deleteConfirmTitle),
+              content: Text(
+                popupContext.t.folders.deleteConfirmText(
+                  folderName: folder.title ?? '',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isDeleting ? null : () => Navigator.of(dialogContext).pop(),
+                  child: Text(popupContext.t.folders.cancel),
+                ),
+                FilledButton(
+                  onPressed: isDeleting
+                      ? null
+                      : () async {
+                          await ctx.read<MessengerCubit>().deleteFolder(folder);
+                          if (dialogContext.mounted) {
+                            Navigator.of(dialogContext).pop();
+                          }
+                        },
+                  child: isDeleting
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(popupContext.t.folders.delete),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     _applySortingPreferences();
@@ -181,8 +274,6 @@ class _MessengerViewState extends State<MessengerView>
     _searchBarController.dispose();
     _searchController.dispose();
     _chatsController.dispose();
-    _isEditingPinsNotifier.dispose();
-    _isSavingPinsNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -228,9 +319,6 @@ class _MessengerViewState extends State<MessengerView>
         listener: (context, state) {
           context.read<MessengerCubit>().resetState();
           context.read<MessengerCubit>().searchChats('');
-          _pinnedSectionKey.currentState?.cancelEditing();
-          _isEditingPinsNotifier.value = false;
-          _isSavingPinsNotifier.value = false;
           setState(() {
             _searchQuery = '';
             _searchController.clear();
@@ -284,43 +372,42 @@ class _MessengerViewState extends State<MessengerView>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              ValueListenableBuilder<bool>(
-                                valueListenable: _isEditingPinsNotifier,
-                                builder: (context, isEditPinning, _) {
-                                  return ValueListenableBuilder<bool>(
-                                    valueListenable: _isSavingPinsNotifier,
-                                    builder: (context, isSavingPinnedOrder, __) => MessengerAppBar(
-                                      selectedChatLabel: state.selectedChat?.displayTitle,
-                                      showTopics: _showTopics,
-                                      onTapBack: () {
-                                        setState(() {
-                                          _showTopics = false;
-                                        });
-                                      },
-                                      isLargeScreen: isLargeScreen,
-                                      searchVisibility: searchVisibility,
-                                      folders: state.folders,
-                                      selectedFolderIndex: state.selectedFolderIndex,
-                                      onSelectFolder: (index) => context.read<MessengerCubit>().selectFolder(index),
-                                      onCreateFolder: () => unawaited(createNewFolder(context)),
-                                      onEditFolder: (folder) async {
-                                        await editFolder(context, folder);
-                                      },
-                                      onOrderPinning: _handleOrderPinning,
-                                      onDeleteFolder: _handleFolderDelete,
-                                      isEditPinning: isEditPinning,
-                                      isSavingPinnedOrder: isSavingPinnedOrder,
-                                      onStopEditingPins: _savePinnedChatOrder,
-                                      showSearchField: _isSearchVisible,
-                                      selfUserId: state.selfUser?.userId ?? -1,
-                                      onSearchChanged: _onSearchChanged,
-                                      onClearSearch: _clearSearch,
-                                      searchController: _searchController,
-                                      searchQuery: _searchQuery,
-                                      isLoadingMore: !state.foundOldestMessage,
+                              MessengerAppBar(
+                                selectedChatLabel: state.selectedChat?.displayTitle,
+                                showTopics: _showTopics,
+                                onTapBack: () {
+                                  setState(() {
+                                    _showTopics = false;
+                                  });
+                                },
+                                isLargeScreen: isLargeScreen,
+                                searchVisibility: searchVisibility,
+                                folders: state.folders,
+                                selectedFolderIndex: state.selectedFolderIndex,
+                                onSelectFolder: (index) => context.read<MessengerCubit>().selectFolder(index),
+                                onCreateFolder: () => unawaited(createNewFolder(context)),
+                                onEditFolder: (folder) async {
+                                  await editFolder(context, folder);
+                                },
+                                onOrderPinning: _handleOrderPinning,
+                                onDeleteFolder: _handleFolderDelete,
+                                isEditPinning: _isEditPinning,
+                                isSavingPinnedOrder: _isSavingPins,
+                                onStopEditingPins: () {
+                                  unawaited(
+                                    savePinnedChatOrder(
+                                      state.folders[state.selectedFolderIndex].uuid,
+                                      _updatedPinnedChats,
                                     ),
                                   );
                                 },
+                                showSearchField: _isSearchVisible,
+                                selfUserId: state.selfUser?.userId ?? -1,
+                                onSearchChanged: _onSearchChanged,
+                                onClearSearch: _clearSearch,
+                                searchController: _searchController,
+                                searchQuery: _searchQuery,
+                                isLoadingMore: !state.foundOldestMessage,
                               ),
                               if (visibleChats.isEmpty)
                                 Padding(
@@ -335,13 +422,13 @@ class _MessengerViewState extends State<MessengerView>
                                     NotificationListener<UserScrollNotification>(
                                       onNotification: _onUserScroll,
                                       child: PinnedChatsSection(
-                                        key: _pinnedSectionKey,
                                         visibleChats: visibleChats,
                                         pinnedMeta: state.pinnedChats,
                                         listPadding: listPadding,
                                         chatsController: _chatsController,
                                         selectedChatId: state.selectedChat?.id,
                                         showTopics: _showTopics,
+                                        isEditPinning: _isEditPinning,
                                         folderUuid: state.selectedFolderIndex < state.folders.length
                                             ? state.folders[state.selectedFolderIndex].uuid
                                             : null,
@@ -358,8 +445,11 @@ class _MessengerViewState extends State<MessengerView>
                                             context.read<MessengerCubit>().selectChat(chat);
                                           }
                                         },
-                                        onEditingChanged: (value) => _isEditingPinsNotifier.value = value,
-                                        onSavingChanged: (value) => _isSavingPinsNotifier.value = value,
+                                        onPinningSaved: (chats) {
+                                          setState(() {
+                                            _updatedPinnedChats = chats;
+                                          });
+                                        },
                                       ),
                                     ),
                                     ChatTopicsList(
@@ -389,13 +479,9 @@ class _MessengerViewState extends State<MessengerView>
                               ),
                               BlocBuilder<CallCubit, CallState>(
                                 builder: (context, callState) {
-                                  final String? chatTitle = state.selectedChat?.displayTitle;
-                                  final String titleText = (chatTitle?.isNotEmpty ?? false)
-                                      ? context.t.call.activeCallIn(name: chatTitle!)
-                                      : (callState.meetLocationName.isNotEmpty
-                                            ? context.t.call.activeCallIn(name: callState.meetLocationName)
-                                            : context.t.call.activeCall);
-
+                                  final String titleText = callState.meetLocationName.isNotEmpty
+                                      ? context.t.call.activeCallIn(name: callState.meetLocationName)
+                                      : context.t.call.activeCall;
                                   return ActiveCallPanel(
                                     callState: callState,
                                     titleText: titleText,
@@ -414,8 +500,21 @@ class _MessengerViewState extends State<MessengerView>
                     if (isLargeScreen) ...[
                       const SizedBox(width: 4.0),
                       Expanded(
-                        child: Builder(
-                          builder: (context) {
+                        child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
+                          builder: (context, panelState) {
+                            if (state.usersIds.isNotEmpty && state.selectedChat == null) {
+                              return Chat(
+                                key: ObjectKey(state.usersIds),
+                                userIds: state.usersIds.toList(),
+                                leadingOnPressed: () {
+                                  if (panelState.status != .closed) {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                  } else {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  }
+                                },
+                              );
+                            }
                             if (state.selectedChat?.dmIds != null) {
                               return Chat(
                                 key: ObjectKey(
@@ -423,7 +522,13 @@ class _MessengerViewState extends State<MessengerView>
                                 ),
                                 userIds: state.selectedChat!.dmIds!,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
+                                leadingOnPressed: () {
+                                  if (panelState.status != .closed) {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                  } else {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                  }
+                                },
                               );
                             }
                             if (state.selectedChat?.streamId != null) {
@@ -434,7 +539,13 @@ class _MessengerViewState extends State<MessengerView>
                                 channelId: state.selectedChat!.streamId!,
                                 topicName: state.selectedTopic,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                leadingOnPressed: () => _isOpenNotifier.value = !_isOpenNotifier.value,
+                                leadingOnPressed: () {
+                                  if (panelState.status != .closed) {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                  } else {
+                                    context.read<InfoPanelCubit>().setInfoPanelState(.channelInfo);
+                                  }
+                                },
                               );
                             }
                             return Center(child: Text(context.t.selectAnyChat));
@@ -442,17 +553,19 @@ class _MessengerViewState extends State<MessengerView>
                         ),
                       ),
                       const SizedBox(width: 4.0),
-                      ValueListenableBuilder(
-                        valueListenable: _isOpenNotifier,
-                        builder: (context, value, _) {
-                          if (state.selectedChat?.dmIds != null || state.selectedChat?.streamId != null) {
+                      BlocBuilder<InfoPanelCubit, InfoPanelState>(
+                        builder: (context, panelState) {
+                          if (state.selectedChat?.dmIds != null ||
+                              state.selectedChat?.streamId != null ||
+                              panelState.status == .profileInfo) {
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
-                              width: value ? 315 : 0,
+                              width: panelState.status != .closed ? 315 : 0,
                               child: InfoPanel(
-                                isChannel: state.selectedChat?.streamId != null,
-                                onClose: () => _isOpenNotifier.value = false,
+                                onClose: () {
+                                  context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                },
                               ),
                             );
                           }
@@ -463,80 +576,6 @@ class _MessengerViewState extends State<MessengerView>
                   ],
                 );
               },
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  bool _onUserScroll(UserScrollNotification notification) {
-    if (notification.metrics.axis != Axis.vertical) {
-      return false;
-    }
-    if (notification.direction == ScrollDirection.reverse && _isSearchVisible) {
-      setState(() => _isSearchVisible = false);
-      _searchBarController.reverse();
-    } else if (notification.direction == ScrollDirection.forward && !_isSearchVisible) {
-      setState(() => _isSearchVisible = true);
-      _searchBarController.forward();
-    }
-    return false;
-  }
-
-  void _handleOrderPinning(BuildContext popupContext, int index) {
-    popupContext.pop();
-    popupContext.read<MessengerCubit>().selectFolder(index);
-    _pinnedSectionKey.currentState?.enterEditMode();
-  }
-
-  void _savePinnedChatOrder() {
-    final saveFuture = _pinnedSectionKey.currentState?.savePinnedChatOrder();
-    if (saveFuture != null) {
-      unawaited(saveFuture);
-    }
-  }
-
-  Future<void> _handleFolderDelete(BuildContext popupContext, FolderEntity folder) async {
-    popupContext.pop();
-    final messengerCubit = popupContext.read<MessengerCubit>();
-    await showDialog<void>(
-      context: popupContext,
-      builder: (dialogContext) => BlocProvider.value(
-        value: messengerCubit,
-        child: BlocBuilder<MessengerCubit, MessengerState>(
-          builder: (ctx, state) {
-            final bool isDeleting = state.isFolderDeleting;
-            return AlertDialog(
-              title: Text(popupContext.t.folders.deleteConfirmTitle),
-              content: Text(
-                popupContext.t.folders.deleteConfirmText(
-                  folderName: folder.title ?? '',
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: isDeleting ? null : () => Navigator.of(dialogContext).pop(),
-                  child: Text(popupContext.t.folders.cancel),
-                ),
-                FilledButton(
-                  onPressed: isDeleting
-                      ? null
-                      : () async {
-                          await ctx.read<MessengerCubit>().deleteFolder(folder);
-                          if (dialogContext.mounted) {
-                            Navigator.of(dialogContext).pop();
-                          }
-                        },
-                  child: isDeleting
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(popupContext.t.folders.delete),
-                ),
-              ],
             );
           },
         ),

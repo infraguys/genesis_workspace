@@ -2,7 +2,7 @@ name: genesis_workspace
 description: "Genesis Workspace application."
 publish_to: 'none'
 
-version: 1.5.4+1
+version: 1.6.0+1
 
 environment:
   sdk: ^3.10.0
@@ -78,6 +78,7 @@ dependencies:
   firebase_messaging: ^16.0.4
   firebase_core: ^4.2.1
   crypto: ^3.0.7
+  flutter_local_notifications: ^19.5.0
 
 dev_dependencies:
   flutter_test:

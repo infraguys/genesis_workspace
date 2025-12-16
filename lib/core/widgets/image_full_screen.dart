@@ -43,7 +43,6 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
         widget.imageUrl,
         options: Options(responseType: ResponseType.bytes),
       );
-      inspect(response);
       final bytes = Uint8List.fromList(response.data!);
       setState(() {
         _imageBytes = bytes;

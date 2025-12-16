@@ -30,6 +30,31 @@ extension PendingExtension on Widget {
       );
     }
 
+    if (this is FilledButton) {
+      final FilledButton button = this as FilledButton;
+
+      return FilledButton(
+        key: button.key,
+        onPressed: isPending ? null : button.onPressed,
+        onLongPress: isPending ? null : button.onLongPress,
+        style: button.style,
+        autofocus: button.autofocus,
+        clipBehavior: button.clipBehavior,
+        focusNode: button.focusNode,
+        statesController: button.statesController,
+        child: isPending
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : button.child ?? const SizedBox(),
+      );
+    }
+
     if (this is TextButton) {
       final TextButton button = this as TextButton;
 
@@ -75,5 +100,29 @@ extension BlocMaybeRead on BuildContext {
     } catch (_) {
       return null;
     }
+  }
+}
+
+extension TextThemeLetterSpacingX on TextTheme {
+  TextTheme withLetterSpacing(double letterSpacing) {
+    TextStyle? applyTo(TextStyle? style) => style?.copyWith(letterSpacing: letterSpacing);
+
+    return copyWith(
+      displayLarge: applyTo(displayLarge),
+      displayMedium: applyTo(displayMedium),
+      displaySmall: applyTo(displaySmall),
+      headlineLarge: applyTo(headlineLarge),
+      headlineMedium: applyTo(headlineMedium),
+      headlineSmall: applyTo(headlineSmall),
+      titleLarge: applyTo(titleLarge),
+      titleMedium: applyTo(titleMedium),
+      titleSmall: applyTo(titleSmall),
+      bodyLarge: applyTo(bodyLarge),
+      bodyMedium: applyTo(bodyMedium),
+      bodySmall: applyTo(bodySmall),
+      labelLarge: applyTo(labelLarge),
+      labelMedium: applyTo(labelMedium),
+      labelSmall: applyTo(labelSmall),
+    );
   }
 }

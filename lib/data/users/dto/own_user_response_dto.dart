@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/data/common/dto/response_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -26,6 +27,8 @@ class OwnUserResponseDto extends ResponseDto {
   final UserRole role;
   @JsonKey(name: "is_active")
   final bool isActive;
+  @JsonKey(name: "profile_data")
+  final Map<int, Map<String, dynamic>> profileData;
 
   OwnUserResponseDto({
     required super.result,
@@ -41,10 +44,10 @@ class OwnUserResponseDto extends ResponseDto {
     required this.isOwner,
     required this.isAdmin,
     required this.isGuest,
+    required this.profileData,
   });
 
-  factory OwnUserResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$OwnUserResponseDtoFromJson(json);
+  factory OwnUserResponseDto.fromJson(Map<String, dynamic> json) => _$OwnUserResponseDtoFromJson(json);
 
   UserEntity toEntity() => UserEntity(
     userId: userId,
@@ -58,6 +61,8 @@ class OwnUserResponseDto extends ResponseDto {
     isAdmin: isAdmin,
     isOwner: isOwner,
     isGuest: isGuest,
+    jobTitle: profileData[AppConstants.jobTitleProfileDataIndex]?["value"] ?? '',
+    bossName: profileData[AppConstants.bossNameProfileDataIndex]?["value"] ?? '',
   );
 
   static UserRole _fromJsonToUserRole(int json) {

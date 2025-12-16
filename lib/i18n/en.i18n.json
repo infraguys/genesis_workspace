@@ -64,7 +64,7 @@
     "logout": "Logout",
     "app_version": "App version",
     "notification_sound": "Notification sound",
-    "chat_sorting_action": "Chat sorting settings",
+    "chat_sorting_action": "Chat sorting",
     "chat_sorting_description": "Choose how unread chats are prioritized.",
     "chat_sorting_title": "Chat sorting settings",
     "chat_sorting_prioritize_directs": "Show unread personal chats above other unread chats",
@@ -101,7 +101,15 @@
     "exit_fullscreen": "Exit fullscreen",
     "active_call_in": "Call in \"{name}\"",
     "active_call": "Active call",
-    "resume_call": "Return to call"
+    "resume_call": "Return to call",
+    "create_call_dialog": {
+      "title": "Create call",
+      "video_title": "Create video call",
+      "name_label": "Call name",
+      "name_required": "Call name cannot be empty",
+      "cancel": "Cancel",
+      "create": "Create"
+    }
   },
   "unread_marker": {
     "label": "Unread messages",
@@ -206,12 +214,14 @@
     "progress_with_total": "{downloaded} / {total}",
     "installed": "Update installed",
     "installed_message": "Version {version} is ready to use.",
-    "open_selector_cta": "Browse builds",
-    "open_selector_subtitle": "Pick a version to install or downgrade.",
+    "browse_builds": "Browse builds",
+    "browse_builds_subtitle": "Pick a version to install or downgrade",
     "latest_badge": "Latest",
     "latest_hint": "Recommended build",
     "dev_channel": "Dev",
-    "stable_channel": "Stable"
+    "stable_channel": "Stable",
+    "new_version_available": "New version available",
+    "download_new_version_rn": "Download new version right now"
   },
   "update_widget": {
     "update_available": "Update available",
@@ -267,11 +277,33 @@
     "forward": "Forward",
     "select": "Select"
   },
-  "input_placeholder": "Select a topic to send messages to the channel",
+  "input": {
+    "banner": "Select a topic to send messages to the channel",
+    "placeholder": "Message..."
+  },
   "bot": "Bot",
   "external_link_dialog": {
     "title": "Open external link?",
     "confirm": "Open",
     "cancel": "Cancel"
-  }
+  },
+  "profile_view": {
+    "personal_info": "Personal information",
+    "notification_sound_pop": "Pop",
+    "notification_sound_whoop": "Whoop",
+    "language_english": "English",
+    "language_russian": "Russian",
+    "clear_db": "Clear DB",
+    "dev_logout": "Dev logout"
+  },
+  "profile_personal_info": {
+    "title": "Personal information",
+    "share_profile": "Share profile",
+    "link_copied": "Profile link copied to clipboard",
+    "user_id": "User ID",
+    "timezone": "Time zone",
+    "team_and_position": "Team > Position",
+    "manager": "Manager"
+  },
+  "profile": "Profile"
 }

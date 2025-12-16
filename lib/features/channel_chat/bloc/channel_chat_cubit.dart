@@ -278,7 +278,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         numBefore: numBefore,
         numAfter: 0,
       );
-      final response = await _getMessagesUseCase(body);
+      final response = await _getMessagesUseCase.call(body);
       final Set<int> channelMembers = {...state.channelMembers};
       final sortedChannelMembers = _sortChannelMembersByRecentMessages(
         channelMembers: channelMembers,

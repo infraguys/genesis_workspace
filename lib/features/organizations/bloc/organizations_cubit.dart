@@ -32,6 +32,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     this._organizationSwitcherService,
     this._multiPollingService,
     this._profileCubit,
+    this._prefs,
   ) : super(
         OrganizationsState(
           organizations: [],
@@ -54,6 +55,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   final RemoveOrganizationUseCase _removeOrganizationUseCase;
   final OrganizationSwitcherService _organizationSwitcherService;
   final MultiPollingService _multiPollingService;
+  final SharedPreferences _prefs;
 
   final ProfileCubit _profileCubit;
 
@@ -105,8 +107,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
         await selectOrganization(organization);
       }
       await _removeOrganizationUseCase.call(id);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(SharedPrefsKeys.selectedOrganizationId);
+      await _prefs.remove(SharedPrefsKeys.selectedOrganizationId);
       await _multiPollingService.closeConnection(id);
     } catch (e) {
       inspect(e);

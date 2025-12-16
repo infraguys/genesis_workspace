@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,7 +10,7 @@ mixin OpenDmChatMixin {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
 
     if (isDesktop) {
-      context.read<AllChatsCubit>().selectGroupChat(membersIds);
+      context.read<MessengerCubit>().createEmptyChat(membersIds);
     } else {
       final userIds = membersIds.toList();
       final userIdsString = userIds.join(',');

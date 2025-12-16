@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 
@@ -39,14 +40,13 @@ class MessageEntity extends Equatable {
   bool get isUnread => flags != null ? !flags!.contains('read') : true;
 
   bool get isDirectMessage =>
-      displayRecipient is DirectMessageRecipients &&
-      (displayRecipient as DirectMessageRecipients).recipients.length <= 2;
+      type == MessageType.private && (displayRecipient as DirectMessageRecipients).recipients.length <= 2;
 
   bool get isGroupChatMessage =>
-      displayRecipient is DirectMessageRecipients &&
-      (displayRecipient as DirectMessageRecipients).recipients.length > 2;
+      type == MessageType.private && (displayRecipient as DirectMessageRecipients).recipients.length > 2;
 
-  bool get isChannelMessage => displayRecipient is StreamDisplayRecipient;
+  // bool get isChannelMessage => displayRecipient is StreamDisplayRecipient;
+  bool get isChannelMessage => type == MessageType.stream;
   bool get isTopicMessage => isChannelMessage && subject.isNotEmpty;
 
   String get displayTitle {
@@ -64,6 +64,7 @@ class MessageEntity extends Equatable {
   bool isMyMessage(int? userId) => senderId == userId;
 
   bool get isCall => content.contains('https://meet.');
+  String? get callName => isCall ? extractMeetingName(content) : null;
 
   Map<String, ReactionDetails> get aggregatedReactions {
     final Map<String, ReactionDetails> map = {};

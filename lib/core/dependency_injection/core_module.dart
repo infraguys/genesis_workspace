@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dio_adapters/stub_adapter.dart'
@@ -43,6 +44,9 @@ abstract class CoreModule {
 
   @lazySingleton
   FlutterSecureStorage secureStorage() => const FlutterSecureStorage();
+
+  @lazySingleton
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin() => FlutterLocalNotificationsPlugin();
 
   @lazySingleton
   TokenStorage tokenStorage(FlutterSecureStorage secureStorage) {

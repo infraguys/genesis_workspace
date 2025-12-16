@@ -11,7 +11,13 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class GetVersionConfigUseCase {
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      sendTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  );
 
   Future<VersionConfigEntity> call() async {
     try {

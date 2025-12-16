@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
@@ -50,7 +51,7 @@ import 'package:injectable/injectable.dart';
 
 part 'messenger_state.dart';
 
-@injectable
+@LazySingleton()
 class MessengerCubit extends Cubit<MessengerState> {
   final AddFolderUseCase _addFolderUseCase;
   final GetFoldersUseCase _getFoldersUseCase;
@@ -128,7 +129,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   void _createChatsFromMessages(List<MessageEntity> messages) {
-    // final messages = [...state.messages];
     final chats = [...state.chats];
     final unreadMessages = [...state.unreadMessages];
 
@@ -142,8 +142,18 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (isChatExist) {
         ChatEntity chat = chats.firstWhere((chat) => chat.id == recipientId);
         final indexOfChat = chats.indexOf(chat);
-        chat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
-        chats[indexOfChat] = chat;
+        if (chat.type == ChatType.channel) {
+          final subscription = state.subscribedChannels.firstWhere(
+            (subscription) => subscription.streamId == chat.streamId,
+            orElse: SubscriptionEntity.fake,
+          );
+          chat = chat.copyWith(
+            colorString: subscription.color,
+            isMuted: subscription.isMuted,
+          );
+        }
+        final updatedChat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
+        chats[indexOfChat] = updatedChat;
       } else {
         ChatEntity chat = ChatEntity.createChatFromMessage(
           message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),
@@ -527,7 +537,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       final refreshedPins = await _getPinnedChatsUseCase.call(folderUuid);
       emit(state.copyWith(pinnedChats: refreshedPins));
       _sortChats();
-    } catch (e, s) {
+    } catch (e, _) {
       // обработка/логирование
     }
   }
@@ -555,7 +565,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _onMessageEvents(MessageEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
-    final message = event.message;
+    final message = event.message.copyWith(flags: event.flags);
 
     final chatId = message.recipientId;
     final isMyMessage = message.isMyMessage(state.selfUser?.userId);
@@ -572,11 +582,23 @@ class MessengerCubit extends Cubit<MessengerState> {
       final messagePreview = message.content;
       final messageDate = message.messageDate;
 
+      /// Update lasMessagePreview for topic
+      var copiedTopicList = chat.topics == null ? null : List.of(chat.topics!);
+      if (copiedTopicList != null) {
+        final targetIndexInTopics = chat.topics!.indexWhere((it) => it.name == event.message.subject);
+        if (targetIndexInTopics != -1) {
+          final targetTopic = chat.topics![targetIndexInTopics];
+          final updatedTopic = targetTopic.copyWith(lastMessagePreview: messagePreview);
+          copiedTopicList[targetIndexInTopics] = updatedTopic;
+        }
+      }
+
       updatedChat = updatedChat.copyWith(
         lastMessageId: message.id,
         lastMessageSenderName: messageSenderName,
         lastMessagePreview: messagePreview,
         lastMessageDate: messageDate,
+        topics: copiedTopicList,
       );
       if (message.isUnread && !isMyMessage) {
         updatedUnreadMessages.add(message);
@@ -610,19 +632,22 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
+
     List<ChatEntity> updatedChats = [...state.chats];
     List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
     if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
       for (final messageId in event.messages) {
         updatedUnreadMessages.removeWhere((message) => message.id == messageId);
-        final message = state.unreadMessages.firstWhere((message) => message.id == messageId);
-        ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
-        final indexOfChat = state.chats.indexOf(updatedChat);
-        updatedChat.unreadMessages.remove(messageId);
-        updatedChat.topics?.forEach((topic) {
-          topic.unreadMessages.remove(messageId);
-        });
-        updatedChats[indexOfChat] = updatedChat;
+        final message = state.messages.firstWhereOrNull((message) => message.id == messageId);
+        ChatEntity? updatedChat = updatedChats.firstWhereOrNull((chat) => chat.id == message?.recipientId);
+        if (updatedChat != null) {
+          final indexOfChat = state.chats.indexOf(updatedChat);
+          updatedChat.unreadMessages.remove(messageId);
+          updatedChat.topics?.forEach((topic) {
+            topic.unreadMessages.remove(messageId);
+          });
+          updatedChats[indexOfChat] = updatedChat;
+        }
       }
     }
     emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
@@ -673,8 +698,6 @@ class MessengerCubit extends Cubit<MessengerState> {
 
     final prevMessage = chatMessages[chatMessages.length - 1];
 
-    inspect(prevMessage);
-
     final indexOfChat = state.chats.indexOf(updatedChat);
     updatedChat.unreadMessages.remove(messageId);
     updatedChat.topics?.forEach((topic) {
@@ -704,35 +727,37 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (organizationId != event.organizationId) return;
 
     final messageId = event.messageId;
-    final message = state.messages.firstWhere((message) => message.id == messageId, orElse: () => MessageEntity.fake());
+    final message = state.messages.firstWhereOrNull((message) => message.id == messageId);
 
-    final updatedChats = [...state.chats];
-    ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
-    final indexOfChat = updatedChats.indexOf(updatedChat);
-    if (updatedChat.lastMessageId == messageId) {
-      updatedChat = updatedChat.copyWith(
-        lastMessageId: message.id,
-        lastMessageDate: message.messageDate,
-        lastMessageSenderName: message.senderFullName,
-        lastMessagePreview: event.content,
-      );
-      updatedChats[indexOfChat] = updatedChat;
-    }
-
-    List<MessageEntity> updatedMessages = [...state.messages];
-    List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
-
-    final updatedMessage = message.copyWith(content: event.content);
-
-    final indexOfMessage = state.messages.indexOf(message);
-    updatedMessages[indexOfMessage] = updatedMessage;
-    if (message.isUnread) {
-      final indexOfUnreadMessage = state.unreadMessages.indexOf(message);
-      if (indexOfUnreadMessage != -1) {
-        updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
+    if (message != null) {
+      final updatedChats = [...state.chats];
+      ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
+      final indexOfChat = updatedChats.indexOf(updatedChat);
+      if (updatedChat.lastMessageId == messageId) {
+        updatedChat = updatedChat.copyWith(
+          lastMessageId: message.id,
+          lastMessageDate: message.messageDate,
+          lastMessageSenderName: message.senderFullName,
+          lastMessagePreview: event.content,
+        );
+        updatedChats[indexOfChat] = updatedChat;
       }
+
+      List<MessageEntity> updatedMessages = [...state.messages];
+      List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
+
+      final updatedMessage = message.copyWith(content: event.content);
+
+      final indexOfMessage = state.messages.indexOf(message);
+      updatedMessages[indexOfMessage] = updatedMessage;
+      if (message.isUnread) {
+        final indexOfUnreadMessage = state.unreadMessages.indexOf(message);
+        if (indexOfUnreadMessage != -1) {
+          updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
+        }
+      }
+      emit(state.copyWith(messages: updatedMessages, unreadMessages: updatedUnreadMessages, chats: updatedChats));
     }
-    emit(state.copyWith(messages: updatedMessages, unreadMessages: updatedUnreadMessages, chats: updatedChats));
   }
 
   @override
@@ -761,7 +786,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
 
     state.filteredChatIds = filteredIds;
-
     emit(state.copyWith(filteredChatIds: state.filteredChatIds));
     _applySearchFilter();
   }
@@ -864,5 +888,10 @@ class MessengerCubit extends Cubit<MessengerState> {
     final result = [...pinnedChats, ...regularChats];
     emit(state.copyWith(chats: result));
     _applySearchFilter();
+  }
+
+  void createEmptyChat(Set<int> membersIds) async {
+    final newState = state.copyWith(usersIds: membersIds);
+    emit(newState);
   }
 }

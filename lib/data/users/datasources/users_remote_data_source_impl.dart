@@ -69,7 +69,8 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   @override
   Future<UserByIdResponseDto> getUserById(int userId) async {
     try {
-      return await apiClient.getUserById(userId);
+      final includeCustomProfileFields = true;
+      return await apiClient.getUserById(userId, includeCustomProfileFields);
     } catch (e) {
       rethrow;
     }

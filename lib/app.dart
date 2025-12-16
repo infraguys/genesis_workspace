@@ -9,6 +9,8 @@ import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
@@ -37,12 +39,10 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider(create: (_) => getIt<DownloadFilesCubit>()),
         BlocProvider(create: (_) => getIt<CallCubit>()),
-        BlocProvider(
-          create: (context) => getIt<ChannelChatCubit>(),
-        ),
-        BlocProvider(
-          create: (context) => getIt<ChatCubit>(),
-        ),
+        BlocProvider(create: (context) => getIt<ChannelChatCubit>()),
+        BlocProvider(create: (context) => getIt<ChatCubit>()),
+        BlocProvider(create: (context) => getIt<NotificationsCubit>()),
+        BlocProvider(create: (context) => getIt<InfoPanelCubit>()),
       ],
       child: MaterialApp.router(
         locale: TranslationProvider.of(context).flutterLocale,

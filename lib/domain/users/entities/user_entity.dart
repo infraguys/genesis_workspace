@@ -18,6 +18,8 @@ class UserEntity extends Equatable {
     required this.timezone,
     required this.isActive,
     this.avatarUrl,
+    required this.jobTitle,
+    required this.bossName,
   });
 
   final String email;
@@ -31,6 +33,8 @@ class UserEntity extends Equatable {
   final String timezone;
   final bool isActive;
   final String? avatarUrl;
+  final String jobTitle;
+  final String bossName;
 
   UserDto toDto() {
     return UserDto(
@@ -47,6 +51,7 @@ class UserEntity extends Equatable {
       isActive: isActive,
       dateJoined: "",
       avatarUrl: avatarUrl,
+      profileData: {},
     );
   }
 
@@ -65,6 +70,8 @@ class UserEntity extends Equatable {
     isGuest: isGuest,
     isOwner: isOwner,
     isAdmin: isAdmin,
+    jobTitle: jobTitle,
+    bossName: bossName,
   );
 
   factory UserEntity.fake({int? id, String? email, String? fullName, bool? isActive}) {
@@ -80,6 +87,8 @@ class UserEntity extends Equatable {
       isAdmin: false,
       isOwner: false,
       isGuest: true,
+      jobTitle: "Developer",
+      bossName: "Boss name",
     );
   }
 
