@@ -129,7 +129,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   void _createChatsFromMessages(List<MessageEntity> messages) {
-    // final messages = [...state.messages];
     final chats = [...state.chats];
     final unreadMessages = [...state.unreadMessages];
 
@@ -143,8 +142,18 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (isChatExist) {
         ChatEntity chat = chats.firstWhere((chat) => chat.id == recipientId);
         final indexOfChat = chats.indexOf(chat);
-        chat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
-        chats[indexOfChat] = chat;
+        if (chat.type == ChatType.channel) {
+          final subscription = state.subscribedChannels.firstWhere(
+            (subscription) => subscription.streamId == chat.streamId,
+            orElse: SubscriptionEntity.fake,
+          );
+          chat = chat.copyWith(
+            colorString: subscription.color,
+            isMuted: subscription.isMuted,
+          );
+        }
+        final updatedChat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
+        chats[indexOfChat] = updatedChat;
       } else {
         ChatEntity chat = ChatEntity.createChatFromMessage(
           message.copyWith(avatarUrl: isMyMessage ? null : message.avatarUrl),
@@ -572,7 +581,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       final messageSenderName = message.senderFullName;
       final messagePreview = message.content;
       final messageDate = message.messageDate;
-
 
       /// Update lasMessagePreview for topic
       var copiedTopicList = chat.topics == null ? null : List.of(chat.topics!);
