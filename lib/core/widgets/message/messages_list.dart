@@ -55,7 +55,6 @@ class _MessagesListState extends State<MessagesList> {
 
   late final UserEntity? _myUser;
   late final AutoScrollController _autoScrollController;
-  late final ScrollController _scrollController;
 
   bool showEmojiPicker = false;
 
@@ -65,8 +64,6 @@ class _MessagesListState extends State<MessagesList> {
   void initState() {
     super.initState();
     _reversed = widget.messages.reversed.toList(growable: false);
-    _scrollController = ScrollController();
-    _scrollController.addListener(_onScroll);
 
     _autoScrollController = AutoScrollController(axis: Axis.vertical);
 
@@ -93,7 +90,6 @@ class _MessagesListState extends State<MessagesList> {
     if (kIsWeb) BrowserContextMenu.enableContextMenu();
     _autoScrollController.removeListener(_onScroll);
     _dayLabelTimer?.cancel();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -185,7 +181,6 @@ class _MessagesListState extends State<MessagesList> {
             children: [
               ListView.separated(
                 controller: _autoScrollController,
-                // controller: _scrollController,
                 reverse: true,
                 itemCount: _reversed.length,
                 padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
