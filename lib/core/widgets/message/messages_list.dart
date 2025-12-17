@@ -22,7 +22,7 @@ class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
   final ScrollController controller;
   final void Function(int id)? onRead;
-  final void Function()? loadMore;
+  final Future<void> Function()? loadMore;
   final bool showTopic;
   final bool isLoadingMore;
   final int myUserId;
@@ -55,6 +55,7 @@ class _MessagesListState extends State<MessagesList> {
 
   late final UserEntity? _myUser;
   late final AutoScrollController _autoScrollController;
+  late final ScrollController _scrollController;
 
   bool showEmojiPicker = false;
 
@@ -64,6 +65,8 @@ class _MessagesListState extends State<MessagesList> {
   void initState() {
     super.initState();
     _reversed = widget.messages.reversed.toList(growable: false);
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
 
     _autoScrollController = AutoScrollController(axis: Axis.vertical);
 
@@ -90,6 +93,7 @@ class _MessagesListState extends State<MessagesList> {
     if (kIsWeb) BrowserContextMenu.enableContextMenu();
     _autoScrollController.removeListener(_onScroll);
     _dayLabelTimer?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -126,10 +130,11 @@ class _MessagesListState extends State<MessagesList> {
     return null;
   }
 
-  void _onScroll() {
-    if (_autoScrollController.offset >= _autoScrollController.position.maxScrollExtent && !widget.isLoadingMore) {
+  void _onScroll() async {
+    final scrollController = _autoScrollController;
+    if (scrollController.offset >= scrollController.position.maxScrollExtent && !widget.isLoadingMore) {
       if (widget.loadMore != null) {
-        widget.loadMore!();
+        await widget.loadMore!();
       }
     }
     if (!_showDayLabel) {
@@ -142,7 +147,7 @@ class _MessagesListState extends State<MessagesList> {
 
     final showScrollToBottomOffset = 200.0;
     final isNearBottom =
-        _autoScrollController.offset <= _autoScrollController.position.minScrollExtent + showScrollToBottomOffset;
+        scrollController.offset <= scrollController.position.minScrollExtent + showScrollToBottomOffset;
 
     if (_showScrollToBottom == isNearBottom) {
       setState(() {
@@ -180,6 +185,7 @@ class _MessagesListState extends State<MessagesList> {
             children: [
               ListView.separated(
                 controller: _autoScrollController,
+                // controller: _scrollController,
                 reverse: true,
                 itemCount: _reversed.length,
                 padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),

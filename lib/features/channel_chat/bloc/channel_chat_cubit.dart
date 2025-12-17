@@ -327,8 +327,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   Future<void> loadMoreMessages() async {
     if (!state.isAllMessagesLoaded) {
-      state.isLoadingMore = true;
-      emit(state.copyWith(isLoadingMore: state.isLoadingMore));
+      emit(state.copyWith(isLoadingMore: true));
       try {
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(state.lastMessageId ?? 0),
@@ -342,19 +341,19 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         );
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;
-        state.isAllMessagesLoaded = response.foundOldest;
         List<MessageEntity> messages = [...state.messages];
         messages = [...response.messages, ...messages];
-        state.isLoadingMore = false;
         emit(
           state.copyWith(
             messages: messages,
-            isLoadingMore: state.isLoadingMore,
-            isAllMessagesLoaded: state.isAllMessagesLoaded,
+            isLoadingMore: false,
+            isAllMessagesLoaded: response.foundOldest,
           ),
         );
       } catch (e) {
         inspect(e);
+      } finally {
+        emit(state.copyWith(isLoadingMore: false));
       }
     }
   }
