@@ -114,8 +114,8 @@ class _MessengerViewState extends State<MessengerView>
   }
 
   Future<void> getInitialData() async {
+    await context.read<MessengerCubit>().loadFolders();
     await Future.wait([
-      context.read<MessengerCubit>().loadFolders(),
       context.read<MessengerCubit>().getInitialMessages(),
     ]);
     if (mounted) {
@@ -252,7 +252,7 @@ class _MessengerViewState extends State<MessengerView>
   void initState() {
     _applySortingPreferences();
     _checkUser();
-    _future = getInitialData();
+    // _future = getInitialData();
     _searchBarController = AnimationController(
       vsync: this,
       duration: _searchAnimationDuration,

@@ -1,6 +1,8 @@
 part of 'messenger_cubit.dart';
 
 class MessengerState {
+  static const Object _notSpecified = Object();
+
   final UserEntity? selfUser;
   final List<FolderEntity> folders;
   final int selectedFolderIndex;
@@ -64,7 +66,7 @@ class MessengerState {
     ChatEntity? selectedChat,
     String? selectedTopic,
     List<PinnedChatEntity>? pinnedChats,
-    Set<int>? filteredChatIds,
+    Object? filteredChatIds = _notSpecified,
     List<ChatEntity>? filteredChats,
     bool? foundOldestMessage,
     List<SubscriptionEntity>? subscribedChannels,
@@ -82,7 +84,7 @@ class MessengerState {
       selectedChat: selectedChat ?? this.selectedChat,
       selectedTopic: selectedTopic ?? this.selectedTopic,
       pinnedChats: pinnedChats ?? this.pinnedChats,
-      filteredChatIds: filteredChatIds ?? this.filteredChatIds,
+      filteredChatIds: identical(filteredChatIds, _notSpecified) ? this.filteredChatIds : filteredChatIds as Set<int>?,
       filteredChats: filteredChats ?? this.filteredChats,
       foundOldestMessage: foundOldestMessage ?? this.foundOldestMessage,
       subscribedChannels: subscribedChannels ?? this.subscribedChannels,

@@ -18,7 +18,6 @@ class LocalNotificationsService {
     final WindowsInitializationSettings initializationSettingsWindows = WindowsInitializationSettings(
       appName: 'Workspace',
       appUserModelId: 'Com.Genesis.Workspace',
-      // Search online for GUID generators to make your own
       guid: '4c1dc691-5ece-47c8-ba3a-0b3a7684b1cc',
     );
     final InitializationSettings initializationSettings = InitializationSettings(
