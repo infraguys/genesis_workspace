@@ -277,6 +277,7 @@ class _MessageItemState extends State<MessageItem> {
               _openContextMenu(context, details.globalPosition);
             }
           },
+          onDoubleTap: onReplay,
           child: Align(
             alignment: widget.isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
             child: Row(
