@@ -287,8 +287,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
 
   Future<void> loadMoreMessages() async {
     if (!state.isAllMessagesLoaded) {
-      state.isLoadingMore = true;
-      emit(state.copyWith(isLoadingMore: state.isLoadingMore));
+      emit(state.copyWith(isLoadingMore: true));
       try {
         final operand = state.chatIds!.toList();
         final body = MessagesRequestEntity(
@@ -300,18 +299,17 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
         );
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;
-        state.isAllMessagesLoaded = response.foundOldest;
-        state.messages = [...response.messages, ...state.messages];
-        state.isLoadingMore = false;
+        final messages = [...response.messages, ...state.messages];
         emit(
           state.copyWith(
-            messages: state.messages,
-            isLoadingMore: state.isLoadingMore,
-            isAllMessagesLoaded: state.isAllMessagesLoaded,
+            messages: messages,
+            isAllMessagesLoaded: response.foundOldest,
           ),
         );
       } catch (e) {
         inspect(e);
+      } finally {
+        emit(state.copyWith(isLoadingMore: false));
       }
     }
   }

@@ -67,7 +67,7 @@ class DioFactory {
     final Dio dio = Dio(
       BaseOptions(
         baseUrl: baseUrl.isEmpty ? 'http://placeholder.local' : '$baseUrl$basePath',
-        receiveTimeout: const Duration(seconds: 90),
+        receiveTimeout: const Duration(seconds: 10),
       ),
     );
 

@@ -26,6 +26,7 @@ class PerOrganizationDioFactory {
 
     final BaseOptions baseOptions = BaseOptions(
       baseUrl: resolvedBaseUrl,
+      receiveTimeout: const Duration(seconds: 90),
       // validateStatus: (int? statusCode) =>
       //     statusCode != null && statusCode >= 200 && statusCode < 600,
     );
