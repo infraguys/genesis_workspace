@@ -14,7 +14,6 @@ class AppConstants {
   static const int bossNameProfileDataIndex = 2;
 
   static late String baseUrl;
-  static late String meetingUrl;
   static int? selectedOrganizationId;
 
   static const String versionConfigUrl = 'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
@@ -42,10 +41,6 @@ class AppConstants {
       baseUrl = '';
     }
     selectedOrganizationId = savedOrganizationId;
-  }
-
-  static setMeetingUrl(String? url) {
-    meetingUrl = url ?? '';
   }
 
   static setBaseUrl(String url) {
