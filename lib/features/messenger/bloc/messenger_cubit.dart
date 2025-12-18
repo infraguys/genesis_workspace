@@ -269,7 +269,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       emit(state.copyWith(unreadMessages: updatedMessages));
       _createChatsFromMessages(updatedMessages);
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
@@ -339,7 +341,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       await _loadFoldersMembers();
       await _loadPinnedForCurrentFolder();
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
@@ -402,7 +406,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       updatedFolders.add(createdFolder);
       emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     } finally {
       emit(state.copyWith(isFolderSaving: false));
     }
@@ -428,7 +434,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       final pins = await _getPinnedChatsUseCase.call(folder.uuid);
       emit(state.copyWith(pinnedChats: pins));
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
@@ -467,7 +475,9 @@ class MessengerCubit extends Cubit<MessengerState> {
 
       _filterChatsByFolder();
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
@@ -482,7 +492,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       updatedFolders[index] = updatedFolder;
       emit(state.copyWith(folders: updatedFolders));
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     } finally {
       emit(state.copyWith(isFolderSaving: false));
     }
@@ -506,7 +518,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       selectFolder(0);
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     } finally {
       emit(state.copyWith(isFolderDeleting: false));
     }
@@ -555,7 +569,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       updatedChats[indexOfChat] = chat;
       emit(state.copyWith(chats: updatedChats));
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
@@ -579,7 +595,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       emit(state.copyWith(pinnedChats: pinnedChats));
       _sortChats();
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
@@ -595,7 +613,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       emit(state.copyWith(pinnedChats: pinnedChats));
       _sortChats();
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
