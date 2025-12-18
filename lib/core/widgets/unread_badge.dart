@@ -7,7 +7,7 @@ class UnreadBadge extends StatelessWidget {
 
   const UnreadBadge({super.key, required this.count, this.isMuted = false});
 
-  String _formatCount(int value) => value >= 100 ? '99+' : value.toString();
+  String _formatCount(int value) => value >= 1000 ? '999+' : value.toString();
 
   @override
   Widget build(BuildContext context) {

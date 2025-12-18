@@ -237,14 +237,13 @@ class MessengerCubit extends Cubit<MessengerState> {
         await getPinnedChats();
         _sortChats();
         _loadingTimes += 1;
+        _loadUnreadMessagesForFolders();
         await lazyLoadAllMessages();
       } catch (e) {
         if (kDebugMode) {
           inspect(e);
         }
       }
-    } else {
-      _loadUnreadMessagesForFolders();
     }
   }
 
@@ -312,11 +311,10 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
     if (selectedTopic == null) {
-      state.selectedTopic = null;
+      emit(state.copyWith(selectedChat: chat, selectedTopic: null));
     } else {
-      state.selectedTopic = selectedTopic;
+      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic));
     }
-    emit(state.copyWith(selectedChat: chat, selectedTopic: state.selectedTopic));
   }
 
   Future<void> loadFolders() async {
@@ -346,28 +344,58 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> _loadFoldersMembers() async {
-    List<FolderEntity> folders = [...state.folders];
-    inspect(folders);
+    final List<FolderEntity> folders = [...state.folders];
 
-    folders.forEach((folder) async {
-      final folderItems = await _getMembersForFolderUseCase.call(folder.uuid);
-      folder.folderItems.addAll(folderItems.chatIds.toSet());
-    });
+    final futures = <Future<void>>[];
+    for (final folder in folders) {
+      futures.add(() async {
+        final folderItems = await _getMembersForFolderUseCase.call(folder.uuid);
+        folder.folderItems.addAll(folderItems.chatIds.toSet());
+      }());
+    }
+
+    await Future.wait(futures);
     emit(state.copyWith(folders: folders));
   }
 
   void _loadUnreadMessagesForFolders() {
-    List<FolderEntity> updatedFolders = [...state.folders];
-    state.chats.forEach((chat) {
-      updatedFolders.forEach((folder) {
-        if (folder.systemType == .all) {
-          folder.unreadMessages.addAll(chat.unreadMessages);
-        } else if (folder.folderItems.contains(chat.id)) {
-          folder.unreadMessages.addAll(chat.unreadMessages);
-        }
-      });
-    });
+    if (state.folders.isEmpty) {
+      return;
+    }
+    final updatedFolders = _recalculateUnreadMessagesForFolders(
+      folders: state.folders,
+      chats: state.chats,
+    );
     emit(state.copyWith(folders: updatedFolders));
+  }
+
+  List<FolderEntity> _recalculateUnreadMessagesForFolders({
+    required List<FolderEntity> folders,
+    required List<ChatEntity> chats,
+  }) {
+    if (folders.isEmpty) {
+      return folders;
+    }
+
+    final unreadByFolderIndex = List.generate(folders.length, (_) => <int>{});
+
+    for (final chat in chats) {
+      for (var i = 0; i < folders.length; i++) {
+        final folder = folders[i];
+        if (folder.systemType == .all || folder.folderItems.contains(chat.id)) {
+          unreadByFolderIndex[i].addAll(chat.unreadMessages);
+        }
+      }
+    }
+
+    final updatedFolders = <FolderEntity>[];
+    for (var i = 0; i < folders.length; i++) {
+      updatedFolders.add(
+        folders[i].copyWith(unreadMessages: unreadByFolderIndex[i].toList()),
+      );
+    }
+
+    return updatedFolders;
   }
 
   Future<void> addFolder(CreateFolderEntity folder) async {
@@ -414,6 +442,33 @@ class MessengerCubit extends Cubit<MessengerState> {
         chatId,
         foldersIds,
       );
+
+      final foldersIdsSet = foldersIds.toSet();
+      final updatedFolders = <FolderEntity>[];
+      for (final folder in state.folders) {
+        if (folder.systemType == FolderSystemType.all) {
+          updatedFolders.add(folder);
+          continue;
+        }
+
+        final updatedItems = {...folder.folderItems};
+        if (foldersIdsSet.contains(folder.uuid)) {
+          updatedItems.add(chatId);
+        } else {
+          updatedItems.remove(chatId);
+        }
+        updatedFolders.add(folder.copyWith(folderItems: updatedItems));
+      }
+
+      emit(
+        state.copyWith(
+          folders: _recalculateUnreadMessagesForFolders(
+            folders: updatedFolders,
+            chats: state.chats,
+          ),
+        ),
+      );
+
       _filterChatsByFolder();
     } catch (e) {
       inspect(e);
@@ -653,7 +708,18 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       updatedChats.add(chat);
     }
-    emit(state.copyWith(messages: updatedMessages, chats: updatedChats, unreadMessages: updatedUnreadMessages));
+    final updatedFolders = _recalculateUnreadMessagesForFolders(
+      folders: state.folders,
+      chats: updatedChats,
+    );
+    emit(
+      state.copyWith(
+        messages: updatedMessages,
+        chats: updatedChats,
+        unreadMessages: updatedUnreadMessages,
+        folders: updatedFolders,
+      ),
+    );
     _sortChats();
   }
 
@@ -678,7 +744,17 @@ class MessengerCubit extends Cubit<MessengerState> {
         }
       }
     }
-    emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
+    final updatedFolders = _recalculateUnreadMessagesForFolders(
+      folders: state.folders,
+      chats: updatedChats,
+    );
+    emit(
+      state.copyWith(
+        chats: updatedChats,
+        unreadMessages: updatedUnreadMessages,
+        folders: updatedFolders,
+      ),
+    );
   }
 
   void _onSubscriptionEvents(SubscriptionEventEntity event) {
@@ -720,7 +796,13 @@ class MessengerCubit extends Cubit<MessengerState> {
 
     if (chatMessages.length == 1) {
       updatedChats.removeWhere((chat) => chat.id == updatedChat.id);
-      emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages, messages: updatedMessages));
+      emit(
+        state.copyWith(
+          chats: updatedChats,
+          unreadMessages: updatedUnreadMessages,
+          messages: updatedMessages,
+        ),
+      );
       return;
     }
 
@@ -747,7 +829,17 @@ class MessengerCubit extends Cubit<MessengerState> {
       updatedChat.topics![indexOfTopic] = updatedTopic;
     }
     updatedChats[indexOfChat] = updatedChat;
-    emit(state.copyWith(chats: updatedChats, unreadMessages: updatedUnreadMessages));
+    final updatedFolders = _recalculateUnreadMessagesForFolders(
+      folders: state.folders,
+      chats: updatedChats,
+    );
+    emit(
+      state.copyWith(
+        chats: updatedChats,
+        unreadMessages: updatedUnreadMessages,
+        folders: updatedFolders,
+      ),
+    );
   }
 
   void _onUpdateMessageEvents(UpdateMessageEventEntity event) {
@@ -784,7 +876,13 @@ class MessengerCubit extends Cubit<MessengerState> {
           updatedUnreadMessages[indexOfUnreadMessage] = updatedMessage;
         }
       }
-      emit(state.copyWith(messages: updatedMessages, unreadMessages: updatedUnreadMessages, chats: updatedChats));
+      emit(
+        state.copyWith(
+          messages: updatedMessages,
+          unreadMessages: updatedUnreadMessages,
+          chats: updatedChats,
+        ),
+      );
     }
   }
 
@@ -799,18 +897,12 @@ class MessengerCubit extends Cubit<MessengerState> {
     return super.close();
   }
 
-  Future<void> _filterChatsByFolder() async {
+  void _filterChatsByFolder() {
     Set<int>? filteredIds;
 
     if (state.folders.isNotEmpty && state.selectedFolderIndex > 0 && state.selectedFolderIndex < state.folders.length) {
       final folder = state.folders[state.selectedFolderIndex];
-
-      try {
-        // final members = await _getMembersForFolderUseCase.call(folder.uuid);
-        filteredIds = folder.folderItems;
-      } catch (e) {
-        inspect(e);
-      }
+      filteredIds = folder.folderItems;
     }
     emit(state.copyWith(filteredChatIds: filteredIds));
     _applySearchFilter();
@@ -827,8 +919,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     final String query = _searchQuery.trim();
     if (query.isEmpty) {
       if (state.filteredChats != null) {
-        state.filteredChats = null;
-        emit(state.copyWith(filteredChats: state.filteredChats));
+        emit(state.copyWith(filteredChats: null));
       }
       return;
     }

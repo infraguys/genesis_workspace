@@ -38,7 +38,7 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
         );
       }
     }
-    await _localDataSource.setChatFolders(chatId: chatId, folderUuids: folderUuids, organizationId: organizationId);
+    // await _localDataSource.setChatFolders(chatId: chatId, folderUuids: folderUuids, organizationId: organizationId);
   }
 
   @override
