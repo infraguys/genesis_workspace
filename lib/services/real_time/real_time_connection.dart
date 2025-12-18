@@ -145,7 +145,14 @@ class RealTimeConnection {
   Future<void> _registerQueue() async {
     try {
       final RegisterQueueEntity registerQueueEntity = await _registerQueueUseCase.call(
-        RegisterQueueRequestBodyEntity(eventTypes: [EventTypes.message, EventTypes.realm_user]),
+        RegisterQueueRequestBodyEntity(
+          eventTypes: [
+            EventTypes.message,
+            EventTypes.subscription,
+            EventTypes.realm_user,
+            EventTypes.update_message_flags,
+          ],
+        ),
       );
       _queueId = registerQueueEntity.queueId;
       _lastEventId = registerQueueEntity.lastEventId;
