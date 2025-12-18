@@ -6,6 +6,7 @@ class Organizations extends Table {
   TextColumn get name => text()();
   TextColumn get icon => text()();
   TextColumn get baseUrl => text()();
+  TextColumn get meetingUrl => text().nullable()();
   TextColumn get unreadMessages => text().map(const UnreadMessagesConverter()).withDefault(const Constant('[]'))();
 
   @override

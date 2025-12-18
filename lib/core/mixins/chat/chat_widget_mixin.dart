@@ -14,6 +14,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -299,13 +300,35 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   }
 
   Future<String> createCall(BuildContext context, {required bool startWithVideoMuted}) async {
+    final OrganizationsCubit? organizationsCubit = BlocProvider.of<OrganizationsCubit>(context);
+    String? meetingBaseUrl;
+
+    if (organizationsCubit != null) {
+      final selectedId = organizationsCubit.state.selectedOrganizationId;
+      for (final organization in organizationsCubit.state.organizations) {
+        if (organization.id == selectedId) {
+          meetingBaseUrl = organization.meetingUrl;
+          break;
+        }
+      }
+    }
+
+    meetingBaseUrl = meetingBaseUrl?.replaceAll(RegExp(r'/+$'), '');
+
+    if (meetingBaseUrl == null || meetingBaseUrl.isEmpty) {
+      return '';
+    }
+
     String? meetingLink;
 
     try {
       meetingLink = await showDialog<String>(
         context: context,
         builder: (dialogContext) {
-          return CreateCallDialog(startWithVideoMuted: startWithVideoMuted);
+          return CreateCallDialog(
+            startWithVideoMuted: startWithVideoMuted,
+            meetingBaseUrl: meetingBaseUrl!,
+          );
         },
       );
     } catch (e) {

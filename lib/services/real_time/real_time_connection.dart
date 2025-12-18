@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -28,6 +29,7 @@ class RealTimeConnection {
   final RegisterQueueUseCase _registerQueueUseCase;
   final GetEventsByQueueIdUseCase _getEventsByQueueIdUseCase;
   final DeleteQueueUseCase _deleteQueueUseCase;
+  final UpdateOrganizationMeetingUrlUseCase _updateOrganizationMeetingUrlUseCase;
 
   final Duration _initialRetryDelay;
   final Duration _maxRetryDelay;
@@ -47,11 +49,13 @@ class RealTimeConnection {
     required RegisterQueueUseCase registerQueueUseCase,
     required GetEventsByQueueIdUseCase getEventsByQueueIdUseCase,
     required DeleteQueueUseCase deleteQueueUseCase,
+    required UpdateOrganizationMeetingUrlUseCase updateOrganizationMeetingUrlUseCase,
     Duration initialRetryDelay = const Duration(seconds: 1),
     Duration maxRetryDelay = const Duration(seconds: 20),
   }) : _registerQueueUseCase = registerQueueUseCase,
        _getEventsByQueueIdUseCase = getEventsByQueueIdUseCase,
        _deleteQueueUseCase = deleteQueueUseCase,
+       _updateOrganizationMeetingUrlUseCase = updateOrganizationMeetingUrlUseCase,
        _initialRetryDelay = initialRetryDelay,
        _maxRetryDelay = maxRetryDelay;
 
@@ -145,6 +149,10 @@ class RealTimeConnection {
       );
       _queueId = registerQueueEntity.queueId;
       _lastEventId = registerQueueEntity.lastEventId;
+      await _updateOrganizationMeetingUrlUseCase.call(
+        organizationId: organizationId,
+        meetingUrl: registerQueueEntity.realmJitsiServerUrl,
+      );
     } catch (e) {
       rethrow;
     }

@@ -51,4 +51,15 @@ class OrganizationsRepositoryImpl implements OrganizationsRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> updateMeetingUrl({
+    required int organizationId,
+    required String? meetingUrl,
+  }) {
+    return _localDataSource.updateMeetingUrl(
+      organizationId: organizationId,
+      meetingUrl: meetingUrl,
+    );
+  }
 }
