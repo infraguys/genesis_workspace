@@ -555,14 +555,20 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                           child: Shortcuts(
                             shortcuts: state.showMentionPopup
                                 ? <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowDown): const MentionNavIntent.down(),
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const MentionNavIntent.up(),
-                                    const SingleActivator(LogicalKeyboardKey.enter): const MentionSelectIntent(),
-                                    const SingleActivator(LogicalKeyboardKey.numpadEnter): const MentionSelectIntent(),
+                                    const SingleActivator(LogicalKeyboardKey.arrowDown, numLock: LockState.ignored):
+                                        const MentionNavIntent.down(),
+                                    const SingleActivator(LogicalKeyboardKey.arrowUp, numLock: LockState.ignored):
+                                        const MentionNavIntent.up(),
+                                    const SingleActivator(LogicalKeyboardKey.enter, numLock: LockState.ignored):
+                                        const MentionSelectIntent(),
+                                    const SingleActivator(LogicalKeyboardKey.numpadEnter, numLock: LockState.ignored):
+                                        const MentionSelectIntent(),
                                   }
                                 : <ShortcutActivator, Intent>{
-                                    LogicalKeySet(LogicalKeyboardKey.arrowUp): const EditLastMessageIntent(),
-                                    LogicalKeySet(LogicalKeyboardKey.escape): const CancelEditMessageIntent(),
+                                    const SingleActivator(LogicalKeyboardKey.arrowUp, numLock: LockState.ignored):
+                                        const EditLastMessageIntent(),
+                                    const SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored):
+                                        const CancelEditMessageIntent(),
                                   },
                             child: Actions(
                               actions: <Type, Action<Intent>>{
