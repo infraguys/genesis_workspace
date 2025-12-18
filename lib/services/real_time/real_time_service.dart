@@ -75,7 +75,6 @@ class RealTimeService {
             EventTypes.message,
             EventTypes.subscription,
             EventTypes.realm_user,
-            EventTypes.update_message_flags,
           ],
         ),
       );
