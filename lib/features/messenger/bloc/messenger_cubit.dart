@@ -344,18 +344,14 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> _loadFoldersMembers() async {
-    final List<FolderEntity> folders = [...state.folders];
+    final futures = state.folders.map((folder) async {
+      final folderItems = await _getMembersForFolderUseCase.call(folder.uuid);
+      final updatedItems = {...folder.folderItems, ...folderItems.chatIds};
+      return folder.copyWith(folderItems: updatedItems);
+    }).toList();
 
-    final futures = <Future<void>>[];
-    for (final folder in folders) {
-      futures.add(() async {
-        final folderItems = await _getMembersForFolderUseCase.call(folder.uuid);
-        folder.folderItems.addAll(folderItems.chatIds.toSet());
-      }());
-    }
-
-    await Future.wait(futures);
-    emit(state.copyWith(folders: folders));
+    final updatedFolders = await Future.wait(futures);
+    emit(state.copyWith(folders: updatedFolders));
   }
 
   void _loadUnreadMessagesForFolders() {
@@ -796,11 +792,16 @@ class MessengerCubit extends Cubit<MessengerState> {
 
     if (chatMessages.length == 1) {
       updatedChats.removeWhere((chat) => chat.id == updatedChat.id);
+      final updatedFolders = _recalculateUnreadMessagesForFolders(
+        folders: state.folders,
+        chats: updatedChats,
+      );
       emit(
         state.copyWith(
           chats: updatedChats,
           unreadMessages: updatedUnreadMessages,
           messages: updatedMessages,
+          folders: updatedFolders,
         ),
       );
       return;
