@@ -300,7 +300,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   }
 
   Future<String> createCall(BuildContext context, {required bool startWithVideoMuted}) async {
-    final OrganizationsCubit? organizationsCubit = BlocProvider.of<OrganizationsCubit>(context);
+    final OrganizationsCubit? organizationsCubit = context.read<OrganizationsCubit>();
     String? meetingBaseUrl;
 
     if (organizationsCubit != null) {
