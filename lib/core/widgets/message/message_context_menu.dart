@@ -141,7 +141,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
             ),
             child: ValueListenableBuilder(
               valueListenable: isEmoji,
-              builder: (context, value, _) {
+              builder: (_, value, _) {
                 if (value) {
                   return EmojiPicker(
                     onEmojiSelected: (category, emoji) {
@@ -165,7 +165,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                   );
                 }
                 return Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
                   children: [
                     _ReactionsRow(
                       onEmojiSelected: _onEmojiSelected,
@@ -174,31 +174,31 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                     const SizedBox(height: 10),
                     _ActionTile(
                       textColor: textColor,
-                      icon: Assets.icons.replay,
+                      icon: Assets.icons.replyIcon,
                       label: context.t.contextMenu.reply,
                       onTap: _onReplay,
                     ),
                     if (widget.onEdit != null)
                       _ActionTile(
                         textColor: textColor,
-                        icon: Assets.icons.edit,
+                        icon: Assets.icons.editIcon,
                         label: context.t.contextMenu.edit,
                         onTap: _onEdit,
                       ),
                     _ActionTile(
                       textColor: textColor,
-                      icon: Assets.icons.fileCopy,
+                      icon: Assets.icons.fileCopyIcon,
                       label: context.t.contextMenu.copy,
                       onTap: _onCopy,
                     ),
                     _ActionTile(
                       textColor: textColor,
-                      icon: Assets.icons.reSend,
+                      icon: Assets.icons.forwardIcon,
                       label: context.t.contextMenu.forward,
                     ),
                     _ActionTile(
                       textColor: textColor,
-                      icon: widget.isStarred ? Assets.icons.bookmarkMarked : Assets.icons.bookmark,
+                      icon: widget.isStarred ? Assets.icons.selectedBookmarkIcon : Assets.icons.newBookmark,
                       label: widget.isStarred
                           ? context.t.contextMenu.unmarkAsImportant
                           : context.t.contextMenu.markAsImportant,
@@ -207,21 +207,21 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                     if (widget.onDelete != null)
                       _ActionTile(
                         textColor: textColor,
-                        icon: Assets.icons.delete,
+                        icon: Assets.icons.deleteIcon,
                         label: context.t.contextMenu.delete,
                         onTap: _onDelete,
                       ),
                     _ActionTile(
                       textColor: textColor,
-                      icon: Assets.icons.checkCircle,
+                      icon: Assets.icons.readReceipt,
                       label: context.t.contextMenu.readBy,
                       onTap: _showMessageReaders,
                     ),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: Assets.icons.checkCircle,
-                      label: context.t.contextMenu.select,
-                    ),
+                    // _ActionTile(
+                    //   textColor: textColor,
+                    //   icon: Assets.icons.checkCircleIcon,
+                    //   label: context.t.contextMenu.select,
+                    // ),
                   ],
                 );
               },
@@ -248,7 +248,7 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final textTheme = TextTheme.of(context);
 
     return SizedBox(
       height: 36.0,
@@ -259,16 +259,12 @@ class _ActionTile extends StatelessWidget {
           child: Padding(
             padding: const .symmetric(horizontal: 12.0),
             child: Row(
+              spacing: 12.0,
               children: [
-                icon.svg(width: 20, height: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                icon.svg(width: 28, height: 28),
+                Text(
+                  label,
+                  style: textTheme.bodyMedium?.copyWith(fontWeight: .w500),
                 ),
               ],
             ),
@@ -302,9 +298,7 @@ class _ReactionsRow extends StatelessWidget {
               Material(
                 child: InkWell(
                   borderRadius: .circular(20),
-                  onTap: () {
-                    onEmojiSelected(emoji.emojiName.replaceAll(':', ''));
-                  },
+                  onTap: () => onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
                   child: Padding(
                     padding: const .all(4.0),
                     child: UnicodeEmojiWidget(emojiDisplay: emoji, size: 20),
@@ -313,7 +307,7 @@ class _ReactionsRow extends StatelessWidget {
               ),
             Material(
               child: InkWell(
-                borderRadius: .circular(20),
+                borderRadius: .circular(20.0),
                 onTap: onOpenEmojiPicker,
                 child: Padding(
                   padding: const .all(4.0),
