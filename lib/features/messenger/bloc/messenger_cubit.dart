@@ -743,29 +743,86 @@ class MessengerCubit extends Cubit<MessengerState> {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
 
-    List<ChatEntity> updatedChats = [...state.chats];
-    List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
-    if (event.op == UpdateMessageFlagsOp.add && event.flag == MessageFlag.read) {
-      for (final messageId in event.messages) {
-        updatedUnreadMessages.removeWhere((message) => message.id == messageId);
-        final message = state.messages.firstWhereOrNull((message) => message.id == messageId);
-        ChatEntity? updatedChat = updatedChats.firstWhereOrNull((chat) => chat.id == message?.recipientId);
-        if (updatedChat != null) {
-          final indexOfChat = state.chats.indexOf(updatedChat);
-          updatedChat.unreadMessages.remove(messageId);
-          updatedChat.topics?.forEach((topic) {
-            topic.unreadMessages.remove(messageId);
-          });
-          updatedChats[indexOfChat] = updatedChat;
+    final Set<int> affectedIds = event.all
+        ? state.messages.map((message) => message.id).toSet()
+        : event.messages.toSet();
+
+    if (affectedIds.isEmpty) return;
+
+    final String flagName = event.flag.name;
+    final bool isReadFlag = event.flag == MessageFlag.read;
+
+    final updatedMessages = state.messages.map((message) {
+      if (!affectedIds.contains(message.id)) return message;
+
+      final List<String> nextFlags = [...?message.flags];
+      if (event.op == UpdateMessageFlagsOp.add) {
+        if (!nextFlags.contains(flagName)) {
+          nextFlags.add(flagName);
         }
+      } else {
+        nextFlags.remove(flagName);
       }
+      return message.copyWith(flags: nextFlags);
+    }).toList();
+
+    final Map<int, MessageEntity> affectedMessages = {
+      for (final message in updatedMessages.where((message) => affectedIds.contains(message.id))) message.id: message,
+    };
+
+    List<MessageEntity> updatedUnreadMessages = state.unreadMessages;
+    List<ChatEntity> updatedChats = state.chats;
+    List<FolderEntity> updatedFolders = state.folders;
+
+    if (isReadFlag) {
+      updatedUnreadMessages = updatedMessages.where((message) => message.isUnread).toList();
+      updatedChats = state.chats.map((chat) {
+        final Set<int> idsForChat = affectedMessages.values
+            .where((message) => message.recipientId == chat.id)
+            .map((message) => message.id)
+            .toSet();
+        if (idsForChat.isEmpty) return chat;
+
+        final Set<int> unread = {...chat.unreadMessages};
+        if (event.op == UpdateMessageFlagsOp.add) {
+          unread.removeAll(idsForChat);
+        } else {
+          unread.addAll(idsForChat);
+        }
+
+        List<TopicEntity>? updatedTopics = chat.topics;
+        if (chat.topics != null) {
+          updatedTopics = chat.topics!.map((topic) {
+            final Set<int> idsForTopic = affectedMessages.values
+                .where((message) => message.recipientId == chat.id && message.subject == topic.name)
+                .map((message) => message.id)
+                .toSet();
+            if (idsForTopic.isEmpty) return topic;
+
+            final Set<int> topicUnread = {...topic.unreadMessages};
+            if (event.op == UpdateMessageFlagsOp.add) {
+              topicUnread.removeAll(idsForTopic);
+            } else {
+              topicUnread.addAll(idsForTopic);
+            }
+            return topic.copyWith(unreadMessages: topicUnread);
+          }).toList();
+        }
+
+        return chat.copyWith(
+          unreadMessages: unread,
+          topics: updatedTopics,
+        );
+      }).toList();
+      updatedFolders = _recalculateUnreadMessagesForFolders(
+        folders: state.folders,
+        chats: updatedChats,
+      );
     }
-    final updatedFolders = _recalculateUnreadMessagesForFolders(
-      folders: state.folders,
-      chats: updatedChats,
-    );
+
     emit(
       state.copyWith(
+        messages: updatedMessages,
         chats: updatedChats,
         unreadMessages: updatedUnreadMessages,
         folders: updatedFolders,

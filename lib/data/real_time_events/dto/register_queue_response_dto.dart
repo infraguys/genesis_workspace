@@ -19,8 +19,7 @@ class RegisterQueueResponseDto {
     required this.lastEventId,
   });
 
-  factory RegisterQueueResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$RegisterQueueResponseDtoFromJson(json);
+  factory RegisterQueueResponseDto.fromJson(Map<String, dynamic> json) => _$RegisterQueueResponseDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$RegisterQueueResponseDtoToJson(this);
 
