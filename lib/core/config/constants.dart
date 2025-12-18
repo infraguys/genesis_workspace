@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppConstants {
   static const String legacyPath = String.fromEnvironment('legacy_ui');
   static const String firebaseApiKey = String.fromEnvironment('firebase_api_key');
-  static const String meetingBaseUrl = String.fromEnvironment('meeting_base_url');
 
   static const String appName = 'genesis_workspace';
 
@@ -15,6 +14,7 @@ class AppConstants {
   static const int bossNameProfileDataIndex = 2;
 
   static late String baseUrl;
+  static late String meetingUrl;
   static int? selectedOrganizationId;
 
   static const String versionConfigUrl = 'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
@@ -42,6 +42,10 @@ class AppConstants {
       baseUrl = '';
     }
     selectedOrganizationId = savedOrganizationId;
+  }
+
+  static setMeetingUrl(String? url) {
+    meetingUrl = url ?? '';
   }
 
   static setBaseUrl(String url) {

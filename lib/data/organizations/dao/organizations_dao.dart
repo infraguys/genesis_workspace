@@ -15,6 +15,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required String icon,
     required String baseUrl,
     required Set<int> unreadMessages,
+    String? meetingUrl,
   }) {
     return transaction(() async {
       final existing = await (select(organizations)..where((t) => t.baseUrl.equals(baseUrl))).getSingleOrNull();
@@ -25,6 +26,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
             icon: Value(icon),
             baseUrl: Value(baseUrl),
             unreadMessages: Value(unreadMessages),
+            meetingUrl: meetingUrl != null ? Value(meetingUrl) : const Value.absent(),
           ),
         );
         return existing.id;
@@ -36,6 +38,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
           icon: icon,
           baseUrl: baseUrl,
           unreadMessages: Value(unreadMessages),
+          meetingUrl: Value(meetingUrl),
         ),
         mode: InsertMode.insert,
       );
@@ -56,5 +59,16 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
 
   Future<Organization?> getOrganizationById(int id) {
     return (select(organizations)..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
+  Future<void> updateMeetingUrl({
+    required int organizationId,
+    required String? meetingUrl,
+  }) {
+    return (update(organizations)..where((t) => t.id.equals(organizationId))).write(
+      OrganizationsCompanion(
+        meetingUrl: Value(meetingUrl),
+      ),
+    );
   }
 }

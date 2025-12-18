@@ -5,12 +5,14 @@ class OrganizationRequestDto {
   final String icon;
   final String baseUrl;
   final Set<int> unreadMessages;
+  final String? meetingUrl;
 
   OrganizationRequestDto({
     required this.name,
     required this.icon,
     required this.baseUrl,
     required this.unreadMessages,
+    this.meetingUrl,
   });
 }
 
@@ -20,6 +22,7 @@ class OrganizationDto {
   final String icon;
   final String baseUrl;
   final Set<int> unreadMessages;
+  final String? meetingUrl;
 
   OrganizationDto({
     required this.id,
@@ -27,6 +30,7 @@ class OrganizationDto {
     required this.icon,
     required this.baseUrl,
     required this.unreadMessages,
+    this.meetingUrl,
   });
 
   OrganizationEntity toEntity() => OrganizationEntity(
@@ -35,5 +39,6 @@ class OrganizationDto {
     icon: icon,
     baseUrl: baseUrl,
     unreadMessages: unreadMessages,
+    meetingUrl: meetingUrl,
   );
 }
