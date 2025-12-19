@@ -1100,4 +1100,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     final newState = state.copyWith(usersIds: membersIds);
     emit(newState);
   }
+
+  void unselectChat() {
+    emit(state.copyWith(selectedChat: null, selectedTopic: null));
+  }
 }

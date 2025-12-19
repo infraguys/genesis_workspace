@@ -6,6 +6,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
@@ -241,143 +242,161 @@ class _MessageInputState extends State<MessageInput> {
                   ),
                   SizedBox(height: 8),
                 ],
-                Row(
-                  spacing: 8,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.background,
-                          borderRadius: .circular(12),
-                        ),
-                        child: Stack(
-                          children: [
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              clipBehavior: .hardEdge,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.background,
-                                borderRadius: .circular(12),
-                              ),
-                              child: Stack(
-                                children: [
-                                  TextField(
-                                    enableInteractiveSelection: true,
-                                    textAlignVertical: .center,
-                                    controller: widget.controller,
-                                    focusNode: widget.focusNode,
-                                    minLines: 1,
-                                    maxLines: 4,
-                                    autofocus: platformInfo.isDesktop,
-                                    clipBehavior: .none,
-                                    onTap: () {
-                                      if (currentSize(context) < ScreenSize.lTablet) {
-                                        context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                          false,
-                                        );
-                                      }
-                                    },
-                                    textInputAction: .send,
-                                    onSubmitted: (_) {
-                                      if (_isShiftPressed()) {
-                                        _insertNewLine();
-                                        widget.focusNode.requestFocus();
-                                        return;
-                                      }
-                                      if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
-                                        if (platformInfo.isDesktop) {
-                                          widget.focusNode.requestFocus();
-                                        }
-                                        return;
-                                      }
-
-                                      switch (widget.isEdit) {
-                                        case true:
-                                          widget.onEdit?.call();
-                                        default:
-                                          widget.onSend?.call();
-                                      }
-
-                                      if (platformInfo.isDesktop) {
-                                        widget.focusNode.requestFocus();
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                      isCollapsed: true,
-                                      border: InputBorder.none,
-                                      fillColor: theme.colorScheme.background,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      focusedBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      hintText: widget.isDropOver ? "" : context.t.input.placeholder,
-                                      contentPadding: const EdgeInsets.fromLTRB(48, 14, 46, 14),
-                                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                        color: textColors.text30,
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 8.0,
-                                    top: 0.0,
-                                    bottom: 0.0,
-                                    child: AttachFilesButton(
-                                      onUploadFile: widget.onUploadFile,
-                                      onUploadImage: widget.onUploadImage,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 8.0,
-                                    top: 0.0,
-                                    bottom: 0.0,
-                                    child: Row(
-                                      mainAxisSize: .min,
-                                      spacing: 24,
-                                      children: [
-                                        ToggleEmojiKeyboardButton(
-                                          emojiState: emojiState,
-                                          focusNode: widget.focusNode,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                Shortcuts(
+                  shortcuts: {
+                    if (widget.isEdit)
+                    SingleActivator(LogicalKeyboardKey.escape): const CancelEditMessageIntent(),
+                  },
+                  child: Actions(
+                    actions: {
+                      CancelEditMessageIntent: CallbackAction<CancelEditMessageIntent>(
+                        onInvoke: (_) {
+                          if (widget.isEdit) {
+                            widget.onCancelEdit?.call();
+                          }
+                          return null;
+                        },
+                      ),
+                    },
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.background,
+                              borderRadius: .circular(12),
                             ),
-                            if (widget.isDropOver)
-                              Positioned.fill(
-                                child: IgnorePointer(
-                                  child: AnimatedOpacity(
-                                    duration: const Duration(milliseconds: 120),
-                                    opacity: 1.0,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.primary.withOpacity(0.06),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        context.t.dropFilesToUpload,
-                                        textAlign: TextAlign.center,
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          color: theme.colorScheme.primary,
-                                          fontWeight: FontWeight.w600,
+                            child: Stack(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  clipBehavior: .hardEdge,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.background,
+                                    borderRadius: .circular(12),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      TextField(
+                                        enableInteractiveSelection: true,
+                                        textAlignVertical: .center,
+                                        controller: widget.controller,
+                                        focusNode: widget.focusNode,
+                                        minLines: 1,
+                                        maxLines: 4,
+                                        autofocus: platformInfo.isDesktop,
+                                        clipBehavior: .none,
+                                        onTap: () {
+                                          if (currentSize(context) < ScreenSize.lTablet) {
+                                            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                              false,
+                                            );
+                                          }
+                                        },
+                                        textInputAction: .send,
+                                        onSubmitted: (_) {
+                                          if (_isShiftPressed()) {
+                                            _insertNewLine();
+                                            widget.focusNode.requestFocus();
+                                            return;
+                                          }
+                                          if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
+                                            if (platformInfo.isDesktop) {
+                                              widget.focusNode.requestFocus();
+                                            }
+                                            return;
+                                          }
+
+                                          switch (widget.isEdit) {
+                                            case true:
+                                              widget.onEdit?.call();
+                                            default:
+                                              widget.onSend?.call();
+                                          }
+
+                                          if (platformInfo.isDesktop) {
+                                            widget.focusNode.requestFocus();
+                                          }
+                                        },
+                                        decoration: InputDecoration(
+                                          isCollapsed: true,
+                                          border: InputBorder.none,
+                                          fillColor: theme.colorScheme.background,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          focusedBorder: InputBorder.none,
+                                          disabledBorder: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          hintText: widget.isDropOver ? "" : context.t.input.placeholder,
+                                          contentPadding: const EdgeInsets.fromLTRB(48, 14, 46, 14),
+                                          hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                            color: textColors.text30,
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                      Positioned(
+                                        left: 8.0,
+                                        top: 0.0,
+                                        bottom: 0.0,
+                                        child: AttachFilesButton(
+                                          onUploadFile: widget.onUploadFile,
+                                          onUploadImage: widget.onUploadImage,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 8.0,
+                                        top: 0.0,
+                                        bottom: 0.0,
+                                        child: Row(
+                                          mainAxisSize: .min,
+                                          spacing: 24,
+                                          children: [
+                                            ToggleEmojiKeyboardButton(
+                                              emojiState: emojiState,
+                                              focusNode: widget.focusNode,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                          ],
+                                if (widget.isDropOver)
+                                  Positioned.fill(
+                                    child: IgnorePointer(
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(milliseconds: 120),
+                                        opacity: 1.0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.primary.withOpacity(0.06),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            context.t.dropFilesToUpload,
+                                            textAlign: TextAlign.center,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                        _SubmitButton(
+                          isEdit: widget.isEdit,
+                          onTap: widget.isEdit ? widget.onEdit : widget.onSend,
+                        ),
+                      ],
                     ),
-                    _SubmitButton(
-                      isEdit: widget.isEdit,
-                      onTap: widget.isEdit ? widget.onEdit : widget.onSend,
-                    ),
-                  ],
+                  ),
                 ),
                 AnimatedContainer(
                   height: emojiState.keyboardHeight,
