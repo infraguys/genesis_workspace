@@ -13,7 +13,7 @@ import 'package:window_manager/window_manager.dart';
 class Main {
   static Future<void> startApp() async {
     WidgetsFlutterBinding.ensureInitialized();
-    if (platformInfo.isDesktop) {
+    if (platformInfo.isDesktop && !platformInfo.isWeb) {
       await windowManager.ensureInitialized();
     }
     await FirebaseService.initialize();
@@ -22,7 +22,9 @@ class Main {
     usePathUrlStrategy();
     final LocalizationService localizationService = getIt<LocalizationService>();
     await localizationService.init();
-    await getIt<LocalNotificationsService>().init();
+    if (platformInfo.isDesktop) {
+      await getIt<LocalNotificationsService>().init();
+    }
 
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }
