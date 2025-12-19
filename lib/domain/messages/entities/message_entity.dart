@@ -86,6 +86,46 @@ class MessageEntity extends Equatable {
     return map;
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'is_me_message': isMeMessage,
+      'avatar_url': avatarUrl,
+      'content': content,
+      'sender_id': senderId,
+      'sender_full_name': senderFullName,
+      'display_recipient': displayRecipient.toJson(),
+      'flags': flags,
+      'type': messageTypeToJson(type),
+      'stream_id': streamId,
+      'subject': subject,
+      'timestamp': timestamp,
+      'reactions': reactions.map((reaction) => reaction.toJson()).toList(),
+      'recipient_id': recipientId,
+    };
+  }
+
+  factory MessageEntity.fromJson(Map<String, dynamic> json) {
+    return MessageEntity(
+      id: (json['id'] as num).toInt(),
+      isMeMessage: json['is_me_message'] as bool,
+      avatarUrl: json['avatar_url'] as String?,
+      content: json['content'] as String,
+      senderId: (json['sender_id'] as num).toInt(),
+      senderFullName: json['sender_full_name'] as String,
+      displayRecipient: DisplayRecipient.fromJson(json['display_recipient']),
+      flags: (json['flags'] as List<dynamic>?)?.map((flag) => flag.toString()).toList(),
+      type: messageTypeFromJson(json['type'] as String),
+      streamId: (json['stream_id'] as num?)?.toInt(),
+      subject: json['subject'] as String,
+      timestamp: (json['timestamp'] as num).toInt(),
+      reactions: (json['reactions'] as List<dynamic>? ?? [])
+          .map((reaction) => ReactionEntity.fromJson(reaction as Map<String, dynamic>))
+          .toList(),
+      recipientId: (json['recipient_id'] as num).toInt(),
+    );
+  }
+
   MessageEntity copyWith({
     int? id,
     bool? isMeMessage,

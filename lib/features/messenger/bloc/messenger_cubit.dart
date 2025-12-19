@@ -319,6 +319,17 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
+  void openChatFromMessage(MessageEntity message) {
+    final chat = state.chats.firstWhereOrNull((chat) => chat.id == message.recipientId);
+    if (chat != null) {
+      selectChat(chat);
+    } else {
+      _createChatsFromMessages([message]);
+      final createdChat = state.chats.firstWhere((chat) => chat.id == message.recipientId);
+      selectChat(createdChat);
+    }
+  }
+
   Future<void> loadFolders() async {
     try {
       final int? organizationId = AppConstants.selectedOrganizationId;

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,6 +77,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                           builder: (_, state) {
                             final organizations = state.organizations;
                             final selectedId = state.selectedOrganizationId;
+                            inspect(state);
                             return SizedBox(
                               height: 40,
                               child: ListView.separated(

@@ -341,11 +341,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i672.AuthRemoteDataSource>(
       () => _i672.AuthRemoteDataSourceImpl(),
     );
-    gh.factory<_i1031.LocalNotificationsService>(
-      () => _i1031.LocalNotificationsService(
-        gh<_i163.FlutterLocalNotificationsPlugin>(),
-      ),
-    );
     gh.factory<_i571.RecentDmDao>(
       () => _i571.RecentDmDao(gh<_i606.AppDatabase>()),
     );
@@ -698,7 +693,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.GetEventsByQueueIdUseCase>(),
       ),
     );
-    gh.factory<_i214.OrganizationsCubit>(
+    gh.lazySingleton<_i214.OrganizationsCubit>(
       () => _i214.OrganizationsCubit(
         gh<_i724.WatchOrganizationsUseCase>(),
         gh<_i183.AddOrganizationUseCase>(),
@@ -851,6 +846,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i766.ProfileCubit>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
+      ),
+    );
+    gh.factory<_i1031.LocalNotificationsService>(
+      () => _i1031.LocalNotificationsService(
+        gh<_i163.FlutterLocalNotificationsPlugin>(),
+        gh<_i49.MessengerCubit>(),
+        gh<_i214.OrganizationsCubit>(),
       ),
     );
     gh.singleton<_i388.NotificationsCubit>(

@@ -7,3 +7,12 @@ enum MessageType {
   @JsonValue("stream")
   stream,
 }
+
+MessageType messageTypeFromJson(String value) {
+  return MessageType.values.firstWhere(
+    (element) => element.name == value,
+    orElse: () => MessageType.stream,
+  );
+}
+
+String messageTypeToJson(MessageType value) => value.name;
