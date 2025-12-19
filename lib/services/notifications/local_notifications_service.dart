@@ -100,6 +100,7 @@ class LocalNotificationsService {
     final DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings();
     final LinuxInitializationSettings initializationSettingsLinux = LinuxInitializationSettings(
       defaultActionName: 'Open notification',
+      defaultIcon: AssetsLinuxIcon('icons/app_icon.png'),
     );
     final WindowsInitializationSettings initializationSettingsWindows = WindowsInitializationSettings(
       appName: 'Workspace',
