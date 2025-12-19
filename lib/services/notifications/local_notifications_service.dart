@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:injectable/injectable.dart';
+import 'package:window_manager/window_manager.dart';
 
 class NotificationPayload {
   final MessageEntity message;
@@ -53,44 +55,12 @@ class LocalNotificationsService {
   LocalNotificationsService(this._flutterLocalNotificationsPlugin, this._messengerCubit, this._organizationsCubit);
 
   void notificationTap(NotificationResponse notificationResponse) async {
-    final NotificationPayload payload = NotificationPayload.fromJsonString(notificationResponse.payload!);
-    final int? organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId != payload.organizationId) {
-      final organization = _organizationsCubit.state.organizations.firstWhereOrNull(
-        (element) => element.id == payload.organizationId,
-      );
-      if (organization != null) {
-        await _organizationsCubit.selectOrganization(organization);
-      }
-    }
-    final chatId = payload.message.recipientId;
-    final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == chatId);
-    if (chat != null) {
-      _messengerCubit.selectChat(chat);
-    } else {
-      _messengerCubit.openChatFromMessage(payload.message);
-    }
+    await _handleNotificationResponse(notificationResponse);
   }
 
   @pragma('vm:entry-point')
   void notificationTapBackground(NotificationResponse notificationResponse) async {
-    final NotificationPayload payload = NotificationPayload.fromJsonString(notificationResponse.payload!);
-    final int? organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId != payload.organizationId) {
-      final organization = _organizationsCubit.state.organizations.firstWhereOrNull(
-        (element) => element.id == payload.organizationId,
-      );
-      if (organization != null) {
-        await _organizationsCubit.selectOrganization(organization);
-      }
-    }
-    final chatId = payload.message.recipientId;
-    final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == chatId);
-    if (chat != null) {
-      _messengerCubit.selectChat(chat);
-    } else {
-      _messengerCubit.openChatFromMessage(payload.message);
-    }
+    await _handleNotificationResponse(notificationResponse);
   }
 
   Future<void> init() async {
@@ -150,5 +120,43 @@ class LocalNotificationsService {
       notificationDetails,
       payload: payload.toJsonString(),
     );
+  }
+
+  Future<void> _handleNotificationResponse(NotificationResponse notificationResponse) async {
+    await _focusAppOnDesktop();
+    final String? payloadString = notificationResponse.payload;
+    if (payloadString == null) return;
+    final NotificationPayload payload = NotificationPayload.fromJsonString(payloadString);
+    await _selectChatFromPayload(payload);
+  }
+
+  Future<void> _selectChatFromPayload(NotificationPayload payload) async {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != payload.organizationId) {
+      final organization = _organizationsCubit.state.organizations.firstWhereOrNull(
+        (element) => element.id == payload.organizationId,
+      );
+      if (organization != null) {
+        await _organizationsCubit.selectOrganization(organization);
+      }
+    }
+    final chatId = payload.message.recipientId;
+    final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == chatId);
+    if (chat != null) {
+      _messengerCubit.selectChat(chat);
+    } else {
+      _messengerCubit.openChatFromMessage(payload.message);
+    }
+  }
+
+  Future<void> _focusAppOnDesktop() async {
+    if (!platformInfo.isDesktop) return;
+    try {
+      if (await windowManager.isMinimized()) {
+        await windowManager.restore();
+      }
+      await windowManager.show();
+      await windowManager.focus();
+    } catch (_) {}
   }
 }
