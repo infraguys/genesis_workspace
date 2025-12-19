@@ -64,10 +64,10 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       final selected = _prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
       _player.play(AssetSource(selected));
       final message = event.message;
+      final chatId = message.recipientId;
       await _localNotificationsService.showNotification(
-        messageId: message.id,
-        title: message.displayTitle,
-        body: "New message",
+        message: message,
+        organizationId: event.organizationId,
       );
     }
   }

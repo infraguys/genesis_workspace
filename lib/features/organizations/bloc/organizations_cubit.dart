@@ -22,7 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'organizations_state.dart';
 
-@injectable
+@LazySingleton()
 class OrganizationsCubit extends Cubit<OrganizationsState> {
   OrganizationsCubit(
     this._watchOrganizationsUseCase,
