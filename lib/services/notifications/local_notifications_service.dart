@@ -52,6 +52,26 @@ class LocalNotificationsService {
 
   LocalNotificationsService(this._flutterLocalNotificationsPlugin, this._messengerCubit, this._organizationsCubit);
 
+  void notificationTap(NotificationResponse notificationResponse) async {
+    final NotificationPayload payload = NotificationPayload.fromJsonString(notificationResponse.payload!);
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != payload.organizationId) {
+      final organization = _organizationsCubit.state.organizations.firstWhereOrNull(
+        (element) => element.id == payload.organizationId,
+      );
+      if (organization != null) {
+        await _organizationsCubit.selectOrganization(organization);
+      }
+    }
+    final chatId = payload.message.recipientId;
+    final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == chatId);
+    if (chat != null) {
+      _messengerCubit.selectChat(chat);
+    } else {
+      _messengerCubit.openChatFromMessage(payload.message);
+    }
+  }
+
   @pragma('vm:entry-point')
   void notificationTapBackground(NotificationResponse notificationResponse) async {
     final NotificationPayload payload = NotificationPayload.fromJsonString(notificationResponse.payload!);
@@ -95,7 +115,7 @@ class LocalNotificationsService {
     );
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: notificationTapBackground,
+      onDidReceiveNotificationResponse: notificationTap,
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     await _flutterLocalNotificationsPlugin
@@ -125,7 +145,7 @@ class LocalNotificationsService {
     await _flutterLocalNotificationsPlugin.show(
       message.id,
       message.displayTitle,
-      "New message",
+      message.content,
       notificationDetails,
       payload: payload.toJsonString(),
     );
