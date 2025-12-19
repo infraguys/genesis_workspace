@@ -326,7 +326,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     } else {
       _createChatsFromMessages([message]);
       final createdChat = state.chats.firstWhere((chat) => chat.id == message.recipientId);
-      selectChat(createdChat);
+      selectChat(createdChat, selectedTopic: message.subject);
     }
   }
 
