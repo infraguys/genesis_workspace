@@ -88,6 +88,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
       final ServerSettingsEntity serverSettings = await _getOrganizationSettingsUseCase.call(
         baseUrl,
       );
+
       final OrganizationRequestEntity body = OrganizationRequestEntity(
         name: serverSettings.realmName,
         icon: serverSettings.realmIcon,

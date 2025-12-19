@@ -252,7 +252,7 @@ class _MessengerViewState extends State<MessengerView>
   void initState() {
     _applySortingPreferences();
     _checkUser();
-    // _future = getInitialData();
+    _future = getInitialData();
     _searchBarController = AnimationController(
       vsync: this,
       duration: _searchAnimationDuration,

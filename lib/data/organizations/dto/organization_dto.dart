@@ -33,12 +33,19 @@ class OrganizationDto {
     this.meetingUrl,
   });
 
-  OrganizationEntity toEntity() => OrganizationEntity(
-    id: id,
-    name: name,
-    icon: icon,
-    baseUrl: baseUrl,
-    unreadMessages: unreadMessages,
-    meetingUrl: meetingUrl,
-  );
+  OrganizationEntity toEntity() {
+    String refactoredBaseUrl = baseUrl;
+    if (baseUrl.endsWith("/")) {
+      refactoredBaseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+
+    return OrganizationEntity(
+      id: id,
+      name: name,
+      icon: icon,
+      baseUrl: refactoredBaseUrl,
+      unreadMessages: unreadMessages,
+      meetingUrl: meetingUrl,
+    );
+  }
 }

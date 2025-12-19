@@ -17,6 +17,10 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required Set<int> unreadMessages,
     String? meetingUrl,
   }) {
+    String refactoredBaseUrl = baseUrl;
+    if (baseUrl.endsWith("/")) {
+      refactoredBaseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
     return transaction(() async {
       final existing = await (select(organizations)..where((t) => t.baseUrl.equals(baseUrl))).getSingleOrNull();
       if (existing != null) {
@@ -24,7 +28,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
           OrganizationsCompanion(
             name: Value(name),
             icon: Value(icon),
-            baseUrl: Value(baseUrl),
+            baseUrl: Value(refactoredBaseUrl),
             unreadMessages: Value(unreadMessages),
             meetingUrl: meetingUrl != null ? Value(meetingUrl) : const Value.absent(),
           ),
@@ -36,7 +40,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
         OrganizationsCompanion.insert(
           name: name,
           icon: icon,
-          baseUrl: baseUrl,
+          baseUrl: refactoredBaseUrl,
           unreadMessages: Value(unreadMessages),
           meetingUrl: Value(meetingUrl),
         ),
