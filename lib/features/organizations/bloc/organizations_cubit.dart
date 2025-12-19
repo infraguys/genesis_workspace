@@ -121,6 +121,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     emit(state.copyWith(selectedOrganizationId: organization.id));
     try {
       await _organizationSwitcherService.selectOrganization(organization);
+      await _profileCubit.getOwnUser();
     } catch (e, st) {
       addError(e, st);
       emit(state.copyWith(selectedOrganizationId: previousSelection));

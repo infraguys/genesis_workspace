@@ -122,6 +122,10 @@ class LocalNotificationsService {
     );
   }
 
+  void cancelNotification(int id) {
+    _flutterLocalNotificationsPlugin.cancel(id);
+  }
+
   Future<void> _handleNotificationResponse(NotificationResponse notificationResponse) async {
     await _focusAppOnDesktop();
     final String? payloadString = notificationResponse.payload;
