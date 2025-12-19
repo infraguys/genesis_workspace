@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/enums/message_flag.dart';
+import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -33,6 +36,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     _messengerStateSubscription = _messengerCubit.stream.listen(_onMessengerStateChanged);
     _onMessengerStateChanged(_messengerCubit.state);
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
+    _messageFlagsEventsSubscription = _realTimeService.messageFlagsEventsStream.listen(_onMessageFlagsEvents);
   }
 
   final _player = AudioPlayer();
@@ -45,6 +49,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   final MultiPollingService _realTimeService;
   final SharedPreferences _prefs;
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
+  late final StreamSubscription<UpdateMessageFlagsEventEntity> _messageFlagsEventsSubscription;
   final LocalNotificationsService _localNotificationsService;
 
   void _onProfileStateChanged(ProfileState profileState) {
@@ -64,11 +69,18 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       final selected = _prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
       _player.play(AssetSource(selected));
       final message = event.message;
-      final chatId = message.recipientId;
       await _localNotificationsService.showNotification(
         message: message,
         organizationId: event.organizationId,
       );
+    }
+  }
+
+  _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
+    if (event.flag == MessageFlag.read && event.op == UpdateMessageFlagsOp.add) {
+      event.messages.forEach((message) {
+        _localNotificationsService.cancelNotification(message);
+      });
     }
   }
 
@@ -77,6 +89,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     _messagesEventsSubscription.cancel();
     _profileStateSubscription.cancel();
     _messengerStateSubscription.cancel();
+    _messageFlagsEventsSubscription.cancel();
     _player.dispose();
     return super.close();
   }
