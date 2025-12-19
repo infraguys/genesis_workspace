@@ -116,7 +116,7 @@ class LocalNotificationsService {
     await _flutterLocalNotificationsPlugin.show(
       message.id,
       message.displayTitle,
-      message.content,
+      "New message",
       notificationDetails,
       payload: payload.toJsonString(),
     );
