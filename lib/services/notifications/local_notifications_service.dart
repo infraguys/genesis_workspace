@@ -147,7 +147,7 @@ class LocalNotificationsService {
     final chatId = payload.message.recipientId;
     final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == chatId);
     if (chat != null) {
-      _messengerCubit.selectChat(chat);
+      _messengerCubit.selectChat(chat, selectedTopic: payload.message.subject);
     } else {
       _messengerCubit.openChatFromMessage(payload.message);
     }
