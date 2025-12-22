@@ -58,7 +58,6 @@ class LocalNotificationsService {
     await _handleNotificationResponse(notificationResponse);
   }
 
-  @pragma('vm:entry-point')
   void notificationTapBackground(NotificationResponse notificationResponse) async {
     await _handleNotificationResponse(notificationResponse);
   }
