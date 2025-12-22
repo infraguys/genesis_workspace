@@ -12,10 +12,12 @@ class _LkViewState extends State<LkView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri.uri(
-            Uri.parse("https://lk.tokens.team/"),
+      body: SafeArea(
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(
+            url: WebUri.uri(
+              Uri.parse("https://lk.tokens.team/"),
+            ),
           ),
         ),
       ),
