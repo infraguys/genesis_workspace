@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 
 class LkView extends StatefulWidget {
   const LkView({super.key});
@@ -16,7 +17,7 @@ class _LkViewState extends State<LkView> {
         child: InAppWebView(
           initialUrlRequest: URLRequest(
             url: WebUri.uri(
-              Uri.parse("https://lk.tokens.team/"),
+              Uri.parse(AppConstants.lkUrl),
             ),
           ),
         ),

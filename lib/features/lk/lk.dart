@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info_io.dart';
+import 'package:genesis_workspace/core/widgets/in_development_widget.dart';
 import 'package:genesis_workspace/features/lk/view/lk_view.dart';
 
 class Lk extends StatelessWidget {
@@ -6,6 +8,6 @@ class Lk extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LkView();
+    return platformInfo.isLinux ? InDevelopmentWidget() : LkView();
   }
 }
