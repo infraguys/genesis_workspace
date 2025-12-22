@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/common/entities/version_config_entity.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 enum _ReleaseChannel { dev, stable }
@@ -23,7 +25,38 @@ class _UpdateViewState extends State<UpdateView> {
     return BlocBuilder<UpdateCubit, UpdateState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(title: Text(context.t.updateView.title)),
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: Assets.icons.arrowLeft.svg(),
+            ),
+            title: Row(
+              spacing: 8,
+              children: [
+                Text(
+                  context.t.updateView.title,
+                  style: theme.textTheme.titleMedium,
+                ),
+                if (state.status == .loading &&
+                    ((state.versionConfigEntity?.versions.stable.isNotEmpty ?? false) ||
+                        (state.versionConfigEntity?.versions.dev.isNotEmpty ?? false)))
+                  CupertinoActivityIndicator(),
+              ],
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  context.read<UpdateCubit>().checkUpdateNeed();
+                },
+                icon: Icon(
+                  Icons.refresh,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
           backgroundColor: theme.colorScheme.surface,
           body: SafeArea(
             child: Padding(
