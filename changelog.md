@@ -1,5 +1,14 @@
 # Changelog
 
+# 1.6.1
+- Added double-tap hotkey on message
+- Added message readers functionality
+- UI fixes (unread badges, lazy loading messages etc.)
+- Fixed hotkeys for linux
+- Set meeting url for organization from server settings
+- Added esc hotkey support for chat unselect
+- Added notifications for desktop platforms (linux, macos, windows)
+
 # 1.6.0
 - Fixed update feature on linux
 - Added profile panel
