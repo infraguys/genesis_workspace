@@ -302,7 +302,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   Future<void> getUnreadMessages() async {
     final organizationId = AppConstants.selectedOrganizationId;
     final connection = _realTimeService.activeConnections[organizationId];
-    // if (connection?.isActive ?? false) return;
+    if (connection?.isActive ?? false) return;
     try {
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
