@@ -12,6 +12,8 @@ import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/lk/lk.dart';
+import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
@@ -92,7 +94,7 @@ final router = GoRouter(
               path: Routes.calendar,
               name: Routes.calendar,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return Lk();
               },
             ),
           ],
@@ -104,7 +106,7 @@ final router = GoRouter(
               path: Routes.mail,
               name: Routes.mail,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return Lk();
               },
             ),
           ],
@@ -128,7 +130,7 @@ final router = GoRouter(
               path: Routes.calls,
               name: Routes.calls,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return Logs();
               },
             ),
           ],
