@@ -22,11 +22,11 @@ class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
     return Column(
       mainAxisSize: .min,
       children: [
-        if (isMacOsSafe && isTabletOrSmaller)
+        if (isMacOsSafe)
           Container(
             height: 20.0,
             width: double.infinity,
-            color: theme.colorScheme.surface,
+            color: isTabletOrSmaller ? theme.colorScheme.surface : Colors.transparent,
           ),
         appBar,
       ],

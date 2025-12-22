@@ -7,6 +7,8 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/dio_interceptors/csrf_cookie_interceptor.dart';
 import 'package:genesis_workspace/core/dio_interceptors/sessionid_interceptor.dart';
 import 'package:genesis_workspace/core/dio_interceptors/token_interceptor.dart';
+import 'package:genesis_workspace/core/shortcuts/close_fullscreen_image_intent.dart';
+import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_view/photo_view.dart';
@@ -65,36 +67,51 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        leading: IconButton(
-          onPressed: context.pop,
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-        ),
-      ),
-      backgroundColor: Colors.black,
-      body: FutureBuilder(
-        future: _future,
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == .waiting) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return GestureDetector(
-            onTap: () => context.pop,
-            child: PhotoView(
-              scaleStateController: scaleStateController,
-              minScale: PhotoViewComputedScale.contained * 1,
-              maxScale: PhotoViewComputedScale.covered * 2,
-              heroAttributes: PhotoViewHeroAttributes(tag: _imageBytes.toString()),
-              backgroundDecoration: const BoxDecoration(color: Colors.black),
-              imageProvider: MemoryImage(_imageBytes ?? Uint8List(0)),
-            ),
-          );
+    return Shortcuts(
+      shortcuts: {
+        SingleActivator(.escape): const CloseFullscreenImageIntent() ,
+      },
+      child: Actions(
+        actions: {
+          CloseFullscreenImageIntent: CloseFullscreenImageAction()
         },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            appBar: AppBarContainer(
+              appBar: AppBar(
+                backgroundColor: Colors.black,
+                systemOverlayStyle: SystemUiOverlayStyle.light,
+                leading: IconButton(
+                  onPressed: context.pop,
+                  icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                ),
+              ),
+            ),
+            backgroundColor: Colors.black,
+            body: FutureBuilder(
+              future: _future,
+              builder: (BuildContext context, snapshot) {
+                if (snapshot.connectionState == .waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return GestureDetector(
+                  onTap: context.pop,
+                  child: PhotoView(
+                    scaleStateController: scaleStateController,
+                    minScale: PhotoViewComputedScale.contained * 1,
+                    maxScale: PhotoViewComputedScale.covered * 2,
+                    heroAttributes: PhotoViewHeroAttributes(tag: _imageBytes.toString()),
+                    backgroundDecoration: const BoxDecoration(color: Colors.black),
+                    imageProvider: MemoryImage(_imageBytes ?? Uint8List(0)),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
