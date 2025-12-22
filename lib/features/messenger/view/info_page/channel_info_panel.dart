@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
@@ -129,43 +130,44 @@ class ChannelInfoPanel extends StatelessWidget {
               ],
             ),
           ),
-          Column(
-            children: [
-              Padding(
-                padding: const .symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: .spaceBetween,
-                  children: [
-                    Text(
-                      context.t.group.members,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                    IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const .symmetric(horizontal: 8.0),
-                child: SizedBox(
-                  height: 400,
-                  child: BlocBuilder<ChannelMembersInfoCubit, ChannelMembersInfoState>(
-                    builder: (context, state) {
-                      if (state is! ChannelMembersLoadedState) {
-                        return SizedBox.shrink();
-                      }
-                      return ListView.separated(
-                        itemCount: state.users.length,
-                        separatorBuilder: (context, index) => SizedBox(height: 4),
-                        itemBuilder: (context, index) {
-                          final user = state.users[index];
-                          return _MemberItem(user: user);
-                        },
-                      );
-                    },
+          Expanded(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const .symmetric(horizontal: 16.0),
+                  child: Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Text(
+                        context.t.group.members,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Padding(
+                    padding: const .symmetric(horizontal: 8.0),
+                    child: BlocBuilder<ChannelMembersInfoCubit, ChannelMembersInfoState>(
+                      builder: (context, state) {
+                        if (state is! ChannelMembersLoadedState) {
+                          return AppProgressIndicator();
+                        }
+                        return ListView.separated(
+                          itemCount: state.users.length,
+                          separatorBuilder: (context, index) => SizedBox(height: 4),
+                          itemBuilder: (context, index) {
+                            final user = state.users[index];
+                            return _MemberItem(user: user);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
