@@ -15,7 +15,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   sqlite3_flutter_libs
   super_native_extensions
   url_launcher_linux
-  webview_all_cef
   window_manager
 )
 
