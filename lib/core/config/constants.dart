@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppConstants {
   static const String legacyPath = String.fromEnvironment('legacy_ui');
   static const String firebaseApiKey = String.fromEnvironment('firebase_api_key');
+  static const String lkUrl = String.fromEnvironment('lk_url');
 
   static const String appName = 'genesis_workspace';
 
