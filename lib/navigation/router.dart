@@ -44,6 +44,7 @@ class Routes {
   static const String calls = '/calls';
   static const String profile = '/profile';
   static const String profileInfo = '/profile-info';
+  static const String talkerScreen = '/talker-screen';
 
   static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
@@ -353,6 +354,11 @@ final router = GoRouter(
       path: Routes.forceUpdate,
       name: Routes.forceUpdate,
       builder: (context, state) => const UpdateForce(),
+    ),
+    GoRoute(
+      path: Routes.talkerScreen,
+      name: Routes.talkerScreen,
+      builder: (context, state) => TalkerScreen(talker: getIt<Talker>()),
     ),
   ],
 );

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/dio_adapters/stub_adapter.dart'
     if (dart.library.html) 'package:genesis_workspace/core/dio_adapters/web_adapter.dart'
     if (dart.library.io) 'package:genesis_workspace/core/dio_adapters/io_adapter.dart';
@@ -30,11 +31,7 @@ abstract class CoreModule {
   AppDatabase appDatabase() => AppDatabase();
 
   @lazySingleton
-  Talker talker() => TalkerFlutter.init(
-    settings: TalkerSettings(
-      useConsoleLogs: false,
-    ),
-  );
+  Talker talker() => Talker();
 
   @preResolve
   @lazySingleton
@@ -94,6 +91,7 @@ class DioFactory {
       ..add(EnumInterceptor())
       ..add(
         TalkerDioLogger(
+          talker: getIt<Talker>(),
           settings: const TalkerDioLoggerSettings(
             printRequestHeaders: false,
             printResponseHeaders: false,

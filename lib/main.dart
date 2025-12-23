@@ -8,6 +8,7 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/services/firebase/firebase_service.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
 import 'package:genesis_workspace/services/notifications/local_notifications_service.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 class Main {
@@ -25,6 +26,8 @@ class Main {
     if (platformInfo.isDesktop) {
       await getIt<LocalNotificationsService>().init();
     }
+
+    TalkerFlutter.init();
     // getIt<Talker>();
 
     runApp(TranslationProvider(child: const WorkspaceApp()));
