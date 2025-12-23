@@ -497,11 +497,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
     );
-    gh.factory<_i325.ChannelMembersInfoCubit>(
-      () => _i325.ChannelMembersInfoCubit(
-        getUsersUseCase: gh<_i194.GetUsersUseCase>(),
-      ),
-    );
     gh.factory<_i48.FolderRepository>(
       () => _i957.FolderRepositoryImpl(
         gh<_i277.FolderLocalDataSource>(),
@@ -554,6 +549,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i445.GetRecentDmsUseCase>(
       () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
+    );
+    gh.factory<_i325.ChannelMembersInfoCubit>(
+      () => _i325.ChannelMembersInfoCubit(
+        getUsersUseCase: gh<_i194.GetUsersUseCase>(),
+        getAllPresenceUseCase: gh<_i837.GetAllPresencesUseCase>(),
+      ),
     );
     gh.factory<_i915.FolderMembershipRepository>(
       () => _i770.FolderMembershipRepositoryImpl(
