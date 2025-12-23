@@ -8,6 +8,6 @@ class Lk extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return platformInfo.isWeb ? InDevelopmentWidget() : LkView();
+    return (platformInfo.isWeb || platformInfo.isLinux) ? InDevelopmentWidget() : LkView();
   }
 }
