@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -157,7 +158,10 @@ class _MessageItemState extends State<MessageItem> {
     _menuController.close();
   }
 
-  void onCopy() {}
+  void onCopy() async {
+    final message = await messagesCubit.getMessageById(messageId: widget.message.id, applyMarkdown: false);
+    await Clipboard.setData(ClipboardData(text: message.content));
+  }
 
   void _closeOverlay() {
     _menuEntry?.remove();
