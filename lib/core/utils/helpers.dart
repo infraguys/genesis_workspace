@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/utils/url_updater_stub.dart'
     if (dart.library.html) 'package:genesis_workspace/core/utils/url_updater_web.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -66,6 +67,24 @@ String timeAgoText(BuildContext context, DateTime lastSeen) {
 bool isJustNow(DateTime lastSeen) {
   final diff = DateTime.now().difference(lastSeen);
   return diff.inMinutes < 1;
+}
+
+String getPresenceText(BuildContext context, DmUserEntity user) {
+  final lastSeen = DateTime.fromMillisecondsSinceEpoch(
+    (user.presenceTimestamp * 1000).toInt(),
+  );
+
+  final timeAgo = timeAgoText(context, lastSeen);
+
+  if (user.isBot) {
+    return context.t.bot;
+  }
+
+  if (user.presenceStatus == .active) {
+    return context.t.online;
+  }
+
+  return isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgo);
 }
 
 Size? parseDimensions(String? raw) {

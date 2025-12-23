@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
-import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -54,10 +55,7 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
-                    Text(
-                      context.t.messengerView.channelInfo,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
+                    Text(context.t.messengerView.channelInfo, style: TextStyle(fontSize: 16, fontWeight: .w500)),
                     IconButton(
                       onPressed: widget.onClose,
                       icon: Assets.icons.close.svg(),
@@ -123,7 +121,11 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
                         onTap: () {},
                         child: SizedBox(
                           height: 56.0,
-                          child: Center(child: Assets.icons.call.svg(width: 40)),
+                          child: Center(
+                            child: Assets.icons.call.svg(
+                              width: 40,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -198,7 +200,7 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
 class _MemberItem extends StatelessWidget {
   const _MemberItem({super.key, required this.user});
 
-  final UserEntity user;
+  final DmUserEntity user;
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +246,7 @@ class _MemberItem extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Был 45 минут назад',
+                            getPresenceText(context, user),
                             maxLines: 1,
                             overflow: .ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
