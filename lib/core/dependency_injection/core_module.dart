@@ -17,6 +17,9 @@ import 'package:genesis_workspace/services/token_storage/secure_token_storage.da
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talker_dio_logger/talker_dio_logger_interceptor.dart';
+import 'package:talker_dio_logger/talker_dio_logger_settings.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 @module
 abstract class CoreModule {
@@ -25,6 +28,13 @@ abstract class CoreModule {
 
   @lazySingleton
   AppDatabase appDatabase() => AppDatabase();
+
+  @lazySingleton
+  Talker talker() => TalkerFlutter.init(
+    settings: TalkerSettings(
+      useConsoleLogs: false,
+    ),
+  );
 
   @preResolve
   @lazySingleton
@@ -81,7 +91,18 @@ class DioFactory {
       ..add(TokenInterceptor(tokenStorage))
       ..add(SessionIdInterceptor(tokenStorage))
       ..add(CsrfCookieInterceptor(tokenStorage))
-      ..add(EnumInterceptor());
+      ..add(EnumInterceptor())
+      ..add(
+        TalkerDioLogger(
+          settings: const TalkerDioLoggerSettings(
+            printRequestHeaders: false,
+            printResponseHeaders: false,
+            printResponseMessage: false,
+            printErrorData: false,
+            printRequestData: false,
+          ),
+        ),
+      );
 
     return dio;
   }

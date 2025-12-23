@@ -25,6 +25,7 @@ class Main {
     if (platformInfo.isDesktop) {
       await getIt<LocalNotificationsService>().init();
     }
+    // getIt<Talker>();
 
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }
