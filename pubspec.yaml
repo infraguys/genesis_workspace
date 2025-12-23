@@ -80,6 +80,9 @@ dependencies:
   firebase_core: ^4.2.1
   crypto: ^3.0.7
   flutter_local_notifications: ^19.5.0
+  talker_flutter: ^5.1.9
+  talker_dio_logger: ^5.1.9
+  talker_bloc_logger: ^5.1.9
 
 dev_dependencies:
   flutter_test:

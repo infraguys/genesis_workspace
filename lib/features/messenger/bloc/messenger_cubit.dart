@@ -243,6 +243,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         if (kDebugMode) {
           inspect(e);
         }
+        emit(
+          state.copyWith(foundOldestMessage: true),
+        );
       }
     }
   }
