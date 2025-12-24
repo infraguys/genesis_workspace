@@ -218,6 +218,7 @@ import 'package:genesis_workspace/features/download_files/bloc/download_files_cu
     as _i1004;
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart'
     as _i144;
+import 'package:genesis_workspace/features/logs/bloc/logs_cubit.dart' as _i1034;
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
     as _i758;
 import 'package:genesis_workspace/features/messages/bloc/message_readers_cubit.dart'
@@ -352,6 +353,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i125.UsersRepository>(
       () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
     );
+    gh.singleton<_i1034.LogsCubit>(() => _i1034.LogsCubit(gh<_i207.Talker>()));
     gh.factory<_i276.AddEmojiReactionUseCase>(
       () => _i276.AddEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
