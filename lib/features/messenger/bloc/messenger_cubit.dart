@@ -411,14 +411,14 @@ class MessengerCubit extends Cubit<MessengerState> {
     inspect(items);
     inspect(state.folders);
     final updatedFolders = [...state.folders];
-    items.forEach((item) {
+    for (var item in items) {
       final folder = updatedFolders.firstWhereOrNull((folder) => folder.uuid == item.folderUuid);
       if (folder != null) {
         final indexOfFolder = updatedFolders.indexOf(folder);
         folder.folderItems.add(item.chatId);
         updatedFolders[indexOfFolder] = folder;
       }
-    });
+    }
     emit(state.copyWith(folders: updatedFolders));
   }
 
