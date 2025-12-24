@@ -3,7 +3,7 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/all_chats/api/all_chats_api_client.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_item_dto.dart';
-import 'package:genesis_workspace/domain/all_chats/entities/folder_item.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_item_entity.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
@@ -25,12 +25,17 @@ class FolderItemsRemoteDataSource {
     return _apiClient!;
   }
 
-  Future<List<FolderItem>> getFolderItems(String folderUuid) async {
+  Future<List<FolderItemEntity>> getFolderItems(String folderUuid) async {
     final items = await _client.getFolderItems(folderUuid);
     return items.map((e) => e.toEntity()).toList();
   }
 
-  Future<FolderItem> createFolderItem({
+  Future<List<FolderItemEntity>> getAllFoldersItems() async {
+    final items = await _client.getAllFoldersItems();
+    return items.map((e) => e.toEntity()).toList();
+  }
+
+  Future<FolderItemEntity> createFolderItem({
     required String folderUuid,
     required int chatId,
     int? orderIndex,
@@ -75,7 +80,7 @@ class FolderItemsRemoteDataSource {
     );
   }
 
-  Future<FolderItem?> findFolderItem(String folderUuid, int chatId) async {
+  Future<FolderItemEntity?> findFolderItem(String folderUuid, int chatId) async {
     final items = await getFolderItems(folderUuid);
     try {
       return items.firstWhere((item) => item.chatId == chatId);
@@ -84,7 +89,7 @@ class FolderItemsRemoteDataSource {
     }
   }
 
-  Future<FolderItem> ensureFolderItem(String folderUuid, int chatId) async {
+  Future<FolderItemEntity> ensureFolderItem(String folderUuid, int chatId) async {
     final existing = await findFolderItem(folderUuid, chatId);
     if (existing != null) return existing;
     return await createFolderItem(folderUuid: folderUuid, chatId: chatId);

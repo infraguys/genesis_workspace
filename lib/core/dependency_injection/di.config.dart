@@ -70,6 +70,8 @@ import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.
     as _i125;
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart'
     as _i849;
+import 'package:genesis_workspace/domain/all_chats/usecases/get_all_folders_items_use_case.dart'
+    as _i293;
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_chat_use_case.dart'
     as _i247;
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart'
@@ -628,6 +630,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i282.UpdateOrganizationMeetingUrlUseCase>(),
       ),
     );
+    gh.factory<_i293.GetAllFoldersItemsUseCase>(
+      () => _i293.GetAllFoldersItemsUseCase(
+        gh<_i915.FolderMembershipRepository>(),
+      ),
+    );
     gh.factory<_i247.GetFolderIdsForChatUseCase>(
       () => _i247.GetFolderIdsForChatUseCase(
         gh<_i915.FolderMembershipRepository>(),
@@ -821,6 +828,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
       ),
     );
+    gh.factory<_i404.AllChatsCubit>(
+      () => _i404.AllChatsCubit(
+        gh<_i125.AddFolderUseCase>(),
+        gh<_i815.GetFoldersUseCase>(),
+        gh<_i7.UpdateFolderUseCase>(),
+        gh<_i849.DeleteFolderUseCase>(),
+        gh<_i1004.SetFoldersForChatUseCase>(),
+        gh<_i247.GetFolderIdsForChatUseCase>(),
+        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
+        gh<_i438.GetMembersForFolderUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
+        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i49.MessengerCubit>(
       () => _i49.MessengerCubit(
         gh<_i125.AddFolderUseCase>(),
@@ -842,6 +865,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
         gh<_i300.MarkStreamAsReadUseCase>(),
         gh<_i657.MarkTopicAsReadUseCase>(),
+        gh<_i293.GetAllFoldersItemsUseCase>(),
       ),
     );
     gh.factory<_i1031.LocalNotificationsService>(
@@ -849,22 +873,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i163.FlutterLocalNotificationsPlugin>(),
         gh<_i49.MessengerCubit>(),
         gh<_i214.OrganizationsCubit>(),
-      ),
-    );
-    gh.factory<_i404.AllChatsCubit>(
-      () => _i404.AllChatsCubit(
-        gh<_i125.AddFolderUseCase>(),
-        gh<_i815.GetFoldersUseCase>(),
-        gh<_i7.UpdateFolderUseCase>(),
-        gh<_i849.DeleteFolderUseCase>(),
-        gh<_i1004.SetFoldersForChatUseCase>(),
-        gh<_i247.GetFolderIdsForChatUseCase>(),
-        gh<_i744.RemoveAllMembershipsForFolderUseCase>(),
-        gh<_i438.GetMembersForFolderUseCase>(),
-        gh<_i126.GetPinnedChatsUseCase>(),
-        gh<_i1012.PinChatUseCase>(),
-        gh<_i631.UnpinChatUseCase>(),
-        gh<_i1057.UpdatePinnedChatOrderUseCase>(),
       ),
     );
     gh.singleton<_i388.NotificationsCubit>(
