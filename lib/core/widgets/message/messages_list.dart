@@ -23,6 +23,7 @@ class MessagesList extends StatefulWidget {
   final ScrollController controller;
   final void Function(int id)? onRead;
   final Future<void> Function()? loadMore;
+  final VoidCallback? onReadAll;
   final bool showTopic;
   final bool isLoadingMore;
   final int myUserId;
@@ -40,6 +41,7 @@ class MessagesList extends StatefulWidget {
     required this.myUserId,
     this.onTapQuote,
     this.onTapEditMessage,
+    this.onReadAll,
   });
 
   @override
@@ -158,6 +160,9 @@ class _MessagesListState extends State<MessagesList> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+    if (widget.onReadAll != null) {
+      widget.onReadAll!();
+    }
   }
 
   int _dayInt(int tsSec) {
