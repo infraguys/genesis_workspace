@@ -408,8 +408,6 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> _loadFoldersMembers() async {
     final items = await _getAllFoldersItemsUseCase.call();
-    inspect(items);
-    inspect(state.folders);
     final updatedFolders = [...state.folders];
     for (var item in items) {
       final folder = updatedFolders.firstWhereOrNull((folder) => folder.uuid == item.folderUuid);
