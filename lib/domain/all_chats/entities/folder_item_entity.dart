@@ -1,4 +1,4 @@
-class FolderItem {
+class FolderItemEntity {
   final String uuid;
   final String folderUuid;
   final int chatId;
@@ -7,7 +7,7 @@ class FolderItem {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  FolderItem({
+  FolderItemEntity({
     required this.uuid,
     required this.folderUuid,
     required this.chatId,
