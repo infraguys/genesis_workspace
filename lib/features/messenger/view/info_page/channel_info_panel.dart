@@ -9,10 +9,26 @@ import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_inf
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
-class ChannelInfoPanel extends StatelessWidget {
+class ChannelInfoPanel extends StatefulWidget {
   const ChannelInfoPanel({super.key, required this.onClose});
 
   final VoidCallback onClose;
+
+  @override
+  State<ChannelInfoPanel> createState() => _ChannelInfoPanelState();
+}
+
+class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final chat = context.read<ChannelChatCubit>().state;
+      if (chat.channelMembers.isNotEmpty) {
+        context.read<ChannelMembersInfoCubit>().getUsers(chat.channelMembers);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +59,7 @@ class ChannelInfoPanel extends StatelessWidget {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                     IconButton(
-                      onPressed: onClose,
+                      onPressed: widget.onClose,
                       icon: Assets.icons.close.svg(),
                     ),
                   ],
@@ -60,25 +76,29 @@ class ChannelInfoPanel extends StatelessWidget {
                       },
                       builder: (context, state) {
                         final length = state.channelMembers.length;
-                        return Column(
-                          crossAxisAlignment: .start,
-                          children: [
-                            Text(
-                              state.topic?.name ?? state.channel?.name ?? '',
-                              style: TextStyle(
-                                fontWeight: .w500,
-                                fontSize: 20,
+                        return Flexible(
+                          child: Column(
+                            crossAxisAlignment: .start,
+                            children: [
+                              Text(
+                                state.topic?.name ?? state.channel?.name ?? '',
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontWeight: .w500,
+                                  fontSize: 20,
+                                  overflow: TextOverflow.ellipsis
+                                ),
                               ),
-                            ),
-                            Text(
-                              context.t.group.membersCount(count: length),
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                color: textColors.text30,
-                                fontWeight: .w400,
+                              Text(
+                                context.t.group.membersCount(count: length),
+                                style: TextStyle(
+                                  fontSize: 14.0,
+                                  color: textColors.text30,
+                                  fontWeight: .w400,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                       },
                     ),
