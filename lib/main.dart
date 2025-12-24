@@ -27,8 +27,8 @@ class Main {
       await getIt<LocalNotificationsService>().init();
     }
 
-    TalkerFlutter.init(settings: TalkerSettings(useConsoleLogs: false));
-    // getIt<Talker>();
+    // TalkerFlutter.init(settings: TalkerSettings(useConsoleLogs: false));
+    getIt<Talker>();
 
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }
