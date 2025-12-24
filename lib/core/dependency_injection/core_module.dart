@@ -31,7 +31,7 @@ abstract class CoreModule {
   AppDatabase appDatabase() => AppDatabase();
 
   @lazySingleton
-  Talker talker() => Talker();
+  Talker talker() => TalkerFlutter.init(settings: TalkerSettings(useConsoleLogs: false));
 
   @preResolve
   @lazySingleton
