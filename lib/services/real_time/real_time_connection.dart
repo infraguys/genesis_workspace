@@ -178,7 +178,7 @@ class RealTimeConnection {
             error.response?.statusCode == 400 && error.response?.data?['code'] == 'BAD_EVENT_QUEUE_ID';
         if (isBadQueueId) {
           await start();
-          continue;
+          break;
         }
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
@@ -193,6 +193,7 @@ class RealTimeConnection {
     if (_queueId == null) {
       _isActive = false;
       await start();
+      return;
     }
     final String queueIdValue = _queueId!;
     try {
