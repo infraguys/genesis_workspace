@@ -14,6 +14,7 @@ import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
+import 'package:genesis_workspace/features/messenger/view/topic_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -155,7 +156,7 @@ class _ChatItemState extends State<ChatItem> {
                 },
                 child: Text(widget.chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat),
               ),
-              if (widget.chat.type == ChatType.channel)
+              if (widget.chat.type == ChatType.channel) ...[
                 TextButton(
                   child: Text(
                     widget.chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
@@ -170,6 +171,17 @@ class _ChatItemState extends State<ChatItem> {
                     }
                   },
                 ),
+                TextButton(
+                  child: Text(
+                    context.t.readAllMessages,
+                    textAlign: TextAlign.center,
+                  ),
+                  onPressed: () async {
+                    context.pop();
+                    await context.read<MessengerCubit>().readAllMessagesInChannel(widget.chat.streamId!);
+                  },
+                ),
+              ],
             ],
           ),
         ),
@@ -181,7 +193,6 @@ class _ChatItemState extends State<ChatItem> {
           child: Column(
             children: [
               InkWell(
-
                 onTap: onTap,
                 onSecondaryTap: () => popupKey.currentState?.show(),
                 borderRadius: BorderRadius.circular(8),
@@ -353,82 +364,7 @@ class _ChatItemState extends State<ChatItem> {
                             itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
                             itemBuilder: (BuildContext context, int index) {
                               final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
-                              return InkWell(
-                                onTap: () {
-                                  context.read<MessengerCubit>().selectChat(
-                                    widget.chat,
-                                    selectedTopic: topic.name,
-                                  );
-                                },
-                                child: Container(
-                                  height: 76,
-                                  padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
-                                  decoration: BoxDecoration(
-                                    color: cardColors.base,
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              width: 3,
-                                              height: 47,
-                                              decoration: BoxDecoration(
-                                                color: Colors.yellow,
-                                                borderRadius: BorderRadiusGeometry.circular(4),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 12,
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Tooltip(
-                                                    message: topic.name,
-                                                    child: Text(
-                                                      "# ${topic.name}",
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: theme.textTheme.labelMedium?.copyWith(
-                                                        fontSize: 14,
-                                                        color: textColors.text100,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    topic.lastMessageSenderName,
-                                                    style: theme.textTheme.bodySmall?.copyWith(
-                                                      color: theme.colorScheme.primary,
-                                                    ),
-                                                  ),
-                                                  MessagePreview(
-                                                    messagePreview: topic.lastMessagePreview,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Skeleton.ignore(
-                                        child: SizedBox(
-                                          height: 21,
-                                          child: UnreadBadge(
-                                            count: topic.unreadMessages.length,
-                                            isMuted: widget.chat.isMuted,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
+                              return TopicItem(chat: widget.chat, topic: topic);
                             },
                           ),
                         )

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
+import 'package:genesis_workspace/data/messages/dto/mark_as_read_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/message_readers_response.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
@@ -25,4 +26,6 @@ abstract class MessagesDataSource {
     CancelToken? cancelToken,
   });
   Future<MessageReadersResponse> getMessageReaders(int messageId);
+  Future<void> markStreamAsRead(MarkStreamAsReadRequestDto body);
+  Future<void> markTopicAsRead(MarkTopicAsReadRequestDto body);
 }

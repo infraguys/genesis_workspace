@@ -22,16 +22,18 @@ import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case
 import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart';
-import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/mark_as_read_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/mark_stream_as_read_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/mark_topic_as_read_use_case.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -57,7 +59,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   final GetFoldersUseCase _getFoldersUseCase;
   final UpdateFolderUseCase _updateFolderUseCase;
   final DeleteFolderUseCase _deleteFolderUseCase;
-  final RemoveAllMembershipsForFolderUseCase _removeAllMembershipsForFolderUseCase;
   final GetMembersForFolderUseCase _getMembersForFolderUseCase;
   final GetMessagesUseCase _getMessagesUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
@@ -69,6 +70,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
   final UpdateSubscriptionSettingsUseCase _updateSubscriptionSettingsUseCase;
+  final MarkStreamAsReadUseCase _markStreamAsReadUseCase;
+  final MarkTopicAsReadUseCase _markTopicAsReadUseCase;
 
   final MultiPollingService _realTimeService;
   final ProfileCubit _profileCubit;
@@ -91,7 +94,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getFoldersUseCase,
     this._updateFolderUseCase,
     this._deleteFolderUseCase,
-    this._removeAllMembershipsForFolderUseCase,
     this._getMembersForFolderUseCase,
     this._getMessagesUseCase,
     this._getTopicsUseCase,
@@ -105,6 +107,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._profileCubit,
     this._getSubscribedChannelsUseCase,
     this._updateSubscriptionSettingsUseCase,
+    this._markStreamAsReadUseCase,
+    this._markTopicAsReadUseCase,
   ) : super(
         MessengerState.initial,
       ) {
@@ -304,6 +308,31 @@ class MessengerCubit extends Cubit<MessengerState> {
         updates: [SubscriptionUpdateEntity(streamId: chat.streamId!, isMuted: false)],
       );
       await _updateSubscriptionSettingsUseCase.call(body);
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> readAllMessagesInChannel(int streamId) async {
+    try {
+      await _markStreamAsReadUseCase.call(MarkStreamAsReadRequestEntity(streamId: streamId));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> readAllMessagesInTopic({required int streamId, required String topicName}) async {
+    try {
+      await _markTopicAsReadUseCase.call(
+        MarkTopicAsReadRequestEntity(
+          streamId: streamId,
+          topicName: topicName,
+        ),
+      );
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
