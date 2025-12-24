@@ -256,13 +256,6 @@ class _MessageItemState extends State<MessageItem> {
       _ => false,
     };
 
-    @Deprecated('This width is wrong')
-    final maxMessageWidth = switch (currentSize(context)) {
-      .laptop => MediaQuery.of(context).size.width * 0.4,
-      .sMobile => MediaQuery.of(context).size.width * 0.55,
-      _ => MediaQuery.of(context).size.width * 0.6,
-    };
-
     Color messageBgColor = switch (widget.isMyMessage) {
       _ when widget.message.isCall => messageColors.activeCallBackground,
       true => messageColors.ownBackground,
@@ -271,7 +264,11 @@ class _MessageItemState extends State<MessageItem> {
 
     return LayoutBuilder(
       builder: (context, constrains) {
-        final maxWidthMessage = constrains.maxWidth * 0.8;
+        final maxWidthMessage = switch(currentSize(context)) {
+          .desktop => constrains.maxWidth * 0.8,
+          .laptop => constrains.maxWidth * 0.7,
+          _ => constrains.maxWidth * 0.6,
+        };
         return Skeletonizer(
           enabled: widget.isSkeleton,
           child: Listener(
@@ -360,11 +357,11 @@ class _MessageItemState extends State<MessageItem> {
                               mainAxisSize: .min,
                               children: [
                                 ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: maxMessageWidth),
+                                  constraints: BoxConstraints(maxWidth: maxWidthMessage),
                                   child: MessageReactionsList(
                                     message: widget.message,
                                     myUserId: widget.myUserId,
-                                    maxWidth: maxMessageWidth,
+                                    maxWidth: maxWidthMessage,
                                   ),
                                 ),
                                 Column(

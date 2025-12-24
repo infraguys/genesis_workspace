@@ -25,6 +25,7 @@ import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
+import 'package:genesis_workspace/core/widgets/channel_app_bar_title.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
@@ -215,16 +216,6 @@ class _ChannelChatViewState extends State<ChannelChatView>
         return true;
       },
       builder: (context, state) {
-        final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
-          fontSize: isTabletOrSmaller ? 14 : 16,
-        );
-        final topicTextStyle = theme.textTheme.bodyLarge?.copyWith(
-          fontSize: isTabletOrSmaller ? 14 : null,
-          color: textColors.text30,
-        );
-        final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
-          color: textColors.text30,
-        );
         return Shortcuts(
           shortcuts: {
             SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): UnselectChatIntent(),
@@ -238,7 +229,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
               child: Scaffold(
                 resizeToAvoidBottomInset: false,
                 appBar: AppBarContainer(
+                  size: Size.fromHeight(106),
                   appBar: AppBar(
+                    toolbarHeight: isTabletOrSmaller ? 76 : null,
                     primary: isTabletOrSmaller,
                     backgroundColor: theme.colorScheme.surface,
                     clipBehavior: .hardEdge,
@@ -255,12 +248,13 @@ class _ChannelChatViewState extends State<ChannelChatView>
                             onPressed: context.pop,
                             icon: Icon(CupertinoIcons.back, color: textColors.text30),
                           )
-                        : IconButton(
-                            onPressed: widget.leadingOnPressed,
-                            icon: Assets.icons.moreVert.svg(
-                              colorFilter: ColorFilter.mode(textColors.text30, .srcIn),
-                            ),
-                          ),
+                        : null,
+                    // : IconButton(
+                    //     onPressed: widget.leadingOnPressed,
+                    //     icon: Assets.icons.moreVert.svg(
+                    //       colorFilter: ColorFilter.mode(textColors.text30, .srcIn),
+                    //     ),
+                    //   ),
                     actions: [
                       DownloadFilesButton(),
                       // IconButton(
@@ -310,40 +304,16 @@ class _ChannelChatViewState extends State<ChannelChatView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              context.pushNamed(
-                                Routes.channelInfo,
-                                pathParameters: GoRouterState.of(context).pathParameters,
-                              );
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  state.channel?.name ?? context.t.channel.channelName,
-                                  style: titleTextStyle,
-                                ),
-                                SizedBox(width: 12),
-                                if (widget.topicName != null) ...[
-                                  Container(
-                                    height: 16,
-                                    width: 3,
-                                    decoration: BoxDecoration(color: AppColors.primary, borderRadius: .circular(16)),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    '# ${widget.topicName!}',
-                                    style: topicTextStyle,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          Text(
-                            context.t.group.membersCount(count: state.channel?.subscriberCount ?? 0),
-                            style: subtitleTextStyle,
+                          ChannelAppBarTitle(
+                            channelName: state.channel?.name ?? context.t.channel.channelName,
+                            topicName: widget.topicName,
+                            count: state.channel?.subscriberCount ?? 0,
+                            onTap: isTabletOrSmaller
+                                ? () => context.pushNamed(
+                                    Routes.channelInfo,
+                                    pathParameters: GoRouterState.of(context).pathParameters,
+                                  )
+                                : widget.leadingOnPressed,
                           ),
                         ],
                       ),
