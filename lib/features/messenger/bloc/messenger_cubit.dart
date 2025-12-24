@@ -318,6 +318,12 @@ class MessengerCubit extends Cubit<MessengerState> {
   Future<void> readAllMessagesInChannel(int streamId) async {
     try {
       await _markStreamAsReadUseCase.call(MarkStreamAsReadRequestEntity(streamId: streamId));
+      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
+      final indexOfChat = state.chats.indexOf(chat);
+      final updatedChat = chat.copyWith(unreadMessages: {});
+      final updatedChats = [...state.chats];
+      updatedChats[indexOfChat] = updatedChat;
+      emit(state.copyWith(chats: updatedChats));
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -333,6 +339,15 @@ class MessengerCubit extends Cubit<MessengerState> {
           topicName: topicName,
         ),
       );
+      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
+      final indexOfChat = state.chats.indexOf(chat);
+      final topic = chat.topics!.firstWhere((topic) => topic.name == topicName);
+      final indexOfTopic = chat.topics!.indexOf(topic);
+      final updatedTopic = topic.copyWith(unreadMessages: {});
+      chat.topics![indexOfTopic] = updatedTopic;
+      final updatedChats = [...state.chats];
+      updatedChats[indexOfChat] = chat;
+      emit(state.copyWith(chats: updatedChats));
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
