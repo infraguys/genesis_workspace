@@ -81,7 +81,6 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
 
   @override
   Future<List<FolderItemEntity>> getAllFoldersItems() async {
-    final items = await _remoteDataSource.getAllFoldersItems();
-    return items;
+    return await _remoteDataSource.getAllFoldersItems();
   }
 }
