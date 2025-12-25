@@ -1,5 +1,12 @@
 # Changelog
 
+# 1.6.3
+- Add progress indicator for info panel
+- Fixed overflowed channel name
+- Added users presences in info panel
+- Added loading messages after losing connection
+- Added logs file
+
 # 1.6.2
 - Added refresh button on updates screen
 - Refactored get messages after lost connection
