@@ -576,8 +576,9 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                               const MentionSelectIntent(),
                                         }
                                       : {
-                                          const SingleActivator(.arrowUp, numLock: .ignored):
-                                              const EditLastMessageIntent(),
+                                          if (messageController.text.isEmpty)
+                                            const SingleActivator(.arrowUp, numLock: .ignored):
+                                                const EditLastMessageIntent(),
                                         },
                                   child: Actions(
                                     actions: {

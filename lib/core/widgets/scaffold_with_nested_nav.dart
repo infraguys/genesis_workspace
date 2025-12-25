@@ -77,6 +77,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
   }
 
   Future<void> getInitialData() async {
+    if (kIsWeb) await BrowserContextMenu.disableContextMenu();
     await context.read<RealTimeCubit>().init();
 
     await Future.wait([
@@ -91,7 +92,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     appShellController.attach(widget.navigationShell);
     _initIdleDetector();
     WidgetsBinding.instance.addObserver(this);
-    if (kIsWeb) BrowserContextMenu.disableContextMenu();
     _future = getInitialData();
     super.initState();
   }
