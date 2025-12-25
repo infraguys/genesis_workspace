@@ -408,15 +408,17 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> _loadFoldersMembers() async {
     final items = await _getAllFoldersItemsUseCase.call();
-    final updatedFolders = [...state.folders];
-    for (var item in items) {
-      final folder = updatedFolders.firstWhereOrNull((folder) => folder.uuid == item.folderUuid);
-      if (folder != null) {
-        final indexOfFolder = updatedFolders.indexOf(folder);
-        folder.folderItems.add(item.chatId);
-        updatedFolders[indexOfFolder] = folder;
-      }
+    final Map<String, Set<int>> itemsByFolder = {};
+    for (final item in items) {
+      itemsByFolder.putIfAbsent(item.folderUuid, () => <int>{}).add(item.chatId);
     }
+
+    final updatedFolders = state.folders.map((folder) {
+      final folderItems = itemsByFolder[folder.uuid];
+      if (folderItems == null) return folder;
+      return folder.copyWith(folderItems: {...folder.folderItems, ...folderItems});
+    }).toList();
+
     emit(state.copyWith(folders: updatedFolders));
   }
 
