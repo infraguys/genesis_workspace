@@ -283,9 +283,7 @@ class _MessengerViewState extends State<MessengerView>
     switch (state) {
       case AppLifecycleState.resumed:
         await context.read<MessengerCubit>().getMessagesAfterLoseConnection();
-        break;
       default:
-        break;
     }
     super.didChangeAppLifecycleState(state);
   }
