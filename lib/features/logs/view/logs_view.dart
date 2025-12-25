@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/features/logs/bloc/logs_cubit.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:genesis_workspace/services/real_time/real_time_connection.dart';
+import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -166,14 +167,15 @@ class _LogsViewState extends State<LogsView> {
                   ElevatedButton.icon(
                     onPressed: () async {
                       try {
-                        await Share.shareXFiles([XFile(file.path)], text: 'Workspace logs');
-                      } catch (_) {
+                        await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Workspace logs'));
+                      } catch (e) {
+                        inspect(e);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Не удалось отправить файл логов')),
                         );
                       }
-                      if (Navigator.of(ctx).canPop()) {
-                        Navigator.of(ctx).pop();
+                      if (context.canPop()) {
+                        context.pop();
                       }
                     },
                     icon: const Icon(Icons.ios_share),
@@ -181,7 +183,7 @@ class _LogsViewState extends State<LogsView> {
                   ),
                   const SizedBox(width: 12),
                   TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
+                    onPressed: () => context.pop(),
                     child: const Text('Закрыть'),
                   ),
                 ],
