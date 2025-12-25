@@ -453,7 +453,7 @@ class _MessengerViewState extends State<MessengerView>
                                       ),
                                     ),
                                     ChatTopicsList(
-                                      showTopics: _showTopics,
+                                      showTopics: isTabletOrSmaller ? _showTopics : false,
                                       isPending: state.selectedChat?.topics == null,
                                       selectedChat: state.selectedChat,
                                       listPadding: _isSearchVisible ? 350 : 300,

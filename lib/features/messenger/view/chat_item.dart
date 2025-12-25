@@ -286,7 +286,7 @@ class _ChatItemState extends State<ChatItem> {
                                         children: [
                                           if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
                                           (widget.chat.type == ChatType.channel &&
-                                                  currentSize(context) >= ScreenSize.tablet)
+                                                  currentSize(context) > ScreenSize.tablet)
                                               ? InkWell(
                                                   borderRadius: BorderRadius.circular(35),
                                                   onTap: () {
