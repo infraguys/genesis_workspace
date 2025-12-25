@@ -17,21 +17,24 @@ import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/get_all_folders_items_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart';
-import 'package:genesis_workspace/domain/all_chats/usecases/remove_all_memberships_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/mark_as_read_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/mark_stream_as_read_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/mark_topic_as_read_use_case.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -55,9 +58,9 @@ part 'messenger_state.dart';
 class MessengerCubit extends Cubit<MessengerState> {
   final AddFolderUseCase _addFolderUseCase;
   final GetFoldersUseCase _getFoldersUseCase;
+  final GetAllFoldersItemsUseCase _getAllFoldersItemsUseCase;
   final UpdateFolderUseCase _updateFolderUseCase;
   final DeleteFolderUseCase _deleteFolderUseCase;
-  final RemoveAllMembershipsForFolderUseCase _removeAllMembershipsForFolderUseCase;
   final GetMembersForFolderUseCase _getMembersForFolderUseCase;
   final GetMessagesUseCase _getMessagesUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
@@ -69,6 +72,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
   final UpdateSubscriptionSettingsUseCase _updateSubscriptionSettingsUseCase;
+  final MarkStreamAsReadUseCase _markStreamAsReadUseCase;
+  final MarkTopicAsReadUseCase _markTopicAsReadUseCase;
 
   final MultiPollingService _realTimeService;
   final ProfileCubit _profileCubit;
@@ -91,7 +96,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getFoldersUseCase,
     this._updateFolderUseCase,
     this._deleteFolderUseCase,
-    this._removeAllMembershipsForFolderUseCase,
     this._getMembersForFolderUseCase,
     this._getMessagesUseCase,
     this._getTopicsUseCase,
@@ -105,6 +109,9 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._profileCubit,
     this._getSubscribedChannelsUseCase,
     this._updateSubscriptionSettingsUseCase,
+    this._markStreamAsReadUseCase,
+    this._markTopicAsReadUseCase,
+    this._getAllFoldersItemsUseCase,
   ) : super(
         MessengerState.initial,
       ) {
@@ -314,6 +321,46 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
+  Future<void> readAllMessagesInChannel(int streamId) async {
+    try {
+      await _markStreamAsReadUseCase.call(MarkStreamAsReadRequestEntity(streamId: streamId));
+      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
+      final indexOfChat = state.chats.indexOf(chat);
+      final updatedChat = chat.copyWith(unreadMessages: {});
+      final updatedChats = [...state.chats];
+      updatedChats[indexOfChat] = updatedChat;
+      emit(state.copyWith(chats: updatedChats));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> readAllMessagesInTopic({required int streamId, required String topicName}) async {
+    try {
+      await _markTopicAsReadUseCase.call(
+        MarkTopicAsReadRequestEntity(
+          streamId: streamId,
+          topicName: topicName,
+        ),
+      );
+      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
+      final indexOfChat = state.chats.indexOf(chat);
+      final topic = chat.topics!.firstWhere((topic) => topic.name == topicName);
+      final indexOfTopic = chat.topics!.indexOf(topic);
+      final updatedTopic = topic.copyWith(unreadMessages: {});
+      chat.topics![indexOfTopic] = updatedTopic;
+      final updatedChats = [...state.chats];
+      updatedChats[indexOfChat] = chat;
+      emit(state.copyWith(chats: updatedChats));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
     if (selectedTopic == null) {
       emit(state.copyWith(selectedChat: chat, selectedTopic: null));
@@ -342,7 +389,8 @@ class MessengerCubit extends Cubit<MessengerState> {
 
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
       List<FolderEntity> initialFolders = [...folders];
-      if (folders.isEmpty) {
+      final bool hasAllFolder = folders.any((folder) => folder.systemType == FolderSystemType.all);
+      if (!hasAllFolder) {
         final allFolderBody = CreateFolderEntity(
           title: "All",
           backgroundColor: AppColors.primary,
@@ -362,13 +410,18 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> _loadFoldersMembers() async {
-    final futures = state.folders.map((folder) async {
-      final folderItems = await _getMembersForFolderUseCase.call(folder.uuid);
-      final updatedItems = {...folder.folderItems, ...folderItems.chatIds};
-      return folder.copyWith(folderItems: updatedItems);
+    final items = await _getAllFoldersItemsUseCase.call();
+    final Map<String, Set<int>> itemsByFolder = {};
+    for (final item in items) {
+      itemsByFolder.putIfAbsent(item.folderUuid, () => <int>{}).add(item.chatId);
+    }
+
+    final updatedFolders = state.folders.map((folder) {
+      final folderItems = itemsByFolder[folder.uuid];
+      if (folderItems == null) return folder;
+      return folder.copyWith(folderItems: {...folder.folderItems, ...folderItems});
     }).toList();
 
-    final updatedFolders = await Future.wait(futures);
     emit(state.copyWith(folders: updatedFolders));
   }
 

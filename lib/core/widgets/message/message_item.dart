@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -157,7 +158,10 @@ class _MessageItemState extends State<MessageItem> {
     _menuController.close();
   }
 
-  void onCopy() {}
+  void onCopy() async {
+    final message = await messagesCubit.getMessageById(messageId: widget.message.id, applyMarkdown: false);
+    await Clipboard.setData(ClipboardData(text: message.content));
+  }
 
   void _closeOverlay() {
     _menuEntry?.remove();
@@ -240,21 +244,16 @@ class _MessageItemState extends State<MessageItem> {
             style: theme.textTheme.bodyMedium?.copyWith(color: messageColors.timeColor),
           );
 
-    final bool showAvatar =
-        !widget.isMyMessage &&
-        (widget.messageOrder == .last ||
-            widget.messageOrder == .single ||
-            widget.messageOrder == .lastSingle ||
-            widget.isNewDay);
+    final bool showAvatar = switch (widget.messageOrder) {
+      _ when widget.isMyMessage => false,
+      _ when widget.isNewDay => true,
+      .last || .single || .lastSingle => true,
+      _ => false,
+    };
 
-    final bool showSenderName =
-        widget.messageOrder == .first || widget.messageOrder == .single || widget.messageOrder == .lastSingle;
-
-    final maxMessageWidth = switch (currentSize(context)) {
-      .desktop => MediaQuery.of(context).size.width * 0.55,
-      .laptop => MediaQuery.of(context).size.width * 0.4,
-      .sMobile => MediaQuery.of(context).size.width * 0.55,
-      _ => MediaQuery.of(context).size.width * 0.6,
+    final bool showSenderName = switch (widget.messageOrder) {
+      .first || .single || .lastSingle => true,
+      _ => false,
     };
 
     Color messageBgColor = switch (widget.isMyMessage) {
@@ -263,139 +262,140 @@ class _MessageItemState extends State<MessageItem> {
       _ => messageColors.background,
     };
 
-    return Skeletonizer(
-      enabled: widget.isSkeleton,
-      child: Listener(
-        behavior: HitTestBehavior.deferToChild,
-        onPointerDown: (event) {
-          if (event.kind == .mouse && event.buttons == kSecondaryMouseButton) {
-            _openContextMenu(context, event.position);
-          }
-        },
-        child: GestureDetector(
-          onLongPressStart: (details) {
-            if (platformInfo.isMobile) {
-              _openContextMenu(context, details.globalPosition);
-            }
-          },
-          onDoubleTap: onReplay,
-          child: Align(
-            alignment: widget.isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-            child: Row(
-              mainAxisSize: .min,
-              crossAxisAlignment: .end,
-              spacing: 12,
-              children: [
-                showAvatar
-                    ? avatar
-                    : const SizedBox(
-                        width: 30,
+    return LayoutBuilder(
+      builder: (context, constrains) {
+        final maxWidthMessage = switch(currentSize(context)) {
+          .desktop => constrains.maxWidth * 0.8,
+          .laptop => constrains.maxWidth * 0.7,
+          _ => constrains.maxWidth * 0.6,
+        };
+        return Skeletonizer(
+          enabled: widget.isSkeleton,
+          child: Listener(
+            behavior: HitTestBehavior.deferToChild,
+            onPointerDown: (event) {
+              if (event.kind == .mouse && event.buttons == kSecondaryMouseButton) {
+                _openContextMenu(context, event.position);
+              }
+            },
+            child: GestureDetector(
+              onLongPressStart: (details) {
+                if (platformInfo.isMobile) {
+                  _openContextMenu(context, details.globalPosition);
+                }
+              },
+              onDoubleTap: onReplay,
+              child: Align(
+                alignment: widget.isMyMessage ? .centerRight : .centerLeft,
+                child: Row(
+                  mainAxisSize: .min,
+                  crossAxisAlignment: .end,
+                  spacing: 12,
+                  children: [
+                    showAvatar ? avatar : const SizedBox(width: 30),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      constraints: (showAvatar)
+                          ? BoxConstraints(
+                              minHeight: 40,
+                              maxWidth: (MediaQuery.sizeOf(context).width * 0.9) - (widget.isMyMessage ? 30 : 0),
+                            )
+                          : null,
+                      decoration: BoxDecoration(
+                        color: messageBgColor,
+                        borderRadius: BorderRadius.circular(8).copyWith(
+                          bottomRight: (widget.isMyMessage) ? .zero : null,
+                          bottomLeft: (!widget.isMyMessage && showAvatar) ? .zero : null,
+                        ),
                       ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  constraints: (showAvatar)
-                      ? BoxConstraints(
-                          minHeight: 40,
-                          maxWidth: (MediaQuery.sizeOf(context).width * 0.9) - (widget.isMyMessage ? 30 : 0),
-                        )
-                      : null,
-                  decoration: BoxDecoration(
-                    color: messageBgColor,
-                    borderRadius: BorderRadius.circular(8).copyWith(
-                      bottomRight: (widget.isMyMessage) ? Radius.zero : null,
-                      bottomLeft: (!widget.isMyMessage && showAvatar) ? Radius.zero : null,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        crossAxisAlignment: widget.message.isCall ? .start : .end,
-                        mainAxisSize: MainAxisSize.min,
+                      child: Column(
+                        crossAxisAlignment: .start,
+                        mainAxisSize: .min,
                         children: [
-                          widget.message.isCall
-                              ? MessageCallBody(
-                                  message: widget.message,
-                                )
-                              : MessageBody(
-                                  showSenderName: showSenderName,
-                                  isSkeleton: widget.isSkeleton,
-                                  message: widget.message,
-                                  showTopic: widget.showTopic,
-                                  isStarred: isStarred,
-                                  maxMessageWidth: maxMessageWidth,
-                                ),
-                          if (widget.message.aggregatedReactions.isEmpty)
-                            Column(
-                              crossAxisAlignment: .end,
-                              children: [
-                                if (widget.message.isCall)
-                                  IconButton(
-                                    padding: .zero,
-                                    onPressed: () {
-                                      joinCall(context);
-                                    },
-                                    icon: Assets.icons.call.svg(
-                                      width: 32,
-                                      height: 32,
-                                      colorFilter: ColorFilter.mode(AppColors.green, BlendMode.srcIn),
+                          Row(
+                            crossAxisAlignment: widget.message.isCall ? .start : .end,
+                            mainAxisSize: .min,
+                            children: [
+                              widget.message.isCall
+                                  ? MessageCallBody(
+                                      message: widget.message,
+                                    )
+                                  : MessageBody(
+                                      showSenderName: showSenderName,
+                                      isSkeleton: widget.isSkeleton,
+                                      message: widget.message,
+                                      showTopic: widget.showTopic,
+                                      isStarred: isStarred,
+                                      maxMessageWidth: maxWidthMessage ,
                                     ),
+                              if (widget.message.aggregatedReactions.isEmpty)
+                                Column(
+                                  crossAxisAlignment: .end,
+                                  children: [
+                                    if (widget.message.isCall)
+                                      IconButton(
+                                        padding: .zero,
+                                        onPressed: () => joinCall(context),
+                                        icon: Assets.icons.call.svg(
+                                          width: 32,
+                                          height: 32,
+                                          colorFilter: ColorFilter.mode(AppColors.green, .srcIn),
+                                        ),
+                                      ),
+                                    MessageTime(
+                                      messageTime: messageTime,
+                                      isMyMessage: widget.isMyMessage,
+                                      isRead: isRead,
+                                      isSkeleton: widget.isSkeleton,
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                          if (widget.message.aggregatedReactions.isNotEmpty)
+                            Row(
+                              mainAxisSize: .min,
+                              children: [
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(maxWidth: maxWidthMessage),
+                                  child: MessageReactionsList(
+                                    message: widget.message,
+                                    myUserId: widget.myUserId,
+                                    maxWidth: maxWidthMessage,
                                   ),
-                                MessageTime(
-                                  messageTime: messageTime,
-                                  isMyMessage: widget.isMyMessage,
-                                  isRead: isRead,
-                                  isSkeleton: widget.isSkeleton,
+                                ),
+                                Column(
+                                  children: [
+                                    if (widget.message.isCall)
+                                      IconButton(
+                                        padding: .zero,
+                                        onPressed: () => joinCall(context),
+                                        icon: Assets.icons.call.svg(
+                                          width: 32,
+                                          height: 32,
+                                          colorFilter: ColorFilter.mode(AppColors.green, .srcIn),
+                                        ),
+                                      ),
+                                    MessageTime(
+                                      messageTime: messageTime,
+                                      isMyMessage: widget.isMyMessage,
+                                      isRead: isRead,
+                                      isSkeleton: widget.isSkeleton,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                         ],
                       ),
-                      if (widget.message.aggregatedReactions.isNotEmpty)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: maxMessageWidth),
-                              child: MessageReactionsList(
-                                message: widget.message,
-                                myUserId: widget.myUserId,
-                                maxWidth: maxMessageWidth,
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                if (widget.message.isCall)
-                                  IconButton(
-                                    padding: .zero,
-                                    onPressed: () {
-                                      joinCall(context);
-                                    },
-                                    icon: Assets.icons.call.svg(
-                                      width: 32,
-                                      height: 32,
-                                      colorFilter: ColorFilter.mode(AppColors.green, BlendMode.srcIn),
-                                    ),
-                                  ),
-                                MessageTime(
-                                  messageTime: messageTime,
-                                  isMyMessage: widget.isMyMessage,
-                                  isRead: isRead,
-                                  isSkeleton: widget.isSkeleton,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

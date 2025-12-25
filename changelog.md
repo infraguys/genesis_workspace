@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.6.2
+- Added refresh button on updates screen
+- Refactored get messages after lost connection
+- Added calendar and mail webviews for android, ios, macos, windows
+- Added copy message functionality
+- Added read all messages buttons for channels and topics
+- Improved folders functions
+
 # 1.6.1
 - Added double-tap hotkey on message
 - Added message readers functionality

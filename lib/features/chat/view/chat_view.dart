@@ -547,7 +547,8 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                               final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
                               final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
 
-                              final bool isSendEnabled = canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                              final bool isSendEnabled =
+                                  canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
                               final bool isEditEnabled = isSendEnabled || state.isEdited;
 
                               return Actions(

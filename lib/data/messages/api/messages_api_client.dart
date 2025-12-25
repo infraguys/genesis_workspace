@@ -92,4 +92,14 @@ abstract class MessagesApiClient {
   Future<MessageReadersResponse> getMessageReaders(
     @Path('message_id') int messageId,
   );
+
+  @POST('/mark_stream_as_read')
+  Future<void> markStreamAsRead(
+    @Query('stream_id') int streamId,
+  );
+  @POST('/mark_topic_as_read')
+  Future<void> markTopicAsRead(
+    @Query('stream_id') int streamId,
+    @Query('topic_name') String topicName,
+  );
 }

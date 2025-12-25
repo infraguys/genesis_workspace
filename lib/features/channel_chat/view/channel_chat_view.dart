@@ -25,6 +25,7 @@ import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
+import 'package:genesis_workspace/core/widgets/channel_app_bar_title.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
@@ -32,6 +33,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -214,16 +216,6 @@ class _ChannelChatViewState extends State<ChannelChatView>
         return true;
       },
       builder: (context, state) {
-        final titleTextStyle = theme.textTheme.labelLarge?.copyWith(
-          fontSize: isTabletOrSmaller ? 14 : 16,
-        );
-        final topicTextStyle = theme.textTheme.bodyLarge?.copyWith(
-          fontSize: isTabletOrSmaller ? 14 : null,
-          color: textColors.text30,
-        );
-        final subtitleTextStyle = theme.textTheme.bodySmall?.copyWith(
-          color: textColors.text30,
-        );
         return Shortcuts(
           shortcuts: {
             SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): UnselectChatIntent(),
@@ -237,7 +229,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
               child: Scaffold(
                 resizeToAvoidBottomInset: false,
                 appBar: AppBarContainer(
+                  size: Size.fromHeight(106),
                   appBar: AppBar(
+                    toolbarHeight: isTabletOrSmaller ? 76 : null,
                     primary: isTabletOrSmaller,
                     backgroundColor: theme.colorScheme.surface,
                     clipBehavior: .hardEdge,
@@ -254,12 +248,13 @@ class _ChannelChatViewState extends State<ChannelChatView>
                             onPressed: context.pop,
                             icon: Icon(CupertinoIcons.back, color: textColors.text30),
                           )
-                        : IconButton(
-                            onPressed: widget.leadingOnPressed,
-                            icon: Assets.icons.moreVert.svg(
-                              colorFilter: ColorFilter.mode(textColors.text30, .srcIn),
-                            ),
-                          ),
+                        : null,
+                    // : IconButton(
+                    //     onPressed: widget.leadingOnPressed,
+                    //     icon: Assets.icons.moreVert.svg(
+                    //       colorFilter: ColorFilter.mode(textColors.text30, .srcIn),
+                    //     ),
+                    //   ),
                     actions: [
                       DownloadFilesButton(),
                       // IconButton(
@@ -309,40 +304,16 @@ class _ChannelChatViewState extends State<ChannelChatView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              context.pushNamed(
-                                Routes.channelInfo,
-                                pathParameters: GoRouterState.of(context).pathParameters,
-                              );
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  state.channel?.name ?? context.t.channel.channelName,
-                                  style: titleTextStyle,
-                                ),
-                                SizedBox(width: 12),
-                                if (widget.topicName != null) ...[
-                                  Container(
-                                    height: 16,
-                                    width: 3,
-                                    decoration: BoxDecoration(color: AppColors.primary, borderRadius: .circular(16)),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    '# ${widget.topicName!}',
-                                    style: topicTextStyle,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          Text(
-                            context.t.group.membersCount(count: state.channel?.subscriberCount ?? 0),
-                            style: subtitleTextStyle,
+                          ChannelAppBarTitle(
+                            channelName: state.channel?.name ?? context.t.channel.channelName,
+                            topicName: widget.topicName,
+                            count: state.channel?.subscriberCount ?? 0,
+                            onTap: isTabletOrSmaller
+                                ? () => context.pushNamed(
+                                    Routes.channelInfo,
+                                    pathParameters: GoRouterState.of(context).pathParameters,
+                                  )
+                                : widget.leadingOnPressed,
                           ),
                         ],
                       ),
@@ -407,6 +378,18 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                           myUserId: _myUser.userId,
                                           onTapQuote: onTapQuote,
                                           onTapEditMessage: onTapEditMessage,
+                                          onReadAll: () async {
+                                            if (widget.topicName != null) {
+                                              await context.read<MessengerCubit>().readAllMessagesInTopic(
+                                                streamId: widget.channelId,
+                                                topicName: widget.topicName!,
+                                              );
+                                            } else {
+                                              await context.read<MessengerCubit>().readAllMessagesInChannel(
+                                                widget.channelId,
+                                              );
+                                            }
+                                          },
                                         ),
                                         Positioned(
                                           bottom: 0,
@@ -498,48 +481,53 @@ class _ChannelChatViewState extends State<ChannelChatView>
                               final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
                               final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
 
-                              final bool isSendEnabled = canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                              final bool isSendEnabled =
+                                  canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
 
                               final bool isEditEnabled = isSendEnabled || state.isEdited;
 
-                        return Actions(
-                          actions: <Type, Action<Intent>>{
-                            PasteTextIntent: ChatPasteAction(
-                              onPaste: () async {
-                                try {
-                                  final captured = await pasteCaptureService.captureNow();
-                                  handleCaptured(captured);
-                                } catch (e) {
-                                  inspect(e);
-                                }
-                              },
-                            ),
-                          },
-                          child: Shortcuts(
-                            shortcuts: state.showMentionPopup
-                                ? {
-                                    const SingleActivator(LogicalKeyboardKey.arrowDown, numLock: LockState.ignored):
-                                        const MentionNavIntent.down(),
-                                    const SingleActivator(LogicalKeyboardKey.arrowUp, numLock: LockState.ignored):
-                                        const MentionNavIntent.up(),
-                                    const SingleActivator(LogicalKeyboardKey.enter, numLock: LockState.ignored):
-                                        const MentionSelectIntent(),
-                                    const SingleActivator(LogicalKeyboardKey.numpadEnter, numLock: LockState.ignored):
-                                        const MentionSelectIntent(),
-                                  }
-                                : {
-                                    const SingleActivator(LogicalKeyboardKey.arrowUp, numLock: LockState.ignored):
-                                        const EditLastMessageIntent(),
-                                  },
-                            child: Actions(
-                              actions: {
-                                UnselectChatIntent: UnselectChatAction(),
-                                EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
-                                  onInvoke: (intent) {
-                                    final lastMessageIndex = state.messages.lastIndexWhere(
-                                      (message) => message.senderId == state.myUserId,
-                                    );
-                                    if (lastMessageIndex == -1) return null;
+                              return Actions(
+                                actions: <Type, Action<Intent>>{
+                                  PasteTextIntent: ChatPasteAction(
+                                    onPaste: () async {
+                                      try {
+                                        final captured = await pasteCaptureService.captureNow();
+                                        handleCaptured(captured);
+                                      } catch (e) {
+                                        inspect(e);
+                                      }
+                                    },
+                                  ),
+                                },
+                                child: Shortcuts(
+                                  shortcuts: state.showMentionPopup
+                                      ? {
+                                          const SingleActivator(
+                                            LogicalKeyboardKey.arrowDown,
+                                            numLock: LockState.ignored,
+                                          ): const MentionNavIntent.down(),
+                                          const SingleActivator(LogicalKeyboardKey.arrowUp, numLock: LockState.ignored):
+                                              const MentionNavIntent.up(),
+                                          const SingleActivator(LogicalKeyboardKey.enter, numLock: LockState.ignored):
+                                              const MentionSelectIntent(),
+                                          const SingleActivator(
+                                            LogicalKeyboardKey.numpadEnter,
+                                            numLock: LockState.ignored,
+                                          ): const MentionSelectIntent(),
+                                        }
+                                      : {
+                                          const SingleActivator(LogicalKeyboardKey.arrowUp, numLock: LockState.ignored):
+                                              const EditLastMessageIntent(),
+                                        },
+                                  child: Actions(
+                                    actions: {
+                                      UnselectChatIntent: UnselectChatAction(),
+                                      EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
+                                        onInvoke: (intent) {
+                                          final lastMessageIndex = state.messages.lastIndexWhere(
+                                            (message) => message.senderId == state.myUserId,
+                                          );
+                                          if (lastMessageIndex == -1) return null;
 
                                           final lastMessage = state.messages[lastMessageIndex];
                                           onTapEditMessage(
@@ -582,7 +570,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               isMessagePending: state.isMessagePending,
                                               focusNode: messageInputFocusNode,
                                               onSubmitIntercept: () {
-                                                if (state.showMentionPopup && state.filteredSuggestedMentions.isNotEmpty) {
+                                                if (state.showMentionPopup &&
+                                                    state.filteredSuggestedMentions.isNotEmpty) {
                                                   final st = _mentionKey.currentState as dynamic?;
                                                   st?.selectFocused();
                                                   return true;

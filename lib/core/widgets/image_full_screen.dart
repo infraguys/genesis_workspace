@@ -8,14 +8,14 @@ import 'package:genesis_workspace/core/dio_interceptors/csrf_cookie_interceptor.
 import 'package:genesis_workspace/core/dio_interceptors/sessionid_interceptor.dart';
 import 'package:genesis_workspace/core/dio_interceptors/token_interceptor.dart';
 import 'package:genesis_workspace/core/shortcuts/close_fullscreen_image_intent.dart';
-import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ImageFullScreen extends StatefulWidget {
-  final String imageUrl;
   const ImageFullScreen({super.key, required this.imageUrl});
+
+  final String imageUrl;
 
   @override
   State<ImageFullScreen> createState() => _ImageFullScreenState();
@@ -69,23 +69,28 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: {
-        SingleActivator(.escape): const CloseFullscreenImageIntent() ,
+        SingleActivator(.escape): const CloseFullscreenImageIntent(),
       },
       child: Actions(
-        actions: {
-          CloseFullscreenImageIntent: CloseFullscreenImageAction()
-        },
+        actions: {CloseFullscreenImageIntent: CloseFullscreenImageAction()},
         child: Focus(
           autofocus: true,
           child: Scaffold(
-            appBar: AppBarContainer(
-              appBar: AppBar(
-                backgroundColor: Colors.black,
-                systemOverlayStyle: SystemUiOverlayStyle.light,
-                leading: IconButton(
-                  onPressed: context.pop,
-                  icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-                ),
+            extendBodyBehindAppBar: true,
+            appBar: PreferredSize(
+              preferredSize: .fromHeight(76),
+              child: Column(
+                children: [
+                  SizedBox(height: 20.0, width: .infinity),
+                  AppBar(
+                    backgroundColor: Colors.transparent,
+                    systemOverlayStyle: .light,
+                    leading: IconButton(
+                      onPressed: context.pop,
+                      icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
             backgroundColor: Colors.black,
