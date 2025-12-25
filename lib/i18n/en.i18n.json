@@ -275,7 +275,8 @@
     "mark_as_important": "Mark as important",
     "unmark_as_important": "Unmark as important",
     "forward": "Forward",
-    "select": "Select"
+    "select": "Select",
+    "readBy": "Read by"
   },
   "input": {
     "banner": "Select a topic to send messages to the channel",
@@ -305,5 +306,10 @@
     "team_and_position": "Team > Position",
     "manager": "Manager"
   },
-  "profile": "Profile"
+  "profile": "Profile",
+  "messageReadersTitle": {
+    "one": "This message has been read by {n} person",
+    "other": "This message has been read by {n} people"
+  },
+  "read_all_messages": "Read all messages"
 }

@@ -16,6 +16,7 @@ class OrganizationsLocalDataSource {
       icon: body.icon,
       baseUrl: body.baseUrl,
       unreadMessages: body.unreadMessages,
+      meetingUrl: body.meetingUrl,
     );
     return OrganizationDto(
       id: id,
@@ -23,6 +24,7 @@ class OrganizationsLocalDataSource {
       icon: body.icon,
       baseUrl: body.baseUrl,
       unreadMessages: body.unreadMessages,
+      meetingUrl: body.meetingUrl,
     );
   }
 
@@ -44,6 +46,7 @@ class OrganizationsLocalDataSource {
               icon: org.icon,
               baseUrl: org.baseUrl,
               unreadMessages: org.unreadMessages,
+              meetingUrl: org.meetingUrl,
             ),
           )
           .toList(),
@@ -61,6 +64,7 @@ class OrganizationsLocalDataSource {
               icon: org.icon,
               baseUrl: org.baseUrl,
               unreadMessages: org.unreadMessages,
+              meetingUrl: org.meetingUrl,
             ),
           )
           .toList();
@@ -81,9 +85,20 @@ class OrganizationsLocalDataSource {
         icon: response.icon,
         baseUrl: response.baseUrl,
         unreadMessages: response.unreadMessages,
+        meetingUrl: response.meetingUrl,
       );
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> updateMeetingUrl({
+    required int organizationId,
+    required String? meetingUrl,
+  }) {
+    return _dao.updateMeetingUrl(
+      organizationId: organizationId,
+      meetingUrl: meetingUrl,
+    );
   }
 }

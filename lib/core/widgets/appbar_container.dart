@@ -3,12 +3,13 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 
 class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
-  const AppBarContainer({super.key, required this.appBar});
+  const AppBarContainer({super.key, required this.appBar, this.size});
 
   final PreferredSizeWidget appBar;
+  final Size? size;
 
   @override
-  Size get preferredSize => const Size.fromHeight(76);
+  Size get preferredSize => size ?? const Size.fromHeight(76);
 
   bool get isMacOsSafe {
     return platformInfo.isMacos;
@@ -26,7 +27,7 @@ class AppBarContainer extends StatelessWidget implements PreferredSizeWidget {
           Container(
             height: 20.0,
             width: double.infinity,
-            color: theme.colorScheme.surface,
+            color: isTabletOrSmaller ? theme.colorScheme.surface : Colors.transparent,
           ),
         appBar,
       ],

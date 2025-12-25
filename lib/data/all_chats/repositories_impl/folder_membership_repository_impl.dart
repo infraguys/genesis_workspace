@@ -3,6 +3,7 @@ import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folder_items_remote_data_source.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folder_membership_local_data_source.dart';
 import 'package:genesis_workspace/data/all_chats/datasources/folders_remote_data_source.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_members.dart';
 import 'package:genesis_workspace/domain/all_chats/repositories/folder_membership_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -38,7 +39,7 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
         );
       }
     }
-    await _localDataSource.setChatFolders(chatId: chatId, folderUuids: folderUuids, organizationId: organizationId);
+    // await _localDataSource.setChatFolders(chatId: chatId, folderUuids: folderUuids, organizationId: organizationId);
   }
 
   @override
@@ -76,5 +77,10 @@ class FolderMembershipRepositoryImpl implements FolderMembershipRepository {
     final items = await _remoteDataSource.getFolderItems(folderUuid);
     final chatIds = items.map((r) => r.chatId).toList(growable: false);
     return FolderMembers(chatIds: chatIds);
+  }
+
+  @override
+  Future<List<FolderItemEntity>> getAllFoldersItems() async {
+    return await _remoteDataSource.getAllFoldersItems();
   }
 }

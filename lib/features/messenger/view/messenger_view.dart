@@ -280,13 +280,11 @@ class _MessengerViewState extends State<MessengerView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    // switch (state) {
-    //   case AppLifecycleState.resumed:
-    //     await context.read<MessengerCubit>().getUnreadMessages();
-    //     break;
-    //   default:
-    //     break;
-    // }
+    switch (state) {
+      case AppLifecycleState.resumed:
+        await context.read<MessengerCubit>().getMessagesAfterLoseConnection();
+      default:
+    }
     super.didChangeAppLifecycleState(state);
   }
 
@@ -453,7 +451,7 @@ class _MessengerViewState extends State<MessengerView>
                                       ),
                                     ),
                                     ChatTopicsList(
-                                      showTopics: _showTopics,
+                                      showTopics: isTabletOrSmaller ? _showTopics : false,
                                       isPending: state.selectedChat?.topics == null,
                                       selectedChat: state.selectedChat,
                                       listPadding: _isSearchVisible ? 350 : 300,

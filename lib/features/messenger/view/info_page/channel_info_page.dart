@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
@@ -26,6 +28,8 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
       context.read<ChannelMembersInfoCubit>().getUsers(chatState.channelMembers);
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +157,7 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                     child: BlocBuilder<ChannelMembersInfoCubit, ChannelMembersInfoState>(
                       builder: (context, state) {
                         if (state is! ChannelMembersLoadedState) {
-                          return SizedBox.shrink();
+                          return Center(child:  CircularProgressIndicator());
                         }
                         return ListView.separated(
                           itemCount: state.users.length,
@@ -179,7 +183,7 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
 class _MemberItem extends StatelessWidget {
   const _MemberItem({super.key, required this.user});
 
-  final UserEntity user;
+  final DmUserEntity user;
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +229,7 @@ class _MemberItem extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Был 45 минут назад',
+                            getPresenceText(context, user),
                             maxLines: 1,
                             overflow: .ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(

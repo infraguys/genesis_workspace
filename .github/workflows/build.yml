@@ -53,7 +53,7 @@ jobs:
             FB_GOOGLE_SERVICES_ANDROID: ${{ secrets.FB_GOOGLE_SERVICES_ANDROID }}
             FB_GOOGLE_SERVICES_IOS: ${{ secrets.FB_GOOGLE_SERVICES_IOS }}
             UI_BUILD_ENV_firebase_api_key: ${{ secrets.FB_API_KEY }}
-            UI_BUILD_ENV_meeting_base_url: ${{ secrets.MEETING_BASE_URL }}
+            UI_BUILD_ENV_lk_url: ${{ secrets.LK_URL }}
         run: |
           set -eux
 

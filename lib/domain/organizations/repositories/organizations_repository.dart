@@ -13,4 +13,9 @@ abstract class OrganizationsRepository {
   Stream<List<OrganizationEntity>> watchOrganizations();
 
   Future<ServerSettingsEntity> getOrganizationSettings(String url);
+
+  Future<void> updateMeetingUrl({
+    required int organizationId,
+    required String? meetingUrl,
+  });
 }

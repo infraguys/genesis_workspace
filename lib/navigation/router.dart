@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/in_development_widget.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
@@ -10,8 +11,9 @@ import 'package:genesis_workspace/features/authentication/presentation/bloc/auth
 import 'package:genesis_workspace/features/authentication/presentation/view/paste_code_view.dart';
 import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
-import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/lk/lk.dart';
+import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
@@ -20,6 +22,7 @@ import 'package:genesis_workspace/features/profile/view/profile_personal_info_pa
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:go_router/go_router.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorMessengerKey = GlobalKey<NavigatorState>(debugLabel: 'shellMessenger');
@@ -41,6 +44,7 @@ class Routes {
   static const String calls = '/calls';
   static const String profile = '/profile';
   static const String profileInfo = '/profile-info';
+  static const String talkerScreen = '/talker-screen';
 
   static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
@@ -67,6 +71,7 @@ class Routes {
 final router = GoRouter(
   initialLocation: Routes.splashScreen,
   navigatorKey: _rootNavigatorKey,
+  observers: [TalkerRouteObserver(getIt<Talker>())],
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
@@ -92,7 +97,7 @@ final router = GoRouter(
               path: Routes.calendar,
               name: Routes.calendar,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return Lk();
               },
             ),
           ],
@@ -104,7 +109,7 @@ final router = GoRouter(
               path: Routes.mail,
               name: Routes.mail,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return Lk();
               },
             ),
           ],
@@ -128,7 +133,7 @@ final router = GoRouter(
               path: Routes.calls,
               name: Routes.calls,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return Logs();
               },
             ),
           ],
@@ -183,11 +188,13 @@ final router = GoRouter(
           final extra = state.extra as Map<String, dynamic>?;
           final unread = extra?['unreadMessagesCount'] ?? 0;
 
-          if (currentSize(context) > ScreenSize.lTablet) {
-            return SizedBox.shrink();
-          } else {
-            return Chat(userIds: userIds, unreadMessagesCount: unread);
-          }
+          return Chat(userIds: userIds, unreadMessagesCount: unread);
+
+          // if (currentSize(context) > ScreenSize.lTablet) {
+          //   return SizedBox.shrink();
+          // } else {
+          //   return Chat(userIds: userIds, unreadMessagesCount: unread);
+          // }
         },
         routes: [
           GoRoute(
@@ -210,15 +217,19 @@ final router = GoRouter(
           final extra = state.extra as Map<String, dynamic>?;
           final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
 
-          if (currentSize(context) > ScreenSize.lTablet) {
-            return NoTransitionPage(
-              child: Channels(initialChannelId: channelId, initialTopicName: null),
-            );
-          } else {
-            return NoTransitionPage(
-              child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
-            );
-          }
+          return NoTransitionPage(
+            child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
+          );
+
+          // if (currentSize(context) > ScreenSize.lTablet) {
+          //   return NoTransitionPage(
+          //     child: Channels(initialChannelId: channelId, initialTopicName: null),
+          //   );
+          // } else {
+          //   return NoTransitionPage(
+          //     child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
+          //   );
+          // }
         },
       ),
       GoRoute(
@@ -233,15 +244,21 @@ final router = GoRouter(
           final extra = state.extra as Map<String, dynamic>?;
           final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
 
-          if (currentSize(context) > ScreenSize.lTablet) {
-            return Channels(initialChannelId: channelId, initialTopicName: topicName);
-          } else {
-            return ChannelChat(
-              channelId: channelId!,
-              topicName: topicName,
-              unreadMessagesCount: unreadMessagesCount,
-            );
-          }
+          return ChannelChat(
+            channelId: channelId!,
+            topicName: topicName,
+            unreadMessagesCount: unreadMessagesCount,
+          );
+
+          // if (currentSize(context) > ScreenSize.lTablet) {
+          //   return Channels(initialChannelId: channelId, initialTopicName: topicName);
+          // } else {
+          //   return ChannelChat(
+          //     channelId: channelId!,
+          //     topicName: topicName,
+          //     unreadMessagesCount: unreadMessagesCount,
+          //   );
+          // }
         },
         routes: [
           GoRoute(
@@ -337,6 +354,11 @@ final router = GoRouter(
       path: Routes.forceUpdate,
       name: Routes.forceUpdate,
       builder: (context, state) => const UpdateForce(),
+    ),
+    GoRoute(
+      path: Routes.talkerScreen,
+      name: Routes.talkerScreen,
+      builder: (context, state) => TalkerScreen(talker: getIt<Talker>()),
     ),
   ],
 );

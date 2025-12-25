@@ -22,7 +22,8 @@ class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
   final ScrollController controller;
   final void Function(int id)? onRead;
-  final void Function()? loadMore;
+  final Future<void> Function()? loadMore;
+  final VoidCallback? onReadAll;
   final bool showTopic;
   final bool isLoadingMore;
   final int myUserId;
@@ -40,6 +41,7 @@ class MessagesList extends StatefulWidget {
     required this.myUserId,
     this.onTapQuote,
     this.onTapEditMessage,
+    this.onReadAll,
   });
 
   @override
@@ -126,10 +128,11 @@ class _MessagesListState extends State<MessagesList> {
     return null;
   }
 
-  void _onScroll() {
-    if (_autoScrollController.offset >= _autoScrollController.position.maxScrollExtent && !widget.isLoadingMore) {
+  void _onScroll() async {
+    final scrollController = _autoScrollController;
+    if (scrollController.offset >= scrollController.position.maxScrollExtent && !widget.isLoadingMore) {
       if (widget.loadMore != null) {
-        widget.loadMore!();
+        await widget.loadMore!();
       }
     }
     if (!_showDayLabel) {
@@ -142,7 +145,7 @@ class _MessagesListState extends State<MessagesList> {
 
     final showScrollToBottomOffset = 200.0;
     final isNearBottom =
-        _autoScrollController.offset <= _autoScrollController.position.minScrollExtent + showScrollToBottomOffset;
+        scrollController.offset <= scrollController.position.minScrollExtent + showScrollToBottomOffset;
 
     if (_showScrollToBottom == isNearBottom) {
       setState(() {
@@ -157,6 +160,9 @@ class _MessagesListState extends State<MessagesList> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+    if (widget.onReadAll != null) {
+      widget.onReadAll!();
+    }
   }
 
   int _dayInt(int tsSec) {

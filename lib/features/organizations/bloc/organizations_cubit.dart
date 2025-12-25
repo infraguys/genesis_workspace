@@ -22,7 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'organizations_state.dart';
 
-@injectable
+@LazySingleton()
 class OrganizationsCubit extends Cubit<OrganizationsState> {
   OrganizationsCubit(
     this._watchOrganizationsUseCase,
@@ -88,6 +88,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
       final ServerSettingsEntity serverSettings = await _getOrganizationSettingsUseCase.call(
         baseUrl,
       );
+
       final OrganizationRequestEntity body = OrganizationRequestEntity(
         name: serverSettings.realmName,
         icon: serverSettings.realmIcon,
@@ -120,6 +121,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
     emit(state.copyWith(selectedOrganizationId: organization.id));
     try {
       await _organizationSwitcherService.selectOrganization(organization);
+      await _profileCubit.getOwnUser();
     } catch (e, st) {
       addError(e, st);
       emit(state.copyWith(selectedOrganizationId: previousSelection));

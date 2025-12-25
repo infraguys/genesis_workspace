@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/dio_adapters/stub_adapter.dart'
     if (dart.library.html) 'package:genesis_workspace/core/dio_adapters/web_adapter.dart'
     if (dart.library.io) 'package:genesis_workspace/core/dio_adapters/io_adapter.dart';
@@ -17,6 +18,9 @@ import 'package:genesis_workspace/services/token_storage/secure_token_storage.da
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talker_dio_logger/talker_dio_logger_interceptor.dart';
+import 'package:talker_dio_logger/talker_dio_logger_settings.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 @module
 abstract class CoreModule {
@@ -25,6 +29,9 @@ abstract class CoreModule {
 
   @lazySingleton
   AppDatabase appDatabase() => AppDatabase();
+
+  @lazySingleton
+  Talker talker() => TalkerFlutter.init(settings: TalkerSettings(useConsoleLogs: false));
 
   @preResolve
   @lazySingleton
@@ -67,7 +74,7 @@ class DioFactory {
     final Dio dio = Dio(
       BaseOptions(
         baseUrl: baseUrl.isEmpty ? 'http://placeholder.local' : '$baseUrl$basePath',
-        receiveTimeout: const Duration(seconds: 90),
+        receiveTimeout: const Duration(seconds: 10),
       ),
     );
 
@@ -81,7 +88,19 @@ class DioFactory {
       ..add(TokenInterceptor(tokenStorage))
       ..add(SessionIdInterceptor(tokenStorage))
       ..add(CsrfCookieInterceptor(tokenStorage))
-      ..add(EnumInterceptor());
+      ..add(EnumInterceptor())
+      ..add(
+        TalkerDioLogger(
+          talker: getIt<Talker>(),
+          settings: const TalkerDioLoggerSettings(
+            printRequestHeaders: false,
+            printResponseHeaders: false,
+            printResponseMessage: false,
+            printErrorData: false,
+            printRequestData: false,
+          ),
+        ),
+      );
 
     return dio;
   }

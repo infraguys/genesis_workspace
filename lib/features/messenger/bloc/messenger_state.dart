@@ -1,6 +1,8 @@
 part of 'messenger_cubit.dart';
 
 class MessengerState {
+  static const Object _notSpecified = Object();
+
   final UserEntity? selfUser;
   final List<FolderEntity> folders;
   final int selectedFolderIndex;
@@ -8,10 +10,10 @@ class MessengerState {
   final List<MessageEntity> unreadMessages;
   final List<ChatEntity> chats;
   final ChatEntity? selectedChat;
-  String? selectedTopic;
+  final String? selectedTopic;
   final List<PinnedChatEntity> pinnedChats;
-  Set<int>? filteredChatIds;
-  List<ChatEntity>? filteredChats;
+  final Set<int>? filteredChatIds;
+  final List<ChatEntity>? filteredChats;
   final bool foundOldestMessage;
   final List<SubscriptionEntity> subscribedChannels;
   final bool isFolderSaving;
@@ -61,11 +63,11 @@ class MessengerState {
     List<MessageEntity>? messages,
     List<MessageEntity>? unreadMessages,
     List<ChatEntity>? chats,
-    ChatEntity? selectedChat,
-    String? selectedTopic,
+    Object? selectedChat = _notSpecified,
+    Object? selectedTopic = _notSpecified,
     List<PinnedChatEntity>? pinnedChats,
-    Set<int>? filteredChatIds,
-    List<ChatEntity>? filteredChats,
+    Object? filteredChatIds = _notSpecified,
+    Object? filteredChats = _notSpecified,
     bool? foundOldestMessage,
     List<SubscriptionEntity>? subscribedChannels,
     bool? isFolderSaving,
@@ -79,11 +81,11 @@ class MessengerState {
       messages: messages ?? this.messages,
       unreadMessages: unreadMessages ?? this.unreadMessages,
       chats: chats ?? this.chats,
-      selectedChat: selectedChat ?? this.selectedChat,
-      selectedTopic: selectedTopic ?? this.selectedTopic,
+      selectedChat: identical(selectedChat, _notSpecified) ? this.selectedChat : selectedChat as ChatEntity?,
+      selectedTopic: identical(selectedTopic, _notSpecified) ? this.selectedTopic : selectedTopic as String?,
       pinnedChats: pinnedChats ?? this.pinnedChats,
-      filteredChatIds: filteredChatIds ?? this.filteredChatIds,
-      filteredChats: filteredChats ?? this.filteredChats,
+      filteredChatIds: identical(filteredChatIds, _notSpecified) ? this.filteredChatIds : filteredChatIds as Set<int>?,
+      filteredChats: identical(filteredChats, _notSpecified) ? this.filteredChats : filteredChats as List<ChatEntity>?,
       foundOldestMessage: foundOldestMessage ?? this.foundOldestMessage,
       subscribedChannels: subscribedChannels ?? this.subscribedChannels,
       isFolderSaving: isFolderSaving ?? this.isFolderSaving,

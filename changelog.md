@@ -1,5 +1,29 @@
 # Changelog
 
+# 1.6.3
+- Add progress indicator for info panel
+- Fixed overflowed channel name
+- Added users presences in info panel
+- Added loading messages after losing connection
+- Added logs file
+
+# 1.6.2
+- Added refresh button on updates screen
+- Refactored get messages after lost connection
+- Added calendar and mail webviews for android, ios, macos, windows
+- Added copy message functionality
+- Added read all messages buttons for channels and topics
+- Improved folders functions
+
+# 1.6.1
+- Added double-tap hotkey on message
+- Added message readers functionality
+- UI fixes (unread badges, lazy loading messages etc.)
+- Fixed hotkeys for linux
+- Set meeting url for organization from server settings
+- Added esc hotkey support for chat unselect
+- Added notifications for desktop platforms (linux, macos, windows)
+
 # 1.6.0
 - Fixed update feature on linux
 - Added profile panel

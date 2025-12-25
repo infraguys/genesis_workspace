@@ -263,7 +263,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
   Future<void> getUnreadMessages() async {
     final organizationId = AppConstants.selectedOrganizationId;
     final connection = _realTimeService.activeConnections[organizationId];
-    // if (connection?.isActive ?? false) return;
+    if (connection?.isActive ?? false) return;
     try {
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
@@ -287,8 +287,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
 
   Future<void> loadMoreMessages() async {
     if (!state.isAllMessagesLoaded) {
-      state.isLoadingMore = true;
-      emit(state.copyWith(isLoadingMore: state.isLoadingMore));
+      emit(state.copyWith(isLoadingMore: true));
       try {
         final operand = state.chatIds!.toList();
         final body = MessagesRequestEntity(
@@ -300,18 +299,17 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
         );
         final response = await _getMessagesUseCase.call(body);
         state.lastMessageId = response.messages.first.id;
-        state.isAllMessagesLoaded = response.foundOldest;
-        state.messages = [...response.messages, ...state.messages];
-        state.isLoadingMore = false;
+        final messages = [...response.messages, ...state.messages];
         emit(
           state.copyWith(
-            messages: state.messages,
-            isLoadingMore: state.isLoadingMore,
-            isAllMessagesLoaded: state.isAllMessagesLoaded,
+            messages: messages,
+            isAllMessagesLoaded: response.foundOldest,
           ),
         );
       } catch (e) {
         inspect(e);
+      } finally {
+        emit(state.copyWith(isLoadingMore: false));
       }
     }
   }
@@ -387,8 +385,8 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
       isThisChatMessage = unorderedEquals(chatIds.toList(), messageRecipients);
     }
     if (isThisChatMessage) {
-      state.messages = [...state.messages, event.message];
-      emit(state.copyWith(messages: state.messages));
+      final updatedMessages = [...state.messages, event.message];
+      emit(state.copyWith(messages: updatedMessages));
     }
   }
 

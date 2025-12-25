@@ -1,11 +1,66 @@
+import 'dart:convert';
+
+import 'package:collection/collection.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:injectable/injectable.dart';
+import 'package:window_manager/window_manager.dart';
+
+class NotificationPayload {
+  final MessageEntity message;
+  final int organizationId;
+
+  const NotificationPayload({
+    required this.message,
+    required this.organizationId,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'message': message.toJson(),
+      'organizationId': organizationId,
+    };
+  }
+
+  String toJsonString() {
+    return jsonEncode(toJson());
+  }
+
+  factory NotificationPayload.fromJson(Map<String, dynamic> json) {
+    return NotificationPayload(
+      message: MessageEntity.fromJson(
+        json['message'] as Map<String, dynamic>,
+      ),
+      organizationId: json['organizationId'] as int,
+    );
+  }
+
+  factory NotificationPayload.fromJsonString(String source) {
+    final Map<String, dynamic> decoded = jsonDecode(source) as Map<String, dynamic>;
+
+    return NotificationPayload.fromJson(decoded);
+  }
+}
 
 @injectable
 class LocalNotificationsService {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
+  final MessengerCubit _messengerCubit;
+  final OrganizationsCubit _organizationsCubit;
 
-  LocalNotificationsService(this._flutterLocalNotificationsPlugin);
+  LocalNotificationsService(this._flutterLocalNotificationsPlugin, this._messengerCubit, this._organizationsCubit);
+
+  void notificationTap(NotificationResponse notificationResponse) async {
+    await _handleNotificationResponse(notificationResponse);
+  }
+
+  void notificationTapBackground(NotificationResponse notificationResponse) async {
+    await _handleNotificationResponse(notificationResponse);
+  }
 
   Future<void> init() async {
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings(
@@ -14,11 +69,11 @@ class LocalNotificationsService {
     final DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings();
     final LinuxInitializationSettings initializationSettingsLinux = LinuxInitializationSettings(
       defaultActionName: 'Open notification',
+      defaultIcon: AssetsLinuxIcon('icons/app_icon.png'),
     );
     final WindowsInitializationSettings initializationSettingsWindows = WindowsInitializationSettings(
       appName: 'Workspace',
       appUserModelId: 'Com.Genesis.Workspace',
-      // Search online for GUID generators to make your own
       guid: '4c1dc691-5ece-47c8-ba3a-0b3a7684b1cc',
     );
     final InitializationSettings initializationSettings = InitializationSettings(
@@ -30,7 +85,8 @@ class LocalNotificationsService {
     );
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (_) {},
+      onDidReceiveNotificationResponse: notificationTap,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     await _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
@@ -41,7 +97,10 @@ class LocalNotificationsService {
         );
   }
 
-  Future<void> showNotification({required int messageId, required String title, required String body}) async {
+  Future<void> showNotification({
+    required MessageEntity message,
+    required int organizationId,
+  }) async {
     NotificationDetails notificationDetails = NotificationDetails(
       linux: LinuxNotificationDetails(
         timeout: LinuxNotificationTimeout.fromDuration(Duration(seconds: 5)),
@@ -52,6 +111,55 @@ class LocalNotificationsService {
         duration: WindowsNotificationDuration.short,
       ),
     );
-    await _flutterLocalNotificationsPlugin.show(messageId, title, body, notificationDetails);
+    final payload = NotificationPayload(message: message, organizationId: organizationId);
+    await _flutterLocalNotificationsPlugin.show(
+      message.id,
+      message.displayTitle,
+      "New message",
+      notificationDetails,
+      payload: payload.toJsonString(),
+    );
+  }
+
+  void cancelNotification(int id) {
+    _flutterLocalNotificationsPlugin.cancel(id);
+  }
+
+  Future<void> _handleNotificationResponse(NotificationResponse notificationResponse) async {
+    await _focusAppOnDesktop();
+    final String? payloadString = notificationResponse.payload;
+    if (payloadString == null) return;
+    final NotificationPayload payload = NotificationPayload.fromJsonString(payloadString);
+    await _selectChatFromPayload(payload);
+  }
+
+  Future<void> _selectChatFromPayload(NotificationPayload payload) async {
+    final int? organizationId = AppConstants.selectedOrganizationId;
+    if (organizationId != payload.organizationId) {
+      final organization = _organizationsCubit.state.organizations.firstWhereOrNull(
+        (element) => element.id == payload.organizationId,
+      );
+      if (organization != null) {
+        await _organizationsCubit.selectOrganization(organization);
+      }
+    }
+    final chatId = payload.message.recipientId;
+    final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == chatId);
+    if (chat != null) {
+      _messengerCubit.selectChat(chat, selectedTopic: payload.message.subject);
+    } else {
+      _messengerCubit.openChatFromMessage(payload.message);
+    }
+  }
+
+  Future<void> _focusAppOnDesktop() async {
+    if (!platformInfo.isDesktop) return;
+    try {
+      if (await windowManager.isMinimized()) {
+        await windowManager.restore();
+      }
+      await windowManager.show();
+      await windowManager.focus();
+    } catch (_) {}
   }
 }

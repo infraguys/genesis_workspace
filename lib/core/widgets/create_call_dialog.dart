@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateCallDialog extends StatefulWidget {
   final bool startWithVideoMuted;
-  const CreateCallDialog({super.key, required this.startWithVideoMuted});
+  final String meetingBaseUrl;
+  const CreateCallDialog({
+    super.key,
+    required this.startWithVideoMuted,
+    required this.meetingBaseUrl,
+  });
 
   @override
   State<CreateCallDialog> createState() => _CreateCallDialogState();
@@ -55,7 +59,7 @@ class _CreateCallDialogState extends State<CreateCallDialog> {
             if (!(formKey.currentState?.validate() ?? false)) return;
             final sanitizedName = callNameController.text.trim().replaceAll(RegExp(r'\s+'), '-');
             final link =
-                '${AppConstants.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
+                '${widget.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
             context.pop(link);
           },
         ),
@@ -70,7 +74,7 @@ class _CreateCallDialogState extends State<CreateCallDialog> {
             if (!(formKey.currentState?.validate() ?? false)) return;
             final sanitizedName = callNameController.text.trim().replaceAll(RegExp(r'\s+'), '-');
             final link =
-                '${AppConstants.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
+                '${widget.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
             context.pop(link);
           },
           child: Text(translations.create),

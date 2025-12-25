@@ -95,7 +95,6 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
 
                                       await Future.wait([
                                         organizationsCubit.selectOrganization(organization),
-                                        profileCubit.getOwnUser(),
                                       ]);
                                     },
                                     onDelete: () async {

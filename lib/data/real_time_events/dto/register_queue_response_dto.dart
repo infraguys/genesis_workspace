@@ -11,19 +11,26 @@ class RegisterQueueResponseDto {
   final String result;
   @JsonKey(name: "last_event_id")
   final int lastEventId;
+  @JsonKey(name: "realm_jitsi_server_url")
+  final String? realmJitsiServerUrl;
 
   RegisterQueueResponseDto({
     required this.queueId,
     required this.msg,
     required this.result,
     required this.lastEventId,
+    this.realmJitsiServerUrl,
   });
 
-  factory RegisterQueueResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$RegisterQueueResponseDtoFromJson(json);
+  factory RegisterQueueResponseDto.fromJson(Map<String, dynamic> json) => _$RegisterQueueResponseDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$RegisterQueueResponseDtoToJson(this);
 
-  RegisterQueueEntity toEntity() =>
-      RegisterQueueEntity(queueId: queueId, msg: msg, result: result, lastEventId: lastEventId);
+  RegisterQueueEntity toEntity() => RegisterQueueEntity(
+    queueId: queueId,
+    msg: msg,
+    result: result,
+    lastEventId: lastEventId,
+    realmJitsiServerUrl: realmJitsiServerUrl,
+  );
 }

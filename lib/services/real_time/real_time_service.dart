@@ -70,7 +70,13 @@ class RealTimeService {
   Future<RegisterQueueEntity> registerQueue() async {
     try {
       final RegisterQueueEntity response = await _registerQueueUseCase.call(
-        RegisterQueueRequestBodyEntity(eventTypes: [EventTypes.message, EventTypes.realm_user]),
+        RegisterQueueRequestBodyEntity(
+          eventTypes: [
+            EventTypes.message,
+            EventTypes.subscription,
+            EventTypes.realm_user,
+          ],
+        ),
       );
       lastEventId = response.lastEventId;
       queueId = response.queueId;

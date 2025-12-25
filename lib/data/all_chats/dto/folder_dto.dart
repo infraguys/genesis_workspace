@@ -81,5 +81,6 @@ class FolderDto {
     backgroundColor: Color(backgroundColorValue),
     unreadMessages: unreadMessages,
     systemType: systemType,
+    folderItems: {},
   );
 }
