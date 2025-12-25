@@ -86,7 +86,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<UpdateMessageEventEntity> _updateMessageEventsSubscription;
 
   String _searchQuery = '';
-  int _lastMessageId = 0;
+  int _oldestMessageId = 0;
+  int _lastMessageId = -1;
   int _loadingTimes = 0;
   bool _prioritizePersonalUnread = false;
   bool _prioritizeUnmutedUnreadChannels = false;
@@ -200,19 +201,22 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       final channelsResponse = await _getSubscribedChannelsUseCase.call(false);
-      _lastMessageId = response.messages.first.id;
-      final messages = response.messages;
-      final foundOldest = response.foundOldest;
-      emit(
-        state.copyWith(
-          messages: messages,
-          foundOldestMessage: foundOldest,
-          subscribedChannels: channelsResponse,
-        ),
-      );
-      _createChatsFromMessages(messages);
-      await getPinnedChats();
-      _sortChats();
+      if (response.messages.isNotEmpty) {
+        _oldestMessageId = response.messages.first.id;
+        _lastMessageId = response.messages.last.id;
+        final messages = response.messages;
+        final foundOldest = response.foundOldest;
+        emit(
+          state.copyWith(
+            messages: messages,
+            foundOldestMessage: foundOldest,
+            subscribedChannels: channelsResponse,
+          ),
+        );
+        _createChatsFromMessages(messages);
+        await getPinnedChats();
+        _sortChats();
+      }
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -224,13 +228,13 @@ class MessengerCubit extends Cubit<MessengerState> {
     if (!state.foundOldestMessage && _loadingTimes < 5) {
       try {
         final body = MessagesRequestEntity(
-          anchor: MessageAnchor.id(_lastMessageId),
+          anchor: MessageAnchor.id(_oldestMessageId),
           numBefore: 5000,
           numAfter: 0,
           includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
-        _lastMessageId = response.messages.first.id;
+        _oldestMessageId = response.messages.first.id;
         final foundOldest = response.foundOldest;
         final messages = [...state.messages];
         messages.addAll(response.messages);
@@ -257,6 +261,29 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
+  Future<void> getMessagesAfterLoseConnection() async {
+    final organizationId = AppConstants.selectedOrganizationId;
+    final connection = _realTimeService.activeConnections[organizationId];
+    if (connection?.isActive ?? false) return;
+    try {
+      final messagesBody = MessagesRequestEntity(
+        anchor: MessageAnchor.id(_lastMessageId),
+        numBefore: 0,
+        numAfter: 5000,
+        includeAnchor: false,
+      );
+      final response = await _getMessagesUseCase.call(messagesBody);
+      final updatedMessages = {...state.messages, ...response.messages}.toList();
+      emit(state.copyWith(messages: updatedMessages));
+      _createChatsFromMessages(updatedMessages);
+      _sortChats();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
   Future<void> getUnreadMessages() async {
     try {
       final messagesBody = MessagesRequestEntity(
@@ -278,6 +305,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       updatedMessages.addAll(response.messages);
       emit(state.copyWith(unreadMessages: updatedMessages));
       _createChatsFromMessages(updatedMessages);
+      _sortChats();
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -286,7 +314,21 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> getPinnedChats() async {
-    await _loadPinnedForCurrentFolder();
+    if (state.folders.isEmpty || state.selectedFolderIndex >= state.folders.length) {
+      emit(state.copyWith(pinnedChats: []));
+      return;
+    }
+
+    final folder = state.folders[state.selectedFolderIndex];
+
+    try {
+      final pins = await _getPinnedChatsUseCase.call(folder.uuid);
+      emit(state.copyWith(pinnedChats: pins));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
   }
 
   Future<void> muteChannel(ChatEntity chat) async {
@@ -401,7 +443,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       }
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
       await _loadFoldersMembers();
-      await _loadPinnedForCurrentFolder();
+      await getPinnedChats();
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -487,24 +529,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     _filterChatsByFolder();
     await getPinnedChats();
     _sortChats();
-  }
-
-  Future<void> _loadPinnedForCurrentFolder() async {
-    if (state.folders.isEmpty || state.selectedFolderIndex >= state.folders.length) {
-      emit(state.copyWith(pinnedChats: []));
-      return;
-    }
-
-    final folder = state.folders[state.selectedFolderIndex];
-
-    try {
-      final pins = await _getPinnedChatsUseCase.call(folder.uuid);
-      emit(state.copyWith(pinnedChats: pins));
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
-      }
-    }
   }
 
   Future<void> setFoldersForChat(List<String> foldersIds, int chatId) async {
@@ -732,6 +756,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
     final message = event.message.copyWith(flags: event.flags);
+    _lastMessageId = message.id;
 
     final chatId = message.recipientId;
     final isMyMessage = message.isMyMessage(state.selfUser?.userId);
@@ -952,6 +977,9 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
 
     final prevMessage = chatMessages[chatMessages.length - 1];
+    if (_lastMessageId == messageId) {
+      _lastMessageId = prevMessage.id;
+    }
 
     final indexOfChat = state.chats.indexOf(updatedChat);
     updatedChat.unreadMessages.remove(messageId);
