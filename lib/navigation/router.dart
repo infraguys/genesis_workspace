@@ -10,7 +10,6 @@ import 'package:genesis_workspace/features/authentication/presentation/bloc/auth
 import 'package:genesis_workspace/features/authentication/presentation/view/paste_code_view.dart';
 import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
-import 'package:genesis_workspace/features/channels/channels.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/lk/lk.dart';
 import 'package:genesis_workspace/features/logs/logs.dart';
@@ -185,11 +184,13 @@ final router = GoRouter(
           final extra = state.extra as Map<String, dynamic>?;
           final unread = extra?['unreadMessagesCount'] ?? 0;
 
-          if (currentSize(context) > ScreenSize.lTablet) {
-            return SizedBox.shrink();
-          } else {
-            return Chat(userIds: userIds, unreadMessagesCount: unread);
-          }
+          return Chat(userIds: userIds, unreadMessagesCount: unread);
+
+          // if (currentSize(context) > ScreenSize.lTablet) {
+          //   return SizedBox.shrink();
+          // } else {
+          //   return Chat(userIds: userIds, unreadMessagesCount: unread);
+          // }
         },
         routes: [
           GoRoute(
@@ -212,15 +213,19 @@ final router = GoRouter(
           final extra = state.extra as Map<String, dynamic>?;
           final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
 
-          if (currentSize(context) > ScreenSize.lTablet) {
-            return NoTransitionPage(
-              child: Channels(initialChannelId: channelId, initialTopicName: null),
-            );
-          } else {
-            return NoTransitionPage(
-              child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
-            );
-          }
+          return NoTransitionPage(
+            child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
+          );
+
+          // if (currentSize(context) > ScreenSize.lTablet) {
+          //   return NoTransitionPage(
+          //     child: Channels(initialChannelId: channelId, initialTopicName: null),
+          //   );
+          // } else {
+          //   return NoTransitionPage(
+          //     child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
+          //   );
+          // }
         },
       ),
       GoRoute(
@@ -235,15 +240,21 @@ final router = GoRouter(
           final extra = state.extra as Map<String, dynamic>?;
           final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
 
-          if (currentSize(context) > ScreenSize.lTablet) {
-            return Channels(initialChannelId: channelId, initialTopicName: topicName);
-          } else {
-            return ChannelChat(
-              channelId: channelId!,
-              topicName: topicName,
-              unreadMessagesCount: unreadMessagesCount,
-            );
-          }
+          return ChannelChat(
+            channelId: channelId!,
+            topicName: topicName,
+            unreadMessagesCount: unreadMessagesCount,
+          );
+
+          // if (currentSize(context) > ScreenSize.lTablet) {
+          //   return Channels(initialChannelId: channelId, initialTopicName: topicName);
+          // } else {
+          //   return ChannelChat(
+          //     channelId: channelId!,
+          //     topicName: topicName,
+          //     unreadMessagesCount: unreadMessagesCount,
+          //   );
+          // }
         },
         routes: [
           GoRoute(
