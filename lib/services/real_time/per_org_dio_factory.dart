@@ -1,7 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/dio_interceptors/real_time/real_time_interceptors.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
+import 'package:talker_dio_logger/talker_dio_logger_interceptor.dart';
+import 'package:talker_dio_logger/talker_dio_logger_settings.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 enum BasePathMode { apiV1, json }
 
@@ -38,6 +42,16 @@ class PerOrganizationDioFactory {
       OrgTokenInterceptor(tokenStorage: tokenStorage, baseUrl: originBaseUrl),
       OrgSessionIdInterceptor(tokenStorage: tokenStorage, baseUrl: originBaseUrl),
       OrgCsrfCookieInterceptor(tokenStorage: tokenStorage, baseUrl: originBaseUrl),
+      TalkerDioLogger(
+        talker: getIt<Talker>(),
+        settings: const TalkerDioLoggerSettings(
+          printRequestHeaders: false,
+          printResponseHeaders: false,
+          printResponseMessage: false,
+          printErrorData: false,
+          printRequestData: false,
+        ),
+      ),
     ]);
 
     // Для Web: с кукoй через браузерный адаптер обычно требуется withCredentials=true.

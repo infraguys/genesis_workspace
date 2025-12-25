@@ -306,6 +306,14 @@ class ProfileSettingsView extends StatelessWidget {
             onTap: onOpenChatSorting,
           ),
           ListTile(
+            leading: Icon(Icons.featured_play_list),
+            title: Text(
+              "Logs",
+              style: theme.textTheme.bodyMedium,
+            ),
+            onTap: () => context.pushNamed(Routes.talkerScreen),
+          ),
+          ListTile(
             leading: Assets.icons.logout.svg(
               colorFilter: ColorFilter.mode(
                 AppColors.noticeBase,

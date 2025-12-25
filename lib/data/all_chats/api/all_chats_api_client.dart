@@ -54,4 +54,7 @@ abstract class AllChatsApiClient {
     @Path('folder_uuid') String folderUuid,
     @Path('item_uuid') String itemUuid,
   );
+
+  @GET('folder_items/')
+  Future<List<FolderItemDto>> getAllFoldersItems();
 }

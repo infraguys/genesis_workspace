@@ -7,7 +7,7 @@ final class _Initial extends ChannelMembersInfoState {}
 final class ChannelMembersInfoLoadingState extends ChannelMembersInfoState {}
 
 final class ChannelMembersLoadedState extends ChannelMembersInfoState {
-  final List<UserEntity> users;
+  final List<DmUserEntity> users;
 
   ChannelMembersLoadedState(this.users);
 }

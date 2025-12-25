@@ -17,6 +17,7 @@ import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/add_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_case.dart';
+import 'package:genesis_workspace/domain/all_chats/usecases/get_all_folders_items_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
@@ -57,6 +58,7 @@ part 'messenger_state.dart';
 class MessengerCubit extends Cubit<MessengerState> {
   final AddFolderUseCase _addFolderUseCase;
   final GetFoldersUseCase _getFoldersUseCase;
+  final GetAllFoldersItemsUseCase _getAllFoldersItemsUseCase;
   final UpdateFolderUseCase _updateFolderUseCase;
   final DeleteFolderUseCase _deleteFolderUseCase;
   final GetMembersForFolderUseCase _getMembersForFolderUseCase;
@@ -110,6 +112,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._updateSubscriptionSettingsUseCase,
     this._markStreamAsReadUseCase,
     this._markTopicAsReadUseCase,
+    this._getAllFoldersItemsUseCase,
   ) : super(
         MessengerState.initial,
       ) {
@@ -251,6 +254,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         if (kDebugMode) {
           inspect(e);
         }
+        emit(
+          state.copyWith(foundOldestMessage: true),
+        );
       }
     }
   }
@@ -425,7 +431,8 @@ class MessengerCubit extends Cubit<MessengerState> {
 
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
       List<FolderEntity> initialFolders = [...folders];
-      if (folders.isEmpty) {
+      final bool hasAllFolder = folders.any((folder) => folder.systemType == FolderSystemType.all);
+      if (!hasAllFolder) {
         final allFolderBody = CreateFolderEntity(
           title: "All",
           backgroundColor: AppColors.primary,
@@ -445,13 +452,18 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> _loadFoldersMembers() async {
-    final futures = state.folders.map((folder) async {
-      final folderItems = await _getMembersForFolderUseCase.call(folder.uuid);
-      final updatedItems = {...folder.folderItems, ...folderItems.chatIds};
-      return folder.copyWith(folderItems: updatedItems);
+    final items = await _getAllFoldersItemsUseCase.call();
+    final Map<String, Set<int>> itemsByFolder = {};
+    for (final item in items) {
+      itemsByFolder.putIfAbsent(item.folderUuid, () => <int>{}).add(item.chatId);
+    }
+
+    final updatedFolders = state.folders.map((folder) {
+      final folderItems = itemsByFolder[folder.uuid];
+      if (folderItems == null) return folder;
+      return folder.copyWith(folderItems: {...folder.folderItems, ...folderItems});
     }).toList();
 
-    final updatedFolders = await Future.wait(futures);
     emit(state.copyWith(folders: updatedFolders));
   }
 

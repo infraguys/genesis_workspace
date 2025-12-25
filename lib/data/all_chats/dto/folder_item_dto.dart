@@ -1,4 +1,4 @@
-import 'package:genesis_workspace/domain/all_chats/entities/folder_item.dart';
+import 'package:genesis_workspace/domain/all_chats/entities/folder_item_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'folder_item_dto.g.dart';
@@ -32,7 +32,7 @@ class FolderItemDto {
 
   factory FolderItemDto.fromJson(Map<String, dynamic> json) => _$FolderItemDtoFromJson(json);
 
-  FolderItem toEntity() => FolderItem(
+  FolderItemEntity toEntity() => FolderItemEntity(
     uuid: uuid,
     folderUuid: folderUuid,
     chatId: chatId,

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/in_development_widget.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
@@ -21,6 +22,7 @@ import 'package:genesis_workspace/features/profile/view/profile_personal_info_pa
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:go_router/go_router.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorMessengerKey = GlobalKey<NavigatorState>(debugLabel: 'shellMessenger');
@@ -42,6 +44,7 @@ class Routes {
   static const String calls = '/calls';
   static const String profile = '/profile';
   static const String profileInfo = '/profile-info';
+  static const String talkerScreen = '/talker-screen';
 
   static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
@@ -68,6 +71,7 @@ class Routes {
 final router = GoRouter(
   initialLocation: Routes.splashScreen,
   navigatorKey: _rootNavigatorKey,
+  observers: [TalkerRouteObserver(getIt<Talker>())],
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
@@ -350,6 +354,11 @@ final router = GoRouter(
       path: Routes.forceUpdate,
       name: Routes.forceUpdate,
       builder: (context, state) => const UpdateForce(),
+    ),
+    GoRoute(
+      path: Routes.talkerScreen,
+      name: Routes.talkerScreen,
+      builder: (context, state) => TalkerScreen(talker: getIt<Talker>()),
     ),
   ],
 );
