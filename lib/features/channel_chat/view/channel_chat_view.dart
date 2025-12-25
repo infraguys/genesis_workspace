@@ -527,20 +527,18 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                       UnselectChatIntent: UnselectChatAction(),
                                       EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
                                         onInvoke: (intent) {
-                                          if (messageController.text.isEmpty) {
-                                            final lastMessageIndex = state.messages.lastIndexWhere(
-                                              (message) => message.senderId == state.myUserId,
-                                            );
-                                            if (lastMessageIndex == -1) return null;
+                                          final lastMessageIndex = state.messages.lastIndexWhere(
+                                            (message) => message.senderId == state.myUserId,
+                                          );
+                                          if (lastMessageIndex == -1) return null;
 
-                                            final lastMessage = state.messages[lastMessageIndex];
-                                            onTapEditMessage(
-                                              UpdateMessageRequestEntity(
-                                                messageId: lastMessage.id,
-                                                content: lastMessage.content,
-                                              ),
-                                            );
-                                          }
+                                          final lastMessage = state.messages[lastMessageIndex];
+                                          onTapEditMessage(
+                                            UpdateMessageRequestEntity(
+                                              messageId: lastMessage.id,
+                                              content: lastMessage.content,
+                                            ),
+                                          );
                                           return null;
                                         },
                                       ),
