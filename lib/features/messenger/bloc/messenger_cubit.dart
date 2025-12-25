@@ -198,20 +198,22 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       final channelsResponse = await _getSubscribedChannelsUseCase.call(false);
-      _oldestMessageId = response.messages.first.id;
-      _lastMessageId = response.messages.last.id;
-      final messages = response.messages;
-      final foundOldest = response.foundOldest;
-      emit(
-        state.copyWith(
-          messages: messages,
-          foundOldestMessage: foundOldest,
-          subscribedChannels: channelsResponse,
-        ),
-      );
-      _createChatsFromMessages(messages);
-      await getPinnedChats();
-      _sortChats();
+      if (response.messages.isNotEmpty) {
+        _oldestMessageId = response.messages.first.id;
+        _lastMessageId = response.messages.last.id;
+        final messages = response.messages;
+        final foundOldest = response.foundOldest;
+        emit(
+          state.copyWith(
+            messages: messages,
+            foundOldestMessage: foundOldest,
+            subscribedChannels: channelsResponse,
+          ),
+        );
+        _createChatsFromMessages(messages);
+        await getPinnedChats();
+        _sortChats();
+      }
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -963,7 +965,9 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
 
     final prevMessage = chatMessages[chatMessages.length - 1];
-    _lastMessageId = prevMessage.id;
+    if (_lastMessageId == messageId) {
+      _lastMessageId = prevMessage.id;
+    }
 
     final indexOfChat = state.chats.indexOf(updatedChat);
     updatedChat.unreadMessages.remove(messageId);
