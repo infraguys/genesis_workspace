@@ -79,6 +79,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
     messageController
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
+    focusOnInit();
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(

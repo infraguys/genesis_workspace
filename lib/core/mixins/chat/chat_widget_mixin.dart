@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop_types.dart';
 import 'package:genesis_workspace/core/widgets/create_call_dialog.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -60,6 +61,12 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   bool isDropOver = false;
   final GlobalKey dropAreaKey = GlobalKey();
   RemoveDropHandlers? removeWebDnD;
+
+  void focusOnInit() {
+    if (platformInfo.isDesktop) {
+      messageInputFocusNode.requestFocus();
+    }
+  }
 
   @mustCallSuper
   void initChatInputEditMixin() {

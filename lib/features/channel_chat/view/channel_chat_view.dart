@@ -83,6 +83,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     messageController
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
+    focusOnInit();
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
