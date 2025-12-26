@@ -447,6 +447,11 @@ class MessengerCubit extends Cubit<MessengerState> {
         final allFolder = await _addFolderUseCase.call(allFolderBody);
         initialFolders = [allFolder, ...folders];
       }
+      if (initialFolders[0].systemType != .all) {
+        final allFolder = initialFolders.firstWhere((folder) => folder.systemType == .all);
+        initialFolders.remove(allFolder);
+        initialFolders = [allFolder ,...initialFolders];
+      }
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
       await _loadFoldersMembers();
       await getPinnedChats();
