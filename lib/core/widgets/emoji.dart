@@ -61,7 +61,7 @@ class UnicodeEmojiWidget extends StatelessWidget {
         final double notoColorEmojiTextSize = size * (14.5 / 17);
         return Text(
           textScaler: textScaler,
-          style: TextStyle(fontFamily: FontFamily.notoColorEmoji, fontSize: notoColorEmojiTextSize),
+          style: TextStyle(fontSize: notoColorEmojiTextSize),
           strutStyle: StrutStyle(fontSize: notoColorEmojiTextSize, forceStrutHeight: true),
           unicode,
         );
