@@ -196,6 +196,7 @@ class _MessagesListState extends State<MessagesList> {
 
                   final messageDate = DateTime.fromMillisecondsSinceEpoch(currentMessage.timestamp * 1000);
                   final isNewDay = _dayInt(currentMessage.timestamp) != _dayInt(nextMessage.timestamp);
+                  final unreadCount = _reversed.where((message) => message.isUnread).length;
                   //   final isNewUser = message.senderId != nextMessage.senderId;
 
                   final bool isNewTopic = currentMessage.subject != nextMessage.subject;
@@ -211,7 +212,7 @@ class _MessagesListState extends State<MessagesList> {
                       spacing: 8.0,
                       children: [
                         if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
-                          UnreadMessagesMarker(unreadCount: _reversed.where((message) => message.isUnread).length),
+                          UnreadMessagesMarker(unreadCount: unreadCount),
                         if (isNewTopic) TopicSeparator(topic: currentMessage.subject),
                         if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
                       ],
