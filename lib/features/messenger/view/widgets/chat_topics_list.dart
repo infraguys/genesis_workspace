@@ -3,7 +3,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
-import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
+import 'package:genesis_workspace/features/messenger/view/widgets/message_preview.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';

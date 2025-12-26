@@ -3,7 +3,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
-import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
+import 'package:genesis_workspace/features/messenger/view/widgets/message_preview.dart';
 
 class ChatReorderItem extends StatelessWidget {
   final ChatEntity chat;

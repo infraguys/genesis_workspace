@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
-import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
-import 'package:genesis_workspace/features/messenger/view/chat_item.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/widgets/chat_item.dart';
 
 class MessengerChatListView extends StatelessWidget {
   const MessengerChatListView({

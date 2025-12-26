@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
-import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
+import 'package:genesis_workspace/features/messenger/view/widgets/folder_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 

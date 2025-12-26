@@ -23,7 +23,7 @@ class MessagesRepositoryImpl implements MessagesRepository {
   final usersDataSource = getIt<UsersRemoteDataSource>();
 
   @override
-  Future<MessagesResponseEntity> getMessages(MessagesRequestEntity body) async {
+  Future<MessagesResponseEntity> getMessages(MessagesRequestEntity body, {bool mockError = false}) async {
     try {
       final dto = await dataSource.getMessages(body.toDto());
       return dto.toEntity();

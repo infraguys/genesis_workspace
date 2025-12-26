@@ -10,7 +10,7 @@ import 'package:genesis_workspace/features/download_files/bloc/download_files_cu
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/logs/bloc/logs_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';

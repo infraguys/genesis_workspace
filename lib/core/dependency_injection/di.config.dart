@@ -231,8 +231,10 @@ import 'package:genesis_workspace/features/messages/bloc/message_readers_cubit.d
     as _i311;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
-import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart'
-    as _i398;
+import 'package:genesis_workspace/features/messenger/bloc/chats_list/chats_list_cubit.dart'
+    as _i999;
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart'
+    as _i772;
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart'
     as _i49;
 import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart'
@@ -308,7 +310,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i397.GetVersionConfigUseCase(),
     );
     gh.factory<_i274.CallCubit>(() => _i274.CallCubit());
-    gh.factory<_i398.InfoPanelCubit>(() => _i398.InfoPanelCubit());
+    gh.factory<_i772.InfoPanelCubit>(() => _i772.InfoPanelCubit());
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
     );
@@ -846,6 +848,19 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1012.PinChatUseCase>(),
         gh<_i631.UnpinChatUseCase>(),
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+      ),
+    );
+    gh.factory<_i999.ChatsListCubit>(
+      () => _i999.ChatsListCubit(
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i699.GetTopicsUseCase>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i1012.PinChatUseCase>(),
+        gh<_i631.UnpinChatUseCase>(),
+        gh<_i126.GetPinnedChatsUseCase>(),
+        gh<_i766.ProfileCubit>(),
+        gh<_i300.MarkStreamAsReadUseCase>(),
+        gh<_i657.MarkTopicAsReadUseCase>(),
       ),
     );
     gh.lazySingleton<_i49.MessengerCubit>(

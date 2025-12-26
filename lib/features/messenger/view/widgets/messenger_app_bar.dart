@@ -10,7 +10,7 @@ import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
-import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
+import 'package:genesis_workspace/features/messenger/view/widgets/folder_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -274,18 +274,18 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                             padding: EdgeInsets.zero,
                             onPressed: () async {
                               await showDialog(
-                              context: context,
-                              builder: (BuildContext dialogContext) {
-                                return BlocProvider(
-                                  create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                                  child: CreateGroupChatDialog(
-                                    onCreate: (membersIds) {
-                                      context.pop();
-                                      openChat(context, {...membersIds, selfUserId});
-                                    },
-                                  ),
-                                );
-                              },
+                                context: context,
+                                builder: (BuildContext dialogContext) {
+                                  return BlocProvider(
+                                    create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
+                                    child: CreateGroupChatDialog(
+                                      onCreate: (membersIds) {
+                                        context.pop();
+                                        openChat(context, {...membersIds, selfUserId});
+                                      },
+                                    ),
+                                  );
+                                },
                               );
                             },
                             icon: Assets.icons.newWindow.svg(),

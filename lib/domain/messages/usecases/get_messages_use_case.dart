@@ -9,7 +9,7 @@ class GetMessagesUseCase {
 
   GetMessagesUseCase(this._repository);
 
-  Future<MessagesResponseEntity> call(MessagesRequestEntity body) async {
+  Future<MessagesResponseEntity> call(MessagesRequestEntity body, {bool mockError = false}) async {
     try {
       return await _repository.getMessages(body);
     } catch (e) {

@@ -15,7 +15,7 @@ import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
-import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
+import 'package:genesis_workspace/features/messenger/view/widgets/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';

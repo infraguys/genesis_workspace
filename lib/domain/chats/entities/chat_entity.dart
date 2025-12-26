@@ -89,7 +89,7 @@ class ChatEntity extends Equatable {
       lastMessagePreview: message.content,
       lastMessageDate: message.messageDate,
       unreadMessages: message.isUnread ? {message.id} : {},
-      avatarUrl: (!message.isDirectMessage) ? null : message.avatarUrl,
+      avatarUrl: message.isDirectMessage ? message.avatarUrl : null,
       isPinned: false,
       isMuted: false,
       lastMessageSenderName: message.senderFullName,
