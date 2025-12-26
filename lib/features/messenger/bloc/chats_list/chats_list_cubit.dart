@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
@@ -42,6 +43,7 @@ class ChatsListCubit extends Cubit<ChatsListState> {
           chats: [],
           isLoadingMessages: false,
           isLoadingMoreMessages: false,
+          hasLoadingChatsError: false,
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
@@ -99,8 +101,10 @@ class ChatsListCubit extends Cubit<ChatsListState> {
         _foundOldestMessage = response.foundOldest;
         _oldestMessageId = response.messages.first.id;
       }
-      emit(state.copyWith(chats: createdChats));
+      emit(state.copyWith(chats: createdChats, hasLoadingChatsError: false));
       unawaited(lazyLoadMessages());
+    } on DioException catch (e) {
+      emit(state.copyWith(hasLoadingChatsError: true));
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -114,6 +118,7 @@ class ChatsListCubit extends Cubit<ChatsListState> {
     emit(state.copyWith(isLoadingMoreMessages: true));
     try {
       if (_loadingTimes < 5 && !_foundOldestMessage) {
+        _loadingTimes += 1;
         final body = MessagesRequestEntity(
           anchor: MessageAnchor.id(_oldestMessageId),
           numBefore: 5000,
@@ -126,10 +131,13 @@ class ChatsListCubit extends Cubit<ChatsListState> {
           _oldestMessageId = response.messages.first.id;
           final chats = _createChatsFromMessages(response.messages);
           final updatedChats = <ChatEntity>[...state.chats, ...chats];
-          emit(state.copyWith(chats: updatedChats));
+          emit(state.copyWith(chats: updatedChats, hasLoadingChatsError: false));
         }
         await lazyLoadMessages();
       }
+    } on DioException catch (e) {
+      _foundOldestMessage = true;
+      emit(state.copyWith(hasLoadingChatsError: true));
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -137,6 +145,10 @@ class ChatsListCubit extends Cubit<ChatsListState> {
     } finally {
       emit(state.copyWith(isLoadingMoreMessages: false));
     }
+  }
+
+  void setHasLoadingChatsError(bool value) {
+    emit(state.copyWith(hasLoadingChatsError: value));
   }
 
   List<ChatEntity> _createChatsFromMessages(List<MessageEntity> messages) {
@@ -175,8 +187,12 @@ class ChatsListCubit extends Cubit<ChatsListState> {
   }
 
   void _onMessageEvents(MessageEventEntity event) {}
+
   void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {}
+
   void _onSubscriptionEvents(SubscriptionEventEntity event) {}
+
   void _onDeleteEvents(DeleteMessageEventEntity event) {}
+
   void _onUpdateMessageEvents(UpdateMessageEventEntity event) {}
 }

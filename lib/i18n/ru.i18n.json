@@ -126,7 +126,7 @@
   "show_all_users": "Показать всех пользователей",
   "show_recent_dialogs": "Показать недавние чаты",
   "no_recent_dialogs": "Нет недавних чатов",
-  "error": "Ошибка",
+  "error": "Ошибка во время загрузки данных",
   "general": {
     "something_went_wrong": "Что-то пошло не так",
     "nothing_here_yet": "Здесь пока ничего нет",

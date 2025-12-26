@@ -154,6 +154,18 @@ class ChatEntity extends Equatable {
     );
   }
 
+  factory ChatEntity.fake() => ChatEntity(
+    id: -1,
+    type: .direct,
+    displayTitle: "displayTitle",
+    lastMessageId: -1,
+    lastMessagePreview: "Hello, how are you?",
+    lastMessageDate: DateTime.now(),
+    unreadMessages: {},
+    isPinned: false,
+    isMuted: false,
+  );
+
   @override
   List<Object?> get props => [
     id,

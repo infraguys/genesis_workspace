@@ -120,7 +120,7 @@
   "show_all_users": "Show all users",
   "show_recent_dialogs": "Show recent dialogs",
   "no_recent_dialogs": "No recent dialogs",
-  "error": "Error",
+  "error": "Error while loading data",
   "general": {
     "something_went_wrong": "Something went wrong",
     "nothing_here_yet": "Nothing here yet",

@@ -18,6 +18,7 @@ class PinnedChatsSection extends StatefulWidget {
     required this.onPinningSaved,
     required this.folderUuid,
     required this.isEditPinning,
+    required this.isPending,
   });
 
   final List<ChatEntity> visibleChats;
@@ -30,6 +31,7 @@ class PinnedChatsSection extends StatefulWidget {
   final Function(List<PinnedChatOrderUpdate> chats) onPinningSaved;
   final String? folderUuid;
   final bool isEditPinning;
+  final bool isPending;
 
   @override
   State<PinnedChatsSection> createState() => PinnedChatsSectionState();
@@ -132,6 +134,7 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
       showTopics: widget.showTopics,
       selectedChatId: widget.selectedChatId,
       onTap: widget.onChatTap,
+      isPending: widget.isPending,
     );
   }
 }
