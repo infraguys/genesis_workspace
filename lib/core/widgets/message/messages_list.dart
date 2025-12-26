@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
+import 'package:genesis_workspace/core/widgets/topic_separator.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
@@ -190,27 +191,32 @@ class _MessagesListState extends State<MessagesList> {
                 itemCount: _reversed.length,
                 padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
                 separatorBuilder: (BuildContext context, int index) {
-                  final message = _reversed[index];
+                  final currentMessage = _reversed[index];
                   final nextMessage = _reversed[index + 1];
 
-                  final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
-                  final nextMessageDate = DateTime.fromMillisecondsSinceEpoch(
-                    nextMessage.timestamp * 1000,
+                  final messageDate = DateTime.fromMillisecondsSinceEpoch(currentMessage.timestamp * 1000);
+                  final isNewDay = _dayInt(currentMessage.timestamp) != _dayInt(nextMessage.timestamp);
+                  //   final isNewUser = message.senderId != nextMessage.senderId;
+
+                  final bool isNewTopic = currentMessage.subject != nextMessage.subject;
+
+                  if (!isNewTopic && !isNewDay) {
+                    return const SizedBox(height: 8);
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: .min,
+                      spacing: 8.0,
+                      children: [
+                        if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
+                          UnreadMessagesMarker(unreadCount: _reversed.where((message) => message.isUnread).length),
+                        if (isNewTopic) TopicSeparator(topic: currentMessage.subject),
+                        if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
+                      ],
+                    ),
                   );
-
-                  final isNewDay = _dayInt(message.timestamp) != _dayInt(nextMessage.timestamp);
-
-                  if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!) {
-                    return UnreadMessagesMarker(
-                      unreadCount: _reversed.where((message) => message.isUnread).length,
-                    );
-                  }
-
-                  if (isNewDay) {
-                    return MessageDayLabel(label: _getDayLabel(context, messageDate));
-                  }
-                  final isNewUser = message.senderId != nextMessage.senderId;
-                  return SizedBox(height: isNewUser ? 12 : 4);
                 },
                 itemBuilder: (BuildContext context, int index) {
                   final message = _reversed[index];
@@ -368,12 +374,7 @@ class MessageDayLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [Text(label, style: Theme.of(context).textTheme.labelMedium)],
-      ),
-    );
+    return Text(label, style: Theme.of(context).textTheme.labelMedium);
   }
 }
+
