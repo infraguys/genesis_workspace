@@ -99,7 +99,7 @@ class _MessengerViewState extends State<MessengerView>
     setState(() {
       _searchQuery = query;
     });
-    context.read<MessengerCubit>().searchChats(query);
+    context.read<ChatsListCubit>().searchChats(query);
   }
 
   void _clearSearch() {
@@ -376,7 +376,7 @@ class _MessengerViewState extends State<MessengerView>
                                 NotificationListener<UserScrollNotification>(
                                   onNotification: _onUserScroll,
                                   child: PinnedChatsSection(
-                                    visibleChats: state.chats,
+                                    visibleChats: state.filteredChats,
                                     pinnedMeta: [],
                                     listPadding: listPadding,
                                     chatsController: _chatsController,

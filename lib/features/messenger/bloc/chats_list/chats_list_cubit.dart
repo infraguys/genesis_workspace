@@ -41,6 +41,7 @@ class ChatsListCubit extends Cubit<ChatsListState> {
   ) : super(
         ChatsListState(
           chats: [],
+          filteredChats: [],
           isLoadingMessages: false,
           isLoadingMoreMessages: false,
           hasLoadingChatsError: false,
@@ -101,7 +102,13 @@ class ChatsListCubit extends Cubit<ChatsListState> {
         _foundOldestMessage = response.foundOldest;
         _oldestMessageId = response.messages.first.id;
       }
-      emit(state.copyWith(chats: createdChats, hasLoadingChatsError: false));
+      emit(
+        state.copyWith(
+          chats: createdChats,
+          filteredChats: createdChats,
+          hasLoadingChatsError: false,
+        ),
+      );
       unawaited(lazyLoadMessages());
     } on DioException catch (e) {
       emit(state.copyWith(hasLoadingChatsError: true));
@@ -131,7 +138,13 @@ class ChatsListCubit extends Cubit<ChatsListState> {
           _oldestMessageId = response.messages.first.id;
           final chats = _createChatsFromMessages(response.messages);
           final updatedChats = <ChatEntity>[...state.chats, ...chats];
-          emit(state.copyWith(chats: updatedChats, hasLoadingChatsError: false));
+          emit(
+            state.copyWith(
+              chats: updatedChats,
+              filteredChats: updatedChats,
+              hasLoadingChatsError: false,
+            ),
+          );
         }
         await lazyLoadMessages();
       }
@@ -184,6 +197,36 @@ class ChatsListCubit extends Cubit<ChatsListState> {
     if (user == null) return;
     if (state.selfUser?.userId == user.userId) return;
     emit(state.copyWith(selfUser: user));
+  }
+
+  void searchChats(String query) {
+    _searchQuery = query.trim();
+    _applySearchFilter();
+  }
+
+  void _applySearchFilter() {
+    final String query = _searchQuery.trim();
+    if (query.isEmpty) {
+      final chats = [...state.chats];
+      emit(state.copyWith(filteredChats: chats));
+      return;
+    }
+
+    final String loweredQuery = query.toLowerCase();
+    final List<ChatEntity> baseChats = _chatsForCurrentFolder();
+    final List<ChatEntity> filtered = baseChats.where((chat) {
+      final bool matchesTitle = chat.displayTitle.toLowerCase().contains(loweredQuery);
+      return matchesTitle;
+    }).toList();
+
+    emit(state.copyWith(filteredChats: filtered));
+  }
+
+  List<ChatEntity> _chatsForCurrentFolder() {
+    if (state.filteredChatIds == null) {
+      return state.chats;
+    }
+    return state.chats.where((chat) => state.filteredChatIds!.contains(chat.id)).toList();
   }
 
   void _onMessageEvents(MessageEventEntity event) {}
