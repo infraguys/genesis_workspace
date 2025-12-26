@@ -1202,6 +1202,12 @@ class MessengerCubit extends Cubit<MessengerState> {
     _applySearchFilter();
   }
 
+  void selectTopic(String topic) {
+    if (state.selectedChat != null) {
+      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic));
+    }
+  }
+
   void createEmptyChat(Set<int> membersIds) async {
     final newState = state.copyWith(usersIds: membersIds);
     emit(newState);
