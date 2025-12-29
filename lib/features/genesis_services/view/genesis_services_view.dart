@@ -65,7 +65,7 @@ class GenesisServicesView extends StatelessWidget {
                         onPressed: () async {
                           await context.read<GenesisServicesCubit>().loadServices();
                         },
-                        child: Text(genesisServicesTexts.tryAgain, style: theme.textTheme.bodyMedium),
+                        child: Text(context.t.tryAgain, style: theme.textTheme.bodyMedium),
                       ),
                     ],
                   ),

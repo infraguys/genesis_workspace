@@ -14,6 +14,8 @@ class AppConstants {
   static const int jobTitleProfileDataIndex = 1;
   static const int bossNameProfileDataIndex = 2;
 
+  static const String mailCalendarUuid = "00000000-0000-0000-0000-000000000001";
+
   static late String baseUrl;
   static int? selectedOrganizationId;
 

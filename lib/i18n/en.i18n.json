@@ -39,8 +39,7 @@
   "feed": "Feed",
   "genesis_services": {
     "title": "All services",
-    "subtitle": "Access to the company's internal tools and resources",
-    "try_again": "Try again"
+    "subtitle": "Access to the company's internal tools and resources"
   },
   "select_any_channel": "Select any channel",
   "all_messages": "All messages",
@@ -317,5 +316,6 @@
     "other": "This message has been read by {n} people"
   },
   "read_all_messages": "Read all messages",
-  "open": "Open"
+  "open": "Open",
+  "try_again": "Try again"
 }
