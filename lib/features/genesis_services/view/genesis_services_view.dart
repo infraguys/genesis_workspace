@@ -1,0 +1,105 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/domain/genesis/entities/genesis_service_entity.dart';
+import 'package:genesis_workspace/features/genesis_services/bloc/genesis_services_cubit.dart';
+import 'package:genesis_workspace/features/genesis_services/view/service_item.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+
+class GenesisServicesView extends StatefulWidget {
+  const GenesisServicesView({super.key});
+
+  @override
+  State<GenesisServicesView> createState() => _GenesisServicesViewState();
+}
+
+class _GenesisServicesViewState extends State<GenesisServicesView> {
+  late final Future _future;
+
+  @override
+  void initState() {
+    _future = context.read<GenesisServicesCubit>().loadServices();
+    super.initState();
+  }
+
+  static const double spacing = 20;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final TextColors textColors = theme.extension<TextColors>()!;
+
+    final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
+    final minCardWidth = isTabletOrSmaller ? 170 : 458;
+    final double expectedCardHeight = isTabletOrSmaller ? 224 : 210;
+    final double childAspectRatio = minCardWidth / expectedCardHeight;
+    return Column(
+      crossAxisAlignment: .stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Column(
+            crossAxisAlignment: .start,
+            children: [
+              Text(
+                "Все сервисы",
+                style: theme.textTheme.titleLarge?.copyWith(fontSize: 32, fontWeight: .w500),
+              ),
+              Text(
+                "Доступ к внутренним инструментам и ресурсам компании",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: textColors.text30,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: FutureBuilder(
+            future: _future,
+            builder: (BuildContext context, snapshot) {
+              return BlocBuilder<GenesisServicesCubit, GenesisServicesState>(
+                builder: (context, state) {
+                  final services = state is GenesisServicesLoaded
+                      ? state.services
+                      : List.generate(15, (int index) => GenesisServiceEntity.fake());
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      await context.read<GenesisServicesCubit>().loadServices();
+                    },
+                    child: Skeletonizer(
+                      enabled: state is! GenesisServicesLoaded,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double maxWidth = constraints.maxWidth;
+
+                          final int columnsCount = (maxWidth / (minCardWidth + spacing)).floor().clamp(2, 12);
+
+                          return GridView.builder(
+                            padding: EdgeInsets.symmetric(horizontal: 15, vertical: spacing),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: columnsCount,
+                              crossAxisSpacing: spacing,
+                              mainAxisSpacing: spacing,
+                              childAspectRatio: childAspectRatio,
+                            ),
+                            itemCount: services.length,
+                            itemBuilder: (context, index) {
+                              final service = services[index];
+                              return ServiceItem(service: service);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}

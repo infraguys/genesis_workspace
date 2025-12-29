@@ -311,5 +311,6 @@
     "one": "This message has been read by {n} person",
     "other": "This message has been read by {n} people"
   },
-  "read_all_messages": "Read all messages"
+  "read_all_messages": "Read all messages",
+  "open": "Open"
 }

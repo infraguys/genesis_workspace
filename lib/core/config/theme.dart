@@ -26,6 +26,7 @@ final darkTheme = ThemeData(
     stopIndicatorRadius: 12,
   ),
   elevatedButtonTheme: _darkElevatedButtonTheme,
+  outlinedButtonTheme: _darkOutlinedButtonTheme,
   dividerColor: Color(0xFFFFFFFF).withValues(alpha: 0.1),
   appBarTheme: AppBarThemeData(
     surfaceTintColor: Colors.transparent,
@@ -70,5 +71,15 @@ final _darkElevatedButtonTheme = ElevatedButtonThemeData(
   style: ElevatedButton.styleFrom(
     backgroundColor: AppColors.primary,
     foregroundColor: AppColors.darkOnPrimary,
+  ),
+);
+
+final _darkOutlinedButtonTheme = OutlinedButtonThemeData(
+  style: OutlinedButton.styleFrom(
+    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+    foregroundColor: AppColors.darkOnPrimary,
+    side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+    padding: .symmetric(vertical: 4),
+    shape: RoundedRectangleBorder(borderRadius: .circular(8)),
   ),
 );
