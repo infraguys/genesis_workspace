@@ -246,7 +246,7 @@ final List<({SvgGenImage icon, String Function(BuildContext) title})> branchMode
   (icon: Assets.icons.chatBubble, title: (BuildContext context) => context.t.chats),
   (icon: Assets.icons.calendarMonth, title: (BuildContext context) => context.t.calendar),
   (icon: Assets.icons.mail, title: (BuildContext context) => context.t.email),
-  (icon: Assets.icons.group, title: (BuildContext context) => context.t.groups),
+  (icon: Assets.icons.group, title: (BuildContext context) => context.t.genesisServices.title),
   (icon: Assets.icons.call, title: (BuildContext context) => context.t.calls),
 ];
 

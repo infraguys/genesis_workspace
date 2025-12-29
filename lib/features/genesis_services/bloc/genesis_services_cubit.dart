@@ -17,7 +17,6 @@ class GenesisServicesCubit extends Cubit<GenesisServicesState> {
   Future<void> loadServices() async {
     emit(GenesisServicesLoading());
     try {
-      await Future.delayed(const Duration(seconds: 5));
       final response = await _getServicesUseCase.call();
       emit(GenesisServicesLoaded(services: response));
     } catch (e) {
