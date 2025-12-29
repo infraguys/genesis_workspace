@@ -262,6 +262,8 @@ class MessengerCubit extends Cubit<MessengerState> {
           state.copyWith(foundOldestMessage: true),
         );
       }
+    } else {
+      emit(state.copyWith(foundOldestMessage: true));
     }
   }
 
@@ -450,7 +452,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (initialFolders[0].systemType != .all) {
         final allFolder = initialFolders.firstWhere((folder) => folder.systemType == .all);
         initialFolders.remove(allFolder);
-        initialFolders = [allFolder ,...initialFolders];
+        initialFolders = [allFolder, ...initialFolders];
       }
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
       await _loadFoldersMembers();
