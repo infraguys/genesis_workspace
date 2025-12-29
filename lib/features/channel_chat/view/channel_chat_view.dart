@@ -18,6 +18,7 @@ import 'package:genesis_workspace/core/utils/message_input_intents/mention_navig
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
+import 'package:genesis_workspace/core/widgets/channel_app_bar_title.dart';
 import 'package:genesis_workspace/core/widgets/input_banner.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
@@ -25,7 +26,6 @@ import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
-import 'package:genesis_workspace/core/widgets/channel_app_bar_title.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
@@ -83,6 +83,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     messageController
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
+    focusOnInit();
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -516,8 +517,11 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                           ): const MentionSelectIntent(),
                                         }
                                       : {
-                                          const SingleActivator(LogicalKeyboardKey.arrowUp, numLock: LockState.ignored):
-                                              const EditLastMessageIntent(),
+                                          if (messageController.text.isEmpty)
+                                            const SingleActivator(
+                                              LogicalKeyboardKey.arrowUp,
+                                              numLock: LockState.ignored,
+                                            ): const EditLastMessageIntent(),
                                         },
                                   child: Actions(
                                     actions: {

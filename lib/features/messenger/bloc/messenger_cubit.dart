@@ -85,12 +85,16 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<DeleteMessageEventEntity> _deleteMessageEventsSubscription;
   late final StreamSubscription<UpdateMessageEventEntity> _updateMessageEventsSubscription;
 
+  static const Duration _loadFoldersShortPollingInterval = Duration(minutes: 1);
+
   String _searchQuery = '';
   int _oldestMessageId = 0;
   int _lastMessageId = -1;
   int _loadingTimes = 0;
   bool _prioritizePersonalUnread = false;
   bool _prioritizeUnmutedUnreadChannels = false;
+  Timer? _loadFoldersShortPollingTimer;
+  bool _isLoadFoldersInProgress = false;
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -258,6 +262,8 @@ class MessengerCubit extends Cubit<MessengerState> {
           state.copyWith(foundOldestMessage: true),
         );
       }
+    } else {
+      emit(state.copyWith(foundOldestMessage: true));
     }
   }
 
@@ -423,6 +429,8 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   Future<void> loadFolders() async {
+    if (_isLoadFoldersInProgress) return;
+    _isLoadFoldersInProgress = true;
     try {
       final int? organizationId = AppConstants.selectedOrganizationId;
       if (organizationId == null) {
@@ -441,6 +449,11 @@ class MessengerCubit extends Cubit<MessengerState> {
         final allFolder = await _addFolderUseCase.call(allFolderBody);
         initialFolders = [allFolder, ...folders];
       }
+      if (initialFolders[0].systemType != .all) {
+        final allFolder = initialFolders.firstWhere((folder) => folder.systemType == .all);
+        initialFolders.remove(allFolder);
+        initialFolders = [allFolder, ...initialFolders];
+      }
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
       await _loadFoldersMembers();
       await getPinnedChats();
@@ -448,6 +461,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (kDebugMode) {
         inspect(e);
       }
+    } finally {
+      _isLoadFoldersInProgress = false;
+      _startLoadFoldersShortPolling();
     }
   }
 
@@ -730,6 +746,13 @@ class MessengerCubit extends Cubit<MessengerState> {
     } catch (e, _) {
       // обработка/логирование
     }
+  }
+
+  void _startLoadFoldersShortPolling() {
+    _loadFoldersShortPollingTimer ??= Timer.periodic(
+      _loadFoldersShortPollingInterval,
+      (_) => unawaited(loadFolders()),
+    );
   }
 
   void resetState() {
@@ -1060,14 +1083,15 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
+    _loadFoldersShortPollingTimer?.cancel();
     _messagesEventsSubscription.cancel();
     _messageFlagsEventsSubscription.cancel();
     _profileStateSubscription.cancel();
     _subscriptionEventsSubscription.cancel();
     _deleteMessageEventsSubscription.cancel();
     _updateMessageEventsSubscription.cancel();
-    return super.close();
+    await super.close();
   }
 
   void _filterChatsByFolder() {
@@ -1178,6 +1202,12 @@ class MessengerCubit extends Cubit<MessengerState> {
     final result = [...pinnedChats, ...regularChats];
     emit(state.copyWith(chats: result));
     _applySearchFilter();
+  }
+
+  void selectTopic(String topic) {
+    if (state.selectedChat != null) {
+      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic));
+    }
   }
 
   void createEmptyChat(Set<int> membersIds) async {

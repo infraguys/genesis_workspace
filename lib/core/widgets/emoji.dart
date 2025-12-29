@@ -58,11 +58,11 @@ class UnicodeEmojiWidget extends StatelessWidget {
           unicode,
         );
       case TargetPlatform.windows:
-        final double notoColorEmojiTextSize = size * (14.5 / 17);
+        final double emojiTextSize = size * (14 / 17);
         return Text(
           textScaler: textScaler,
-          style: TextStyle(fontFamily: FontFamily.notoColorEmoji, fontSize: notoColorEmojiTextSize),
-          strutStyle: StrutStyle(fontSize: notoColorEmojiTextSize, forceStrutHeight: true),
+          style: TextStyle(fontSize: emojiTextSize),
+          strutStyle: StrutStyle(fontSize: emojiTextSize, forceStrutHeight: true),
           unicode,
         );
       case TargetPlatform.iOS:
