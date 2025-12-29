@@ -37,6 +37,11 @@
     "group_chats": "Group chats"
   },
   "feed": "Feed",
+  "genesis_services": {
+    "title": "All services",
+    "subtitle": "Access to the company's internal tools and resources",
+    "try_again": "Try again"
+  },
   "select_any_channel": "Select any channel",
   "all_messages": "All messages",
   "no_messages_here_yet": "No messages here yet...",

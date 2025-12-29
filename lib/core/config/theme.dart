@@ -79,7 +79,7 @@ final _darkOutlinedButtonTheme = OutlinedButtonThemeData(
     backgroundColor: AppColors.primary.withValues(alpha: 0.1),
     foregroundColor: AppColors.darkOnPrimary,
     side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
-    padding: .symmetric(vertical: 4),
+    padding: .symmetric(vertical: 4, horizontal: 8),
     shape: RoundedRectangleBorder(borderRadius: .circular(8)),
   ),
 );

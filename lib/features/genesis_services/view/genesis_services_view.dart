@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/domain/genesis/entities/genesis_service_entity.dart';
 import 'package:genesis_workspace/features/genesis_services/bloc/genesis_services_cubit.dart';
 import 'package:genesis_workspace/features/genesis_services/view/service_item.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class GenesisServicesView extends StatefulWidget {
@@ -29,6 +30,7 @@ class _GenesisServicesViewState extends State<GenesisServicesView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final TextColors textColors = theme.extension<TextColors>()!;
+    final genesisServicesTexts = context.t.genesisServices;
 
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     final minCardWidth = isTabletOrSmaller ? 170 : 458;
@@ -43,11 +45,11 @@ class _GenesisServicesViewState extends State<GenesisServicesView> {
             crossAxisAlignment: .start,
             children: [
               Text(
-                "Все сервисы",
+                genesisServicesTexts.title,
                 style: theme.textTheme.titleLarge?.copyWith(fontSize: 32, fontWeight: .w500),
               ),
               Text(
-                "Доступ к внутренним инструментам и ресурсам компании",
+                genesisServicesTexts.subtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: textColors.text30,
                 ),
@@ -64,6 +66,27 @@ class _GenesisServicesViewState extends State<GenesisServicesView> {
                   final services = state is GenesisServicesLoaded
                       ? state.services
                       : List.generate(15, (int index) => GenesisServiceEntity.fake());
+                  if (state is GenesisServicesError) {
+                    return Center(
+                      child: Column(
+                        spacing: 16,
+                        children: [
+                          Text(
+                            context.t.error,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: .w500,
+                            ),
+                          ),
+                          OutlinedButton(
+                            onPressed: () async {
+                              await context.read<GenesisServicesCubit>().loadServices();
+                            },
+                            child: Text(genesisServicesTexts.tryAgain, style: theme.textTheme.bodyMedium),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                   return RefreshIndicator(
                     onRefresh: () async {
                       await context.read<GenesisServicesCubit>().loadServices();
