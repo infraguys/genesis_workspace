@@ -21,11 +21,26 @@ class GenesisServicesView extends StatelessWidget {
 
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     final minCardWidth = isTabletOrSmaller ? 170 : 458;
-    final double expectedCardHeight = isTabletOrSmaller ? 224 : 210;
+    double expectedCardHeight;
+
+    switch (currentSize(context)) {
+      case ScreenSize.sMobile:
+        expectedCardHeight = 260;
+      case .mobile || .tablet:
+        expectedCardHeight = 230;
+      case ScreenSize.lTablet:
+        expectedCardHeight = 210;
+      default:
+        expectedCardHeight = 240;
+    }
     final double childAspectRatio = minCardWidth / expectedCardHeight;
     return Column(
       crossAxisAlignment: .stretch,
       children: [
+        if (isTabletOrSmaller)
+          SizedBox(
+            height: 30,
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
