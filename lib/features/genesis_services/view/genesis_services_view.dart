@@ -71,7 +71,7 @@ class GenesisServicesView extends StatelessWidget {
                   ),
                 );
               }
-              return RefreshIndicator(
+              return RefreshIndicator.adaptive(
                 onRefresh: () async {
                   await context.read<GenesisServicesCubit>().loadServices();
                 },
