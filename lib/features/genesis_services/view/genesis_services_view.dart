@@ -8,21 +8,8 @@ import 'package:genesis_workspace/features/genesis_services/view/service_item.da
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class GenesisServicesView extends StatefulWidget {
+class GenesisServicesView extends StatelessWidget {
   const GenesisServicesView({super.key});
-
-  @override
-  State<GenesisServicesView> createState() => _GenesisServicesViewState();
-}
-
-class _GenesisServicesViewState extends State<GenesisServicesView> {
-  late final Future _future;
-
-  @override
-  void initState() {
-    _future = context.read<GenesisServicesCubit>().loadServices();
-    super.initState();
-  }
 
   static const double spacing = 20;
 
@@ -58,66 +45,61 @@ class _GenesisServicesViewState extends State<GenesisServicesView> {
           ),
         ),
         Expanded(
-          child: FutureBuilder(
-            future: _future,
-            builder: (BuildContext context, snapshot) {
-              return BlocBuilder<GenesisServicesCubit, GenesisServicesState>(
-                builder: (context, state) {
-                  final services = state is GenesisServicesLoaded
-                      ? state.services
-                      : List.generate(15, (int index) => GenesisServiceEntity.fake());
-                  if (state is GenesisServicesError) {
-                    return Center(
-                      child: Column(
-                        spacing: 16,
-                        children: [
-                          Text(
-                            context.t.error,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: .w500,
-                            ),
-                          ),
-                          OutlinedButton(
-                            onPressed: () async {
-                              await context.read<GenesisServicesCubit>().loadServices();
-                            },
-                            child: Text(genesisServicesTexts.tryAgain, style: theme.textTheme.bodyMedium),
-                          ),
-                        ],
+          child: BlocBuilder<GenesisServicesCubit, GenesisServicesState>(
+            builder: (context, state) {
+              final services = state is GenesisServicesLoaded
+                  ? state.services
+                  : List.generate(15, (int index) => GenesisServiceEntity.fake());
+              if (state is GenesisServicesError) {
+                return Center(
+                  child: Column(
+                    spacing: 16,
+                    children: [
+                      Text(
+                        context.t.error,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: .w500,
+                        ),
                       ),
-                    );
-                  }
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await context.read<GenesisServicesCubit>().loadServices();
-                    },
-                    child: Skeletonizer(
-                      enabled: state is! GenesisServicesLoaded,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final double maxWidth = constraints.maxWidth;
-
-                          final int columnsCount = (maxWidth / (minCardWidth + spacing)).floor().clamp(2, 12);
-
-                          return GridView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: 15, vertical: spacing),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: columnsCount,
-                              crossAxisSpacing: spacing,
-                              mainAxisSpacing: spacing,
-                              childAspectRatio: childAspectRatio,
-                            ),
-                            itemCount: services.length,
-                            itemBuilder: (context, index) {
-                              final service = services[index];
-                              return ServiceItem(service: service);
-                            },
-                          );
+                      OutlinedButton(
+                        onPressed: () async {
+                          await context.read<GenesisServicesCubit>().loadServices();
                         },
+                        child: Text(genesisServicesTexts.tryAgain, style: theme.textTheme.bodyMedium),
                       ),
-                    ),
-                  );
+                    ],
+                  ),
+                );
+              }
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await context.read<GenesisServicesCubit>().loadServices();
                 },
+                child: Skeletonizer(
+                  enabled: state is! GenesisServicesLoaded,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double maxWidth = constraints.maxWidth;
+
+                      final int columnsCount = (maxWidth / (minCardWidth + spacing)).floor().clamp(2, 12);
+
+                      return GridView.builder(
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: spacing),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columnsCount,
+                          crossAxisSpacing: spacing,
+                          mainAxisSpacing: spacing,
+                          childAspectRatio: childAspectRatio,
+                        ),
+                        itemCount: services.length,
+                        itemBuilder: (context, index) {
+                          final service = services[index];
+                          return ServiceItem(service: service);
+                        },
+                      );
+                    },
+                  ),
+                ),
               );
             },
           ),

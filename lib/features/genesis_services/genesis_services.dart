@@ -10,7 +10,7 @@ class GenesisServices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<GenesisServicesCubit>(),
+      create: (context) => getIt<GenesisServicesCubit>()..loadServices(),
       child: GenesisServicesView(),
     );
   }
