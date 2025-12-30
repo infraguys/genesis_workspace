@@ -174,6 +174,12 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                     const SizedBox(height: 10),
                     _ActionTile(
                       textColor: textColor,
+                      icon: Assets.icons.visibility,
+                      label: context.t.contextMenu.viewedBy,
+                      onTap: _showMessageReaders,
+                    ),
+                    _ActionTile(
+                      textColor: textColor,
                       icon: Assets.icons.replyIcon,
                       label: context.t.contextMenu.reply,
                       onTap: _onReplay,
@@ -211,12 +217,6 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                         label: context.t.contextMenu.delete,
                         onTap: _onDelete,
                       ),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: Assets.icons.readReceipt,
-                      label: context.t.contextMenu.readBy,
-                      onTap: _showMessageReaders,
-                    ),
                     // _ActionTile(
                     //   textColor: textColor,
                     //   icon: Assets.icons.checkCircleIcon,
