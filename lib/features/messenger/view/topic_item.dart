@@ -92,7 +92,7 @@ class TopicItem extends StatelessWidget {
                           width: 3,
                           height: 47,
                           decoration: BoxDecoration(
-                            color: Colors.yellow,
+                            color: chat.backgroundColor ?? AppColors.primary,
                             borderRadius: BorderRadiusGeometry.circular(4),
                           ),
                         ),
