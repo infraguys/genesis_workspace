@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
-import 'package:genesis_workspace/core/widgets/in_development_widget.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
@@ -12,6 +11,7 @@ import 'package:genesis_workspace/features/authentication/presentation/view/past
 import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/genesis_services/genesis_services.dart';
 import 'package:genesis_workspace/features/lk/lk.dart';
 import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
@@ -28,7 +28,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorMessengerKey = GlobalKey<NavigatorState>(debugLabel: 'shellMessenger');
 final _shellNavigatorCalendarKey = GlobalKey<NavigatorState>(debugLabel: 'shellCalendar');
 final _shellNavigatorMailKey = GlobalKey<NavigatorState>(debugLabel: 'shellMail');
-final _shellNavigatorGroupsKey = GlobalKey<NavigatorState>(debugLabel: 'shellGroups');
+final _shellNavigatorServicesKey = GlobalKey<NavigatorState>(debugLabel: 'shellServices');
 final _shellNavigatorCallsKey = GlobalKey<NavigatorState>(debugLabel: 'shellCalls');
 final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
@@ -40,7 +40,7 @@ class Routes {
   static const String messenger = '/messenger';
   static const String calendar = '/calendar';
   static const String mail = '/mail';
-  static const String groups = '/groups';
+  static const String services = '/services';
   static const String calls = '/calls';
   static const String profile = '/profile';
   static const String profileInfo = '/profile-info';
@@ -115,13 +115,13 @@ final router = GoRouter(
           ],
         ),
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorGroupsKey,
+          navigatorKey: _shellNavigatorServicesKey,
           routes: [
             GoRoute(
-              path: Routes.groups,
-              name: Routes.groups,
+              path: Routes.services,
+              name: Routes.services,
               builder: (context, state) {
-                return InDevelopmentWidget();
+                return GenesisServices();
               },
             ),
           ],

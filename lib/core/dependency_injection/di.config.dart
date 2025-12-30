@@ -37,6 +37,12 @@ import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_reposi
 import 'package:genesis_workspace/data/all_chats/repositories_impl/pinned_chats_repository_impl.dart'
     as _i835;
 import 'package:genesis_workspace/data/database/app_database.dart' as _i606;
+import 'package:genesis_workspace/data/genesis/datasources/genesis_services_data_source.dart'
+    as _i640;
+import 'package:genesis_workspace/data/genesis/datasources/genesis_services_data_source_impl.dart'
+    as _i734;
+import 'package:genesis_workspace/data/genesis/repositories_impl/genesis_services_repository_impl.dart'
+    as _i143;
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart'
     as _i253;
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source_impl.dart'
@@ -96,6 +102,12 @@ import 'package:genesis_workspace/domain/common/usecases/get_version_config_sha_
     as _i690;
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart'
     as _i397;
+import 'package:genesis_workspace/domain/genesis/repositories/genesis_services_repository.dart'
+    as _i1072;
+import 'package:genesis_workspace/domain/genesis/usecases/get_service_by_id_use_case.dart'
+    as _i845;
+import 'package:genesis_workspace/domain/genesis/usecases/get_services_use_case.dart'
+    as _i881;
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart'
     as _i857;
 import 'package:genesis_workspace/domain/messages/usecases/add_emoji_reaction_use_case.dart'
@@ -224,6 +236,8 @@ import 'package:genesis_workspace/features/download_files/bloc/download_files_cu
     as _i1004;
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart'
     as _i144;
+import 'package:genesis_workspace/features/genesis_services/bloc/genesis_services_cubit.dart'
+    as _i998;
 import 'package:genesis_workspace/features/logs/bloc/logs_cubit.dart' as _i1034;
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart'
     as _i758;
@@ -353,6 +367,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i571.RecentDmDao>(
       () => _i571.RecentDmDao(gh<_i606.AppDatabase>()),
     );
+    gh.factory<_i640.GenesisServicesDataSource>(
+      () => _i734.GenesisServicesDataSourceImpl(),
+    );
+    gh.factory<_i1072.GenesisServicesRepository>(
+      () => _i143.GenesisServicesRepositoryImpl(
+        gh<_i640.GenesisServicesDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i958.TokenStorage>(
       () => coreModule.tokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
@@ -421,6 +443,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i294.OrganizationsLocalDataSource>(
       () => _i294.OrganizationsLocalDataSource(gh<_i500.OrganizationsDao>()),
+    );
+    gh.factory<_i845.GetServiceByIdUseCase>(
+      () => _i845.GetServiceByIdUseCase(gh<_i1072.GenesisServicesRepository>()),
+    );
+    gh.factory<_i881.GetServicesUseCase>(
+      () => _i881.GetServicesUseCase(gh<_i1072.GenesisServicesRepository>()),
     );
     gh.lazySingleton<_i377.OrganizationSwitcherService>(
       () => _i377.OrganizationSwitcherService(
@@ -555,6 +583,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i445.GetRecentDmsUseCase>(
       () => _i445.GetRecentDmsUseCase(gh<_i911.RecentDmRepository>()),
+    );
+    gh.factory<_i998.GenesisServicesCubit>(
+      () => _i998.GenesisServicesCubit(gh<_i881.GetServicesUseCase>()),
     );
     gh.factory<_i325.ChannelMembersInfoCubit>(
       () => _i325.ChannelMembersInfoCubit(

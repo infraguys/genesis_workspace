@@ -37,6 +37,10 @@
     "group_chats": "Group chats"
   },
   "feed": "Feed",
+  "genesis_services": {
+    "title": "All services",
+    "subtitle": "Access to the company's internal tools and resources"
+  },
   "select_any_channel": "Select any channel",
   "all_messages": "All messages",
   "no_messages_here_yet": "No messages here yet...",
@@ -311,5 +315,7 @@
     "one": "This message has been read by {n} person",
     "other": "This message has been read by {n} people"
   },
-  "read_all_messages": "Read all messages"
+  "read_all_messages": "Read all messages",
+  "open": "Open",
+  "try_again": "Try again"
 }

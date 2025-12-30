@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
-import 'package:genesis_workspace/data/all_chats/api/all_chats_api_client.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_item_dto.dart';
+import 'package:genesis_workspace/data/genesis/api/genesis_api_client.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_item_entity.dart';
 import 'package:injectable/injectable.dart';
 
@@ -10,14 +10,14 @@ import 'package:injectable/injectable.dart';
 class FolderItemsRemoteDataSource {
   FolderItemsRemoteDataSource();
 
-  AllChatsApiClient? _apiClient;
+  GenesisApiClient? _apiClient;
   String? _cachedBaseUrl;
 
-  AllChatsApiClient get _client {
+  GenesisApiClient get _client {
     final currentBaseUrl = AppConstants.baseUrl;
     if (_apiClient == null || _cachedBaseUrl != currentBaseUrl) {
       _cachedBaseUrl = currentBaseUrl;
-      _apiClient = AllChatsApiClient(
+      _apiClient = GenesisApiClient(
         getIt<Dio>(),
         baseUrl: "$currentBaseUrl/workspace/v1/",
       );
