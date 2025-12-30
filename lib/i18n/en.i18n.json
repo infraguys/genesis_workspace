@@ -276,7 +276,7 @@
     "unmark_as_important": "Unmark as important",
     "forward": "Forward",
     "select": "Select",
-    "readBy": "Read by"
+    "viewedBy": "Viewed by"
   },
   "input": {
     "banner": "Select a topic to send messages to the channel",
