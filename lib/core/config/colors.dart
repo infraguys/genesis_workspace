@@ -27,6 +27,7 @@ class AppColors {
   static final darkCardColors = CardColors(
     base: Color(0xFFFFFFFF).withValues(alpha: 0.02),
     active: Color(0xFFFFFFFF).withValues(alpha: 0.1),
+    onBackgroundCard: Color(0xff202022),
   );
 }
 
@@ -70,20 +71,24 @@ class TextColors extends ThemeExtension<TextColors> {
 class CardColors extends ThemeExtension<CardColors> {
   final Color base;
   final Color active;
+  final Color onBackgroundCard;
 
   const CardColors({
     required this.base,
     required this.active,
+    required this.onBackgroundCard,
   });
 
   @override
   CardColors copyWith({
     Color? base,
     Color? active,
+    Color? onBackgroundCard,
   }) {
     return CardColors(
       base: base ?? this.base,
       active: active ?? this.active,
+      onBackgroundCard: onBackgroundCard ?? this.onBackgroundCard,
     );
   }
 
@@ -93,6 +98,7 @@ class CardColors extends ThemeExtension<CardColors> {
     return CardColors(
       base: Color.lerp(base, other.base, t)!,
       active: Color.lerp(active, other.active, t)!,
+      onBackgroundCard: Color.lerp(onBackgroundCard, other.onBackgroundCard, t)!,
     );
   }
 }
