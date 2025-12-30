@@ -72,73 +72,78 @@ class TopicItem extends StatelessWidget {
             selectedTopic: topic.name,
           );
         },
-        child: Container(
-          height: 76,
-          padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
-          decoration: BoxDecoration(
-            color: cardColors.base,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 3,
-                      height: 47,
-                      decoration: BoxDecoration(
-                        color: Colors.yellow,
-                        borderRadius: BorderRadiusGeometry.circular(4),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 12,
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Tooltip(
-                            message: topic.name,
-                            child: Text(
-                              "# ${topic.name}",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontSize: 14,
-                                color: textColors.text100,
+        child: BlocBuilder<MessengerCubit, MessengerState>(
+          builder: (context, state) {
+            final isSelected = topic.name == state.selectedTopic;
+            return Container(
+              height: 76,
+              padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
+              decoration: BoxDecoration(
+                color: isSelected ? cardColors.active : cardColors.base,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 47,
+                          decoration: BoxDecoration(
+                            color: Colors.yellow,
+                            borderRadius: BorderRadiusGeometry.circular(4),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Tooltip(
+                                message: topic.name,
+                                child: Text(
+                                  "# ${topic.name}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    fontSize: 14,
+                                    color: textColors.text100,
+                                  ),
+                                ),
                               ),
-                            ),
+                              Text(
+                                topic.lastMessageSenderName,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                              MessagePreview(
+                                messagePreview: topic.lastMessagePreview,
+                              ),
+                            ],
                           ),
-                          Text(
-                            topic.lastMessageSenderName,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          MessagePreview(
-                            messagePreview: topic.lastMessagePreview,
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Skeleton.ignore(
+                    child: SizedBox(
+                      height: 21,
+                      child: UnreadBadge(
+                        count: topic.unreadMessages.length,
+                        isMuted: chat.isMuted,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Skeleton.ignore(
-                child: SizedBox(
-                  height: 21,
-                  child: UnreadBadge(
-                    count: topic.unreadMessages.length,
-                    isMuted: chat.isMuted,
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
