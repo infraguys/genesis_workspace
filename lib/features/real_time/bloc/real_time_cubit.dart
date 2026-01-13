@@ -33,7 +33,8 @@ class RealTimeCubit extends Cubit<RealTimeState> {
           provisional: false,
           sound: true,
         );
-        await messaging.getToken();
+        final token = await messaging.getToken();
+        print("fcm token: ${token}");
       }
       await _multiPollingService.init();
     } catch (e) {

@@ -12,7 +12,7 @@ class GenesisLogo extends StatelessWidget {
       duration: duration,
       width: size,
       height: size,
-      child: Assets.images.genesisLogo.svg(),
+      child: Assets.images.genesisLogoSvg.svg(),
     );
   }
 }
