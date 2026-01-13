@@ -5,21 +5,6 @@ import 'package:genesis_workspace/domain/messages/entities/display_recipient.dar
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 
 class MessageEntity extends Equatable {
-  final int id;
-  final bool isMeMessage;
-  final String? avatarUrl;
-  final String content;
-  final int senderId;
-  final String senderFullName;
-  final DisplayRecipient displayRecipient;
-  final List<String>? flags;
-  final MessageType type;
-  final int? streamId;
-  final String subject;
-  final int timestamp;
-  final List<ReactionEntity> reactions;
-  final int recipientId;
-
   MessageEntity({
     required this.id,
     required this.isMeMessage,
@@ -36,6 +21,22 @@ class MessageEntity extends Equatable {
     required this.reactions,
     required this.recipientId,
   });
+
+  final int id;
+  final bool isMeMessage;
+  final String? avatarUrl;
+  final String content;
+  final int senderId;
+  final String senderFullName;
+  final DisplayRecipient displayRecipient;
+  final List<String>? flags;
+  final MessageType type;
+  final int? streamId;
+  final String subject;
+  final int timestamp;
+  final List<ReactionEntity> reactions;
+  final int recipientId;
+
 
   bool get isUnread => flags != null ? !flags!.contains('read') : true;
 
@@ -84,6 +85,10 @@ class MessageEntity extends Equatable {
       );
     }
     return map;
+  }
+
+  String makeForwardedContent() {
+    return '@_**$senderFullName**\n```quote\n$content\n```';
   }
 
   Map<String, dynamic> toJson() {

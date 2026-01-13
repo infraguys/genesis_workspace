@@ -21,7 +21,12 @@ import 'package:genesis_workspace/domain/messages/entities/display_recipient.dar
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
+import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
+import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/forward_message_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/forward_message_dialog/forward_message_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -163,6 +168,24 @@ class _MessageItemState extends State<MessageItem> {
     await Clipboard.setData(ClipboardData(text: message.content));
   }
 
+  void onForward() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.read<ChatCubit>()),
+            BlocProvider.value(value: context.read<ChannelChatCubit>()),
+            BlocProvider.value(value: context.read<MessagesCubit>()),
+            BlocProvider.value(value: context.read<MessengerCubit>()),
+            BlocProvider(create: (context) => ForwardMessageCubit())
+          ],
+          child: ForwardMessageDialog(message: widget.message),
+        );
+      },
+    );
+  }
+
   void _closeOverlay() {
     _menuEntry?.remove();
     _menuEntry = null;
@@ -193,40 +216,13 @@ class _MessageItemState extends State<MessageItem> {
           onDelete: widget.isMyMessage ? handleDeleteMessage : null,
           onEmojiSelected: (emoji) async => await handleEmojiSelected(emoji),
           onClose: _closeOverlay,
+          onForward: onForward,
         );
       },
     );
 
     overlay.insert(_menuEntry!);
   }
-
-  // void openMobileOverlay() {
-  //   final renderBox = messageKey.currentContext?.findRenderObject() as RenderBox?;
-  //   final position = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-  //
-  //   late OverlayEntry overlay;
-  //   overlay = OverlayEntry(
-  //     builder: (_) => MessageActionsOverlay(
-  //       message: widget.message,
-  //       position: position,
-  //       onTapQuote: () {
-  //         widget.onTapQuote(widget.message.id);
-  //       },
-  //       onClose: () => overlay.remove(),
-  //       onEdit: () {
-  //         final body = UpdateMessageRequestEntity(
-  //           messageId: widget.message.id,
-  //           content: widget.message.content,
-  //         );
-  //         widget.onTapEditMessage(body);
-  //       },
-  //       messageContent: MessageHtml(content: widget.message.content),
-  //       isOwnMessage: widget.isMyMessage,
-  //     ),
-  //   );
-  //
-  //   Overlay.of(context).insert(overlay);
-  // }
 
   @override
   Widget build(BuildContext context) {

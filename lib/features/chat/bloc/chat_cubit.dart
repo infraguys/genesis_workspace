@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -333,19 +334,21 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
     emit(state.copyWith(isMessagePending: value));
   }
 
-  Future<void> sendMessage({required String content}) async {
+  Future<void> sendMessage({required String content, List<int>? chatIds}) async {
     emit(state.copyWith(isMessagePending: true));
-    final String composed = buildMessageContent(content: content);
+    final String composed = buildMessageContent(content: content, stripExistingAttachmentsFromContent: false);
 
     final body = SendMessageRequestEntity(
       type: SendMessageType.direct,
-      to: state.chatIds!.toList(),
+      to: chatIds ?? state.chatIds!.toList(),
       content: composed,
     );
 
     try {
       await _sendMessageUseCase.call(body);
       emit(state.copyWith(uploadedFilesString: '', uploadedFiles: []));
+    } on DioException {
+      rethrow;
     } catch (e) {
       inspect(e);
     } finally {
