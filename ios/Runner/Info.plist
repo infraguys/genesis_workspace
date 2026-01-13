@@ -32,7 +32,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>genesis_workspace</string>
+				<string>genesis.workspace</string>
 			</array>
 		</dict>
 	</array>
