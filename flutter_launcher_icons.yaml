@@ -8,8 +8,8 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/images/genesis_logo.png"
-    background_color: "#hexcode"
-    theme_color: "#hexcode"
+    background_color: "#1B1B1D"
+    theme_color: "#1B1B1D"
   windows:
     generate: true
     image_path: "assets/images/genesis_logo.png"

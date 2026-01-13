@@ -83,7 +83,6 @@ dependencies:
   talker_flutter: ^5.1.9
   talker_dio_logger: ^5.1.9
   talker_bloc_logger: ^5.1.9
-  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -98,6 +97,7 @@ dev_dependencies:
   flutter_gen_runner: ^5.10.0
   slang_build_runner: ^4.7.0
   drift_dev: ^2.28.0
+  flutter_launcher_icons: ^0.14.4
 
 dependency_overrides:
   flutter_secure_storage_linux:
