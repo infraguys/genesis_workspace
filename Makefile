@@ -95,4 +95,7 @@ rename_prod_apk:
 open_directories:
 	open $(APK_DIR)
 
-.PHONY: generate watch slang clean build_stage_web build_prod_web build_stage_apk build_prod_apk build_prod_macos build_stage_linux build_prod_linux build_prod_windows ci_stage_web ci_prod_web ci_prod_apk ci_stage_apk ci_stage_linux ci_prod_linux ci_prod_windows rename_prod_apk open_directories
+generate_app_icons:
+	dart run flutter_launcher_icons
+
+.PHONY: generate watch slang clean build_stage_web build_prod_web build_stage_apk build_prod_apk build_prod_macos build_stage_linux build_prod_linux build_prod_windows ci_stage_web ci_prod_web ci_prod_apk ci_stage_apk ci_stage_linux ci_prod_linux ci_prod_windows rename_prod_apk open_directories generate_app_icons
