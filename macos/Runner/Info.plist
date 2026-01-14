@@ -35,5 +35,9 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>$(PRODUCT_NAME) requires access to microphone.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>$(PRODUCT_NAME) requires access to camera.</string>
 </dict>
 </plist>
