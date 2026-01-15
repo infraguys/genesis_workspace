@@ -401,6 +401,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         if (kDebugMode) {
           inspect(e);
         }
+        break;
       }
     }
     final updatedChats = [...state.chats];
