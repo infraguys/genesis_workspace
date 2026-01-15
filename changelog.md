@@ -1,11 +1,15 @@
 # Changelog
 
+# 1.6.5
+- Topics ui refactor
+
 # 1.6.4
 - Fixed emoji on windows
 - Set "All" folder at the 0 index
 - Autofocus on chat input
 - Topic separator in the chats
 - List of genesis services
+
 
 # 1.6.3
 - Add progress indicator for info panel

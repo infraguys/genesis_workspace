@@ -90,6 +90,12 @@ class _LogsViewState extends State<LogsView> {
                 },
                 child: Text("Disconnect"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  _multiPollingService.deleteConnection(connection.organizationId);
+                },
+                child: Text("Delete"),
+              ),
             ],
           );
         },
