@@ -280,6 +280,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       final response = await _getMessagesUseCase.call(messagesBody);
       final updatedMessages = {...state.messages, ...response.messages}.toList();
+      _lastMessageId = response.messages.last.id;
       emit(state.copyWith(messages: updatedMessages));
       _createChatsFromMessages(updatedMessages);
       _sortChats();
