@@ -404,20 +404,54 @@ class MessengerCubit extends Cubit<MessengerState> {
       }
     }
     final updatedChats = [...state.chats];
+    final updatedUnreadMessages = [...state.unreadMessages];
 
     if (topicName != null) {
-      ChatEntity updatedChat = chat;
-      final topic = chat.topics!.firstWhere((topic) => topic.name == topicName);
-      final indexOfTopic = chat.topics!.indexOf(topic);
-      final updatedTopic = topic.copyWith(unreadMessages: {});
-      updatedChat.topics![indexOfTopic] = updatedTopic;
+      final unreadIdsForTopic = state.unreadMessages
+          .where((message) => message.recipientId == chat.id && message.subject == topicName)
+          .map((message) => message.id)
+          .toSet();
+
+      List<TopicEntity>? updatedTopics = chat.topics;
+      if (chat.topics != null) {
+        final indexOfTopic = chat.topics!.indexWhere((topic) => topic.name == topicName);
+        if (indexOfTopic != -1) {
+          final topic = chat.topics![indexOfTopic];
+          unreadIdsForTopic.addAll(topic.unreadMessages);
+          updatedTopics = [...chat.topics!];
+          updatedTopics[indexOfTopic] = topic.copyWith(unreadMessages: {});
+        }
+      }
+
+      final updatedChat = chat.copyWith(
+        unreadMessages: {...chat.unreadMessages}..removeAll(unreadIdsForTopic),
+        topics: updatedTopics,
+      );
       updatedChats[indexOfChat] = updatedChat;
+
+      updatedUnreadMessages.removeWhere(
+        (message) => message.recipientId == chat.id && message.subject == topicName,
+      );
     } else {
-      ChatEntity updatedChat = chat.copyWith(unreadMessages: {});
-      updatedChat.copyWith(topics: updatedChat.topics?.map((topic) => topic.copyWith(unreadMessages: {})).toList());
+      final updatedChat = chat.copyWith(
+        unreadMessages: {},
+        topics: chat.topics?.map((topic) => topic.copyWith(unreadMessages: {})).toList(),
+      );
       updatedChats[indexOfChat] = updatedChat;
+      updatedUnreadMessages.removeWhere((message) => message.recipientId == chat.id);
     }
-    emit(state.copyWith(chats: updatedChats));
+
+    final updatedFolders = _recalculateUnreadMessagesForFolders(
+      folders: state.folders,
+      chats: updatedChats,
+    );
+    emit(
+      state.copyWith(
+        chats: updatedChats,
+        unreadMessages: updatedUnreadMessages,
+        folders: updatedFolders,
+      ),
+    );
   }
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
