@@ -406,7 +406,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     final updatedChats = [...state.chats];
 
     if (topicName != null) {
-      ChatEntity updatedChat = chat.copyWith(unreadMessages: {});
+      ChatEntity updatedChat = chat;
       final topic = chat.topics!.firstWhere((topic) => topic.name == topicName);
       final indexOfTopic = chat.topics!.indexOf(topic);
       final updatedTopic = topic.copyWith(unreadMessages: {});
