@@ -11,6 +11,7 @@ import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
+import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -76,15 +77,23 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
         ? folders[selectedFolderIndex].title
         : t.messengerView.chatsAndChannels;
 
-    final Widget titleWidget = isLargeScreen
-        ? Text(
-            largeScreenTitle,
-            style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
-          )
-        : Text(
-            showTopics ? selectedChatLabel! : context.t.messenger,
-            style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
-          );
+    final Widget titleWidget = BlocBuilder<RealTimeCubit, RealTimeState>(
+      builder: (context, state) {
+        return isLargeScreen
+            ? Text(
+                state.isConnecting ? "${context.t.connecting}..." : largeScreenTitle,
+                style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
+              )
+            : Text(
+                state.isConnecting
+                    ? "${context.t.connecting}..."
+                    : showTopics
+                    ? selectedChatLabel!
+                    : context.t.messenger,
+                style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
+              );
+      },
+    );
 
     final List<Widget> actions = [];
     if (isTabletOrSmaller) {
@@ -175,24 +184,28 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                 Expanded(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      spacing: 4,
-                      children: [
-                        isTabletOrSmaller
-                            ? Center(child: titleWidget)
-                            : Align(
-                                alignment: Alignment.centerLeft,
-                                child: titleWidget,
+                    child: BlocBuilder<RealTimeCubit, RealTimeState>(
+                      builder: (context, state) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 4,
+                          children: [
+                            isTabletOrSmaller
+                                ? Center(child: titleWidget)
+                                : Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: titleWidget,
+                                  ),
+                            if (isLoadingMore || state.isConnecting)
+                              SizedBox(
+                                height: 14,
+                                child: CupertinoActivityIndicator(
+                                  radius: 7,
+                                ),
                               ),
-                        if (isLoadingMore)
-                          SizedBox(
-                            height: 14,
-                            child: CupertinoActivityIndicator(
-                              radius: 7,
-                            ),
-                          ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -274,18 +287,18 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                             padding: EdgeInsets.zero,
                             onPressed: () async {
                               await showDialog(
-                              context: context,
-                              builder: (BuildContext dialogContext) {
-                                return BlocProvider(
-                                  create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                                  child: CreateGroupChatDialog(
-                                    onCreate: (membersIds) {
-                                      context.pop();
-                                      openChat(context, {...membersIds, selfUserId});
-                                    },
-                                  ),
-                                );
-                              },
+                                context: context,
+                                builder: (BuildContext dialogContext) {
+                                  return BlocProvider(
+                                    create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
+                                    child: CreateGroupChatDialog(
+                                      onCreate: (membersIds) {
+                                        context.pop();
+                                        openChat(context, {...membersIds, selfUserId});
+                                      },
+                                    ),
+                                  );
+                                },
                               );
                             },
                             icon: Assets.icons.newWindow.svg(),

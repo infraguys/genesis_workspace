@@ -180,6 +180,12 @@ class MultiPollingService {
     ]);
   }
 
+  void deleteConnection(int id) async {
+    final connection = _activeConnections[id];
+    await connection?.stop();
+    _activeConnections.remove(id);
+  }
+
   Future<List<OrganizationEntity>> _fetchAuthorizedOrganizations() async {
     final List<OrganizationEntity> organizations = await _getAllOrganizationsUseCase.call();
     final List<OrganizationEntity> authorizedOrganizations = [];

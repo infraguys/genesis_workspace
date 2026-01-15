@@ -14,13 +14,19 @@ part 'real_time_state.dart';
 
 @lazySingleton
 class RealTimeCubit extends Cubit<RealTimeState> {
-  RealTimeCubit(this._multiPollingService, this._organizationsCubit) : super(RealTimeState());
+  RealTimeCubit(this._multiPollingService, this._organizationsCubit)
+    : super(
+        RealTimeState(
+          isConnecting: false,
+        ),
+      );
 
   final RealTimeService _realTimeService = getIt<RealTimeService>();
   final MultiPollingService _multiPollingService;
   final OrganizationsCubit _organizationsCubit;
 
   Future<void> init() async {
+    emit(state.copyWith(isConnecting: true));
     try {
       if (isFirebaseSupported) {
         FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -39,10 +45,13 @@ class RealTimeCubit extends Cubit<RealTimeState> {
       await _multiPollingService.init();
     } catch (e) {
       inspect(e);
+    } finally {
+      emit(state.copyWith(isConnecting: false));
     }
   }
 
   Future<void> addConnection() async {
+    emit(state.copyWith(isConnecting: true));
     final selectedOrganizationId = _organizationsCubit.state.selectedOrganizationId;
     final baseUrl = _organizationsCubit.state.organizations
         .firstWhere((org) => org.id == selectedOrganizationId)
@@ -51,14 +60,19 @@ class RealTimeCubit extends Cubit<RealTimeState> {
       await _multiPollingService.addConnection(selectedOrganizationId!, baseUrl);
     } catch (e) {
       inspect(e);
+    } finally {
+      emit(state.copyWith(isConnecting: false));
     }
   }
 
   Future<void> ensureConnection() async {
+    emit(state.copyWith(isConnecting: true));
     try {
       await _multiPollingService.ensureAllConnections();
     } catch (e) {
       inspect(e);
+    } finally {
+      emit(state.copyWith(isConnecting: false));
     }
   }
 
