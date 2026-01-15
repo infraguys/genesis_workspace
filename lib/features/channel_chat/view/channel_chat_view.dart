@@ -46,12 +46,14 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 class ChannelChatView extends StatefulWidget {
   const ChannelChatView({
     super.key,
+    required this.chatId,
     required this.channelId,
     this.topicName,
     this.unreadMessagesCount = 0,
     this.leadingOnPressed,
   });
 
+  final int chatId;
   final int channelId;
   final String? topicName;
   final int? unreadMessagesCount;
@@ -380,16 +382,10 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                           onTapQuote: onTapQuote,
                                           onTapEditMessage: onTapEditMessage,
                                           onReadAll: () async {
-                                            if (widget.topicName != null) {
-                                              await context.read<MessengerCubit>().readAllMessages(
-                                                streamId: widget.channelId,
-                                                topicName: widget.topicName!,
-                                              );
-                                            } else {
-                                              await context.read<MessengerCubit>().readAllMessages(
-                                                streamId: widget.channelId,
-                                              );
-                                            }
+                                            await context.read<MessengerCubit>().readAllMessages(
+                                              widget.chatId,
+                                              topicName: widget.topicName,
+                                            );
                                           },
                                         ),
                                         Positioned(

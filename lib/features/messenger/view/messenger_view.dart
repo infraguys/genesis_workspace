@@ -534,6 +534,7 @@ class _MessengerViewState extends State<MessengerView>
                                 key: ObjectKey(
                                   state.selectedChat!.id,
                                 ),
+                                chatId: state.selectedChat!.id,
                                 channelId: state.selectedChat!.streamId!,
                                 topicName: state.selectedTopic,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,

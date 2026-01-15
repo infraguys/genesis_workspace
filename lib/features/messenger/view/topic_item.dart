@@ -54,7 +54,7 @@ class TopicItem extends StatelessWidget {
               onPressed: () async {
                 context.pop();
                 await context.read<MessengerCubit>().readAllMessages(
-                  streamId: chat.streamId!,
+                  chat.id,
                   topicName: topic.name,
                 );
               },

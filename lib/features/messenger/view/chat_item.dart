@@ -171,17 +171,19 @@ class _ChatItemState extends State<ChatItem> {
                     }
                   },
                 ),
-                TextButton(
-                  child: Text(
-                    context.t.readAllMessages,
-                    textAlign: TextAlign.center,
-                  ),
-                  onPressed: () async {
-                    context.pop();
-                    await context.read<MessengerCubit>().readAllMessages(streamId: widget.chat.streamId!);
-                  },
-                ),
               ],
+              TextButton(
+                child: Text(
+                  context.t.readAllMessages,
+                  textAlign: TextAlign.center,
+                ),
+                onPressed: () async {
+                  context.pop();
+                  await context.read<MessengerCubit>().readAllMessages(
+                    widget.chat.id,
+                  );
+                },
+              ),
             ],
           ),
         ),

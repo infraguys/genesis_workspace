@@ -367,7 +367,14 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  Future<void> readAllMessages({required int streamId, String? topicName}) async {
+  Future<void> readAllMessages(
+    int chatId, {
+    String? topicName,
+  }) async {
+    final chat = state.chats.firstWhere((chat) => chat.id == chatId);
+    final indexOfChat = state.chats.indexOf(chat);
+    final dmIds = chat.dmIds;
+    final streamId = chat.streamId;
     bool foundNewest = false;
     int? lastProcessedId = null;
     while (foundNewest == false) {
@@ -381,7 +388,9 @@ class MessengerCubit extends Cubit<MessengerState> {
             op: UpdateMessageFlagsOp.add,
             flag: MessageFlag.read,
             narrow: [
-              MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamId),
+              MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: "unread"),
+              if (dmIds != null) MessageNarrowEntity(operator: NarrowOperator.dm, operand: dmIds),
+              if (streamId != null) MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamId),
               if (topicName != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: topicName),
             ],
           ),
@@ -394,6 +403,21 @@ class MessengerCubit extends Cubit<MessengerState> {
         }
       }
     }
+    final updatedChats = [...state.chats];
+
+    if (topicName != null) {
+      ChatEntity updatedChat = chat.copyWith(unreadMessages: {});
+      final topic = chat.topics!.firstWhere((topic) => topic.name == topicName);
+      final indexOfTopic = chat.topics!.indexOf(topic);
+      final updatedTopic = topic.copyWith(unreadMessages: {});
+      updatedChat.topics![indexOfTopic] = updatedTopic;
+      updatedChats[indexOfChat] = updatedChat;
+    } else {
+      ChatEntity updatedChat = chat.copyWith(unreadMessages: {});
+      updatedChat.copyWith(topics: updatedChat.topics?.map((topic) => topic.copyWith(unreadMessages: {})).toList());
+      updatedChats[indexOfChat] = updatedChat;
+    }
+    emit(state.copyWith(chats: updatedChats));
   }
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {

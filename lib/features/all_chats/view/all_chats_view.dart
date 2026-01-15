@@ -11,7 +11,6 @@ import 'package:genesis_workspace/features/all_chats/view/all_chats_channels.dar
 import 'package:genesis_workspace/features/all_chats/view/all_chats_dms.dart';
 import 'package:genesis_workspace/features/all_chats/view/all_group_chats.dart';
 import 'package:genesis_workspace/features/all_chats/view/folder_pill.dart';
-import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/channels/bloc/channels_cubit.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
@@ -330,15 +329,15 @@ class _AllChatsViewState extends State<AllChatsView> {
                                                 selectedChatState.selectedDmChat!.unreadMessages.length,
                                           );
                                         }
-                                        if (selectedChatState.selectedChannel != null) {
-                                          return ChannelChat(
-                                            key: ObjectKey(
-                                              selectedChatState.selectedChannel!.streamId,
-                                            ),
-                                            channelId: selectedChatState.selectedChannel!.streamId,
-                                            topicName: selectedChatState.selectedTopic?.name,
-                                          );
-                                        }
+                                        // if (selectedChatState.selectedChannel != null) {
+                                        //   return ChannelChat(
+                                        //     key: ObjectKey(
+                                        //       selectedChatState.selectedChannel!.streamId,
+                                        //     ),
+                                        //     channelId: selectedChatState.selectedChannel!.streamId,
+                                        //     topicName: selectedChatState.selectedTopic?.name,
+                                        //   );
+                                        // }
                                         if (selectedChatState.selectedGroupChat != null) {
                                           return Chat(
                                             key: ObjectKey(
