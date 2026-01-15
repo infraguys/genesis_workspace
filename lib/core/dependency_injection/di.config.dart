@@ -120,16 +120,14 @@ import 'package:genesis_workspace/domain/messages/usecases/get_message_readers.d
     as _i90;
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart'
     as _i207;
-import 'package:genesis_workspace/domain/messages/usecases/mark_stream_as_read_use_case.dart'
-    as _i300;
-import 'package:genesis_workspace/domain/messages/usecases/mark_topic_as_read_use_case.dart'
-    as _i657;
 import 'package:genesis_workspace/domain/messages/usecases/remove_emoji_reaction_use_case.dart'
     as _i513;
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart'
     as _i116;
 import 'package:genesis_workspace/domain/messages/usecases/update_message_use_case.dart'
     as _i1005;
+import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_narrow_use_case.dart'
+    as _i54;
 import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_use_case.dart'
     as _i664;
 import 'package:genesis_workspace/domain/messages/usecases/upload_file_use_case.dart'
@@ -397,12 +395,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i207.GetMessagesUseCase>(
       () => _i207.GetMessagesUseCase(gh<_i857.MessagesRepository>()),
     );
-    gh.factory<_i300.MarkStreamAsReadUseCase>(
-      () => _i300.MarkStreamAsReadUseCase(gh<_i857.MessagesRepository>()),
-    );
-    gh.factory<_i657.MarkTopicAsReadUseCase>(
-      () => _i657.MarkTopicAsReadUseCase(gh<_i857.MessagesRepository>()),
-    );
     gh.factory<_i513.RemoveEmojiReactionUseCase>(
       () => _i513.RemoveEmojiReactionUseCase(gh<_i857.MessagesRepository>()),
     );
@@ -411,6 +403,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i1005.UpdateMessageUseCase>(
       () => _i1005.UpdateMessageUseCase(gh<_i857.MessagesRepository>()),
+    );
+    gh.factory<_i54.UpdateMessagesFlagsNarrowUseCase>(
+      () =>
+          _i54.UpdateMessagesFlagsNarrowUseCase(gh<_i857.MessagesRepository>()),
     );
     gh.factory<_i664.UpdateMessagesFlagsUseCase>(
       () => _i664.UpdateMessagesFlagsUseCase(gh<_i857.MessagesRepository>()),
@@ -898,9 +894,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i766.ProfileCubit>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
-        gh<_i300.MarkStreamAsReadUseCase>(),
-        gh<_i657.MarkTopicAsReadUseCase>(),
         gh<_i293.GetAllFoldersItemsUseCase>(),
+        gh<_i54.UpdateMessagesFlagsNarrowUseCase>(),
       ),
     );
     gh.factory<_i1031.LocalNotificationsService>(

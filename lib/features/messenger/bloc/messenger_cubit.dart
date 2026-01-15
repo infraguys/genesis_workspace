@@ -28,13 +28,12 @@ import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/mark_as_read_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
-import 'package:genesis_workspace/domain/messages/usecases/mark_stream_as_read_use_case.dart';
-import 'package:genesis_workspace/domain/messages/usecases/mark_topic_as_read_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_narrow_use_case.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -72,8 +71,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
   final UpdateSubscriptionSettingsUseCase _updateSubscriptionSettingsUseCase;
-  final MarkStreamAsReadUseCase _markStreamAsReadUseCase;
-  final MarkTopicAsReadUseCase _markTopicAsReadUseCase;
+  final UpdateMessagesFlagsNarrowUseCase _updateMessagesFlagsNarrowUseCase;
 
   final MultiPollingService _realTimeService;
   final ProfileCubit _profileCubit;
@@ -114,9 +112,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._profileCubit,
     this._getSubscribedChannelsUseCase,
     this._updateSubscriptionSettingsUseCase,
-    this._markStreamAsReadUseCase,
-    this._markTopicAsReadUseCase,
     this._getAllFoldersItemsUseCase,
+    this._updateMessagesFlagsNarrowUseCase,
   ) : super(
         MessengerState.initial,
       ) {
@@ -370,42 +367,31 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  Future<void> readAllMessagesInChannel(int streamId) async {
-    try {
-      await _markStreamAsReadUseCase.call(MarkStreamAsReadRequestEntity(streamId: streamId));
-      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-      final indexOfChat = state.chats.indexOf(chat);
-      final updatedChat = chat.copyWith(unreadMessages: {});
-      final updatedChats = [...state.chats];
-      updatedChats[indexOfChat] = updatedChat;
-      emit(state.copyWith(chats: updatedChats));
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
-      }
-    }
-  }
-
-  Future<void> readAllMessagesInTopic({required int streamId, required String topicName}) async {
-    try {
-      await _markTopicAsReadUseCase.call(
-        MarkTopicAsReadRequestEntity(
-          streamId: streamId,
-          topicName: topicName,
-        ),
-      );
-      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-      final indexOfChat = state.chats.indexOf(chat);
-      final topic = chat.topics!.firstWhere((topic) => topic.name == topicName);
-      final indexOfTopic = chat.topics!.indexOf(topic);
-      final updatedTopic = topic.copyWith(unreadMessages: {});
-      chat.topics![indexOfTopic] = updatedTopic;
-      final updatedChats = [...state.chats];
-      updatedChats[indexOfChat] = chat;
-      emit(state.copyWith(chats: updatedChats));
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
+  Future<void> readAllMessages({required int streamId, String? topicName}) async {
+    bool foundNewest = false;
+    int? lastProcessedId = null;
+    while (foundNewest == false) {
+      try {
+        final response = await _updateMessagesFlagsNarrowUseCase.call(
+          UpdateMessagesFlagsNarrowRequestEntity(
+            anchor: lastProcessedId != null ? MessageAnchor.id(lastProcessedId) : MessageAnchor.oldest(),
+            includeAnchor: false,
+            numBefore: 0,
+            numAfter: 1000,
+            op: UpdateMessageFlagsOp.add,
+            flag: MessageFlag.read,
+            narrow: [
+              MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamId),
+              if (topicName != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: topicName),
+            ],
+          ),
+        );
+        foundNewest = response.foundNewest;
+        lastProcessedId = response.lastProcessedId;
+      } catch (e) {
+        if (kDebugMode) {
+          inspect(e);
+        }
       }
     }
   }

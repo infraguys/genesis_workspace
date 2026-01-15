@@ -5,12 +5,12 @@ import 'package:genesis_workspace/data/users/datasources/users_remote_data_sourc
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/delete_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/emoji_reaction_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/mark_as_read_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_response_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/repositories/messages_repository.dart';
@@ -55,6 +55,18 @@ class MessagesRepositoryImpl implements MessagesRepository {
   Future<void> updateMessagesFlags(UpdateMessagesFlagsRequestEntity body) async {
     try {
       await dataSource.updateMessagesFlags(body.toDto());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpdateMessagesFlagsNarrowResponseEntity> updateMessagesFlagsNarrow(
+    UpdateMessagesFlagsNarrowRequestEntity body,
+  ) async {
+    try {
+      final dto = await dataSource.updateMessagesFlagsNarrow(body.toDto());
+      return dto.toEntity();
     } catch (e) {
       rethrow;
     }
@@ -124,24 +136,6 @@ class MessagesRepositoryImpl implements MessagesRepository {
       final response = await dataSource.getMessageReaders(messageId);
       final users = await usersDataSource.getUsers(UsersRequestDto(userIds: response.userIds));
       return users.members.map((it) => it.toEntity()).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> markStreamAsRead(MarkStreamAsReadRequestEntity body) async {
-    try {
-      await dataSource.markStreamAsRead(body.toDto());
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> markTopicAsRead(MarkTopicAsReadRequestEntity body) async {
-    try {
-      await dataSource.markTopicAsRead(body.toDto());
     } catch (e) {
       rethrow;
     }

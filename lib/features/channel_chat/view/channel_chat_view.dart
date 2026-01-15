@@ -381,13 +381,13 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                           onTapEditMessage: onTapEditMessage,
                                           onReadAll: () async {
                                             if (widget.topicName != null) {
-                                              await context.read<MessengerCubit>().readAllMessagesInTopic(
+                                              await context.read<MessengerCubit>().readAllMessages(
                                                 streamId: widget.channelId,
                                                 topicName: widget.topicName!,
                                               );
                                             } else {
-                                              await context.read<MessengerCubit>().readAllMessagesInChannel(
-                                                widget.channelId,
+                                              await context.read<MessengerCubit>().readAllMessages(
+                                                streamId: widget.channelId,
                                               );
                                             }
                                           },

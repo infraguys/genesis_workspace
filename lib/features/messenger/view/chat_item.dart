@@ -178,7 +178,7 @@ class _ChatItemState extends State<ChatItem> {
                   ),
                   onPressed: () async {
                     context.pop();
-                    await context.read<MessengerCubit>().readAllMessagesInChannel(widget.chat.streamId!);
+                    await context.read<MessengerCubit>().readAllMessages(streamId: widget.chat.streamId!);
                   },
                 ),
               ],
