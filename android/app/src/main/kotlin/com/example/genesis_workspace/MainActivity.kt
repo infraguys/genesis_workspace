@@ -1,4 +1,4 @@
-package com.example.genesis_workspace
+package genesis.workspace
 
 import io.flutter.embedding.android.FlutterActivity
 
