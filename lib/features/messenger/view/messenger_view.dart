@@ -437,7 +437,11 @@ class _MessengerViewState extends State<MessengerView>
                                                 _showTopics = !_showTopics;
                                               });
                                             } else {
-                                              openChat(context, chat.dmIds?.toSet() ?? {});
+                                              openChat(
+                                                context,
+                                                chatId: chat.id,
+                                                membersIds: chat.dmIds?.toSet() ?? {},
+                                              );
                                             }
                                           } else {
                                             context.read<MessengerCubit>().selectChat(chat);
@@ -503,6 +507,7 @@ class _MessengerViewState extends State<MessengerView>
                             if (state.usersIds.isNotEmpty && state.selectedChat == null) {
                               return Chat(
                                 key: ObjectKey(state.usersIds),
+                                chatId: state.selectedChat!.id,
                                 userIds: state.usersIds.toList(),
                                 leadingOnPressed: () {
                                   if (panelState.status != .closed) {
@@ -518,6 +523,7 @@ class _MessengerViewState extends State<MessengerView>
                                 key: ObjectKey(
                                   state.selectedChat!.id,
                                 ),
+                                chatId: state.selectedChat!.id,
                                 userIds: state.selectedChat!.dmIds!,
                                 unreadMessagesCount: state.selectedChat?.unreadMessages.length,
                                 leadingOnPressed: () {

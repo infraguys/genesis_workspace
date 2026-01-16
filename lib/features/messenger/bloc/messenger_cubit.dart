@@ -20,7 +20,6 @@ import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_ca
 import 'package:genesis_workspace/domain/all_chats/usecases/get_all_folders_items_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart';
-import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart';
@@ -60,7 +59,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   final GetAllFoldersItemsUseCase _getAllFoldersItemsUseCase;
   final UpdateFolderUseCase _updateFolderUseCase;
   final DeleteFolderUseCase _deleteFolderUseCase;
-  final GetMembersForFolderUseCase _getMembersForFolderUseCase;
   final GetMessagesUseCase _getMessagesUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
   final PinChatUseCase _pinChatUseCase;
@@ -99,7 +97,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getFoldersUseCase,
     this._updateFolderUseCase,
     this._deleteFolderUseCase,
-    this._getMembersForFolderUseCase,
     this._getMessagesUseCase,
     this._getTopicsUseCase,
     this._realTimeService,
@@ -981,12 +978,15 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
     }
 
+    final updatedSelectedChat = updatedChats.firstWhereOrNull((chat) => chat.id == state.selectedChat?.id);
+
     emit(
       state.copyWith(
         messages: updatedMessages,
         chats: updatedChats,
         unreadMessages: updatedUnreadMessages,
         folders: updatedFolders,
+        selectedChat: updatedSelectedChat,
       ),
     );
   }
@@ -1016,11 +1016,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
 
     final message = state.messages.firstWhere((message) => message.id == messageId, orElse: MessageEntity.fake);
-
     ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
-
     updatedMessages.removeWhere((message) => message.id == messageId);
-    emit(state.copyWith(messages: updatedMessages));
 
     final List<MessageEntity> chatMessages =
         state.messages.where((message) => message.recipientId == updatedChat.id).toList()
@@ -1044,7 +1041,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       return;
     }
-
     final prevMessage = chatMessages[chatMessages.length - 1];
     if (_lastMessageId == messageId) {
       _lastMessageId = prevMessage.id;

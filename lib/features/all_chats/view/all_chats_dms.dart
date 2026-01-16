@@ -173,10 +173,10 @@ class _AllChatsDmsState extends State<AllChatsDms> with TickerProviderStateMixin
                               child: CreateGroupChatDialog(
                                 onCreate: (membersIds) {
                                   Navigator.of(dialogContext).pop();
-                                  openChat(context, {
-                                    ...membersIds,
-                                    directMessagesState.selfUser!.userId,
-                                  });
+                                  // openChat(context, {
+                                  //   ...membersIds,
+                                  //   directMessagesState.selfUser!.userId,
+                                  // });
                                 },
                               ),
                             );

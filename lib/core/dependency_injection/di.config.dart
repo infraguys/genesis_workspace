@@ -881,7 +881,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i815.GetFoldersUseCase>(),
         gh<_i7.UpdateFolderUseCase>(),
         gh<_i849.DeleteFolderUseCase>(),
-        gh<_i438.GetMembersForFolderUseCase>(),
         gh<_i207.GetMessagesUseCase>(),
         gh<_i699.GetTopicsUseCase>(),
         gh<_i823.MultiPollingService>(),
