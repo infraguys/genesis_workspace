@@ -377,6 +377,7 @@ class _MessengerViewState extends State<MessengerView>
                                   setState(() {
                                     _showTopics = false;
                                   });
+                                  context.read<MessengerCubit>().unselectChat();
                                 },
                                 isLargeScreen: isLargeScreen,
                                 searchVisibility: searchVisibility,
