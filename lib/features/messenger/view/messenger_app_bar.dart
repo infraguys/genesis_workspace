@@ -354,7 +354,12 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                     title: title,
                     folder: folder,
                     isSelected: isSelected,
-                    onTap: () => onSelectFolder(index),
+                    onTap: () {
+                      onSelectFolder(index);
+                      if (showTopics) {
+                        onTapBack();
+                      }
+                    },
                     onEdit: (folder.systemType != FolderSystemType.all && onEditFolder != null)
                         ? () => onEditFolder!(folder)
                         : null,
