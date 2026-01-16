@@ -64,9 +64,14 @@ def short_version(version: str) -> str:
     return version.split("-", 1)[0]
 
 
-def build_url(base_name: str, version: str) -> str:
+def build_linux_url(base_name: str, version: str) -> str:
     # Base repository URL pattern as per example
     return f"{REPO_URL}/{base_name}/{version}/bundle_linux.tar.gz"
+
+
+def build_win_url(base_name: str, version: str) -> str:
+    # Base repository URL pattern as per example
+    return f"{REPO_URL}/{base_name}/{version}/bundle_win.zip"
 
 
 def collect_versions_dir(dir_path: str) -> list[str]:
@@ -129,7 +134,8 @@ def make_index(
         {
             "version": v,
             "short_version": short_version(v),
-            "linux": {"url": build_url(base_name, v)},
+            "linux": {"url": build_linux_url(base_name, v)},
+            "win": {"url": build_win_url(base_name, v)},
         }
         for v in stable_versions_sorted
     ]
@@ -138,7 +144,8 @@ def make_index(
         {
             "version": v,
             "short_version": short_version(v),
-            "linux": {"url": build_url(base_name, v)},
+            "linux": {"url": build_linux_url(base_name, v)},
+            "win": {"url": build_win_url(base_name, v)},
         }
         for v in dev_versions_sorted
     ]
@@ -165,7 +172,14 @@ def make_index(
                 ),
                 "linux": {
                     "url": (
-                        build_url(base_name, latest_stable)
+                        build_linux_url(base_name, latest_stable)
+                        if latest_stable
+                        else ""
+                    )
+                },
+                "win": {
+                    "url": (
+                        build_win_url(base_name, latest_stable)
                         if latest_stable
                         else ""
                     )
@@ -178,7 +192,16 @@ def make_index(
                 ),
                 "linux": {
                     "url": (
-                        build_url(base_name, latest_dev) if latest_dev else ""
+                        build_linux_url(base_name, latest_dev)
+                        if latest_dev
+                        else ""
+                    )
+                },
+                "win": {
+                    "url": (
+                        build_win_url(base_name, latest_dev)
+                        if latest_dev
+                        else ""
                     )
                 },
             },
