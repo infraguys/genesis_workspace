@@ -110,7 +110,11 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                     child: CreateGroupChatDialog(
                       onCreate: (membersIds) {
                         context.pop();
-                        openChat(context, {...membersIds, selfUserId});
+                        openChat(
+                          context,
+                          chatId: -1,
+                          membersIds: {...membersIds, selfUserId},
+                        );
                       },
                     ),
                   );
@@ -294,7 +298,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                                     child: CreateGroupChatDialog(
                                       onCreate: (membersIds) {
                                         context.pop();
-                                        openChat(context, {...membersIds, selfUserId});
+                                        openChat(context, chatId: -1, membersIds: {...membersIds, selfUserId});
                                       },
                                     ),
                                   );

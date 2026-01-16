@@ -8,12 +8,14 @@ import 'package:genesis_workspace/features/channel_chat/view/channel_chat_view.d
 class ChannelChat extends StatelessWidget {
   const ChannelChat({
     super.key,
+    required this.chatId,
     required this.channelId,
     this.topicName,
     this.unreadMessagesCount = 0,
     this.leadingOnPressed,
   });
 
+  final int chatId;
   final int channelId;
   final String? topicName;
   final int? unreadMessagesCount;
@@ -26,6 +28,7 @@ class ChannelChat extends StatelessWidget {
     return Builder(
       builder: (context) {
         final channel = ChannelChatView(
+          chatId: chatId,
           channelId: channelId,
           topicName: topicName,
           unreadMessagesCount: unreadMessagesCount,

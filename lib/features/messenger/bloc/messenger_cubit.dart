@@ -20,7 +20,6 @@ import 'package:genesis_workspace/domain/all_chats/usecases/delete_folder_use_ca
 import 'package:genesis_workspace/domain/all_chats/usecases/get_all_folders_items_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folder_ids_for_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_folders_use_case.dart';
-import 'package:genesis_workspace/domain/all_chats/usecases/get_members_for_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/get_pinned_chats_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/pin_chat_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/set_folders_for_chat_use_case.dart';
@@ -28,13 +27,12 @@ import 'package:genesis_workspace/domain/all_chats/usecases/unpin_chat_use_case.
 import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_case.dart';
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
-import 'package:genesis_workspace/domain/messages/entities/mark_as_read_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_messages_flags_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
-import 'package:genesis_workspace/domain/messages/usecases/mark_stream_as_read_use_case.dart';
-import 'package:genesis_workspace/domain/messages/usecases/mark_topic_as_read_use_case.dart';
+import 'package:genesis_workspace/domain/messages/usecases/update_messages_flags_narrow_use_case.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -61,7 +59,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   final GetAllFoldersItemsUseCase _getAllFoldersItemsUseCase;
   final UpdateFolderUseCase _updateFolderUseCase;
   final DeleteFolderUseCase _deleteFolderUseCase;
-  final GetMembersForFolderUseCase _getMembersForFolderUseCase;
   final GetMessagesUseCase _getMessagesUseCase;
   final GetTopicsUseCase _getTopicsUseCase;
   final PinChatUseCase _pinChatUseCase;
@@ -72,8 +69,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
   final UpdateSubscriptionSettingsUseCase _updateSubscriptionSettingsUseCase;
-  final MarkStreamAsReadUseCase _markStreamAsReadUseCase;
-  final MarkTopicAsReadUseCase _markTopicAsReadUseCase;
+  final UpdateMessagesFlagsNarrowUseCase _updateMessagesFlagsNarrowUseCase;
 
   final MultiPollingService _realTimeService;
   final ProfileCubit _profileCubit;
@@ -101,7 +97,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._getFoldersUseCase,
     this._updateFolderUseCase,
     this._deleteFolderUseCase,
-    this._getMembersForFolderUseCase,
     this._getMessagesUseCase,
     this._getTopicsUseCase,
     this._realTimeService,
@@ -114,9 +109,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._profileCubit,
     this._getSubscribedChannelsUseCase,
     this._updateSubscriptionSettingsUseCase,
-    this._markStreamAsReadUseCase,
-    this._markTopicAsReadUseCase,
     this._getAllFoldersItemsUseCase,
+    this._updateMessagesFlagsNarrowUseCase,
   ) : super(
         MessengerState.initial,
       ) {
@@ -370,44 +364,92 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  Future<void> readAllMessagesInChannel(int streamId) async {
-    try {
-      await _markStreamAsReadUseCase.call(MarkStreamAsReadRequestEntity(streamId: streamId));
-      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-      final indexOfChat = state.chats.indexOf(chat);
-      final updatedChat = chat.copyWith(unreadMessages: {});
-      final updatedChats = [...state.chats];
-      updatedChats[indexOfChat] = updatedChat;
-      emit(state.copyWith(chats: updatedChats));
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
+  Future<void> readAllMessages(
+    int chatId, {
+    String? topicName,
+  }) async {
+    final chat = state.chats.firstWhere((chat) => chat.id == chatId);
+    final indexOfChat = state.chats.indexOf(chat);
+    final dmIds = chat.dmIds;
+    final streamId = chat.streamId;
+    bool foundNewest = false;
+    int? lastProcessedId = null;
+    while (foundNewest == false) {
+      try {
+        final response = await _updateMessagesFlagsNarrowUseCase.call(
+          UpdateMessagesFlagsNarrowRequestEntity(
+            anchor: lastProcessedId != null ? MessageAnchor.id(lastProcessedId) : MessageAnchor.oldest(),
+            includeAnchor: false,
+            numBefore: 0,
+            numAfter: 1000,
+            op: UpdateMessageFlagsOp.add,
+            flag: MessageFlag.read,
+            narrow: [
+              MessageNarrowEntity(operator: NarrowOperator.isFilter, operand: "unread"),
+              if (dmIds != null) MessageNarrowEntity(operator: NarrowOperator.dm, operand: dmIds),
+              if (streamId != null) MessageNarrowEntity(operator: NarrowOperator.channel, operand: streamId),
+              if (topicName != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: topicName),
+            ],
+          ),
+        );
+        foundNewest = response.foundNewest;
+        lastProcessedId = response.lastProcessedId;
+      } catch (e) {
+        if (kDebugMode) {
+          inspect(e);
+        }
+        break;
       }
     }
-  }
+    final updatedChats = [...state.chats];
+    final updatedUnreadMessages = [...state.unreadMessages];
 
-  Future<void> readAllMessagesInTopic({required int streamId, required String topicName}) async {
-    try {
-      await _markTopicAsReadUseCase.call(
-        MarkTopicAsReadRequestEntity(
-          streamId: streamId,
-          topicName: topicName,
-        ),
-      );
-      final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-      final indexOfChat = state.chats.indexOf(chat);
-      final topic = chat.topics!.firstWhere((topic) => topic.name == topicName);
-      final indexOfTopic = chat.topics!.indexOf(topic);
-      final updatedTopic = topic.copyWith(unreadMessages: {});
-      chat.topics![indexOfTopic] = updatedTopic;
-      final updatedChats = [...state.chats];
-      updatedChats[indexOfChat] = chat;
-      emit(state.copyWith(chats: updatedChats));
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
+    if (topicName != null) {
+      final unreadIdsForTopic = state.unreadMessages
+          .where((message) => message.recipientId == chat.id && message.subject == topicName)
+          .map((message) => message.id)
+          .toSet();
+
+      List<TopicEntity>? updatedTopics = chat.topics;
+      if (chat.topics != null) {
+        final indexOfTopic = chat.topics!.indexWhere((topic) => topic.name == topicName);
+        if (indexOfTopic != -1) {
+          final topic = chat.topics![indexOfTopic];
+          unreadIdsForTopic.addAll(topic.unreadMessages);
+          updatedTopics = [...chat.topics!];
+          updatedTopics[indexOfTopic] = topic.copyWith(unreadMessages: {});
+        }
       }
+
+      final updatedChat = chat.copyWith(
+        unreadMessages: {...chat.unreadMessages}..removeAll(unreadIdsForTopic),
+        topics: updatedTopics,
+      );
+      updatedChats[indexOfChat] = updatedChat;
+
+      updatedUnreadMessages.removeWhere(
+        (message) => message.recipientId == chat.id && message.subject == topicName,
+      );
+    } else {
+      final updatedChat = chat.copyWith(
+        unreadMessages: {},
+        topics: chat.topics?.map((topic) => topic.copyWith(unreadMessages: {})).toList(),
+      );
+      updatedChats[indexOfChat] = updatedChat;
+      updatedUnreadMessages.removeWhere((message) => message.recipientId == chat.id);
     }
+
+    final updatedFolders = _recalculateUnreadMessagesForFolders(
+      folders: state.folders,
+      chats: updatedChats,
+    );
+    emit(
+      state.copyWith(
+        chats: updatedChats,
+        unreadMessages: updatedUnreadMessages,
+        folders: updatedFolders,
+      ),
+    );
   }
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
@@ -936,12 +978,15 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
     }
 
+    final updatedSelectedChat = updatedChats.firstWhereOrNull((chat) => chat.id == state.selectedChat?.id);
+
     emit(
       state.copyWith(
         messages: updatedMessages,
         chats: updatedChats,
         unreadMessages: updatedUnreadMessages,
         folders: updatedFolders,
+        selectedChat: updatedSelectedChat,
       ),
     );
   }
@@ -971,11 +1016,8 @@ class MessengerCubit extends Cubit<MessengerState> {
     List<MessageEntity> updatedUnreadMessages = [...state.unreadMessages];
 
     final message = state.messages.firstWhere((message) => message.id == messageId, orElse: MessageEntity.fake);
-
     ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
-
     updatedMessages.removeWhere((message) => message.id == messageId);
-    emit(state.copyWith(messages: updatedMessages));
 
     final List<MessageEntity> chatMessages =
         state.messages.where((message) => message.recipientId == updatedChat.id).toList()
@@ -999,7 +1041,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       return;
     }
-
     final prevMessage = chatMessages[chatMessages.length - 1];
     if (_lastMessageId == messageId) {
       _lastMessageId = prevMessage.id;

@@ -2,34 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class TopicItem extends StatelessWidget {
-  final ChatEntity chat;
+class MobileTopicItem extends StatelessWidget {
+  final ChatEntity selectedChat;
   final TopicEntity topic;
-  final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
+  MobileTopicItem({super.key, required this.selectedChat, required this.topic});
 
-  TopicItem({super.key, required this.chat, required this.topic});
+  final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColors = theme.extension<CardColors>()!;
-    final textColors = theme.extension<TextColors>()!;
+    final TextColors textColors = theme.extension<TextColors>()!;
     return CustomPopup(
       key: popupKey,
       backgroundColor: theme.colorScheme.surfaceDim,
       arrowColor: theme.colorScheme.surfaceDim,
       rootNavigator: true,
-      isLongPress: currentSize(context) <= .tablet,
+      isLongPress: true,
       contentDecoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceDim,
         borderRadius: BorderRadius.circular(12),
@@ -54,7 +53,7 @@ class TopicItem extends StatelessWidget {
               onPressed: () async {
                 context.pop();
                 await context.read<MessengerCubit>().readAllMessages(
-                  chat.id,
+                  selectedChat.id,
                   topicName: topic.name,
                 );
               },
@@ -62,25 +61,26 @@ class TopicItem extends StatelessWidget {
           ],
         ),
       ),
-      child: InkWell(
-        onSecondaryTap: () {
-          popupKey.currentState?.show();
-        },
-        onTap: () {
-          context.read<MessengerCubit>().selectChat(
-            chat,
-            selectedTopic: topic.name,
-          );
-        },
-        child: BlocBuilder<MessengerCubit, MessengerState>(
-          builder: (context, state) {
-            final isSelected = topic.name == state.selectedTopic;
-            return Container(
+      child: Padding(
+        padding: EdgeInsetsGeometry.only(
+          left: 38,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              context.pushNamed(
+                Routes.channelChatTopic,
+                pathParameters: {
+                  'chatId': selectedChat.id.toString(),
+                  'channelId': selectedChat.streamId.toString(),
+                  'topicName': topic.name,
+                },
+                extra: {'unreadMessagesCount': topic.unreadMessages.length},
+              );
+            },
+            child: Ink(
               height: 76,
-              padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? cardColors.active : cardColors.base,
-              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -92,8 +92,10 @@ class TopicItem extends StatelessWidget {
                           width: 3,
                           height: 47,
                           decoration: BoxDecoration(
-                            color: chat.backgroundColor ?? AppColors.primary,
-                            borderRadius: BorderRadiusGeometry.circular(4),
+                            color: Colors.yellow,
+                            borderRadius: BorderRadiusGeometry.circular(
+                              4,
+                            ),
                           ),
                         ),
                         SizedBox(
@@ -131,19 +133,21 @@ class TopicItem extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Skeleton.ignore(
-                    child: SizedBox(
-                      height: 21,
-                      child: UnreadBadge(
-                        count: topic.unreadMessages.length,
-                        isMuted: chat.isMuted,
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Skeleton.ignore(
+                      child: SizedBox(
+                        height: 21,
+                        child: UnreadBadge(
+                          count: topic.unreadMessages.length,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );

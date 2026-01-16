@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/utils/url_updater_stub.dart'
     if (dart.library.html) 'package:genesis_workspace/core/utils/url_updater_web.dart';
+import 'package:genesis_workspace/data/messages/dto/message_narrow_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -39,6 +40,21 @@ class ToListAsJsonStringConverter implements JsonConverter<List<String>, String>
   @override
   String toJson(List<String> object) {
     return json.encode(object);
+  }
+}
+
+class NarrowToJsonConverter implements JsonConverter<List<MessageNarrowDto>, String> {
+  const NarrowToJsonConverter();
+
+  @override
+  List<MessageNarrowDto> fromJson(String jsonStr) {
+    final List<dynamic> decoded = json.decode(jsonStr);
+    return decoded.map((e) => MessageNarrowDto.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  @override
+  String toJson(List<MessageNarrowDto> object) {
+    return json.encode(object.map((e) => e.toJson()).toList());
   }
 }
 

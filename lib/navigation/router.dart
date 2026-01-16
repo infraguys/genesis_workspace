@@ -163,38 +163,38 @@ final router = GoRouter(
     ),
     if (!kIsWeb) ...[
       GoRoute(
-        path: '${Routes.directMessages}/:userId',
+        path: '${Routes.directMessages}/:chatId/:userId',
         name: Routes.chat,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
+          final chatIdString = state.pathParameters['chatId'];
           final userId = int.parse(state.pathParameters['userId']!);
           final extra = state.extra as Map<String, dynamic>?;
           final unread = extra?['unreadMessagesCount'] ?? 0;
+          final chatId = int.tryParse(chatIdString ?? '');
+          assert(chatId != null, 'chatId must be int');
 
           if (currentSize(context) > ScreenSize.lTablet) {
             // На десктопе в идеале сюда не приходим, но на всякий случай
             return SizedBox.shrink();
           } else {
-            return Chat(userIds: [userId], unreadMessagesCount: unread);
+            return Chat(chatId: chatId!, userIds: [userId], unreadMessagesCount: unread);
           }
         },
       ),
       GoRoute(
-        path: '${Routes.groupChat}/:userIds',
+        path: '${Routes.groupChat}/:chatId/:userIds',
         name: Routes.groupChat,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
+          final chatIdString = state.pathParameters['chatId'];
           final List<int> userIds = state.pathParameters['userIds']?.split(',').map(int.parse).toList() ?? [];
           final extra = state.extra as Map<String, dynamic>?;
           final unread = extra?['unreadMessagesCount'] ?? 0;
+          final chatId = int.tryParse(chatIdString ?? '');
+          assert(chatId != null, 'chatId must be int');
 
-          return Chat(userIds: userIds, unreadMessagesCount: unread);
-
-          // if (currentSize(context) > ScreenSize.lTablet) {
-          //   return SizedBox.shrink();
-          // } else {
-          //   return Chat(userIds: userIds, unreadMessagesCount: unread);
-          // }
+          return Chat(chatId: chatId!, userIds: userIds, unreadMessagesCount: unread);
         },
         routes: [
           GoRoute(
@@ -207,18 +207,25 @@ final router = GoRouter(
         ],
       ),
       GoRoute(
-        path: '${Routes.channels}/:channelId',
+        path: '${Routes.channels}/:chatId/:channelId',
         name: Routes.channelChat,
         pageBuilder: (context, state) {
+          final chatIdString = state.pathParameters['chatId'];
           final channelIdString = state.pathParameters['channelId'];
           final channelId = int.tryParse(channelIdString ?? '');
+          final chatId = int.tryParse(chatIdString ?? '');
           assert(channelId != null, 'channelId must be int');
+          assert(chatId != null, 'chatId must be int');
 
           final extra = state.extra as Map<String, dynamic>?;
           final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
 
           return NoTransitionPage(
-            child: ChannelChat(channelId: channelId!, unreadMessagesCount: unreadMessagesCount),
+            child: ChannelChat(
+              chatId: chatId!,
+              channelId: channelId!,
+              unreadMessagesCount: unreadMessagesCount,
+            ),
           );
 
           // if (currentSize(context) > ScreenSize.lTablet) {
@@ -233,18 +240,22 @@ final router = GoRouter(
         },
       ),
       GoRoute(
-        path: '${Routes.channels}/:channelId/:topicName',
+        path: '${Routes.channels}/:chatId/:channelId/:topicName',
         name: Routes.channelChatTopic,
         builder: (context, state) {
+          final chatIdString = state.pathParameters['chatId'];
           final channelIdString = state.pathParameters['channelId'];
           final topicName = state.pathParameters['topicName'];
+          final chatId = int.tryParse(chatIdString ?? '');
           final channelId = int.tryParse(channelIdString ?? '');
           assert(channelId != null, 'channelId must be int');
+          assert(chatId != null, 'chatId must be int');
 
           final extra = state.extra as Map<String, dynamic>?;
           final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
 
           return ChannelChat(
+            chatId: chatId!,
             channelId: channelId!,
             topicName: topicName,
             unreadMessagesCount: unreadMessagesCount,
