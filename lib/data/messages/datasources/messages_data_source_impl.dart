@@ -10,13 +10,13 @@ import 'package:genesis_workspace/data/messages/api/messages_api_client.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
-import 'package:genesis_workspace/data/messages/dto/mark_as_read_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/message_readers_response.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/messages_response_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/send_message_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/single_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_message_dto.dart';
+import 'package:genesis_workspace/data/messages/dto/update_messages_flags_narrow_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/update_messages_flags_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
 import 'package:genesis_workspace/data/messages/tus/platform_chunk_reader.dart';
@@ -83,6 +83,27 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   Future<void> updateMessagesFlags(UpdateMessagesFlagsRequestDto body) async {
     try {
       await apiClient.updateMessagesFlags(jsonEncode(body.messages), body.op, body.flag);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpdateMessagesFlagsNarrowResponseDto> updateMessagesFlagsNarrow(
+    UpdateMessagesFlagsNarrowRequestDto body,
+  ) async {
+    try {
+      final narrowString = jsonEncode(body.narrow?.map((e) => e.toJson()).toList());
+      final response = await apiClient.updateMessagesFlagsNarrow(
+        body.anchor,
+        body.includeAnchor,
+        body.numBefore,
+        body.numAfter,
+        narrowString,
+        body.op,
+        body.flag,
+      );
+      return response;
     } catch (e) {
       rethrow;
     }
@@ -306,29 +327,12 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       rethrow;
     }
   }
-
-  @override
-  Future<void> markStreamAsRead(MarkStreamAsReadRequestDto body) async {
-    try {
-      await apiClient.markStreamAsRead(body.streamId);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> markTopicAsRead(MarkTopicAsReadRequestDto body) async {
-    try {
-      await apiClient.markTopicAsRead(body.streamId, body.topicName);
-    } catch (e) {
-      rethrow;
-    }
-  }
 }
 
 class _AttachmentMatch {
   final String filename;
   final String pathId;
   final int createTime;
+
   _AttachmentMatch({required this.filename, required this.pathId, required this.createTime});
 }

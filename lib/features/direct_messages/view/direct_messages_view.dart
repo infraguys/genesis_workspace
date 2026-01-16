@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
-import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/sliver_direct_messages_list.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -89,8 +88,7 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                     constraints: BoxConstraints(
                       maxWidth: isDesktopLayout
                           ? desktopListPaneWidth
-                          : (MediaQuery.sizeOf(context).width -
-                                (currentSize(context) > ScreenSize.tablet ? 114 : 0)),
+                          : (MediaQuery.sizeOf(context).width - (currentSize(context) > ScreenSize.tablet ? 114 : 0)),
                     ),
                     decoration: BoxDecoration(
                       border: Border(
@@ -121,11 +119,12 @@ class _DirectMessagesViewState extends State<DirectMessagesView> {
                       directMessagesState.selectedUserId != null
                           ? Expanded(
                               key: ObjectKey(directMessagesState.selectedUserId),
-                              child: Chat(
-                                userIds: [directMessagesState.selectedUserId!],
-                                unreadMessagesCount:
-                                    directMessagesState.selectedUnreadMessagesCount,
-                              ),
+                              child: SizedBox(),
+                              // child: Chat(
+                              //   userIds: [directMessagesState.selectedUserId!],
+                              //   unreadMessagesCount:
+                              //       directMessagesState.selectedUnreadMessagesCount,
+                              // ),
                             )
                           : Expanded(child: Center(child: Text(context.t.selectAnyChat))),
                     ],

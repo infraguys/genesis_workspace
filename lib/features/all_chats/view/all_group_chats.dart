@@ -357,11 +357,11 @@ class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateM
                                     unreadCount: group.unreadMessagesCount,
                                     isPinned: isPinned,
                                     onTap: () {
-                                      openChat(
-                                        context,
-                                        group.members.map((member) => member.userId).toSet(),
-                                        unreadMessagesCount: group.unreadMessagesCount,
-                                      );
+                                      // openChat(
+                                      //   context,
+                                      //   group.members.map((member) => member.userId).toSet(),
+                                      //   unreadMessagesCount: group.unreadMessagesCount,
+                                      // );
                                     },
                                   ),
                                 ),

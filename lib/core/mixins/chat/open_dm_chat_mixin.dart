@@ -6,7 +6,12 @@ import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
 mixin OpenDmChatMixin {
-  void openChat(BuildContext context, Set<int> membersIds, {int? unreadMessagesCount}) {
+  void openChat(
+    BuildContext context, {
+    required Set<int> membersIds,
+    required int chatId,
+    int? unreadMessagesCount,
+  }) {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
 
     if (isDesktop) {
@@ -16,7 +21,7 @@ mixin OpenDmChatMixin {
       final userIdsString = userIds.join(',');
       context.pushNamed(
         Routes.groupChat,
-        pathParameters: {'userIds': userIdsString},
+        pathParameters: {'userIds': userIdsString, 'chatId': chatId.toString()},
         extra: {'unreadMessagesCount': unreadMessagesCount},
       );
     }

@@ -42,9 +42,17 @@ class RealTimeCubit extends Cubit<RealTimeState> {
         final token = await messaging.getToken();
         // print("fcm token: ${token}");
       }
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+    try {
       await _multiPollingService.init();
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     } finally {
       emit(state.copyWith(isConnecting: false));
     }

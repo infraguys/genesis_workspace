@@ -11,6 +11,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/logs/bloc/logs_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -45,6 +46,7 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (context) => getIt<NotificationsCubit>()),
         BlocProvider(create: (context) => getIt<InfoPanelCubit>()),
         BlocProvider(create: (context) => getIt<LogsCubit>()),
+        BlocProvider(create: (context) => getIt<MessengerCubit>()),
       ],
       child: MaterialApp.router(
         locale: TranslationProvider.of(context).flutterLocale,

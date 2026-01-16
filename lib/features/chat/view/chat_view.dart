@@ -33,6 +33,7 @@ import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -45,11 +46,13 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 class ChatView extends StatefulWidget {
   const ChatView({
     super.key,
+    required this.chatId,
     required this.userIds,
     this.unreadMessagesCount = 0,
     this.leadingOnPressed,
   });
 
+  final int chatId;
   final List<int> userIds;
   final int? unreadMessagesCount;
   final VoidCallback? leadingOnPressed;
@@ -457,6 +460,11 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                               myUserId: _myUser.userId,
                                               onTapQuote: onTapQuote,
                                               onTapEditMessage: onTapEditMessage,
+                                              onReadAll: () async {
+                                                await context.read<MessengerCubit>().readAllMessages(
+                                                  widget.chatId,
+                                                );
+                                              },
                                             ),
                                             Positioned(
                                               bottom: 0,
