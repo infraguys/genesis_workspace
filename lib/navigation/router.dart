@@ -207,7 +207,7 @@ final router = GoRouter(
         ],
       ),
       GoRoute(
-        path: '${Routes.channels}/:channelId',
+        path: '${Routes.channels}/:chatId/:channelId',
         name: Routes.channelChat,
         pageBuilder: (context, state) {
           final chatIdString = state.pathParameters['chatId'];
