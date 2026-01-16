@@ -19,6 +19,7 @@ class MessageContextMenu extends StatefulWidget {
     this.onEdit,
     this.onDelete,
     this.onClose,
+    this.onForward,
     required this.offset,
     required this.isMyMessage,
     required this.messageId,
@@ -28,6 +29,7 @@ class MessageContextMenu extends StatefulWidget {
   final VoidCallback? onReply;
   final VoidCallback? onEdit;
   final VoidCallback? onCopy;
+  final VoidCallback? onForward;
   final VoidCallback? onToggleStar;
   final VoidCallback? onDelete;
   final ValueChanged<String> onEmojiSelected;
@@ -62,6 +64,11 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
 
   void _onCopy() {
     widget.onCopy?.call();
+    _close();
+  }
+
+  void _onForward() {
+    widget.onForward?.call();
     _close();
   }
 
@@ -201,6 +208,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                       textColor: textColor,
                       icon: Assets.icons.forwardIcon,
                       label: context.t.contextMenu.forward,
+                      onTap: _onForward,
                     ),
                     _ActionTile(
                       textColor: textColor,

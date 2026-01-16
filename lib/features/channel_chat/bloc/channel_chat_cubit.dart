@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
@@ -373,6 +374,8 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     try {
       await _sendMessageUseCase.call(body);
       emit(state.copyWith(uploadedFilesString: '', uploadedFiles: []));
+    } on DioException {
+      rethrow;
     } catch (e) {
       inspect(e);
     } finally {
