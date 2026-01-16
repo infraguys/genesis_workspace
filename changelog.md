@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.7.0
+- Added icon for application (ios, android, macos)
+- Added developer profile at ios, macos
+- Fixed webrtc in webview in release mode
+- Added connection status in appbar
+- Added forward message functionality
+- Refactored read all functionality
+
 # 1.6.5
 - Topics ui refactor
 
