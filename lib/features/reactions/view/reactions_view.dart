@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
-import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/reactions/bloc/reactions_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -31,7 +30,7 @@ class _ReactionsViewState extends State<ReactionsView> {
     return BlocBuilder<ReactionsCubit, ReactionsState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: context.t.reactions.title),
+          // appBar: WorkspaceAppBar(title: context.t.reactions.title),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {

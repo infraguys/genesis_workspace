@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/inbox/bloc/inbox_cubit.dart';
@@ -31,7 +30,7 @@ class _InboxViewState extends State<InboxView> {
     return BlocBuilder<InboxCubit, InboxState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: context.t.inbox.title),
+          // appBar: WorkspaceAppBar(title: context.t.inbox.title),
           body: FutureBuilder(
             future: _future,
             builder: (context, snapshot) {
@@ -77,9 +76,7 @@ class _InboxViewState extends State<InboxView> {
                             ? null
                             : () async {
                                 final userId = user.value.first.senderId;
-                                final UserEntity userEntity = await context
-                                    .read<InboxCubit>()
-                                    .getUserById(userId);
+                                final UserEntity userEntity = await context.read<InboxCubit>().getUserById(userId);
                                 final DmUserEntity dmUser = userEntity.toDmUser();
                                 context.pushNamed(Routes.chat, extra: dmUser);
                               },
@@ -87,8 +84,7 @@ class _InboxViewState extends State<InboxView> {
                     },
                   ),
                   if (state.channelMessages.isNotEmpty) const SizedBox(height: 16),
-                  if (state.channelMessages.isNotEmpty)
-                    SectionHeader(title: context.t.inbox.channelsTab),
+                  if (state.channelMessages.isNotEmpty) SectionHeader(title: context.t.inbox.channelsTab),
                   ...state.channelMessages.entries.map(
                     (channelMessage) => ExpansionTile(
                       tilePadding: EdgeInsets.zero,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
-import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/features/mentions/bloc/mentions_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -37,7 +36,7 @@ class _MentionsViewState extends State<MentionsView> {
     return BlocBuilder<MentionsCubit, MentionsState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: context.t.mentions.title),
+          // appBar: WorkspaceAppBar(title: context.t.mentions.title),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {

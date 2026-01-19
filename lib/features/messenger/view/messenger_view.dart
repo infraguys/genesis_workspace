@@ -27,6 +27,7 @@ import 'package:genesis_workspace/features/messenger/view/widgets/pinned_chats_s
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
+import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
@@ -555,9 +556,7 @@ class _MessengerViewState extends State<MessengerView>
                               );
                             }
                             if (state.openStarredMessages) {
-                              return Center(
-                                child: Text("Starred Messages"),
-                              );
+                              return Starred();
                             }
                             return Center(child: Text(context.t.selectAnyChat));
                           },

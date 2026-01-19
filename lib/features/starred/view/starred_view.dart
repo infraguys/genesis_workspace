@@ -4,6 +4,7 @@ import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class StarredView extends StatefulWidget {
@@ -30,7 +31,29 @@ class _StarredViewState extends State<StarredView> {
     return BlocBuilder<StarredCubit, StarredState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: context.t.starred.title),
+          appBar: WorkspaceAppBar(
+            title: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  padding: EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xffF04C4C),
+                  ),
+                  child: Assets.icons.selectedBookmarkIcon.svg(
+                    colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text(
+                  context.t.starred.title,
+                ),
+              ],
+            ),
+            centerTitle: false,
+          ),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {
