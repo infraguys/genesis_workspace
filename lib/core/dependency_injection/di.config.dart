@@ -533,9 +533,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i570.FoldersRemoteDataSource>(),
       ),
     );
-    gh.factory<_i758.MentionsCubit>(
-      () => _i758.MentionsCubit(gh<_i207.GetMessagesUseCase>()),
-    );
     gh.factory<_i180.FolderMembershipLocalDataSource>(
       () => _i180.FolderMembershipLocalDataSource(gh<_i909.FolderItemDao>()),
     );
@@ -686,6 +683,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
+    gh.factory<_i758.MentionsCubit>(
+      () => _i758.MentionsCubit(
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i823.MultiPollingService>(),
+      ),
+    );
     gh.factory<_i433.DeleteTokenUseCase>(
       () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
@@ -796,6 +799,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i214.OrganizationsCubit>(),
       ),
     );
+    gh.factory<_i1068.StarredCubit>(
+      () => _i1068.StarredCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i207.GetMessagesUseCase>(),
+      ),
+    );
     gh.factory<_i739.ChannelChatCubit>(
       () => _i739.ChannelChatCubit(
         gh<_i823.MultiPollingService>(),
@@ -813,12 +822,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i656.ReactionsCubit>(
       () => _i656.ReactionsCubit(
-        gh<_i82.RealTimeService>(),
-        gh<_i207.GetMessagesUseCase>(),
-      ),
-    );
-    gh.factory<_i1068.StarredCubit>(
-      () => _i1068.StarredCubit(
         gh<_i82.RealTimeService>(),
         gh<_i207.GetMessagesUseCase>(),
       ),

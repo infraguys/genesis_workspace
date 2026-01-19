@@ -96,6 +96,9 @@
     "title": "Starred Messages",
     "no_starred": "No starred messages"
   },
+  "favorite": {
+    "title": "Favorite"
+  },
   "select_any_chat": "Select any chat",
   "call": {
     "title": "Call",

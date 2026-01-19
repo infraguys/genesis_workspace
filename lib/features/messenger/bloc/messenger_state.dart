@@ -1,5 +1,11 @@
 part of 'messenger_cubit.dart';
 
+enum OpenedSection {
+  chat,
+  starredMessages,
+  mentions,
+}
+
 class MessengerState {
   static const Object _notSpecified = Object();
 
@@ -19,7 +25,7 @@ class MessengerState {
   final bool isFolderSaving;
   final bool isFolderDeleting;
   final Set<int> usersIds;
-  final bool openStarredMessages;
+  final OpenedSection openedSection;
 
   MessengerState({
     this.selfUser,
@@ -38,7 +44,7 @@ class MessengerState {
     this.isFolderSaving = false,
     this.isFolderDeleting = false,
     Set<int>? usersIds,
-    required this.openStarredMessages,
+    required this.openedSection,
   }) : usersIds = usersIds ?? {};
 
   static MessengerState initial = MessengerState(
@@ -56,7 +62,7 @@ class MessengerState {
     subscribedChannels: [],
     isFolderSaving: false,
     isFolderDeleting: false,
-    openStarredMessages: false,
+    openedSection: .chat,
   );
 
   MessengerState copyWith({
@@ -76,7 +82,7 @@ class MessengerState {
     bool? isFolderSaving,
     bool? isFolderDeleting,
     Set<int>? usersIds,
-    bool? openStarredMessages,
+    OpenedSection? openedSection,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -95,7 +101,7 @@ class MessengerState {
       isFolderSaving: isFolderSaving ?? this.isFolderSaving,
       isFolderDeleting: isFolderDeleting ?? this.isFolderDeleting,
       usersIds: usersIds ?? this.usersIds,
-      openStarredMessages: openStarredMessages ?? this.openStarredMessages,
+      openedSection: openedSection ?? this.openedSection,
     );
   }
 }

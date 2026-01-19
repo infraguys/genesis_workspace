@@ -454,9 +454,17 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
     if (selectedTopic == null) {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: null, openStarredMessages: false));
+      emit(state.copyWith(selectedChat: chat, selectedTopic: null, openedSection: .chat));
     } else {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic, openStarredMessages: false));
+      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic, openedSection: .chat));
+    }
+  }
+
+  void openMySelfChat() {
+    final chat = state.chats.firstWhereOrNull((chat) => chat.dmIds?.length == 1);
+    inspect(chat);
+    if (chat != null) {
+      // inspect(chat);
     }
   }
 
@@ -727,10 +735,10 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> loadTopics(int streamId) async {
     final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-    emit(state.copyWith(selectedChat: chat, openStarredMessages: false));
+    emit(state.copyWith(selectedChat: chat, openedSection: .chat));
     await getChannelTopics(streamId);
     final updatedChat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-    emit(state.copyWith(selectedChat: updatedChat, openStarredMessages: false));
+    emit(state.copyWith(selectedChat: updatedChat, openedSection: .chat));
   }
 
   Future<void> pinChat({required int chatId}) async {
@@ -1248,23 +1256,22 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void selectTopic(String topic) {
     if (state.selectedChat != null) {
-      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic, openStarredMessages: false));
+      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic, openedSection: .chat));
     }
   }
 
   void createEmptyChat(Set<int> membersIds) async {
-    final newState = state.copyWith(usersIds: membersIds);
-    emit(newState);
+    emit(state.copyWith(usersIds: membersIds, openedSection: .chat));
   }
 
   void unselectChat() {
     emit(state.copyWith(selectedChat: null, selectedTopic: null));
   }
 
-  void openStarredMessages() {
+  void openSection(OpenedSection section) {
     emit(
       state.copyWith(
-        openStarredMessages: true,
+        openedSection: section,
         selectedChat: null,
         selectedTopic: null,
       ),

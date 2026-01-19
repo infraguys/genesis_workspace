@@ -14,12 +14,14 @@ import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/genesis_services/genesis_services.dart';
 import 'package:genesis_workspace/features/lk/lk.dart';
 import 'package:genesis_workspace/features/logs/logs.dart';
+import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/profile/profile.dart';
 import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
+import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:go_router/go_router.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -370,6 +372,16 @@ final router = GoRouter(
       path: Routes.talkerScreen,
       name: Routes.talkerScreen,
       builder: (context, state) => TalkerScreen(talker: getIt<Talker>()),
+    ),
+    GoRoute(
+      path: Routes.starred,
+      name: Routes.starred,
+      builder: (context, state) => Starred(),
+    ),
+    GoRoute(
+      path: Routes.mentions,
+      name: Routes.mentions,
+      builder: (context, state) => Mentions(),
     ),
   ],
 );

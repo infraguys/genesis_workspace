@@ -46,13 +46,13 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 class ChatView extends StatefulWidget {
   const ChatView({
     super.key,
-    required this.chatId,
+    this.chatId = -1,
     required this.userIds,
     this.unreadMessagesCount = 0,
     this.leadingOnPressed,
   });
 
-  final int chatId;
+  final int? chatId;
   final List<int> userIds;
   final int? unreadMessagesCount;
   final VoidCallback? leadingOnPressed;
@@ -461,9 +461,11 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                               onTapQuote: onTapQuote,
                                               onTapEditMessage: onTapEditMessage,
                                               onReadAll: () async {
-                                                await context.read<MessengerCubit>().readAllMessages(
-                                                  widget.chatId,
-                                                );
+                                                if (widget.chatId != null) {
+                                                  await context.read<MessengerCubit>().readAllMessages(
+                                                    widget.chatId!,
+                                                  );
+                                                }
                                               },
                                             ),
                                             Positioned(
