@@ -19,6 +19,7 @@ class MessengerState {
   final bool isFolderSaving;
   final bool isFolderDeleting;
   final Set<int> usersIds;
+  final bool openStarredMessages;
 
   MessengerState({
     this.selfUser,
@@ -37,6 +38,7 @@ class MessengerState {
     this.isFolderSaving = false,
     this.isFolderDeleting = false,
     Set<int>? usersIds,
+    required this.openStarredMessages,
   }) : usersIds = usersIds ?? {};
 
   static MessengerState initial = MessengerState(
@@ -54,6 +56,7 @@ class MessengerState {
     subscribedChannels: [],
     isFolderSaving: false,
     isFolderDeleting: false,
+    openStarredMessages: false,
   );
 
   MessengerState copyWith({
@@ -73,6 +76,7 @@ class MessengerState {
     bool? isFolderSaving,
     bool? isFolderDeleting,
     Set<int>? usersIds,
+    bool? openStarredMessages,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -91,6 +95,7 @@ class MessengerState {
       isFolderSaving: isFolderSaving ?? this.isFolderSaving,
       isFolderDeleting: isFolderDeleting ?? this.isFolderDeleting,
       usersIds: usersIds ?? this.usersIds,
+      openStarredMessages: openStarredMessages ?? this.openStarredMessages,
     );
   }
 }

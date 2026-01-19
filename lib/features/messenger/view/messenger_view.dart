@@ -554,6 +554,11 @@ class _MessengerViewState extends State<MessengerView>
                                 },
                               );
                             }
+                            if (state.openStarredMessages) {
+                              return Center(
+                                child: Text("Starred Messages"),
+                              );
+                            }
                             return Center(child: Text(context.t.selectAnyChat));
                           },
                         ),

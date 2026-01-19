@@ -454,9 +454,9 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
     if (selectedTopic == null) {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: null));
+      emit(state.copyWith(selectedChat: chat, selectedTopic: null, openStarredMessages: false));
     } else {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic));
+      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic, openStarredMessages: false));
     }
   }
 
@@ -727,10 +727,10 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> loadTopics(int streamId) async {
     final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-    emit(state.copyWith(selectedChat: chat));
+    emit(state.copyWith(selectedChat: chat, openStarredMessages: false));
     await getChannelTopics(streamId);
     final updatedChat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-    emit(state.copyWith(selectedChat: updatedChat));
+    emit(state.copyWith(selectedChat: updatedChat, openStarredMessages: false));
   }
 
   Future<void> pinChat({required int chatId}) async {
@@ -1248,7 +1248,7 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void selectTopic(String topic) {
     if (state.selectedChat != null) {
-      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic));
+      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic, openStarredMessages: false));
     }
   }
 
@@ -1259,5 +1259,15 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void unselectChat() {
     emit(state.copyWith(selectedChat: null, selectedTopic: null));
+  }
+
+  void openStarredMessages() {
+    emit(
+      state.copyWith(
+        openStarredMessages: true,
+        selectedChat: null,
+        selectedTopic: null,
+      ),
+    );
   }
 }
