@@ -26,6 +26,7 @@ import 'package:genesis_workspace/features/messenger/view/widgets/active_call_pa
 import 'package:genesis_workspace/features/messenger/view/widgets/messenger_folder_rail.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/pinned_chats_section.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
+import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
@@ -410,13 +411,6 @@ class _MessengerViewState extends State<MessengerView>
                                 searchQuery: _searchQuery,
                                 isLoadingMore: !state.foundOldestMessage,
                               ),
-                              if (visibleChats.isEmpty)
-                                Padding(
-                                  padding: EdgeInsets.only(top: 20),
-                                  child: Center(
-                                    child: Text(context.t.folders.folderIsEmpty),
-                                  ),
-                                ),
                               Expanded(
                                 child: Stack(
                                   children: [
@@ -479,6 +473,13 @@ class _MessengerViewState extends State<MessengerView>
                                         ),
                                       ),
                                     ),
+                                    if (visibleChats.isEmpty)
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 20),
+                                        child: Center(
+                                          child: Text(context.t.folders.folderIsEmpty),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
@@ -562,6 +563,8 @@ class _MessengerViewState extends State<MessengerView>
                                 return Starred();
                               case .mentions:
                                 return Mentions();
+                              case .reactions:
+                                return Reactions();
                               default:
                                 return Center(child: Text(context.t.selectAnyChat));
                             }

@@ -4,6 +4,7 @@ enum OpenedSection {
   chat,
   starredMessages,
   mentions,
+  reactions,
 }
 
 class MessengerState {

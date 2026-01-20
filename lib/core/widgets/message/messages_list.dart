@@ -213,7 +213,7 @@ class _MessagesListState extends State<MessagesList> {
                       children: [
                         if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
                           UnreadMessagesMarker(unreadCount: unreadCount),
-                        if (isNewTopic) TopicSeparator(topic: currentMessage.subject),
+                        if (isNewTopic) TopicSeparator(message: currentMessage),
                         if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
                       ],
                     ),
@@ -378,4 +378,3 @@ class MessageDayLabel extends StatelessWidget {
     return Text(label, style: Theme.of(context).textTheme.labelMedium);
   }
 }
-

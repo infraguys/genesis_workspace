@@ -20,6 +20,7 @@ import 'package:genesis_workspace/features/messenger/view/info_page/info_page.da
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/profile/profile.dart';
 import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
+import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/features/update/update.dart';
@@ -382,6 +383,11 @@ final router = GoRouter(
       path: Routes.mentions,
       name: Routes.mentions,
       builder: (context, state) => Mentions(),
+    ),
+    GoRoute(
+      path: Routes.reactions,
+      name: Routes.reactions,
+      builder: (context, state) => Reactions(),
     ),
   ],
 );
