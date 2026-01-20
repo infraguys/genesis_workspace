@@ -32,6 +32,7 @@ import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.da
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -78,11 +79,15 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
     );
     _controller = ScrollController();
     messageController = ChatTextEditingController();
-
     messageController
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
     focusOnInit();
+    final otherUserIds = widget.userIds.where((id) => id != _myUser.userId).toList(growable: false);
+    final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(userIds: otherUserIds);
+    if (draftForThisChat != null) {
+      messageController.text = draftForThisChat.content;
+    }
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -134,6 +139,15 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
         break;
     }
     super.didChangeAppLifecycleState(state);
+  }
+
+  @override
+  void deactivate() async {
+    await saveDraft(
+      messageController.text,
+      userIds: widget.userIds,
+    );
+    super.deactivate();
   }
 
   @override

@@ -11,6 +11,7 @@ import 'package:genesis_workspace/features/authentication/presentation/view/past
 import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/drafts/drafts.dart';
 import 'package:genesis_workspace/features/genesis_services/genesis_services.dart';
 import 'package:genesis_workspace/features/lk/lk.dart';
 import 'package:genesis_workspace/features/logs/logs.dart';
@@ -48,6 +49,10 @@ class Routes {
   static const String profile = '/profile';
   static const String profileInfo = '/profile-info';
   static const String talkerScreen = '/talker-screen';
+  static const String drafts = '/drafts';
+  static const String mentions = '/mentions';
+  static const String reactions = '/reactions';
+  static const String starred = '/starred';
 
   static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
@@ -59,9 +64,7 @@ class Routes {
   static const String channelChat = '/channel-chat';
   static const String channelChatTopic = '/channel-chat/topic';
   static const String inbox = '/inbox';
-  static const String mentions = '/mentions';
-  static const String reactions = '/reactions';
-  static const String starred = '/starred';
+
   static const String imageFullScreen = '/image-full-screen';
   static const String pasteBaseUrl = '/paste-base-url';
   static const String forceUpdate = '/force-update';
@@ -388,6 +391,11 @@ final router = GoRouter(
       path: Routes.reactions,
       name: Routes.reactions,
       builder: (context, state) => Reactions(),
+    ),
+    GoRoute(
+      path: Routes.drafts,
+      name: Routes.drafts,
+      builder: (context, state) => Drafts(),
     ),
   ],
 );

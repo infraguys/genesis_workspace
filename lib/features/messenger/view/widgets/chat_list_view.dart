@@ -45,7 +45,7 @@ class MessengerChatListView extends StatelessWidget with OpenDmChatMixin {
   final int? selectedChatId;
   final void Function(ChatEntity chat) onTap;
 
-  static const int headerItemsCount = 4;
+  static const int headerItemsCount = 5;
   static const BorderRadius materialBorderRadius = BorderRadius.all(Radius.circular(8));
 
   @override
@@ -112,6 +112,20 @@ class MessengerChatListView extends StatelessWidget with OpenDmChatMixin {
           color: Colors.white,
         ),
         color: Color(0xff58a333),
+      ),
+      _HeaderItem(
+        title: context.t.drafts.title,
+        onTap: () {
+          if (currentSize(context) <= ScreenSize.lTablet) {
+            context.pushNamed(Routes.drafts);
+          } else {
+            context.read<MessengerCubit>().openSection(.drafts);
+          }
+        },
+        icon: Assets.icons.pencilFilled.svg(
+          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+        ),
+        color: Color(0xffB86BEF),
       ),
     ];
     return ListView.separated(

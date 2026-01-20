@@ -94,6 +94,10 @@
     "title": "Упоминания",
     "no_mentions": "Нет упоминаний"
   },
+  "drafts": {
+    "title": "Черновики",
+    "no_mentions": "Нет черновиков"
+  },
   "reactions": {
     "title": "Реакции",
     "no_reactions": "Нет реакций"

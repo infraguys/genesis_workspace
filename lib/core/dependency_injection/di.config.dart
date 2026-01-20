@@ -37,6 +37,12 @@ import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_reposi
 import 'package:genesis_workspace/data/all_chats/repositories_impl/pinned_chats_repository_impl.dart'
     as _i835;
 import 'package:genesis_workspace/data/database/app_database.dart' as _i606;
+import 'package:genesis_workspace/data/drafts/datasources/drafts_remote_data_source.dart'
+    as _i803;
+import 'package:genesis_workspace/data/drafts/datasources/drafts_remote_data_source_impl.dart'
+    as _i614;
+import 'package:genesis_workspace/data/drafts/repositories_impl/drafts_repository_impl.dart'
+    as _i421;
 import 'package:genesis_workspace/data/genesis/datasources/genesis_services_data_source.dart'
     as _i640;
 import 'package:genesis_workspace/data/genesis/datasources/genesis_services_data_source_impl.dart'
@@ -102,6 +108,12 @@ import 'package:genesis_workspace/domain/common/usecases/get_version_config_sha_
     as _i690;
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart'
     as _i397;
+import 'package:genesis_workspace/domain/drafts/repositories/drafts_repository.dart'
+    as _i343;
+import 'package:genesis_workspace/domain/drafts/usecases/create_drafts_use_case.dart'
+    as _i367;
+import 'package:genesis_workspace/domain/drafts/usecases/get_drafts_use_case.dart'
+    as _i73;
 import 'package:genesis_workspace/domain/genesis/repositories/genesis_services_repository.dart'
     as _i1072;
 import 'package:genesis_workspace/domain/genesis/usecases/get_service_by_id_use_case.dart'
@@ -232,6 +244,8 @@ import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_
     as _i852;
 import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart'
     as _i1004;
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart'
+    as _i627;
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart'
     as _i144;
 import 'package:genesis_workspace/features/genesis_services/bloc/genesis_services_cubit.dart'
@@ -357,6 +371,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i451.UsersRemoteDataSource>(
       () => _i451.UsersRemoteDataSourceImpl(),
     );
+    gh.factory<_i803.DraftsRemoteDataSource>(
+      () => _i614.DraftsRemoteDataSourceImpl(),
+    );
+    gh.factory<_i343.DraftsRepository>(
+      () => _i421.DraftsRepositoryImpl(gh<_i803.DraftsRemoteDataSource>()),
+    );
     gh.factory<_i857.MessagesRepository>(() => _i971.MessagesRepositoryImpl());
     gh.factory<_i253.MessagesDataSource>(() => _i695.MessagesDataSourceImpl());
     gh.factory<_i672.AuthRemoteDataSource>(
@@ -453,6 +473,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i440.DioFactory>(),
       ),
     );
+    gh.factory<_i367.CreateDraftsUseCase>(
+      () => _i367.CreateDraftsUseCase(gh<_i343.DraftsRepository>()),
+    );
+    gh.factory<_i73.GetDraftsUseCase>(
+      () => _i73.GetDraftsUseCase(gh<_i343.DraftsRepository>()),
+    );
     gh.factory<_i277.FolderLocalDataSource>(
       () => _i277.FolderLocalDataSource(gh<_i483.FolderDao>()),
     );
@@ -526,6 +552,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
+    );
+    gh.factory<_i627.DraftsCubit>(
+      () => _i627.DraftsCubit(
+        gh<_i367.CreateDraftsUseCase>(),
+        gh<_i73.GetDraftsUseCase>(),
+      ),
     );
     gh.factory<_i48.FolderRepository>(
       () => _i957.FolderRepositoryImpl(

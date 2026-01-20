@@ -32,6 +32,7 @@ import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.da
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -86,6 +87,13 @@ class _ChannelChatViewState extends State<ChannelChatView>
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
     focusOnInit();
+    final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
+      channelId: widget.channelId,
+      topicName: widget.topicName,
+    );
+    if (draftForThisChat != null) {
+      messageController.text = draftForThisChat.content;
+    }
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -132,6 +140,16 @@ class _ChannelChatViewState extends State<ChannelChatView>
   }
 
   @override
+  void deactivate() async {
+    await saveDraft(
+      messageController.text,
+      channelId: widget.channelId,
+      topicName: widget.topicName,
+    );
+    super.deactivate();
+  }
+
+  @override
   void didUpdateWidget(ChannelChatView oldWidget) {
     if (widget.channelId != oldWidget.channelId) {
       context.read<ChannelChatCubit>().getInitialData(
@@ -147,15 +165,26 @@ class _ChannelChatViewState extends State<ChannelChatView>
         context.read<ChannelChatCubit>().getChannelMessages(
           unreadMessagesCount: widget.unreadMessagesCount,
         );
+        saveDraft(
+          messageController.text,
+          channelId: widget.channelId,
+          topicName: widget.topicName,
+        );
       });
       messageController.clear();
+      final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
+        channelId: widget.channelId,
+        topicName: widget.topicName,
+      );
+      if (draftForThisChat != null) {
+        messageController.text = draftForThisChat.content;
+      }
     }
-
     super.didUpdateWidget(oldWidget);
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     _scrollController.dispose();
     messageController
       ..removeListener(onTextChanged)

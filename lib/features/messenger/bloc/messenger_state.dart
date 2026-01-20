@@ -5,6 +5,7 @@ enum OpenedSection {
   starredMessages,
   mentions,
   reactions,
+  drafts,
 }
 
 class MessengerState {

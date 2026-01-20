@@ -88,6 +88,10 @@
     "title": "Mentions",
     "no_mentions": "No mentions"
   },
+  "drafts": {
+    "title": "Drafts",
+    "no_mentions": "No drafts"
+  },
   "reactions": {
     "title": "Reactions",
     "no_reactions": "No reactions"
