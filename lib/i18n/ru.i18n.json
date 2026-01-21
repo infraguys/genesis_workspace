@@ -94,6 +94,10 @@
     "title": "Упоминания",
     "no_mentions": "Нет упоминаний"
   },
+  "drafts": {
+    "title": "Черновики",
+    "no_drafts": "Нет черновиков"
+  },
   "reactions": {
     "title": "Реакции",
     "no_reactions": "Нет реакций"
@@ -101,6 +105,9 @@
   "starred": {
     "title": "Отмеченные сообщения",
     "no_starred": "Нет отмеченных сообщений"
+  },
+  "favorite": {
+    "title": "Избранное"
   },
   "select_any_chat": "Выберите любой чат",
   "call": {

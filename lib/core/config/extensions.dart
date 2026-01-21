@@ -79,6 +79,37 @@ extension PendingExtension on Widget {
       );
     }
 
+    if (this is IconButton) {
+      final IconButton button = this as IconButton;
+
+      return IconButton(
+        key: button.key,
+        onPressed: isPending ? null : button.onPressed,
+        iconSize: button.iconSize,
+        padding: button.padding,
+        alignment: button.alignment,
+        splashRadius: button.splashRadius,
+        color: button.color,
+        focusColor: button.focusColor,
+        hoverColor: button.hoverColor,
+        highlightColor: button.highlightColor,
+        splashColor: button.splashColor,
+        disabledColor: button.disabledColor,
+        focusNode: button.focusNode,
+        tooltip: button.tooltip,
+        enableFeedback: button.enableFeedback,
+        constraints: button.constraints,
+        style: button.style,
+        icon: isPending
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              )
+            : button.icon,
+      );
+    }
+
     return this;
   }
 }

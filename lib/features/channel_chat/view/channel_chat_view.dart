@@ -26,12 +26,14 @@ import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
+import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -69,6 +71,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
   late final UserEntity _myUser;
   late final ScrollController _scrollController;
   final GlobalKey _mentionKey = GlobalKey();
+  bool isDraftPasted = false;
+  DraftEntity? draftForThisChat;
 
   @override
   void initState() {
@@ -86,6 +90,14 @@ class _ChannelChatViewState extends State<ChannelChatView>
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
     focusOnInit();
+    draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
+      channelId: widget.channelId,
+      topicName: widget.topicName,
+    );
+    if (draftForThisChat != null) {
+      messageController.text = draftForThisChat!.content;
+      isDraftPasted = true;
+    }
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -132,7 +144,27 @@ class _ChannelChatViewState extends State<ChannelChatView>
   }
 
   @override
+  void deactivate() async {
+    if (!isDraftPasted && !isEditMode) {
+      await saveDraft(
+        messageController.text,
+        channelId: widget.channelId,
+        topicName: widget.topicName,
+        type: .stream,
+      );
+    } else if (!isEditMode) {
+      await updateDraft(
+        draftForThisChat!.id!,
+        messageController.text,
+      );
+    }
+
+    super.deactivate();
+  }
+
+  @override
   void didUpdateWidget(ChannelChatView oldWidget) {
+    final oldWidgetInputText = messageController.text;
     if (widget.channelId != oldWidget.channelId) {
       context.read<ChannelChatCubit>().getInitialData(
         streamId: widget.channelId,
@@ -141,6 +173,13 @@ class _ChannelChatViewState extends State<ChannelChatView>
       );
       messageController.clear();
     } else if (widget.topicName != oldWidget.topicName) {
+      messageController.clear();
+      saveDraft(
+        oldWidgetInputText,
+        channelId: oldWidget.channelId,
+        topicName: oldWidget.topicName,
+        type: .stream,
+      );
       context.read<ChannelChatCubit>().getChannelTopics(streamId: widget.channelId, topicName: widget.topicName).then((
         _,
       ) {
@@ -148,9 +187,15 @@ class _ChannelChatViewState extends State<ChannelChatView>
           unreadMessagesCount: widget.unreadMessagesCount,
         );
       });
-      messageController.clear();
+      final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
+        channelId: widget.channelId,
+        topicName: widget.topicName,
+      );
+      if (draftForThisChat != null) {
+        messageController.text = draftForThisChat.content;
+        isDraftPasted = true;
+      }
     }
-
     super.didUpdateWidget(oldWidget);
   }
 

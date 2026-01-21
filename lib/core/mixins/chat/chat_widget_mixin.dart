@@ -6,14 +6,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/enums/draft_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop_types.dart';
 import 'package:genesis_workspace/core/widgets/create_call_dialog.dart';
+import 'package:genesis_workspace/domain/drafts/entities/create_drafts_entity.dart';
+import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
@@ -65,6 +69,43 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   void focusOnInit() {
     if (platformInfo.isDesktop) {
       messageInputFocusNode.requestFocus();
+    }
+  }
+
+  Future<void> saveDraft(
+    String content, {
+    int? channelId,
+    String? topicName,
+    List<int>? userIds,
+    required DraftType type,
+  }) async {
+    if (content.isEmpty) {
+      return;
+    }
+    try {
+      final to = channelId != null ? [channelId] : userIds!;
+      final draft = DraftEntity(
+        type: type,
+        to: to,
+        topic: topicName ?? '',
+        content: content,
+      );
+      final body = CreateDraftsRequestEntity(drafts: [draft]);
+      await context.read<DraftsCubit>().saveDraft(body);
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> updateDraft(int draftId, String content) async {
+    try {
+      await context.read<DraftsCubit>().editDraft(draftId, content);
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 

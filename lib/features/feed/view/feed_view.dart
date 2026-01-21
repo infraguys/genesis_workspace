@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
-import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/feed/bloc/feed_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class FeedView extends StatefulWidget {
   const FeedView({super.key});
@@ -46,7 +44,7 @@ class _MixedFeedViewState extends State<FeedView> {
     return BlocBuilder<FeedCubit, FeedState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: WorkspaceAppBar(title: context.t.feed),
+          // appBar: WorkspaceAppBar(title: context.t.feed),
           body: FutureBuilder(
             future: _future,
             builder: (BuildContext context, snapshot) {

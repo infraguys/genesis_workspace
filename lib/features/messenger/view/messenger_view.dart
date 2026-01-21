@@ -14,6 +14,9 @@ import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_up
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
+import 'package:genesis_workspace/features/drafts/drafts.dart';
+import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
@@ -25,8 +28,10 @@ import 'package:genesis_workspace/features/messenger/view/widgets/active_call_pa
 import 'package:genesis_workspace/features/messenger/view/widgets/messenger_folder_rail.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/pinned_chats_section.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
+import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
+import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
@@ -117,6 +122,7 @@ class _MessengerViewState extends State<MessengerView>
     await Future.wait([
       context.read<MessengerCubit>().loadFolders(),
       context.read<MessengerCubit>().getInitialMessages(),
+      context.read<DraftsCubit>().getDrafts(),
     ]);
     if (mounted) {
       unawaited(context.read<MessengerCubit>().lazyLoadAllMessages());
@@ -326,6 +332,7 @@ class _MessengerViewState extends State<MessengerView>
             Future.wait([
               context.read<RealTimeCubit>().ensureConnection(),
               context.read<MessengerCubit>().getUnreadMessages(),
+              context.read<DraftsCubit>().getDrafts(),
             ]),
           );
         },
@@ -408,13 +415,6 @@ class _MessengerViewState extends State<MessengerView>
                                 searchQuery: _searchQuery,
                                 isLoadingMore: !state.foundOldestMessage,
                               ),
-                              if (visibleChats.isEmpty)
-                                Padding(
-                                  padding: EdgeInsets.only(top: 20),
-                                  child: Center(
-                                    child: Text(context.t.folders.folderIsEmpty),
-                                  ),
-                                ),
                               Expanded(
                                 child: Stack(
                                   children: [
@@ -477,6 +477,13 @@ class _MessengerViewState extends State<MessengerView>
                                         ),
                                       ),
                                     ),
+                                    if (visibleChats.isEmpty)
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 20),
+                                        child: Center(
+                                          child: Text(context.t.folders.folderIsEmpty),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
@@ -505,54 +512,67 @@ class _MessengerViewState extends State<MessengerView>
                       Expanded(
                         child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
                           builder: (context, panelState) {
-                            if (state.usersIds.isNotEmpty && state.selectedChat == null) {
-                              return Chat(
-                                key: ObjectKey(state.usersIds),
-                                chatId: state.selectedChat!.id,
-                                userIds: state.usersIds.toList(),
-                                leadingOnPressed: () {
-                                  if (panelState.status != .closed) {
-                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
-                                  } else {
-                                    context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
-                                  }
-                                },
-                              );
-                            }
-                            if (state.selectedChat?.dmIds != null) {
-                              return Chat(
-                                key: ObjectKey(
-                                  state.selectedChat!.id,
-                                ),
-                                chatId: state.selectedChat!.id,
-                                userIds: state.selectedChat!.dmIds!,
-                                unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                leadingOnPressed: () {
-                                  if (panelState.status != .closed) {
-                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
-                                  } else {
-                                    context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
-                                  }
-                                },
-                              );
-                            }
-                            if (state.selectedChat?.streamId != null) {
-                              return ChannelChat(
-                                key: ObjectKey(
-                                  state.selectedChat!.id,
-                                ),
-                                chatId: state.selectedChat!.id,
-                                channelId: state.selectedChat!.streamId!,
-                                topicName: state.selectedTopic,
-                                unreadMessagesCount: state.selectedChat?.unreadMessages.length,
-                                leadingOnPressed: () {
-                                  if (panelState.status != .closed) {
-                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
-                                  } else {
-                                    context.read<InfoPanelCubit>().setInfoPanelState(.channelInfo);
-                                  }
-                                },
-                              );
+                            switch (state.openedSection) {
+                              case .chat:
+                                if (state.usersIds.isNotEmpty && state.selectedChat == null) {
+                                  return Chat(
+                                    key: ObjectKey(state.usersIds),
+                                    chatId: state.selectedChat?.id,
+                                    userIds: state.usersIds.toList(),
+                                    leadingOnPressed: () {
+                                      if (panelState.status != .closed) {
+                                        context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                      } else {
+                                        context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                      }
+                                    },
+                                  );
+                                }
+                                if (state.selectedChat?.dmIds != null) {
+                                  return Chat(
+                                    key: ObjectKey(
+                                      state.selectedChat!.id,
+                                    ),
+                                    chatId: state.selectedChat?.id,
+                                    userIds: state.selectedChat!.dmIds!,
+                                    unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                    leadingOnPressed: () {
+                                      if (panelState.status != .closed) {
+                                        context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                      } else {
+                                        context.read<InfoPanelCubit>().setInfoPanelState(.dmInfo);
+                                      }
+                                    },
+                                  );
+                                }
+                                if (state.selectedChat?.streamId != null) {
+                                  return ChannelChat(
+                                    key: ObjectKey(
+                                      state.selectedChat!.id,
+                                    ),
+                                    chatId: state.selectedChat!.id,
+                                    channelId: state.selectedChat!.streamId!,
+                                    topicName: state.selectedTopic,
+                                    unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                    leadingOnPressed: () {
+                                      if (panelState.status != .closed) {
+                                        context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                      } else {
+                                        context.read<InfoPanelCubit>().setInfoPanelState(.channelInfo);
+                                      }
+                                    },
+                                  );
+                                }
+                              case .starredMessages:
+                                return Starred();
+                              case .mentions:
+                                return Mentions();
+                              case .reactions:
+                                return Reactions();
+                              case .drafts:
+                                return Drafts();
+                              default:
+                                return Center(child: Text(context.t.selectAnyChat));
                             }
                             return Center(child: Text(context.t.selectAnyChat));
                           },

@@ -15,6 +15,7 @@ import 'package:genesis_workspace/features/authentication/presentation/auth.dart
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/call/view/draggable_resizable_call_modal.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -83,6 +84,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     await Future.wait([
       context.read<UpdateCubit>().checkUpdateNeed(),
       context.read<ProfileCubit>().getOwnUser(),
+      context.read<DraftsCubit>().getDrafts(),
     ]);
   }
 
