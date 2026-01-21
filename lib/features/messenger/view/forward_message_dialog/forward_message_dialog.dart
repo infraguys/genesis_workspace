@@ -43,14 +43,14 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
   final _tabsScroll = ScrollController();
   late final ForwardMessageCubit forwardMessageCubit;
   late final MessengerCubit messengerCubit;
-  int _selectedFolderIndex = 0;
+  final _selectedFolderIndex = ValueNotifier(0);
 
   @override
   void initState() {
     super.initState();
     messengerCubit = context.read<MessengerCubit>();
     forwardMessageCubit = context.read<ForwardMessageCubit>();
-    _selectedFolderIndex = messengerCubit.state.selectedFolderIndex;
+    _selectedFolderIndex.value = messengerCubit.state.selectedFolderIndex;
     forwardMessageCubit.applyChatFilter(_folderFilteredChats(messengerCubit.state));
     _searchController.addListener(_onSearchChanged);
   }
@@ -61,11 +61,10 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
   }
 
   List<ChatEntity> _folderFilteredChats(MessengerState state) {
-    final int index = _selectedFolderIndex;
-    if (index <= 0 || index >= state.folders.length) {
+    if (_selectedFolderIndex.value <= 0 || _selectedFolderIndex.value >= state.folders.length) {
       return state.chats;
     }
-    final ids = state.folders[index].folderItems;
+    final ids = state.folders[_selectedFolderIndex.value].folderItems;
     return state.chats.where((chat) => ids.contains(chat.id)).toList();
   }
 
@@ -123,79 +122,79 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
               const SizedBox(height: 20),
               BlocConsumer<MessengerCubit, MessengerState>(
                 listener: (context, state) {
-                  if (_selectedFolderIndex >= state.folders.length) {
-                    setState(() {
-                      _selectedFolderIndex = 0;
-                    });
+                  if (_selectedFolderIndex.value >= state.folders.length) {
+                    _selectedFolderIndex.value = 0;
                   }
                   final query = _searchController.text.trim().toLowerCase();
                   forwardMessageCubit.applyChatFilter(_folderFilteredChats(state), query: query);
                 },
                 builder: (context, state) {
-                  // return const SizedBox();
                   return Padding(
                     padding: const .symmetric(horizontal: 0.0),
-                    child: DefaultTabController(
-                      initialIndex: _selectedFolderIndex,
-                      length: state.folders.length,
-                      child: Listener(
-                        onPointerSignal: (signal) {
-                          if (signal is PointerScrollEvent && _tabsScroll.hasClients) {
-                            final delta = signal.scrollDelta.dx != 0 ? signal.scrollDelta.dx : signal.scrollDelta.dy;
-                            final next = (_tabsScroll.offset + delta).clamp(0.0, _tabsScroll.position.maxScrollExtent);
-                            _tabsScroll.jumpTo(next);
-                          }
-                        },
-                        child: SizedBox(
-                          height: kTextTabBarHeight,
-                          width: double.infinity,
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                child: Container(
-                                  height: 1,
-                                  color: theme.dividerColor.withValues(alpha: .10),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  controller: _tabsScroll,
-                                  child: TabBar.secondary(
-                                    onTap: (value) {
-                                      if (_selectedFolderIndex == value) return;
-                                      setState(() {
-                                        _selectedFolderIndex = value;
-                                      });
-                                      final query = _searchController.text.trim().toLowerCase();
-                                      forwardMessageCubit.applyChatFilter(
-                                        _folderFilteredChats(messengerCubit.state),
-                                        query: query,
-                                      );
-                                    },
-                                    dividerColor: Colors.transparent,
-                                    indicatorSize: TabBarIndicatorSize.tab,
-                                    isScrollable: true,
-                                    tabAlignment: .start,
-                                    tabs: state.folders.indexed.map(
-                                      (it) {
-                                        final index = it.$1;
-                                        final folder = it.$2;
-                                        final title = index == 0 ? context.t.folders.all : folder.title;
-                                        return Tab(text: title);
-                                      },
-                                    ).toList(),
+                    child: ValueListenableBuilder(
+                      valueListenable: _selectedFolderIndex,
+                      builder: (context, value, _) {
+                        return DefaultTabController(
+                          initialIndex: value,
+                          length: state.folders.length,
+                          child: Listener(
+                            onPointerSignal: (signal) {
+                              if (signal is PointerScrollEvent && _tabsScroll.hasClients) {
+                                final delta = signal.scrollDelta.dx != 0 ? signal.scrollDelta.dx : signal.scrollDelta.dy;
+                                final next = (_tabsScroll.offset + delta).clamp(0.0, _tabsScroll.position.maxScrollExtent);
+                                _tabsScroll.jumpTo(next);
+                              }
+                            },
+                            child: SizedBox(
+                              height: kTextTabBarHeight,
+                              width: double.infinity,
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    child: Container(
+                                      height: 1,
+                                      color: theme.dividerColor.withValues(alpha: .10),
+                                    ),
                                   ),
-                                ),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      controller: _tabsScroll,
+                                      child: TabBar.secondary(
+                                        onTap: (value) {
+                                          if (_selectedFolderIndex.value == value) return;
+                                          _selectedFolderIndex.value = value;
+                                          final query = _searchController.text.trim().toLowerCase();
+                                          forwardMessageCubit.applyChatFilter(
+                                            _folderFilteredChats(messengerCubit.state),
+                                            query: query,
+                                          );
+                                        },
+                                        dividerColor: Colors.transparent,
+                                        indicatorSize: TabBarIndicatorSize.tab,
+                                        isScrollable: true,
+                                        tabAlignment: .start,
+                                        tabs: state.folders.indexed.map(
+                                          (it) {
+                                            final index = it.$1;
+                                            final folder = it.$2;
+                                            final title = index == 0 ? context.t.folders.all : folder.title;
+                                            return Tab(text: title);
+                                          },
+                                        ).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   );
                 },
