@@ -81,7 +81,6 @@ class StarredCubit extends Cubit<StarredState> {
   }
 
   void _onMessageFlagsEvents(UpdateMessageFlagsEventEntity event) {
-    inspect(event);
     final updatedMessages = [...state.messages];
     for (var messageId in event.messages) {
       if (event.flag == MessageFlag.starred) {

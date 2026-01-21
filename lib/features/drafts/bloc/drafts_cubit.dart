@@ -25,7 +25,6 @@ class DraftsCubit extends Cubit<DraftsState> {
         DraftsState(
           drafts: [],
           pendingDraftId: null,
-          currentDraft: null,
         ),
       );
 
