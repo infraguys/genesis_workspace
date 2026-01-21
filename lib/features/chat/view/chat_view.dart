@@ -152,6 +152,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
     if (!isDraftPasted && !isEditMode) {
       await saveDraft(
         messageController.text,
+        chatId: widget.chatId!,
         userIds: widget.userIds,
       );
     } else if (!isEditMode) {

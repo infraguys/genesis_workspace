@@ -73,6 +73,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
 
   Future<void> saveDraft(
     String content, {
+    required int chatId,
     int? channelId,
     String? topicName,
     List<int>? userIds,
@@ -87,6 +88,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         to: to,
         topic: topicName ?? '',
         content: content,
+        chatId: chatId,
       );
       final body = CreateDraftsRequestEntity(drafts: [draft]);
       await context.read<DraftsCubit>().saveDraft(body);

@@ -148,6 +148,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     if (!isDraftPasted && !isEditMode) {
       await saveDraft(
         messageController.text,
+        chatId: widget.chatId,
         channelId: widget.channelId,
         topicName: widget.topicName,
       );
@@ -175,6 +176,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
       messageController.clear();
       saveDraft(
         oldWidgetInputText,
+        chatId: oldWidget.chatId,
         channelId: oldWidget.channelId,
         topicName: oldWidget.topicName,
       );

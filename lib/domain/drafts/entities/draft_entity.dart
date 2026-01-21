@@ -9,6 +9,7 @@ class DraftEntity {
   final String topic;
   final String content;
   final int? timestamp;
+  final int chatId;
 
   DraftEntity({
     this.id,
@@ -17,6 +18,7 @@ class DraftEntity {
     required this.topic,
     required this.content,
     this.timestamp,
+    required this.chatId,
   });
 
   DraftDto toDto() => DraftDto(id: id, type: type, to: to, topic: topic, content: content, timestamp: timestamp);
@@ -28,6 +30,7 @@ class DraftEntity {
     String? topic,
     String? content,
     int? timestamp,
+    int? chatId,
   }) {
     return DraftEntity(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class DraftEntity {
       topic: topic ?? this.topic,
       content: content ?? this.content,
       timestamp: timestamp ?? this.timestamp,
+      chatId: chatId ?? this.chatId,
     );
   }
 }

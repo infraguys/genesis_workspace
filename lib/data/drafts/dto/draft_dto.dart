@@ -28,5 +28,12 @@ class DraftDto {
 
   factory DraftDto.fromJson(Map<String, dynamic> json) => _$DraftDtoFromJson(json);
 
-  DraftEntity toEntity() => DraftEntity(id: id, type: type, to: to, topic: topic, content: content);
+  DraftEntity toEntity() => DraftEntity(
+    id: id,
+    type: type,
+    to: to,
+    topic: topic,
+    content: content,
+    chatId: -1,
+  );
 }

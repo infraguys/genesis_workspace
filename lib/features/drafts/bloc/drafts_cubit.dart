@@ -128,6 +128,7 @@ class DraftsCubit extends Cubit<DraftsState> {
       return;
     }
     try {
+      emit(state.copyWith(pendingDraftId: draftId));
       final body = EditDraftRequestEntity(
         id: draftId,
         draft: draft.copyWith(content: content),
@@ -138,6 +139,8 @@ class DraftsCubit extends Cubit<DraftsState> {
       if (kDebugMode) {
         inspect(e);
       }
+    } finally {
+      emit(state.copyWith(pendingDraftId: null));
     }
   }
 }

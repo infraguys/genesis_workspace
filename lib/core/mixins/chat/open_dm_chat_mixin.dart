@@ -26,4 +26,38 @@ mixin OpenDmChatMixin {
       );
     }
   }
+
+  void openChannel(
+    BuildContext context, {
+    required int channelId,
+    String? topicName,
+    int? unreadMessagesCount,
+  }) {
+    final isDesktop = currentSize(context) > ScreenSize.tablet;
+    final chat = context.read<MessengerCubit>().state.chats.firstWhere((chat) => chat.streamId == channelId);
+    if (isDesktop) {
+      context.read<MessengerCubit>().selectChat(chat, selectedTopic: topicName);
+    } else {
+      if (topicName != null && topicName.isNotEmpty) {
+        context.pushNamed(
+          Routes.channelChatTopic,
+          pathParameters: {
+            'chatId': chat.id.toString(),
+            'channelId': channelId.toString(),
+            'topicName': topicName,
+          },
+          extra: {'unreadMessagesCount': unreadMessagesCount},
+        );
+      } else {
+        context.pushNamed(
+          Routes.channelChat,
+          pathParameters: {
+            'chatId': chat.id.toString(),
+            'channelId': channelId.toString(),
+          },
+          extra: {'unreadMessagesCount': unreadMessagesCount},
+        );
+      }
+    }
+  }
 }
