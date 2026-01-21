@@ -6,13 +6,13 @@ part 'draft_dto.g.dart';
 
 @JsonSerializable()
 class DraftDto {
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final int? id;
   final DraftType type;
   final List<int> to;
   final String topic;
   final String content;
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeToJson: false)
   final int? timestamp;
 
   DraftDto({

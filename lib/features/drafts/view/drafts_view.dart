@@ -48,6 +48,13 @@ class DraftsView extends StatelessWidget {
               final draft = state.drafts[index];
               return ListTile(
                 title: Text(draft.content),
+                subtitle: Row(
+                  spacing: 4,
+                  children: [
+                    Text(draft.to.toString()),
+                    Text(draft.topic),
+                  ],
+                ),
                 trailing: IconButton(
                   onPressed: () async {
                     if (draft.id != null) {

@@ -1,5 +1,6 @@
 import 'package:genesis_workspace/data/drafts/datasources/drafts_remote_data_source.dart';
 import 'package:genesis_workspace/domain/drafts/entities/create_drafts_entity.dart';
+import 'package:genesis_workspace/domain/drafts/entities/edit_draft_entity.dart';
 import 'package:genesis_workspace/domain/drafts/entities/get_drafts_entity.dart';
 import 'package:genesis_workspace/domain/drafts/repositories/drafts_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -16,14 +17,13 @@ class DraftsRepositoryImpl implements DraftsRepository {
   }
 
   @override
-  Future<void> deleteDraft(int id) {
-    return _dataSource.deleteDraft(id);
+  Future<void> deleteDraft(int id) async {
+    return await _dataSource.deleteDraft(id);
   }
 
   @override
-  Future<void> editDraft() {
-    // TODO: implement editDraft
-    throw UnimplementedError();
+  Future<void> editDraft(EditDraftRequestEntity body) async {
+    return await _dataSource.editDraft(body.toDto());
   }
 
   @override

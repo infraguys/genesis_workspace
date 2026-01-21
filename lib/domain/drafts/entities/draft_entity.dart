@@ -20,6 +20,24 @@ class DraftEntity {
   });
 
   DraftDto toDto() => DraftDto(id: id, type: type, to: to, topic: topic, content: content, timestamp: timestamp);
+
+  DraftEntity copyWith({
+    int? id,
+    DraftType? type,
+    List<int>? to,
+    String? topic,
+    String? content,
+    int? timestamp,
+  }) {
+    return DraftEntity(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      to: to ?? this.to,
+      topic: topic ?? this.topic,
+      content: content ?? this.content,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
 }
 
 extension DraftEntityMatcher on DraftEntity {

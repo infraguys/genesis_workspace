@@ -26,6 +26,7 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
@@ -67,6 +68,8 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   late final ScrollController _controller;
   late final UserEntity _myUser;
   final GlobalKey _mentionKey = GlobalKey();
+  bool isDraftPasted = false;
+  DraftEntity? draftForThisChat;
 
   @override
   void initState() {
@@ -84,9 +87,10 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
       ..addListener(mentionListener);
     focusOnInit();
     final otherUserIds = widget.userIds.where((id) => id != _myUser.userId).toList(growable: false);
-    final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(userIds: otherUserIds);
+    draftForThisChat = context.read<DraftsCubit>().getDraftForChat(userIds: otherUserIds);
     if (draftForThisChat != null) {
-      messageController.text = draftForThisChat.content;
+      messageController.text = draftForThisChat!.content;
+      isDraftPasted = true;
     }
     super.initState();
     if (kIsWeb) {
@@ -143,10 +147,17 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
 
   @override
   void deactivate() async {
-    await saveDraft(
-      messageController.text,
-      userIds: widget.userIds,
-    );
+    if (!isDraftPasted) {
+      await saveDraft(
+        messageController.text,
+        userIds: widget.userIds,
+      );
+    } else {
+      await updateDraft(
+        draftForThisChat!.id!,
+        messageController.text,
+      );
+    }
     super.deactivate();
   }
 

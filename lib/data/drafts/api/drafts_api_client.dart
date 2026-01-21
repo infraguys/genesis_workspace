@@ -23,7 +23,7 @@ abstract class DraftsApiClient {
   @FormUrlEncoded()
   Future<void> editDraft(
     @Path('draft_id') int draftId,
-    @Field('content') String content,
+    @Field('draft') String draft,
   );
 
   @DELETE('/drafts/{draft_id}')

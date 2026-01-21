@@ -26,6 +26,7 @@ import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
+import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
@@ -70,6 +71,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
   late final UserEntity _myUser;
   late final ScrollController _scrollController;
   final GlobalKey _mentionKey = GlobalKey();
+  bool isDraftPasted = false;
+  DraftEntity? draftForThisChat;
 
   @override
   void initState() {
@@ -87,12 +90,13 @@ class _ChannelChatViewState extends State<ChannelChatView>
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
     focusOnInit();
-    final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
+    draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
       channelId: widget.channelId,
       topicName: widget.topicName,
     );
     if (draftForThisChat != null) {
-      messageController.text = draftForThisChat.content;
+      messageController.text = draftForThisChat!.content;
+      isDraftPasted = true;
     }
     super.initState();
     if (kIsWeb) {
@@ -141,16 +145,25 @@ class _ChannelChatViewState extends State<ChannelChatView>
 
   @override
   void deactivate() async {
-    await saveDraft(
-      messageController.text,
-      channelId: widget.channelId,
-      topicName: widget.topicName,
-    );
+    if (!isDraftPasted) {
+      await saveDraft(
+        messageController.text,
+        channelId: widget.channelId,
+        topicName: widget.topicName,
+      );
+    } else {
+      await updateDraft(
+        draftForThisChat!.id!,
+        messageController.text,
+      );
+    }
+
     super.deactivate();
   }
 
   @override
   void didUpdateWidget(ChannelChatView oldWidget) {
+    final oldWidgetInputText = messageController.text;
     if (widget.channelId != oldWidget.channelId) {
       context.read<ChannelChatCubit>().getInitialData(
         streamId: widget.channelId,
@@ -159,25 +172,26 @@ class _ChannelChatViewState extends State<ChannelChatView>
       );
       messageController.clear();
     } else if (widget.topicName != oldWidget.topicName) {
+      messageController.clear();
+      saveDraft(
+        oldWidgetInputText,
+        channelId: oldWidget.channelId,
+        topicName: oldWidget.topicName,
+      );
       context.read<ChannelChatCubit>().getChannelTopics(streamId: widget.channelId, topicName: widget.topicName).then((
         _,
       ) {
         context.read<ChannelChatCubit>().getChannelMessages(
           unreadMessagesCount: widget.unreadMessagesCount,
         );
-        saveDraft(
-          messageController.text,
-          channelId: widget.channelId,
-          topicName: widget.topicName,
-        );
       });
-      messageController.clear();
       final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
         channelId: widget.channelId,
         topicName: widget.topicName,
       );
       if (draftForThisChat != null) {
         messageController.text = draftForThisChat.content;
+        isDraftPasted = true;
       }
     }
     super.didUpdateWidget(oldWidget);

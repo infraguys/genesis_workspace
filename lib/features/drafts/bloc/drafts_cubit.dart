@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/drafts/entities/create_drafts_entity.dart';
 import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
+import 'package:genesis_workspace/domain/drafts/entities/edit_draft_entity.dart';
 import 'package:genesis_workspace/domain/drafts/usecases/create_drafts_use_case.dart';
 import 'package:genesis_workspace/domain/drafts/usecases/delete_draft_use_case.dart';
+import 'package:genesis_workspace/domain/drafts/usecases/edit_draft_use_case.dart';
 import 'package:genesis_workspace/domain/drafts/usecases/get_drafts_use_case.dart';
 import 'package:injectable/injectable.dart';
 
@@ -18,11 +20,19 @@ class DraftsCubit extends Cubit<DraftsState> {
     this._createDraftsUseCase,
     this._getDraftsUseCase,
     this._deleteDraftUseCase,
-  ) : super(DraftsState(drafts: []));
+    this._editDraftUseCase,
+  ) : super(
+        DraftsState(
+          drafts: [],
+          pendingDraftId: null,
+          currentDraft: null,
+        ),
+      );
 
   final GetDraftsUseCase _getDraftsUseCase;
   final CreateDraftsUseCase _createDraftsUseCase;
   final DeleteDraftUseCase _deleteDraftUseCase;
+  final EditDraftUseCase _editDraftUseCase;
 
   Future<void> getDrafts() async {
     try {
@@ -59,8 +69,25 @@ class DraftsCubit extends Cubit<DraftsState> {
   }
 
   Future<void> saveDraft(CreateDraftsRequestEntity body) async {
+    final bodyDraft = body.drafts.first;
+    DraftEntity? draft;
+    if (bodyDraft.type == .private) {
+      draft = state.drafts.firstWhereOrNull((draft) => draft.matchesUsers(bodyDraft.to));
+    }
+
+    if (bodyDraft.type == .stream) {
+      draft = state.drafts.firstWhereOrNull(
+        (draft) => draft.matchesChannel(
+          channelId: bodyDraft.to.first,
+          topicName: bodyDraft.topic,
+        ),
+      );
+    }
+    if (draft != null) {
+      return;
+    }
     try {
-      final response = await _createDraftsUseCase.call(body);
+      await _createDraftsUseCase.call(body);
       await getDrafts();
     } catch (e) {
       if (kDebugMode) {
@@ -82,6 +109,35 @@ class DraftsCubit extends Cubit<DraftsState> {
       }
     } finally {
       emit(state.copyWith(pendingDraftId: null));
+    }
+  }
+
+  Future<void> editDraft(
+    int draftId,
+    String content, {
+    List<int>? userIds,
+    int? channelId,
+    String? topicName,
+  }) async {
+    final draft = state.drafts.firstWhere((draft) => draft.id == draftId);
+    if (draft.content == content) {
+      return;
+    }
+    if (content.isEmpty) {
+      await deleteDraft(draftId);
+      return;
+    }
+    try {
+      final body = EditDraftRequestEntity(
+        id: draftId,
+        draft: draft.copyWith(content: content),
+      );
+      await _editDraftUseCase.call(body);
+      await getDrafts();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 }

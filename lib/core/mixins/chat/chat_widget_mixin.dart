@@ -89,7 +89,17 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         content: content,
       );
       final body = CreateDraftsRequestEntity(drafts: [draft]);
-      final response = await context.read<DraftsCubit>().saveDraft(body);
+      await context.read<DraftsCubit>().saveDraft(body);
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> updateDraft(int draftId, String content) async {
+    try {
+      await context.read<DraftsCubit>().editDraft(draftId, content);
     } catch (e) {
       if (kDebugMode) {
         inspect(e);

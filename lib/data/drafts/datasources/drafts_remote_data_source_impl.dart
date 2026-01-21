@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/drafts/api/drafts_api_client.dart';
 import 'package:genesis_workspace/data/drafts/datasources/drafts_remote_data_source.dart';
 import 'package:genesis_workspace/data/drafts/dto/create_drafts_dto.dart';
+import 'package:genesis_workspace/data/drafts/dto/edit_draft_dto.dart';
 import 'package:genesis_workspace/data/drafts/dto/get_drafts_dto.dart';
 import 'package:injectable/injectable.dart';
 
@@ -21,14 +22,13 @@ class DraftsRemoteDataSourceImpl implements DraftsRemoteDataSource {
   }
 
   @override
-  Future<void> deleteDraft(int id) {
-    return _apiClient.deleteDraft(id);
+  Future<void> deleteDraft(int id) async {
+    return await _apiClient.deleteDraft(id);
   }
 
   @override
-  Future<void> editDraft() {
-    // TODO: implement editDraft
-    throw UnimplementedError();
+  Future<void> editDraft(EditDraftRequestDto body) {
+    return _apiClient.editDraft(body.id, jsonEncode(body.draft));
   }
 
   @override
