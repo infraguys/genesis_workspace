@@ -34,6 +34,5 @@ class DraftDto {
     to: to,
     topic: topic,
     content: content,
-    chatId: -1,
   );
 }
