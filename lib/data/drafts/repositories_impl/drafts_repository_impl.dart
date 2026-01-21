@@ -17,8 +17,7 @@ class DraftsRepositoryImpl implements DraftsRepository {
 
   @override
   Future<void> deleteDraft(int id) {
-    // TODO: implement deleteDraft
-    throw UnimplementedError();
+    return _dataSource.deleteDraft(id);
   }
 
   @override

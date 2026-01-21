@@ -112,6 +112,8 @@ import 'package:genesis_workspace/domain/drafts/repositories/drafts_repository.d
     as _i343;
 import 'package:genesis_workspace/domain/drafts/usecases/create_drafts_use_case.dart'
     as _i367;
+import 'package:genesis_workspace/domain/drafts/usecases/delete_draft_use_case.dart'
+    as _i387;
 import 'package:genesis_workspace/domain/drafts/usecases/get_drafts_use_case.dart'
     as _i73;
 import 'package:genesis_workspace/domain/genesis/repositories/genesis_services_repository.dart'
@@ -476,6 +478,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i367.CreateDraftsUseCase>(
       () => _i367.CreateDraftsUseCase(gh<_i343.DraftsRepository>()),
     );
+    gh.factory<_i387.DeleteDraftUseCase>(
+      () => _i387.DeleteDraftUseCase(gh<_i343.DraftsRepository>()),
+    );
     gh.factory<_i73.GetDraftsUseCase>(
       () => _i73.GetDraftsUseCase(gh<_i343.DraftsRepository>()),
     );
@@ -543,6 +548,13 @@ extension GetItInjectableX on _i174.GetIt {
         getMessageReadersUseCase: gh<_i90.GetMessageReadersUseCase>(),
       ),
     );
+    gh.factory<_i627.DraftsCubit>(
+      () => _i627.DraftsCubit(
+        gh<_i367.CreateDraftsUseCase>(),
+        gh<_i73.GetDraftsUseCase>(),
+        gh<_i387.DeleteDraftUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => coreModule.dio(
         gh<_i460.SharedPreferences>(),
@@ -552,12 +564,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
-    );
-    gh.factory<_i627.DraftsCubit>(
-      () => _i627.DraftsCubit(
-        gh<_i367.CreateDraftsUseCase>(),
-        gh<_i73.GetDraftsUseCase>(),
-      ),
     );
     gh.factory<_i48.FolderRepository>(
       () => _i957.FolderRepositoryImpl(

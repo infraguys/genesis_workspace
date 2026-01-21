@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/drafts/entities/create_drafts_entity.dart';
 import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/drafts/usecases/create_drafts_use_case.dart';
+import 'package:genesis_workspace/domain/drafts/usecases/delete_draft_use_case.dart';
 import 'package:genesis_workspace/domain/drafts/usecases/get_drafts_use_case.dart';
 import 'package:injectable/injectable.dart';
 
@@ -13,10 +14,15 @@ part 'drafts_state.dart';
 
 @injectable
 class DraftsCubit extends Cubit<DraftsState> {
-  DraftsCubit(this._createDraftsUseCase, this._getDraftsUseCase) : super(DraftsState(drafts: []));
+  DraftsCubit(
+    this._createDraftsUseCase,
+    this._getDraftsUseCase,
+    this._deleteDraftUseCase,
+  ) : super(DraftsState(drafts: []));
 
   final GetDraftsUseCase _getDraftsUseCase;
   final CreateDraftsUseCase _createDraftsUseCase;
+  final DeleteDraftUseCase _deleteDraftUseCase;
 
   Future<void> getDrafts() async {
     try {
@@ -60,6 +66,22 @@ class DraftsCubit extends Cubit<DraftsState> {
       if (kDebugMode) {
         inspect(e);
       }
+    }
+  }
+
+  Future<void> deleteDraft(int id) async {
+    emit(state.copyWith(pendingDraftId: id));
+    try {
+      await _deleteDraftUseCase.call(id);
+      List<DraftEntity> updatedDrafts = [...state.drafts];
+      updatedDrafts.removeWhere((draft) => draft.id == id);
+      emit(state.copyWith(drafts: updatedDrafts));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    } finally {
+      emit(state.copyWith(pendingDraftId: null));
     }
   }
 }

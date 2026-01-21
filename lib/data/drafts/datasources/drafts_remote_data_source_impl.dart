@@ -21,9 +21,8 @@ class DraftsRemoteDataSourceImpl implements DraftsRemoteDataSource {
   }
 
   @override
-  Future<void> deleteDraft() {
-    // TODO: implement deleteDraft
-    throw UnimplementedError();
+  Future<void> deleteDraft(int id) {
+    return _apiClient.deleteDraft(id);
   }
 
   @override

@@ -5,5 +5,5 @@ abstract class DraftsRemoteDataSource {
   Future<GetDraftsResponseDto> getDrafts();
   Future<CreateDraftsResponseDto> createDrafts(CreateDraftsRequestDto body);
   Future<void> editDraft();
-  Future<void> deleteDraft();
+  Future<void> deleteDraft(int id);
 }
