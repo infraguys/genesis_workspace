@@ -150,6 +150,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         messageController.text,
         channelId: widget.channelId,
         topicName: widget.topicName,
+        type: .stream,
       );
     } else if (!isEditMode) {
       await updateDraft(
@@ -177,6 +178,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         oldWidgetInputText,
         channelId: oldWidget.channelId,
         topicName: oldWidget.topicName,
+        type: .stream,
       );
       context.read<ChannelChatCubit>().getChannelTopics(streamId: widget.channelId, topicName: widget.topicName).then((
         _,
@@ -198,7 +200,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     _scrollController.dispose();
     messageController
       ..removeListener(onTextChanged)

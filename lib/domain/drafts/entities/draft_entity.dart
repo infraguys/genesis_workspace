@@ -43,9 +43,10 @@ class DraftEntity {
 
 extension DraftEntityMatcher on DraftEntity {
   static const ListEquality<int> _listEquals = ListEquality<int>();
+  static const SetEquality<int> _setEquals = SetEquality<int>();
 
   bool matchesUsers(List<int> userIds) {
-    return _listEquals.equals(to, userIds);
+    return _setEquals.equals(to.toSet(), userIds.toSet());
   }
 
   bool matchesChannel({

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/enums/draft_type.dart';
 import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
@@ -76,6 +77,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     int? channelId,
     String? topicName,
     List<int>? userIds,
+    required DraftType type,
   }) async {
     if (content.isEmpty) {
       return;
@@ -83,7 +85,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     try {
       final to = channelId != null ? [channelId] : userIds!;
       final draft = DraftEntity(
-        type: channelId != null ? .stream : .private,
+        type: type,
         to: to,
         topic: topicName ?? '',
         content: content,

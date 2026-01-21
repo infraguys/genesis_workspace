@@ -57,7 +57,9 @@ class MessengerChatListView extends StatelessWidget with OpenDmChatMixin {
         title: context.t.favorite.title,
         onTap: () {
           final myUserId = context.read<ProfileCubit>().state.user?.userId;
-          final int? mySelfChatId = chats.firstWhereOrNull((chat) => chat.dmIds?.length == 1)?.id;
+          final int? mySelfChatId = chats
+              .firstWhereOrNull((chat) => chat.dmIds?.length == 1 && chat.dmIds?.first == myUserId)
+              ?.id;
           if (myUserId != null) {
             openChat(
               context,
