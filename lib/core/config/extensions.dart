@@ -81,11 +81,21 @@ extension PendingExtension on Widget {
 
     if (this is IconButton) {
       final IconButton button = this as IconButton;
+      Widget buildPendingIcon() => SizedBox(
+            width: button.iconSize ?? 24,
+            height: button.iconSize ?? 24,
+            child: const CircularProgressIndicator(
+              strokeWidth: 2.5,
+            ),
+          );
 
       return IconButton(
         key: button.key,
         onPressed: isPending ? null : button.onPressed,
+        onHover: isPending ? null : button.onHover,
+        onLongPress: isPending ? null : button.onLongPress,
         iconSize: button.iconSize,
+        visualDensity: button.visualDensity,
         padding: button.padding,
         alignment: button.alignment,
         splashRadius: button.splashRadius,
@@ -95,18 +105,17 @@ extension PendingExtension on Widget {
         highlightColor: button.highlightColor,
         splashColor: button.splashColor,
         disabledColor: button.disabledColor,
+        mouseCursor: button.mouseCursor,
         focusNode: button.focusNode,
+        autofocus: button.autofocus,
         tooltip: button.tooltip,
         enableFeedback: button.enableFeedback,
         constraints: button.constraints,
         style: button.style,
-        icon: isPending
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
-              )
-            : button.icon,
+        isSelected: button.isSelected,
+        selectedIcon: isPending ? buildPendingIcon() : button.selectedIcon,
+        statesController: button.statesController,
+        icon: isPending ? buildPendingIcon() : button.icon,
       );
     }
 

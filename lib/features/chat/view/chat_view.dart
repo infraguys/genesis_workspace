@@ -149,12 +149,12 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
 
   @override
   void deactivate() async {
-    if (!isDraftPasted) {
+    if (!isDraftPasted && !isEditMode) {
       await saveDraft(
         messageController.text,
         userIds: widget.userIds,
       );
-    } else {
+    } else if (!isEditMode) {
       await updateDraft(
         draftForThisChat!.id!,
         messageController.text,

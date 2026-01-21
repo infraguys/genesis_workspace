@@ -145,13 +145,13 @@ class _ChannelChatViewState extends State<ChannelChatView>
 
   @override
   void deactivate() async {
-    if (!isDraftPasted) {
+    if (!isDraftPasted && !isEditMode) {
       await saveDraft(
         messageController.text,
         channelId: widget.channelId,
         topicName: widget.topicName,
       );
-    } else {
+    } else if (!isEditMode) {
       await updateDraft(
         draftForThisChat!.id!,
         messageController.text,
