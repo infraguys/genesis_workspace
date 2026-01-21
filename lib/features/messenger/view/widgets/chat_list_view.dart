@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -56,10 +57,11 @@ class MessengerChatListView extends StatelessWidget with OpenDmChatMixin {
         title: context.t.favorite.title,
         onTap: () {
           final myUserId = context.read<ProfileCubit>().state.user?.userId;
+          final int? mySelfChatId = chats.firstWhereOrNull((chat) => chat.dmIds?.length == 1)?.id;
           if (myUserId != null) {
             openChat(
               context,
-              chatId: -1,
+              chatId: mySelfChatId ?? -1,
               membersIds: {myUserId},
             );
           }

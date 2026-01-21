@@ -86,7 +86,9 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
     focusOnInit();
-    final otherUserIds = widget.userIds.where((id) => id != _myUser.userId).toList(growable: false);
+    final otherUserIds = widget.userIds.length == 1
+        ? widget.userIds
+        : widget.userIds.where((id) => id != _myUser.userId).toList(growable: false);
     draftForThisChat = context.read<DraftsCubit>().getDraftForChat(userIds: otherUserIds);
     if (draftForThisChat != null) {
       messageController.text = draftForThisChat!.content;

@@ -460,14 +460,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  void openMySelfChat() {
-    final chat = state.chats.firstWhereOrNull((chat) => chat.dmIds?.length == 1);
-    inspect(chat);
-    if (chat != null) {
-      // inspect(chat);
-    }
-  }
-
   void openChatFromMessage(MessageEntity message) {
     final chat = state.chats.firstWhereOrNull((chat) => chat.id == message.recipientId);
     if (chat != null) {
@@ -1261,7 +1253,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   }
 
   void createEmptyChat(Set<int> membersIds) async {
-    emit(state.copyWith(usersIds: membersIds, openedSection: .chat));
+    emit(state.copyWith(usersIds: membersIds, openedSection: .chat, selectedChat: null));
   }
 
   void unselectChat() {
