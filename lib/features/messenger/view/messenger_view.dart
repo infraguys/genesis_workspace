@@ -14,6 +14,7 @@ import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_up
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/drafts/drafts.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
@@ -121,6 +122,7 @@ class _MessengerViewState extends State<MessengerView>
     await Future.wait([
       context.read<MessengerCubit>().loadFolders(),
       context.read<MessengerCubit>().getInitialMessages(),
+      context.read<DraftsCubit>().getDrafts(),
     ]);
     if (mounted) {
       unawaited(context.read<MessengerCubit>().lazyLoadAllMessages());
@@ -330,6 +332,7 @@ class _MessengerViewState extends State<MessengerView>
             Future.wait([
               context.read<RealTimeCubit>().ensureConnection(),
               context.read<MessengerCubit>().getUnreadMessages(),
+              context.read<DraftsCubit>().getDrafts(),
             ]),
           );
         },
