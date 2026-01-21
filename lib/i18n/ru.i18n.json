@@ -96,7 +96,7 @@
   },
   "drafts": {
     "title": "Черновики",
-    "no_mentions": "Нет черновиков"
+    "no_drafts": "Нет черновиков"
   },
   "reactions": {
     "title": "Реакции",

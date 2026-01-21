@@ -37,6 +37,11 @@ class DraftsView extends StatelessWidget {
       ),
       body: BlocBuilder<DraftsCubit, DraftsState>(
         builder: (context, state) {
+          if (state.drafts.isEmpty) {
+            return Center(
+              child: Text(context.t.drafts.noDrafts),
+            );
+          }
           return ListView.builder(
             itemCount: state.drafts.length,
             itemBuilder: (BuildContext context, int index) {
