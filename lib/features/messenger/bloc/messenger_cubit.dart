@@ -463,7 +463,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   void openChatFromMessage(MessageEntity message) {
     final chat = state.chats.firstWhereOrNull((chat) => chat.id == message.recipientId);
     if (chat != null) {
-      selectChat(chat);
+      selectChat(chat, selectedTopic: message.subject);
     } else {
       _createChatsFromMessages([message]);
       final createdChat = state.chats.firstWhere((chat) => chat.id == message.recipientId);

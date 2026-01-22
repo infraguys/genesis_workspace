@@ -154,14 +154,24 @@ class VersionEntryDto {
   final String shortVersion;
 
   final PlatformDto linux;
+  final PlatformDto? win;
 
-  VersionEntryDto({required this.version, required this.shortVersion, required this.linux});
+  VersionEntryDto({
+    required this.version,
+    required this.shortVersion,
+    required this.linux,
+    required this.win,
+  });
 
   factory VersionEntryDto.fromJson(Map<String, dynamic> json) => _$VersionEntryDtoFromJson(json);
   Map<String, dynamic> toJson() => _$VersionEntryDtoToJson(this);
 
-  VersionEntryEntity toEntity() =>
-      VersionEntryEntity(version: version, shortVersion: shortVersion, linux: linux.toEntity());
+  VersionEntryEntity toEntity() => VersionEntryEntity(
+    version: version,
+    shortVersion: shortVersion,
+    linux: linux.toEntity(),
+    win: win?.toEntity(),
+  );
 }
 
 @JsonSerializable(explicitToJson: true)
