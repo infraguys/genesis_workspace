@@ -26,12 +26,14 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
+import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -46,13 +48,13 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 class ChatView extends StatefulWidget {
   const ChatView({
     super.key,
-    required this.chatId,
+    this.chatId = -1,
     required this.userIds,
     this.unreadMessagesCount = 0,
     this.leadingOnPressed,
   });
 
-  final int chatId;
+  final int? chatId;
   final List<int> userIds;
   final int? unreadMessagesCount;
   final VoidCallback? leadingOnPressed;
@@ -66,6 +68,8 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
   late final ScrollController _controller;
   late final UserEntity _myUser;
   final GlobalKey _mentionKey = GlobalKey();
+  bool isDraftPasted = false;
+  DraftEntity? draftForThisChat;
 
   @override
   void initState() {
@@ -78,11 +82,18 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
     );
     _controller = ScrollController();
     messageController = ChatTextEditingController();
-
     messageController
       ..addListener(onTextChanged)
       ..addListener(mentionListener);
     focusOnInit();
+    final otherUserIds = widget.userIds.length == 1
+        ? widget.userIds
+        : widget.userIds.where((id) => id != _myUser.userId).toList(growable: false);
+    draftForThisChat = context.read<DraftsCubit>().getDraftForChat(userIds: otherUserIds);
+    if (draftForThisChat != null) {
+      messageController.text = draftForThisChat!.content;
+      isDraftPasted = true;
+    }
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -134,6 +145,19 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
         break;
     }
     super.didChangeAppLifecycleState(state);
+  }
+
+  @override
+  void deactivate() async {
+    if (!isDraftPasted && !isEditMode) {
+      await saveDraft(messageController.text, userIds: widget.userIds, type: .private);
+    } else if (!isEditMode) {
+      await updateDraft(
+        draftForThisChat!.id!,
+        messageController.text,
+      );
+    }
+    super.deactivate();
   }
 
   @override
@@ -461,9 +485,11 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                               onTapQuote: onTapQuote,
                                               onTapEditMessage: onTapEditMessage,
                                               onReadAll: () async {
-                                                await context.read<MessengerCubit>().readAllMessages(
-                                                  widget.chatId,
-                                                );
+                                                if (widget.chatId != null) {
+                                                  await context.read<MessengerCubit>().readAllMessages(
+                                                    widget.chatId!,
+                                                  );
+                                                }
                                               },
                                             ),
                                             Positioned(

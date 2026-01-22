@@ -6,14 +6,14 @@ import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/chat_view.dart';
 
 class Chat extends StatelessWidget {
-  final int chatId;
+  final int? chatId;
   final List<int> userIds;
   final int? unreadMessagesCount;
   final VoidCallback? leadingOnPressed;
 
   const Chat({
     super.key,
-    required this.chatId,
+    this.chatId = -1,
     required this.userIds,
     this.unreadMessagesCount = 0,
     this.leadingOnPressed,

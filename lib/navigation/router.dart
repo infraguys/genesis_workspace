@@ -11,15 +11,19 @@ import 'package:genesis_workspace/features/authentication/presentation/view/past
 import 'package:genesis_workspace/features/call/view/call_web_view_page.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
+import 'package:genesis_workspace/features/drafts/drafts.dart';
 import 'package:genesis_workspace/features/genesis_services/genesis_services.dart';
 import 'package:genesis_workspace/features/lk/lk.dart';
 import 'package:genesis_workspace/features/logs/logs.dart';
+import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/profile/profile.dart';
 import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
+import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
+import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:go_router/go_router.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -45,6 +49,10 @@ class Routes {
   static const String profile = '/profile';
   static const String profileInfo = '/profile-info';
   static const String talkerScreen = '/talker-screen';
+  static const String drafts = '/drafts';
+  static const String mentions = '/mentions';
+  static const String reactions = '/reactions';
+  static const String starred = '/starred';
 
   static const String allChats = '/all-chats';
   static const String directMessages = '/direct-messages';
@@ -56,9 +64,7 @@ class Routes {
   static const String channelChat = '/channel-chat';
   static const String channelChatTopic = '/channel-chat/topic';
   static const String inbox = '/inbox';
-  static const String mentions = '/mentions';
-  static const String reactions = '/reactions';
-  static const String starred = '/starred';
+
   static const String imageFullScreen = '/image-full-screen';
   static const String pasteBaseUrl = '/paste-base-url';
   static const String forceUpdate = '/force-update';
@@ -370,6 +376,26 @@ final router = GoRouter(
       path: Routes.talkerScreen,
       name: Routes.talkerScreen,
       builder: (context, state) => TalkerScreen(talker: getIt<Talker>()),
+    ),
+    GoRoute(
+      path: Routes.starred,
+      name: Routes.starred,
+      builder: (context, state) => Starred(),
+    ),
+    GoRoute(
+      path: Routes.mentions,
+      name: Routes.mentions,
+      builder: (context, state) => Mentions(),
+    ),
+    GoRoute(
+      path: Routes.reactions,
+      name: Routes.reactions,
+      builder: (context, state) => Reactions(),
+    ),
+    GoRoute(
+      path: Routes.drafts,
+      name: Routes.drafts,
+      builder: (context, state) => Drafts(),
     ),
   ],
 );

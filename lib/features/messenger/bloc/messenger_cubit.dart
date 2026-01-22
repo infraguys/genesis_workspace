@@ -454,9 +454,9 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void selectChat(ChatEntity chat, {String? selectedTopic}) {
     if (selectedTopic == null) {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: null));
+      emit(state.copyWith(selectedChat: chat, selectedTopic: null, openedSection: .chat));
     } else {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic));
+      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic, openedSection: .chat));
     }
   }
 
@@ -727,10 +727,10 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   Future<void> loadTopics(int streamId) async {
     final chat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-    emit(state.copyWith(selectedChat: chat));
+    emit(state.copyWith(selectedChat: chat, openedSection: .chat));
     await getChannelTopics(streamId);
     final updatedChat = state.chats.firstWhere((chat) => chat.streamId == streamId);
-    emit(state.copyWith(selectedChat: updatedChat));
+    emit(state.copyWith(selectedChat: updatedChat, openedSection: .chat));
   }
 
   Future<void> pinChat({required int chatId}) async {
@@ -1248,16 +1248,25 @@ class MessengerCubit extends Cubit<MessengerState> {
 
   void selectTopic(String topic) {
     if (state.selectedChat != null) {
-      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic));
+      emit(state.copyWith(selectedChat: state.selectedChat, selectedTopic: topic, openedSection: .chat));
     }
   }
 
   void createEmptyChat(Set<int> membersIds) async {
-    final newState = state.copyWith(usersIds: membersIds);
-    emit(newState);
+    emit(state.copyWith(usersIds: membersIds, openedSection: .chat, selectedChat: null));
   }
 
   void unselectChat() {
     emit(state.copyWith(selectedChat: null, selectedTopic: null));
+  }
+
+  void openSection(OpenedSection section) {
+    emit(
+      state.copyWith(
+        openedSection: section,
+        selectedChat: null,
+        selectedTopic: null,
+      ),
+    );
   }
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.7.3
+- Added sections for favorites, starred, draft messages
+- Refactored forward message functionality
+- Fixed bug when topics not closed after change folder on mobile
+- Configured android project for stores
+
 # 1.7.0
 - Added icon for application (ios, android, macos)
 - Added developer profile at ios, macos

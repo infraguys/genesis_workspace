@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +9,7 @@ class MenuView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: WorkspaceAppBar(title: context.t.navBar.menu),
+      // appBar: WorkspaceAppBar(title: context.t.navBar.menu),
       body: ListView(
         children: [
           ListTile(

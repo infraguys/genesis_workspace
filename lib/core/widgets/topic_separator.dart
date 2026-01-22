@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
+import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
 
 class TopicSeparator extends StatelessWidget {
-  final String topic;
+  final MessageEntity message;
 
-  const TopicSeparator({super.key, required this.topic});
+  const TopicSeparator({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +23,10 @@ class TopicSeparator extends StatelessWidget {
             TapEffectIcon(
               onTap: () {
                 final cubit = context.read<MessengerCubit>();
-                cubit.selectTopic(topic);
+                cubit.openChatFromMessage(message);
               },
               child: Text(
-                '# $topic',
+                '# ${message.subject}',
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontSize: 12.0,
                   color: theme.colorScheme.primary,
