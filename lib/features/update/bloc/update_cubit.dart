@@ -2,6 +2,8 @@ import 'dart:collection';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -202,7 +204,7 @@ class UpdateCubit extends Cubit<UpdateState> {
       emit(state.copyWith(operationStatus: UpdateOperationStatus.installing));
 
       await extractDir.create(recursive: true);
-      await _extractArchive(archiveFile, extractDir);
+      await _extractTarArchive(archiveFile, extractDir);
 
       final bundleRoot = await _detectBundleRoot(extractDir);
       final installDir = _resolveInstallDirectory();
@@ -258,7 +260,7 @@ class UpdateCubit extends Cubit<UpdateState> {
     );
 
     final tempDir = await Directory.systemTemp.createTemp('genesis_update_');
-    final archiveFile = File(p.join(tempDir.path, 'bundle.tar.gz'));
+    final archiveFile = File(p.join(tempDir.path, 'bundle.zip'));
     final extractDir = Directory(p.join(tempDir.path, 'bundle'));
 
     try {
@@ -267,7 +269,7 @@ class UpdateCubit extends Cubit<UpdateState> {
       emit(state.copyWith(operationStatus: UpdateOperationStatus.installing));
 
       await extractDir.create(recursive: true);
-      await _extractArchive(archiveFile, extractDir);
+      await _extractZipArchive(archiveFile, extractDir);
 
       final bundleRoot = await _detectBundleRoot(extractDir);
       final installDir = _resolveInstallDirectory();
@@ -352,7 +354,7 @@ class UpdateCubit extends Cubit<UpdateState> {
     );
   }
 
-  Future<void> _extractArchive(File archive, Directory outputDir) async {
+  Future<void> _extractTarArchive(File archive, Directory outputDir) async {
     final reader = TarReader(archive.openRead().transform(gzip.decoder));
     try {
       while (await reader.moveNext()) {
@@ -398,6 +400,31 @@ class UpdateCubit extends Cubit<UpdateState> {
       }
     } finally {
       await reader.cancel();
+    }
+  }
+
+  Future<void> _extractZipArchive(File archive, Directory outputDir) async {
+    final input = InputFileStream(archive.path);
+    try {
+      final zip = ZipDecoder().decodeBuffer(input);
+      for (final entry in zip) {
+        final targetPath = _buildExtractPath(outputDir.path, entry.name);
+        if (targetPath == null) {
+          continue;
+        }
+        if (entry.isFile) {
+          final file = File(targetPath);
+          await file.parent.create(recursive: true);
+          final output = OutputFileStream(file.path);
+          entry.writeContent(output);
+          await output.close();
+        } else {
+          final directory = Directory(targetPath);
+          await directory.create(recursive: true);
+        }
+      }
+    } finally {
+      await input.close();
     }
   }
 
