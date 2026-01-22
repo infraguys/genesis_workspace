@@ -110,27 +110,45 @@ class UpdateCubit extends Cubit<UpdateState> {
       return;
     }
 
-    if (!Platform.isLinux) {
+    if (!Platform.isLinux || !Platform.isWindows) {
       emit(
         state.copyWith(
           operationStatus: UpdateOperationStatus.failure,
-          updateError: 'Updates are only supported on Linux at the moment.',
+          updateError: 'Updates are only supported on Linux/Windows at the moment.',
           selectedVersion: version,
         ),
       );
       return;
     }
 
-    final url = version.linux.url;
-    if (url.isEmpty) {
-      emit(
-        state.copyWith(
-          operationStatus: UpdateOperationStatus.failure,
-          updateError: 'Download URL is missing for the selected version.',
-          selectedVersion: version,
-        ),
-      );
-      return;
+    String url = '';
+
+    if (Platform.isLinux) {
+      url = version.linux.url;
+      if (url.isEmpty) {
+        emit(
+          state.copyWith(
+            operationStatus: UpdateOperationStatus.failure,
+            updateError: 'Download URL is missing for the selected version.',
+            selectedVersion: version,
+          ),
+        );
+        return;
+      }
+    }
+
+    if (Platform.isWindows) {
+      url = version.win.url;
+      if (url.isEmpty) {
+        emit(
+          state.copyWith(
+            operationStatus: UpdateOperationStatus.failure,
+            updateError: 'Download URL is missing for the selected version.',
+            selectedVersion: version,
+          ),
+        );
+        return;
+      }
     }
 
     emit(
