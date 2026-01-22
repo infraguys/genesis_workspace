@@ -16,7 +16,7 @@ class _DialogChatItem extends StatefulWidget {
   State<_DialogChatItem> createState() => _DialogChatItemState();
 }
 
-class _DialogChatItemState extends State<_DialogChatItem> {
+class _DialogChatItemState extends State<_DialogChatItem> with OpenDmChatMixin {
   bool _isExpanded = false;
 
   static const Duration _animationDuration = Duration(milliseconds: 220);
@@ -56,8 +56,17 @@ class _DialogChatItemState extends State<_DialogChatItem> {
                     applyMarkdown: false,
                   );
                   await chatCubit.sendMessage(content: message.makeForwardedContent(), chatIds: widget.chat.dmIds);
+                  if (context.mounted) {
+                    openChat(
+                      context,
+                      chatId: widget.chat.id,
+                      membersIds: widget.chat.dmIds?.toSet() ?? {},
+                    );
+                  }
                 } on DioException catch (e) {
-                  showErrorSnackBar(context, exception: e);
+                  if (context.mounted) {
+                    showErrorSnackBar(context, exception: e);
+                  }
                 }
                 router.pop();
               }
@@ -148,8 +157,7 @@ class _DialogChatItemState extends State<_DialogChatItem> {
                                   Row(
                                     children: [
                                       if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
-                                      (widget.chat.type == ChatType.channel &&
-                                              currentSize(context) > ScreenSize.tablet)
+                                      (widget.chat.type == ChatType.channel && currentSize(context) > .tablet)
                                           ? InkWell(
                                               borderRadius: BorderRadius.circular(35),
                                               onTap: () {
