@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -404,27 +403,26 @@ class UpdateCubit extends Cubit<UpdateState> {
   }
 
   Future<void> _extractZipArchive(File archive, Directory outputDir) async {
-    final input = InputFileStream(archive.path);
-    try {
-      final zip = ZipDecoder().decodeBuffer(input);
-      for (final entry in zip) {
-        final targetPath = _buildExtractPath(outputDir.path, entry.name);
-        if (targetPath == null) {
-          continue;
-        }
-        if (entry.isFile) {
-          final file = File(targetPath);
-          await file.parent.create(recursive: true);
-          final output = OutputFileStream(file.path);
-          entry.writeContent(output);
-          await output.close();
-        } else {
-          final directory = Directory(targetPath);
-          await directory.create(recursive: true);
-        }
+    final bytes = await archive.readAsBytes();
+    final zip = ZipDecoder().decodeBytes(bytes);
+    for (final entry in zip) {
+      final targetPath = _buildExtractPath(outputDir.path, entry.name);
+      if (targetPath == null) {
+        continue;
       }
-    } finally {
-      await input.close();
+      if (entry.isFile) {
+        final file = File(targetPath);
+        await file.parent.create(recursive: true);
+        final content = entry.content;
+        if (content is List<int>) {
+          await file.writeAsBytes(content, flush: true);
+        } else {
+          await file.writeAsString(content.toString(), flush: true);
+        }
+      } else {
+        final directory = Directory(targetPath);
+        await directory.create(recursive: true);
+      }
     }
   }
 
