@@ -86,13 +86,13 @@ class VersionEntryEntity {
   final String version;
   final String shortVersion;
   final PlatformEntity linux;
-  final PlatformEntity win;
+  final PlatformEntity? win;
 
   VersionEntryEntity({
     required this.version,
     required this.shortVersion,
     required this.linux,
-    required this.win,
+    this.win,
   });
 }
 

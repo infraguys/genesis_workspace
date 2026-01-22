@@ -154,7 +154,7 @@ class VersionEntryDto {
   final String shortVersion;
 
   final PlatformDto linux;
-  final PlatformDto win;
+  final PlatformDto? win;
 
   VersionEntryDto({
     required this.version,
@@ -170,7 +170,7 @@ class VersionEntryDto {
     version: version,
     shortVersion: shortVersion,
     linux: linux.toEntity(),
-    win: win.toEntity(),
+    win: win?.toEntity(),
   );
 }
 

@@ -42,6 +42,7 @@ class UpdateCubit extends Cubit<UpdateState> {
   final GetVersionConfigUseCase _getVersionConfigUseCase;
   final GetVersionConfigShaUseCase _getVersionConfigShaUseCase;
   final Dio _dio = Dio();
+  File? _windowsUpdateScript;
 
   Future<void> checkUpdateNeed() async {
     emit(
@@ -110,7 +111,7 @@ class UpdateCubit extends Cubit<UpdateState> {
       return;
     }
 
-    if (!Platform.isLinux || !Platform.isWindows) {
+    if (!Platform.isLinux && !Platform.isWindows) {
       emit(
         state.copyWith(
           operationStatus: UpdateOperationStatus.failure,
@@ -121,34 +122,64 @@ class UpdateCubit extends Cubit<UpdateState> {
       return;
     }
 
-    String url = '';
-
     if (Platform.isLinux) {
-      url = version.linux.url;
-      if (url.isEmpty) {
-        emit(
-          state.copyWith(
-            operationStatus: UpdateOperationStatus.failure,
-            updateError: 'Download URL is missing for the selected version.',
-            selectedVersion: version,
-          ),
-        );
-        return;
-      }
+      await _installLinux(version);
+    } else if (Platform.isWindows) {
+      await _installWindows(version);
+    }
+  }
+
+  Future<void> restartApplication() async {
+    if (state.operationStatus != UpdateOperationStatus.readyToRestart) {
+      return;
     }
 
-    if (Platform.isWindows) {
-      url = version.win.url;
-      if (url.isEmpty) {
-        emit(
-          state.copyWith(
-            operationStatus: UpdateOperationStatus.failure,
-            updateError: 'Download URL is missing for the selected version.',
-            selectedVersion: version,
-          ),
+    try {
+      if (Platform.isWindows && _windowsUpdateScript != null) {
+        final script = _windowsUpdateScript!;
+        _windowsUpdateScript = null;
+        await Process.start(
+          'cmd',
+          ['/c', script.path],
+          workingDirectory: _resolveInstallDirectory().path,
+          mode: ProcessStartMode.detached,
         );
-        return;
+        exit(0);
       }
+
+      final executable = Platform.resolvedExecutable;
+      final arguments = Platform.executableArguments;
+      final workingDirectory = Directory.current.path;
+
+      await Process.start(
+        executable,
+        arguments,
+        workingDirectory: workingDirectory,
+        mode: ProcessStartMode.detached,
+      );
+      exit(0);
+    } catch (error, stackTrace) {
+      log('Failed to restart application', error: error, stackTrace: stackTrace);
+      emit(
+        state.copyWith(
+          operationStatus: UpdateOperationStatus.failure,
+          updateError: 'Failed to restart: $error',
+        ),
+      );
+    }
+  }
+
+  Future<void> _installLinux(VersionEntryEntity version) async {
+    final url = version.linux.url;
+    if (url.isEmpty) {
+      emit(
+        state.copyWith(
+          operationStatus: UpdateOperationStatus.failure,
+          updateError: 'Download URL is missing for the selected version.',
+          selectedVersion: version,
+        ),
+      );
+      return;
     }
 
     emit(
@@ -203,32 +234,107 @@ class UpdateCubit extends Cubit<UpdateState> {
     }
   }
 
-  Future<void> restartApplication() async {
-    if (state.operationStatus != UpdateOperationStatus.readyToRestart) {
-      return;
-    }
-
-    try {
-      final executable = Platform.resolvedExecutable;
-      final arguments = Platform.executableArguments;
-      final workingDirectory = Directory.current.path;
-
-      await Process.start(
-        executable,
-        arguments,
-        workingDirectory: workingDirectory,
-        mode: ProcessStartMode.detached,
-      );
-      exit(0);
-    } catch (error, stackTrace) {
-      log('Failed to restart application', error: error, stackTrace: stackTrace);
+  Future<void> _installWindows(VersionEntryEntity version) async {
+    final url = version.win?.url ?? '';
+    if (url.isEmpty) {
       emit(
         state.copyWith(
           operationStatus: UpdateOperationStatus.failure,
-          updateError: 'Failed to restart: $error',
+          updateError: 'Download URL is missing for the selected version.',
+          selectedVersion: version,
         ),
       );
+      return;
     }
+
+    emit(
+      state.copyWith(
+        operationStatus: UpdateOperationStatus.downloading,
+        downloadedBytes: 0,
+        totalBytes: 0,
+        updateError: null,
+        selectedVersion: version,
+      ),
+    );
+
+    final tempDir = await Directory.systemTemp.createTemp('genesis_update_');
+    final archiveFile = File(p.join(tempDir.path, 'bundle.tar.gz'));
+    final extractDir = Directory(p.join(tempDir.path, 'bundle'));
+
+    try {
+      await _downloadBundle(url, archiveFile);
+
+      emit(state.copyWith(operationStatus: UpdateOperationStatus.installing));
+
+      await extractDir.create(recursive: true);
+      await _extractArchive(archiveFile, extractDir);
+
+      final bundleRoot = await _detectBundleRoot(extractDir);
+      final installDir = _resolveInstallDirectory();
+      final stagingDir = Directory(p.join(installDir.path, '_update_staging'));
+
+      if (await stagingDir.exists()) {
+        await stagingDir.delete(recursive: true);
+      }
+      await stagingDir.create(recursive: true);
+      await _applyBundle(bundleRoot, stagingDir);
+
+      _windowsUpdateScript = await _createWindowsUpdateScript(stagingDir, installDir);
+
+      emit(
+        state.copyWith(
+          operationStatus: UpdateOperationStatus.readyToRestart,
+          downloadedBytes: state.totalBytes == 0 ? state.downloadedBytes : state.totalBytes,
+        ),
+      );
+    } catch (error, stackTrace) {
+      log('Failed to install update', error: error, stackTrace: stackTrace);
+      emit(
+        state.copyWith(
+          operationStatus: UpdateOperationStatus.failure,
+          updateError: error.toString(),
+        ),
+      );
+    } finally {
+      try {
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      } catch (error, stackTrace) {
+        log('Failed to clean temporary update directory', error: error, stackTrace: stackTrace);
+      }
+    }
+  }
+
+  Future<File> _createWindowsUpdateScript(
+    Directory stagingDir,
+    Directory installDir,
+  ) async {
+    final exeName = p.basename(Platform.resolvedExecutable);
+    final scriptName = '_genesis_update_${DateTime.now().millisecondsSinceEpoch}.bat';
+    final scriptFile = File(p.join(installDir.path, scriptName));
+    final scriptContent = [
+      '@echo off',
+      'setlocal',
+      'set "PID=$pid"',
+      'set "SRC=${p.normalize(stagingDir.path)}"',
+      'set "DST=${p.normalize(installDir.path)}"',
+      'set "EXE=$exeName"',
+      ':wait',
+      'tasklist /FI "PID eq %PID%" | find "%PID%" >nul',
+      'if not errorlevel 1 (',
+      '  timeout /T 1 /NOBREAK >nul',
+      '  goto wait',
+      ')',
+      'xcopy "%SRC%\\*" "%DST%\\" /E /H /C /I /Y >nul',
+      'start "" "%DST%\\%EXE%"',
+      'rmdir /S /Q "%SRC%"',
+      'del "%~f0"',
+      '',
+    ].join('\r\n');
+
+    await scriptFile.writeAsString(scriptContent, flush: true);
+    return scriptFile;
   }
 
   Future<void> _downloadBundle(String url, File destination) async {
