@@ -140,8 +140,8 @@ class UpdateCubit extends Cubit<UpdateState> {
         final script = _windowsUpdateScript!;
         _windowsUpdateScript = null;
         await Process.start(
-          'cmd',
-          ['/c', script.path],
+          'wscript',
+          [script.path],
           workingDirectory: _resolveInstallDirectory().path,
           mode: ProcessStartMode.detached,
         );
@@ -312,9 +312,10 @@ class UpdateCubit extends Cubit<UpdateState> {
     Directory installDir,
   ) async {
     final exeName = p.basename(Platform.resolvedExecutable);
-    final scriptName = '_genesis_update_${DateTime.now().millisecondsSinceEpoch}.bat';
-    final scriptFile = File(p.join(installDir.path, scriptName));
-    final scriptContent = [
+    final scriptBase = '_genesis_update_${DateTime.now().millisecondsSinceEpoch}';
+    final batFile = File(p.join(installDir.path, '$scriptBase.bat'));
+    final vbsFile = File(p.join(installDir.path, '$scriptBase.vbs'));
+    final batContent = [
       '@echo off',
       'setlocal',
       'set "PID=$pid"',
@@ -334,8 +335,18 @@ class UpdateCubit extends Cubit<UpdateState> {
       '',
     ].join('\r\n');
 
-    await scriptFile.writeAsString(scriptContent, flush: true);
-    return scriptFile;
+    final batPath = p.normalize(batFile.path);
+    final vbsContent = [
+      'Set shell = CreateObject("WScript.Shell")',
+      'shell.Run "cmd /c ""$batPath""", 0, False',
+      'Set fso = CreateObject("Scripting.FileSystemObject")',
+      'fso.DeleteFile WScript.ScriptFullName, True',
+      '',
+    ].join('\r\n');
+
+    await batFile.writeAsString(batContent, flush: true);
+    await vbsFile.writeAsString(vbsContent, flush: true);
+    return vbsFile;
   }
 
   Future<void> _downloadBundle(String url, File destination) async {
