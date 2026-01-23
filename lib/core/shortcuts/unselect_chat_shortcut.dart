@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 
 class UnselectChatIntent extends Intent {
   const UnselectChatIntent();
@@ -19,5 +19,3 @@ class UnselectChatAction extends ContextAction {
     return null;
   }
 }
-
-

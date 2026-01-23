@@ -9,7 +9,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/services/notifications/local_notifications_service.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';

@@ -6,7 +6,7 @@ import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/app_bar/view/branch_item.dart';
 import 'package:genesis_workspace/features/app_bar/view/organization_item.dart';
-import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';

@@ -11,7 +11,7 @@ import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/workspace_app_bar.dart';
 import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';

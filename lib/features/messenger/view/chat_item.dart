@@ -12,7 +12,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/features/messenger/view/topic_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';

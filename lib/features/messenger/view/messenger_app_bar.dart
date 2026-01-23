@@ -41,6 +41,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     required this.onSearchChanged,
     this.selectedChatLabel,
     required this.isLoadingMore,
+    required this.onShowChats,
   });
 
   final bool isLargeScreen;
@@ -65,6 +66,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final bool isLoadingMore;
+  final VoidCallback onShowChats;
 
   bool get isTabletOrSmaller => !isLargeScreen;
 
@@ -289,22 +291,23 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                           width: 32,
                           child: IconButton(
                             padding: EdgeInsets.zero,
-                            onPressed: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (BuildContext dialogContext) {
-                                  return BlocProvider(
-                                    create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                                    child: CreateGroupChatDialog(
-                                      onCreate: (membersIds) {
-                                        context.pop();
-                                        openChat(context, chatId: -1, membersIds: {...membersIds, selfUserId});
-                                      },
-                                    ),
-                                  );
-                                },
-                              );
-                            },
+                            onPressed: onShowChats,
+                            // onPressed: () async {
+                            //   await showDialog(
+                            //     context: context,
+                            //     builder: (BuildContext dialogContext) {
+                            //       return BlocProvider(
+                            //         create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
+                            //         child: CreateGroupChatDialog(
+                            //           onCreate: (membersIds) {
+                            //             context.pop();
+                            //             openChat(context, chatId: -1, membersIds: {...membersIds, selfUserId});
+                            //           },
+                            //         ),
+                            //       );
+                            //     },
+                            //   );
+                            // },
                             icon: Assets.icons.newWindow.svg(),
                           ),
                         ),
