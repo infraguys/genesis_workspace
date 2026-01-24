@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
@@ -184,9 +185,10 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                   ),
                   FilledButton(
                     onPressed: () {
+                      final myUserId = context.read<ProfileCubit>().state.user?.userId ?? -1;
                       context.read<CreateChatCubit>().createChannel(
                         name: _nameController.text,
-                        selectedUsers: _selectedIds.toList(),
+                        selectedUsers: [..._selectedIds.toList(), myUserId],
                       );
                     },
                     child: Text(context.t.groupChat.createDialog.create),
