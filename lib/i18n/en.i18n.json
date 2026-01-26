@@ -196,7 +196,20 @@
   "channel": {
     "channelName": "Channel name",
     "muteChannel": "Mute channel",
-    "unmuteChannel": "Unmute channel"
+    "unmuteChannel": "Unmute channel",
+    "create_dialog": {
+      "title": "New channel",
+      "name_label": "Channel name",
+      "name_hint": "Channel for discussions",
+      "description_label": "Channel description",
+      "description_hint": "What this channel is about",
+      "announce": "Announce channel creation",
+      "invite_only": "Invite only",
+      "name_required": "Enter channel name",
+      "name_max_length": "Maximum {max} characters",
+      "description_max_length": "Maximum {max} characters",
+      "name_already_exists": "A channel with this name already exists"
+    }
   },
   "chat": {
     "pinChat": "Pin chat",

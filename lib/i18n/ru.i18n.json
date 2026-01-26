@@ -202,7 +202,20 @@
   "channel": {
     "channelName": "Название канала",
     "muteChannel": "Заглушить канал",
-    "unmuteChannel": "Включить уведомления канала"
+    "unmuteChannel": "Включить уведомления канала",
+    "create_dialog": {
+      "title": "Новый канал",
+      "name_label": "Название канала",
+      "name_hint": "Канал для обсуждений",
+      "description_label": "Описание канала",
+      "description_hint": "О чем этот канал",
+      "announce": "Оповестить о создании канала",
+      "invite_only": "Только по приглашению",
+      "name_required": "Введите название канала",
+      "name_max_length": "Максимум {max} символов",
+      "description_max_length": "Максимум {max} символов",
+      "name_already_exists": "Канал с таким именем уже существует"
+    }
   },
   "chat": {
     "pinChat": "Закрепить чат",

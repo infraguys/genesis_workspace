@@ -54,10 +54,10 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
   String? _validateName(String value) {
     final String trimmed = value.trim();
     if (trimmed.isEmpty) {
-      return 'Введите название канала';
+      return context.t.channel.createDialog.nameRequired;
     }
     if (trimmed.length > _maxNameLength) {
-      return 'Максимум $_maxNameLength символов';
+      return context.t.channel.createDialog.nameMaxLength(max: _maxNameLength);
     }
     return null;
   }
@@ -68,7 +68,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
       return null;
     }
     if (trimmed.length > _maxDescriptionLength) {
-      return 'Максимум $_maxDescriptionLength символов';
+      return context.t.channel.createDialog.descriptionMaxLength(max: _maxDescriptionLength);
     }
     return null;
   }
@@ -117,7 +117,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
       switch (code) {
         case 'CHANNEL_ALREADY_EXISTS':
           setState(() {
-            _nameError = 'Канал с таким именем уже существует';
+            _nameError = context.t.channel.createDialog.nameAlreadyExists;
           });
         default:
           setState(() {
@@ -141,6 +141,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
+    final t = context.t;
     return Dialog(
       constraints: BoxConstraints(maxWidth: 500, maxHeight: 700),
       child: BlocBuilder<CreateChatCubit, CreateChatState>(
@@ -151,7 +152,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
               Padding(
                 padding: const .fromLTRB(16, 16, 8, 8),
                 child: Text(
-                  "Новый канал",
+                  t.channel.createDialog.title,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -162,7 +163,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                   spacing: 4,
                   children: [
                     Text(
-                      "Название канала",
+                      t.channel.createDialog.nameLabel,
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: textColors.text30,
                       ),
@@ -171,7 +172,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                       controller: _nameController,
                       onChanged: _onNameChanged,
                       decoration: InputDecoration(
-                        hintText: "Канал для обсуждений",
+                        hintText: t.channel.createDialog.nameHint,
                         isDense: true,
                         border: const OutlineInputBorder(),
                         errorText: _nameError,
@@ -187,7 +188,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                   spacing: 4,
                   children: [
                     Text(
-                      "Описание канала",
+                      t.channel.createDialog.descriptionLabel,
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: textColors.text30,
                       ),
@@ -196,7 +197,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                       controller: _descriptionController,
                       onChanged: _onDescriptionChanged,
                       decoration: InputDecoration(
-                        hintText: "О чем этот канал",
+                        hintText: t.channel.createDialog.descriptionHint,
                         isDense: true,
                         border: const OutlineInputBorder(),
                         errorText: _descriptionError,
@@ -222,7 +223,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                       contentPadding: EdgeInsets.zero,
                       controlAffinity: ListTileControlAffinity.leading,
                       title: Text(
-                        "Оповестить о создании канала",
+                        t.channel.createDialog.announce,
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -237,7 +238,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                       contentPadding: EdgeInsets.zero,
                       controlAffinity: ListTileControlAffinity.leading,
                       title: Text(
-                        "Только по приглашению",
+                        t.channel.createDialog.inviteOnly,
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -250,7 +251,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                   controller: _searchController,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
-                    hintText: context.t.groupChat.createDialog.searchHint,
+                    hintText: t.groupChat.createDialog.searchHint,
                     isDense: true,
                     border: const OutlineInputBorder(),
                   ),
@@ -272,7 +273,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                       return Center(child: CircularProgressIndicator());
                     }
                     if (users.isEmpty && !state.isUsersPending) {
-                      return Center(child: Text(context.t.groupChat.createDialog.noUsers));
+                      return Center(child: Text(t.groupChat.createDialog.noUsers));
                     }
                     return ListView.builder(
                       itemCount: displayUsers.length,
@@ -349,11 +350,11 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                   children: [
                     TextButton(
                       onPressed: context.pop,
-                      child: Text(context.t.groupChat.createDialog.cancel),
+                      child: Text(t.groupChat.createDialog.cancel),
                     ),
                     FilledButton(
                       onPressed: _canSubmit ? _submit : null,
-                      child: Text(context.t.groupChat.createDialog.create),
+                      child: Text(t.groupChat.createDialog.create),
                     ).pending(state is CreateChatPending),
                   ],
                 ),
