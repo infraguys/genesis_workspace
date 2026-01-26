@@ -8,6 +8,8 @@ class Organizations extends Table {
   TextColumn get baseUrl => text()();
   TextColumn get meetingUrl => text().nullable()();
   TextColumn get unreadMessages => text().map(const UnreadMessagesConverter()).withDefault(const Constant('[]'))();
+  IntColumn get maxStreamNameLength => integer().nullable()();
+  IntColumn get maxStreamDescriptionLength => integer().nullable()();
 
   @override
   List<Set<Column>> get uniqueKeys => [

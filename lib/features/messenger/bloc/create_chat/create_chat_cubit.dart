@@ -19,9 +19,18 @@ class CreateChatCubit extends Cubit<CreateChatState> {
   Future<void> createChannel({
     required String name,
     required List<int> selectedUsers,
+    String? description,
+    bool announce = false,
+    bool inviteOnly = false,
   }) async {
     try {
-      final body = CreateChannelRequestEntity(name: name, subscribers: selectedUsers);
+      final body = CreateChannelRequestEntity(
+        name: name,
+        subscribers: selectedUsers,
+        description: description,
+        announce: announce,
+        inviteOnly: inviteOnly,
+      );
       await _createChannelUseCase.call(body);
     } catch (e) {
       if (kDebugMode) {

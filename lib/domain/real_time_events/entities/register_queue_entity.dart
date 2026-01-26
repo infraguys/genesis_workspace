@@ -4,6 +4,8 @@ class RegisterQueueEntity {
   final String result;
   final int lastEventId;
   final String? realmJitsiServerUrl;
+  final int? maxStreamNameLength;
+  final int? maxStreamDescriptionLength;
 
   RegisterQueueEntity({
     required this.queueId,
@@ -11,5 +13,7 @@ class RegisterQueueEntity {
     required this.result,
     required this.lastEventId,
     required this.realmJitsiServerUrl,
+    required this.maxStreamNameLength,
+    required this.maxStreamDescriptionLength,
   });
 }
