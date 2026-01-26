@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/channels/entities/channel_entity.dart';
@@ -23,6 +24,7 @@ class CreateChatCubit extends Cubit<CreateChatState> {
     bool announce = false,
     bool inviteOnly = false,
   }) async {
+    emit(CreateChatPending());
     try {
       final body = CreateChannelRequestEntity(
         name: name,
@@ -32,10 +34,13 @@ class CreateChatCubit extends Cubit<CreateChatState> {
         inviteOnly: inviteOnly,
       );
       await _createChannelUseCase.call(body);
-    } catch (e) {
+    } on DioException catch (e) {
       if (kDebugMode) {
         inspect(e);
       }
+      rethrow;
+    } finally {
+      emit(CreateChatInitial());
     }
   }
 }
