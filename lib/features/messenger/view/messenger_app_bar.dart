@@ -66,7 +66,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final bool isLoadingMore;
-  final VoidCallback onShowChats;
+  final ValueChanged<Offset> onShowChats;
 
   bool get isTabletOrSmaller => !isLargeScreen;
 
@@ -289,26 +289,16 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                         SizedBox(
                           height: 32,
                           width: 32,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: onShowChats,
-                            // onPressed: () async {
-                            //   await showDialog(
-                            //     context: context,
-                            //     builder: (BuildContext dialogContext) {
-                            //       return BlocProvider(
-                            //         create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                            //         child: CreateGroupChatDialog(
-                            //           onCreate: (membersIds) {
-                            //             context.pop();
-                            //             openChat(context, chatId: -1, membersIds: {...membersIds, selfUserId});
-                            //           },
-                            //         ),
-                            //       );
-                            //     },
-                            //   );
-                            // },
-                            icon: Assets.icons.newWindow.svg(),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTapDown: (details) => onShowChats(details.globalPosition),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Assets.icons.newWindow.svg(),
+                              ),
+                            ),
                           ),
                         ),
                     ],

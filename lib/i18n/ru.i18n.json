@@ -296,7 +296,12 @@
   "birthday": "День рождения",
   "messenger_view": {
     "chats_and_channels": "Чаты и каналы",
-    "channelInfo": "Информация о канале"
+    "channelInfo": "Информация о канале",
+    "create_chat_menu": {
+      "start_chat": "Начать чат",
+      "create_channel": "Создать канал",
+      "create_group_chat": "Создать групповой чат"
+    }
   },
   "roles": {
     "owner": "Владелец",

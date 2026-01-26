@@ -290,7 +290,12 @@
   "birthday": "Birthday",
   "messenger_view": {
     "chats_and_channels": "Chats and channels",
-    "channelInfo": "Channel information"
+    "channelInfo": "Channel information",
+    "create_chat_menu": {
+      "start_chat": "Start chat",
+      "create_channel": "Create channel",
+      "create_group_chat": "Create group chat"
+    }
   },
   "roles": {
     "owner": "Owner",

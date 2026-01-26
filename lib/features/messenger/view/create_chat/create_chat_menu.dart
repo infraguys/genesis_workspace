@@ -8,18 +8,26 @@ import 'package:genesis_workspace/features/messenger/view/create_chat/create_cha
 import 'package:genesis_workspace/features/messenger/view/create_chat/create_dm_chat_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/create_chat/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateChatMenu extends StatelessWidget with OpenChatMixin {
   final int selfUserId;
-  const CreateChatMenu({super.key, required this.selfUserId});
+  final VoidCallback? onClose;
+  const CreateChatMenu({
+    super.key,
+    required this.selfUserId,
+    this.onClose,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: .min,
       children: [
         InkWell(
           onTap: () async {
+            onClose?.call();
             final channelId = await showDialog(
               context: context,
               builder: (BuildContext dialogContext) {
@@ -39,12 +47,13 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
             spacing: 16,
             children: [
               Assets.icons.personAdd.svg(),
-              Text("Начать чат"),
+              Text(context.t.messengerView.createChatMenu.startChat),
             ],
           ),
         ),
         InkWell(
           onTap: () async {
+            onClose?.call();
             final channelId = await showDialog(
               context: context,
               builder: (BuildContext dialogContext) {
@@ -66,12 +75,13 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
             spacing: 16,
             children: [
               Assets.icons.campaign.svg(),
-              Text("Создать канал"),
+              Text(context.t.messengerView.createChatMenu.createChannel),
             ],
           ),
         ),
         InkWell(
           onTap: () async {
+            onClose?.call();
             await showDialog(
               context: context,
               builder: (BuildContext dialogContext) {
@@ -95,7 +105,7 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
             spacing: 16,
             children: [
               Assets.icons.group.svg(),
-              Text("Создать групповой чат"),
+              Text(context.t.messengerView.createChatMenu.createGroupChat),
             ],
           ),
         ),
