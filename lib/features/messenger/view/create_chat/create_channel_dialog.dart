@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
+import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -24,6 +25,8 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
   final Set<int> _selectedIds = <int>{};
   bool _announce = false;
   bool _inviteOnly = false;
+  late final int _maxNameLength;
+  late final int _maxDescriptionLength;
 
   @override
   void initState() {
@@ -31,6 +34,12 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
     directMessageCubit = context.read<DirectMessagesCubit>();
     directMessageCubit.searchUsers('');
     _searchController.addListener(_onSearchChanged);
+    final organizationsState = context.read<OrganizationsCubit>().state;
+    final org = organizationsState.organizations.firstWhere(
+      (org) => org.id == organizationsState.selectedOrganizationId,
+    );
+    _maxNameLength = org.streamNameMaxLength!;
+    _maxDescriptionLength = org.streamDescriptionMaxLength!;
   }
 
   void _onSearchChanged() {
@@ -52,10 +61,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
     return Dialog(
-      constraints: BoxConstraints(
-        maxWidth: 500,
-        maxHeight: 700
-      ),
+      constraints: BoxConstraints(maxWidth: 500, maxHeight: 700),
       child: Column(
         mainAxisSize: .min,
         children: [
