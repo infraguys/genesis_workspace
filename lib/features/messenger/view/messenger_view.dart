@@ -6,26 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
-import 'package:genesis_workspace/core/widgets/external_expandable.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
-import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/drafts/drafts.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
-import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
-import 'package:genesis_workspace/features/messenger/view/create_chat/create_channel_dialog.dart';
-import 'package:genesis_workspace/features/messenger/view/create_chat/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
@@ -38,7 +32,6 @@ import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
-import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
@@ -66,7 +59,6 @@ class _MessengerViewState extends State<MessengerView>
   bool _showTopics = false;
   final GlobalKey _activeCallKey = GlobalKey();
   Rect? _lastReportedDockRect;
-  bool _showCreateChatsButtons = false;
 
   late final ScrollController _chatsController;
 
@@ -262,11 +254,7 @@ class _MessengerViewState extends State<MessengerView>
     );
   }
 
-  void toggleShowCreateChatsButtons() {
-    setState(() {
-      _showCreateChatsButtons = !_showCreateChatsButtons;
-    });
-  }
+  void toggleShowCreateChatsButtons() {}
 
   @override
   void initState() {
@@ -429,76 +417,6 @@ class _MessengerViewState extends State<MessengerView>
                                 searchQuery: _searchQuery,
                                 isLoadingMore: !state.foundOldestMessage,
                                 onShowChats: toggleShowCreateChatsButtons,
-                              ),
-                              ExternalExpandable(
-                                isExpanded: _showCreateChatsButtons,
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      spacing: 16,
-                                      children: [
-                                        Assets.icons.personAdd.svg(),
-                                        Text("Начать чат"),
-                                      ],
-                                    ),
-                                    InkWell(
-                                      onTap: () async {
-                                        final channelId = await showDialog(
-                                          context: context,
-                                          builder: (BuildContext dialogContext) {
-                                            return MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider(create: (_) => getIt<DirectMessagesCubit>()..getUsers()),
-                                                BlocProvider(create: (_) => getIt<CreateChatCubit>()),
-                                              ],
-
-                                              child: CreateChannelDialog(),
-                                            );
-                                          },
-                                        );
-                                        if (channelId != null) {
-                                          openChannel(context, channelId: channelId);
-                                        }
-                                      },
-                                      child: Row(
-                                        spacing: 16,
-                                        children: [
-                                          Assets.icons.campaign.svg(),
-                                          Text("Создать канал"),
-                                        ],
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () async {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (BuildContext dialogContext) {
-                                            return BlocProvider(
-                                              create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                                              child: CreateGroupChatDialog(
-                                                onCreate: (membersIds) {
-                                                  context.pop();
-                                                  openChat(
-                                                    context,
-                                                    chatId: -1,
-                                                    membersIds: {...membersIds, state.selfUser?.userId ?? -1},
-                                                  );
-                                                },
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Row(
-                                        spacing: 16,
-                                        children: [
-                                          Assets.icons.group.svg(),
-                                          Text("Создать групповой чат"),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
                               Expanded(
                                 child: Stack(

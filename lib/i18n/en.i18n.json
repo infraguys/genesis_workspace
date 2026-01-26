@@ -229,6 +229,14 @@
       "create": "Create"
     }
   },
+  "direct_message": {
+    "create_dialog": {
+      "title": "New chat",
+      "search_hint": "Search users",
+      "no_users": "No users found",
+      "cancel": "Cancel"
+    }
+  },
   "nothing_found": "Nothing found",
   "update_view": {
     "title": "Choose version",

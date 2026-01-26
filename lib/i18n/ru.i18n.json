@@ -235,6 +235,14 @@
       "create": "Создать"
     }
   },
+  "direct_message": {
+    "create_dialog": {
+      "title": "Новый чат",
+      "search_hint": "Поиск пользователей",
+      "no_users": "Пользователи не найдены",
+      "cancel": "Отмена"
+    }
+  },
   "nothing_found": "Ничего не нашли",
   "update_view": {
     "title": "Выберите версию",
