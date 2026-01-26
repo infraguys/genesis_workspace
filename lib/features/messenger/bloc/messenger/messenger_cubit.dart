@@ -847,7 +847,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _onMessageEvents(MessageEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
-    inspect(event);
     final message = event.message.copyWith(flags: event.flags);
     _lastMessageId = message.id;
 
