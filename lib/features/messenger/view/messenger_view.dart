@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
-import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/external_expandable.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
@@ -50,7 +50,7 @@ class MessengerView extends StatefulWidget {
 }
 
 class _MessengerViewState extends State<MessengerView>
-    with SingleTickerProviderStateMixin, OpenDmChatMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin, OpenChatMixin, WidgetsBindingObserver {
   static const Duration _searchAnimationDuration = Duration(milliseconds: 220);
   Future<void>? _future;
   final TextEditingController _searchController = TextEditingController();
@@ -443,7 +443,7 @@ class _MessengerViewState extends State<MessengerView>
                                     ),
                                     InkWell(
                                       onTap: () async {
-                                        await showDialog(
+                                        final channelId = await showDialog(
                                           context: context,
                                           builder: (BuildContext dialogContext) {
                                             return MultiBlocProvider(
@@ -456,6 +456,9 @@ class _MessengerViewState extends State<MessengerView>
                                             );
                                           },
                                         );
+                                        if (channelId != null) {
+                                          openChannel(context, channelId: channelId);
+                                        }
                                       },
                                       child: Row(
                                         spacing: 16,

@@ -80,8 +80,6 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
       nextSelection = organizations.isNotEmpty ? organizations.first.id : null;
     }
 
-    inspect(organizations);
-
     emit(state.copyWith(organizations: organizations, selectedOrganizationId: nextSelection));
   }
 

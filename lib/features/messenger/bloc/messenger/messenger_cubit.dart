@@ -127,6 +127,31 @@ class MessengerCubit extends Cubit<MessengerState> {
     _updateMessageEventsSubscription = _realTimeService.updateMessageEventsStream.listen(_onUpdateMessageEvents);
   }
 
+  Future<void> addChannelById(int channelId) async {
+    final existingChat = state.chats.firstWhereOrNull((chat) => chat.streamId == channelId);
+    if (existingChat != null) {
+      return;
+    }
+    try {
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.newest(),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.channel, operand: channelId),
+        ],
+        numBefore: 1,
+        numAfter: 0,
+      );
+      final response = await _getMessagesUseCase.call(body);
+      if (response.messages.isNotEmpty) {
+        _createChatsFromMessages(response.messages);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
   void _onProfileStateChanged(ProfileState profileState) {
     final user = profileState.user;
     if (user == null) return;
@@ -821,6 +846,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   void _onMessageEvents(MessageEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
+    inspect(event);
     final message = event.message.copyWith(flags: event.flags);
     _lastMessageId = message.id;
 

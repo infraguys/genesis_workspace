@@ -7,6 +7,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -102,14 +103,15 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
       final myUserId = context.read<ProfileCubit>().state.user?.userId ?? -1;
       final name = _nameController.text.trim();
       final description = _descriptionController.text.trim();
-      await context.read<CreateChatCubit>().createChannel(
+      final channelId = await context.read<CreateChatCubit>().createChannel(
         name: name,
         description: description.isEmpty ? null : description,
         announce: _announce,
         inviteOnly: _inviteOnly,
         selectedUsers: [..._selectedIds.toList(), myUserId],
       );
-      context.pop();
+      await context.read<MessengerCubit>().addChannelById(channelId);
+      context.pop<int>(channelId);
     } on DioException catch (e) {
       final data = e.response?.data;
       final code = data['code'];
@@ -349,7 +351,7 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
                   spacing: 8.0,
                   children: [
                     TextButton(
-                      onPressed: context.pop,
+                      onPressed: () => context.pop(),
                       child: Text(t.groupChat.createDialog.cancel),
                     ),
                     FilledButton(

@@ -5,7 +5,7 @@ import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cu
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
-mixin OpenDmChatMixin {
+mixin OpenChatMixin {
   void openChat(
     BuildContext context, {
     required Set<int> membersIds,

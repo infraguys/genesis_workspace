@@ -12,7 +12,7 @@ class ChannelsRemoteDataSourceImpl implements ChannelsDataSource {
   final ChannelsApiClient _apiClient = ChannelsApiClient(getIt<Dio>());
 
   @override
-  Future<void> createChannel(CreateChannelRequestDto body) async {
+  Future<CreateChannelResponseDto> createChannel(CreateChannelRequestDto body) async {
     return await _apiClient.createChannel(
       body.name,
       jsonEncode(body.subscribers),

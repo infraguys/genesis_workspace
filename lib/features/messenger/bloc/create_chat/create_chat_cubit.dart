@@ -17,7 +17,7 @@ class CreateChatCubit extends Cubit<CreateChatState> {
 
   final CreateChannelUseCase _createChannelUseCase;
 
-  Future<void> createChannel({
+  Future<int> createChannel({
     required String name,
     required List<int> selectedUsers,
     String? description,
@@ -33,7 +33,8 @@ class CreateChatCubit extends Cubit<CreateChatState> {
         announce: announce,
         inviteOnly: inviteOnly,
       );
-      await _createChannelUseCase.call(body);
+      final response = await _createChannelUseCase.call(body);
+      return response.streamId;
     } on DioException catch (e) {
       if (kDebugMode) {
         inspect(e);

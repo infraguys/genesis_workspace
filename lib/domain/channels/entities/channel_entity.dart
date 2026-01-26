@@ -1,5 +1,12 @@
 import 'package:genesis_workspace/data/channels/dto/channel_dto.dart';
 
+class CreateChannelResponseEntity {
+  final int streamId;
+  CreateChannelResponseEntity({
+    required this.streamId,
+  });
+}
+
 class CreateChannelRequestEntity {
   final String name;
   final String? description;

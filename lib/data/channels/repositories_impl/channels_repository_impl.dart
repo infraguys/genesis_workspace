@@ -8,7 +8,8 @@ class ChannelsRepositoryImpl implements ChannelsRepository {
   final ChannelsDataSource _dataSource;
   ChannelsRepositoryImpl(this._dataSource);
   @override
-  Future<void> createChannel(CreateChannelRequestEntity body) async {
-    return await _dataSource.createChannel(body.toDto());
+  Future<CreateChannelResponseEntity> createChannel(CreateChannelRequestEntity body) async {
+    final response = await _dataSource.createChannel(body.toDto());
+    return response.toEntity();
   }
 }

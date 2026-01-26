@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:genesis_workspace/data/channels/dto/channel_dto.dart';
 import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 
@@ -10,7 +11,7 @@ abstract class ChannelsApiClient {
 
   @FormUrlEncoded()
   @POST('/channels/create')
-  Future<void> createChannel(
+  Future<CreateChannelResponseDto> createChannel(
     @Field('name') String name,
     @Field('subscribers') String subscribers,
   );

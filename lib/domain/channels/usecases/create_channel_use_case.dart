@@ -7,7 +7,7 @@ class CreateChannelUseCase {
   final ChannelsRepository _repository;
   CreateChannelUseCase(this._repository);
 
-  Future<void> call(CreateChannelRequestEntity body) async {
+  Future<CreateChannelResponseEntity> call(CreateChannelRequestEntity body) async {
     return await _repository.createChannel(body);
   }
 }
