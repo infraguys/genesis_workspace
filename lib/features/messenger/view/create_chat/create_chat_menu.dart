@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 class CreateChatMenu extends StatelessWidget with OpenChatMixin {
   final int selfUserId;
   final VoidCallback? onClose;
+
   const CreateChatMenu({
     super.key,
     required this.selfUserId,
@@ -22,94 +23,110 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: .min,
-      children: [
-        InkWell(
-          onTap: () async {
-            onClose?.call();
-            final channelId = await showDialog(
-              context: context,
-              builder: (BuildContext dialogContext) {
-                return MultiBlocProvider(
-                  providers: [
-                    BlocProvider(create: (_) => getIt<DirectMessagesCubit>()..getUsers()),
-                  ],
-                  child: CreateDmChatDialog(),
-                );
-              },
-            );
-            if (channelId != null) {
-              openChannel(context, channelId: channelId);
-            }
-          },
-          child: Row(
-            spacing: 16,
-            children: [
-              Assets.icons.personAdd.svg(),
-              Text(context.t.messengerView.createChatMenu.startChat),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: .circular(8),
+      ),
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          _CreateChatItem(
+            onCreate: () async {
+              onClose?.call();
+              final channelId = await showDialog(
+                context: context,
+                builder: (BuildContext dialogContext) {
+                  return MultiBlocProvider(
+                    providers: [
+                      BlocProvider(create: (_) => getIt<DirectMessagesCubit>()..getUsers()),
+                    ],
+                    child: CreateDmChatDialog(),
+                  );
+                },
+              );
+              if (channelId != null) {
+                openChannel(context, channelId: channelId);
+              }
+            },
+            icon: Assets.icons.personAdd.svg(),
+            label: context.t.messengerView.createChatMenu.startChat,
           ),
-        ),
-        InkWell(
-          onTap: () async {
-            onClose?.call();
-            final channelId = await showDialog(
-              context: context,
-              builder: (BuildContext dialogContext) {
-                return MultiBlocProvider(
-                  providers: [
-                    BlocProvider(create: (_) => getIt<DirectMessagesCubit>()..getUsers()),
-                    BlocProvider(create: (_) => getIt<CreateChatCubit>()),
-                  ],
+          _CreateChatItem(
+            onCreate: () async {
+              onClose?.call();
+              await showDialog(
+                context: context,
+                builder: (BuildContext dialogContext) {
+                  return MultiBlocProvider(
+                    providers: [
+                      BlocProvider(create: (_) => getIt<DirectMessagesCubit>()..getUsers()),
+                      BlocProvider(create: (_) => getIt<CreateChatCubit>()),
+                    ],
+                    child: CreateChannelDialog(),
+                  );
+                },
+              );
+            },
+            icon: Assets.icons.campaign.svg(),
+            label: context.t.messengerView.createChatMenu.createChannel,
+          ),
+          _CreateChatItem(
+            onCreate: () async {
+              onClose?.call();
+              await showDialog(
+                context: context,
+                builder: (BuildContext dialogContext) {
+                  return BlocProvider(
+                    create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
+                    child: CreateGroupChatDialog(
+                      onCreate: (membersIds) {
+                        context.pop();
+                        openChat(
+                          context,
+                          chatId: -1,
+                          membersIds: {...membersIds, selfUserId},
+                        );
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+            icon: Assets.icons.group.svg(
+              width: 25,
+            ),
+            label: context.t.messengerView.createChatMenu.createGroupChat,
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-                  child: CreateChannelDialog(),
-                );
-              },
-            );
-            if (channelId != null) {
-              openChannel(context, channelId: channelId);
-            }
-          },
+class _CreateChatItem extends StatelessWidget {
+  final VoidCallback onCreate;
+  final Widget icon;
+  final String label;
+
+  const _CreateChatItem({super.key, required this.onCreate, required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: InkWell(
+        onTap: onCreate,
+        child: Container(
+          padding: .symmetric(vertical: 4, horizontal: 12),
+          height: 40,
           child: Row(
             spacing: 16,
             children: [
-              Assets.icons.campaign.svg(),
-              Text(context.t.messengerView.createChatMenu.createChannel),
+              icon,
+              Text(label),
             ],
           ),
         ),
-        InkWell(
-          onTap: () async {
-            onClose?.call();
-            await showDialog(
-              context: context,
-              builder: (BuildContext dialogContext) {
-                return BlocProvider(
-                  create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                  child: CreateGroupChatDialog(
-                    onCreate: (membersIds) {
-                      context.pop();
-                      openChat(
-                        context,
-                        chatId: -1,
-                        membersIds: {...membersIds, selfUserId},
-                      );
-                    },
-                  ),
-                );
-              },
-            );
-          },
-          child: Row(
-            spacing: 16,
-            children: [
-              Assets.icons.group.svg(),
-              Text(context.t.messengerView.createChatMenu.createGroupChat),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

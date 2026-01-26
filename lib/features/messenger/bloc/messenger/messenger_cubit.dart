@@ -144,6 +144,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       final response = await _getMessagesUseCase.call(body);
       if (response.messages.isNotEmpty) {
         _createChatsFromMessages(response.messages);
+        _sortChats();
       }
     } catch (e) {
       if (kDebugMode) {

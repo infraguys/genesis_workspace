@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
@@ -20,7 +21,7 @@ class CreateChannelDialog extends StatefulWidget {
   State<CreateChannelDialog> createState() => _CreateChannelDialogState();
 }
 
-class _CreateChannelDialogState extends State<CreateChannelDialog> {
+class _CreateChannelDialogState extends State<CreateChannelDialog> with OpenChatMixin {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -111,7 +112,8 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> {
         selectedUsers: [..._selectedIds.toList(), myUserId],
       );
       await context.read<MessengerCubit>().addChannelById(channelId);
-      context.pop<int>(channelId);
+      context.pop();
+      openChannel(context, channelId: channelId);
     } on DioException catch (e) {
       final data = e.response?.data;
       final code = data['code'];
