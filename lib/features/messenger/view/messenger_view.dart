@@ -13,7 +13,6 @@ import 'package:genesis_workspace/core/widgets/external_expandable.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
-import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/channel_chat.dart';
 import 'package:genesis_workspace/features/chat/chat.dart';
@@ -26,6 +25,7 @@ import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
 import 'package:genesis_workspace/features/messenger/view/create_chat/create_channel_dialog.dart';
+import 'package:genesis_workspace/features/messenger/view/create_chat/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';

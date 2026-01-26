@@ -9,10 +9,10 @@ import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.d
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
-import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/dm_search_field.dart';
 import 'package:genesis_workspace/features/chats/common/widgets/user_tile.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/create_chat/create_group_chat_dialog.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
