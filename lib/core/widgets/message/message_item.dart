@@ -169,16 +169,26 @@ class _MessageItemState extends State<MessageItem> {
   }
 
   void onForward() async {
+    _closeOverlay();
+    _menuController.close();
+
+    if (!mounted) return;
+
+    final chatCubit = context.read<ChatCubit>();
+    final channelChatCubit = context.read<ChannelChatCubit>();
+    final messagesCubit = context.read<MessagesCubit>();
+    final messengerCubit = context.read<MessengerCubit>();
+
     await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.read<ChatCubit>()),
-            BlocProvider.value(value: context.read<ChannelChatCubit>()),
-            BlocProvider.value(value: context.read<MessagesCubit>()),
-            BlocProvider.value(value: context.read<MessengerCubit>()),
-            BlocProvider(create: (context) => ForwardMessageCubit())
+            BlocProvider.value(value: chatCubit),
+            BlocProvider.value(value: channelChatCubit),
+            BlocProvider.value(value: messagesCubit),
+            BlocProvider.value(value: messengerCubit),
+            BlocProvider(create: (_) => ForwardMessageCubit())
           ],
           child: ForwardMessageDialog(message: widget.message),
         );
