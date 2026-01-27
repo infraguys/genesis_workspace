@@ -207,7 +207,7 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
               ),
             ),
           ),
-          if (currentSize(context) > ScreenSize.tablet)
+          // if (currentSize(context) > ScreenSize.tablet)
             AnimatedSize(
               duration: _animationDuration,
               curve: _animationCurve,

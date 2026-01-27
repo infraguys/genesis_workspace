@@ -40,7 +40,7 @@ mixin OpenChatMixin {
     BuildContext context, {
     required int channelId,
     String? topicName,
-    int? unreadMessagesCount,
+    int? unreadMessagesCount, bool replace = false,
   }) {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
     final chat = context.read<MessengerCubit>().state.chats.firstWhere((chat) => chat.streamId == channelId);
@@ -48,15 +48,27 @@ mixin OpenChatMixin {
       context.read<MessengerCubit>().selectChat(chat, selectedTopic: topicName);
     } else {
       if (topicName != null && topicName.isNotEmpty) {
-        context.pushNamed(
-          Routes.channelChatTopic,
-          pathParameters: {
-            'chatId': chat.id.toString(),
-            'channelId': channelId.toString(),
-            'topicName': topicName,
-          },
-          extra: {'unreadMessagesCount': unreadMessagesCount},
-        );
+        if (replace) {
+          context.pushReplacementNamed(
+            Routes.channelChatTopic,
+            pathParameters: {
+              'chatId': chat.id.toString(),
+              'channelId': channelId.toString(),
+              'topicName': topicName,
+            },
+            extra: {'unreadMessagesCount': unreadMessagesCount},
+          );
+        } else {
+          context.pushNamed(
+            Routes.channelChatTopic,
+            pathParameters: {
+              'chatId': chat.id.toString(),
+              'channelId': channelId.toString(),
+              'topicName': topicName,
+            },
+            extra: {'unreadMessagesCount': unreadMessagesCount},
+          );
+        }
       } else {
         context.pushNamed(
           Routes.channelChat,
