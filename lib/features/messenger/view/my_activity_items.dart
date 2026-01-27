@@ -126,7 +126,7 @@ class _MyActivityItemsState extends State<MyActivityItems> with OpenChatMixin {
       ),
     ];
     return ExpansionTile(
-      title: Text("Моя активность"),
+      title: Text(context.t.myActivity),
       controller: _controller,
       trailing: AnimatedRotation(
         turns: _isExpanded ? 0.5 : 0.0,

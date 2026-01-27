@@ -351,5 +351,6 @@
   "read_all_messages": "Read all messages",
   "open": "Open",
   "try_again": "Try again",
-  "connecting": "Connecting"
+  "connecting": "Connecting",
+  "my_activity": "My activity"
 }
