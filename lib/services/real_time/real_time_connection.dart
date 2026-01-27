@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/update_stream_settings_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -30,6 +31,7 @@ class RealTimeConnection {
   final GetEventsByQueueIdUseCase _getEventsByQueueIdUseCase;
   final DeleteQueueUseCase _deleteQueueUseCase;
   final UpdateOrganizationMeetingUrlUseCase _updateOrganizationMeetingUrlUseCase;
+  final UpdateStreamSettingsUseCase _updateStreamSettingsUseCase;
 
   final Duration _initialRetryDelay;
   final Duration _maxRetryDelay;
@@ -38,10 +40,14 @@ class RealTimeConnection {
   int _lastEventId = -1;
   bool _isActive = false;
   Future<void>? _pollingTask;
+  int _maxStreamNameLength = 20;
+  int _maxStreamDescriptionLength = 256;
 
   bool get isActive => _isActive;
   int get lastEventId => _lastEventId;
   String? get queueId => _queueId;
+  int get maxStreamNameLength => _maxStreamNameLength;
+  int get maxStreamDescriptionLength => _maxStreamDescriptionLength;
 
   RealTimeConnection({
     required this.organizationId,
@@ -50,12 +56,14 @@ class RealTimeConnection {
     required GetEventsByQueueIdUseCase getEventsByQueueIdUseCase,
     required DeleteQueueUseCase deleteQueueUseCase,
     required UpdateOrganizationMeetingUrlUseCase updateOrganizationMeetingUrlUseCase,
+    required UpdateStreamSettingsUseCase updateStreamSettingsUseCase,
     Duration initialRetryDelay = const Duration(seconds: 1),
     Duration maxRetryDelay = const Duration(seconds: 20),
   }) : _registerQueueUseCase = registerQueueUseCase,
        _getEventsByQueueIdUseCase = getEventsByQueueIdUseCase,
        _deleteQueueUseCase = deleteQueueUseCase,
        _updateOrganizationMeetingUrlUseCase = updateOrganizationMeetingUrlUseCase,
+       _updateStreamSettingsUseCase = updateStreamSettingsUseCase,
        _initialRetryDelay = initialRetryDelay,
        _maxRetryDelay = maxRetryDelay;
 
@@ -155,10 +163,19 @@ class RealTimeConnection {
       );
       _queueId = registerQueueEntity.queueId;
       _lastEventId = registerQueueEntity.lastEventId;
-      await _updateOrganizationMeetingUrlUseCase.call(
-        organizationId: organizationId,
-        meetingUrl: registerQueueEntity.realmJitsiServerUrl,
-      );
+      _maxStreamNameLength = registerQueueEntity.maxStreamNameLength ?? 20;
+      _maxStreamDescriptionLength = registerQueueEntity.maxStreamDescriptionLength ?? 256;
+      await Future.wait([
+        _updateOrganizationMeetingUrlUseCase.call(
+          organizationId: organizationId,
+          meetingUrl: registerQueueEntity.realmJitsiServerUrl,
+        ),
+        _updateStreamSettingsUseCase.call(
+          organizationId: organizationId,
+          maxNameLength: _maxStreamNameLength,
+          maxDescriptionLength: _maxStreamDescriptionLength,
+        ),
+      ]);
     } catch (e) {
       rethrow;
     }

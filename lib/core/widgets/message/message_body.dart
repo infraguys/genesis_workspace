@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/message/message_html.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class MessageBody extends StatelessWidget {

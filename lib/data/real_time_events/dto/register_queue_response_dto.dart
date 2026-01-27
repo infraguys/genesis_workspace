@@ -13,6 +13,10 @@ class RegisterQueueResponseDto {
   final int lastEventId;
   @JsonKey(name: "realm_jitsi_server_url")
   final String? realmJitsiServerUrl;
+  @JsonKey(name: "max_stream_name_length")
+  final int? maxStreamNameLength;
+  @JsonKey(name: "max_stream_description_length")
+  final int? maxStreamDescriptionLength;
 
   RegisterQueueResponseDto({
     required this.queueId,
@@ -20,6 +24,8 @@ class RegisterQueueResponseDto {
     required this.result,
     required this.lastEventId,
     this.realmJitsiServerUrl,
+    this.maxStreamNameLength,
+    this.maxStreamDescriptionLength,
   });
 
   factory RegisterQueueResponseDto.fromJson(Map<String, dynamic> json) => _$RegisterQueueResponseDtoFromJson(json);
@@ -32,5 +38,7 @@ class RegisterQueueResponseDto {
     result: result,
     lastEventId: lastEventId,
     realmJitsiServerUrl: realmJitsiServerUrl,
+    maxStreamNameLength: maxStreamNameLength,
+    maxStreamDescriptionLength: maxStreamDescriptionLength,
   );
 }

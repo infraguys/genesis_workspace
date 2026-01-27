@@ -202,7 +202,20 @@
   "channel": {
     "channelName": "Название канала",
     "muteChannel": "Заглушить канал",
-    "unmuteChannel": "Включить уведомления канала"
+    "unmuteChannel": "Включить уведомления канала",
+    "create_dialog": {
+      "title": "Новый канал",
+      "name_label": "Название канала",
+      "name_hint": "Канал для обсуждений",
+      "description_label": "Описание канала",
+      "description_hint": "О чем этот канал",
+      "announce": "Оповестить о создании канала",
+      "invite_only": "Только по приглашению",
+      "name_required": "Введите название канала",
+      "name_max_length": "Максимум {max} символов",
+      "description_max_length": "Максимум {max} символов",
+      "name_already_exists": "Канал с таким именем уже существует"
+    }
   },
   "chat": {
     "pinChat": "Закрепить чат",
@@ -220,6 +233,14 @@
       "no_users": "Пользователи не найдены",
       "cancel": "Отмена",
       "create": "Создать"
+    }
+  },
+  "direct_message": {
+    "create_dialog": {
+      "title": "Новый чат",
+      "search_hint": "Поиск пользователей",
+      "no_users": "Пользователи не найдены",
+      "cancel": "Отмена"
     }
   },
   "nothing_found": "Ничего не нашли",
@@ -275,7 +296,12 @@
   "birthday": "День рождения",
   "messenger_view": {
     "chats_and_channels": "Чаты и каналы",
-    "channelInfo": "Информация о канале"
+    "channelInfo": "Информация о канале",
+    "create_chat_menu": {
+      "start_chat": "Начать чат",
+      "create_channel": "Создать канал",
+      "create_group_chat": "Создать групповой чат"
+    }
   },
   "roles": {
     "owner": "Владелец",

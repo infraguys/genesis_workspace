@@ -196,7 +196,20 @@
   "channel": {
     "channelName": "Channel name",
     "muteChannel": "Mute channel",
-    "unmuteChannel": "Unmute channel"
+    "unmuteChannel": "Unmute channel",
+    "create_dialog": {
+      "title": "New channel",
+      "name_label": "Channel name",
+      "name_hint": "Channel for discussions",
+      "description_label": "Channel description",
+      "description_hint": "What this channel is about",
+      "announce": "Announce channel creation",
+      "invite_only": "Invite only",
+      "name_required": "Enter channel name",
+      "name_max_length": "Maximum {max} characters",
+      "description_max_length": "Maximum {max} characters",
+      "name_already_exists": "A channel with this name already exists"
+    }
   },
   "chat": {
     "pinChat": "Pin chat",
@@ -214,6 +227,14 @@
       "no_users": "No users found",
       "cancel": "Cancel",
       "create": "Create"
+    }
+  },
+  "direct_message": {
+    "create_dialog": {
+      "title": "New chat",
+      "search_hint": "Search users",
+      "no_users": "No users found",
+      "cancel": "Cancel"
     }
   },
   "nothing_found": "Nothing found",
@@ -269,7 +290,12 @@
   "birthday": "Birthday",
   "messenger_view": {
     "chats_and_channels": "Chats and channels",
-    "channelInfo": "Channel information"
+    "channelInfo": "Channel information",
+    "create_chat_menu": {
+      "start_chat": "Start chat",
+      "create_channel": "Create channel",
+      "create_group_chat": "Create group chat"
+    }
   },
   "roles": {
     "owner": "Owner",

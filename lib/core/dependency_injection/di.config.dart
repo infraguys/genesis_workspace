@@ -36,6 +36,12 @@ import 'package:genesis_workspace/data/all_chats/repositories_impl/folder_reposi
     as _i957;
 import 'package:genesis_workspace/data/all_chats/repositories_impl/pinned_chats_repository_impl.dart'
     as _i835;
+import 'package:genesis_workspace/data/channels/datasources/channels_data_source.dart'
+    as _i194;
+import 'package:genesis_workspace/data/channels/datasources/channels_remote_data_source_impl.dart'
+    as _i695;
+import 'package:genesis_workspace/data/channels/repositories_impl/channels_repository_impl.dart'
+    as _i1037;
 import 'package:genesis_workspace/data/database/app_database.dart' as _i606;
 import 'package:genesis_workspace/data/drafts/datasources/drafts_remote_data_source.dart'
     as _i803;
@@ -104,6 +110,10 @@ import 'package:genesis_workspace/domain/all_chats/usecases/update_folder_use_ca
     as _i7;
 import 'package:genesis_workspace/domain/all_chats/usecases/update_pinned_chat_order_use_case.dart'
     as _i1057;
+import 'package:genesis_workspace/domain/channels/repositories/channels_repository.dart'
+    as _i574;
+import 'package:genesis_workspace/domain/channels/usecases/create_channel_use_case.dart'
+    as _i458;
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_sha_use_case.dart'
     as _i690;
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart'
@@ -162,6 +172,8 @@ import 'package:genesis_workspace/domain/organizations/usecases/remove_organizat
     as _i240;
 import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart'
     as _i282;
+import 'package:genesis_workspace/domain/organizations/usecases/update_stream_settings_use_case.dart'
+    as _i655;
 import 'package:genesis_workspace/domain/organizations/usecases/watch_organizations_use_case.dart'
     as _i724;
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart'
@@ -261,10 +273,12 @@ import 'package:genesis_workspace/features/messages/bloc/message_readers_cubit.d
     as _i311;
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart'
     as _i592;
-import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart'
-    as _i398;
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart'
-    as _i49;
+import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart'
+    as _i962;
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart'
+    as _i772;
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart'
+    as _i240;
 import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart'
     as _i388;
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart'
@@ -338,7 +352,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i397.GetVersionConfigUseCase(),
     );
     gh.factory<_i274.CallCubit>(() => _i274.CallCubit());
-    gh.factory<_i398.InfoPanelCubit>(() => _i398.InfoPanelCubit());
+    gh.factory<_i772.InfoPanelCubit>(() => _i772.InfoPanelCubit());
     gh.lazySingleton<_i188.AppShellController>(
       () => coreModule.provideAppShellController(),
     );
@@ -392,6 +406,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i640.GenesisServicesDataSource>(
       () => _i734.GenesisServicesDataSourceImpl(),
     );
+    gh.factory<_i194.ChannelsDataSource>(
+      () => _i695.ChannelsRemoteDataSourceImpl(),
+    );
     gh.factory<_i1072.GenesisServicesRepository>(
       () => _i143.GenesisServicesRepositoryImpl(
         gh<_i640.GenesisServicesDataSource>(),
@@ -399,6 +416,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i958.TokenStorage>(
       () => coreModule.tokenStorage(gh<_i558.FlutterSecureStorage>()),
+    );
+    gh.factory<_i574.ChannelsRepository>(
+      () => _i1037.ChannelsRepositoryImpl(gh<_i194.ChannelsDataSource>()),
     );
     gh.factory<_i125.UsersRepository>(
       () => _i675.UsersRepositoryImpl(gh<_i451.UsersRemoteDataSource>()),
@@ -560,6 +580,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i440.DioFactory>(),
       ),
     );
+    gh.factory<_i458.CreateChannelUseCase>(
+      () => _i458.CreateChannelUseCase(gh<_i574.ChannelsRepository>()),
+    );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
     );
@@ -577,6 +600,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i672.AuthRemoteDataSource>(),
         gh<_i958.TokenStorage>(),
       ),
+    );
+    gh.factory<_i962.CreateChatCubit>(
+      () => _i962.CreateChatCubit(gh<_i458.CreateChannelUseCase>()),
     );
     gh.lazySingleton<_i703.RealTimeEventsRepository>(
       () => realTimeModule.realTimeEventsRepository(
@@ -662,6 +688,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i654.OrganizationsRepository>(),
       ),
     );
+    gh.factory<_i655.UpdateStreamSettingsUseCase>(
+      () => _i655.UpdateStreamSettingsUseCase(
+        gh<_i654.OrganizationsRepository>(),
+      ),
+    );
     gh.factory<_i724.WatchOrganizationsUseCase>(
       () =>
           _i724.WatchOrganizationsUseCase(gh<_i654.OrganizationsRepository>()),
@@ -692,16 +723,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
-    gh.lazySingleton<_i823.MultiPollingService>(
-      () => _i823.MultiPollingService(
-        gh<_i535.GetAllOrganizationsUseCase>(),
-        gh<_i75.GetTokenUseCase>(),
-        gh<_i862.GetCsrftokenUseCase>(),
-        gh<_i350.GetSessionIdUseCase>(),
-        gh<_i951.RealTimeConnectionFactory>(),
-        gh<_i282.UpdateOrganizationMeetingUrlUseCase>(),
-      ),
-    );
     gh.factory<_i293.GetAllFoldersItemsUseCase>(
       () => _i293.GetAllFoldersItemsUseCase(
         gh<_i915.FolderMembershipRepository>(),
@@ -727,12 +748,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
-    gh.factory<_i758.MentionsCubit>(
-      () => _i758.MentionsCubit(
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i823.MultiPollingService>(),
-      ),
-    );
     gh.factory<_i433.DeleteTokenUseCase>(
       () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
@@ -741,20 +756,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i643.SaveTokenUseCase>(
       () => _i643.SaveTokenUseCase(gh<_i1022.AuthRepository>()),
-    );
-    gh.factory<_i277.ChatCubit>(
-      () => _i277.ChatCubit(
-        gh<_i823.MultiPollingService>(),
-        gh<_i207.GetMessagesUseCase>(),
-        gh<_i116.SendMessageUseCase>(),
-        gh<_i487.SetTypingUseCase>(),
-        gh<_i664.UpdateMessagesFlagsUseCase>(),
-        gh<_i773.GetUserByIdUseCase>(),
-        gh<_i394.GetUserPresenceUseCase>(),
-        gh<_i42.UploadFileUseCase>(),
-        gh<_i1005.UpdateMessageUseCase>(),
-        gh<_i194.GetUsersUseCase>(),
-      ),
     );
     gh.lazySingleton<_i725.PinnedChatsRepository>(
       () => _i835.PinnedChatsRepositoryImpl(
@@ -789,16 +790,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.GetEventsByQueueIdUseCase>(),
       ),
     );
-    gh.lazySingleton<_i214.OrganizationsCubit>(
-      () => _i214.OrganizationsCubit(
-        gh<_i724.WatchOrganizationsUseCase>(),
-        gh<_i183.AddOrganizationUseCase>(),
-        gh<_i286.GetOrganizationSettingsUseCase>(),
-        gh<_i240.RemoveOrganizationUseCase>(),
-        gh<_i377.OrganizationSwitcherService>(),
-        gh<_i823.MultiPollingService>(),
-        gh<_i766.ProfileCubit>(),
-        gh<_i460.SharedPreferences>(),
+    gh.lazySingleton<_i823.MultiPollingService>(
+      () => _i823.MultiPollingService(
+        gh<_i535.GetAllOrganizationsUseCase>(),
+        gh<_i75.GetTokenUseCase>(),
+        gh<_i862.GetCsrftokenUseCase>(),
+        gh<_i350.GetSessionIdUseCase>(),
+        gh<_i951.RealTimeConnectionFactory>(),
+        gh<_i282.UpdateOrganizationMeetingUrlUseCase>(),
+        gh<_i655.UpdateStreamSettingsUseCase>(),
       ),
     );
     gh.lazySingleton<_i862.AuthCubit>(
@@ -835,12 +835,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i837.GetAllPresencesUseCase>(),
         gh<_i194.GetUsersUseCase>(),
         gh<_i207.GetMessagesUseCase>(),
-      ),
-    );
-    gh.lazySingleton<_i573.RealTimeCubit>(
-      () => _i573.RealTimeCubit(
-        gh<_i823.MultiPollingService>(),
-        gh<_i214.OrganizationsCubit>(),
       ),
     );
     gh.factory<_i1068.StarredCubit>(
@@ -884,6 +878,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i725.PinnedChatsRepository>(),
       ),
     );
+    gh.factory<_i758.MentionsCubit>(
+      () => _i758.MentionsCubit(
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i823.MultiPollingService>(),
+      ),
+    );
     gh.lazySingleton<_i592.MessagesCubit>(
       () => _i592.MessagesCubit(
         gh<_i82.RealTimeService>(),
@@ -897,6 +897,20 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: _i592.disposeMessagesCubit,
     );
+    gh.factory<_i277.ChatCubit>(
+      () => _i277.ChatCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i116.SendMessageUseCase>(),
+        gh<_i487.SetTypingUseCase>(),
+        gh<_i664.UpdateMessagesFlagsUseCase>(),
+        gh<_i773.GetUserByIdUseCase>(),
+        gh<_i394.GetUserPresenceUseCase>(),
+        gh<_i42.UploadFileUseCase>(),
+        gh<_i1005.UpdateMessageUseCase>(),
+        gh<_i194.GetUsersUseCase>(),
+      ),
+    );
     gh.factory<_i201.ChannelsCubit>(
       () => _i201.ChannelsCubit(
         gh<_i82.RealTimeService>(),
@@ -904,6 +918,24 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i207.GetMessagesUseCase>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
         gh<_i541.UpdateSubscriptionSettingsUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i214.OrganizationsCubit>(
+      () => _i214.OrganizationsCubit(
+        gh<_i724.WatchOrganizationsUseCase>(),
+        gh<_i183.AddOrganizationUseCase>(),
+        gh<_i286.GetOrganizationSettingsUseCase>(),
+        gh<_i240.RemoveOrganizationUseCase>(),
+        gh<_i377.OrganizationSwitcherService>(),
+        gh<_i823.MultiPollingService>(),
+        gh<_i766.ProfileCubit>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+    );
+    gh.lazySingleton<_i573.RealTimeCubit>(
+      () => _i573.RealTimeCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i214.OrganizationsCubit>(),
       ),
     );
     gh.factory<_i404.AllChatsCubit>(
@@ -922,8 +954,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
       ),
     );
-    gh.lazySingleton<_i49.MessengerCubit>(
-      () => _i49.MessengerCubit(
+    gh.lazySingleton<_i240.MessengerCubit>(
+      () => _i240.MessengerCubit(
         gh<_i125.AddFolderUseCase>(),
         gh<_i815.GetFoldersUseCase>(),
         gh<_i7.UpdateFolderUseCase>(),
@@ -947,7 +979,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1031.LocalNotificationsService>(
       () => _i1031.LocalNotificationsService(
         gh<_i163.FlutterLocalNotificationsPlugin>(),
-        gh<_i49.MessengerCubit>(),
+        gh<_i240.MessengerCubit>(),
         gh<_i214.OrganizationsCubit>(),
       ),
     );
@@ -955,7 +987,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i388.NotificationsCubit(
         gh<_i823.MultiPollingService>(),
         gh<_i766.ProfileCubit>(),
-        gh<_i49.MessengerCubit>(),
+        gh<_i240.MessengerCubit>(),
         gh<_i460.SharedPreferences>(),
         gh<_i1031.LocalNotificationsService>(),
       ),

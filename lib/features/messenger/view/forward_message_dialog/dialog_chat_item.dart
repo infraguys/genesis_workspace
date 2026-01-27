@@ -16,7 +16,7 @@ class _DialogChatItem extends StatefulWidget {
   State<_DialogChatItem> createState() => _DialogChatItemState();
 }
 
-class _DialogChatItemState extends State<_DialogChatItem> with OpenDmChatMixin {
+class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
   bool _isExpanded = false;
 
   static const Duration _animationDuration = Duration(milliseconds: 220);

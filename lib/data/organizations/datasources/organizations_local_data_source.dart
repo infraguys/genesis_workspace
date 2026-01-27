@@ -47,6 +47,8 @@ class OrganizationsLocalDataSource {
               baseUrl: org.baseUrl,
               unreadMessages: org.unreadMessages,
               meetingUrl: org.meetingUrl,
+              streamNameMaxLength: org.maxStreamNameLength,
+              streamDescriptionMaxLength: org.maxStreamDescriptionLength,
             ),
           )
           .toList(),
@@ -86,6 +88,8 @@ class OrganizationsLocalDataSource {
         baseUrl: response.baseUrl,
         unreadMessages: response.unreadMessages,
         meetingUrl: response.meetingUrl,
+        streamNameMaxLength: response.maxStreamNameLength,
+        streamDescriptionMaxLength: response.maxStreamDescriptionLength,
       );
     } catch (e) {
       rethrow;
@@ -99,6 +103,18 @@ class OrganizationsLocalDataSource {
     return _dao.updateMeetingUrl(
       organizationId: organizationId,
       meetingUrl: meetingUrl,
+    );
+  }
+
+  Future<void> updateStreamSettings({
+    required int organizationId,
+    int? streamNameMaxLength,
+    int? streamDescriptionMaxLength,
+  }) {
+    return _dao.updateStreamSettings(
+      organizationId: organizationId,
+      streamNameMaxLength: streamNameMaxLength,
+      streamDescriptionMaxLength: streamDescriptionMaxLength,
     );
   }
 }

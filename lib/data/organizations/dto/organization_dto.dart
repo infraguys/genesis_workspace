@@ -6,6 +6,8 @@ class OrganizationRequestDto {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final int? streamNameMaxLength;
+  final int? streamDescriptionMaxLength;
 
   OrganizationRequestDto({
     required this.name,
@@ -13,6 +15,8 @@ class OrganizationRequestDto {
     required this.baseUrl,
     required this.unreadMessages,
     this.meetingUrl,
+    this.streamNameMaxLength,
+    this.streamDescriptionMaxLength,
   });
 }
 
@@ -23,6 +27,8 @@ class OrganizationDto {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final int? streamNameMaxLength;
+  final int? streamDescriptionMaxLength;
 
   OrganizationDto({
     required this.id,
@@ -31,6 +37,8 @@ class OrganizationDto {
     required this.baseUrl,
     required this.unreadMessages,
     this.meetingUrl,
+    this.streamNameMaxLength,
+    this.streamDescriptionMaxLength,
   });
 
   OrganizationEntity toEntity() {
@@ -46,6 +54,8 @@ class OrganizationDto {
       baseUrl: refactoredBaseUrl,
       unreadMessages: unreadMessages,
       meetingUrl: meetingUrl,
+      streamNameMaxLength: streamNameMaxLength,
+      streamDescriptionMaxLength: streamDescriptionMaxLength,
     );
   }
 }

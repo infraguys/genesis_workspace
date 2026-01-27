@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
-import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/pinned_chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/folder_item_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/group_chat_entity.dart';
@@ -30,7 +30,7 @@ class AllGroupChats extends StatefulWidget {
   State<AllGroupChats> createState() => _AllGroupChatsState();
 }
 
-class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateMixin, OpenDmChatMixin {
+class _AllGroupChatsState extends State<AllGroupChats> with TickerProviderStateMixin, OpenChatMixin {
   late final AnimationController expandController;
   late final Animation<double> expandAnimation;
   bool isExpanded = true;
