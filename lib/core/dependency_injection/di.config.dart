@@ -748,6 +748,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.FolderMembershipRepository>(),
       ),
     );
+    gh.factory<_i758.MentionsCubit>(
+      () => _i758.MentionsCubit(
+        gh<_i207.GetMessagesUseCase>(),
+        gh<_i823.MultiPollingService>(),
+      ),
+    );
     gh.factory<_i433.DeleteTokenUseCase>(
       () => _i433.DeleteTokenUseCase(gh<_i1022.AuthRepository>()),
     );
@@ -834,6 +840,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i82.RealTimeService>(),
         gh<_i837.GetAllPresencesUseCase>(),
         gh<_i194.GetUsersUseCase>(),
+        gh<_i207.GetMessagesUseCase>(),
+      ),
+    );
+    gh.factory<_i1068.StarredCubit>(
+      () => _i1068.StarredCubit(
+        gh<_i823.MultiPollingService>(),
         gh<_i207.GetMessagesUseCase>(),
       ),
     );
