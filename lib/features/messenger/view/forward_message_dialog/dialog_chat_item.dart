@@ -16,11 +16,14 @@ class _DialogChatItem extends StatefulWidget {
   State<_DialogChatItem> createState() => _DialogChatItemState();
 }
 
-class _DialogChatItemState extends State<_DialogChatItem> {
+class _DialogChatItemState extends State<_DialogChatItem> with OpenDmChatMixin {
   bool _isExpanded = false;
 
   static const Duration _animationDuration = Duration(milliseconds: 220);
   static const Curve _animationCurve = Curves.easeInOut;
+
+  Set<int> get userIds => widget.chat.dmIds?.toSet() ?? {};
+  int get chatId => widget.chat.id;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,6 @@ class _DialogChatItemState extends State<_DialogChatItem> {
           InkWell(
             onTap: () async {
               if (widget.chat.type != .channel) {
-                final router = GoRouter.of(context);
                 final chatCubit = context.read<ChatCubit>();
                 final messagesCubit = context.read<MessagesCubit>();
                 try {
@@ -56,10 +58,20 @@ class _DialogChatItemState extends State<_DialogChatItem> {
                     applyMarkdown: false,
                   );
                   await chatCubit.sendMessage(content: message.makeForwardedContent(), chatIds: widget.chat.dmIds);
+                  if (context.mounted) {
+                    context.pop();
+                    openChat(
+                      context,
+                      chatId: chatId,
+                      membersIds: userIds,
+                      replace: true,
+                    );
+                  }
                 } on DioException catch (e) {
-                  showErrorSnackBar(context, exception: e);
+                  if (context.mounted) {
+                    showErrorSnackBar(context, exception: e);
+                  }
                 }
-                router.pop();
               }
             },
             borderRadius: BorderRadius.circular(8),
@@ -98,16 +110,14 @@ class _DialogChatItemState extends State<_DialogChatItem> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: .min,
+                                crossAxisAlignment: .start,
                                 children: [
                                   Row(
                                     spacing: 4,
                                     children: [
                                       ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxWidth: 185,
-                                        ),
+                                        constraints: BoxConstraints(maxWidth: 185),
                                         child: Text(
                                           widget.chat.displayTitle,
                                           maxLines: 1,
@@ -120,12 +130,6 @@ class _DialogChatItemState extends State<_DialogChatItem> {
                                           ),
                                         ),
                                       ),
-                                      if (widget.chat.isMuted)
-                                        Icon(
-                                          Icons.headset_off,
-                                          size: 14,
-                                          color: AppColors.noticeDisabled,
-                                        ),
                                     ],
                                   ),
                                   if (widget.chat.type == ChatType.channel)
@@ -142,14 +146,13 @@ class _DialogChatItemState extends State<_DialogChatItem> {
                             SizedBox(
                               height: rightContainerHeight,
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: .spaceAround,
+                                crossAxisAlignment: .end,
                                 children: [
                                   Row(
                                     children: [
                                       if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
-                                      (widget.chat.type == ChatType.channel &&
-                                              currentSize(context) > ScreenSize.tablet)
+                                      (widget.chat.type == .channel)
                                           ? InkWell(
                                               borderRadius: BorderRadius.circular(35),
                                               onTap: () {

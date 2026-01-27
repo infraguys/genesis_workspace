@@ -22,6 +22,7 @@ class _DialogTopicItem extends StatelessWidget {
         final router = GoRouter.of(context);
         final messagesCubit = context.read<MessagesCubit>();
         final channelChatCubit = context.read<ChannelChatCubit>();
+        final messengerCubit = context.read<MessengerCubit>();
         try {
           final message = await messagesCubit.getMessageById(
             messageId: messageId,
@@ -32,8 +33,13 @@ class _DialogTopicItem extends StatelessWidget {
             topic: topic.name,
             content: message.makeForwardedContent(),
           );
+          if (context.mounted) {
+            messengerCubit.selectChat(chat, selectedTopic: topic.name);
+          }
         } on DioException catch (e) {
-          showErrorSnackBar(context, exception: e);
+          if (context.mounted) {
+            showErrorSnackBar(context, exception: e);
+          }
         }
         router.pop();
       },

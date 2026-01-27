@@ -11,6 +11,7 @@ mixin OpenChatMixin {
     required Set<int> membersIds,
     required int chatId,
     int? unreadMessagesCount,
+    bool replace = false,
   }) {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
 
@@ -19,11 +20,19 @@ mixin OpenChatMixin {
     } else {
       final userIds = membersIds.toList();
       final userIdsString = userIds.join(',');
-      context.pushNamed(
-        Routes.groupChat,
-        pathParameters: {'userIds': userIdsString, 'chatId': chatId.toString()},
-        extra: {'unreadMessagesCount': unreadMessagesCount},
-      );
+      if (replace) {
+        context.pushReplacementNamed(
+          Routes.groupChat,
+          pathParameters: {'userIds': userIdsString, 'chatId': chatId.toString()},
+          extra: {'unreadMessagesCount': unreadMessagesCount},
+        );
+      } else {
+        context.pushNamed(
+          Routes.groupChat,
+          pathParameters: {'userIds': userIdsString, 'chatId': chatId.toString()},
+          extra: {'unreadMessagesCount': unreadMessagesCount},
+        );
+      }
     }
   }
 
