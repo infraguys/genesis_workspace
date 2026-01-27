@@ -35,7 +35,7 @@ import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -406,7 +406,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                             isSkeleton: true,
                                             messageOrder: MessageUIOrder.single,
                                             myUserId: _myUser.userId,
-                                            onTapQuote: (_) {},
+                                            onTapQuote: (_, {quote}) {},
                                             onTapEditMessage: (_) {},
                                           );
                                         },

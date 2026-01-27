@@ -28,7 +28,8 @@ class WorkspaceHtmlFactory extends WidgetFactory {}
 
 class MessageHtml extends StatelessWidget {
   final String content;
-  MessageHtml({super.key, required this.content});
+  final Function(String) onSelectedTextChanged;
+  MessageHtml({super.key, required this.content, required this.onSelectedTextChanged});
 
   final GetUserByIdUseCase _getUserByIdUseCase = getIt<GetUserByIdUseCase>();
 
@@ -97,6 +98,9 @@ class MessageHtml extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SelectionArea(
+      onSelectionChanged: (content) {
+        onSelectedTextChanged(content?.plainText ?? '');
+      },
       contextMenuBuilder: (BuildContext context, SelectableRegionState state) {
         return const SizedBox.shrink();
       },

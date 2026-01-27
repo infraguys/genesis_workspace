@@ -16,6 +16,8 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required String baseUrl,
     required Set<int> unreadMessages,
     String? meetingUrl,
+    int? maxStreamNameLength,
+    int? maxStreamDescriptionLength,
   }) {
     String refactoredBaseUrl = baseUrl;
     if (baseUrl.endsWith("/")) {
@@ -31,6 +33,8 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
             baseUrl: Value(refactoredBaseUrl),
             unreadMessages: Value(unreadMessages),
             meetingUrl: meetingUrl != null ? Value(meetingUrl) : const Value.absent(),
+            maxStreamNameLength: Value(maxStreamNameLength),
+            maxStreamDescriptionLength: Value(maxStreamDescriptionLength),
           ),
         );
         return existing.id;
@@ -72,6 +76,19 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     return (update(organizations)..where((t) => t.id.equals(organizationId))).write(
       OrganizationsCompanion(
         meetingUrl: Value(meetingUrl),
+      ),
+    );
+  }
+
+  Future<void> updateStreamSettings({
+    required int organizationId,
+    int? streamNameMaxLength,
+    int? streamDescriptionMaxLength,
+  }) {
+    return (update(organizations)..where((t) => t.id.equals(organizationId))).write(
+      OrganizationsCompanion(
+        maxStreamNameLength: Value(streamNameMaxLength),
+        maxStreamDescriptionLength: Value(streamDescriptionMaxLength),
       ),
     );
   }

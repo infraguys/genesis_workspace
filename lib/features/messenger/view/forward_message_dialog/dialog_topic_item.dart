@@ -1,16 +1,18 @@
 part of './forward_message_dialog.dart';
 
-class _DialogTopicItem extends StatelessWidget {
+class _DialogTopicItem extends StatelessWidget with OpenChatMixin {
   const _DialogTopicItem({
     super.key, // ignore: unused_element_parameter
     required this.chat,
     required this.topic,
     required this.messageId,
+    this.quote,
   });
 
   final ChatEntity chat;
   final TopicEntity topic;
   final int messageId;
+  final String? quote;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +32,15 @@ class _DialogTopicItem extends StatelessWidget {
           channelChatCubit.sendMessage(
             streamId: chat.streamId!,
             topic: topic.name,
-            content: message.makeForwardedContent(),
+            content: message.makeForwardedContent(quote: quote),
           );
+          if (context.mounted) {
+            openChannel(context, channelId: chat.streamId!, topicName: topic.name, replace: true);
+          }
         } on DioException catch (e) {
-          showErrorSnackBar(context, exception: e);
+          if (context.mounted) {
+            showErrorSnackBar(context, exception: e);
+          }
         }
         router.pop();
       },

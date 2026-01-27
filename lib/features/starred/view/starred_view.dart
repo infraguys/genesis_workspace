@@ -76,7 +76,7 @@ class _StarredViewState extends State<StarredView> {
                         isSkeleton: true,
                         messageOrder: MessageUIOrder.single,
                         myUserId: myUserId ?? -1,
-                        onTapQuote: (_) {},
+                        onTapQuote: (_, {quote}) {},
                         onTapEditMessage: (_) {},
                       );
                     },

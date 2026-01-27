@@ -28,7 +28,7 @@ class MessagesList extends StatefulWidget {
   final bool showTopic;
   final bool isLoadingMore;
   final int myUserId;
-  final void Function(int messageId)? onTapQuote;
+  final void Function(int messageId, {String? quote})? onTapQuote;
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
 
   const MessagesList({
@@ -291,7 +291,7 @@ class _MessagesListState extends State<MessagesList> {
                         showTopic: widget.showTopic,
                         myUserId: widget.myUserId,
                         isNewDay: isNewDay,
-                        onTapQuote: widget.onTapQuote ?? (_) {},
+                        onTapQuote: widget.onTapQuote ?? (_, {quote}) {},
                         onTapEditMessage: widget.onTapEditMessage ?? (_) {},
                       ),
                     ),

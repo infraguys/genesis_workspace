@@ -24,8 +24,8 @@ import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/forward_message_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/forward_message/forward_message_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/forward_message_dialog/forward_message_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -56,7 +56,7 @@ class MessageItem extends StatefulWidget {
   final MessageUIOrder messageOrder;
   final int myUserId;
   final bool isNewDay;
-  final Function(int messageId) onTapQuote;
+  final void Function(int messageId, {String? quote}) onTapQuote;
   final Function(UpdateMessageRequestEntity body) onTapEditMessage;
 
   @override
@@ -74,6 +74,12 @@ class _MessageItemState extends State<MessageItem> {
   bool get isRead => widget.message.flags?.contains('read') ?? false;
 
   bool get isStarred => widget.message.flags?.contains('starred') ?? false;
+
+  String selectedText = '';
+
+  onSelectedTextChanged(String value) {
+    selectedText = value;
+  }
 
   @override
   void initState() {
@@ -159,7 +165,7 @@ class _MessageItemState extends State<MessageItem> {
   }
 
   void onReplay() {
-    widget.onTapQuote(widget.message.id);
+    widget.onTapQuote(widget.message.id, quote: selectedText.isNotEmpty ? selectedText : null);
     _menuController.close();
   }
 
@@ -169,18 +175,31 @@ class _MessageItemState extends State<MessageItem> {
   }
 
   void onForward() async {
+    _closeOverlay();
+    _menuController.close();
+
+    if (!mounted) return;
+
+    final chatCubit = context.read<ChatCubit>();
+    final channelChatCubit = context.read<ChannelChatCubit>();
+    final messagesCubit = context.read<MessagesCubit>();
+    final messengerCubit = context.read<MessengerCubit>();
+
     await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.read<ChatCubit>()),
-            BlocProvider.value(value: context.read<ChannelChatCubit>()),
-            BlocProvider.value(value: context.read<MessagesCubit>()),
-            BlocProvider.value(value: context.read<MessengerCubit>()),
-            BlocProvider(create: (context) => ForwardMessageCubit())
+            BlocProvider.value(value: chatCubit),
+            BlocProvider.value(value: channelChatCubit),
+            BlocProvider.value(value: messagesCubit),
+            BlocProvider.value(value: messengerCubit),
+            BlocProvider(create: (_) => ForwardMessageCubit()),
           ],
-          child: ForwardMessageDialog(message: widget.message),
+          child: ForwardMessageDialog(
+            message: widget.message,
+            quote: selectedText.isNotEmpty ? selectedText : null,
+          ),
         );
       },
     );
@@ -260,7 +279,7 @@ class _MessageItemState extends State<MessageItem> {
 
     return LayoutBuilder(
       builder: (context, constrains) {
-        final maxWidthMessage = switch(currentSize(context)) {
+        final maxWidthMessage = switch (currentSize(context)) {
           .desktop => constrains.maxWidth * 0.8,
           .laptop => constrains.maxWidth * 0.7,
           _ => constrains.maxWidth * 0.6,
@@ -322,7 +341,8 @@ class _MessageItemState extends State<MessageItem> {
                                       message: widget.message,
                                       showTopic: widget.showTopic,
                                       isStarred: isStarred,
-                                      maxMessageWidth: maxWidthMessage ,
+                                      maxMessageWidth: maxWidthMessage,
+                                      onSelectedTextChanged: onSelectedTextChanged,
                                     ),
                               if (widget.message.aggregatedReactions.isEmpty)
                                 Column(

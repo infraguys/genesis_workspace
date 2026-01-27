@@ -62,4 +62,13 @@ class OrganizationsRepositoryImpl implements OrganizationsRepository {
       meetingUrl: meetingUrl,
     );
   }
+
+  @override
+  Future<void> updateStreamSettings({required int organizationId, int? maxNameLength, int? maxDescriptionLength}) {
+    return _localDataSource.updateStreamSettings(
+      organizationId: organizationId,
+      streamNameMaxLength: maxNameLength,
+      streamDescriptionMaxLength: maxDescriptionLength,
+    );
+  }
 }

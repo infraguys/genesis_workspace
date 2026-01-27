@@ -181,12 +181,12 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
       final int mentionEnd = activeMatch.end;
 
       final String before = text.substring(0, mentionStart);
-      final String after = text.substring(mentionEnd);
+      final String after = text.substring(mentionEnd) + ' ';
 
       final String newText = '$before$replacement$after';
       messageController.text = newText;
 
-      final int newOffset = (before + replacement).length;
+      final int newOffset = (before + replacement + after).length;
       messageController.selection = TextSelection.collapsed(offset: newOffset);
     } else {
       final String before = text.substring(0, cursorPosition);
@@ -208,7 +208,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
 
   //Quote message
 
-  Future<void> onTapQuote(int messageId) async {
+  Future<void> onTapQuote(int messageId, {String? quote}) async {
     try {
       context.read<TChatCubit>().setIsMessagePending(true);
 
@@ -217,10 +217,10 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         applyMarkdown: false,
       );
 
-      final String quote = generateMessageQuote(singleMessage);
+      final String quoteText = generateMessageQuote(singleMessage, quote: quote);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        insertQuoteAndFocus(textToInsert: quote);
+        insertQuoteAndFocus(textToInsert: quoteText);
       });
     } catch (e) {
       inspect(e);

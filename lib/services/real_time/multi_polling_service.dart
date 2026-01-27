@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/update_stream_settings_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
@@ -29,6 +30,7 @@ class MultiPollingService {
   final GetSessionIdUseCase _getSessionIdUseCase;
   final RealTimeConnectionFactory _connectionFactory;
   final UpdateOrganizationMeetingUrlUseCase _updateOrganizationMeetingUrlUseCase;
+  final UpdateStreamSettingsUseCase _updateStreamSettingsUseCase;
 
   MultiPollingService(
     this._getAllOrganizationsUseCase,
@@ -37,6 +39,7 @@ class MultiPollingService {
     this._getSessionIdUseCase,
     this._connectionFactory,
     this._updateOrganizationMeetingUrlUseCase,
+    this._updateStreamSettingsUseCase,
   );
 
   Map<int, RealTimeConnection> get activeConnections => _activeConnections;
@@ -129,6 +132,7 @@ class MultiPollingService {
       getEventsByQueueIdUseCase: getEventsByQueueIdUseCase,
       deleteQueueUseCase: deleteQueueUseCase,
       updateOrganizationMeetingUrlUseCase: _updateOrganizationMeetingUrlUseCase,
+      updateStreamSettingsUseCase: _updateStreamSettingsUseCase,
     );
 
     connection.typingEventsStream.listen(_typingEventsController.add, onError: (_) {});

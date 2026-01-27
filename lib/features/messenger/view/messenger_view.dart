@@ -7,7 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
-import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
+import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messenger/entities/pinned_chat_order_update.dart';
@@ -17,12 +18,14 @@ import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/drafts/drafts.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
-import 'package:genesis_workspace/features/messenger/bloc/info_panel_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/chat_topics_list.dart';
+import 'package:genesis_workspace/features/messenger/view/create_chat/create_chat_menu.dart';
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
+import 'package:genesis_workspace/features/messenger/view/my_activity_items.dart';
 import 'package:genesis_workspace/features/messenger/view/update_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/active_call_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/messenger_folder_rail.dart';
@@ -43,7 +46,7 @@ class MessengerView extends StatefulWidget {
 }
 
 class _MessengerViewState extends State<MessengerView>
-    with SingleTickerProviderStateMixin, OpenDmChatMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin, OpenChatMixin, WidgetsBindingObserver {
   static const Duration _searchAnimationDuration = Duration(milliseconds: 220);
   Future<void>? _future;
   final TextEditingController _searchController = TextEditingController();
@@ -59,6 +62,8 @@ class _MessengerViewState extends State<MessengerView>
   bool _showTopics = false;
   final GlobalKey _activeCallKey = GlobalKey();
   Rect? _lastReportedDockRect;
+
+  OverlayEntry? _createChatMenuEntry;
 
   late final ScrollController _chatsController;
 
@@ -254,6 +259,61 @@ class _MessengerViewState extends State<MessengerView>
     );
   }
 
+  void _closeCreateChatMenu() {
+    _createChatMenuEntry?.remove();
+    _createChatMenuEntry = null;
+  }
+
+  void _openCreateChatMenu(Offset globalPosition, {required int selfUserId}) {
+    _closeCreateChatMenu();
+
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    if (overlayBox == null) {
+      return;
+    }
+
+    final localInOverlay = overlayBox.globalToLocal(globalPosition);
+
+    _createChatMenuEntry = OverlayEntry(
+      builder: (context) {
+        final screenSize = MediaQuery.sizeOf(context);
+        const padding = 8.0;
+        const menuWidth = 260.0;
+        const menuHeight = 160.0;
+
+        final spaceBelow = screenSize.height - localInOverlay.dy - padding;
+        final openDown = spaceBelow > menuHeight;
+
+        final left = localInOverlay.dx.clamp(
+          padding,
+          screenSize.width - menuWidth - padding,
+        );
+
+        return AnimatedOverlay(
+          left: left,
+          top: openDown ? localInOverlay.dy : null,
+          bottom: openDown ? null : (screenSize.height - localInOverlay.dy),
+          alignment: openDown ? Alignment.topLeft : Alignment.bottomLeft,
+          closeOverlay: _closeCreateChatMenu,
+          child: Container(
+            width: menuWidth,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+            ),
+            child: CreateChatMenu(
+              selfUserId: selfUserId,
+              onClose: _closeCreateChatMenu,
+            ),
+          ),
+        );
+      },
+    );
+
+    overlay.insert(_createChatMenuEntry!);
+  }
+
   @override
   void initState() {
     _applySortingPreferences();
@@ -277,6 +337,7 @@ class _MessengerViewState extends State<MessengerView>
 
   @override
   void dispose() {
+    _closeCreateChatMenu();
     _searchBarController.dispose();
     _searchController.dispose();
     _chatsController.dispose();
@@ -414,6 +475,16 @@ class _MessengerViewState extends State<MessengerView>
                                 searchController: _searchController,
                                 searchQuery: _searchQuery,
                                 isLoadingMore: !state.foundOldestMessage,
+                                onShowChats: (position) => _openCreateChatMenu(
+                                  position,
+                                  selfUserId: state.selfUser?.userId ?? -1,
+                                ),
+                              ),
+                              MyActivityItems(
+                                mySelfChatId: state.mySelfChatId ?? -1,
+                              ),
+                              SizedBox(
+                                height: 8,
                               ),
                               Expanded(
                                 child: Stack(

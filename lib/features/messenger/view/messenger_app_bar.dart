@@ -1,22 +1,16 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
-import 'package:genesis_workspace/core/mixins/chat/open_dm_chat_mixin.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
-import 'package:genesis_workspace/features/all_chats/view/create_group_chat_dialog.dart';
-import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
-import 'package:go_router/go_router.dart';
 
-class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
+class MessengerAppBar extends StatelessWidget with OpenChatMixin {
   const MessengerAppBar({
     super.key,
     required this.isLargeScreen,
@@ -41,6 +35,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     required this.onSearchChanged,
     this.selectedChatLabel,
     required this.isLoadingMore,
+    required this.onShowChats,
   });
 
   final bool isLargeScreen;
@@ -65,6 +60,7 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final bool isLoadingMore;
+  final ValueChanged<Offset> onShowChats;
 
   bool get isTabletOrSmaller => !isLargeScreen;
 
@@ -98,33 +94,13 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
     final List<Widget> actions = [];
     if (isTabletOrSmaller) {
       actions.add(
-        IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: () async {
-            try {
-              await showDialog(
-                context: context,
-                builder: (BuildContext dialogContext) {
-                  return BlocProvider(
-                    create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                    child: CreateGroupChatDialog(
-                      onCreate: (membersIds) {
-                        context.pop();
-                        openChat(
-                          context,
-                          chatId: -1,
-                          membersIds: {...membersIds, selfUserId},
-                        );
-                      },
-                    ),
-                  );
-                },
-              );
-            } catch (e) {
-              inspect(e);
-            }
-          },
-          icon: Assets.icons.editSquare.svg(width: 32, height: 32),
+        InkWell(
+          customBorder: const CircleBorder(),
+          onTapDown: (details) => onShowChats(details.globalPosition),
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Assets.icons.editSquare.svg(width: 32, height: 32),
+          ),
         ),
       );
     }
@@ -287,25 +263,16 @@ class MessengerAppBar extends StatelessWidget with OpenDmChatMixin {
                         SizedBox(
                           height: 32,
                           width: 32,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (BuildContext dialogContext) {
-                                  return BlocProvider(
-                                    create: (_) => getIt<DirectMessagesCubit>()..getUsers(),
-                                    child: CreateGroupChatDialog(
-                                      onCreate: (membersIds) {
-                                        context.pop();
-                                        openChat(context, chatId: -1, membersIds: {...membersIds, selfUserId});
-                                      },
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            icon: Assets.icons.newWindow.svg(),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTapDown: (details) => onShowChats(details.globalPosition),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Assets.icons.newWindow.svg(),
+                              ),
+                            ),
                           ),
                         ),
                     ],

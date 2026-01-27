@@ -131,11 +131,11 @@ void updateBrowserUrlPath(String path, {bool addToHistory = true}) {
   platformUpdateBrowserUrlPath(normalizedPath, addToHistory: addToHistory);
 }
 
-String generateMessageQuote(MessageEntity message) {
+String generateMessageQuote(MessageEntity message, {String? quote}) {
   final quoteText =
       '''@_**${message.senderFullName}|${message.senderId}** [писал/а]:
 ```quote
-${message.content}
+${quote ?? message.content}
 ```
 ''';
   return quoteText;

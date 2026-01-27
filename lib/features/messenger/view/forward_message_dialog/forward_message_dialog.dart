@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
@@ -17,11 +18,12 @@ import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/forward_message_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/forward_message/forward_message_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -30,9 +32,10 @@ part './dialog_chat_item.dart';
 part './dialog_topic_item.dart';
 
 class ForwardMessageDialog extends StatefulWidget {
-  const ForwardMessageDialog({super.key, required this.message});
+  const ForwardMessageDialog({super.key, required this.message, this.quote});
 
   final MessageEntity message;
+  final String? quote;
 
   @override
   State<ForwardMessageDialog> createState() => _ForwardMessageDialogState();
@@ -140,8 +143,13 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
                           child: Listener(
                             onPointerSignal: (signal) {
                               if (signal is PointerScrollEvent && _tabsScroll.hasClients) {
-                                final delta = signal.scrollDelta.dx != 0 ? signal.scrollDelta.dx : signal.scrollDelta.dy;
-                                final next = (_tabsScroll.offset + delta).clamp(0.0, _tabsScroll.position.maxScrollExtent);
+                                final delta = signal.scrollDelta.dx != 0
+                                    ? signal.scrollDelta.dx
+                                    : signal.scrollDelta.dy;
+                                final next = (_tabsScroll.offset + delta).clamp(
+                                  0.0,
+                                  _tabsScroll.position.maxScrollExtent,
+                                );
                                 _tabsScroll.jumpTo(next);
                               }
                             },
@@ -227,6 +235,7 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
                                 chat: chat,
                                 showTopics: true,
                                 messageId: widget.message.id,
+                                quote: widget.quote,
                               );
                             },
                           ),

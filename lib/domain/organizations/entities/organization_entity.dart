@@ -7,6 +7,8 @@ class OrganizationEntity {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final int? streamNameMaxLength;
+  final int? streamDescriptionMaxLength;
 
   String get imageUrl => icon.contains('https://') ? icon : '$baseUrl$icon';
 
@@ -17,9 +19,16 @@ class OrganizationEntity {
     required this.baseUrl,
     required this.unreadMessages,
     required this.meetingUrl,
+    required this.streamNameMaxLength,
+    required this.streamDescriptionMaxLength,
   });
 
-  OrganizationEntity copyWith({Set<int>? unreadMessages, String? meetingUrl}) {
+  OrganizationEntity copyWith({
+    Set<int>? unreadMessages,
+    String? meetingUrl,
+    int? streamNameMaxLength,
+    int? streamDescriptionMaxLength,
+  }) {
     return OrganizationEntity(
       id: id,
       name: name,
@@ -27,6 +36,8 @@ class OrganizationEntity {
       baseUrl: baseUrl,
       unreadMessages: unreadMessages ?? this.unreadMessages,
       meetingUrl: meetingUrl ?? this.meetingUrl,
+      streamNameMaxLength: streamNameMaxLength ?? this.streamNameMaxLength,
+      streamDescriptionMaxLength: streamDescriptionMaxLength ?? this.streamDescriptionMaxLength,
     );
   }
 }
@@ -37,6 +48,8 @@ class OrganizationRequestEntity {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final int? streamNameMaxLength;
+  final int? streamDescriptionMaxLength;
 
   OrganizationRequestEntity({
     required this.name,
@@ -44,6 +57,8 @@ class OrganizationRequestEntity {
     required this.baseUrl,
     required this.unreadMessages,
     this.meetingUrl,
+    this.streamNameMaxLength,
+    this.streamDescriptionMaxLength,
   });
 
   OrganizationRequestDto toDto() => OrganizationRequestDto(
