@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 
-class HeaderChatItem extends StatelessWidget {
+class ActivityChatItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final Widget icon;
   final Color color;
-  const HeaderChatItem({super.key, required this.title, required this.onTap, required this.icon, required this.color});
+  const ActivityChatItem({
+    super.key,
+    required this.title,
+    required this.onTap,
+    required this.icon,
+    required this.color,
+  });
 
   static const BorderRadius materialBorderRadius = BorderRadius.all(Radius.circular(8));
 

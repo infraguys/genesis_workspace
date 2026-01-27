@@ -49,6 +49,9 @@ class MessengerState {
     required this.openedSection,
   }) : usersIds = usersIds ?? {};
 
+  int? get mySelfChatId =>
+      chats.firstWhereOrNull((chat) => chat.dmIds?.length == 1 && chat.dmIds?.first == selfUser?.userId)?.id;
+
   static MessengerState initial = MessengerState(
     selfUser: null,
     folders: [],
