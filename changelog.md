@@ -1,5 +1,12 @@
 # Changelog
 
+# 1.7.4
+- Added update functionality for windows
+- Added create channels functionality
+- Refactored navigation logic after forward message
+- Refactored my activity container
+- Added quote forward/reply functionality
+
 # 1.7.3
 - Added sections for favorites, starred, draft messages
 - Refactored forward message functionality
