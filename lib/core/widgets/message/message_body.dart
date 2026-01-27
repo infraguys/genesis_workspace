@@ -13,6 +13,7 @@ class MessageBody extends StatelessWidget {
   final bool showTopic;
   final bool isStarred;
   final double maxMessageWidth;
+  final Function(String) onSelectedTextChanged;
   const MessageBody({
     super.key,
     required this.showSenderName,
@@ -21,6 +22,7 @@ class MessageBody extends StatelessWidget {
     required this.showTopic,
     required this.isStarred,
     required this.maxMessageWidth,
+    required this.onSelectedTextChanged,
   });
 
   @override
@@ -109,7 +111,10 @@ class MessageBody extends StatelessWidget {
                         width: 150,
                         color: theme.colorScheme.surfaceContainerHighest,
                       )
-                    : MessageHtml(content: message.content),
+                    : MessageHtml(
+                        content: message.content,
+                        onSelectedTextChanged: onSelectedTextChanged,
+                      ),
               ),
             ),
             // if (currentSize(context) > ScreenSize.tablet && !showSenderName)

@@ -406,7 +406,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                             isSkeleton: true,
                                             messageOrder: MessageUIOrder.single,
                                             myUserId: _myUser.userId,
-                                            onTapQuote: (_) {},
+                                            onTapQuote: (_, {quote}) {},
                                             onTapEditMessage: (_) {},
                                           );
                                         },

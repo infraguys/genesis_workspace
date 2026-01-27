@@ -77,7 +77,7 @@ class _ReactionsViewState extends State<ReactionsView> {
                         isSkeleton: true,
                         messageOrder: MessageUIOrder.single,
                         myUserId: _myUserId,
-                        onTapQuote: (_) {},
+                        onTapQuote: (_, {quote}) {},
                         onTapEditMessage: (_) {},
                       );
                     },

@@ -464,7 +464,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                                 message: MessageEntity.fake(),
                                                 isSkeleton: true,
                                                 myUserId: _myUser.userId,
-                                                onTapQuote: (_) {},
+                                                onTapQuote: (_, {quote}) {},
                                                 onTapEditMessage: (_) {},
                                               );
                                             },

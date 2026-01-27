@@ -208,7 +208,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
 
   //Quote message
 
-  Future<void> onTapQuote(int messageId) async {
+  Future<void> onTapQuote(int messageId, {String? quote}) async {
     try {
       context.read<TChatCubit>().setIsMessagePending(true);
 
@@ -217,10 +217,10 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         applyMarkdown: false,
       );
 
-      final String quote = generateMessageQuote(singleMessage);
+      final String quoteText = generateMessageQuote(singleMessage, quote: quote);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        insertQuoteAndFocus(textToInsert: quote);
+        insertQuoteAndFocus(textToInsert: quoteText);
       });
     } catch (e) {
       inspect(e);

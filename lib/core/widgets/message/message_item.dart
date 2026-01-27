@@ -56,7 +56,7 @@ class MessageItem extends StatefulWidget {
   final MessageUIOrder messageOrder;
   final int myUserId;
   final bool isNewDay;
-  final Function(int messageId) onTapQuote;
+  final void Function(int messageId, {String? quote}) onTapQuote;
   final Function(UpdateMessageRequestEntity body) onTapEditMessage;
 
   @override
@@ -74,6 +74,12 @@ class _MessageItemState extends State<MessageItem> {
   bool get isRead => widget.message.flags?.contains('read') ?? false;
 
   bool get isStarred => widget.message.flags?.contains('starred') ?? false;
+
+  String selectedText = '';
+
+  onSelectedTextChanged(String value) {
+    selectedText = value;
+  }
 
   @override
   void initState() {
@@ -159,7 +165,7 @@ class _MessageItemState extends State<MessageItem> {
   }
 
   void onReplay() {
-    widget.onTapQuote(widget.message.id);
+    widget.onTapQuote(widget.message.id, quote: selectedText.isNotEmpty ? selectedText : null);
     _menuController.close();
   }
 
@@ -190,7 +196,10 @@ class _MessageItemState extends State<MessageItem> {
             BlocProvider.value(value: messengerCubit),
             BlocProvider(create: (_) => ForwardMessageCubit()),
           ],
-          child: ForwardMessageDialog(message: widget.message),
+          child: ForwardMessageDialog(
+            message: widget.message,
+            quote: selectedText.isNotEmpty ? selectedText : null,
+          ),
         );
       },
     );
@@ -333,6 +342,7 @@ class _MessageItemState extends State<MessageItem> {
                                       showTopic: widget.showTopic,
                                       isStarred: isStarred,
                                       maxMessageWidth: maxWidthMessage,
+                                      onSelectedTextChanged: onSelectedTextChanged,
                                     ),
                               if (widget.message.aggregatedReactions.isEmpty)
                                 Column(
