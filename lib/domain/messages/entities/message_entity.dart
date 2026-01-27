@@ -37,7 +37,6 @@ class MessageEntity extends Equatable {
   final List<ReactionEntity> reactions;
   final int recipientId;
 
-
   bool get isUnread => flags != null ? !flags!.contains('read') : true;
 
   bool get isDirectMessage =>
@@ -87,8 +86,8 @@ class MessageEntity extends Equatable {
     return map;
   }
 
-  String makeForwardedContent() {
-    return '@_**$senderFullName**\n```quote\n$content\n```';
+  String makeForwardedContent({String? quote}) {
+    return '@_**$senderFullName**\n```quote\n${quote ?? content}\n```';
   }
 
   Map<String, dynamic> toJson() {

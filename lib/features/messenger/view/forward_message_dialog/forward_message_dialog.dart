@@ -31,9 +31,10 @@ part './dialog_chat_item.dart';
 part './dialog_topic_item.dart';
 
 class ForwardMessageDialog extends StatefulWidget {
-  const ForwardMessageDialog({super.key, required this.message});
+  const ForwardMessageDialog({super.key, required this.message, this.quote});
 
   final MessageEntity message;
+  final String? quote;
 
   @override
   State<ForwardMessageDialog> createState() => _ForwardMessageDialogState();
@@ -233,6 +234,7 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
                                 chat: chat,
                                 showTopics: true,
                                 messageId: widget.message.id,
+                                quote: widget.quote,
                               );
                             },
                           ),

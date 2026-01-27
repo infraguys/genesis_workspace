@@ -1,16 +1,12 @@
 part of './forward_message_dialog.dart';
 
 class _DialogChatItem extends StatefulWidget {
-  const _DialogChatItem({
-    super.key,
-    required this.chat,
-    required this.showTopics,
-    required this.messageId,
-  });
+  const _DialogChatItem({super.key, required this.chat, required this.showTopics, required this.messageId, this.quote});
 
   final ChatEntity chat;
   final bool showTopics;
   final int messageId;
+  final String? quote;
 
   @override
   State<_DialogChatItem> createState() => _DialogChatItemState();
@@ -57,7 +53,12 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
                     messageId: widget.messageId,
                     applyMarkdown: false,
                   );
-                  await chatCubit.sendMessage(content: message.makeForwardedContent(), chatIds: widget.chat.dmIds);
+                  await chatCubit.sendMessage(
+                    content: message.makeForwardedContent(
+                      quote: widget.quote,
+                    ),
+                    chatIds: widget.chat.dmIds,
+                  );
                   if (context.mounted) {
                     context.pop();
                     openChat(
@@ -223,6 +224,7 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
                             chat: widget.chat,
                             topic: topic,
                             messageId: widget.messageId,
+                            quote: widget.quote,
                           );
                         },
                       ),

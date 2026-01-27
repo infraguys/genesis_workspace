@@ -6,11 +6,13 @@ class _DialogTopicItem extends StatelessWidget {
     required this.chat,
     required this.topic,
     required this.messageId,
+    this.quote,
   });
 
   final ChatEntity chat;
   final TopicEntity topic;
   final int messageId;
+  final String? quote;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class _DialogTopicItem extends StatelessWidget {
           channelChatCubit.sendMessage(
             streamId: chat.streamId!,
             topic: topic.name,
-            content: message.makeForwardedContent(),
+            content: message.makeForwardedContent(quote: quote),
           );
           if (context.mounted) {
             messengerCubit.selectChat(chat, selectedTopic: topic.name);
