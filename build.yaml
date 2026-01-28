@@ -13,6 +13,7 @@ targets:
           - lib/features/**/domain/usecases/**.dart
           - lib/features/**/presentation/bloc/**.dart
           - lib/features/**/bloc/**.dart
+          - lib/features/**/bloc/**/**.dart
           - lib/services/real_time/**.dart
           - lib/services/localization/localization_service.dart
           - lib/services/paste/paste_capture_service.dart
