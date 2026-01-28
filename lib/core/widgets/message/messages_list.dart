@@ -201,12 +201,8 @@ class _MessagesListState extends State<MessagesList> {
 
                   final bool isNewTopic = currentMessage.subject != nextMessage.subject;
 
-                  if (!isNewTopic && !isNewDay) {
-                    return const SizedBox(height: 8);
-                  }
-
                   return Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: (!isNewTopic && !isNewDay) ? const .symmetric(vertical: 4) : const .all(16.0),
                     child: Column(
                       mainAxisSize: .min,
                       spacing: 8.0,
