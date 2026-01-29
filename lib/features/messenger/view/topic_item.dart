@@ -1,9 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
@@ -98,18 +100,30 @@ class _TopicItemState extends State<TopicItem> {
               );
             },
             onMuteTopic: () async {
-              _closeOverlay();
-              await context.read<MuteCubit>().muteTopic(
-                streamId: widget.chat.streamId!,
-                topic: widget.topic.name,
-              );
+              try {
+                _closeOverlay();
+                await context.read<MuteCubit>().muteTopic(
+                  streamId: widget.chat.streamId!,
+                  topic: widget.topic.name,
+                );
+              } on DioException catch (e) {
+                if (context.mounted) {
+                  showErrorSnackBar(context, exception: e);
+                }
+              }
             },
             onUnmuteTopic: () async {
-              _closeOverlay();
-              await context.read<MuteCubit>().unmuteTopic(
-                streamId: widget.chat.streamId!,
-                topic: widget.topic.name,
-              );
+              try {
+                _closeOverlay();
+                await context.read<MuteCubit>().unmuteTopic(
+                  streamId: widget.chat.streamId!,
+                  topic: widget.topic.name,
+                );
+              } on DioException catch (e) {
+                if (context.mounted) {
+                  showErrorSnackBar(context, exception: e);
+                }
+              }
             },
           ),
         );

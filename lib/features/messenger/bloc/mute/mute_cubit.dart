@@ -32,6 +32,7 @@ class MuteCubit extends Cubit<MuteState> {
       if (kDebugMode) {
         inspect(e);
       }
+      rethrow;
     }
   }
 
@@ -48,6 +49,7 @@ class MuteCubit extends Cubit<MuteState> {
       if (kDebugMode) {
         inspect(e);
       }
+      rethrow;
     }
   }
 
@@ -63,6 +65,7 @@ class MuteCubit extends Cubit<MuteState> {
       if (kDebugMode) {
         inspect(e);
       }
+      rethrow;
     }
   }
 
@@ -78,6 +81,7 @@ class MuteCubit extends Cubit<MuteState> {
       if (kDebugMode) {
         inspect(e);
       }
+      rethrow;
     }
   }
 }
