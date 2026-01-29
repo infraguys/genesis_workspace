@@ -8,10 +8,6 @@ class CreateChannelUseCase {
   CreateChannelUseCase(this._repository);
 
   Future<CreateChannelResponseEntity> call(CreateChannelRequestEntity body) async {
-    try {
-      return await _repository.createChannel(body);
-    } catch (e) {
-      rethrow;
-    }
+    return await _repository.createChannel(body);
   }
 }
