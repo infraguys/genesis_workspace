@@ -114,6 +114,8 @@ import 'package:genesis_workspace/domain/channels/repositories/channels_reposito
     as _i574;
 import 'package:genesis_workspace/domain/channels/usecases/create_channel_use_case.dart'
     as _i458;
+import 'package:genesis_workspace/domain/channels/usecases/update_topic_muting_use_case.dart'
+    as _i878;
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_sha_use_case.dart'
     as _i690;
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart'
@@ -279,6 +281,8 @@ import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_
     as _i772;
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart'
     as _i240;
+import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart'
+    as _i185;
 import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart'
     as _i388;
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart'
@@ -583,6 +587,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i458.CreateChannelUseCase>(
       () => _i458.CreateChannelUseCase(gh<_i574.ChannelsRepository>()),
     );
+    gh.factory<_i878.UpdateTopicMutingUseCase>(
+      () => _i878.UpdateTopicMutingUseCase(gh<_i574.ChannelsRepository>()),
+    );
     gh.factory<_i38.RecentDmLocalDataSource>(
       () => _i38.RecentDmLocalDataSource(gh<_i571.RecentDmDao>()),
     );
@@ -620,6 +627,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i477.RegisterQueueUseCase>(
       () => _i477.RegisterQueueUseCase(gh<_i703.RealTimeEventsRepository>()),
+    );
+    gh.factory<_i185.MuteCubit>(
+      () => _i185.MuteCubit(
+        gh<_i541.UpdateSubscriptionSettingsUseCase>(),
+        gh<_i878.UpdateTopicMutingUseCase>(),
+      ),
     );
     gh.factory<_i796.PinnedChatsLocalDataSource>(
       () => _i796.PinnedChatsLocalDataSource(gh<_i691.PinnedChatsDao>()),
@@ -971,7 +984,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
         gh<_i766.ProfileCubit>(),
         gh<_i988.GetSubscribedChannelsUseCase>(),
-        gh<_i541.UpdateSubscriptionSettingsUseCase>(),
         gh<_i293.GetAllFoldersItemsUseCase>(),
         gh<_i54.UpdateMessagesFlagsNarrowUseCase>(),
       ),

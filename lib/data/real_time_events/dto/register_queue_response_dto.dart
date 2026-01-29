@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/data/channels/dto/user_topic_dto.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -17,7 +18,8 @@ class RegisterQueueResponseDto {
   final int? maxStreamNameLength;
   @JsonKey(name: "max_stream_description_length")
   final int? maxStreamDescriptionLength;
-
+  @JsonKey(name: "user_topics")
+  final List<UserTopicDto>? userTopics;
   RegisterQueueResponseDto({
     required this.queueId,
     required this.msg,
@@ -26,6 +28,7 @@ class RegisterQueueResponseDto {
     this.realmJitsiServerUrl,
     this.maxStreamNameLength,
     this.maxStreamDescriptionLength,
+    this.userTopics,
   });
 
   factory RegisterQueueResponseDto.fromJson(Map<String, dynamic> json) => _$RegisterQueueResponseDtoFromJson(json);
@@ -40,5 +43,6 @@ class RegisterQueueResponseDto {
     realmJitsiServerUrl: realmJitsiServerUrl,
     maxStreamNameLength: maxStreamNameLength,
     maxStreamDescriptionLength: maxStreamDescriptionLength,
+    userTopics: userTopics?.map((dto) => dto.toEntity()).toList(),
   );
 }

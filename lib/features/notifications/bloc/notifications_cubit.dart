@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/domain/channels/entities/user_topic_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
@@ -30,6 +31,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
         NotificationsState(
           user: null,
           mutedChatsIds: {},
+          userTopics: [],
         ),
       ) {
     _profileStateSubscription = _profileCubit.stream.listen(_onProfileStateChanged);
@@ -68,7 +70,13 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   }
 
   _onMessageEvents(MessageEventEntity event) async {
-    if (event.message.senderId != state.user?.userId && !state.mutedChatsIds.contains(event.message.recipientId)) {
+    final isChatMuted = state.mutedChatsIds.contains(event.message.recipientId);
+    final isOtherMessage = event.message.senderId != state.user?.userId;
+    final userTopics = _realTimeService.activeConnections[event.organizationId]?.userTopics;
+    final isTopicMuted =
+        userTopics?.any((topic) => topic.topicName == event.message.subject && topic.visibilityPolicy == .muted) ??
+        false;
+    if (isOtherMessage && !isChatMuted && !isTopicMuted) {
       final selected = _prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
       _player.play(AssetSource(selected));
       final message = event.message;

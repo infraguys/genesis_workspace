@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,12 +10,14 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/features/messenger/view/topic_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -120,11 +123,15 @@ class _ChatItemState extends State<ChatItem> {
             },
             onToggleMute: widget.chat.type == ChatType.channel
                 ? () async {
-                    _closeOverlay();
-                    if (widget.chat.isMuted) {
-                      await context.read<MessengerCubit>().unmuteChannel(widget.chat);
-                    } else {
-                      await context.read<MessengerCubit>().muteChannel(widget.chat);
+                    try {
+                      _closeOverlay();
+                      if (widget.chat.isMuted) {
+                        await context.read<MuteCubit>().unmuteChannel(widget.chat);
+                      } else {
+                        await context.read<MuteCubit>().muteChannel(widget.chat);
+                      }
+                    } on DioException catch (e) {
+                      showErrorSnackBar(context, exception: e);
                     }
                   }
                 : null,

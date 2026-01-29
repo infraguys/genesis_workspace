@@ -29,6 +29,9 @@ enum EventType {
   @JsonValue('subscription')
   subscription,
 
+  @JsonValue('user_topic')
+  userTopic,
+
   unsupported,
 }
 
@@ -53,6 +56,8 @@ extension EventTypeX on EventType {
         return 'update_message';
       case EventType.subscription:
         return 'subscription';
+      case EventType.userTopic:
+        return 'user_topic';
       default:
         return 'unsupported';
     }
@@ -78,6 +83,8 @@ extension EventTypeX on EventType {
         return EventType.updateMessage;
       case 'subscription':
         return EventType.subscription;
+      case 'user_topic':
+        return EventType.userTopic;
       default:
         return EventType.unsupported;
     }

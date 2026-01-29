@@ -1,3 +1,5 @@
+import 'package:genesis_workspace/domain/channels/entities/user_topic_entity.dart';
+
 class RegisterQueueEntity {
   final String queueId;
   final String msg;
@@ -6,6 +8,7 @@ class RegisterQueueEntity {
   final String? realmJitsiServerUrl;
   final int? maxStreamNameLength;
   final int? maxStreamDescriptionLength;
+  final List<UserTopicEntity>? userTopics;
 
   RegisterQueueEntity({
     required this.queueId,
@@ -15,5 +18,6 @@ class RegisterQueueEntity {
     required this.realmJitsiServerUrl,
     required this.maxStreamNameLength,
     required this.maxStreamDescriptionLength,
+    required this.userTopics,
   });
 }

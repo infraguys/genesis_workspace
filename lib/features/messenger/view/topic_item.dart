@@ -1,13 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -44,10 +47,7 @@ class _TopicItemState extends State<TopicItem> {
       textScaler: textScaler,
     )..layout();
 
-    final contentWidth = (_menuRowHorizontalPadding * 2) +
-        _menuIconSize +
-        _menuIconTextSpacing +
-        textPainter.width;
+    final contentWidth = (_menuRowHorizontalPadding * 2) + _menuIconSize + _menuIconTextSpacing + textPainter.width;
 
     final screenWidth = MediaQuery.sizeOf(context).width;
     final maxWidth = screenWidth - (_menuPadding * 2);
@@ -90,6 +90,7 @@ class _TopicItemState extends State<TopicItem> {
           alignment: openDown ? Alignment.topLeft : Alignment.bottomLeft,
           closeOverlay: _closeOverlay,
           child: _TopicContextMenu(
+            topic: widget.topic,
             width: menuWidth,
             onReadAll: () async {
               _closeOverlay();
@@ -97,6 +98,32 @@ class _TopicItemState extends State<TopicItem> {
                 widget.chat.id,
                 topicName: widget.topic.name,
               );
+            },
+            onMuteTopic: () async {
+              try {
+                await context.read<MuteCubit>().muteTopic(
+                  streamId: widget.chat.streamId!,
+                  topic: widget.topic.name,
+                );
+              } on DioException catch (e) {
+                showErrorSnackBar(context, exception: e);
+              } finally {
+                _closeOverlay();
+              }
+            },
+            onUnmuteTopic: () async {
+              try {
+                await context.read<MuteCubit>().unmuteTopic(
+                  streamId: widget.chat.streamId!,
+                  topic: widget.topic.name,
+                );
+              } on DioException catch (e) {
+                if (context.mounted) {
+                  showErrorSnackBar(context, exception: e);
+                }
+              } finally {
+                _closeOverlay();
+              }
             },
           ),
         );
@@ -163,17 +190,28 @@ class _TopicItemState extends State<TopicItem> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Tooltip(
-                                  message: widget.topic.name,
-                                  child: Text(
-                                    "# ${widget.topic.name}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.labelMedium?.copyWith(
-                                      fontSize: 14,
-                                      color: textColors.text100,
+                                Row(
+                                  spacing: 4,
+                                  children: [
+                                    Tooltip(
+                                      message: widget.topic.name,
+                                      child: Text(
+                                        "# ${widget.topic.name}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.labelMedium?.copyWith(
+                                          fontSize: 14,
+                                          color: textColors.text100,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    if (widget.topic.visibilityPolicy == .muted)
+                                      Icon(
+                                        Icons.headset_off,
+                                        size: 14,
+                                        color: AppColors.noticeDisabled,
+                                      ),
+                                  ],
                                 ),
                                 Text(
                                   widget.topic.lastMessageSenderName,
@@ -195,7 +233,7 @@ class _TopicItemState extends State<TopicItem> {
                         height: 21,
                         child: UnreadBadge(
                           count: widget.topic.unreadMessages.length,
-                          isMuted: widget.chat.isMuted,
+                          isMuted: widget.chat.isMuted || widget.topic.isMuted,
                         ),
                       ),
                     ),
@@ -212,18 +250,26 @@ class _TopicItemState extends State<TopicItem> {
 
 class _TopicContextMenu extends StatelessWidget {
   const _TopicContextMenu({
+    required this.topic,
     required this.width,
     required this.onReadAll,
+    required this.onMuteTopic,
+    required this.onUnmuteTopic,
   });
 
+  final TopicEntity topic;
   final double width;
   final VoidCallback onReadAll;
+  final VoidCallback onMuteTopic;
+  final VoidCallback onUnmuteTopic;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     const textColor = Colors.white;
     const iconColor = ColorFilter.mode(Colors.white, BlendMode.srcIn);
+
+    final isMuted = topic.visibilityPolicy == .muted;
 
     return Container(
       width: width,
@@ -232,12 +278,23 @@ class _TopicContextMenu extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: _TopicContextMenuAction(
-        textColor: textColor,
-        icon: Assets.icons.readReceipt,
-        iconColor: iconColor,
-        label: context.t.readAllMessages,
-        onTap: onReadAll,
+      child: Column(
+        children: [
+          _TopicContextMenuAction(
+            textColor: textColor,
+            icon: Assets.icons.readReceipt,
+            iconColor: iconColor,
+            label: context.t.readAllMessages,
+            onTap: onReadAll,
+          ),
+          _TopicContextMenuAction(
+            textColor: textColor,
+            icon: Assets.icons.notif,
+            iconColor: iconColor,
+            label: isMuted ? context.t.topicItem.unmute : context.t.topicItem.mute,
+            onTap: isMuted ? onUnmuteTopic : onMuteTopic,
+          ),
+        ],
       ),
     );
   }

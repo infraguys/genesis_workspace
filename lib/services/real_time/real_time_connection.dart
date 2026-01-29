@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/enums/event_types.dart';
 import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dart';
+import 'package:genesis_workspace/domain/channels/entities/user_topic_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_stream_settings_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
@@ -16,6 +17,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/subscri
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/user_topic_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
@@ -42,12 +44,14 @@ class RealTimeConnection {
   Future<void>? _pollingTask;
   int _maxStreamNameLength = 20;
   int _maxStreamDescriptionLength = 256;
+  List<UserTopicEntity> _userTopics = [];
 
   bool get isActive => _isActive;
   int get lastEventId => _lastEventId;
   String? get queueId => _queueId;
   int get maxStreamNameLength => _maxStreamNameLength;
   int get maxStreamDescriptionLength => _maxStreamDescriptionLength;
+  List<UserTopicEntity> get userTopics => _userTopics;
 
   RealTimeConnection({
     required this.organizationId,
@@ -82,6 +86,8 @@ class RealTimeConnection {
       StreamController<UpdateMessageEventEntity>.broadcast();
   final StreamController<SubscriptionEventEntity> _subscriptionEventsController =
       StreamController<SubscriptionEventEntity>.broadcast();
+  final StreamController<UserTopicEventEntity> _userTopicEventsController =
+      StreamController<UserTopicEventEntity>.broadcast();
 
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
 
@@ -98,6 +104,8 @@ class RealTimeConnection {
   Stream<UpdateMessageEventEntity> get updateMessageEventsStream => _updateMessageEventsController.stream;
 
   Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
+
+  Stream<UserTopicEventEntity> get userTopicEventsStream => _userTopicEventsController.stream;
 
   Future<void> start() async {
     if (_isActive) return;
@@ -147,6 +155,7 @@ class RealTimeConnection {
       _deleteMessageEventsController.close(),
       _updateMessageEventsController.close(),
       _subscriptionEventsController.close(),
+      _userTopicEventsController.close(),
     ]);
   }
 
@@ -165,6 +174,7 @@ class RealTimeConnection {
       _lastEventId = registerQueueEntity.lastEventId;
       _maxStreamNameLength = registerQueueEntity.maxStreamNameLength ?? 20;
       _maxStreamDescriptionLength = registerQueueEntity.maxStreamDescriptionLength ?? 256;
+      _userTopics.addAll(registerQueueEntity.userTopics ?? []);
       await Future.wait([
         _updateOrganizationMeetingUrlUseCase.call(
           organizationId: organizationId,
@@ -229,28 +239,22 @@ class RealTimeConnection {
         switch (event.type) {
           case EventType.typing:
             _typingEventsController.add(event as TypingEventEntity);
-            break;
           case EventType.message:
             _messageEventsController.add(event as MessageEventEntity);
-            break;
           case EventType.updateMessageFlags:
             _messageFlagsEventsController.add(event as UpdateMessageFlagsEventEntity);
-            break;
           case EventType.reaction:
             _reactionEventsController.add(event as ReactionEventEntity);
-            break;
           case EventType.presence:
             _presenceEventsController.add(event as PresenceEventEntity);
-            break;
           case EventType.deleteMessage:
             _deleteMessageEventsController.add(event as DeleteMessageEventEntity);
-            break;
           case EventType.updateMessage:
             _updateMessageEventsController.add(event as UpdateMessageEventEntity);
-            break;
           case EventType.subscription:
             _subscriptionEventsController.add(event as SubscriptionEventEntity);
-            break;
+          case EventType.userTopic:
+            _userTopicEventsController.add(event as UserTopicEventEntity);
           default:
             break;
         }
