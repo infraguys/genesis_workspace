@@ -16,6 +16,10 @@ class ChannelsRepositoryImpl implements ChannelsRepository {
 
   @override
   Future<void> updateTopicMuting(UpdateTopicMutingRequestEntity body) async {
-    return await _dataSource.updateTopicMuting(body.toDto());
+    try {
+      return await _dataSource.updateTopicMuting(body.toDto());
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -8,6 +8,10 @@ class UpdateTopicMutingUseCase {
   UpdateTopicMutingUseCase(this._repository);
 
   Future<void> call(UpdateTopicMutingRequestEntity body) async {
-    return await _repository.updateTopicMuting(body);
+    try {
+      return await _repository.updateTopicMuting(body);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

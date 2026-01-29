@@ -101,20 +101,18 @@ class _TopicItemState extends State<TopicItem> {
             },
             onMuteTopic: () async {
               try {
-                _closeOverlay();
                 await context.read<MuteCubit>().muteTopic(
                   streamId: widget.chat.streamId!,
                   topic: widget.topic.name,
                 );
               } on DioException catch (e) {
-                if (context.mounted) {
-                  showErrorSnackBar(context, exception: e);
-                }
+                showErrorSnackBar(context, exception: e);
+              } finally {
+                _closeOverlay();
               }
             },
             onUnmuteTopic: () async {
               try {
-                _closeOverlay();
                 await context.read<MuteCubit>().unmuteTopic(
                   streamId: widget.chat.streamId!,
                   topic: widget.topic.name,
@@ -123,6 +121,8 @@ class _TopicItemState extends State<TopicItem> {
                 if (context.mounted) {
                   showErrorSnackBar(context, exception: e);
                 }
+              } finally {
+                _closeOverlay();
               }
             },
           ),

@@ -22,10 +22,14 @@ class ChannelsRemoteDataSourceImpl implements ChannelsDataSource {
 
   @override
   Future<void> updateTopicMuting(UpdateTopicMutingRequestDto body) async {
-    return await _apiClient.changeTopicVisibilityPolicy(
-      streamId: body.streamId,
-      topic: body.topic,
-      visibilityPolicy: body.policy.value,
-    );
+    try {
+      return await _apiClient.changeTopicVisibilityPolicy(
+        streamId: body.streamId,
+        topic: body.topic,
+        visibilityPolicy: body.policy.value,
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }
