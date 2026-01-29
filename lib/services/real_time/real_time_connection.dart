@@ -239,31 +239,22 @@ class RealTimeConnection {
         switch (event.type) {
           case EventType.typing:
             _typingEventsController.add(event as TypingEventEntity);
-            break;
           case EventType.message:
             _messageEventsController.add(event as MessageEventEntity);
-            break;
           case EventType.updateMessageFlags:
             _messageFlagsEventsController.add(event as UpdateMessageFlagsEventEntity);
-            break;
           case EventType.reaction:
             _reactionEventsController.add(event as ReactionEventEntity);
-            break;
           case EventType.presence:
             _presenceEventsController.add(event as PresenceEventEntity);
-            break;
           case EventType.deleteMessage:
             _deleteMessageEventsController.add(event as DeleteMessageEventEntity);
-            break;
           case EventType.updateMessage:
             _updateMessageEventsController.add(event as UpdateMessageEventEntity);
-            break;
           case EventType.subscription:
             _subscriptionEventsController.add(event as SubscriptionEventEntity);
-            break;
           case EventType.userTopic:
             _userTopicEventsController.add(event as UserTopicEventEntity);
-            break;
           default:
             break;
         }
