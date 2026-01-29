@@ -352,5 +352,9 @@
   "open": "Open",
   "try_again": "Try again",
   "connecting": "Connecting",
-  "my_activity": "My activity"
+  "my_activity": "My activity",
+  "topic_item": {
+    "mute": "Mute topic",
+    "unmute": "Unmute topic"
+  }
 }

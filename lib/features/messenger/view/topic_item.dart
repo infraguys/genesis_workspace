@@ -291,7 +291,7 @@ class _TopicContextMenu extends StatelessWidget {
             textColor: textColor,
             icon: Assets.icons.notif,
             iconColor: iconColor,
-            label: isMuted ? "Включить уведомления" : "Заглушить тему",
+            label: isMuted ? context.t.topicItem.unmute : context.t.topicItem.mute,
             onTap: isMuted ? onUnmuteTopic : onMuteTopic,
           ),
         ],
