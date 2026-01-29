@@ -219,7 +219,7 @@ class _TopicItemState extends State<TopicItem> {
                         height: 21,
                         child: UnreadBadge(
                           count: widget.topic.unreadMessages.length,
-                          isMuted: widget.chat.isMuted,
+                          isMuted: widget.chat.isMuted || widget.topic.isMuted,
                         ),
                       ),
                     ),

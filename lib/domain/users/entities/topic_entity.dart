@@ -9,6 +9,8 @@ class TopicEntity extends Equatable {
   final TopicVisibilityPolicy visibilityPolicy;
   Set<int> unreadMessages;
 
+  bool get isMuted => visibilityPolicy == .muted;
+
   TopicEntity({
     required this.maxId,
     required this.name,
