@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
@@ -92,42 +91,28 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> with OpenChat
   }
 
   void _submit() async {
-    try {
-      final String? nameError = _validateName(_nameController.text);
-      final String? descriptionError = _validateDescription(_descriptionController.text);
-      setState(() {
-        _nameError = nameError;
-        _descriptionError = descriptionError;
-      });
-      if (nameError != null || descriptionError != null) return;
+    final String? nameError = _validateName(_nameController.text);
+    final String? descriptionError = _validateDescription(_descriptionController.text);
+    setState(() {
+      _nameError = nameError;
+      _descriptionError = descriptionError;
+    });
+    if (nameError != null || descriptionError != null) return;
 
-      final myUserId = context.read<ProfileCubit>().state.user?.userId ?? -1;
-      final name = _nameController.text.trim();
-      final description = _descriptionController.text.trim();
-      final channelId = await context.read<CreateChatCubit>().createChannel(
-        name: name,
-        description: description.isEmpty ? null : description,
-        announce: _announce,
-        inviteOnly: _inviteOnly,
-        selectedUsers: [..._selectedIds.toList(), myUserId],
-      );
+    final myUserId = context.read<ProfileCubit>().state.user?.userId ?? -1;
+    final name = _nameController.text.trim();
+    final description = _descriptionController.text.trim();
+    final channelId = await context.read<CreateChatCubit>().createChannel(
+      name: name,
+      description: description.isEmpty ? null : description,
+      announce: _announce,
+      inviteOnly: _inviteOnly,
+      selectedUsers: [..._selectedIds.toList(), myUserId],
+    );
+    if (channelId != null) {
       await context.read<MessengerCubit>().addChannelById(channelId);
       context.pop();
       openChannel(context, channelId: channelId);
-    } on DioException catch (e) {
-      final data = e.response?.data;
-      final code = data['code'];
-      final msg = data['msg'];
-      switch (code) {
-        case 'CHANNEL_ALREADY_EXISTS':
-          setState(() {
-            _nameError = context.t.channel.createDialog.nameAlreadyExists;
-          });
-        default:
-          setState(() {
-            _creationError = msg;
-          });
-      }
     }
   }
 
@@ -179,7 +164,9 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> with OpenChat
                         hintText: t.channel.createDialog.nameHint,
                         isDense: true,
                         border: const OutlineInputBorder(),
-                        errorText: _nameError,
+                        errorText: state is CreateChatAlreadyExistError
+                            ? context.t.channel.createDialog.nameAlreadyExists
+                            : _nameError,
                       ),
                     ),
                   ],
@@ -339,9 +326,9 @@ class _CreateChannelDialogState extends State<CreateChannelDialog> with OpenChat
                   },
                 ),
               ),
-              if (_creationError != null)
+              if (state is CreateChatError)
                 Text(
-                  _creationError!,
+                  state.msg,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.error,
                   ),

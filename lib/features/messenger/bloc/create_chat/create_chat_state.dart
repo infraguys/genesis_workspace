@@ -10,3 +10,5 @@ class CreateChatError extends CreateChatState {
   final String msg;
   CreateChatError({required this.msg});
 }
+
+class CreateChatAlreadyExistError extends CreateChatState {}
