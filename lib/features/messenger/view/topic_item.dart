@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -44,10 +45,7 @@ class _TopicItemState extends State<TopicItem> {
       textScaler: textScaler,
     )..layout();
 
-    final contentWidth = (_menuRowHorizontalPadding * 2) +
-        _menuIconSize +
-        _menuIconTextSpacing +
-        textPainter.width;
+    final contentWidth = (_menuRowHorizontalPadding * 2) + _menuIconSize + _menuIconTextSpacing + textPainter.width;
 
     final screenWidth = MediaQuery.sizeOf(context).width;
     final maxWidth = screenWidth - (_menuPadding * 2);
@@ -98,6 +96,14 @@ class _TopicItemState extends State<TopicItem> {
                 topicName: widget.topic.name,
               );
             },
+            onMuteTopic: () async {
+              _closeOverlay();
+              await context.read<MuteCubit>().muteTopic(
+                streamId: widget.chat.streamId!,
+                topic: widget.topic.name,
+              );
+            },
+            onUnmuteTopic: () async {},
           ),
         );
       },
@@ -214,10 +220,14 @@ class _TopicContextMenu extends StatelessWidget {
   const _TopicContextMenu({
     required this.width,
     required this.onReadAll,
+    required this.onMuteTopic,
+    required this.onUnmuteTopic,
   });
 
   final double width;
   final VoidCallback onReadAll;
+  final VoidCallback onMuteTopic;
+  final VoidCallback onUnmuteTopic;
 
   @override
   Widget build(BuildContext context) {
@@ -232,12 +242,23 @@ class _TopicContextMenu extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: _TopicContextMenuAction(
-        textColor: textColor,
-        icon: Assets.icons.readReceipt,
-        iconColor: iconColor,
-        label: context.t.readAllMessages,
-        onTap: onReadAll,
+      child: Column(
+        children: [
+          _TopicContextMenuAction(
+            textColor: textColor,
+            icon: Assets.icons.readReceipt,
+            iconColor: iconColor,
+            label: context.t.readAllMessages,
+            onTap: onReadAll,
+          ),
+          _TopicContextMenuAction(
+            textColor: textColor,
+            icon: Assets.icons.notif,
+            iconColor: iconColor,
+            label: "Заглушить топик",
+            onTap: onMuteTopic,
+          ),
+        ],
       ),
     );
   }

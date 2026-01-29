@@ -41,11 +41,9 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/update_
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_subscribed_channels_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_topics_use_case.dart';
-import 'package:genesis_workspace/domain/users/usecases/update_subscription_settings_use_case.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
@@ -68,7 +66,6 @@ class MessengerCubit extends Cubit<MessengerState> {
   final GetFolderIdsForChatUseCase _getFolderIdsForChatUseCase;
   final UpdatePinnedChatOrderUseCase _updatePinnedChatOrderUseCase;
   final GetSubscribedChannelsUseCase _getSubscribedChannelsUseCase;
-  final UpdateSubscriptionSettingsUseCase _updateSubscriptionSettingsUseCase;
   final UpdateMessagesFlagsNarrowUseCase _updateMessagesFlagsNarrowUseCase;
 
   final MultiPollingService _realTimeService;
@@ -108,7 +105,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     this._updatePinnedChatOrderUseCase,
     this._profileCubit,
     this._getSubscribedChannelsUseCase,
-    this._updateSubscriptionSettingsUseCase,
     this._getAllFoldersItemsUseCase,
     this._updateMessagesFlagsNarrowUseCase,
   ) : super(
@@ -351,38 +347,6 @@ class MessengerCubit extends Cubit<MessengerState> {
     try {
       final pins = await _getPinnedChatsUseCase.call(folder.uuid);
       emit(state.copyWith(pinnedChats: pins));
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
-      }
-    }
-  }
-
-  Future<void> muteChannel(ChatEntity chat) async {
-    if (chat.type != ChatType.channel || chat.streamId == null) {
-      return;
-    }
-    try {
-      final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
-        updates: [SubscriptionUpdateEntity(streamId: chat.streamId!, isMuted: true)],
-      );
-      await _updateSubscriptionSettingsUseCase.call(body);
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
-      }
-    }
-  }
-
-  Future<void> unmuteChannel(ChatEntity chat) async {
-    if (chat.type != ChatType.channel || chat.streamId == null) {
-      return;
-    }
-    try {
-      final UpdateSubscriptionRequestEntity body = UpdateSubscriptionRequestEntity(
-        updates: [SubscriptionUpdateEntity(streamId: chat.streamId!, isMuted: false)],
-      );
-      await _updateSubscriptionSettingsUseCase.call(body);
     } catch (e) {
       if (kDebugMode) {
         inspect(e);

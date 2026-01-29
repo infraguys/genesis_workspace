@@ -165,6 +165,7 @@ class RealTimeConnection {
       _lastEventId = registerQueueEntity.lastEventId;
       _maxStreamNameLength = registerQueueEntity.maxStreamNameLength ?? 20;
       _maxStreamDescriptionLength = registerQueueEntity.maxStreamDescriptionLength ?? 256;
+      inspect(registerQueueEntity);
       await Future.wait([
         _updateOrganizationMeetingUrlUseCase.call(
           organizationId: organizationId,

@@ -15,6 +15,7 @@ import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/features/messenger/view/topic_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -122,9 +123,9 @@ class _ChatItemState extends State<ChatItem> {
                 ? () async {
                     _closeOverlay();
                     if (widget.chat.isMuted) {
-                      await context.read<MessengerCubit>().unmuteChannel(widget.chat);
+                      await context.read<MuteCubit>().unmuteChannel(widget.chat);
                     } else {
-                      await context.read<MessengerCubit>().muteChannel(widget.chat);
+                      await context.read<MuteCubit>().muteChannel(widget.chat);
                     }
                   }
                 : null,

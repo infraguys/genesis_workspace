@@ -13,6 +13,7 @@ import 'package:genesis_workspace/features/logs/bloc/logs_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
 import 'package:genesis_workspace/features/notifications/bloc/notifications_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -49,6 +50,7 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (context) => getIt<LogsCubit>()),
         BlocProvider(create: (context) => getIt<MessengerCubit>()),
         BlocProvider(create: (context) => getIt<DraftsCubit>()),
+        BlocProvider(create: (_) => getIt<MuteCubit>()),
       ],
       child: MaterialApp.router(
         locale: TranslationProvider.of(context).flutterLocale,
