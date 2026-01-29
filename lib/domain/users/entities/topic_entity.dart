@@ -1,10 +1,12 @@
 import 'package:equatable/equatable.dart';
+import 'package:genesis_workspace/core/enums/topic_visibility_policy.dart';
 
 class TopicEntity extends Equatable {
   final int maxId;
   final String name;
   final String lastMessageSenderName;
   final String lastMessagePreview;
+  final TopicVisibilityPolicy visibilityPolicy;
   Set<int> unreadMessages;
 
   TopicEntity({
@@ -13,6 +15,7 @@ class TopicEntity extends Equatable {
     required this.unreadMessages,
     this.lastMessageSenderName = '',
     this.lastMessagePreview = '',
+    this.visibilityPolicy = .none,
   });
 
   TopicEntity copyWith({
@@ -21,6 +24,7 @@ class TopicEntity extends Equatable {
     Set<int>? unreadMessages,
     String? lastMessageSenderName,
     String? lastMessagePreview,
+    TopicVisibilityPolicy? visibilityPolicy,
   }) {
     return TopicEntity(
       maxId: maxId ?? this.maxId,
@@ -28,6 +32,7 @@ class TopicEntity extends Equatable {
       unreadMessages: unreadMessages ?? Set<int>.from(this.unreadMessages),
       lastMessageSenderName: lastMessageSenderName ?? this.lastMessageSenderName,
       lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
+      visibilityPolicy: visibilityPolicy ?? this.visibilityPolicy,
     );
   }
 

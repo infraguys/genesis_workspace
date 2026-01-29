@@ -88,6 +88,7 @@ class _TopicItemState extends State<TopicItem> {
           alignment: openDown ? Alignment.topLeft : Alignment.bottomLeft,
           closeOverlay: _closeOverlay,
           child: _TopicContextMenu(
+            topic: widget.topic,
             width: menuWidth,
             onReadAll: () async {
               _closeOverlay();
@@ -103,7 +104,13 @@ class _TopicItemState extends State<TopicItem> {
                 topic: widget.topic.name,
               );
             },
-            onUnmuteTopic: () async {},
+            onUnmuteTopic: () async {
+              _closeOverlay();
+              await context.read<MuteCubit>().unmuteTopic(
+                streamId: widget.chat.streamId!,
+                topic: widget.topic.name,
+              );
+            },
           ),
         );
       },
@@ -169,17 +176,28 @@ class _TopicItemState extends State<TopicItem> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Tooltip(
-                                  message: widget.topic.name,
-                                  child: Text(
-                                    "# ${widget.topic.name}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.labelMedium?.copyWith(
-                                      fontSize: 14,
-                                      color: textColors.text100,
+                                Row(
+                                  spacing: 4,
+                                  children: [
+                                    Tooltip(
+                                      message: widget.topic.name,
+                                      child: Text(
+                                        "# ${widget.topic.name}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.labelMedium?.copyWith(
+                                          fontSize: 14,
+                                          color: textColors.text100,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    if (widget.topic.visibilityPolicy == .muted)
+                                      Icon(
+                                        Icons.headset_off,
+                                        size: 14,
+                                        color: AppColors.noticeDisabled,
+                                      ),
+                                  ],
                                 ),
                                 Text(
                                   widget.topic.lastMessageSenderName,
@@ -218,12 +236,14 @@ class _TopicItemState extends State<TopicItem> {
 
 class _TopicContextMenu extends StatelessWidget {
   const _TopicContextMenu({
+    required this.topic,
     required this.width,
     required this.onReadAll,
     required this.onMuteTopic,
     required this.onUnmuteTopic,
   });
 
+  final TopicEntity topic;
   final double width;
   final VoidCallback onReadAll;
   final VoidCallback onMuteTopic;
@@ -234,6 +254,8 @@ class _TopicContextMenu extends StatelessWidget {
     final theme = Theme.of(context);
     const textColor = Colors.white;
     const iconColor = ColorFilter.mode(Colors.white, BlendMode.srcIn);
+
+    final isMuted = topic.visibilityPolicy == .muted;
 
     return Container(
       width: width,
@@ -255,8 +277,8 @@ class _TopicContextMenu extends StatelessWidget {
             textColor: textColor,
             icon: Assets.icons.notif,
             iconColor: iconColor,
-            label: "Заглушить топик",
-            onTap: onMuteTopic,
+            label: isMuted ? "Включить уведомления" : "Заглушить тему",
+            onTap: isMuted ? onUnmuteTopic : onMuteTopic,
           ),
         ],
       ),
