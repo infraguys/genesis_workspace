@@ -67,12 +67,12 @@ class MessagesDataSourceImpl implements MessagesDataSource {
     try {
       final readBySender = true;
       await apiClient.sendMessage(
-        body.type,
-        jsonEncode(body.to),
-        body.content,
-        body.streamId,
-        body.topic,
-        readBySender,
+        type: body.type.name,
+        to: jsonEncode(body.to),
+        content: body.content,
+        streamId: body.streamId,
+        topic: body.topic,
+        readBySender: readBySender,
       );
     } catch (e) {
       rethrow;

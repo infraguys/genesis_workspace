@@ -36,15 +36,16 @@ abstract class MessagesApiClient {
     @Query("apply_markdown") bool applyMarkdown,
   );
 
+  @FormUrlEncoded()
   @POST('/messages')
-  Future<void> sendMessage(
-    @Query("type") SendMessageType type,
-    @Query("to") String to,
-    @Query("content") String content,
-    @Query("stream_id") int? streamId,
-    @Query("topic") String? topic,
-    @Query("read_by_sender") bool? readBySender,
-  );
+  Future<void> sendMessage({
+    @Field("type") required String type,
+    @Field("to") required String to,
+    @Field("content") required String content,
+    @Field("stream_id") int? streamId,
+    @Field("topic") String? topic,
+    @Field("read_by_sender") bool? readBySender,
+  });
 
   @PATCH('/messages/{message_id}')
   Future<UpdateMessageResponseDto> updateMessage(
