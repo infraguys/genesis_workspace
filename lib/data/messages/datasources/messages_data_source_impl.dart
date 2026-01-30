@@ -139,7 +139,10 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   @override
   Future<UpdateMessageResponseDto> updateMessage(UpdateMessageRequestDto body) async {
     try {
-      final response = await apiClient.updateMessage(body.messageId, body.content);
+      final response = await apiClient.updateMessage(
+        messageId: body.messageId,
+        content: body.content,
+      );
       return response;
     } catch (e) {
       rethrow;

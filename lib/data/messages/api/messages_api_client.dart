@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart' hide Headers;
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
-import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
@@ -47,11 +46,12 @@ abstract class MessagesApiClient {
     @Field("read_by_sender") bool? readBySender,
   });
 
+  @FormUrlEncoded()
   @PATCH('/messages/{message_id}')
-  Future<UpdateMessageResponseDto> updateMessage(
-    @Path('message_id') int messageId,
-    @Query("content") String content,
-  );
+  Future<UpdateMessageResponseDto> updateMessage({
+    @Field('message_id') required int messageId,
+    @Field("content") required String content,
+  });
 
   @POST('/messages/flags')
   Future<void> updateMessagesFlags(
