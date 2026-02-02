@@ -10,11 +10,29 @@ class SelectionIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isSelected
-        ? Assets.icons.circleSelectedGreen.svg()
-        : Icon(
-            Icons.circle_outlined,
-            size: 20,
-          );
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: animation, child: child),
+        );
+      },
+      child: SizedBox(
+        key: ValueKey<bool>(isSelected),
+        width: 20,
+        height: 20,
+        child: Center(
+          child: isSelected
+              ? Assets.icons.circleSelectedGreen.svg(width: 20, height: 20)
+              : const Icon(
+                  Icons.circle_outlined,
+                  size: 20,
+                ),
+        ),
+      ),
+    );
   }
 }

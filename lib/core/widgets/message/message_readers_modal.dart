@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
-import 'package:genesis_workspace/features/messages/bloc/message_readers_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/message_readers/message_readers_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 

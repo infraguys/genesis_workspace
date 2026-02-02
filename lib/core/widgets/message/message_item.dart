@@ -24,7 +24,8 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/forward_message/forward_message_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/forward_message_dialog/forward_message_dialog.dart';
@@ -172,6 +173,11 @@ class _MessageItemState extends State<MessageItem> {
     _menuController.close();
   }
 
+  void onSelect() {
+    context.read<MessagesSelectCubit>().setSelectMode(true, selectedMessage: widget.message);
+    _menuController.close();
+  }
+
   void onCopy() async {
     final message = await messagesCubit.getMessageById(messageId: widget.message.id, applyMarkdown: false);
     await Clipboard.setData(ClipboardData(text: message.content));
@@ -239,6 +245,7 @@ class _MessageItemState extends State<MessageItem> {
           onEmojiSelected: (emoji) async => await handleEmojiSelected(emoji),
           onClose: _closeOverlay,
           onForward: onForward,
+          onSelect: onSelect,
         );
       },
     );

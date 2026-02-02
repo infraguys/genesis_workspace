@@ -9,7 +9,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -28,8 +28,7 @@ class ScaffoldWithNestedNavigation extends StatefulWidget {
   State<ScaffoldWithNestedNavigation> createState() => _ScaffoldWithNestedNavigationState();
 }
 
-class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation>
-    with WidgetsBindingObserver {
+class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> with WidgetsBindingObserver {
   late final Future _future;
   late final AppShellController appShellController;
 
@@ -137,8 +136,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             label: Text(context.t.navBar.directMessages),
                             icon: Badge(
                               isLabelVisible: state.messages.any(
-                                (message) =>
-                                    (message.type == MessageType.private && message.isUnread),
+                                (message) => (message.type == MessageType.private && message.isUnread),
                               ),
                               child: Icon(Icons.people),
                             ),
@@ -147,8 +145,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                             label: Text(context.t.navBar.channels),
                             icon: Badge(
                               isLabelVisible: state.messages.any(
-                                (message) =>
-                                    (message.type == MessageType.stream && message.isUnread),
+                                (message) => (message.type == MessageType.stream && message.isUnread),
                               ),
                               child: Icon(Icons.chat),
                             ),
