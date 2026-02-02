@@ -22,8 +22,8 @@ class SelectionIndicator extends StatelessWidget {
       },
       child: SizedBox(
         key: ValueKey<bool>(isSelected),
-        width: 20,
-        height: 20,
+        width: 30,
+        height: 30,
         child: Center(
           child: isSelected
               ? Assets.icons.circleSelectedGreen.svg(width: 20, height: 20)

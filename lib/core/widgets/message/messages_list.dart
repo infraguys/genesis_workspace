@@ -31,6 +31,7 @@ class MessagesList extends StatefulWidget {
   final void Function(int messageId, {String? quote})? onTapQuote;
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
   final bool isSelectMode;
+  final List<MessageEntity> selectedMessages;
 
   const MessagesList({
     super.key,
@@ -45,6 +46,7 @@ class MessagesList extends StatefulWidget {
     this.onTapEditMessage,
     this.onReadAll,
     this.isSelectMode = false,
+    this.selectedMessages = const <MessageEntity>[],
   });
 
   @override
@@ -292,6 +294,9 @@ class _MessagesListState extends State<MessagesList> {
                         onTapQuote: widget.onTapQuote ?? (_, {quote}) {},
                         onTapEditMessage: widget.onTapEditMessage ?? (_) {},
                         isSelectMode: widget.isSelectMode,
+                        isSelected: widget.selectedMessages.any(
+                          (selectedMessage) => selectedMessage.id == message.id,
+                        ),
                       ),
                     ),
                   );

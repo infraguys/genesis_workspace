@@ -12,6 +12,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
+import 'package:genesis_workspace/core/shortcuts/cancel_select_mode_intent.dart';
 import 'package:genesis_workspace/core/shortcuts/unselect_chat_shortcut.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
@@ -221,20 +222,25 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
       builder: (context, state) {
         final isLoading = state.userEntity == null && state.groupUsers == null;
 
-        return Shortcuts(
-          shortcuts: {
-            SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): UnselectChatIntent(),
-          },
-          child: Actions(
-            actions: {
-              UnselectChatIntent: UnselectChatAction(),
-            },
-            child: Focus(
-              autofocus: true,
-              child: BlocBuilder<MessagesSelectCubit, MessagesSelectState>(
-                builder: (context, messagesSelectState) {
-                  final bool isSelectMode = messagesSelectState is MessagesSelectStateActive;
-                  return Scaffold(
+        return BlocBuilder<MessagesSelectCubit, MessagesSelectState>(
+          builder: (context, messagesSelectState) {
+            final bool isSelectMode = messagesSelectState is MessagesSelectStateActive;
+            final int selectedCount = messagesSelectState.selectedMessages.length;
+            final selectedMessages = messagesSelectState.selectedMessages;
+            return Shortcuts(
+              shortcuts: {
+                SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): isSelectMode
+                    ? CancelSelectModeIntent()
+                    : UnselectChatIntent(),
+              },
+              child: Actions(
+                actions: {
+                  CancelSelectModeIntent: CancelSelectModeAction(),
+                  UnselectChatIntent: UnselectChatAction(),
+                },
+                child: Focus(
+                  autofocus: true,
+                  child: Scaffold(
                     resizeToAvoidBottomInset: false,
                     appBar: AppBarContainer(
                       appBar: isSelectMode
@@ -243,7 +249,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                               backgroundColor: theme.colorScheme.surface,
                               surfaceTintColor: Colors.transparent,
                               automaticallyImplyLeading: false,
-                              title: Text("Selected (${messagesSelectState.messages.length})"),
+                              title: Text("Selected ($selectedCount)"),
                               actions: [
                                 TextButton.icon(
                                   onPressed: () {
@@ -517,6 +523,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                                     }
                                                   },
                                                   isSelectMode: messagesSelectState is MessagesSelectStateActive,
+                                                  selectedMessages: selectedMessages,
                                                 ),
                                                 Positioned(
                                                   bottom: 0,
@@ -536,247 +543,262 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                             ),
                                     ),
                                   ),
-                            isSelectMode
-                                ? MessagesSelectFooter(count: messagesSelectState.messages.length)
-                                : DropRegion(
-                                    formats: Formats.standardFormats,
-                                    hitTestBehavior: HitTestBehavior.opaque,
-                                    onDropOver: (DropOverEvent event) async {
-                                      if (!isDropOver) {
-                                        setState(() {
-                                          isDropOver = true;
-                                        });
-                                      }
-                                      return DropOperation.link;
-                                    },
-                                    onDropLeave: (_) {
-                                      if (isDropOver) {
-                                        setState(() {
-                                          isDropOver = false;
-                                        });
-                                      }
-                                    },
-                                    onPerformDrop: (PerformDropEvent event) async {
-                                      setState(() => isDropOver = false);
-                                      final List<PlatformFile> droppedFiles = await toPlatformFiles(event);
+                            AnimatedCrossFade(
+                              duration: const Duration(milliseconds: 200),
+                              firstCurve: Curves.easeOut,
+                              secondCurve: Curves.easeIn,
+                              crossFadeState: isSelectMode ? .showFirst : .showSecond,
+                              firstChild: KeyedSubtree(
+                                key: const ValueKey<String>('select-footer'),
+                                child: MessagesSelectFooter(
+                                  count: selectedCount,
+                                ),
+                              ),
+                              secondChild: KeyedSubtree(
+                                key: const ValueKey<String>('input-footer'),
+                                child: DropRegion(
+                                  formats: Formats.standardFormats,
+                                  hitTestBehavior: HitTestBehavior.opaque,
+                                  onDropOver: (DropOverEvent event) async {
+                                    if (!isDropOver) {
+                                      setState(() {
+                                        isDropOver = true;
+                                      });
+                                    }
+                                    return DropOperation.link;
+                                  },
+                                  onDropLeave: (_) {
+                                    if (isDropOver) {
+                                      setState(() {
+                                        isDropOver = false;
+                                      });
+                                    }
+                                  },
+                                  onPerformDrop: (PerformDropEvent event) async {
+                                    setState(() => isDropOver = false);
+                                    final List<PlatformFile> droppedFiles = await toPlatformFiles(event);
 
-                                      // Split into image files and other files
-                                      final List<PlatformFile> nonImageFiles = <PlatformFile>[];
-                                      final List<XFile> imageFiles = <XFile>[];
+                                    // Split into image files and other files
+                                    final List<PlatformFile> nonImageFiles = <PlatformFile>[];
+                                    final List<XFile> imageFiles = <XFile>[];
 
-                                      for (final pf in droppedFiles) {
-                                        final ext = extensionOf(pf.name);
-                                        if (isImageExtension(ext)) {
-                                          if (pf.path != null && pf.path!.isNotEmpty) {
-                                            imageFiles.add(XFile(pf.path!, name: pf.name));
-                                          } else if (pf.bytes != null) {
-                                            imageFiles.add(XFile.fromData(pf.bytes!, name: pf.name));
-                                          }
-                                        } else {
-                                          nonImageFiles.add(pf);
+                                    for (final pf in droppedFiles) {
+                                      final ext = extensionOf(pf.name);
+                                      if (isImageExtension(ext)) {
+                                        if (pf.path != null && pf.path!.isNotEmpty) {
+                                          imageFiles.add(XFile(pf.path!, name: pf.name));
+                                        } else if (pf.bytes != null) {
+                                          imageFiles.add(XFile.fromData(pf.bytes!, name: pf.name));
                                         }
+                                      } else {
+                                        nonImageFiles.add(pf);
                                       }
-                                      try {
-                                        if (nonImageFiles.isNotEmpty) {
-                                          unawaited(
-                                            context.read<ChatCubit>().uploadFilesCommon(droppedFiles: nonImageFiles),
-                                          );
-                                        }
-                                        if (imageFiles.isNotEmpty) {
-                                          unawaited(
-                                            context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
-                                          );
-                                        }
-                                        if (platformInfo.isDesktop) {
-                                          messageInputFocusNode.requestFocus();
-                                        }
-                                      } catch (e) {
-                                        inspect(e);
-                                      }
-                                    },
-                                    child: BlocBuilder<ChatCubit, ChatState>(
-                                      buildWhen: (prev, current) => (prev.uploadedFiles != current.uploadedFiles),
-                                      builder: (context, inputState) {
-                                        final String _currentText = currentText.trim();
-                                        final bool hasText = _currentText.isNotEmpty;
-
-                                        final files = inputState.uploadedFiles;
-                                        final bool hasFiles = files.isNotEmpty;
-                                        final bool hasUploadingFiles = files.any(
-                                          (file) => file is UploadingFileEntity,
+                                    }
+                                    try {
+                                      if (nonImageFiles.isNotEmpty) {
+                                        unawaited(
+                                          context.read<ChatCubit>().uploadFilesCommon(
+                                            droppedFiles: nonImageFiles,
+                                          ),
                                         );
+                                      }
+                                      if (imageFiles.isNotEmpty) {
+                                        unawaited(
+                                          context.read<ChatCubit>().uploadImagesCommon(droppedImages: imageFiles),
+                                        );
+                                      }
+                                      if (platformInfo.isDesktop) {
+                                        messageInputFocusNode.requestFocus();
+                                      }
+                                    } catch (e) {
+                                      inspect(e);
+                                    }
+                                  },
+                                  child: BlocBuilder<ChatCubit, ChatState>(
+                                    buildWhen: (prev, current) => (prev.uploadedFiles != current.uploadedFiles),
+                                    builder: (context, inputState) {
+                                      final String _currentText = currentText.trim();
+                                      final bool hasText = _currentText.isNotEmpty;
 
-                                        final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
-                                        final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
-                                        final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
+                                      final files = inputState.uploadedFiles;
+                                      final bool hasFiles = files.isNotEmpty;
+                                      final bool hasUploadingFiles = files.any(
+                                        (file) => file is UploadingFileEntity,
+                                      );
 
-                                        final bool isSendEnabled =
-                                            canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
-                                        final bool isEditEnabled = isSendEnabled || state.isEdited;
+                                      final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
+                                      final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
+                                      final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
 
-                                        return Actions(
-                                          actions: {
-                                            PasteTextIntent: ChatPasteAction(
-                                              onPaste: () async {
-                                                try {
-                                                  final captured = await pasteCaptureService.captureNow();
-                                                  handleCaptured(captured);
-                                                } catch (e) {
-                                                  inspect(e);
+                                      final bool isSendEnabled =
+                                          canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                                      final bool isEditEnabled = isSendEnabled || state.isEdited;
+
+                                      return Actions(
+                                        actions: {
+                                          PasteTextIntent: ChatPasteAction(
+                                            onPaste: () async {
+                                              try {
+                                                final captured = await pasteCaptureService.captureNow();
+                                                handleCaptured(captured);
+                                              } catch (e) {
+                                                inspect(e);
+                                              }
+                                            },
+                                          ),
+                                        },
+                                        child: Shortcuts(
+                                          shortcuts: state.showMentionPopup
+                                              ? {
+                                                  const SingleActivator(.arrowDown, numLock: .ignored):
+                                                      const MentionNavIntent.down(),
+                                                  const SingleActivator(.arrowUp, numLock: .ignored):
+                                                      const MentionNavIntent.up(),
+                                                  const SingleActivator(.enter, numLock: .ignored):
+                                                      const MentionSelectIntent(),
+                                                  const SingleActivator(.numpadEnter, numLock: .ignored):
+                                                      const MentionSelectIntent(),
                                                 }
-                                              },
-                                            ),
-                                          },
-                                          child: Shortcuts(
-                                            shortcuts: state.showMentionPopup
-                                                ? {
-                                                    const SingleActivator(.arrowDown, numLock: .ignored):
-                                                        const MentionNavIntent.down(),
+                                              : {
+                                                  if (messageController.text.isEmpty)
                                                     const SingleActivator(.arrowUp, numLock: .ignored):
-                                                        const MentionNavIntent.up(),
-                                                    const SingleActivator(.enter, numLock: .ignored):
-                                                        const MentionSelectIntent(),
-                                                    const SingleActivator(.numpadEnter, numLock: .ignored):
-                                                        const MentionSelectIntent(),
-                                                  }
-                                                : {
-                                                    if (messageController.text.isEmpty)
-                                                      const SingleActivator(.arrowUp, numLock: .ignored):
-                                                          const EditLastMessageIntent(),
-                                                  },
-                                            child: Actions(
-                                              actions: {
-                                                UnselectChatIntent: UnselectChatAction(),
-                                                EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
-                                                  onInvoke: (intent) {
-                                                    final lastMessageIndex = state.messages.lastIndexWhere(
-                                                      (message) => message.senderId == state.myUserId,
-                                                    );
-                                                    if (lastMessageIndex == -1) return null;
+                                                        const EditLastMessageIntent(),
+                                                },
+                                          child: Actions(
+                                            actions: {
+                                              UnselectChatIntent: UnselectChatAction(),
+                                              EditLastMessageIntent: CallbackAction<EditLastMessageIntent>(
+                                                onInvoke: (intent) {
+                                                  final lastMessageIndex = state.messages.lastIndexWhere(
+                                                    (message) => message.senderId == state.myUserId,
+                                                  );
+                                                  if (lastMessageIndex == -1) return null;
 
-                                                    final lastMessage = state.messages[lastMessageIndex];
-                                                    onTapEditMessage(
-                                                      UpdateMessageRequestEntity(
-                                                        messageId: lastMessage.id,
-                                                        content: lastMessage.content,
-                                                      ),
-                                                    );
-                                                    return null;
-                                                  },
-                                                ),
-                                                MentionNavIntent: CallbackAction<MentionNavIntent>(
-                                                  onInvoke: (intent) {
-                                                    if (state.showMentionPopup &&
-                                                        state.filteredSuggestedMentions.isNotEmpty) {
-                                                      final st = _mentionKey.currentState as dynamic?;
-                                                      if (intent.direction == TraversalDirection.down) {
-                                                        st?.moveNext();
-                                                      } else {
-                                                        st?.movePrevious();
+                                                  final lastMessage = state.messages[lastMessageIndex];
+                                                  onTapEditMessage(
+                                                    UpdateMessageRequestEntity(
+                                                      messageId: lastMessage.id,
+                                                      content: lastMessage.content,
+                                                    ),
+                                                  );
+                                                  return null;
+                                                },
+                                              ),
+                                              MentionNavIntent: CallbackAction<MentionNavIntent>(
+                                                onInvoke: (intent) {
+                                                  if (state.showMentionPopup &&
+                                                      state.filteredSuggestedMentions.isNotEmpty) {
+                                                    final st = _mentionKey.currentState as dynamic?;
+                                                    if (intent.direction == TraversalDirection.down) {
+                                                      st?.moveNext();
+                                                    } else {
+                                                      st?.movePrevious();
+                                                    }
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                              MentionSelectIntent: CallbackAction<MentionSelectIntent>(
+                                                onInvoke: (intent) {
+                                                  if (state.showMentionPopup &&
+                                                      state.filteredSuggestedMentions.isNotEmpty) {
+                                                    final st = _mentionKey.currentState as dynamic?;
+                                                    st?.selectFocused();
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            },
+                                            child: Container(
+                                              key: dropAreaKey,
+                                              child: MessageInput(
+                                                controller: messageController,
+                                                isMessagePending: state.isMessagePending,
+                                                focusNode: messageInputFocusNode,
+                                                onSubmitIntercept: () {
+                                                  if (state.showMentionPopup &&
+                                                      state.filteredSuggestedMentions.isNotEmpty) {
+                                                    final st = _mentionKey.currentState as dynamic?;
+                                                    st?.selectFocused();
+                                                    return true;
+                                                  }
+                                                  return false;
+                                                },
+                                                onSend: isSendEnabled
+                                                    ? () async {
+                                                        final content = messageController.text;
+                                                        messageController.clear();
+                                                        try {
+                                                          await context.read<ChatCubit>().sendMessage(
+                                                            content: content,
+                                                          );
+                                                        } catch (e) {
+                                                          if (kDebugMode) {
+                                                            inspect(e);
+                                                          }
+                                                        } finally {
+                                                          if (platformInfo.isDesktop) {
+                                                            messageInputFocusNode.requestFocus();
+                                                          }
+                                                        }
                                                       }
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
-                                                MentionSelectIntent: CallbackAction<MentionSelectIntent>(
-                                                  onInvoke: (intent) {
-                                                    if (state.showMentionPopup &&
-                                                        state.filteredSuggestedMentions.isNotEmpty) {
-                                                      final st = _mentionKey.currentState as dynamic?;
-                                                      st?.selectFocused();
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
-                                              },
-                                              child: Container(
-                                                key: dropAreaKey,
-                                                child: MessageInput(
-                                                  controller: messageController,
-                                                  isMessagePending: state.isMessagePending,
-                                                  focusNode: messageInputFocusNode,
-                                                  onSubmitIntercept: () {
-                                                    if (state.showMentionPopup &&
-                                                        state.filteredSuggestedMentions.isNotEmpty) {
-                                                      final st = _mentionKey.currentState as dynamic?;
-                                                      st?.selectFocused();
-                                                      return true;
-                                                    }
-                                                    return false;
-                                                  },
-                                                  onSend: isSendEnabled
-                                                      ? () async {
-                                                          final content = messageController.text;
-                                                          messageController.clear();
-                                                          try {
-                                                            await context.read<ChatCubit>().sendMessage(
-                                                              content: content,
-                                                            );
-                                                          } catch (e) {
-                                                            if (kDebugMode) {
-                                                              inspect(e);
-                                                            }
-                                                          } finally {
-                                                            if (platformInfo.isDesktop) {
-                                                              messageInputFocusNode.requestFocus();
-                                                            }
+                                                    : null,
+                                                onEdit: isEditEnabled
+                                                    ? () async {
+                                                        try {
+                                                          await submitEdit();
+                                                        } on DioException catch (e) {
+                                                          showErrorSnackBar(context, exception: e);
+                                                        } finally {
+                                                          if (platformInfo.isDesktop) {
+                                                            messageInputFocusNode.requestFocus();
                                                           }
                                                         }
-                                                      : null,
-                                                  onEdit: isEditEnabled
-                                                      ? () async {
-                                                          try {
-                                                            await submitEdit();
-                                                          } on DioException catch (e) {
-                                                            showErrorSnackBar(context, exception: e);
-                                                          } finally {
-                                                            if (platformInfo.isDesktop) {
-                                                              messageInputFocusNode.requestFocus();
-                                                            }
-                                                          }
-                                                        }
-                                                      : null,
-                                                  onUploadFile: () async {
-                                                    await context.read<ChatCubit>().uploadFilesCommon();
-                                                    if (platformInfo.isDesktop) {
-                                                      messageInputFocusNode.requestFocus();
-                                                    }
-                                                  },
-                                                  onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
-                                                  onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
-                                                  files: inputState.uploadedFiles,
-                                                  onUploadImage: () async {
-                                                    await context.read<ChatCubit>().uploadImagesCommon();
-                                                    if (platformInfo.isDesktop) {
-                                                      messageInputFocusNode.requestFocus();
-                                                    }
-                                                  },
-                                                  isDropOver: isDropOver,
-                                                  onCancelEdit: onCancelEdit,
-                                                  isEdit: isEditMode,
-                                                  editingMessage: editingMessage,
-                                                  editingFiles: state.editingAttachments,
-                                                  onRemoveEditingAttachment: (attachment) {
-                                                    context.read<ChatCubit>().removeEditingAttachment(attachment);
-                                                  },
-                                                  inputTitle: state.userEntity?.fullName,
-                                                ),
+                                                      }
+                                                    : null,
+                                                onUploadFile: () async {
+                                                  await context.read<ChatCubit>().uploadFilesCommon();
+                                                  if (platformInfo.isDesktop) {
+                                                    messageInputFocusNode.requestFocus();
+                                                  }
+                                                },
+                                                onRemoveFile: context.read<ChatCubit>().removeUploadedFileCommon,
+                                                onCancelUpload: context.read<ChatCubit>().cancelUploadCommon,
+                                                files: inputState.uploadedFiles,
+                                                onUploadImage: () async {
+                                                  await context.read<ChatCubit>().uploadImagesCommon();
+                                                  if (platformInfo.isDesktop) {
+                                                    messageInputFocusNode.requestFocus();
+                                                  }
+                                                },
+                                                isDropOver: isDropOver,
+                                                onCancelEdit: onCancelEdit,
+                                                isEdit: isEditMode,
+                                                editingMessage: editingMessage,
+                                                editingFiles: state.editingAttachments,
+                                                onRemoveEditingAttachment: (attachment) {
+                                                  context.read<ChatCubit>().removeEditingAttachment(attachment);
+                                                },
+                                                inputTitle: state.userEntity?.fullName,
                                               ),
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      );
+                                    },
                                   ),
+                                ),
+                              ),
+                            ),
                           ],
                         );
                       },
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

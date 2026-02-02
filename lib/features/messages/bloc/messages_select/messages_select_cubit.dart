@@ -15,4 +15,19 @@ class MessagesSelectCubit extends Cubit<MessagesSelectState> {
       emit(MessagesSelectStateDisabled());
     }
   }
+
+  void toggleMessageSelection(MessageEntity message) {
+    final currentSelectedMessages = state.selectedMessages;
+
+    final updatedSelectedMessages = [...currentSelectedMessages];
+    final isMessageSelected = updatedSelectedMessages.any((selected) => selected.id == message.id);
+
+    if (isMessageSelected) {
+      updatedSelectedMessages.removeWhere((selected) => selected.id == message.id);
+    } else {
+      updatedSelectedMessages.add(message);
+    }
+
+    emit(MessagesSelectStateActive(messages: updatedSelectedMessages));
+  }
 }
