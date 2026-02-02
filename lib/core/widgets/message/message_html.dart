@@ -371,9 +371,9 @@ class MessageHtml extends StatelessWidget {
       onSelectionChanged: (content) {
         onSelectedTextChanged(content?.plainText ?? '');
       },
-      // contextMenuBuilder: (BuildContext context, SelectableRegionState state) {
-      //   return const SizedBox.shrink();
-      // },
+      contextMenuBuilder: (BuildContext context, SelectableRegionState state) {
+        return const SizedBox.shrink();
+      },
       child: html,
     );
   }
