@@ -499,6 +499,10 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   onForward: () async {
                                     await onForward(context);
                                   },
+                                  onReply: () {
+                                    final messagesIds = selectedMessages.map((message) => message.id).toList();
+                                    replyMultiMessages(messagesIds);
+                                  },
                                 ),
                               ),
                               secondChild: DropRegion(

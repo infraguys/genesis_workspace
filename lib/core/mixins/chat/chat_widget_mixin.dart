@@ -19,6 +19,7 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';
@@ -207,7 +208,6 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   }
 
   //Quote message
-
   Future<void> onTapQuote(int messageId, {String? quote}) async {
     try {
       context.read<TChatCubit>().setIsMessagePending(true);
@@ -221,6 +221,23 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         insertQuoteAndFocus(textToInsert: quoteText);
+      });
+    } catch (e) {
+      inspect(e);
+    } finally {
+      context.read<TChatCubit>().setIsMessagePending(false);
+    }
+  }
+
+  //Reply multi messages
+  Future<void> replyMultiMessages(List<int> messagesIds) async {
+    context.read<MessagesSelectCubit>().setSelectMode(false);
+    try {
+      context.read<TChatCubit>().setIsMessagePending(true);
+      final messages = await context.read<MessagesCubit>().getMessagesListByIds(messagesIds: messagesIds);
+      final content = messages.map((message) => message.makeForwardedContent()).join('\n') + '\n';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        insertQuoteAndFocus(textToInsert: content);
       });
     } catch (e) {
       inspect(e);

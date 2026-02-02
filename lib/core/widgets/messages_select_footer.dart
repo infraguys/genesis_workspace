@@ -7,10 +7,12 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 class MessagesSelectFooter extends StatelessWidget {
   final int count;
   final VoidCallback onForward;
+  final VoidCallback onReply;
   const MessagesSelectFooter({
     super.key,
     required this.count,
     required this.onForward,
+    required this.onReply,
   });
 
   @override
@@ -41,7 +43,7 @@ class MessagesSelectFooter extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: count == 0 ? null : () {},
+                      onPressed: count == 0 ? null : onReply,
                       child: Text(
                         context.t.contextMenu.replyCount(
                           n: count,
