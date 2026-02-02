@@ -92,6 +92,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   bool _prioritizeUnmutedUnreadChannels = false;
   Timer? _loadFoldersShortPollingTimer;
   bool _isLoadFoldersInProgress = false;
+  final Set<int> _topicsRefreshInProgress = <int>{};
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -741,6 +742,8 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (kDebugMode) {
         inspect(e);
       }
+    } finally {
+      _topicsRefreshInProgress.remove(streamId);
     }
   }
 
@@ -876,6 +879,16 @@ class MessengerCubit extends Cubit<MessengerState> {
         lastMessageDate: messageDate,
         topics: copiedTopicList,
       );
+      if (updatedChat.type == .channel &&
+          updatedChat.topics != null &&
+          message.subject.isNotEmpty &&
+          !updatedChat.topics!.any((topic) => topic.name == message.subject)) {
+        final streamId = updatedChat.streamId ?? message.streamId;
+        if (streamId != null && !_topicsRefreshInProgress.contains(streamId)) {
+          _topicsRefreshInProgress.add(streamId);
+          unawaited(getChannelTopics(streamId));
+        }
+      }
       if (message.isUnread && !isMyMessage) {
         updatedUnreadMessages.add(message);
         //if message is unread and send in topic

@@ -364,6 +364,12 @@
   "try_again": "Попробовать снова",
   "connecting": "Подключение",
   "my_activity": "Моя активность",
+  "topic": {
+    "newTopic": "Новый топик",
+    "createTopic": "Создать топик",
+    "topicName": "Название топика",
+    "requiredNameError": "Введите название топика"
+  },
   "topic_item": {
     "mute": "Заглушить тему",
     "unmute": "Включить уведомления в теме"

@@ -50,4 +50,13 @@ class TopicEntity extends Equatable {
       unreadMessages: unreadMessages ?? {1, 2},
     );
   }
+
+  factory TopicEntity.newTopic(String name) {
+
+    return TopicEntity(
+      maxId: -1,
+      name: name,
+      unreadMessages: {},
+    );
+  }
 }
