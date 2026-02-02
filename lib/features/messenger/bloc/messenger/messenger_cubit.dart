@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -184,7 +185,17 @@ class MessengerCubit extends Cubit<MessengerState> {
             isMuted: subscription.isMuted,
           );
         }
-        final updatedChat = chat.updateLastMessage(message, isMyMessage: isMyMessage);
+        int? unreadMessageId;
+        if (message.isUnread) {
+          unreadMessageId = chat.firstUnreadMessageId != null
+              ? min(chat.firstUnreadMessageId!, message.id)
+              : message.id;
+        }
+        final updatedChat = chat
+            .updateLastMessage(message, isMyMessage: isMyMessage)
+            .copyWith(
+              firstUnreadMessageId: unreadMessageId,
+            );
         chats[indexOfChat] = updatedChat;
       } else {
         ChatEntity chat = ChatEntity.createChatFromMessage(

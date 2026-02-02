@@ -15,6 +15,7 @@ import 'package:genesis_workspace/core/widgets/message/message_call_body.dart';
 import 'package:genesis_workspace/core/widgets/message/message_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/message_reactions_list.dart';
 import 'package:genesis_workspace/core/widgets/message/message_time.dart';
+import 'package:genesis_workspace/core/widgets/message/selection_indicator.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
@@ -47,6 +48,7 @@ class MessageItem extends StatefulWidget {
     this.isNewDay = false,
     required this.onTapQuote,
     required this.onTapEditMessage,
+    this.isSelectMode = true,
   });
 
   final bool isMyMessage;
@@ -56,6 +58,7 @@ class MessageItem extends StatefulWidget {
   final MessageUIOrder messageOrder;
   final int myUserId;
   final bool isNewDay;
+  final bool isSelectMode;
   final void Function(int messageId, {String? quote}) onTapQuote;
   final Function(UpdateMessageRequestEntity body) onTapEditMessage;
 
@@ -262,9 +265,16 @@ class _MessageItemState extends State<MessageItem> {
     final bool showAvatar = switch (widget.messageOrder) {
       _ when widget.isMyMessage => false,
       _ when widget.isNewDay => true,
+      _ when widget.isSelectMode => false,
       .last || .single || .lastSingle => true,
       _ => false,
     };
+
+    final Widget messageLeading = widget.isSelectMode
+        ? SelectionIndicator(isSelected: false)
+        : const SizedBox(
+            width: 30,
+          );
 
     final bool showSenderName = switch (widget.messageOrder) {
       .first || .single || .lastSingle => true,
@@ -303,11 +313,12 @@ class _MessageItemState extends State<MessageItem> {
               child: Align(
                 alignment: widget.isMyMessage ? .centerRight : .centerLeft,
                 child: Row(
-                  mainAxisSize: .min,
+                  mainAxisSize: widget.isSelectMode ? .max : .min,
                   crossAxisAlignment: .end,
                   spacing: 12,
                   children: [
-                    showAvatar ? avatar : const SizedBox(width: 30),
+                    showAvatar ? avatar : messageLeading,
+                    if (widget.isSelectMode && widget.isMyMessage) Spacer(),
                     Container(
                       padding: const EdgeInsets.all(12),
                       constraints: (showAvatar)
