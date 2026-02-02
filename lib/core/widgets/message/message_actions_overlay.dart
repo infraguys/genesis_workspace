@@ -12,7 +12,7 @@ import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/message/message_actions.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
 
 class MessageActionsOverlay extends StatefulWidget {
   final Offset position;

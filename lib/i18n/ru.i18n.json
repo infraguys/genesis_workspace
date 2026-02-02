@@ -142,7 +142,8 @@
     "something_went_wrong": "Что-то пошло не так",
     "nothing_here_yet": "Здесь пока ничего нет",
     "find": "Найти",
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "cancel": "Отменить"
   },
   "message_actions": {
     "quote": "Цитировать это сообщение",
@@ -312,12 +313,14 @@
   },
   "context_menu": {
     "reply": "Ответить",
+    "reply_count": "Ответить ({n})",
     "edit": "Редактировать",
     "delete": "Удалить",
     "copy": "Копировать",
     "mark_as_important": "Пометить как важное",
     "unmark_as_important": "Убрать из важного",
     "forward": "Переслать",
+    "forward_count": "Переслать ({n})",
     "select": "Выбрать",
     "viewedBy": "Просмотры"
   },

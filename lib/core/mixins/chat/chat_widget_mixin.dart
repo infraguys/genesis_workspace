@@ -18,7 +18,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/services/paste/paste_capture_service.dart';
 import 'package:image_picker/image_picker.dart';

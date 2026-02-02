@@ -30,6 +30,7 @@ class MessagesList extends StatefulWidget {
   final int myUserId;
   final void Function(int messageId, {String? quote})? onTapQuote;
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
+  final bool isSelectMode;
 
   const MessagesList({
     super.key,
@@ -43,6 +44,7 @@ class MessagesList extends StatefulWidget {
     this.onTapQuote,
     this.onTapEditMessage,
     this.onReadAll,
+    this.isSelectMode = false,
   });
 
   @override
@@ -289,6 +291,7 @@ class _MessagesListState extends State<MessagesList> {
                         isNewDay: isNewDay,
                         onTapQuote: widget.onTapQuote ?? (_, {quote}) {},
                         onTapEditMessage: widget.onTapEditMessage ?? (_) {},
+                        isSelectMode: widget.isSelectMode,
                       ),
                     ),
                   );
