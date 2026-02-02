@@ -18,6 +18,7 @@ import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/forward_message/forward_message_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
@@ -31,9 +32,15 @@ part './dialog_chat_item.dart';
 part './dialog_topic_item.dart';
 
 class ForwardMessageDialog extends StatefulWidget {
-  const ForwardMessageDialog({super.key, required this.message, this.quote});
+  const ForwardMessageDialog({
+    super.key,
+    this.message,
+    required this.selectedMessages,
+    this.quote,
+  });
 
-  final MessageEntity message;
+  final MessageEntity? message;
+  final List<MessageEntity> selectedMessages;
   final String? quote;
 
   @override
@@ -93,7 +100,9 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
               Padding(
                 padding: const .fromLTRB(12, 0, 12, 12),
                 child: Text(
-                  context.t.contextMenu.forward,
+                  widget.selectedMessages.isNotEmpty
+                      ? context.t.contextMenu.forwardCount(n: widget.selectedMessages.length)
+                      : context.t.contextMenu.forward,
                   style: textTheme.titleMedium,
                   textAlign: .start,
                 ),
@@ -233,8 +242,9 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
                                 key: ValueKey(chat.id),
                                 chat: chat,
                                 showTopics: true,
-                                messageId: widget.message.id,
+                                messageId: widget.message?.id,
                                 quote: widget.quote,
+                                selectedMessages: widget.selectedMessages,
                               );
                             },
                           ),

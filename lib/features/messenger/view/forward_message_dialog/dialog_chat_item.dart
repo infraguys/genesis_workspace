@@ -1,11 +1,19 @@
 part of './forward_message_dialog.dart';
 
 class _DialogChatItem extends StatefulWidget {
-  const _DialogChatItem({super.key, required this.chat, required this.showTopics, required this.messageId, this.quote});
+  const _DialogChatItem({
+    super.key,
+    required this.chat,
+    required this.showTopics,
+    this.messageId,
+    required this.selectedMessages,
+    this.quote,
+  });
 
   final ChatEntity chat;
   final bool showTopics;
-  final int messageId;
+  final int? messageId;
+  final List<MessageEntity> selectedMessages;
   final String? quote;
 
   @override
@@ -49,14 +57,22 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
                 final chatCubit = context.read<ChatCubit>();
                 final messagesCubit = context.read<MessagesCubit>();
                 try {
-                  final message = await messagesCubit.getMessageById(
-                    messageId: widget.messageId,
-                    applyMarkdown: false,
-                  );
-                  await chatCubit.sendMessage(
-                    content: message.makeForwardedContent(
+                  String content = '';
+                  if (widget.selectedMessages.isNotEmpty) {
+                    final messagesIds = widget.selectedMessages.map((message) => message.id).toList();
+                    final messages = await messagesCubit.getMessagesListByIds(messagesIds: messagesIds);
+                    content = messages.map((message) => message.makeForwardedContent()).join('\n');
+                  } else if (widget.messageId != null) {
+                    final message = await messagesCubit.getMessageById(
+                      messageId: widget.messageId!,
+                      applyMarkdown: false,
+                    );
+                    content = message.makeForwardedContent(
                       quote: widget.quote,
-                    ),
+                    );
+                  }
+                  await chatCubit.sendMessage(
+                    content: content,
                     chatIds: widget.chat.dmIds,
                   );
                   if (context.mounted) {
@@ -208,29 +224,29 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
             ),
           ),
           // if (currentSize(context) > ScreenSize.tablet)
-            AnimatedSize(
-              duration: _animationDuration,
-              curve: _animationCurve,
-              child: _isExpanded
-                  ? Skeletonizer(
-                      enabled: widget.chat.isTopicsLoading,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
-                          return _DialogTopicItem(
-                            chat: widget.chat,
-                            topic: topic,
-                            messageId: widget.messageId,
-                            quote: widget.quote,
-                          );
-                        },
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
+          AnimatedSize(
+            duration: _animationDuration,
+            curve: _animationCurve,
+            child: _isExpanded
+                ? Skeletonizer(
+                    enabled: widget.chat.isTopicsLoading,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
+                        return _DialogTopicItem(
+                          chat: widget.chat,
+                          topic: topic,
+                          messageId: widget.messageId,
+                          quote: widget.quote,
+                        );
+                      },
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );

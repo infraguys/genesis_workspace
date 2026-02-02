@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/mixins/message/forward_message_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/message_body.dart';
@@ -22,13 +23,8 @@ import 'package:genesis_workspace/domain/messages/entities/display_recipient.dar
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
-import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
-import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/forward_message/forward_message_cubit.dart';
-import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
-import 'package:genesis_workspace/features/messenger/view/forward_message_dialog/forward_message_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -69,7 +65,7 @@ class MessageItem extends StatefulWidget {
   State<MessageItem> createState() => _MessageItemState();
 }
 
-class _MessageItemState extends State<MessageItem> {
+class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
   late final GlobalObjectKey messageKey;
   late final MenuController _menuController;
 
@@ -186,36 +182,40 @@ class _MessageItemState extends State<MessageItem> {
     await Clipboard.setData(ClipboardData(text: message.content));
   }
 
-  void onForward() async {
-    _closeOverlay();
-    _menuController.close();
-
-    if (!mounted) return;
-
-    final chatCubit = context.read<ChatCubit>();
-    final channelChatCubit = context.read<ChannelChatCubit>();
-    final messagesCubit = context.read<MessagesCubit>();
-    final messengerCubit = context.read<MessengerCubit>();
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: chatCubit),
-            BlocProvider.value(value: channelChatCubit),
-            BlocProvider.value(value: messagesCubit),
-            BlocProvider.value(value: messengerCubit),
-            BlocProvider(create: (_) => ForwardMessageCubit()),
-          ],
-          child: ForwardMessageDialog(
-            message: widget.message,
-            quote: selectedText.isNotEmpty ? selectedText : null,
-          ),
-        );
-      },
-    );
-  }
+  // void onForward() async {
+  //   _closeOverlay();
+  //   _menuController.close();
+  //
+  //   if (!mounted) return;
+  //
+  //   final chatCubit = context.read<ChatCubit>();
+  //   final channelChatCubit = context.read<ChannelChatCubit>();
+  //   final messagesCubit = context.read<MessagesCubit>();
+  //   final messengerCubit = context.read<MessengerCubit>();
+  //   final messagesSelectCubit = context.read<MessagesSelectCubit>();
+  //
+  //   final selectedMessages = messagesSelectCubit.state.selectedMessages;
+  //
+  //   await showDialog(
+  //     context: context,
+  //     builder: (BuildContext dialogContext) {
+  //       return MultiBlocProvider(
+  //         providers: [
+  //           BlocProvider.value(value: chatCubit),
+  //           BlocProvider.value(value: channelChatCubit),
+  //           BlocProvider.value(value: messagesCubit),
+  //           BlocProvider.value(value: messengerCubit),
+  //           BlocProvider(create: (_) => ForwardMessageCubit()),
+  //         ],
+  //         child: ForwardMessageDialog(
+  //           message: widget.message,
+  //           selectedMessages: selectedMessages,
+  //           quote: selectedText.isNotEmpty ? selectedText : null,
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   void _closeOverlay() {
     _menuEntry?.remove();
@@ -247,7 +247,17 @@ class _MessageItemState extends State<MessageItem> {
           onDelete: widget.isMyMessage ? handleDeleteMessage : null,
           onEmojiSelected: (emoji) async => await handleEmojiSelected(emoji),
           onClose: _closeOverlay,
-          onForward: onForward,
+          onForward: () {
+            onForward(
+              context,
+              closeOverlay: () {
+                _closeOverlay();
+                _menuController.close();
+              },
+              message: widget.message,
+              quote: selectedText.isNotEmpty ? selectedText : null,
+            );
+          },
           onSelect: onSelect,
         );
       },
@@ -322,7 +332,7 @@ class _MessageItemState extends State<MessageItem> {
                 if (event.kind == .mouse && event.buttons == kPrimaryMouseButton && widget.isSelectMode) {
                   context.read<MessagesSelectCubit>().toggleMessageSelection(widget.message);
                 }
-                if (event.kind == .mouse && event.buttons == kSecondaryMouseButton) {
+                if (event.kind == .mouse && event.buttons == kSecondaryMouseButton && !widget.isSelectMode) {
                   _openContextMenu(context, event.position);
                 }
               },

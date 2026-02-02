@@ -2,32 +2,35 @@ import 'package:genesis_workspace/data/messages/dto/messages_request_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 
 class MessagesRequestEntity {
-  final MessageAnchor anchor;
+  final MessageAnchor? anchor;
   final List<MessageNarrowEntity>? narrow;
   final int? numBefore;
   final int? numAfter;
   final bool applyMarkdown;
   final bool clientGravatar;
   final bool includeAnchor;
+  final List<int>? messageIds;
 
   MessagesRequestEntity({
-    required this.anchor,
+    this.anchor,
     this.narrow,
     this.numBefore,
     this.numAfter,
     this.applyMarkdown = true,
     this.clientGravatar = false,
     this.includeAnchor = true,
+    this.messageIds,
   });
 
   MessagesRequestDto toDto() => MessagesRequestDto(
-    anchor: anchor.toJson(),
+    anchor: anchor?.toJson(),
     narrow: narrow?.map((e) => e.toDto()).toList(),
     numBefore: numBefore,
     numAfter: numAfter,
     applyMarkdown: applyMarkdown,
     clientGravatar: clientGravatar,
     includeAnchor: includeAnchor,
+    messageIds: messageIds,
   );
 }
 

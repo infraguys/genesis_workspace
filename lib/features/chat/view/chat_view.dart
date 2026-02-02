@@ -12,6 +12,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
+import 'package:genesis_workspace/core/mixins/message/forward_message_mixin.dart';
 import 'package:genesis_workspace/core/shortcuts/cancel_select_mode_intent.dart';
 import 'package:genesis_workspace/core/shortcuts/unselect_chat_shortcut.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -66,7 +67,8 @@ class ChatView extends StatefulWidget {
   State<ChatView> createState() => _ChatViewState();
 }
 
-class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver {
+class _ChatViewState extends State<ChatView>
+    with ChatWidgetMixin<ChatCubit, ChatView>, WidgetsBindingObserver, ForwardMessageMixin {
   late final Future _future;
   late final ScrollController _controller;
   late final UserEntity _myUser;
@@ -83,6 +85,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
       myUserId: _myUser.userId,
       unreadMessagesCount: widget.unreadMessagesCount,
     );
+    context.read<MessagesSelectCubit>().setSelectMode(false);
     _controller = ScrollController();
     messageController = ChatTextEditingController();
     messageController
@@ -249,7 +252,7 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                               backgroundColor: theme.colorScheme.surface,
                               surfaceTintColor: Colors.transparent,
                               automaticallyImplyLeading: false,
-                              title: Text("Selected ($selectedCount)"),
+                              title: Text(context.t.selectedCount(n: selectedCount)),
                               actions: [
                                 TextButton.icon(
                                   onPressed: () {
@@ -552,6 +555,9 @@ class _ChatViewState extends State<ChatView> with ChatWidgetMixin<ChatCubit, Cha
                                 key: const ValueKey<String>('select-footer'),
                                 child: MessagesSelectFooter(
                                   count: selectedCount,
+                                  onForward: () async {
+                                    await onForward(context);
+                                  },
                                 ),
                               ),
                               secondChild: KeyedSubtree(

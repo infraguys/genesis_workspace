@@ -4,14 +4,14 @@ class MessagesResponseEntity {
   final String msg;
   final String result;
   final List<MessageEntity> messages;
-  final int anchor;
+  final int? anchor;
   final bool foundOldest;
 
   MessagesResponseEntity({
     required this.msg,
     required this.result,
     required this.messages,
-    required this.anchor,
+    this.anchor,
     required this.foundOldest,
   });
 }
