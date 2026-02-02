@@ -9,7 +9,7 @@ class MessagesResponseDto {
   final String msg;
   final String result;
   final List<MessageDto> messages;
-  final int anchor;
+  final int? anchor;
   @JsonKey(name: 'found_oldest')
   final bool foundOldest;
 
@@ -17,12 +17,11 @@ class MessagesResponseDto {
     required this.result,
     required this.msg,
     required this.messages,
-    required this.anchor,
+    this.anchor,
     required this.foundOldest,
   });
 
-  factory MessagesResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$MessagesResponseDtoFromJson(json);
+  factory MessagesResponseDto.fromJson(Map<String, dynamic> json) => _$MessagesResponseDtoFromJson(json);
 
   MessagesResponseEntity toEntity() => MessagesResponseEntity(
     msg: msg,

@@ -6,7 +6,7 @@ part 'messages_request_dto.g.dart';
 
 @JsonSerializable()
 class MessagesRequestDto {
-  final String anchor;
+  final String? anchor;
 
   final List<MessageNarrowDto>? narrow;
 
@@ -16,15 +16,17 @@ class MessagesRequestDto {
   final bool applyMarkdown;
   final bool clientGravatar;
   final bool includeAnchor;
+  final List<int>? messageIds;
 
   MessagesRequestDto({
-    required this.anchor,
+    this.anchor,
     this.narrow,
     this.numBefore,
     this.numAfter,
     this.applyMarkdown = true,
     this.clientGravatar = false,
     this.includeAnchor = true,
+    this.messageIds,
   });
 
   factory MessagesRequestDto.fromJson(Map<String, dynamic> json) => _$MessagesRequestDtoFromJson(json);
@@ -37,5 +39,6 @@ class MessagesRequestDto {
     "apply_markdown": applyMarkdown,
     "client_gravatar": clientGravatar,
     "include_anchor": includeAnchor,
+    "message_ids": messageIds,
   };
 }

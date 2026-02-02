@@ -6,7 +6,12 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessagesSelectFooter extends StatelessWidget {
   final int count;
-  const MessagesSelectFooter({super.key, required this.count});
+  final VoidCallback onForward;
+  const MessagesSelectFooter({
+    super.key,
+    required this.count,
+    required this.onForward,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,7 @@ class MessagesSelectFooter extends StatelessWidget {
                   spacing: 12,
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: count == 0 ? null : onForward,
                       child: Text(
                         context.t.contextMenu.forwardCount(
                           n: count,
@@ -36,7 +41,7 @@ class MessagesSelectFooter extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: count == 0 ? null : () {},
                       child: Text(
                         context.t.contextMenu.replyCount(
                           n: count,

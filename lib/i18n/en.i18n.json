@@ -359,5 +359,6 @@
   "topic_item": {
     "mute": "Mute topic",
     "unmute": "Unmute topic"
-  }
+  },
+  "selected_count": "Selected ({n})"
 }

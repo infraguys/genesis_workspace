@@ -145,6 +145,24 @@ class MessagesCubit extends Cubit<MessagesState> {
     }
   }
 
+  Future<List<MessageEntity>> getMessagesListByIds({
+    required List<int> messagesIds,
+    bool? applyMarkdown = true,
+  }) async {
+    try {
+      final body = MessagesRequestEntity(
+        applyMarkdown: false,
+        messageIds: messagesIds,
+      );
+      final response = await _getMessagesUseCase.call(body);
+      inspect(response);
+      return response.messages;
+    } catch (e) {
+      inspect(e);
+      rethrow;
+    }
+  }
+
   _onMessageEvents(MessageEventEntity event) {
     final messages = [...state.messages];
     messages.add(event.message.copyWith(flags: event.flags));

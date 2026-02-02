@@ -36,6 +36,8 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final bool applyMarkdown = body.applyMarkdown;
       final bool clientGravatar = body.clientGravatar;
       final bool includeAnchor = body.includeAnchor;
+      // final String? messageIds = "[${body.messageIds?.join(',')}]";
+      final String? messageIds = jsonEncode(body.messageIds);
 
       return await apiClient.getMessages(
         anchor,
@@ -45,6 +47,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
         applyMarkdown,
         clientGravatar,
         includeAnchor,
+        messageIds,
       );
     } catch (e) {
       rethrow;
