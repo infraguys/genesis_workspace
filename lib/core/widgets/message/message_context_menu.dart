@@ -20,6 +20,7 @@ class MessageContextMenu extends StatefulWidget {
     this.onDelete,
     this.onClose,
     this.onForward,
+    this.onSelect,
     required this.offset,
     required this.isMyMessage,
     required this.messageId,
@@ -34,6 +35,7 @@ class MessageContextMenu extends StatefulWidget {
   final VoidCallback? onDelete;
   final ValueChanged<String> onEmojiSelected;
   final VoidCallback? onClose;
+  final VoidCallback? onSelect;
   final Offset offset;
   final bool isMyMessage;
   final int messageId;
@@ -79,6 +81,11 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
 
   void _onEmojiSelected(String value) {
     widget.onEmojiSelected(value);
+    _close();
+  }
+
+  void _onSelect() {
+    widget.onSelect?.call();
     _close();
   }
 
@@ -225,11 +232,12 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                         label: context.t.contextMenu.delete,
                         onTap: _onDelete,
                       ),
-                    // _ActionTile(
-                    //   textColor: textColor,
-                    //   icon: Assets.icons.checkCircleIcon,
-                    //   label: context.t.contextMenu.select,
-                    // ),
+                    _ActionTile(
+                      textColor: textColor,
+                      icon: Assets.icons.checkCircle,
+                      label: context.t.contextMenu.select,
+                      onTap: _onSelect,
+                    ),
                   ],
                 );
               },
