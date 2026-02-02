@@ -182,41 +182,6 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
     await Clipboard.setData(ClipboardData(text: message.content));
   }
 
-  // void onForward() async {
-  //   _closeOverlay();
-  //   _menuController.close();
-  //
-  //   if (!mounted) return;
-  //
-  //   final chatCubit = context.read<ChatCubit>();
-  //   final channelChatCubit = context.read<ChannelChatCubit>();
-  //   final messagesCubit = context.read<MessagesCubit>();
-  //   final messengerCubit = context.read<MessengerCubit>();
-  //   final messagesSelectCubit = context.read<MessagesSelectCubit>();
-  //
-  //   final selectedMessages = messagesSelectCubit.state.selectedMessages;
-  //
-  //   await showDialog(
-  //     context: context,
-  //     builder: (BuildContext dialogContext) {
-  //       return MultiBlocProvider(
-  //         providers: [
-  //           BlocProvider.value(value: chatCubit),
-  //           BlocProvider.value(value: channelChatCubit),
-  //           BlocProvider.value(value: messagesCubit),
-  //           BlocProvider.value(value: messengerCubit),
-  //           BlocProvider(create: (_) => ForwardMessageCubit()),
-  //         ],
-  //         child: ForwardMessageDialog(
-  //           message: widget.message,
-  //           selectedMessages: selectedMessages,
-  //           quote: selectedText.isNotEmpty ? selectedText : null,
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void _closeOverlay() {
     _menuEntry?.remove();
     _menuEntry = null;
