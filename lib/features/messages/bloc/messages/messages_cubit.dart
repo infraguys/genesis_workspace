@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
@@ -155,10 +156,11 @@ class MessagesCubit extends Cubit<MessagesState> {
         messageIds: messagesIds,
       );
       final response = await _getMessagesUseCase.call(body);
-      inspect(response);
       return response.messages;
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
       rethrow;
     }
   }
