@@ -26,6 +26,7 @@ import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart'
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
+import 'package:genesis_workspace/core/widgets/messages_select_app_bar.dart';
 import 'package:genesis_workspace/core/widgets/messages_select_footer.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -269,22 +270,8 @@ class _ChatViewState extends State<ChatView>
                     resizeToAvoidBottomInset: false,
                     appBar: AppBarContainer(
                       appBar: isSelectMode
-                          ? AppBar(
-                              primary: isTabletOrSmaller,
-                              backgroundColor: theme.colorScheme.surface,
-                              surfaceTintColor: Colors.transparent,
-                              automaticallyImplyLeading: false,
-                              title: Text(context.t.selectedCount(n: selectedCount)),
-                              actions: [
-                                TextButton.icon(
-                                  onPressed: () {
-                                    context.read<MessagesSelectCubit>().setSelectMode(false);
-                                  },
-                                  label: Text(context.t.general.cancel),
-                                  icon: Icon(Icons.cancel_outlined),
-                                  iconAlignment: .end,
-                                ),
-                              ],
+                          ? MessagesSelectAppBar(
+                              selectedCount: selectedCount,
                             )
                           : AppBar(
                               primary: isTabletOrSmaller,

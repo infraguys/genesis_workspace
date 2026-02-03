@@ -148,11 +148,11 @@ class MessagesCubit extends Cubit<MessagesState> {
 
   Future<List<MessageEntity>> getMessagesListByIds({
     required List<int> messagesIds,
-    bool? applyMarkdown = true,
+    bool applyMarkdown = true,
   }) async {
     try {
       final body = MessagesRequestEntity(
-        applyMarkdown: false,
+        applyMarkdown: applyMarkdown,
         messageIds: messagesIds,
       );
       final response = await _getMessagesUseCase.call(body);

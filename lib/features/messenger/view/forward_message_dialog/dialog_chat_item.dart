@@ -54,13 +54,15 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
           InkWell(
             onTap: () async {
               if (widget.chat.type != .channel) {
-                final chatCubit = context.read<ChatCubit>();
                 final messagesCubit = context.read<MessagesCubit>();
                 try {
                   final List<MessageEntity> forwardMessages = [];
                   if (widget.selectedMessages.isNotEmpty) {
                     final messagesIds = widget.selectedMessages.map((message) => message.id).toList();
-                    final messages = await messagesCubit.getMessagesListByIds(messagesIds: messagesIds);
+                    final messages = await messagesCubit.getMessagesListByIds(
+                      messagesIds: messagesIds,
+                      applyMarkdown: false,
+                    );
                     forwardMessages.addAll(messages);
                   } else if (widget.messageId != null) {
                     final message = await messagesCubit.getMessageById(

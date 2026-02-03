@@ -27,6 +27,7 @@ import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart'
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
+import 'package:genesis_workspace/core/widgets/messages_select_app_bar.dart';
 import 'package:genesis_workspace/core/widgets/messages_select_footer.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
@@ -77,6 +78,34 @@ class _ChannelChatViewState extends State<ChannelChatView>
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
   DraftEntity? draftForThisChat;
+
+  Future<void> sendMessage({
+    required int streamId,
+    String? topicName,
+    required List<MessageEntity> selectedMessages,
+  }) async {
+    final messageContent = messageController.text;
+    messageController.clear();
+    final forwardMessages = selectedMessages;
+    final forwardContent = forwardMessages.map((message) => message.makeForwardedContent()).join('\n');
+    final content = '$forwardContent\n$messageContent';
+    try {
+      await context.read<ChannelChatCubit>().sendMessage(
+        streamId: streamId,
+        content: content,
+        topic: topicName,
+      );
+      context.read<MessagesSelectCubit>().clearForwardMessages();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    } finally {
+      if (platformInfo.isDesktop) {
+        messageInputFocusNode.requestFocus();
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -294,23 +323,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                     appBar: AppBarContainer(
                       size: Size.fromHeight(106),
                       appBar: isSelectMode
-                          ? AppBar(
-                              primary: isTabletOrSmaller,
-                              backgroundColor: theme.colorScheme.surface,
-                              surfaceTintColor: Colors.transparent,
-                              automaticallyImplyLeading: false,
-                              title: Text(context.t.selectedCount(n: selectedCount)),
-                              actions: [
-                                TextButton.icon(
-                                  onPressed: () {
-                                    context.read<MessagesSelectCubit>().setSelectMode(false);
-                                  },
-                                  label: Text(context.t.general.cancel),
-                                  icon: Icon(Icons.cancel_outlined),
-                                  iconAlignment: .end,
-                                ),
-                              ],
-                            )
+                          ? MessagesSelectAppBar(selectedCount: selectedCount)
                           : AppBar(
                               toolbarHeight: isTabletOrSmaller ? 76 : null,
                               primary: isTabletOrSmaller,
@@ -576,9 +589,14 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
                                     final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
                                     final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
+                                    final bool canSendByForwardMessages =
+                                        messagesSelectState.selectedMessages.isNotEmpty;
 
                                     final bool isSendEnabled =
-                                        canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                                        canSendByTextOnly ||
+                                        canSendByFilesOnly ||
+                                        canSendByTextAndFiles ||
+                                        canSendByForwardMessages;
 
                                     final bool isEditEnabled = isSendEnabled || state.isEdited;
 
@@ -684,24 +702,14 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                                       return false;
                                                     },
                                                     onSend: isSendEnabled
-                                                        ? () async {
-                                                            final content = messageController.text;
-                                                            messageController.clear();
-                                                            try {
-                                                              await context.read<ChannelChatCubit>().sendMessage(
+                                                        ? () {
+                                                            unawaited(
+                                                              sendMessage(
                                                                 streamId: state.channel!.streamId,
-                                                                content: content,
-                                                                topic: state.topic?.name,
-                                                              );
-                                                            } catch (e) {
-                                                              if (kDebugMode) {
-                                                                inspect(e);
-                                                              }
-                                                            } finally {
-                                                              if (platformInfo.isDesktop) {
-                                                                messageInputFocusNode.requestFocus();
-                                                              }
-                                                            }
+                                                                selectedMessages: messagesSelectState.selectedMessages,
+                                                                topicName: state.topic?.name,
+                                                              ),
+                                                            );
                                                           }
                                                         : null,
                                                     onEdit: isEditEnabled

@@ -23,28 +23,26 @@ class _DialogTopicItem extends StatelessWidget with OpenChatMixin {
       onTap: () async {
         final router = GoRouter.of(context);
         final messagesCubit = context.read<MessagesCubit>();
-        final channelChatCubit = context.read<ChannelChatCubit>();
         final messageSelectCubit = context.read<MessagesSelectCubit>();
         final selectedMessages = messageSelectCubit.state.selectedMessages;
         try {
-          String content = '';
+          final List<MessageEntity> forwardMessages = [];
           if (selectedMessages.isNotEmpty) {
             final messagesIds = selectedMessages.map((message) => message.id).toList();
-            final messages = await messagesCubit.getMessagesListByIds(messagesIds: messagesIds);
-            content = messages.map((message) => message.makeForwardedContent()).join('\n');
+            final messages = await messagesCubit.getMessagesListByIds(
+              messagesIds: messagesIds,
+              applyMarkdown: false,
+            );
+            forwardMessages.addAll(messages);
           } else if (messageId != null) {
             final message = await messagesCubit.getMessageById(
               messageId: messageId!,
               applyMarkdown: false,
             );
-            content = message.makeForwardedContent(quote: quote);
+            forwardMessages.add(message);
           }
-          channelChatCubit.sendMessage(
-            streamId: chat.streamId!,
-            topic: topic.name,
-            content: content,
-          );
           if (context.mounted) {
+            context.read<MessagesSelectCubit>().setForwardMessages(forwardMessages);
             openChannel(context, channelId: chat.streamId!, topicName: topic.name, replace: true);
           }
         } on DioException catch (e) {

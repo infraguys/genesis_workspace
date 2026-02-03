@@ -358,7 +358,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                             bottomLeft: (!widget.isMyMessage && showAvatar) ? .zero : null,
                           ),
                         ),
-                        foregroundDecoration: widget.isSelected
+                        foregroundDecoration: (widget.isSelected && widget.isSelectMode)
                             ? BoxDecoration(
                                 color: messageColors.selectedMessageForeground,
                                 borderRadius: BorderRadius.circular(8).copyWith(
