@@ -79,6 +79,11 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
 
   String selectedText = '';
 
+  Offset? _touchDownPosition;
+  bool _touchMoved = false;
+
+  static const double _tapSlop = 6.0;
+
   onSelectedTextChanged(String value) {
     selectedText = value;
   }
@@ -188,6 +193,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
   }
 
   void _openContextMenu(BuildContext context, Offset globalPosition) {
+    HapticFeedback.mediumImpact();
     _closeOverlay();
 
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -289,17 +295,47 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
             child: Listener(
               behavior: widget.isSelectMode ? .translucent : .deferToChild,
               onPointerDown: (event) {
-                //Mobile toggle select
-                if (event.kind == .touch && event.buttons == kPrimaryMouseButton && widget.isSelectMode) {
-                  context.read<MessagesSelectCubit>().toggleMessageSelection(widget.message);
-                }
-                //Desktop toggle select
-                if (event.kind == .mouse && event.buttons == kPrimaryMouseButton && widget.isSelectMode) {
-                  context.read<MessagesSelectCubit>().toggleMessageSelection(widget.message);
-                }
-                if (event.kind == .mouse && event.buttons == kSecondaryMouseButton && !widget.isSelectMode) {
+                final isMouse = event.kind == PointerDeviceKind.mouse;
+                final isRightClick = isMouse && event.buttons == kSecondaryMouseButton;
+
+                // ✅ Desktop context menu
+                if (isRightClick && !widget.isSelectMode) {
                   _openContextMenu(context, event.position);
+                  return;
                 }
+
+                // ✅ Mobile tap-detection for select-mode
+                if (!widget.isSelectMode) return;
+                if (event.kind != PointerDeviceKind.touch) return;
+                if (event.buttons != kPrimaryMouseButton) return;
+
+                _touchDownPosition = event.position;
+                _touchMoved = false;
+              },
+              onPointerMove: (event) {
+                if (!widget.isSelectMode) return;
+                if (_touchDownPosition == null) return;
+
+                final movedDistance = (event.position - _touchDownPosition!).distance;
+                if (movedDistance > _tapSlop) {
+                  _touchMoved = true;
+                }
+              },
+              onPointerUp: (event) {
+                if (!widget.isSelectMode) return;
+                if (event.kind != PointerDeviceKind.touch) return;
+                if (event.buttons != 0) return; // up
+
+                if (!_touchMoved) {
+                  context.read<MessagesSelectCubit>().toggleMessageSelection(widget.message);
+                }
+
+                _touchDownPosition = null;
+                _touchMoved = false;
+              },
+              onPointerCancel: (_) {
+                _touchDownPosition = null;
+                _touchMoved = false;
               },
               child: GestureDetector(
                 onLongPressStart: (details) {
@@ -333,7 +369,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                             bottomLeft: (!widget.isMyMessage && showAvatar) ? .zero : null,
                           ),
                         ),
-                        foregroundDecoration: widget.isSelected
+                        foregroundDecoration: (widget.isSelected && widget.isSelectMode)
                             ? BoxDecoration(
                                 color: messageColors.selectedMessageForeground,
                                 borderRadius: BorderRadius.circular(8).copyWith(

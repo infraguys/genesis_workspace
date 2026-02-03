@@ -26,6 +26,7 @@ import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart'
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
+import 'package:genesis_workspace/core/widgets/messages_select_app_bar.dart';
 import 'package:genesis_workspace/core/widgets/messages_select_footer.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -75,6 +76,28 @@ class _ChatViewState extends State<ChatView>
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
   DraftEntity? draftForThisChat;
+
+  Future<void> sendMessage({required List<MessageEntity> selectedMessages}) async {
+    final messageContent = messageController.text;
+    messageController.clear();
+    final forwardMessages = selectedMessages;
+    final forwardContent = forwardMessages.map((message) => message.makeForwardedContent()).join('\n');
+    final content = '$forwardContent\n$messageContent';
+    try {
+      await context.read<ChatCubit>().sendMessage(
+        content: content,
+      );
+      context.read<MessagesSelectCubit>().clearForwardMessages();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    } finally {
+      if (platformInfo.isDesktop) {
+        messageInputFocusNode.requestFocus();
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -227,7 +250,7 @@ class _ChatViewState extends State<ChatView>
 
         return BlocBuilder<MessagesSelectCubit, MessagesSelectState>(
           builder: (context, messagesSelectState) {
-            final bool isSelectMode = messagesSelectState is MessagesSelectStateActive;
+            final bool isSelectMode = messagesSelectState.isActive;
             final int selectedCount = messagesSelectState.selectedMessages.length;
             final selectedMessages = messagesSelectState.selectedMessages;
             return Shortcuts(
@@ -247,22 +270,8 @@ class _ChatViewState extends State<ChatView>
                     resizeToAvoidBottomInset: false,
                     appBar: AppBarContainer(
                       appBar: isSelectMode
-                          ? AppBar(
-                              primary: isTabletOrSmaller,
-                              backgroundColor: theme.colorScheme.surface,
-                              surfaceTintColor: Colors.transparent,
-                              automaticallyImplyLeading: false,
-                              title: Text(context.t.selectedCount(n: selectedCount)),
-                              actions: [
-                                TextButton.icon(
-                                  onPressed: () {
-                                    context.read<MessagesSelectCubit>().setSelectMode(false);
-                                  },
-                                  label: Text(context.t.general.cancel),
-                                  icon: Icon(Icons.cancel_outlined),
-                                  iconAlignment: .end,
-                                ),
-                              ],
+                          ? MessagesSelectAppBar(
+                              selectedCount: selectedCount,
                             )
                           : AppBar(
                               primary: isTabletOrSmaller,
@@ -525,7 +534,7 @@ class _ChatViewState extends State<ChatView>
                                                       );
                                                     }
                                                   },
-                                                  isSelectMode: messagesSelectState is MessagesSelectStateActive,
+                                                  isSelectMode: messagesSelectState.isActive,
                                                   selectedMessages: selectedMessages,
                                                 ),
                                                 Positioned(
@@ -639,9 +648,14 @@ class _ChatViewState extends State<ChatView>
                                       final bool canSendByTextOnly = hasText && !hasFiles && !hasUploadingFiles;
                                       final bool canSendByFilesOnly = !hasText && hasFiles && !hasUploadingFiles;
                                       final bool canSendByTextAndFiles = hasText && hasFiles && !hasUploadingFiles;
+                                      final bool canSendByForwardMessages =
+                                          messagesSelectState.selectedMessages.isNotEmpty;
 
                                       final bool isSendEnabled =
-                                          canSendByTextOnly || canSendByFilesOnly || canSendByTextAndFiles;
+                                          canSendByTextOnly ||
+                                          canSendByFilesOnly ||
+                                          canSendByTextAndFiles ||
+                                          canSendByForwardMessages;
                                       final bool isEditEnabled = isSendEnabled || state.isEdited;
 
                                       return Actions(
@@ -735,22 +749,12 @@ class _ChatViewState extends State<ChatView>
                                                   return false;
                                                 },
                                                 onSend: isSendEnabled
-                                                    ? () async {
-                                                        final content = messageController.text;
-                                                        messageController.clear();
-                                                        try {
-                                                          await context.read<ChatCubit>().sendMessage(
-                                                            content: content,
-                                                          );
-                                                        } catch (e) {
-                                                          if (kDebugMode) {
-                                                            inspect(e);
-                                                          }
-                                                        } finally {
-                                                          if (platformInfo.isDesktop) {
-                                                            messageInputFocusNode.requestFocus();
-                                                          }
-                                                        }
+                                                    ? () {
+                                                        unawaited(
+                                                          sendMessage(
+                                                            selectedMessages: messagesSelectState.selectedMessages,
+                                                          ),
+                                                        );
                                                       }
                                                     : null,
                                                 onEdit: isEditEnabled

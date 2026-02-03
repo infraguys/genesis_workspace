@@ -50,7 +50,7 @@ abstract class MessagesApiClient {
   @FormUrlEncoded()
   @PATCH('/messages/{message_id}')
   Future<UpdateMessageResponseDto> updateMessage({
-    @Field('message_id') required int messageId,
+    @Path('message_id') required int messageId,
     @Field("content") required String content,
   });
 

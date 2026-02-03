@@ -6,13 +6,23 @@ part 'messages_select_state.dart';
 
 @injectable
 class MessagesSelectCubit extends Cubit<MessagesSelectState> {
-  MessagesSelectCubit() : super(MessagesSelectStateDisabled());
+  MessagesSelectCubit()
+    : super(
+        MessagesSelectState(
+          selectedMessages: [],
+          isActive: false,
+        ),
+      );
 
   void setSelectMode(bool isActive, {MessageEntity? selectedMessage}) {
+    assert(
+      !isActive || selectedMessage != null,
+      'selectedMessage must not be null when select mode is active',
+    );
     if (isActive) {
-      emit(MessagesSelectStateActive(messages: [selectedMessage!]));
+      emit(state.copyWith(selectedMessages: [selectedMessage!], isActive: true));
     } else {
-      emit(MessagesSelectStateDisabled());
+      emit(state.copyWith(isActive: false));
     }
   }
 
@@ -28,6 +38,14 @@ class MessagesSelectCubit extends Cubit<MessagesSelectState> {
       updatedSelectedMessages.add(message);
     }
 
-    emit(MessagesSelectStateActive(messages: updatedSelectedMessages));
+    emit(state.copyWith(selectedMessages: updatedSelectedMessages, isActive: true));
+  }
+
+  void setForwardMessages(List<MessageEntity> messages) {
+    emit(state.copyWith(selectedMessages: messages, isActive: false));
+  }
+
+  void clearForwardMessages() {
+    emit(state.copyWith(selectedMessages: [], isActive: false));
   }
 }
