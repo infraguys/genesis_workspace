@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
@@ -16,7 +17,10 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
+import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/create_chat/create_topic_dialog.dart';
 import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/features/messenger/view/topic_item.dart';
@@ -138,6 +142,20 @@ class _ChatItemState extends State<ChatItem> {
             onReadAll: () async {
               _closeOverlay();
               await context.read<MessengerCubit>().readAllMessages(widget.chat.id);
+            },
+            onCreateTopic: () async {
+              _closeOverlay();
+              await showDialog(
+              context: context,
+              builder: (_) {
+                return MultiBlocProvider(
+                  providers: [
+                    BlocProvider(create: (_) => getIt<CreateChatCubit>()),
+                  ],
+                  child: CreateTopicDialog(channelId: widget.chat.streamId),
+                );
+              },
+              );
             },
           ),
         );
@@ -418,6 +436,7 @@ class _ChatContextMenu extends StatelessWidget {
     required this.onAddToFolder,
     required this.onTogglePin,
     required this.onReadAll,
+    required this.onCreateTopic,
     this.onToggleMute,
   });
 
@@ -427,6 +446,7 @@ class _ChatContextMenu extends StatelessWidget {
   final VoidCallback onTogglePin;
   final VoidCallback? onToggleMute;
   final VoidCallback onReadAll;
+  final VoidCallback onCreateTopic;
 
   @override
   Widget build(BuildContext context) {
@@ -442,8 +462,8 @@ class _ChatContextMenu extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
         children: [
           _ChatContextMenuAction(
             textColor: textColor,
@@ -452,7 +472,6 @@ class _ChatContextMenu extends StatelessWidget {
             label: context.t.folders.addToFolder,
             onTap: onAddToFolder,
           ),
-          const SizedBox(height: 4),
           _ChatContextMenuAction(
             textColor: textColor,
             icon: Assets.icons.pinned,
@@ -461,7 +480,6 @@ class _ChatContextMenu extends StatelessWidget {
             onTap: onTogglePin,
           ),
           if (onToggleMute != null) ...[
-            const SizedBox(height: 4),
             _ChatContextMenuAction(
               textColor: textColor,
               icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
@@ -470,13 +488,19 @@ class _ChatContextMenu extends StatelessWidget {
               onTap: onToggleMute,
             ),
           ],
-          const SizedBox(height: 4),
           _ChatContextMenuAction(
             textColor: textColor,
             icon: Assets.icons.readReceipt,
             iconColor: iconColor,
             label: context.t.readAllMessages,
             onTap: onReadAll,
+          ),
+          _ChatContextMenuAction(
+            textColor: textColor,
+            icon: Assets.icons.allChats,
+            iconColor: iconColor,
+            label: context.t.topic.createTopic,
+            onTap: onCreateTopic,
           ),
         ],
       ),

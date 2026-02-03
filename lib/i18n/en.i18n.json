@@ -361,6 +361,12 @@
   "try_again": "Try again",
   "connecting": "Connecting",
   "my_activity": "My activity",
+  "topic": {
+    "newTopic": "New topic",
+    "createTopic": "Create topic",
+    "topicName": "Topic name",
+    "requiredNameError": "Enter topic name"
+  },
   "topic_item": {
     "mute": "Mute topic",
     "unmute": "Unmute topic"
