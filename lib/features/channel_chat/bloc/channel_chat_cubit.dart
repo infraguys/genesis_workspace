@@ -256,9 +256,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         emit(state.copyWith(topic: topic));
       } else {
         final response = await _getTopicsUseCase.call(streamId);
-        final topic = response
-            .where((topic) => topicName == topic.name)
-            .firstOrNull;
+        final topic = response.where((topic) => topicName == topic.name).firstOrNull;
         emit(state.copyWith(topic: topic));
       }
     } catch (e) {

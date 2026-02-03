@@ -146,15 +146,15 @@ class _ChatItemState extends State<ChatItem> {
             onCreateTopic: () async {
               _closeOverlay();
               await showDialog(
-              context: context,
-              builder: (_) {
-                return MultiBlocProvider(
-                  providers: [
-                    BlocProvider(create: (_) => getIt<CreateChatCubit>()),
-                  ],
-                  child: CreateTopicDialog(channelId: widget.chat.streamId),
-                );
-              },
+                context: context,
+                builder: (_) {
+                  return MultiBlocProvider(
+                    providers: [
+                      BlocProvider(create: (_) => getIt<CreateChatCubit>()),
+                    ],
+                    child: CreateTopicDialog(channelId: widget.chat.streamId),
+                  );
+                },
               );
             },
           ),

@@ -18,7 +18,7 @@ class CreateTopicDialog extends StatefulWidget {
 }
 
 class _CreateTopicDialogState extends State<CreateTopicDialog> with OpenChatMixin {
-  final  _nameController = TextEditingController();
+  final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late final int _maxNameLength;
 
@@ -103,7 +103,7 @@ class _CreateTopicDialogState extends State<CreateTopicDialog> with OpenChatMixi
                       ),
                       FilledButton(
                         onPressed: () {
-                          if(_formKey.currentState!.validate()) {
+                          if (_formKey.currentState!.validate()) {
                             context.pop();
                             openChannel(context, channelId: widget.channelId!, topicName: _nameController.text);
                           }

@@ -52,7 +52,6 @@ class TopicEntity extends Equatable {
   }
 
   factory TopicEntity.newTopic(String name) {
-
     return TopicEntity(
       maxId: -1,
       name: name,
