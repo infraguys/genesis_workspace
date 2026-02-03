@@ -234,11 +234,11 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     context.read<MessagesSelectCubit>().setSelectMode(false);
     try {
       context.read<TChatCubit>().setIsMessagePending(true);
-      final messages = await context.read<MessagesCubit>().getMessagesListByIds(messagesIds: messagesIds);
-      final content = messages.map((message) => message.makeForwardedContent()).join('\n') + '\n';
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        insertQuoteAndFocus(textToInsert: content);
-      });
+      final messages = await context.read<MessagesCubit>().getMessagesListByIds(
+        messagesIds: messagesIds,
+        applyMarkdown: false,
+      );
+      context.read<MessagesSelectCubit>().setForwardMessages(messages);
     } catch (e) {
       inspect(e);
     } finally {
