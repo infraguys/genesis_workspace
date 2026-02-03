@@ -20,9 +20,10 @@ class MessagesSelectCubit extends Cubit<MessagesSelectState> {
       'selectedMessage must not be null when select mode is active',
     );
     if (isActive) {
-      emit(state.copyWith(selectedMessages: [selectedMessage!]));
+      emit(state.copyWith(selectedMessages: [selectedMessage!], isActive: true));
+    } else {
+      emit(state.copyWith(isActive: false));
     }
-    emit(state.copyWith(isActive: isActive));
   }
 
   void toggleMessageSelection(MessageEntity message) {

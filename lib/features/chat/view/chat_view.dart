@@ -750,8 +750,10 @@ class _ChatViewState extends State<ChatView>
                                                 },
                                                 onSend: isSendEnabled
                                                     ? () {
-                                                        sendMessage(
-                                                          selectedMessages: messagesSelectState.selectedMessages,
+                                                        unawaited(
+                                                          sendMessage(
+                                                            selectedMessages: messagesSelectState.selectedMessages,
+                                                          ),
                                                         );
                                                       }
                                                     : null,
