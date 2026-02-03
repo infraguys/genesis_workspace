@@ -57,24 +57,19 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
                 final chatCubit = context.read<ChatCubit>();
                 final messagesCubit = context.read<MessagesCubit>();
                 try {
-                  String content = '';
+                  final List<MessageEntity> forwardMessages = [];
                   if (widget.selectedMessages.isNotEmpty) {
                     final messagesIds = widget.selectedMessages.map((message) => message.id).toList();
                     final messages = await messagesCubit.getMessagesListByIds(messagesIds: messagesIds);
-                    content = messages.map((message) => message.makeForwardedContent()).join('\n');
+                    forwardMessages.addAll(messages);
                   } else if (widget.messageId != null) {
                     final message = await messagesCubit.getMessageById(
                       messageId: widget.messageId!,
                       applyMarkdown: false,
                     );
-                    content = message.makeForwardedContent(
-                      quote: widget.quote,
-                    );
+                    forwardMessages.add(message);
                   }
-                  await chatCubit.sendMessage(
-                    content: content,
-                    chatIds: widget.chat.dmIds,
-                  );
+                  context.read<MessagesSelectCubit>().setForwardMessages(forwardMessages);
                   if (context.mounted) {
                     context.pop();
                     openChat(

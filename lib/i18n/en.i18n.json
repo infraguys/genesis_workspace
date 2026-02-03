@@ -137,7 +137,12 @@
     "nothing_here_yet": "Nothing here yet",
     "find": "Find",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "forward_messages": "Forward messages",
+    "messages_count": {
+      "one": "{n} message",
+      "other": "{n} messages"
+    }
   },
   "message_actions": {
     "quote": "Quote this message",

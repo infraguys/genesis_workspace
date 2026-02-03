@@ -1,20 +1,14 @@
 part of 'messages_select_cubit.dart';
 
-sealed class MessagesSelectState {
-  const MessagesSelectState();
+class MessagesSelectState {
+  const MessagesSelectState({required this.selectedMessages, required this.isActive});
+  final List<MessageEntity> selectedMessages;
+  final bool isActive;
 
-  List<MessageEntity> get selectedMessages => switch (this) {
-    MessagesSelectStateActive(:final messages) => messages,
-    MessagesSelectStateDisabled() => const <MessageEntity>[],
-  };
-
-  bool get isActive => this is MessagesSelectStateActive;
-}
-
-class MessagesSelectStateDisabled extends MessagesSelectState {}
-
-class MessagesSelectStateActive extends MessagesSelectState {
-  final List<MessageEntity> messages;
-
-  MessagesSelectStateActive({required this.messages});
+  MessagesSelectState copyWith({List<MessageEntity>? selectedMessages, bool? isActive}) {
+    return MessagesSelectState(
+      selectedMessages: selectedMessages ?? this.selectedMessages,
+      isActive: isActive ?? this.isActive,
+    );
+  }
 }

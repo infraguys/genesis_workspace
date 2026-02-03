@@ -273,7 +273,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
       builder: (context, state) {
         return BlocBuilder<MessagesSelectCubit, MessagesSelectState>(
           builder: (context, messagesSelectState) {
-            final bool isSelectMode = messagesSelectState is MessagesSelectStateActive;
+            final bool isSelectMode = messagesSelectState.isActive;
             final int selectedCount = messagesSelectState.selectedMessages.length;
             final selectedMessages = messagesSelectState.selectedMessages;
             return Shortcuts(
@@ -466,7 +466,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                                   topicName: widget.topicName,
                                                 );
                                               },
-                                              isSelectMode: messagesSelectState is MessagesSelectStateActive,
+                                              isSelectMode: messagesSelectState.isActive,
                                               selectedMessages: selectedMessages,
                                             ),
                                             Positioned(
