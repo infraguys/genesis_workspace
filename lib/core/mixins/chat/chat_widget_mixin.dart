@@ -212,16 +212,19 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     try {
       context.read<TChatCubit>().setIsMessagePending(true);
 
-      final singleMessage = await context.read<MessagesCubit>().getMessageById(
-        messageId: messageId,
-        applyMarkdown: false,
-      );
+      if (quote?.isNotEmpty ?? false) {
+        final singleMessage = await context.read<MessagesCubit>().getMessageById(
+          messageId: messageId,
+          applyMarkdown: false,
+        );
+        final String quoteText = generateMessageQuote(singleMessage, quote: quote);
 
-      final String quoteText = generateMessageQuote(singleMessage, quote: quote);
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        insertQuoteAndFocus(textToInsert: quoteText);
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          insertQuoteAndFocus(textToInsert: quoteText);
+        });
+      } else {
+        replyMultiMessages([messageId]);
+      }
     } catch (e) {
       inspect(e);
     } finally {
@@ -255,25 +258,25 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     messageInputFocusNode.requestFocus();
   }
 
-  Future<void> quoteMessageById({
-    required int messageId,
-    required String Function(MessageEntity) quoteBuilder,
-    required Future<void> Function(bool isPending) setPending,
-  }) async {
-    try {
-      await setPending(true);
-      final MessageEntity message = await context.read<MessagesCubit>().getMessageById(
-        messageId: messageId,
-        applyMarkdown: false,
-      );
-      final String quote = quoteBuilder(message);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        insertQuoteAndFocus(textToInsert: quote);
-      });
-    } finally {
-      await setPending(false);
-    }
-  }
+  // Future<void> quoteMessageById({
+  //   required int messageId,
+  //   required String Function(MessageEntity) quoteBuilder,
+  //   required Future<void> Function(bool isPending) setPending,
+  // }) async {
+  //   try {
+  //     await setPending(true);
+  //     final MessageEntity message = await context.read<MessagesCubit>().getMessageById(
+  //       messageId: messageId,
+  //       applyMarkdown: false,
+  //     );
+  //     final String quote = quoteBuilder(message);
+  //     WidgetsBinding.instance.addPostFrameCallback((_) {
+  //       insertQuoteAndFocus(textToInsert: quote);
+  //     });
+  //   } finally {
+  //     await setPending(false);
+  //   }
+  // }
 
   //Edit message
 

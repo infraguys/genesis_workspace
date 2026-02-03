@@ -295,6 +295,16 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
             child: Listener(
               behavior: widget.isSelectMode ? .translucent : .deferToChild,
               onPointerDown: (event) {
+                final isMouse = event.kind == PointerDeviceKind.mouse;
+                final isRightClick = isMouse && event.buttons == kSecondaryMouseButton;
+
+                // ✅ Desktop context menu
+                if (isRightClick && !widget.isSelectMode) {
+                  _openContextMenu(context, event.position);
+                  return;
+                }
+
+                // ✅ Mobile tap-detection for select-mode
                 if (!widget.isSelectMode) return;
                 if (event.kind != PointerDeviceKind.touch) return;
                 if (event.buttons != kPrimaryMouseButton) return;

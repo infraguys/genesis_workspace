@@ -330,6 +330,7 @@ class _MessageInputState extends State<MessageInput> {
                                                 );
                                               }
                                             },
+                                            textInputAction: platformInfo.isDesktop ? .send : null,
                                             textCapitalization: platformInfo.isMobile
                                                 ? TextCapitalization.sentences
                                                 : TextCapitalization.none,
