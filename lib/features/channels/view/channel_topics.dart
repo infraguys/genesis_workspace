@@ -19,8 +19,7 @@ class ChannelTopics extends StatefulWidget {
 }
 
 class _ChannelTopicsState extends State<ChannelTopics> {
-  Widget selectedTopic(ThemeData theme) =>
-      Icon(Icons.circle, color: theme.colorScheme.primary, size: 10);
+  Widget selectedTopic(ThemeData theme) => Icon(Icons.circle, color: theme.colorScheme.primary, size: 10);
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +53,7 @@ class _ChannelTopicsState extends State<ChannelTopics> {
                       firstTrailing = selectedTopic(theme);
                     }
                     return TopicItem(
-                      topicName: widget.channel!.topics.isEmpty
-                          ? 'Loading...'
-                          : context.t.allMessages,
+                      topicName: widget.channel!.topics.isEmpty ? 'Loading...' : context.t.allMessages,
                       channel: widget.channel!,
                       trailing: firstTrailing,
                       onTap: state.pendingTopicsId != widget.channel!.streamId

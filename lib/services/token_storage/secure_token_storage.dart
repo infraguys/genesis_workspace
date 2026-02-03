@@ -56,9 +56,7 @@ class SecureTokenStorage implements TokenStorage {
     final token = await _storage.read(key: _buildKey(TokenStorageKeys.token, baseUrl));
     final session = await _storage.read(key: _buildKey(TokenStorageKeys.sessionId, baseUrl));
     final csrf = await _storage.read(key: _buildKey(TokenStorageKeys.csrftoken, baseUrl));
-    if ((token == null || token.isEmpty) &&
-        (session == null || session.isEmpty) &&
-        (csrf == null || csrf.isEmpty)) {
+    if ((token == null || token.isEmpty) && (session == null || session.isEmpty) && (csrf == null || csrf.isEmpty)) {
       await _unregisterScope(baseUrl);
     }
   }
@@ -101,16 +99,13 @@ class SecureTokenStorage implements TokenStorage {
   }
 
   @override
-  Future<String?> getToken(String baseUrl) =>
-      _storage.read(key: _buildKey(TokenStorageKeys.token, baseUrl));
+  Future<String?> getToken(String baseUrl) => _storage.read(key: _buildKey(TokenStorageKeys.token, baseUrl));
 
   @override
-  Future<String?> getCsrftoken(String baseUrl) =>
-      _storage.read(key: _buildKey(TokenStorageKeys.csrftoken, baseUrl));
+  Future<String?> getCsrftoken(String baseUrl) => _storage.read(key: _buildKey(TokenStorageKeys.csrftoken, baseUrl));
 
   @override
-  Future<String?> getSessionId(String baseUrl) =>
-      _storage.read(key: _buildKey(TokenStorageKeys.sessionId, baseUrl));
+  Future<String?> getSessionId(String baseUrl) => _storage.read(key: _buildKey(TokenStorageKeys.sessionId, baseUrl));
 
   @override
   Future<void> deleteToken(String baseUrl) async {

@@ -93,10 +93,7 @@ class MessageDto {
       return StreamDisplayRecipient(json);
     }
     if (json is List) {
-      final recipients = json
-          .cast<Map<String, dynamic>>()
-          .map((map) => RecipientDto.fromJson(map).toEntity())
-          .toList();
+      final recipients = json.cast<Map<String, dynamic>>().map((map) => RecipientDto.fromJson(map).toEntity()).toList();
       return DirectMessageRecipients(recipients);
     }
     throw FormatException('Unsupported display_recipient format: ${json.runtimeType}');

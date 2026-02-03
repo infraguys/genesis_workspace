@@ -174,9 +174,7 @@ class ChannelsCubit extends Cubit<ChannelsState> {
       channel.topics = response;
       for (var message in state.unreadMessages) {
         if (message.type == MessageType.stream && message.isUnread) {
-          final TopicEntity? topic = channel.topics
-              .where((topic) => topic.name == message.subject)
-              .firstOrNull;
+          final TopicEntity? topic = channel.topics.where((topic) => topic.name == message.subject).firstOrNull;
           topic?.unreadMessages.add(message.id);
         }
       }

@@ -19,8 +19,7 @@ class PresencesResponseDto {
     required this.presences,
   });
 
-  factory PresencesResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$PresencesResponseDtoFromJson(json);
+  factory PresencesResponseDto.fromJson(Map<String, dynamic> json) => _$PresencesResponseDtoFromJson(json);
   Map<String, dynamic> toJson() => _$PresencesResponseDtoToJson(this);
 
   PresencesResponseEntity toEntity() => PresencesResponseEntity(

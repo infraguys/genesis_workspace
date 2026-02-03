@@ -43,9 +43,7 @@ class FolderPill extends StatelessWidget {
           ),
         ),
         child: InkWell(
-          hoverColor:
-              folder.backgroundColor?.withValues(alpha: 0.1) ??
-              schema.primary.withValues(alpha: 0.2),
+          hoverColor: folder.backgroundColor?.withValues(alpha: 0.1) ?? schema.primary.withValues(alpha: 0.2),
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12),
@@ -90,8 +88,7 @@ class FolderPill extends StatelessWidget {
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
       items: [
         if (onEdit != null) PopupMenuItem(value: 'edit', child: Text(context.t.folders.edit)),
-        if (onEditPinning != null)
-          PopupMenuItem(value: 'editPinning', child: Text(context.t.folders.orderPinning)),
+        if (onEditPinning != null) PopupMenuItem(value: 'editPinning', child: Text(context.t.folders.orderPinning)),
         if (onDelete != null) PopupMenuItem(value: 'delete', child: Text(context.t.folders.delete)),
       ],
     );

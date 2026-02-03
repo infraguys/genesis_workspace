@@ -12,4 +12,3 @@ class UpdateMessageUseCase {
     return await _repository.updateMessage(body);
   }
 }
-

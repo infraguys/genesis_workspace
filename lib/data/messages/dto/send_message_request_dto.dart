@@ -21,8 +21,7 @@ class SendMessageRequestDto {
     this.streamId,
   });
 
-  factory SendMessageRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$SendMessageRequestDtoFromJson(json);
+  factory SendMessageRequestDto.fromJson(Map<String, dynamic> json) => _$SendMessageRequestDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$SendMessageRequestDtoToJson(this);
 

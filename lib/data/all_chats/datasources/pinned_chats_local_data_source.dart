@@ -61,10 +61,9 @@ class PinnedChatsLocalDataSource {
     required int organizationId,
     required List<PinnedChatEntity> pins,
   }) async {
-    await (_dao.delete(_dao.pinnedChats)
-          ..where(
-            (t) => t.folderUuid.equals(folderUuid) & t.organizationId.equals(organizationId),
-          ))
+    await (_dao.delete(_dao.pinnedChats)..where(
+          (t) => t.folderUuid.equals(folderUuid) & t.organizationId.equals(organizationId),
+        ))
         .go();
 
     final rows = pins.map(

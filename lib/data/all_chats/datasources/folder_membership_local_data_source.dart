@@ -22,11 +22,10 @@ class FolderMembershipLocalDataSource {
   Future<List<String>> getFolderUuidsForChat({
     required int chatId,
     required int organizationId,
-  }) =>
-      _dao.getFolderUuidsForChat(
-        chatId: chatId,
-        organizationId: organizationId,
-      );
+  }) => _dao.getFolderUuidsForChat(
+    chatId: chatId,
+    organizationId: organizationId,
+  );
 
   Future<void> deleteByFolderUuid(String folderUuid, int organizationId) =>
       _dao.deleteByFolderUuid(folderUuid, organizationId);

@@ -10,7 +10,5 @@ class UpdateMessageRequestEntity {
   final String content;
   UpdateMessageRequestEntity({required this.messageId, required this.content});
 
-  UpdateMessageRequestDto toDto() =>
-      UpdateMessageRequestDto(messageId: messageId, content: content);
+  UpdateMessageRequestDto toDto() => UpdateMessageRequestDto(messageId: messageId, content: content);
 }
-

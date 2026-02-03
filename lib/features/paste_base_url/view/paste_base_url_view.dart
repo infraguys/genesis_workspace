@@ -168,8 +168,7 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,
                     builder: (context, value, _) {
-                      final bool enabled =
-                          value.text.trim().isNotEmpty && _validationError == null && !_submitting;
+                      final bool enabled = value.text.trim().isNotEmpty && _validationError == null && !_submitting;
 
                       return SizedBox(
                         height: 48,

@@ -264,6 +264,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
   Future<void> getUnreadMessages() async {
     final organizationId = AppConstants.selectedOrganizationId;
     final connection = _realTimeService.activeConnections[organizationId];
+    inspect(connection);
     if (connection?.isActive ?? false) return;
     try {
       final body = MessagesRequestEntity(
@@ -276,6 +277,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
         numAfter: 0,
       );
       final response = await _getMessagesUseCase(body);
+      inspect(response);
       final updatedMessages = [...state.messages];
       updatedMessages.addAll(response.messages);
       emit(state.copyWith(messages: updatedMessages, lastMessageId: updatedMessages.first.id));

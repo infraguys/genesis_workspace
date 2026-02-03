@@ -8,8 +8,7 @@ part 'emoji_reaction_dto.g.dart';
 class EmojiReactionResponseDto extends ResponseDto {
   EmojiReactionResponseDto({required super.msg, required super.result});
 
-  factory EmojiReactionResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$EmojiReactionResponseDtoFromJson(json);
+  factory EmojiReactionResponseDto.fromJson(Map<String, dynamic> json) => _$EmojiReactionResponseDtoFromJson(json);
 
   EmojiReactionResponseEntity toEntity() => EmojiReactionResponseEntity(msg: msg, result: result);
 }

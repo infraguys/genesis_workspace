@@ -11,6 +11,5 @@ class EmojiReactionRequestEntity {
 
   EmojiReactionRequestEntity({required this.messageId, required this.emojiName});
 
-  EmojiReactionRequestDto toDto() =>
-      EmojiReactionRequestDto(messageId: messageId, emojiName: emojiName);
+  EmojiReactionRequestDto toDto() => EmojiReactionRequestDto(messageId: messageId, emojiName: emojiName);
 }

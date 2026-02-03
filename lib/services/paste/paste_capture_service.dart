@@ -127,8 +127,7 @@ class PasteCaptureService {
   String _ensureImageExtension(String name, format) {
     final String lower = name.toLowerCase();
     if (format == Formats.png && !lower.endsWith('.png')) return '$name.png';
-    if (format == Formats.jpeg && !(lower.endsWith('.jpg') || lower.endsWith('.jpeg')))
-      return '$name.jpg';
+    if (format == Formats.jpeg && !(lower.endsWith('.jpg') || lower.endsWith('.jpeg'))) return '$name.jpg';
     if (format == Formats.gif && !lower.endsWith('.gif')) return '$name.gif';
     if (format == Formats.webp && !lower.endsWith('.webp')) return '$name.webp';
     return name;

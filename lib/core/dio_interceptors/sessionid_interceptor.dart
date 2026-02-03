@@ -45,12 +45,7 @@ class SessionIdInterceptor extends Interceptor {
   // Убирает дубликаты и двойные разделители в Cookie
   String _normalizeCookie(String cookie) {
     final seen = <String>{};
-    final parts = cookie
-        .split(';')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .where((e) => seen.add(e))
-        .toList();
+    final parts = cookie.split(';').map((e) => e.trim()).where((e) => e.isNotEmpty).where((e) => seen.add(e)).toList();
     return parts.join('; ');
   }
 }

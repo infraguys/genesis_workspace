@@ -38,9 +38,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
     if (widget.filteredSuggestedMentions.isEmpty) return;
     final int lastIndex = widget.filteredSuggestedMentions.length - 1;
     setState(() {
-      focusedMentionIndex = (focusedMentionIndex >= lastIndex)
-          ? lastIndex
-          : focusedMentionIndex + 1;
+      focusedMentionIndex = (focusedMentionIndex >= lastIndex) ? lastIndex : focusedMentionIndex + 1;
     });
     _scrollToFocused();
   }
@@ -108,8 +106,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
         _scrollToFocused();
       }
       return KeyEventResult.handled;
-    } else if (event.logicalKey == LogicalKeyboardKey.enter ||
-        event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+    } else if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.numpadEnter) {
       selectMention(focusedMentionIndex);
       return KeyEventResult.handled;
     }
@@ -208,9 +205,7 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
                                     title: Text(
                                       user.fullName,
                                       style: theme.textTheme.bodyMedium!.copyWith(
-                                        color: isFocused
-                                            ? theme.colorScheme.primary
-                                            : theme.colorScheme.onSurface,
+                                        color: isFocused ? theme.colorScheme.primary : theme.colorScheme.onSurface,
                                       ),
                                     ),
                                   ),

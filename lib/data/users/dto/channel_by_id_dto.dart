@@ -10,8 +10,7 @@ class ChannelByIdResponseDto extends ResponseDto {
   final StreamDto stream;
   ChannelByIdResponseDto({required super.msg, required super.result, required this.stream});
 
-  factory ChannelByIdResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$ChannelByIdResponseDtoFromJson(json);
+  factory ChannelByIdResponseDto.fromJson(Map<String, dynamic> json) => _$ChannelByIdResponseDtoFromJson(json);
   ChannelByIdResponseEntity toEntity() =>
       ChannelByIdResponseEntity(stream: stream.toEntity(), msg: msg, result: result);
 }

@@ -40,7 +40,8 @@ mixin OpenChatMixin {
     BuildContext context, {
     required int channelId,
     String? topicName,
-    int? unreadMessagesCount, bool replace = false,
+    int? unreadMessagesCount,
+    bool replace = false,
   }) {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
     final chat = context.read<MessengerCubit>().state.chats.firstWhere((chat) => chat.streamId == channelId);

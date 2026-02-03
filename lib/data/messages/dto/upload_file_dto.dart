@@ -18,8 +18,7 @@ class UploadFileResponseDto extends ResponseDto {
     this.uri,
     required this.filename,
   });
-  factory UploadFileResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$UploadFileResponseDtoFromJson(json);
+  factory UploadFileResponseDto.fromJson(Map<String, dynamic> json) => _$UploadFileResponseDtoFromJson(json);
 
   UploadFileResponseEntity toEntity() =>
       UploadFileResponseEntity(msg: msg, result: result, url: url, filename: filename);

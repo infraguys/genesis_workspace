@@ -71,7 +71,8 @@ class _LogsViewState extends State<LogsView> {
         ),
         itemBuilder: (BuildContext context, int index) {
           final connection = activeConnections[index];
-          return Row(
+          return Column(
+            spacing: 4,
             children: [
               Column(
                 crossAxisAlignment: .start,

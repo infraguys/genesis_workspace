@@ -24,8 +24,7 @@ class SubscriptionEventDto extends EventDto {
   @JsonKey(fromJson: SubscriptionValue.fromJson, toJson: SubscriptionValue.toJson)
   final SubscriptionValue value;
 
-  factory SubscriptionEventDto.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionEventDtoFromJson(json);
+  factory SubscriptionEventDto.fromJson(Map<String, dynamic> json) => _$SubscriptionEventDtoFromJson(json);
 
   @override
   SubscriptionEventEntity toEntity() => SubscriptionEventEntity(

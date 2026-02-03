@@ -113,9 +113,8 @@ class UploadingFileEntity extends UploadFileEntity {
     this.bytesTotal,
   });
 
-  double? get progress => (bytesSent != null && bytesTotal != null && bytesTotal! > 0)
-      ? (bytesSent! / bytesTotal!).clamp(0.0, 1.0)
-      : null;
+  double? get progress =>
+      (bytesSent != null && bytesTotal != null && bytesTotal! > 0) ? (bytesSent! / bytesTotal!).clamp(0.0, 1.0) : null;
 
   UploadingFileEntity copyWith({
     String? localId,

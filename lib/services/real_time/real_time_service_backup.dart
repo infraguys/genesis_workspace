@@ -31,41 +31,33 @@ class RealTimeServiceBackup {
 
   bool _isPolling = false;
 
-  StreamController<TypingEventEntity> _typingEventsController =
-      StreamController<TypingEventEntity>.broadcast();
+  StreamController<TypingEventEntity> _typingEventsController = StreamController<TypingEventEntity>.broadcast();
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
 
-  StreamController<MessageEventEntity> _messagesEventsController =
-      StreamController<MessageEventEntity>.broadcast();
+  StreamController<MessageEventEntity> _messagesEventsController = StreamController<MessageEventEntity>.broadcast();
   Stream<MessageEventEntity> get messagesEventsStream => _messagesEventsController.stream;
 
   StreamController<UpdateMessageFlagsEventEntity> _messageFlagsEventsController =
       StreamController<UpdateMessageFlagsEventEntity>.broadcast();
-  Stream<UpdateMessageFlagsEventEntity> get messagesFlagsEventsStream =>
-      _messageFlagsEventsController.stream;
+  Stream<UpdateMessageFlagsEventEntity> get messagesFlagsEventsStream => _messageFlagsEventsController.stream;
 
-  StreamController<ReactionEventEntity> _reactionsEventsController =
-      StreamController<ReactionEventEntity>.broadcast();
+  StreamController<ReactionEventEntity> _reactionsEventsController = StreamController<ReactionEventEntity>.broadcast();
   Stream<ReactionEventEntity> get reactionsEventsStream => _reactionsEventsController.stream;
 
-  StreamController<PresenceEventEntity> _presenceEventsController =
-      StreamController<PresenceEventEntity>.broadcast();
+  StreamController<PresenceEventEntity> _presenceEventsController = StreamController<PresenceEventEntity>.broadcast();
   Stream<PresenceEventEntity> get presenceEventsStream => _presenceEventsController.stream;
 
   StreamController<DeleteMessageEventEntity> _deleteMessageEventsController =
       StreamController<DeleteMessageEventEntity>.broadcast();
-  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream =>
-      _deleteMessageEventsController.stream;
+  Stream<DeleteMessageEventEntity> get deleteMessageEventsStream => _deleteMessageEventsController.stream;
 
   StreamController<UpdateMessageEventEntity> _updateMessageEventsController =
       StreamController<UpdateMessageEventEntity>.broadcast();
-  Stream<UpdateMessageEventEntity> get updateMessageEventsStream =>
-      _updateMessageEventsController.stream;
+  Stream<UpdateMessageEventEntity> get updateMessageEventsStream => _updateMessageEventsController.stream;
 
   StreamController<SubscriptionEventEntity> _subscriptionEventsController =
       StreamController<SubscriptionEventEntity>.broadcast();
-  Stream<SubscriptionEventEntity> get subscriptionEventsStream =>
-      _subscriptionEventsController.stream;
+  Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
 
   Future<RegisterQueueEntity> registerQueue() async {
     try {

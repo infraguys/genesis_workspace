@@ -16,6 +16,6 @@ class PinnedChats extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {folderUuid, chatId},
-      ];
+    {folderUuid, chatId},
+  ];
 }

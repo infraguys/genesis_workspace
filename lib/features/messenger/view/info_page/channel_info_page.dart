@@ -29,8 +29,6 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -157,7 +155,7 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                     child: BlocBuilder<ChannelMembersInfoCubit, ChannelMembersInfoState>(
                       builder: (context, state) {
                         if (state is! ChannelMembersLoadedState) {
-                          return Center(child:  CircularProgressIndicator());
+                          return Center(child: CircularProgressIndicator());
                         }
                         return ListView.separated(
                           itemCount: state.users.length,

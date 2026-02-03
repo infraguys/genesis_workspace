@@ -81,11 +81,7 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
                               Text(
                                 state.topic?.name ?? state.channel?.name ?? '',
                                 maxLines: 1,
-                                style: TextStyle(
-                                  fontWeight: .w500,
-                                  fontSize: 20,
-                                  overflow: TextOverflow.ellipsis
-                                ),
+                                style: TextStyle(fontWeight: .w500, fontSize: 20, overflow: TextOverflow.ellipsis),
                               ),
                               Text(
                                 context.t.group.membersCount(count: length),

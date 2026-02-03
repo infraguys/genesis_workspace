@@ -11,7 +11,6 @@ class TopicsResponseDto {
 
   TopicsResponseDto({required this.msg, required this.result, required this.topics});
 
-  factory TopicsResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$TopicsResponseDtoFromJson(json);
+  factory TopicsResponseDto.fromJson(Map<String, dynamic> json) => _$TopicsResponseDtoFromJson(json);
   Map<String, dynamic> toJson() => _$TopicsResponseDtoToJson(this);
 }

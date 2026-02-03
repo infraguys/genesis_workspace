@@ -13,12 +13,15 @@ class InputBanner extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           // todo: вынести в Colors.scheme
-          border: BoxBorder.fromLTRB(top: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: .1)))
+          border: BoxBorder.fromLTRB(
+            top: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: .1)),
+          ),
         ),
-        child:  Center(
-          child:  Text(context.t.input.banner, style: textTheme.bodySmall!.copyWith(
-            fontSize: 16
-          ),),
+        child: Center(
+          child: Text(
+            context.t.input.banner,
+            style: textTheme.bodySmall!.copyWith(fontSize: 16),
+          ),
         ),
       ),
     );

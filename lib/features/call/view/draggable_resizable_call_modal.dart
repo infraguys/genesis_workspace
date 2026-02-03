@@ -146,14 +146,14 @@ class _DraggableResizableCallModalState extends State<DraggableResizableCallModa
         final Size targetSize = widget.isMinimized
             ? (hasDockTarget ? widget.dockRect!.size : _hiddenSize)
             : widget.isFullscreen
-                ? fullscreenSize
-                : _size;
+            ? fullscreenSize
+            : _size;
 
         final Offset targetPosition = widget.isMinimized && widget.dockRect != null
             ? widget.dockRect!.topLeft
             : widget.isFullscreen
-                ? Offset(padding.left + _edgePadding, padding.top + _edgePadding)
-                : _clampPosition(_position, targetSize, constraints, padding);
+            ? Offset(padding.left + _edgePadding, padding.top + _edgePadding)
+            : _clampPosition(_position, targetSize, constraints, padding);
 
         final double targetOpacity = widget.isMinimized ? 0 : 1;
 
@@ -188,8 +188,9 @@ class _DraggableResizableCallModalState extends State<DraggableResizableCallModa
                           children: [
                             GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onPanUpdate:
-                                  widget.isFullscreen ? null : (details) => _onDrag(details, constraints, padding),
+                              onPanUpdate: widget.isFullscreen
+                                  ? null
+                                  : (details) => _onDrag(details, constraints, padding),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10).copyWith(bottom: 0),
                                 decoration: BoxDecoration(
@@ -210,15 +211,12 @@ class _DraggableResizableCallModalState extends State<DraggableResizableCallModa
                                       icon: Icon(
                                         widget.isMinimized ? Icons.unfold_more_rounded : Icons.minimize_rounded,
                                       ),
-                                      tooltip:
-                                          widget.isMinimized ? context.t.call.restore : context.t.call.minimize,
+                                      tooltip: widget.isMinimized ? context.t.call.restore : context.t.call.minimize,
                                     ),
                                     IconButton(
                                       onPressed: widget.onToggleFullscreen,
                                       icon: Icon(
-                                        widget.isFullscreen
-                                            ? Icons.fullscreen_exit_rounded
-                                            : Icons.fullscreen_rounded,
+                                        widget.isFullscreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
                                       ),
                                       tooltip: widget.isFullscreen
                                           ? context.t.call.exitFullscreen

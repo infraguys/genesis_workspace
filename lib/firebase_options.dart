@@ -83,5 +83,4 @@ class DefaultFirebaseOptions {
     authDomain: 'genesis-workspace.firebaseapp.com',
     storageBucket: 'genesis-workspace.firebasestorage.app',
   );
-
 }

@@ -12,8 +12,7 @@ class MessageRecipientDto {
 
   MessageRecipientDto({required this.email, required this.id, required this.fullName});
 
-  factory MessageRecipientDto.fromJson(Map<String, dynamic> json) =>
-      _$MessageRecipientDtoFromJson(json);
+  factory MessageRecipientDto.fromJson(Map<String, dynamic> json) => _$MessageRecipientDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$MessageRecipientDtoToJson(this);
 

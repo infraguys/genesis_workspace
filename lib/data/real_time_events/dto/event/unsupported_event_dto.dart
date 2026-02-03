@@ -15,9 +15,7 @@ class UnsupportedEventDto extends EventDto {
   factory UnsupportedEventDto.fromJson(Map<String, dynamic> json) {
     return UnsupportedEventDto(
       id: json['id'],
-      type: EventType.values.contains(json['type'])
-          ? EventTypeX.fromJson(json['type'])
-          : EventType.unsupported,
+      type: EventType.values.contains(json['type']) ? EventTypeX.fromJson(json['type']) : EventType.unsupported,
     );
   }
 

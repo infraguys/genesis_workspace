@@ -52,9 +52,7 @@ class UserTile extends StatelessWidget {
         ],
       ),
       subtitle: Text(
-        isJustNow(lastSeen)
-            ? context.t.wasOnlineJustNow
-            : context.t.wasOnline(time: timeAgoText(context, lastSeen)),
+        isJustNow(lastSeen) ? context.t.wasOnlineJustNow : context.t.wasOnline(time: timeAgoText(context, lastSeen)),
         style: Theme.of(context).textTheme.labelSmall,
       ),
       trailing: trailing,

@@ -23,8 +23,7 @@ class FetchApiKeyResponseDto {
     required this.userId,
   });
 
-  factory FetchApiKeyResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$FetchApiKeyResponseDtoFromJson(json);
+  factory FetchApiKeyResponseDto.fromJson(Map<String, dynamic> json) => _$FetchApiKeyResponseDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$FetchApiKeyResponseDtoToJson(this);
 

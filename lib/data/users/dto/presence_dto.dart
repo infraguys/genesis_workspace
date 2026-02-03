@@ -14,8 +14,7 @@ class PresenceDto {
   factory PresenceDto.fromJson(Map<String, dynamic> json) => _$PresenceDtoFromJson(json);
   Map<String, dynamic> toJson() => _$PresenceDtoToJson(this);
 
-  PresenceEntity toEntity() =>
-      PresenceEntity(aggregated: aggregated?.toEntity(), website: website?.toEntity());
+  PresenceEntity toEntity() => PresenceEntity(aggregated: aggregated?.toEntity(), website: website?.toEntity());
 }
 
 @JsonSerializable()
@@ -26,10 +25,8 @@ class PresenceDetailDto {
 
   PresenceDetailDto({required this.status, required this.timestamp, this.pushable});
 
-  factory PresenceDetailDto.fromJson(Map<String, dynamic> json) =>
-      _$PresenceDetailDtoFromJson(json);
+  factory PresenceDetailDto.fromJson(Map<String, dynamic> json) => _$PresenceDetailDtoFromJson(json);
   Map<String, dynamic> toJson() => _$PresenceDetailDtoToJson(this);
 
-  PresenceDetailEntity toEntity() =>
-      PresenceDetailEntity(status: status, timestamp: timestamp, pushable: pushable);
+  PresenceDetailEntity toEntity() => PresenceDetailEntity(status: status, timestamp: timestamp, pushable: pushable);
 }
