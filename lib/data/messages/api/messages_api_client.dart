@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart' hide Headers;
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
-import 'package:genesis_workspace/core/enums/send_message_type.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/delete_message_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/emoji_reaction_dto.dart';
@@ -21,13 +20,14 @@ abstract class MessagesApiClient {
 
   @GET('/messages')
   Future<MessagesResponseDto> getMessages(
-    @Query("anchor") String anchor,
+    @Query("anchor") String? anchor,
     @Query("narrow") String? narrow,
     @Query("num_before") int? numBefore,
     @Query("num_after") int? numAfter,
     @Query("apply_markdown") bool? applyMarkdown,
     @Query("client_gravatar") bool? clientGravatar,
     @Query("include_anchor") bool? includeAnchor,
+    @Query("message_ids") String? messageIds,
   );
 
   @GET('/messages/{message_id}')
@@ -36,21 +36,23 @@ abstract class MessagesApiClient {
     @Query("apply_markdown") bool applyMarkdown,
   );
 
+  @FormUrlEncoded()
   @POST('/messages')
-  Future<void> sendMessage(
-    @Query("type") SendMessageType type,
-    @Query("to") String to,
-    @Query("content") String content,
-    @Query("stream_id") int? streamId,
-    @Query("topic") String? topic,
-    @Query("read_by_sender") bool? readBySender,
-  );
+  Future<void> sendMessage({
+    @Field("type") required String type,
+    @Field("to") required String to,
+    @Field("content") required String content,
+    @Field("stream_id") int? streamId,
+    @Field("topic") String? topic,
+    @Field("read_by_sender") bool? readBySender,
+  });
 
+  @FormUrlEncoded()
   @PATCH('/messages/{message_id}')
-  Future<UpdateMessageResponseDto> updateMessage(
-    @Path('message_id') int messageId,
-    @Query("content") String content,
-  );
+  Future<UpdateMessageResponseDto> updateMessage({
+    @Path('message_id') required int messageId,
+    @Field("content") required String content,
+  });
 
   @POST('/messages/flags')
   Future<void> updateMessagesFlags(

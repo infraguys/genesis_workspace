@@ -16,6 +16,5 @@ class StreamDto {
 
   factory StreamDto.fromJson(Map<String, dynamic> json) => _$StreamDtoFromJson(json);
 
-  StreamEntity toEntity() =>
-      StreamEntity(streamId: streamId, name: name, subscriberCount: subscriberCount);
+  StreamEntity toEntity() => StreamEntity(streamId: streamId, name: name, subscriberCount: subscriberCount);
 }

@@ -11,8 +11,7 @@ class SubscriptionsResponseDto {
 
   SubscriptionsResponseDto({required this.msg, required this.result, required this.subscriptions});
 
-  factory SubscriptionsResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionsResponseDtoFromJson(json);
+  factory SubscriptionsResponseDto.fromJson(Map<String, dynamic> json) => _$SubscriptionsResponseDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$SubscriptionsResponseDtoToJson(this);
 }

@@ -11,9 +11,7 @@ sealed class DisplayRecipient extends Equatable {
       return StreamDisplayRecipient(json);
     }
     if (json is List) {
-      final recipients = json
-          .map((recipient) => RecipientEntity.fromJson(recipient as Map<String, dynamic>))
-          .toList();
+      final recipients = json.map((recipient) => RecipientEntity.fromJson(recipient as Map<String, dynamic>)).toList();
       return DirectMessageRecipients(recipients);
     }
     throw FormatException('Unsupported display_recipient format: ${json.runtimeType}');

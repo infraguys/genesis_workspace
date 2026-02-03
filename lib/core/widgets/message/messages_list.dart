@@ -30,6 +30,8 @@ class MessagesList extends StatefulWidget {
   final int myUserId;
   final void Function(int messageId, {String? quote})? onTapQuote;
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
+  final bool isSelectMode;
+  final List<MessageEntity> selectedMessages;
 
   const MessagesList({
     super.key,
@@ -43,6 +45,8 @@ class MessagesList extends StatefulWidget {
     this.onTapQuote,
     this.onTapEditMessage,
     this.onReadAll,
+    this.isSelectMode = false,
+    this.selectedMessages = const <MessageEntity>[],
   });
 
   @override
@@ -201,12 +205,8 @@ class _MessagesListState extends State<MessagesList> {
 
                   final bool isNewTopic = currentMessage.subject != nextMessage.subject;
 
-                  if (!isNewTopic && !isNewDay) {
-                    return const SizedBox(height: 8);
-                  }
-
                   return Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: (!isNewTopic && !isNewDay) ? const .symmetric(vertical: 4) : const .all(16.0),
                     child: Column(
                       mainAxisSize: .min,
                       spacing: 8.0,
@@ -293,6 +293,10 @@ class _MessagesListState extends State<MessagesList> {
                         isNewDay: isNewDay,
                         onTapQuote: widget.onTapQuote ?? (_, {quote}) {},
                         onTapEditMessage: widget.onTapEditMessage ?? (_) {},
+                        isSelectMode: widget.isSelectMode,
+                        isSelected: widget.selectedMessages.any(
+                          (selectedMessage) => selectedMessage.id == message.id,
+                        ),
                       ),
                     ),
                   );

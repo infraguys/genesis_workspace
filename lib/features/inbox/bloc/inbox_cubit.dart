@@ -115,9 +115,7 @@ class InboxCubit extends Cubit<InboxState> {
       state.dmMessages.putIfAbsent(senderFullName, () => []).add(message);
     } else {
       state.channelMessages.putIfAbsent(message.displayRecipient.streamName ?? 'Unknown', () => {});
-      state.channelMessages[message.displayRecipient]!
-          .putIfAbsent(message.subject, () => [])
-          .add(message);
+      state.channelMessages[message.displayRecipient]!.putIfAbsent(message.subject, () => []).add(message);
     }
     emit(state.copyWith(dmMessages: state.dmMessages, channelMessages: state.channelMessages));
   }

@@ -24,8 +24,7 @@ class DeleteMessageEventDto extends EventDto {
   final int? streamId;
   final String? topic;
 
-  factory DeleteMessageEventDto.fromJson(Map<String, dynamic> json) =>
-      _$DeleteMessageEventDtoFromJson(json);
+  factory DeleteMessageEventDto.fromJson(Map<String, dynamic> json) => _$DeleteMessageEventDtoFromJson(json);
 
   @override
   DeleteMessageEventEntity toEntity() => DeleteMessageEventEntity(

@@ -12,6 +12,7 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/subscri
 import 'package:genesis_workspace/domain/real_time_events/entities/event/typing_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/event/user_topic_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart';
@@ -61,6 +62,8 @@ class MultiPollingService {
       StreamController<UpdateMessageEventEntity>.broadcast();
   final StreamController<SubscriptionEventEntity> _subscriptionEventsController =
       StreamController<SubscriptionEventEntity>.broadcast();
+  final StreamController<UserTopicEventEntity> _userTopicEventsController =
+      StreamController<UserTopicEventEntity>.broadcast();
 
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
 
@@ -77,6 +80,8 @@ class MultiPollingService {
   Stream<UpdateMessageEventEntity> get updateMessageEventsStream => _updateMessageEventsController.stream;
 
   Stream<SubscriptionEventEntity> get subscriptionEventsStream => _subscriptionEventsController.stream;
+
+  Stream<UserTopicEventEntity> get userTopicEventsStream => _userTopicEventsController.stream;
 
   Future<void> init() async {
     final List<OrganizationEntity> authorizedOrganizations = await _fetchAuthorizedOrganizations();
@@ -149,6 +154,7 @@ class MultiPollingService {
       onError: (_) {},
     );
     connection.subscriptionEventsStream.listen(_subscriptionEventsController.add, onError: (_) {});
+    connection.userTopicEventsStream.listen(_userTopicEventsController.add, onError: (_) {});
 
     _activeConnections[organizationId] = connection;
     await connection.start();
@@ -181,6 +187,7 @@ class MultiPollingService {
       _deleteMessageEventsController.close(),
       _updateMessageEventsController.close(),
       _subscriptionEventsController.close(),
+      _userTopicEventsController.close(),
     ]);
   }
 

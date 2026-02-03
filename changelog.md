@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.8.0
+- Replaced legacy popup with actual
+- Fixed unread separator behavior
+- Send/Edit message requests refactor
+- Added multi select messages feature
+- Added create topic feature
+- Refactored create channels layout on mobile platforms
+
 # 1.7.4
 - Added update functionality for windows
 - Added create channels functionality

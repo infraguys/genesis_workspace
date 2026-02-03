@@ -13,6 +13,5 @@ class SingleMessageRequestEntity {
 
   SingleMessageRequestEntity({required this.messageId, required this.applyMarkdown});
 
-  SingleMessageRequestDto toDto() =>
-      SingleMessageRequestDto(messageId: messageId, applyMarkdown: applyMarkdown);
+  SingleMessageRequestDto toDto() => SingleMessageRequestDto(messageId: messageId, applyMarkdown: applyMarkdown);
 }

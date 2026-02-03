@@ -1,6 +1,7 @@
 enum Flavor {
   stage,
-  prod;
+  prod
+  ;
 
   static var current = Flavor.prod;
 

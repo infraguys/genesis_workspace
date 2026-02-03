@@ -136,7 +136,13 @@
     "something_went_wrong": "Something went wrong",
     "nothing_here_yet": "Nothing here yet",
     "find": "Find",
-    "close": "Close"
+    "close": "Close",
+    "cancel": "Cancel",
+    "forward_messages": "Forward messages",
+    "messages_count": {
+      "one": "{n} message",
+      "other": "{n} messages"
+    }
   },
   "message_actions": {
     "quote": "Quote this message",
@@ -306,12 +312,14 @@
   },
   "context_menu": {
     "reply": "Reply",
+    "reply_count": "Reply ({n})",
     "edit": "Edit",
     "delete": "Delete",
     "copy": "Copy",
     "mark_as_important": "Mark as important",
     "unmark_as_important": "Unmark as important",
     "forward": "Forward",
+    "forward_count": "Forward ({n})",
     "select": "Select",
     "viewedBy": "Viewed by"
   },
@@ -352,5 +360,16 @@
   "open": "Open",
   "try_again": "Try again",
   "connecting": "Connecting",
-  "my_activity": "My activity"
+  "my_activity": "My activity",
+  "topic": {
+    "newTopic": "New topic",
+    "createTopic": "Create topic",
+    "topicName": "Topic name",
+    "requiredNameError": "Enter topic name"
+  },
+  "topic_item": {
+    "mute": "Mute topic",
+    "unmute": "Unmute topic"
+  },
+  "selected_count": "Selected ({n})"
 }

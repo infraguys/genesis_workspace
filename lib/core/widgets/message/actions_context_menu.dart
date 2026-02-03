@@ -107,8 +107,7 @@ class _ActionsContextMenuState extends State<ActionsContextMenu> {
                 ),
               AnimatedSwitcher(
                 duration: animationsEnabled ? const Duration(milliseconds: 200) : Duration.zero,
-                transitionBuilder: (child, animation) =>
-                    RotationTransition(turns: animation, child: child),
+                transitionBuilder: (child, animation) => RotationTransition(turns: animation, child: child),
                 child: IconButton(
                   key: ValueKey(showEmojiPicker),
                   icon: Icon((showEmojiPicker) ? Icons.close : Icons.add_reaction_outlined),

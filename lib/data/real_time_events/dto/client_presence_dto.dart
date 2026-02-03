@@ -17,8 +17,7 @@ class ClientPresenceDto {
     required this.pushable,
   });
 
-  factory ClientPresenceDto.fromJson(Map<String, dynamic> json) =>
-      _$ClientPresenceDtoFromJson(json);
+  factory ClientPresenceDto.fromJson(Map<String, dynamic> json) => _$ClientPresenceDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$ClientPresenceDtoToJson(this);
 

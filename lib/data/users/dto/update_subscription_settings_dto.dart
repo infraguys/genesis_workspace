@@ -13,8 +13,7 @@ class UpdateSubscriptionSettingsResponseDto extends ResponseDto {
   factory UpdateSubscriptionSettingsResponseDto.fromJson(Map<String, dynamic> json) =>
       _$UpdateSubscriptionSettingsResponseDtoFromJson(json);
 
-  UpdateSubscriptionResponseEntity toEntity() =>
-      UpdateSubscriptionResponseEntity(msg: msg, result: result);
+  UpdateSubscriptionResponseEntity toEntity() => UpdateSubscriptionResponseEntity(msg: msg, result: result);
 }
 
 @JsonSerializable()

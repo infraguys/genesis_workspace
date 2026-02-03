@@ -23,6 +23,5 @@ class MessageEventDto extends EventDto {
   Map<String, dynamic> toJson() => _$MessageEventDtoToJson(this);
 
   @override
-  MessageEventEntity toEntity() =>
-      MessageEventEntity(id: id, type: type, message: message.toEntity(), flags: flags);
+  MessageEventEntity toEntity() => MessageEventEntity(id: id, type: type, message: message.toEntity(), flags: flags);
 }

@@ -18,11 +18,12 @@ class AppColors {
     text30: Color(0xFFFFFFFF).withValues(alpha: 0.3),
   );
   static final darkMessageColors = MessageColors(
-    background: Color(0xff333333),
-    ownBackground: Color(0xff47382B),
-    timeColor: Color(0xffFFFFFF).withValues(alpha: 0.5),
+    background: const Color(0xff333333),
+    ownBackground: const Color(0xff47382B),
+    timeColor: const Color(0xffFFFFFF).withValues(alpha: 0.5),
     senderNameColor: primary,
-    activeCallBackground: Color(0xff1C2B20),
+    activeCallBackground: const Color(0xff1C2B20),
+    selectedMessageForeground: const Color(0xFF26C038).withValues(alpha: 0.2),
   );
   static final darkCardColors = CardColors(
     base: Color(0xFFFFFFFF).withValues(alpha: 0.02),
@@ -110,6 +111,7 @@ class MessageColors extends ThemeExtension<MessageColors> {
   final Color timeColor;
   final Color senderNameColor;
   final Color activeCallBackground;
+  final Color selectedMessageForeground;
 
   const MessageColors({
     required this.background,
@@ -117,6 +119,7 @@ class MessageColors extends ThemeExtension<MessageColors> {
     required this.timeColor,
     required this.senderNameColor,
     required this.activeCallBackground,
+    required this.selectedMessageForeground,
   });
 
   @override
@@ -126,6 +129,7 @@ class MessageColors extends ThemeExtension<MessageColors> {
     Color? timeColor,
     Color? senderNameColor,
     Color? activeCallBackground,
+    Color? selectedMessageForeground,
   }) {
     return MessageColors(
       background: background ?? this.background,
@@ -133,6 +137,7 @@ class MessageColors extends ThemeExtension<MessageColors> {
       timeColor: timeColor ?? this.timeColor,
       senderNameColor: senderNameColor ?? this.senderNameColor,
       activeCallBackground: activeCallBackground ?? this.activeCallBackground,
+      selectedMessageForeground: selectedMessageForeground ?? this.selectedMessageForeground,
     );
   }
 
@@ -145,6 +150,7 @@ class MessageColors extends ThemeExtension<MessageColors> {
       timeColor: Color.lerp(timeColor, other.timeColor, t)!,
       senderNameColor: Color.lerp(senderNameColor, other.senderNameColor, t)!,
       activeCallBackground: Color.lerp(activeCallBackground, other.activeCallBackground, t)!,
+      selectedMessageForeground: Color.lerp(selectedMessageForeground, other.selectedMessageForeground, t)!,
     );
   }
 }

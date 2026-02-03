@@ -11,8 +11,7 @@ class UpdatePresenceResponseDto extends ResponseDto {
 
   UpdatePresenceResponseDto({required super.msg, required super.result, this.presenceLastUpdateId});
 
-  factory UpdatePresenceResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$UpdatePresenceResponseDtoFromJson(json);
+  factory UpdatePresenceResponseDto.fromJson(Map<String, dynamic> json) => _$UpdatePresenceResponseDtoFromJson(json);
 
   UpdatePresenceResponseEntity toEntity() => UpdatePresenceResponseEntity(
     msg: msg,

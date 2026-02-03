@@ -4,14 +4,12 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 class UpdateMessageResponseDto extends ResponseDto {
   UpdateMessageResponseDto({required super.msg, required super.result});
 
-  factory UpdateMessageResponseDto.fromJson(Map<String, dynamic> json) =>
-      UpdateMessageResponseDto(
-        msg: (json['msg'] as String?) ?? '',
-        result: (json['result'] as String?) ?? 'success',
-      );
+  factory UpdateMessageResponseDto.fromJson(Map<String, dynamic> json) => UpdateMessageResponseDto(
+    msg: (json['msg'] as String?) ?? '',
+    result: (json['result'] as String?) ?? 'success',
+  );
 
-  UpdateMessageResponseEntity toEntity() =>
-      UpdateMessageResponseEntity(msg: msg, result: result);
+  UpdateMessageResponseEntity toEntity() => UpdateMessageResponseEntity(msg: msg, result: result);
 }
 
 class UpdateMessageRequestDto {

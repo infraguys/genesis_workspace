@@ -15,4 +15,3 @@ class DroppedItem {
 }
 
 typedef RemoveDropHandlers = void Function();
-

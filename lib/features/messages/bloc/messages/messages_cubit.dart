@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
@@ -141,6 +142,25 @@ class MessagesCubit extends Cubit<MessagesState> {
       return response.message;
     } catch (e) {
       inspect(e);
+      rethrow;
+    }
+  }
+
+  Future<List<MessageEntity>> getMessagesListByIds({
+    required List<int> messagesIds,
+    bool applyMarkdown = true,
+  }) async {
+    try {
+      final body = MessagesRequestEntity(
+        applyMarkdown: applyMarkdown,
+        messageIds: messagesIds,
+      );
+      final response = await _getMessagesUseCase.call(body);
+      return response.messages;
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
       rethrow;
     }
   }

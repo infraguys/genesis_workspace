@@ -11,6 +11,5 @@ class UserByIdResponseDto {
 
   UserByIdResponseDto({required this.msg, required this.result, required this.user});
 
-  factory UserByIdResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$UserByIdResponseDtoFromJson(json);
+  factory UserByIdResponseDto.fromJson(Map<String, dynamic> json) => _$UserByIdResponseDtoFromJson(json);
 }

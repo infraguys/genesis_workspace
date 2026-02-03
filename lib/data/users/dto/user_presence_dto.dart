@@ -10,8 +10,7 @@ class UserPresenceResponseDto extends ResponseDto {
   UserPresenceResponseDto({required super.msg, required super.result, required this.presence});
   final PresenceDto presence;
 
-  factory UserPresenceResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$UserPresenceResponseDtoFromJson(json);
+  factory UserPresenceResponseDto.fromJson(Map<String, dynamic> json) => _$UserPresenceResponseDtoFromJson(json);
 
   UserPresenceResponseEntity toEntity() =>
       UserPresenceResponseEntity(userPresence: presence.toEntity(), msg: msg, result: result);

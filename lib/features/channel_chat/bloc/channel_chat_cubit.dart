@@ -251,9 +251,14 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   Future<void> getChannelTopics({required int streamId, String? topicName}) async {
     try {
-      final response = await _getTopicsUseCase.call(streamId);
-      final topic = response.where((topic) => topicName == topic.name).firstOrNull;
-      emit(state.copyWith(topic: topic));
+      if (topicName != null) {
+        final topic = TopicEntity.newTopic(topicName);
+        emit(state.copyWith(topic: topic));
+      } else {
+        final response = await _getTopicsUseCase.call(streamId);
+        final topic = response.where((topic) => topicName == topic.name).firstOrNull;
+        emit(state.copyWith(topic: topic));
+      }
     } catch (e) {
       inspect(e);
     }
@@ -285,14 +290,14 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         channelMembers: channelMembers,
         recentSenderIds: response.messages.reversed.map((message) => message.senderId).toList(),
       );
-      emit(
-        state.copyWith(
-          messages: response.messages,
-          isAllMessagesLoaded: response.foundOldest,
-          lastMessageId: response.messages.first.id,
-          channelMembers: sortedChannelMembers,
-        ),
+
+      final newState = state.copyWith(
+        messages: response.messages,
+        isAllMessagesLoaded: response.foundOldest,
+        lastMessageId: response.messages.isNotEmpty ? response.messages.first.id : null,
+        channelMembers: sortedChannelMembers,
       );
+      emit(newState);
     } catch (e) {
       inspect(e);
     } finally {

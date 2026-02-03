@@ -36,6 +36,8 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final bool applyMarkdown = body.applyMarkdown;
       final bool clientGravatar = body.clientGravatar;
       final bool includeAnchor = body.includeAnchor;
+      // final String? messageIds = "[${body.messageIds?.join(',')}]";
+      final String? messageIds = jsonEncode(body.messageIds);
 
       return await apiClient.getMessages(
         anchor,
@@ -45,6 +47,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
         applyMarkdown,
         clientGravatar,
         includeAnchor,
+        messageIds,
       );
     } catch (e) {
       rethrow;
@@ -67,12 +70,12 @@ class MessagesDataSourceImpl implements MessagesDataSource {
     try {
       final readBySender = true;
       await apiClient.sendMessage(
-        body.type,
-        jsonEncode(body.to),
-        body.content,
-        body.streamId,
-        body.topic,
-        readBySender,
+        type: body.type.name,
+        to: jsonEncode(body.to),
+        content: body.content,
+        streamId: body.streamId,
+        topic: body.topic,
+        readBySender: readBySender,
       );
     } catch (e) {
       rethrow;
@@ -139,7 +142,10 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   @override
   Future<UpdateMessageResponseDto> updateMessage(UpdateMessageRequestDto body) async {
     try {
-      final response = await apiClient.updateMessage(body.messageId, body.content);
+      final response = await apiClient.updateMessage(
+        messageId: body.messageId,
+        content: body.content,
+      );
       return response;
     } catch (e) {
       rethrow;

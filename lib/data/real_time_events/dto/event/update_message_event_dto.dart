@@ -21,8 +21,7 @@ class UpdateMessageEventDto extends EventDto {
     required this.messageId,
   });
 
-  factory UpdateMessageEventDto.fromJson(Map<String, dynamic> json) =>
-      _$UpdateMessageEventDtoFromJson(json);
+  factory UpdateMessageEventDto.fromJson(Map<String, dynamic> json) => _$UpdateMessageEventDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$UpdateMessageEventDtoToJson(this);
 

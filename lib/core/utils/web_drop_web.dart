@@ -62,12 +62,14 @@ RemoveDropHandlers attachWebDropHandlersForKey({
     final List<DroppedItem> result = [];
     for (final f in files) {
       final bytes = await _readFileBytes(f);
-      result.add(DroppedItem(
-        name: f.name,
-        size: f.size,
-        mime: f.type,
-        bytes: bytes,
-      ));
+      result.add(
+        DroppedItem(
+          name: f.name,
+          size: f.size,
+          mime: f.type,
+          bytes: bytes,
+        ),
+      );
     }
     onDrop(result);
   }

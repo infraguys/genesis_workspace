@@ -19,6 +19,5 @@ class RecipientDto {
 
   Map<String, dynamic> toJson() => _$RecipientDtoToJson(this);
 
-  RecipientEntity toEntity() =>
-      RecipientEntity(email: email, userId: userId, fullName: fullName ?? '');
+  RecipientEntity toEntity() => RecipientEntity(email: email, userId: userId, fullName: fullName ?? '');
 }

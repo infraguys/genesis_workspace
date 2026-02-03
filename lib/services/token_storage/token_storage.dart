@@ -21,6 +21,7 @@ abstract class TokenStorage {
 
   Future<void> clearAll();
 }
+
 class TokenStorageKeys {
   static const String token = 'auth_token';
   static const String sessionId = 'session_id';

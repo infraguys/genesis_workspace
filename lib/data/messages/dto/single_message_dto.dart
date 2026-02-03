@@ -15,8 +15,7 @@ class SingleMessageResponseDto extends ResponseDto {
   });
   final MessageDto message;
 
-  factory SingleMessageResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$SingleMessageResponseDtoFromJson(json);
+  factory SingleMessageResponseDto.fromJson(Map<String, dynamic> json) => _$SingleMessageResponseDtoFromJson(json);
 
   SingleMessageResponseEntity toEntity() => SingleMessageResponseEntity(
     msg: msg,

@@ -8,8 +8,7 @@ part 'delete_message_dto.g.dart';
 class DeleteMessageResponseDto extends ResponseDto {
   DeleteMessageResponseDto({required super.msg, required super.result});
 
-  factory DeleteMessageResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$DeleteMessageResponseDtoFromJson(json);
+  factory DeleteMessageResponseDto.fromJson(Map<String, dynamic> json) => _$DeleteMessageResponseDtoFromJson(json);
 
   DeleteMessageResponseEntity toEntity() => DeleteMessageResponseEntity(msg: msg, result: result);
 }

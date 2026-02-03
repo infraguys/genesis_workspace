@@ -21,9 +21,7 @@ class UnreadMessagesMarker extends StatelessWidget {
     final ColorScheme colors = theme.colorScheme;
 
     final Color lineColor = colors.outlineVariant.withOpacity(0.6);
-    final Color pillBackground = theme.brightness == Brightness.dark
-        ? colors.surfaceContainerHigh
-        : colors.surface;
+    final Color pillBackground = theme.brightness == Brightness.dark ? colors.surfaceContainerHigh : colors.surface;
     final Color pillBorder = colors.outlineVariant.withOpacity(0.7);
     final Color textColor = colors.onSurfaceVariant;
 

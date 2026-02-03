@@ -4,7 +4,7 @@ import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
-import 'package:genesis_workspace/features/messages/bloc/messages_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
 
 class MessageReactionsList extends StatelessWidget {
   final MessageEntity message;
@@ -53,9 +53,7 @@ class MessageReactionsList extends StatelessWidget {
                   color: isMyReaction ? theme.colorScheme.primaryFixedDim : Colors.transparent,
                   borderRadius: BorderRadius.circular(16.0),
                   border: Border.all(
-                    color: isMyReaction
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outlineVariant,
+                    color: isMyReaction ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
                     width: 2,
                   ),
                 ),

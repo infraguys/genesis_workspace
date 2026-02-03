@@ -23,8 +23,7 @@ class UpdateMessageFlagsEventDto extends EventDto {
     required this.all,
   });
 
-  factory UpdateMessageFlagsEventDto.fromJson(Map<String, dynamic> json) =>
-      _$UpdateMessageFlagsEventDtoFromJson(json);
+  factory UpdateMessageFlagsEventDto.fromJson(Map<String, dynamic> json) => _$UpdateMessageFlagsEventDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$UpdateMessageFlagsEventDtoToJson(this);
 

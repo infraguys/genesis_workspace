@@ -9,8 +9,7 @@ class ChannelMembersResponseDto extends ResponseDto {
   final List<int> subscribers;
   ChannelMembersResponseDto({required super.msg, required super.result, required this.subscribers});
 
-  factory ChannelMembersResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$ChannelMembersResponseDtoFromJson(json);
+  factory ChannelMembersResponseDto.fromJson(Map<String, dynamic> json) => _$ChannelMembersResponseDtoFromJson(json);
 
   ChannelMembersResponseEntity toEntity() =>
       ChannelMembersResponseEntity(msg: msg, result: result, subscribers: subscribers);

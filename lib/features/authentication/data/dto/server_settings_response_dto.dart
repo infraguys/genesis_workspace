@@ -24,8 +24,7 @@ class ServerSettingsResponseDto extends ResponseDto {
     required this.externalAuthenticationMethods,
   });
 
-  factory ServerSettingsResponseDto.fromJson(Map<String, dynamic> json) =>
-      _$ServerSettingsResponseDtoFromJson(json);
+  factory ServerSettingsResponseDto.fromJson(Map<String, dynamic> json) => _$ServerSettingsResponseDtoFromJson(json);
 
   ServerSettingsEntity toEntity() => ServerSettingsEntity(
     realmName: realmName,

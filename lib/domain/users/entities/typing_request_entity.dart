@@ -11,6 +11,5 @@ class TypingRequestEntity {
 
   TypingRequestEntity({required this.type, required this.op, this.to, this.streamId, this.topic});
 
-  TypingRequestDto toDto() =>
-      TypingRequestDto(type: type, op: op, to: to, streamId: streamId, topic: topic);
+  TypingRequestDto toDto() => TypingRequestDto(type: type, op: op, to: to, streamId: streamId, topic: topic);
 }

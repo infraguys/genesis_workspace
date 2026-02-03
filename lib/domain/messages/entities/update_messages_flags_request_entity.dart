@@ -9,6 +9,5 @@ class UpdateMessagesFlagsRequestEntity {
 
   UpdateMessagesFlagsRequestEntity({required this.messages, required this.op, required this.flag});
 
-  UpdateMessagesFlagsRequestDto toDto() =>
-      UpdateMessagesFlagsRequestDto(messages: messages, op: op, flag: flag);
+  UpdateMessagesFlagsRequestDto toDto() => UpdateMessagesFlagsRequestDto(messages: messages, op: op, flag: flag);
 }

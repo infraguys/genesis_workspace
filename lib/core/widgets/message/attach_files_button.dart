@@ -28,7 +28,7 @@ class _AttachFilesButtonState extends State<AttachFilesButton> {
   }
 
   void _openContextMenu(Offset globalPosition) async {
-     _closeOverlay();
+    _closeOverlay();
 
     if (!mounted) {
       return;

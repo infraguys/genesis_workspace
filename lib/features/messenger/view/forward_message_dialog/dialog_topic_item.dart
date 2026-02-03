@@ -5,13 +5,13 @@ class _DialogTopicItem extends StatelessWidget with OpenChatMixin {
     super.key, // ignore: unused_element_parameter
     required this.chat,
     required this.topic,
-    required this.messageId,
+    this.messageId,
     this.quote,
   });
 
   final ChatEntity chat;
   final TopicEntity topic;
-  final int messageId;
+  final int? messageId;
   final String? quote;
 
   @override
@@ -23,18 +23,26 @@ class _DialogTopicItem extends StatelessWidget with OpenChatMixin {
       onTap: () async {
         final router = GoRouter.of(context);
         final messagesCubit = context.read<MessagesCubit>();
-        final channelChatCubit = context.read<ChannelChatCubit>();
+        final messageSelectCubit = context.read<MessagesSelectCubit>();
+        final selectedMessages = messageSelectCubit.state.selectedMessages;
         try {
-          final message = await messagesCubit.getMessageById(
-            messageId: messageId,
-            applyMarkdown: false,
-          );
-          channelChatCubit.sendMessage(
-            streamId: chat.streamId!,
-            topic: topic.name,
-            content: message.makeForwardedContent(quote: quote),
-          );
+          final List<MessageEntity> forwardMessages = [];
+          if (selectedMessages.isNotEmpty) {
+            final messagesIds = selectedMessages.map((message) => message.id).toList();
+            final messages = await messagesCubit.getMessagesListByIds(
+              messagesIds: messagesIds,
+              applyMarkdown: false,
+            );
+            forwardMessages.addAll(messages);
+          } else if (messageId != null) {
+            final message = await messagesCubit.getMessageById(
+              messageId: messageId!,
+              applyMarkdown: false,
+            );
+            forwardMessages.add(message);
+          }
           if (context.mounted) {
+            context.read<MessagesSelectCubit>().setForwardMessages(forwardMessages);
             openChannel(context, channelId: chat.streamId!, topicName: topic.name, replace: true);
           }
         } on DioException catch (e) {

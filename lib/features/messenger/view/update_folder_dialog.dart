@@ -187,9 +187,7 @@ class _UpdateFolderDialogState extends State<UpdateFolderDialog> {
                         Icon(Icons.folder, color: selectedColor),
                         const SizedBox(width: 8),
                         Text(
-                          titleController.text.trim().isEmpty
-                              ? context.t.folders.preview
-                              : titleController.text.trim(),
+                          titleController.text.trim().isEmpty ? context.t.folders.preview : titleController.text.trim(),
                         ),
                       ],
                     ),

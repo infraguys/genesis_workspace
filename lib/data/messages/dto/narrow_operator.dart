@@ -14,6 +14,8 @@ enum NarrowOperator {
   has,
   @JsonValue('sender')
   sender,
+  @JsonValue('id')
+  id,
 }
 
 extension NarrowOperatorToJson on NarrowOperator {
@@ -31,6 +33,8 @@ extension NarrowOperatorToJson on NarrowOperator {
         return 'has';
       case NarrowOperator.sender:
         return 'sender';
+      case NarrowOperator.id:
+        return 'id';
     }
   }
 }

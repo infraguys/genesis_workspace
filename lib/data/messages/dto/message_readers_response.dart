@@ -14,6 +14,5 @@ class MessageReadersResponse extends ResponseDto {
   @JsonKey(name: 'user_ids')
   final List<int> userIds;
 
-  factory MessageReadersResponse.fromJson(Map<String, dynamic> json) =>
-      _$MessageReadersResponseFromJson(json);
+  factory MessageReadersResponse.fromJson(Map<String, dynamic> json) => _$MessageReadersResponseFromJson(json);
 }

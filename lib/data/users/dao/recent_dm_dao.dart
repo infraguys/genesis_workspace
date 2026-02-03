@@ -26,9 +26,7 @@ class RecentDmDao extends DatabaseAccessor<AppDatabase> with _$RecentDmDaoMixin 
     await batch((Batch batch) {
       batch.insertAllOnConflictUpdate(
         recentDms,
-        directMessageIds
-            .map((int id) => RecentDmsCompanion.insert(dmId: Value(id)))
-            .toList(growable: false),
+        directMessageIds.map((int id) => RecentDmsCompanion.insert(dmId: Value(id))).toList(growable: false),
       );
     });
   }
