@@ -193,6 +193,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
   }
 
   void _openContextMenu(BuildContext context, Offset globalPosition) {
+    HapticFeedback.mediumImpact();
     _closeOverlay();
 
     final overlay = Overlay.of(context, rootOverlay: true);
