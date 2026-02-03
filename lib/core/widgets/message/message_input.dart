@@ -330,7 +330,9 @@ class _MessageInputState extends State<MessageInput> {
                                                 );
                                               }
                                             },
-                                            textInputAction: .send,
+                                            textCapitalization: platformInfo.isMobile
+                                                ? TextCapitalization.sentences
+                                                : TextCapitalization.none,
                                             onSubmitted: (_) {
                                               if (_isShiftPressed()) {
                                                 _insertNewLine();
