@@ -112,8 +112,6 @@ class _MessagesListState extends State<MessagesList> {
 
     _firstUnreadIndexInReversed = _findFirstUnreadBoundaryIndex(reversedMessages);
 
-    print(_firstUnreadIndexInReversed);
-
     if (_firstUnreadIndexInReversed != null) {
       if (_itemScrollController.isAttached) {
         _itemScrollController.jumpTo(
