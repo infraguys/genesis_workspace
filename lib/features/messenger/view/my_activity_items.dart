@@ -132,9 +132,11 @@ class _MyActivityItemsState extends State<MyActivityItems> with OpenChatMixin {
 
   @override
   Widget build(BuildContext context) {
-    final messages = context.read<MessengerCubit>().state.messages;
-    final mentionsUnreadCount = messages.where((message) => message.isUnread && message.isMentioned).toList().length;
-    final draftsCount = context.read<DraftsCubit>().state.drafts.length;
+    final mentionsUnreadCount = context.select((MessengerCubit cubit) {
+      return cubit.state.mentionsUnreadCount;
+    });
+
+    final draftsCount = context.select((DraftsCubit cubit) => cubit.state.drafts.length);
     return ExpansionTile(
       title: Text(context.t.myActivity),
       controller: _controller,
