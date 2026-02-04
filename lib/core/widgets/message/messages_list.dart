@@ -116,7 +116,7 @@ class _MessagesListState extends State<MessagesList> {
       if (_itemScrollController.isAttached) {
         _itemScrollController.scrollTo(
           index: _firstUnreadIndexInReversed!,
-          alignment: 1.0, // начало экрана
+          alignment: 1, // начало экрана
           duration: const Duration(milliseconds: 300),
         );
       }
@@ -359,29 +359,6 @@ class _MessagesListState extends State<MessagesList> {
                   if (index == _reversed.length - 1) {
                     return messageWidget;
                   }
-
-                  // final currentMessage = _reversed[index];
-                  // final nextSeparatorMessage = _reversed[index + 1];
-
-                  // final separatorMessageDate = DateTime.fromMillisecondsSinceEpoch(currentMessage.timestamp * 1000);
-                  // final isNewDaySeparator =
-                  //     _dayInt(currentMessage.timestamp) != _dayInt(nextSeparatorMessage.timestamp);
-                  // final unreadCount = _reversed.where((message) => message.isUnread).length;
-                  // final bool isNewTopic = currentMessage.subject != nextSeparatorMessage.subject;
-
-                  // final separator = Padding(
-                  //   padding: (!isNewTopic && !isNewDaySeparator) ? const .symmetric(vertical: 4) : const .all(16.0),
-                  //   child: Column(
-                  //     mainAxisSize: .min,
-                  //     spacing: 8.0,
-                  //     children: [
-                  //       if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
-                  //         UnreadMessagesMarker(unreadCount: unreadCount),
-                  //       if (isNewTopic) TopicSeparator(message: currentMessage),
-                  //       if (isNewDaySeparator) MessageDayLabel(label: _getDayLabel(context, separatorMessageDate)),
-                  //     ],
-                  //   ),
-                  // );
 
                   return messageWidget;
                 },
