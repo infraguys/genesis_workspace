@@ -480,9 +480,7 @@ class _MessengerViewState extends State<MessengerView>
                                   selfUserId: state.selfUser?.userId ?? -1,
                                 ),
                               ),
-                              MyActivityItems(
-                                mySelfChatId: state.mySelfChatId ?? -1,
-                              ),
+                              MyActivityItems(),
                               SizedBox(
                                 height: 8,
                               ),
