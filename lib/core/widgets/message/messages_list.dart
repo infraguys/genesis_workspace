@@ -322,7 +322,7 @@ class _MessagesListState extends State<MessagesList> {
                         messageDate.year != prevMessageDate.year;
                   }
 
-                  final messageWidget = VisibilityDetector(
+                  return VisibilityDetector(
                     key: ValueKey('msg-${message.id}'),
                     onVisibilityChanged: (info) {
                       final visiblePercentage = info.visibleFraction * 100;
@@ -354,12 +354,6 @@ class _MessagesListState extends State<MessagesList> {
                       ),
                     ),
                   );
-
-                  if (index == _reversed.length - 1) {
-                    return messageWidget;
-                  }
-
-                  return messageWidget;
                 },
               ),
               // Лейбл даты при скролле
