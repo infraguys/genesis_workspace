@@ -47,16 +47,21 @@ class _MyActivityItemsState extends State<MyActivityItems> with OpenChatMixin {
     super.dispose();
   }
 
-  List<_ActivityItem> _activityItems({required int mentionsUnreadCount, required int draftsCount}) {
+  List<_ActivityItem> _activityItems(
+    BuildContext context, {
+    required int mentionsUnreadCount,
+    required int draftsCount,
+  }) {
     return <_ActivityItem>[
       _ActivityItem(
         title: context.t.favorite.title,
         onTap: () {
-          final myUserId = context.read<ProfileCubit>().state.user?.userId;
+          final myUserId = context.select((ProfileCubit cubit) => cubit.state.user?.userId);
+          final mySelfChatId = context.select((MessengerCubit cubit) => cubit.state.mySelfChatId);
           if (myUserId != null) {
             openChat(
               context,
-              chatId: myUserId,
+              chatId: mySelfChatId ?? -1,
               membersIds: {myUserId},
             );
           }
@@ -162,7 +167,7 @@ class _MyActivityItemsState extends State<MyActivityItems> with OpenChatMixin {
       onExpansionChanged: (bool isExpanded) {
         setState(() => _isExpanded = isExpanded);
       },
-      children: _activityItems(mentionsUnreadCount: mentionsUnreadCount, draftsCount: draftsCount)
+      children: _activityItems(context, mentionsUnreadCount: mentionsUnreadCount, draftsCount: draftsCount)
           .expand(
             (item) => [
               ActivityChatItem(
