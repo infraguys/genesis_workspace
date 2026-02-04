@@ -51,6 +51,7 @@ class MessengerState {
 
   int? get mySelfChatId =>
       chats.firstWhereOrNull((chat) => chat.dmIds?.length == 1 && chat.dmIds?.first == selfUser?.userId)?.id;
+  int get mentionsUnreadCount => messages.where((message) => message.isUnread && message.isMentioned).length;
 
   static MessengerState initial = MessengerState(
     selfUser: null,
