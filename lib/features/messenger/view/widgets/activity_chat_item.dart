@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 
 class ActivityChatItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final Widget icon;
   final Color color;
+  final int unreadCount;
+  final bool isMuted;
   const ActivityChatItem({
     super.key,
     required this.title,
     required this.onTap,
     required this.icon,
     required this.color,
+    this.unreadCount = 0,
+    this.isMuted = false,
   });
 
   static const BorderRadius materialBorderRadius = BorderRadius.all(Radius.circular(8));
@@ -34,25 +39,32 @@ class ActivityChatItem extends StatelessWidget {
         child: Padding(
           padding: EdgeInsetsGeometry.all(8),
           child: Row(
+            mainAxisAlignment: .spaceBetween,
             children: [
-              Container(
-                width: 30,
-                height: 30,
-                padding: EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color,
-                ),
-                child: icon,
+              Row(
+                spacing: 12,
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    padding: EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color,
+                    ),
+                    child: icon,
+                  ),
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(
-                width: 12,
-              ),
-              Text(
-                title,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+              UnreadBadge(
+                count: unreadCount,
+                isMuted: isMuted,
               ),
             ],
           ),

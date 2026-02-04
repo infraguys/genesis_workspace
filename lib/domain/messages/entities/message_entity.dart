@@ -38,6 +38,7 @@ class MessageEntity extends Equatable {
   final int recipientId;
 
   bool get isUnread => flags != null ? !flags!.contains('read') : true;
+  bool get isMentioned => flags != null ? flags!.contains('mentioned') : true;
 
   bool get isDirectMessage =>
       type == MessageType.private && (displayRecipient as DirectMessageRecipients).recipients.length <= 2;
