@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/messenger/view/mobile_topic_item.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatTopicsList extends StatefulWidget {
-  final bool showTopics;
-  final bool isPending;
-  final ChatEntity? selectedChat;
-  final double listPadding;
   const ChatTopicsList({
     super.key,
     required this.showTopics,
@@ -17,6 +12,11 @@ class ChatTopicsList extends StatefulWidget {
     this.selectedChat,
     required this.listPadding,
   });
+
+  final bool showTopics;
+  final bool isPending;
+  final ChatEntity? selectedChat;
+  final double listPadding;
 
   @override
   State<ChatTopicsList> createState() => _ChatTopicsListState();
@@ -40,15 +40,16 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
+    final sizeOf = MediaQuery.sizeOf(context);
+
     return Positioned(
       right: 0,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: MediaQuery.sizeOf(context).height,
+        height: sizeOf.height,
         decoration: BoxDecoration(color: theme.colorScheme.background),
         constraints: BoxConstraints(
-          maxWidth: widget.showTopics ? MediaQuery.sizeOf(context).width - 70 : 0,
+          maxWidth: widget.showTopics ? sizeOf.width - 70 : 0,
         ),
         child: Skeletonizer(
           enabled: widget.isPending,
@@ -59,7 +60,7 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
                   shrinkWrap: true,
                   padding: EdgeInsets.only(bottom: widget.listPadding),
                   itemCount: widget.selectedChat!.isTopicsLoading ? 4 : widget.selectedChat!.topics!.length,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (context, index) {
                     final topic = widget.selectedChat?.topics?[index] ?? TopicEntity.fake();
                     return MobileTopicItem(selectedChat: widget.selectedChat!, topic: topic);
                   },
