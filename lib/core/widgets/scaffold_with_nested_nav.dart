@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/core/widgets/app_mobile_drawer.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
@@ -152,6 +153,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                 return Stack(
                   children: [
                     Scaffold(
+                      drawer: AppMobileDrawer(),
                       bottomNavigationBar: isTabletOrSmaller
                           ? ClipRRect(
                               borderRadius: const BorderRadius.only(

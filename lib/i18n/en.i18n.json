@@ -197,7 +197,8 @@
       "urlInvalid": "Link is not valid",
       "submit": "Add"
     },
-    "delete_organization": "Delete organization"
+    "delete_organization": "Delete organization",
+    "title": "Organizations"
   },
   "channel": {
     "channelName": "Channel name",

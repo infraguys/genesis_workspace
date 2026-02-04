@@ -205,7 +205,8 @@
       "urlInvalid": "Некорректная ссылка",
       "submit": "Добавить"
     },
-    "delete_organization": "Удалить организацию"
+    "delete_organization": "Удалить организацию",
+    "title": "Организации"
   },
   "channel": {
     "channelName": "Название канала",
