@@ -9,7 +9,6 @@ import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/event/update_message_flags_event_entity.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
 
@@ -27,13 +26,9 @@ class MentionsCubit extends Cubit<MentionsState> {
         ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
-    _updateMessageFlagsEventsSubscription = _realTimeService.messageFlagsEventsStream.listen(
-      _onMessageFlagsUpdateEvents,
-    );
   }
 
   late final StreamSubscription<MessageEventEntity> _messagesEventsSubscription;
-  late final StreamSubscription<UpdateMessageFlagsEventEntity> _updateMessageFlagsEventsSubscription;
 
   final MultiPollingService _realTimeService;
   final GetMessagesUseCase _getMessagesUseCase;
@@ -90,8 +85,6 @@ class MentionsCubit extends Cubit<MentionsState> {
       emit(state.copyWith(messages: updatedMessages));
     }
   }
-
-  void _onMessageFlagsUpdateEvents(UpdateMessageFlagsEventEntity event) {}
 
   @override
   Future<void> close() {
