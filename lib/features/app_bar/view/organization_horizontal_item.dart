@@ -3,7 +3,7 @@ import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
-class OrganizationHorizonlatItem extends StatelessWidget {
+class OrganizationHorizontalItem extends StatelessWidget {
   final String name;
   final int unreadCount;
   final String imagePath;
@@ -11,7 +11,7 @@ class OrganizationHorizonlatItem extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
-  OrganizationHorizonlatItem({
+  OrganizationHorizontalItem({
     super.key,
     required this.name,
     required this.unreadCount,

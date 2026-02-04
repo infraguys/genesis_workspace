@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/features/app_bar/view/organization_horizonlat_item.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/features/app_bar/view/organization_horizontal_item.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
+import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class AppMobileDrawer extends StatelessWidget {
@@ -10,6 +12,7 @@ class AppMobileDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final TextColors textColors = theme.extension<TextColors>()!;
     return Drawer(
       child: SafeArea(
         child: Padding(
@@ -33,7 +36,7 @@ class AppMobileDrawer extends StatelessWidget {
                     separatorBuilder: (_, _) => SizedBox(width: 16),
                     itemBuilder: (context, index) {
                       final organization = organizations[index];
-                      return OrganizationHorizonlatItem(
+                      return OrganizationHorizontalItem(
                         name: organization.name,
                         unreadCount: organization.unreadMessages.length,
                         imagePath: organization.imageUrl,
@@ -54,6 +57,29 @@ class AppMobileDrawer extends StatelessWidget {
                     },
                   );
                 },
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final url = await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext dialogContext) => const AddOrganizationDialog(),
+                    );
+                    if (url != null && context.mounted) {
+                      await context.read<OrganizationsCubit>().addOrganization(url);
+                    }
+                  },
+                  icon: Icon(
+                    Icons.add,
+                    color: textColors.text100,
+                  ),
+                  label: Text(
+                    context.t.organizations.addDialog.title,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
               ),
             ],
           ),
