@@ -169,6 +169,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   @override
   Widget build(BuildContext context) {
     final isTabletOrSmaller = currentSize(context) <= .tablet;
+    final mockHeight = _loading && isTabletOrSmaller;
     return GestureDetector(
       onTap: () {
         if (_imageBytes != null) {
@@ -185,12 +186,12 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
         tag: _imageBytes.toString(),
         child: SizedBox(
           width: widget.width,
-          height: _loading ? 150 : widget.height,
+          height: mockHeight ? 150 : widget.height,
           child: Builder(
             builder: (BuildContext context) {
               if ((_error || _imageBytes == null) && !_loading) {
                 return Container(
-                  height: widget.height,
+                  height: mockHeight ? 150 : widget.height,
                   width: widget.width,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
@@ -206,7 +207,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
                 child: Image.memory(
                   _loading ? Uint8List(1) : (_imageBytes ?? Uint8List(0)),
                   width: widget.width,
-                  height: _loading ? 150 : widget.height,
+                  height: mockHeight ? 150 : widget.height,
                   fit: widget.fit,
                   filterQuality: FilterQuality.high,
                   errorBuilder: (context, error, stackTrace) {
