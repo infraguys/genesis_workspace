@@ -129,7 +129,10 @@ class MessageHtml extends StatelessWidget {
         return true;
       },
       customWidgetBuilder: (element) {
-        if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
+        if (element.attributes.containsValue('image/png') ||
+            element.attributes.containsValue('image/jpeg') ||
+            element.attributes.containsValue('image/gif') ||
+            element.attributes.containsValue('image/webp')) {
           final src = element.parentNode?.attributes['href'];
           final thumbnailSrc = element.attributes['src'];
           final size = extractDimensionsFromUrl(thumbnailSrc ?? '');

@@ -42,6 +42,9 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   bool _loading = true;
   bool _error = false;
 
+  static const double mockedHeight = 250;
+  static const double mockedWidth = 300;
+
   late final Dio _authorizedDio;
 
   @override
@@ -169,7 +172,8 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   @override
   Widget build(BuildContext context) {
     final isTabletOrSmaller = currentSize(context) <= .tablet;
-    final mockHeight = _loading && isTabletOrSmaller;
+    final mockHeight = (_loading && isTabletOrSmaller) || widget.height == null;
+    final mockWidth = _loading && widget.width == null;
     return GestureDetector(
       onTap: () {
         if (_imageBytes != null) {
@@ -185,14 +189,14 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
       child: Hero(
         tag: _imageBytes.toString(),
         child: SizedBox(
-          width: widget.width,
-          height: mockHeight ? 150 : widget.height,
+          width: mockWidth ? mockedWidth : widget.width,
+          height: mockHeight ? mockedHeight : widget.height,
           child: Builder(
             builder: (BuildContext context) {
               if ((_error || _imageBytes == null) && !_loading) {
                 return Container(
-                  height: mockHeight ? 150 : widget.height,
-                  width: widget.width,
+                  height: mockHeight ? mockedHeight : widget.height,
+                  width: mockWidth ? mockedWidth : widget.width,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(8),
@@ -206,14 +210,14 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
                 enabled: _loading,
                 child: Image.memory(
                   _loading ? Uint8List(1) : (_imageBytes ?? Uint8List(0)),
-                  width: widget.width,
-                  height: mockHeight ? 150 : widget.height,
+                  width: mockWidth ? mockedWidth : widget.width,
+                  height: mockHeight ? mockedHeight : widget.height,
                   fit: widget.fit,
                   filterQuality: FilterQuality.high,
                   errorBuilder: (context, error, stackTrace) {
                     return SizedBox(
-                      width: widget.width,
-                      height: widget.height,
+                      width: mockWidth ? mockedWidth : widget.width,
+                      height: mockHeight ? mockedHeight : widget.height,
                       child: const ColoredBox(color: Colors.white),
                     );
                   },
