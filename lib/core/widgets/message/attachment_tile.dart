@@ -86,7 +86,12 @@ class _AttachmentTileState extends State<AttachmentTile> {
       onTap: () {
         if (isImage && widget.file is UploadedFileEntity) {
           final UploadedFileEntity file = widget.file as UploadedFileEntity;
-          context.pushNamed(Routes.imageFullScreen, extra: '${AppConstants.baseUrl}${file.url}');
+          context.pushNamed(
+            Routes.imageFullScreen,
+            extra: {
+              "imageUrl": '${AppConstants.baseUrl}${file.url}',
+            },
+          );
         }
       },
       child: MouseRegion(

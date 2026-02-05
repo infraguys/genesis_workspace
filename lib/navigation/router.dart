@@ -344,9 +344,10 @@ final router = GoRouter(
       path: Routes.imageFullScreen,
       name: Routes.imageFullScreen,
       pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
         return CustomTransitionPage(
           key: state.pageKey,
-          child: ImageFullScreen(imageUrl: state.extra as String),
+          child: ImageFullScreen(imageUrl: extra['imageUrl'] ?? '', bytes: extra['bytes']),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),

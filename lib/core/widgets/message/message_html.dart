@@ -98,6 +98,7 @@ class MessageHtml extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isTabletOrSmaller = currentSize(context) <= .tablet;
     final Widget html = HtmlWidget(
       content,
       customStylesBuilder: (element) {
@@ -128,19 +129,22 @@ class MessageHtml extends StatelessWidget {
         return true;
       },
       customWidgetBuilder: (element) {
-        if (element.attributes.containsValue('image/png') || element.attributes.containsValue('image/jpeg')) {
+        if (element.attributes.containsValue('image/png') ||
+            element.attributes.containsValue('image/jpeg') ||
+            element.attributes.containsValue('image/gif') ||
+            element.attributes.containsValue('image/webp')) {
           final src = element.parentNode?.attributes['href'];
           final thumbnailSrc = element.attributes['src'];
-          final size = extractDimensionsFromUrl(src ?? '');
+          final size = extractDimensionsFromUrl(thumbnailSrc ?? '');
           final String? imageUrl = _buildImageUrl(src);
           final String thumbnailUrl = _buildThumbnailUrl(thumbnailSrc) ?? '';
           if (imageUrl == null) return const SizedBox.shrink();
           return AuthorizedImage(
             url: imageUrl,
-            thumbnailUrl: thumbnailUrl,
+            thumbnailUrl: imageUrl,
             width: size?.width,
-            height: size?.height,
-            fit: BoxFit.contain,
+            height: isTabletOrSmaller ? null : size?.height,
+            fit: isTabletOrSmaller ? .fitWidth : .contain,
           );
         }
 
