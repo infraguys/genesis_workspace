@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:media_kit/media_kit.dart';
@@ -44,6 +47,12 @@ class _AuthorizedVideo extends StatefulWidget {
 
 class _AuthorizedVideoState extends State<_AuthorizedVideo> {
   static const double _fallbackAspectRatio = 16 / 9;
+  static const List<DeviceOrientation> _allOrientations = <DeviceOrientation>[
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ];
 
   final _videoKey = GlobalKey<VideoState>();
 
@@ -61,16 +70,19 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
     _open();
   }
 
-  @override
-  void didUpdateWidget(covariant _AuthorizedVideo oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.fileUrl.trim() != widget.fileUrl.trim()) {
-      _open();
-    }
-  }
+  // @override
+  // void didUpdateWidget(covariant _AuthorizedVideo oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   if (oldWidget.fileUrl.trim() != widget.fileUrl.trim()) {
+  //     _open();
+  //   }
+  // }
 
   @override
   void dispose() {
+    // Safety: if something goes wrong and fullscreen exits without callback,
+    // at least don't keep orientation/UI locked after widget disposal.
+    _exitMobileFullscreenIfNeeded();
     _player.dispose();
     super.dispose();
   }
@@ -197,31 +209,64 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
     }
   }
 
-  Future<void> _enterFullscreen() async {
-    await _videoKey.currentState?.enterFullscreen();
+  bool get _isMobile =>
+      !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+
+  Future<void> _enterMobileFullscreenIfNeeded() async {
+    if (!_isMobile) return;
+    await Future.wait(<Future<void>>[
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.immersive,
+      ),
+    ]);
   }
 
-  Future<void> _onEnterFullscreen() async {
-    // Включаем звук и запускаем воспроизведение только в fullscreen.
-    await _player.setVolume(1.0);
+  Future<void> _exitMobileFullscreenIfNeeded() async {
+    if (!_isMobile) return;
+    await Future.wait(<Future<void>>[
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      ),
+      // На iOS/Android `[]` иногда не снимает лок. Явно возвращаем "всё разрешено".
+      SystemChrome.setPreferredOrientations(_allOrientations),
+    ]);
+  }
+
+  Future<void> _prepareForFullscreenPlayback() async {
+    // media_kit volume: 0..100
+    await _player.setVolume(70);
     await _player.play();
   }
 
-  Future<void> _onExitFullscreen() async {
-    // Возвращаемся к превью (пауза, mute, в начало).
+  Future<void> _restoreAfterFullscreenPlayback() async {
     await _player.pause();
     await _player.setVolume(0.0);
     await _player.seek(Duration.zero);
   }
 
+  Future<void> _enterFullscreen() async {
+    if (_opening) return;
+    await _prepareForFullscreenPlayback();
+    await _videoKey.currentState?.enterFullscreen();
+  }
+
+  Future<void> _onEnterFullscreen() async {
+    // В fullscreen: скрыть system UI + залочить landscape (для мобильных).
+    await _enterMobileFullscreenIfNeeded();
+  }
+
+  Future<void> _onExitFullscreen() async {
+    await _restoreAfterFullscreenPlayback();
+    await _exitMobileFullscreenIfNeeded();
+  }
+
   Future<void> _handleEnterFullscreen() async {
-    await defaultEnterNativeFullscreen();
     await _onEnterFullscreen();
   }
 
   Future<void> _handleExitFullscreen() async {
     await _onExitFullscreen();
-    await defaultExitNativeFullscreen();
   }
 
   double _aspectRatioFrom(VideoParams? params) {
@@ -234,6 +279,7 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isTabletOrSmaller = currentSize(context) <= .tablet;
 
     if (_initError != null) {
       return Container(
@@ -266,6 +312,7 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
         child: StreamBuilder<VideoParams>(
           stream: _player.stream.videoParams,
           builder: (context, snapshot) {
+            inspect(snapshot);
             final aspectRatio = _aspectRatioFrom(snapshot.data);
             return AspectRatio(
               aspectRatio: aspectRatio,
@@ -282,10 +329,11 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
                       child: Video(
                         key: _videoKey,
                         controller: _controller,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fitWidth,
+                        aspectRatio: aspectRatio,
                         controls: (state) {
-                          // В чате — без панели. В fullscreen — показываем контролы.
-                          return state.isFullscreen() ? AdaptiveVideoControls(state) : const SizedBox.shrink();
+                          final bool showControls = !isTabletOrSmaller || state.isFullscreen();
+                          return showControls ? AdaptiveVideoControls(state) : const SizedBox.shrink();
                         },
                         onEnterFullscreen: _handleEnterFullscreen,
                         onExitFullscreen: _handleExitFullscreen,
@@ -306,7 +354,7 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: _enterFullscreen,
+                        onTap: _opening ? null : _enterFullscreen,
                         child: Center(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
