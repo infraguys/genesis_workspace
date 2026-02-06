@@ -199,7 +199,7 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
             child: Video(
               controller: _controller,
               fit: BoxFit.contain,
-              controls: MaterialVideoControls,
+              controls: AdaptiveVideoControls,
               // При смене ориентации/метрик не хотим автопауз.
               pauseUponEnteringBackgroundMode: false,
               resumeUponEnteringForegroundMode: true,
