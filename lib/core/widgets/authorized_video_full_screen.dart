@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -29,14 +30,20 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
 
   Object? _error;
   bool _opening = true;
+  final List<StreamSubscription<dynamic>> _debugSubs = [];
+  bool _forcedAudioTrack = false;
 
   @override
   void initState() {
     super.initState();
-    _player = Player();
-    _player.stream.audioDevices.listen((devices) {
-      debugPrint('Audio devices: ${devices.map((d) => '${d.name} (${d.description})').join(', ')}');
-    });
+    _player = Player(
+      configuration: const PlayerConfiguration(
+        logLevel: MPVLogLevel.info,
+      ),
+    );
+    if (kDebugMode) {
+      _attachDebugListeners();
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _enterImmersiveIfMobile();
     });
@@ -45,9 +52,42 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
 
   @override
   void dispose() {
+    for (final sub in _debugSubs) {
+      sub.cancel();
+    }
     _exitImmersiveIfMobile();
     _player.dispose();
     super.dispose();
+  }
+
+  void _attachDebugListeners() {
+    _debugSubs.add(_player.stream.audioDevices.listen((devices) {
+      debugPrint('Audio devices: $devices');
+    }));
+    _debugSubs.add(_player.stream.audioDevice.listen((device) {
+      debugPrint('Audio device selected: $device');
+    }));
+    _debugSubs.add(_player.stream.audioParams.listen((params) {
+      debugPrint('Audio params: $params');
+    }));
+    _debugSubs.add(_player.stream.tracks.listen((tracks) {
+      debugPrint('Audio tracks: ${tracks.audio}');
+      if (_forcedAudioTrack) return;
+      final real = tracks.audio.where((t) => t.id != 'auto' && t.id != 'no').toList();
+      if (real.isNotEmpty) {
+        _forcedAudioTrack = true;
+        unawaited(_player.setAudioTrack(real.first));
+      }
+    }));
+    _debugSubs.add(_player.stream.track.listen((track) {
+      debugPrint('Selected track: $track');
+    }));
+    _debugSubs.add(_player.stream.error.listen((err) {
+      debugPrint('Player error: $err');
+    }));
+    _debugSubs.add(_player.stream.log.listen((log) {
+      debugPrint('MPV ${log.level} ${log.prefix}: ${log.text}');
+    }));
   }
 
   bool get _isMobile =>
@@ -149,7 +189,6 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
   }
 
   Future<void> _openAndPlay() async {
-    await _player.setAudioDevice(AudioDevice.auto());
     _controller = VideoController(_player);
     try {
       final Uri? uri = _resolveUri(widget.fileUrl);
@@ -159,8 +198,6 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
 
       final Map<String, String>? headers = _shouldUseAuthorizedHeaders(uri) ? await _buildAuthorizedHeaders() : null;
 
-      // media_kit volume: 0..100
-      await _player.setVolume(70);
       await _player.open(
         Media(
           uri.toString(),
@@ -168,6 +205,9 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
         ),
         play: true,
       );
+      await _player.setAudioDevice(AudioDevice.auto());
+      // media_kit volume: 0..100
+      await _player.setVolume(100);
 
       if (!mounted) return;
       setState(() {
