@@ -77,7 +77,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 30
+          fetch-depth: 100
       - name: Install DevTools & get version
         id: devtools
         run: |
