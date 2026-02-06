@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
-import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -16,7 +16,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 ///
 /// Сейчас реализовано видео (например `.mp4`):
 /// - В чате: превью (первый кадр) + tap to open fullscreen.
-/// - В fullscreen: показываем панель управления.
+/// - Fullscreen: отдельный роут с плеером и панелью управления.
 class AuthorizedMedia extends StatelessWidget {
   final String fileUrl;
 
@@ -27,24 +27,22 @@ class AuthorizedMedia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Сейчас поддерживаем только видео. Если в будущем добавится аудио/другое —
-    // можно расширить здесь по расширению файла или MIME.
-    return _AuthorizedVideo(fileUrl: fileUrl);
+    return _AuthorizedVideoPreview(fileUrl: fileUrl);
   }
 }
 
-class _AuthorizedVideo extends StatefulWidget {
+class _AuthorizedVideoPreview extends StatefulWidget {
   final String fileUrl;
 
-  const _AuthorizedVideo({
+  const _AuthorizedVideoPreview({
     required this.fileUrl,
   });
 
   @override
-  State<_AuthorizedVideo> createState() => _AuthorizedVideoState();
+  State<_AuthorizedVideoPreview> createState() => _AuthorizedVideoPreviewState();
 }
 
-class _AuthorizedVideoState extends State<_AuthorizedVideo> {
+class _AuthorizedVideoPreviewState extends State<_AuthorizedVideoPreview> {
   static const double _fallbackAspectRatio = 16 / 9;
 
   late final Player _player;
@@ -52,15 +50,21 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
 
   Object? _initError;
   bool _opening = true;
-  String? _resolvedUrl;
-  Map<String, String>? _headers;
 
   @override
   void initState() {
     super.initState();
     _player = Player();
     _controller = VideoController(_player);
-    _open();
+    _openPreview();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AuthorizedVideoPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.fileUrl.trim() != widget.fileUrl.trim()) {
+      _openPreview();
+    }
   }
 
   @override
@@ -140,8 +144,7 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
       headers['Referer'] = AppConstants.baseUrl;
     }
 
-    // На Web браузер не позволяет вручную проставлять Cookie/Referer/CSRF
-    // заголовки. Оставляем только Authorization (если есть).
+    // На Web браузер не позволяет вручную проставлять Cookie/Referer/CSRF.
     if (!kIsWeb) {
       headers['Cookie'] = cookieParts.join('; ');
     }
@@ -149,7 +152,7 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
     return headers;
   }
 
-  Future<void> _open() async {
+  Future<void> _openPreview() async {
     setState(() {
       _opening = true;
       _initError = null;
@@ -167,9 +170,6 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
     try {
       final Map<String, String>? headers = _shouldUseAuthorizedHeaders(uri) ? await _buildAuthorizedHeaders() : null;
       if (!mounted) return;
-
-      _resolvedUrl = uri.toString();
-      _headers = headers;
 
       await _player.setVolume(0.0);
       await _player.open(
@@ -194,22 +194,19 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
     }
   }
 
-  Future<void> _openFullscreen(BuildContext context) async {
-    final url = _resolvedUrl;
-    if (url == null || url.isEmpty) return;
-    await Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute<void>(
-        builder: (_) => _AuthorizedVideoFullScreenPage(
-          url: url,
-          headers: _headers,
-        ),
-      ),
+  Future<void> _openFullscreen() async {
+    if (_opening) return;
+    context.pushNamed(
+      Routes.videoFullScreen,
+      extra: <String, dynamic>{
+        'fileUrl': widget.fileUrl,
+      },
     );
   }
 
   double _aspectRatioFrom(VideoParams? params) {
-    final int w = params?.w ?? 1920;
-    final int h = params?.h ?? 1080;
+    final int w = params?.w ?? 0;
+    final int h = params?.h ?? 0;
     if (w > 0 && h > 0) return w / h;
     return _fallbackAspectRatio;
   }
@@ -255,33 +252,39 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ColoredBox(
-                    color: Colors.black,
-                    child: Video(
-                      controller: _controller,
-                      fit: BoxFit.cover,
-                      // В чате контролы не показываем.
-                      controls: (_) => const SizedBox.shrink(),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: aspectRatio * 360,
+                      minWidth: aspectRatio * 480,
+                    ),
+                    child: ColoredBox(
+                      color: Colors.black,
+                      child: Video(
+                        controller: _controller,
+                        fit: BoxFit.fitWidth,
+                        aspectRatio: aspectRatio,
+                        controls: NoVideoControls,
+                        // onEnterFullscreen: _handleEnterFullscreen,
+                        // onExitFullscreen: _handleExitFullscreen,
+                      ),
                     ),
                   ),
                   Positioned.fill(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _opening ? null : () => _openFullscreen(context),
-                        child: Center(
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.35),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Icon(
-                                Icons.play_arrow_rounded,
-                                color: Colors.white,
-                                size: 32,
-                              ),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _opening ? null : _openFullscreen,
+                      child: Center(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 32,
                             ),
                           ),
                         ),
@@ -293,153 +296,6 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class _AuthorizedVideoFullScreenPage extends StatefulWidget {
-  final String url;
-  final Map<String, String>? headers;
-
-  const _AuthorizedVideoFullScreenPage({
-    required this.url,
-    required this.headers,
-  });
-
-  @override
-  State<_AuthorizedVideoFullScreenPage> createState() => _AuthorizedVideoFullScreenPageState();
-}
-
-class _AuthorizedVideoFullScreenPageState extends State<_AuthorizedVideoFullScreenPage> {
-  late final Player _player;
-  late final VideoController _controller;
-
-  Object? _error;
-  bool _opening = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _player = Player();
-    _controller = VideoController(_player);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _enterImmersive();
-    });
-    _openAndPlay();
-  }
-
-  @override
-  void dispose() {
-    _exitImmersive();
-    _player.dispose();
-    super.dispose();
-  }
-
-  bool get _isMobile => platformInfo.isMobile;
-
-  Future<void> _enterImmersive() async {
-    if (!_isMobile) return;
-    await SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.immersiveSticky,
-      overlays: const <SystemUiOverlay>[],
-    );
-  }
-
-  Future<void> _exitImmersive() async {
-    if (!_isMobile) return;
-    await SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: SystemUiOverlay.values,
-    );
-  }
-
-  Future<void> _openAndPlay() async {
-    try {
-      // media_kit volume: 0..100
-      await _player.setVolume(70);
-      await _player.open(
-        Media(
-          widget.url,
-          httpHeaders: widget.headers,
-        ),
-        play: true,
-      );
-      if (!mounted) return;
-      setState(() {
-        _opening = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _opening = false;
-        _error = e;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final controlsTheme = kDefaultMaterialVideoControlsThemeDataFullscreen.copyWith(
-      // Мы уже "на весь экран" в отдельном роуте; кнопку fullscreen убираем.
-      bottomButtonBar: const <Widget>[
-        MaterialPositionIndicator(),
-        Spacer(),
-      ],
-    );
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          MaterialVideoControlsTheme(
-            normal: controlsTheme,
-            fullscreen: controlsTheme,
-            child: Video(
-              controller: _controller,
-              fit: BoxFit.contain,
-              controls: MaterialVideoControls,
-            ),
-          ),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: IconButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                color: Colors.white,
-                tooltip: 'Back',
-              ),
-            ),
-          ),
-          if (_opening)
-            const Center(
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator(strokeWidth: 3),
-              ),
-            ),
-          if (_error != null)
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'Failed to load video',
-                  style: theme.textTheme.labelMedium,
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }
