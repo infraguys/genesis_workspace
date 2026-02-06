@@ -17,6 +17,8 @@ import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/services/token_storage/secure_token_storage.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:injectable/injectable.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_dio_logger/talker_dio_logger_interceptor.dart';
 import 'package:talker_dio_logger/talker_dio_logger_settings.dart';
@@ -59,6 +61,17 @@ abstract class CoreModule {
   TokenStorage tokenStorage(FlutterSecureStorage secureStorage) {
     return SecureTokenStorage(secureStorage);
   }
+
+  @lazySingleton
+  Player mediaKitPlayer() => Player(
+        configuration: PlayerConfiguration(
+          title: 'Genesis Video',
+          logLevel: kDebugMode ? MPVLogLevel.info : MPVLogLevel.error,
+        ),
+      );
+
+  @lazySingleton
+  VideoController mediaKitVideoController(Player player) => VideoController(player);
 }
 
 @injectable

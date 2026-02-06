@@ -66,3 +66,5 @@ update_script.sh
 **/firebase_app_id_file.json
 .firebase/
 firebase-debug.log
+
+.agents/

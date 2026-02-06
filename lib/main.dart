@@ -10,12 +10,14 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/services/firebase/firebase_service.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
 import 'package:genesis_workspace/services/notifications/local_notifications_service.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 class Main {
   static Future<void> startApp() async {
     WidgetsFlutterBinding.ensureInitialized();
+    MediaKit.ensureInitialized();
     if (platformInfo.isDesktop && !platformInfo.isWeb) {
       await windowManager.ensureInitialized();
     }

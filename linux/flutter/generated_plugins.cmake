@@ -10,6 +10,8 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_secure_storage_linux
   in_app_idle_detector
   irondash_engine_context
+  media_kit_libs_linux
+  media_kit_video
   open_file_linux
   screen_retriever
   sqlite3_flutter_libs

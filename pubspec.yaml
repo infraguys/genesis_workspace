@@ -84,6 +84,9 @@ dependencies:
   talker_dio_logger: ^5.1.9
   talker_bloc_logger: ^5.1.9
   scrollable_positioned_list: ^0.3.8
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_video: ^1.0.7
 
 dev_dependencies:
   flutter_test:

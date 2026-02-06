@@ -79,7 +79,9 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
         SingleActivator(.escape): const CloseFullscreenImageIntent(),
       },
       child: Actions(
-        actions: {CloseFullscreenImageIntent: CloseFullscreenImageAction()},
+        actions: {
+          CloseFullscreenImageIntent: CloseFullscreenImageAction(),
+        },
         child: Focus(
           autofocus: true,
           child: Scaffold(
