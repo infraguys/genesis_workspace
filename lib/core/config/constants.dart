@@ -444,6 +444,7 @@ class SharedPrefsKeys {
   static const String notificationSound = 'notificationSound';
   static const String prioritizePersonalUnread = 'prioritizePersonalUnread';
   static const String prioritizeUnmutedUnreadChannels = 'prioritizeUnmutedUnreadChannels';
+  static const String videoAudioHintDismissed = 'videoAudioHintDismissed';
 }
 
 class AssetsConstants {

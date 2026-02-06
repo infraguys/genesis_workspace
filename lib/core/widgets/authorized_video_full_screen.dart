@@ -7,10 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/shortcuts/close_fullscreen_video_intent.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthorizedVideoFullScreenPage extends StatefulWidget {
   final String fileUrl;
@@ -27,16 +30,20 @@ class AuthorizedVideoFullScreenPage extends StatefulWidget {
 class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScreenPage> {
   late final Player _player;
   late final VideoController _controller;
+  late final SharedPreferences _prefs;
 
   Object? _error;
   bool _opening = true;
   final List<StreamSubscription<dynamic>> _debugSubs = [];
   bool _forcedAudioTrack = false;
   bool _showAudioHint = false;
+  bool _audioHintDismissed = false;
 
   @override
   void initState() {
     super.initState();
+    _prefs = getIt<SharedPreferences>();
+    _audioHintDismissed = _prefs.getBool(SharedPrefsKeys.videoAudioHintDismissed) ?? false;
     _player = getIt<Player>();
     _controller = getIt<VideoController>();
     if (kDebugMode) {
@@ -59,39 +66,52 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
   }
 
   void _attachDebugListeners() {
-    _debugSubs.add(_player.stream.audioDevices.listen((devices) {
-      debugPrint('Audio devices: $devices');
-    }));
-    _debugSubs.add(_player.stream.audioDevice.listen((device) {
-      debugPrint('Audio device selected: $device');
-    }));
-    _debugSubs.add(_player.stream.audioParams.listen((params) {
-      debugPrint('Audio params: $params');
-    }));
-    _debugSubs.add(_player.stream.tracks.listen((tracks) {
-      debugPrint('Audio tracks: ${tracks.audio}');
-      if (_forcedAudioTrack) return;
-      final real = tracks.audio.where((t) => t.id != 'auto' && t.id != 'no').toList();
-      if (real.isNotEmpty) {
-        _forcedAudioTrack = true;
-        unawaited(_player.setAudioTrack(real.first));
-      }
-    }));
-    _debugSubs.add(_player.stream.track.listen((track) {
-      debugPrint('Selected track: $track');
-    }));
-    _debugSubs.add(_player.stream.error.listen((err) {
-      debugPrint('Player error: $err');
-    }));
-    _debugSubs.add(_player.stream.log.listen((log) {
-      debugPrint('MPV ${log.level} ${log.prefix}: ${log.text}');
-    }));
+    _debugSubs.add(
+      _player.stream.audioDevices.listen((devices) {
+        debugPrint('Audio devices: $devices');
+      }),
+    );
+    _debugSubs.add(
+      _player.stream.audioDevice.listen((device) {
+        debugPrint('Audio device selected: $device');
+      }),
+    );
+    _debugSubs.add(
+      _player.stream.audioParams.listen((params) {
+        debugPrint('Audio params: $params');
+      }),
+    );
+    _debugSubs.add(
+      _player.stream.tracks.listen((tracks) {
+        debugPrint('Audio tracks: ${tracks.audio}');
+        if (_forcedAudioTrack) return;
+        final real = tracks.audio.where((t) => t.id != 'auto' && t.id != 'no').toList();
+        if (real.isNotEmpty) {
+          _forcedAudioTrack = true;
+          unawaited(_player.setAudioTrack(real.first));
+        }
+      }),
+    );
+    _debugSubs.add(
+      _player.stream.track.listen((track) {
+        debugPrint('Selected track: $track');
+      }),
+    );
+    _debugSubs.add(
+      _player.stream.error.listen((err) {
+        debugPrint('Player error: $err');
+      }),
+    );
+    _debugSubs.add(
+      _player.stream.log.listen((log) {
+        debugPrint('MPV ${log.level} ${log.prefix}: ${log.text}');
+      }),
+    );
   }
 
-  bool get _isMobile =>
-      !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+  bool get _isMobile => platformInfo.isMobile;
 
-  bool get _isLinuxDesktop => !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
+  bool get _isLinuxDesktop => platformInfo.isLinux;
 
   Future<void> _enterImmersiveIfMobile() async {
     if (!_isMobile) return;
@@ -211,7 +231,7 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
       if (!mounted) return;
       setState(() {
         _opening = false;
-        _showAudioHint = _isLinuxDesktop;
+        _showAudioHint = _isLinuxDesktop && !_audioHintDismissed;
       });
     } catch (e) {
       if (!mounted) return;
@@ -290,8 +310,7 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
                           children: [
                             Expanded(
                               child: Text(
-                                'Если нет звука, проверьте системный микшер (PipeWire/PulseAudio): '
-                                'приложение может быть приглушено или направлено на другой выход.',
+                                context.t.general.audioHint,
                                 style: theme.textTheme.labelMedium?.copyWith(color: Colors.white),
                               ),
                             ),
@@ -299,11 +318,15 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
                               onPressed: () {
                                 setState(() {
                                   _showAudioHint = false;
+                                  _audioHintDismissed = true;
                                 });
+                                unawaited(
+                                  _prefs.setBool(SharedPrefsKeys.videoAudioHintDismissed, true),
+                                );
                               },
                               icon: const Icon(Icons.close),
                               color: Colors.white,
-                              tooltip: 'Close',
+                              tooltip: context.t.general.close,
                               visualDensity: VisualDensity.compact,
                             ),
                           ],
