@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/shortcuts/close_fullscreen_video_intent.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
@@ -154,7 +155,7 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
       final Map<String, String>? headers = _shouldUseAuthorizedHeaders(uri) ? await _buildAuthorizedHeaders() : null;
 
       // media_kit volume: 0..100
-      await _player.setVolume(100.0);
+      await _player.setVolume(70);
       await _player.open(
         Media(
           uri.toString(),
@@ -188,59 +189,72 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
       ],
     );
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          MaterialVideoControlsTheme(
-            normal: controlsTheme,
-            fullscreen: controlsTheme,
-            child: Video(
-              controller: _controller,
-              fit: BoxFit.contain,
-              controls: AdaptiveVideoControls,
-              // При смене ориентации/метрик не хотим автопауз.
-              pauseUponEnteringBackgroundMode: false,
-              resumeUponEnteringForegroundMode: true,
+    return Shortcuts(
+      shortcuts: {
+        SingleActivator(.escape): const CloseFullscreenVideoIntent(),
+      },
+      child: Actions(
+        actions: {
+          CloseFullscreenVideoIntent: CloseFullscreenVideoAction(),
+        },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: Stack(
+              fit: StackFit.expand,
+              children: [
+                MaterialVideoControlsTheme(
+                  normal: controlsTheme,
+                  fullscreen: controlsTheme,
+                  child: Video(
+                    controller: _controller,
+                    fit: BoxFit.contain,
+                    controls: AdaptiveVideoControls,
+                    // При смене ориентации/метрик не хотим автопауз.
+                    pauseUponEnteringBackgroundMode: false,
+                    resumeUponEnteringForegroundMode: true,
+                  ),
+                ),
+                SafeArea(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      onPressed: () => context.pop(),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                      color: Colors.white,
+                      tooltip: 'Back',
+                    ),
+                  ),
+                ),
+                if (_opening)
+                  const Center(
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    ),
+                  ),
+                if (_error != null)
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'Failed to load video',
+                        style: theme.textTheme.labelMedium,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: IconButton(
-                onPressed: () => context.pop(),
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                color: Colors.white,
-                tooltip: 'Back',
-              ),
-            ),
-          ),
-          if (_opening)
-            const Center(
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator(strokeWidth: 3),
-              ),
-            ),
-          if (_error != null)
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'Failed to load video',
-                  style: theme.textTheme.labelMedium,
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
