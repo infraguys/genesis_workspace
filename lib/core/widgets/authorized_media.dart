@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
-import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -47,20 +46,14 @@ class _AuthorizedVideo extends StatefulWidget {
 
 class _AuthorizedVideoState extends State<_AuthorizedVideo> {
   static const double _fallbackAspectRatio = 16 / 9;
-  static const List<DeviceOrientation> _allOrientations = <DeviceOrientation>[
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ];
-
-  final _videoKey = GlobalKey<VideoState>();
 
   late final Player _player;
   late final VideoController _controller;
 
   Object? _initError;
   bool _opening = true;
+  String? _resolvedUrl;
+  Map<String, String>? _headers;
 
   @override
   void initState() {
@@ -70,19 +63,8 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
     _open();
   }
 
-  // @override
-  // void didUpdateWidget(covariant _AuthorizedVideo oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   if (oldWidget.fileUrl.trim() != widget.fileUrl.trim()) {
-  //     _open();
-  //   }
-  // }
-
   @override
   void dispose() {
-    // Safety: if something goes wrong and fullscreen exits without callback,
-    // at least don't keep orientation/UI locked after widget disposal.
-    _exitMobileFullscreenIfNeeded();
     _player.dispose();
     super.dispose();
   }
@@ -186,6 +168,9 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
       final Map<String, String>? headers = _shouldUseAuthorizedHeaders(uri) ? await _buildAuthorizedHeaders() : null;
       if (!mounted) return;
 
+      _resolvedUrl = uri.toString();
+      _headers = headers;
+
       await _player.setVolume(0.0);
       await _player.open(
         Media(
@@ -209,64 +194,17 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
     }
   }
 
-  bool get _isMobile =>
-      !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
-
-  Future<void> _enterMobileFullscreenIfNeeded() async {
-    if (!_isMobile) return;
-    await Future.wait(<Future<void>>[
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.immersive,
+  Future<void> _openFullscreen(BuildContext context) async {
+    final url = _resolvedUrl;
+    if (url == null || url.isEmpty) return;
+    await Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _AuthorizedVideoFullScreenPage(
+          url: url,
+          headers: _headers,
+        ),
       ),
-    ]);
-  }
-
-  Future<void> _exitMobileFullscreenIfNeeded() async {
-    if (!_isMobile) return;
-    await Future.wait(<Future<void>>[
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: SystemUiOverlay.values,
-      ),
-      // На iOS/Android `[]` иногда не снимает лок. Явно возвращаем "всё разрешено".
-      SystemChrome.setPreferredOrientations(_allOrientations),
-    ]);
-  }
-
-  Future<void> _prepareForFullscreenPlayback() async {
-    // media_kit volume: 0..100
-    await _player.setVolume(70);
-    await _player.play();
-  }
-
-  Future<void> _restoreAfterFullscreenPlayback() async {
-    await _player.pause();
-    await _player.setVolume(0.0);
-    await _player.seek(Duration.zero);
-  }
-
-  Future<void> _enterFullscreen() async {
-    if (_opening) return;
-    await _prepareForFullscreenPlayback();
-    await _videoKey.currentState?.enterFullscreen();
-  }
-
-  Future<void> _onEnterFullscreen() async {
-    // В fullscreen: скрыть system UI + залочить landscape (для мобильных).
-    await _enterMobileFullscreenIfNeeded();
-  }
-
-  Future<void> _onExitFullscreen() async {
-    await _restoreAfterFullscreenPlayback();
-    await _exitMobileFullscreenIfNeeded();
-  }
-
-  Future<void> _handleEnterFullscreen() async {
-    await _onEnterFullscreen();
-  }
-
-  Future<void> _handleExitFullscreen() async {
-    await _onExitFullscreen();
+    );
   }
 
   double _aspectRatioFrom(VideoParams? params) {
@@ -279,7 +217,6 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isTabletOrSmaller = currentSize(context) <= .tablet;
 
     if (_initError != null) {
       return Container(
@@ -312,49 +249,26 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
         child: StreamBuilder<VideoParams>(
           stream: _player.stream.videoParams,
           builder: (context, snapshot) {
-            inspect(snapshot);
             final aspectRatio = _aspectRatioFrom(snapshot.data);
             return AspectRatio(
               aspectRatio: aspectRatio,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: aspectRatio * 360,
-                      minWidth: aspectRatio * 480,
-                    ),
-                    child: ColoredBox(
-                      color: Colors.black,
-                      child: Video(
-                        key: _videoKey,
-                        controller: _controller,
-                        fit: BoxFit.fitWidth,
-                        aspectRatio: aspectRatio,
-                        controls: (state) {
-                          final bool showControls = !isTabletOrSmaller || state.isFullscreen();
-                          return showControls ? AdaptiveVideoControls(state) : const SizedBox.shrink();
-                        },
-                        onEnterFullscreen: _handleEnterFullscreen,
-                        onExitFullscreen: _handleExitFullscreen,
-                      ),
+                  ColoredBox(
+                    color: Colors.black,
+                    child: Video(
+                      controller: _controller,
+                      fit: BoxFit.cover,
+                      // В чате контролы не показываем.
+                      controls: (_) => const SizedBox.shrink(),
                     ),
                   ),
-                  if (_opening)
-                    Expanded(
-                      child: const Center(
-                        child: SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
                   Positioned.fill(
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: _opening ? null : _enterFullscreen,
+                        onTap: _opening ? null : () => _openFullscreen(context),
                         child: Center(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
@@ -379,6 +293,153 @@ class _AuthorizedVideoState extends State<_AuthorizedVideo> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _AuthorizedVideoFullScreenPage extends StatefulWidget {
+  final String url;
+  final Map<String, String>? headers;
+
+  const _AuthorizedVideoFullScreenPage({
+    required this.url,
+    required this.headers,
+  });
+
+  @override
+  State<_AuthorizedVideoFullScreenPage> createState() => _AuthorizedVideoFullScreenPageState();
+}
+
+class _AuthorizedVideoFullScreenPageState extends State<_AuthorizedVideoFullScreenPage> {
+  late final Player _player;
+  late final VideoController _controller;
+
+  Object? _error;
+  bool _opening = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _player = Player();
+    _controller = VideoController(_player);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _enterImmersive();
+    });
+    _openAndPlay();
+  }
+
+  @override
+  void dispose() {
+    _exitImmersive();
+    _player.dispose();
+    super.dispose();
+  }
+
+  bool get _isMobile => platformInfo.isMobile;
+
+  Future<void> _enterImmersive() async {
+    if (!_isMobile) return;
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+      overlays: const <SystemUiOverlay>[],
+    );
+  }
+
+  Future<void> _exitImmersive() async {
+    if (!_isMobile) return;
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+  }
+
+  Future<void> _openAndPlay() async {
+    try {
+      // media_kit volume: 0..100
+      await _player.setVolume(70);
+      await _player.open(
+        Media(
+          widget.url,
+          httpHeaders: widget.headers,
+        ),
+        play: true,
+      );
+      if (!mounted) return;
+      setState(() {
+        _opening = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _opening = false;
+        _error = e;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final controlsTheme = kDefaultMaterialVideoControlsThemeDataFullscreen.copyWith(
+      // Мы уже "на весь экран" в отдельном роуте; кнопку fullscreen убираем.
+      bottomButtonBar: const <Widget>[
+        MaterialPositionIndicator(),
+        Spacer(),
+      ],
+    );
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          MaterialVideoControlsTheme(
+            normal: controlsTheme,
+            fullscreen: controlsTheme,
+            child: Video(
+              controller: _controller,
+              fit: BoxFit.contain,
+              controls: MaterialVideoControls,
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                color: Colors.white,
+                tooltip: 'Back',
+              ),
+            ),
+          ),
+          if (_opening)
+            const Center(
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+            ),
+          if (_error != null)
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Failed to load video',
+                  style: theme.textTheme.labelMedium,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
