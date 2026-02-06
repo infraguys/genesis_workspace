@@ -34,7 +34,9 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
   void initState() {
     super.initState();
     _player = Player();
-    _controller = VideoController(_player);
+    _player.stream.audioDevices.listen((devices) {
+      debugPrint('Audio devices: ${devices.map((d) => '${d.name} (${d.description})').join(', ')}');
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _enterImmersiveIfMobile();
     });
@@ -111,6 +113,7 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
     final bool samePort = _effectivePort(uri) == _effectivePort(baseUri);
 
     return sameScheme && sameHost && samePort && _isUserUploadPath(uri);
+    // return true;
   }
 
   Future<Map<String, String>> _buildAuthorizedHeaders() async {
@@ -146,6 +149,8 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
   }
 
   Future<void> _openAndPlay() async {
+    await _player.setAudioDevice(AudioDevice.auto());
+    _controller = VideoController(_player);
     try {
       final Uri? uri = _resolveUri(widget.fileUrl);
       if (uri == null || !_isHttpScheme(uri)) {
