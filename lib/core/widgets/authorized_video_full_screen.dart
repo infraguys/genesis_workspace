@@ -32,15 +32,13 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
   bool _opening = true;
   final List<StreamSubscription<dynamic>> _debugSubs = [];
   bool _forcedAudioTrack = false;
+  bool _showAudioHint = false;
 
   @override
   void initState() {
     super.initState();
-    _player = Player(
-      configuration: const PlayerConfiguration(
-        logLevel: MPVLogLevel.info,
-      ),
-    );
+    _player = getIt<Player>();
+    _controller = getIt<VideoController>();
     if (kDebugMode) {
       _attachDebugListeners();
     }
@@ -56,7 +54,7 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
       sub.cancel();
     }
     _exitImmersiveIfMobile();
-    _player.dispose();
+    unawaited(_player.stop());
     super.dispose();
   }
 
@@ -92,6 +90,8 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
 
   bool get _isMobile =>
       !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+
+  bool get _isLinuxDesktop => !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
 
   Future<void> _enterImmersiveIfMobile() async {
     if (!_isMobile) return;
@@ -189,7 +189,6 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
   }
 
   Future<void> _openAndPlay() async {
-    _controller = VideoController(_player);
     try {
       final Uri? uri = _resolveUri(widget.fileUrl);
       if (uri == null || !_isHttpScheme(uri)) {
@@ -212,6 +211,7 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
       if (!mounted) return;
       setState(() {
         _opening = false;
+        _showAudioHint = _isLinuxDesktop;
       });
     } catch (e) {
       if (!mounted) return;
@@ -272,6 +272,45 @@ class _AuthorizedVideoFullScreenPageState extends State<AuthorizedVideoFullScree
                     ),
                   ),
                 ),
+                if (_showAudioHint)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                    child: SafeArea(
+                      minimum: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Если нет звука, проверьте системный микшер (PipeWire/PulseAudio): '
+                                'приложение может быть приглушено или направлено на другой выход.',
+                                style: theme.textTheme.labelMedium?.copyWith(color: Colors.white),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _showAudioHint = false;
+                                });
+                              },
+                              icon: const Icon(Icons.close),
+                              color: Colors.white,
+                              tooltip: 'Close',
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 if (_opening)
                   const Center(
                     child: SizedBox(
