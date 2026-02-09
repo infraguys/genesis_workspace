@@ -50,6 +50,7 @@ class ChatItem extends StatefulWidget {
 class _ChatItemState extends State<ChatItem> {
   bool _isExpanded = false;
   bool _isPinPending = false;
+  bool _showAllTopics = false;
 
   static const Duration _animationDuration = Duration(milliseconds: 220);
   static const Curve _animationCurve = Curves.easeInOut;
@@ -410,13 +411,42 @@ class _ChatItemState extends State<ChatItem> {
                 child: _isExpanded
                     ? Skeletonizer(
                         enabled: widget.chat.isTopicsLoading,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: widget.chat.isTopicsLoading ? 4 : widget.chat.topics!.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
-                            return TopicItem(chat: widget.chat, topic: topic);
+                        child: Builder(
+                          builder: (context) {
+                            final int topicsCount = widget.chat.topics?.length ?? 0;
+                            final bool isLoading = widget.chat.isTopicsLoading;
+                            final bool hasMoreThanLimit = topicsCount > 10;
+                            final int visibleCount = hasMoreThanLimit && !_showAllTopics ? 10 : topicsCount;
+                            final int listCount = isLoading ? 4 : visibleCount + (hasMoreThanLimit ? 1 : 0);
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: listCount,
+                              itemBuilder: (BuildContext context, int index) {
+                                if (!isLoading && hasMoreThanLimit && index == listCount - 1) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: TextButton(
+                                        style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: .circular(8),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          setState(() => _showAllTopics = !_showAllTopics);
+                                        },
+                                        child: Text(_showAllTopics ? context.t.showLess : context.t.showMore),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
+                                return TopicItem(chat: widget.chat, topic: topic);
+                              },
+                            );
                           },
                         ),
                       )
