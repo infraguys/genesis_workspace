@@ -10,13 +10,6 @@ import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
-/// AuthorizedMedia
-/// --------------
-/// Отображает медиа из `user_uploads` с авторизационными заголовками.
-///
-/// Сейчас реализовано видео (например `.mp4`):
-/// - В чате: превью (первый кадр) + tap to open fullscreen.
-/// - Fullscreen: отдельный роут с плеером и панелью управления.
 class AuthorizedMedia extends StatelessWidget {
   final String fileUrl;
 
@@ -144,7 +137,6 @@ class _AuthorizedVideoPreviewState extends State<_AuthorizedVideoPreview> {
       headers['Referer'] = AppConstants.baseUrl;
     }
 
-    // На Web браузер не позволяет вручную проставлять Cookie/Referer/CSRF.
     if (!kIsWeb) {
       headers['Cookie'] = cookieParts.join('; ');
     }

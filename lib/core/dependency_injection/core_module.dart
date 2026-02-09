@@ -64,11 +64,11 @@ abstract class CoreModule {
 
   @lazySingleton
   Player mediaKitPlayer() => Player(
-        configuration: PlayerConfiguration(
-          title: 'Genesis Video',
-          logLevel: kDebugMode ? MPVLogLevel.info : MPVLogLevel.error,
-        ),
-      );
+    configuration: PlayerConfiguration(
+      title: 'Genesis Video',
+      logLevel: kDebugMode ? MPVLogLevel.info : MPVLogLevel.error,
+    ),
+  );
 
   @lazySingleton
   VideoController mediaKitVideoController(Player player) => VideoController(player);
