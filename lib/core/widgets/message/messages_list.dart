@@ -246,115 +246,118 @@ class _MessagesListState extends State<MessagesList> {
         Expanded(
           child: Stack(
             children: [
-              ScrollablePositionedList.separated(
-                reverse: true,
-                itemCount: _reversed.length,
-                padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
-                itemScrollController: _itemScrollController,
-                itemPositionsListener: _itemPositionsListener,
-                scrollOffsetListener: _scrollOffsetListener,
-                separatorBuilder: (BuildContext context, int index) {
-                  final currentMessage = _reversed[index];
-                  final nextMessage = _reversed[index + 1];
+              ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: ScrollablePositionedList.separated(
+                  reverse: true,
+                  itemCount: _reversed.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
+                  itemScrollController: _itemScrollController,
+                  itemPositionsListener: _itemPositionsListener,
+                  scrollOffsetListener: _scrollOffsetListener,
+                  separatorBuilder: (BuildContext context, int index) {
+                    final currentMessage = _reversed[index];
+                    final nextMessage = _reversed[index + 1];
 
-                  final messageDate = DateTime.fromMillisecondsSinceEpoch(currentMessage.timestamp * 1000);
-                  final isNewDay = _dayInt(currentMessage.timestamp) != _dayInt(nextMessage.timestamp);
-                  final unreadCount = _reversed.where((message) => message.isUnread).length;
-                  //   final isNewUser = message.senderId != nextMessage.senderId;
+                    final messageDate = DateTime.fromMillisecondsSinceEpoch(currentMessage.timestamp * 1000);
+                    final isNewDay = _dayInt(currentMessage.timestamp) != _dayInt(nextMessage.timestamp);
+                    final unreadCount = _reversed.where((message) => message.isUnread).length;
+                    //   final isNewUser = message.senderId != nextMessage.senderId;
 
-                  final bool isNewTopic = currentMessage.subject != nextMessage.subject;
+                    final bool isNewTopic = currentMessage.subject != nextMessage.subject;
 
-                  return Padding(
-                    padding: (!isNewTopic && !isNewDay) ? const .symmetric(vertical: 4) : const .all(16.0),
-                    child: Column(
-                      mainAxisSize: .min,
-                      spacing: 8.0,
-                      children: [
-                        if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
-                          UnreadMessagesMarker(unreadCount: unreadCount),
-                        if (isNewTopic) TopicSeparator(message: currentMessage),
-                        if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
-                      ],
-                    ),
-                  );
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  final message = _reversed[index];
-                  final MessageEntity? nextMessage = (_reversed.length > 1 && index != _reversed.length - 1)
-                      ? _reversed[index + 1]
-                      : null;
-                  final MessageEntity? prevMessage = index != 0 ? _reversed[index - 1] : null;
-
-                  final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
-                  final isMyMessage = message.senderId == _myUser?.userId;
-
-                  final isNewUser = message.senderId != nextMessage?.senderId;
-                  final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
-                  final isMessageMiddle =
-                      message.senderId == nextMessage?.senderId && message.senderId == prevMessage?.senderId;
-                  final isSingle = prevOtherUser && isNewUser;
-
-                  MessageUIOrder messageOrder;
-                  if (index == 0) {
-                    messageOrder = isNewUser ? MessageUIOrder.lastSingle : MessageUIOrder.last;
-                  } else if (isSingle) {
-                    messageOrder = MessageUIOrder.single;
-                  } else if (isNewUser) {
-                    messageOrder = MessageUIOrder.first;
-                  } else if (isMessageMiddle) {
-                    messageOrder = MessageUIOrder.middle;
-                  } else if (prevOtherUser) {
-                    messageOrder = MessageUIOrder.last;
-                  } else {
-                    messageOrder = MessageUIOrder.middle;
-                  }
-
-                  bool isNewDay = false;
-
-                  if (prevMessage != null) {
-                    final prevMessageDate = DateTime.fromMillisecondsSinceEpoch(
-                      prevMessage.timestamp * 1000,
-                    );
-
-                    isNewDay =
-                        messageDate.day != prevMessageDate.day ||
-                        messageDate.month != prevMessageDate.month ||
-                        messageDate.year != prevMessageDate.year;
-                  }
-
-                  return VisibilityDetector(
-                    key: ValueKey('msg-${message.id}'),
-                    onVisibilityChanged: (info) {
-                      final visiblePercentage = info.visibleFraction * 100;
-                      if (visiblePercentage > 50) {
-                        final label = _getDayLabel(context, messageDate);
-                        if (_currentDayLabel != label) {
-                          setState(() => _currentDayLabel = label);
-                        }
-                      }
-                      if (visiblePercentage > 50 &&
-                          (message.flags == null ||
-                              message.flags!.isEmpty ||
-                              (message.flags != null && !message.flags!.contains('read')))) {
-                        widget.onRead?.call(message.id);
-                      }
-                    },
-                    child: MessageItem(
-                      isMyMessage: isMyMessage,
-                      message: message,
-                      messageOrder: messageOrder,
-                      showTopic: widget.showTopic,
-                      myUserId: widget.myUserId,
-                      isNewDay: isNewDay,
-                      onTapQuote: widget.onTapQuote ?? (_, {quote}) {},
-                      onTapEditMessage: widget.onTapEditMessage ?? (_) {},
-                      isSelectMode: widget.isSelectMode,
-                      isSelected: widget.selectedMessages.any(
-                        (selectedMessage) => selectedMessage.id == message.id,
+                    return Padding(
+                      padding: (!isNewTopic && !isNewDay) ? const .symmetric(vertical: 4) : const .all(16.0),
+                      child: Column(
+                        mainAxisSize: .min,
+                        spacing: 8.0,
+                        children: [
+                          if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
+                            UnreadMessagesMarker(unreadCount: unreadCount),
+                          if (isNewTopic) TopicSeparator(message: currentMessage),
+                          if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
+                        ],
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    final message = _reversed[index];
+                    final MessageEntity? nextMessage = (_reversed.length > 1 && index != _reversed.length - 1)
+                        ? _reversed[index + 1]
+                        : null;
+                    final MessageEntity? prevMessage = index != 0 ? _reversed[index - 1] : null;
+
+                    final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
+                    final isMyMessage = message.senderId == _myUser?.userId;
+
+                    final isNewUser = message.senderId != nextMessage?.senderId;
+                    final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
+                    final isMessageMiddle =
+                        message.senderId == nextMessage?.senderId && message.senderId == prevMessage?.senderId;
+                    final isSingle = prevOtherUser && isNewUser;
+
+                    MessageUIOrder messageOrder;
+                    if (index == 0) {
+                      messageOrder = isNewUser ? MessageUIOrder.lastSingle : MessageUIOrder.last;
+                    } else if (isSingle) {
+                      messageOrder = MessageUIOrder.single;
+                    } else if (isNewUser) {
+                      messageOrder = MessageUIOrder.first;
+                    } else if (isMessageMiddle) {
+                      messageOrder = MessageUIOrder.middle;
+                    } else if (prevOtherUser) {
+                      messageOrder = MessageUIOrder.last;
+                    } else {
+                      messageOrder = MessageUIOrder.middle;
+                    }
+
+                    bool isNewDay = false;
+
+                    if (prevMessage != null) {
+                      final prevMessageDate = DateTime.fromMillisecondsSinceEpoch(
+                        prevMessage.timestamp * 1000,
+                      );
+
+                      isNewDay =
+                          messageDate.day != prevMessageDate.day ||
+                          messageDate.month != prevMessageDate.month ||
+                          messageDate.year != prevMessageDate.year;
+                    }
+
+                    return VisibilityDetector(
+                      key: ValueKey('msg-${message.id}'),
+                      onVisibilityChanged: (info) {
+                        final visiblePercentage = info.visibleFraction * 100;
+                        if (visiblePercentage > 50) {
+                          final label = _getDayLabel(context, messageDate);
+                          if (_currentDayLabel != label) {
+                            setState(() => _currentDayLabel = label);
+                          }
+                        }
+                        if (visiblePercentage > 50 &&
+                            (message.flags == null ||
+                                message.flags!.isEmpty ||
+                                (message.flags != null && !message.flags!.contains('read')))) {
+                          widget.onRead?.call(message.id);
+                        }
+                      },
+                      child: MessageItem(
+                        isMyMessage: isMyMessage,
+                        message: message,
+                        messageOrder: messageOrder,
+                        showTopic: widget.showTopic,
+                        myUserId: widget.myUserId,
+                        isNewDay: isNewDay,
+                        onTapQuote: widget.onTapQuote ?? (_, {quote}) {},
+                        onTapEditMessage: widget.onTapEditMessage ?? (_) {},
+                        isSelectMode: widget.isSelectMode,
+                        isSelected: widget.selectedMessages.any(
+                          (selectedMessage) => selectedMessage.id == message.id,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
               // Лейбл даты при скролле
               Positioned(
