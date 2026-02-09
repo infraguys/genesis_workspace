@@ -140,6 +140,7 @@
     "find": "Find",
     "close": "Close",
     "cancel": "Cancel",
+    "audio_hint": "If there's no sound, check the system mixer (PipeWire/PulseAudio): the app may be muted or routed to a different output.",
     "forward_messages": "Forward messages",
     "messages_count": {
       "one": "{n} message",

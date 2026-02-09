@@ -76,6 +76,19 @@ class AppConstants {
     Color(0xFF6B7280),
     Color(0xFF334155),
   ];
+
+  static const Set<String> prioritizedVideoFileExtensions = {
+    'mp4',
+    'mov',
+    'm4v',
+    'mkv',
+    'webm',
+    'avi',
+    '3gp',
+    '3g2',
+    'ts',
+    'm2ts',
+  };
 }
 
 class SharedPrefsKeys {
@@ -86,6 +99,7 @@ class SharedPrefsKeys {
   static const String notificationSound = 'notificationSound';
   static const String prioritizePersonalUnread = 'prioritizePersonalUnread';
   static const String prioritizeUnmutedUnreadChannels = 'prioritizeUnmutedUnreadChannels';
+  static const String videoAudioHintDismissed = 'videoAudioHintDismissed';
 }
 
 class AssetsConstants {

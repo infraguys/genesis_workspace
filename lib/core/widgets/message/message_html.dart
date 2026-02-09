@@ -11,6 +11,7 @@ import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
+import 'package:genesis_workspace/core/widgets/authorized_media.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
@@ -141,7 +142,7 @@ class MessageHtml extends StatelessWidget {
           if (imageUrl == null) return const SizedBox.shrink();
           return AuthorizedImage(
             url: imageUrl,
-            thumbnailUrl: imageUrl,
+            thumbnailUrl: thumbnailUrl.isEmpty ? imageUrl : thumbnailUrl,
             width: size?.width,
             height: isTabletOrSmaller ? null : size?.height,
             fit: isTabletOrSmaller ? .fitWidth : .contain,
@@ -153,6 +154,11 @@ class MessageHtml extends StatelessWidget {
             !element.attributes.containsKey('title')) {
           final String fileUrl = element.attributes['href'] ?? '';
           final String rawFileName = element.nodes.first.parentNode?.text ?? 'File';
+          final fileExtension = extractFileExtension(fileUrl);
+
+          if (AppConstants.prioritizedVideoFileExtensions.contains(fileExtension)) {
+            return AuthorizedMedia(fileUrl: fileUrl);
+          }
 
           return BlocBuilder<DownloadFilesCubit, DownloadFilesState>(
             builder: (context, state) {
