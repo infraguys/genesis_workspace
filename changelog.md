@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.8.1
+- Fixed multi select messages on desktop
+- Added badges for my activity
+- Added multi organizations on mobile
+- Added placeholders for media messages
+- Refactored scrolling behavior for chat
+- Added video support for ios, android, macos, linux, windows
+
 # 1.8.0
 - Replaced legacy popup with actual
 - Fixed unread separator behavior
