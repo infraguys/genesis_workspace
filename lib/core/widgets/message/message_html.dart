@@ -156,7 +156,7 @@ class MessageHtml extends StatelessWidget {
           final String rawFileName = element.nodes.first.parentNode?.text ?? 'File';
           final fileExtension = extractFileExtension(fileUrl);
 
-          if (fileExtension == 'mp4') {
+          if (AppConstants.prioritizedVideoFileExtensions.contains(fileExtension)) {
             return AuthorizedMedia(fileUrl: fileUrl);
           }
 
