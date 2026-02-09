@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/widgets/authorized_video_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/image_full_screen.dart';
 import 'package:genesis_workspace/core/widgets/scaffold_with_nested_nav.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
@@ -72,6 +73,8 @@ class Routes {
   static const String call = '/call';
   static const String chatInfo = 'chat-info';
   static const String channelInfo = 'channel-info';
+
+  static const String videoFullScreen = '/video-full-screen';
 }
 
 final router = GoRouter(
@@ -344,9 +347,29 @@ final router = GoRouter(
       path: Routes.imageFullScreen,
       name: Routes.imageFullScreen,
       pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
         return CustomTransitionPage(
           key: state.pageKey,
-          child: ImageFullScreen(imageUrl: state.extra as String),
+          child: ImageFullScreen(imageUrl: extra['imageUrl'] ?? '', bytes: extra['bytes']),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: Routes.videoFullScreen,
+      name: Routes.videoFullScreen,
+      parentNavigatorKey: _rootNavigatorKey,
+      pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? const <String, dynamic>{};
+        final String fileUrl = (extra['fileUrl'] as String?)?.trim() ?? '';
+        return CustomTransitionPage(
+          key: ValueKey<String>('video:$fileUrl'),
+          child: AuthorizedVideoFullScreenPage(fileUrl: fileUrl),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
@@ -362,9 +385,12 @@ final router = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final meetingLink = state.extra as String?;
-        assert(meetingLink != null && meetingLink!.isNotEmpty, 'meeting link required');
+        assert(meetingLink != null && meetingLink.isNotEmpty, 'meeting link required');
+        if (meetingLink == null || meetingLink.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-        return CallWebViewPage(meetingLink: meetingLink!);
+        return CallWebViewPage(meetingLink: meetingLink);
       },
     ),
     GoRoute(

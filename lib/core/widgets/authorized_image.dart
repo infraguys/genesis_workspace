@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/dio_interceptors/csrf_cookie_interceptor.dart';
 import 'package:genesis_workspace/core/dio_interceptors/sessionid_interceptor.dart';
@@ -11,6 +12,7 @@ import 'package:genesis_workspace/core/dio_interceptors/token_interceptor.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class AuthorizedImage extends StatefulWidget {
   final String url;
@@ -39,6 +41,9 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   Uint8List? _imageBytes;
   bool _loading = true;
   bool _error = false;
+
+  static const double mockedHeight = 250;
+  static const double mockedWidth = 300;
 
   late final Dio _authorizedDio;
 
@@ -166,32 +171,62 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
 
   @override
   Widget build(BuildContext context) {
+    final isTabletOrSmaller = currentSize(context) <= .tablet;
+    final mockHeight = (_loading && isTabletOrSmaller) || widget.height == null;
+    final mockWidth = _loading && widget.width == null;
     return GestureDetector(
       onTap: () {
         if (_imageBytes != null) {
-          context.pushNamed(Routes.imageFullScreen, extra: widget.url);
+          context.pushNamed(
+            Routes.imageFullScreen,
+            extra: {
+              "imageUrl": widget.url,
+              "bytes": _imageBytes,
+            },
+          );
         }
       },
       child: Hero(
         tag: _imageBytes.toString(),
-        child: SizedBox(width: widget.width, height: widget.height, child: _buildContent(context)),
+        child: SizedBox(
+          width: mockWidth ? mockedWidth : widget.width,
+          height: mockHeight ? mockedHeight : widget.height,
+          child: Builder(
+            builder: (BuildContext context) {
+              if ((_error || _imageBytes == null) && !_loading) {
+                return Container(
+                  height: mockHeight ? mockedHeight : widget.height,
+                  width: mockWidth ? mockedWidth : widget.width,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.error, color: Colors.red),
+                  ),
+                );
+              }
+              return Skeletonizer(
+                enabled: _loading,
+                child: Image.memory(
+                  _loading ? Uint8List(1) : (_imageBytes ?? Uint8List(0)),
+                  width: mockWidth ? mockedWidth : widget.width,
+                  height: mockHeight ? mockedHeight : widget.height,
+                  fit: widget.fit,
+                  filterQuality: FilterQuality.high,
+                  errorBuilder: (context, error, stackTrace) {
+                    return SizedBox(
+                      width: mockWidth ? mockedWidth : widget.width,
+                      height: mockHeight ? mockedHeight : widget.height,
+                      child: const ColoredBox(color: Colors.white),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
       ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context) {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_error || _imageBytes == null) {
-      return const Center(child: Icon(Icons.error, color: Colors.red));
-    }
-    return Image.memory(
-      _imageBytes!,
-      width: widget.width,
-      height: widget.height,
-      fit: widget.fit,
-      filterQuality: FilterQuality.high,
     );
   }
 }

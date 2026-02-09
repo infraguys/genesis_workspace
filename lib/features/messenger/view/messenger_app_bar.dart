@@ -147,6 +147,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                         onTapBack();
                         return;
                       }
+                      Scaffold.of(context).openDrawer();
                     },
                     icon: showTopics
                         ? Icon(Icons.arrow_back_ios)

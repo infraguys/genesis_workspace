@@ -28,6 +28,8 @@
   "login": "Login",
   "typing": "Typing",
   "online": "Online",
+  "showLess": "Show less",
+  "showMore": "Show More",
   "nav_bar": {
     "all_chats": "All chats",
     "direct_messages": "Direct Messages",
@@ -138,6 +140,7 @@
     "find": "Find",
     "close": "Close",
     "cancel": "Cancel",
+    "audio_hint": "If there's no sound, check the system mixer (PipeWire/PulseAudio): the app may be muted or routed to a different output.",
     "forward_messages": "Forward messages",
     "messages_count": {
       "one": "{n} message",
@@ -197,7 +200,8 @@
       "urlInvalid": "Link is not valid",
       "submit": "Add"
     },
-    "delete_organization": "Delete organization"
+    "delete_organization": "Delete organization",
+    "title": "Organizations"
   },
   "channel": {
     "channelName": "Channel name",

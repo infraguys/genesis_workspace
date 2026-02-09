@@ -298,6 +298,10 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                 final isMouse = event.kind == PointerDeviceKind.mouse;
                 final isRightClick = isMouse && event.buttons == kSecondaryMouseButton;
 
+                if (isMouse && event.buttons == kPrimaryMouseButton && widget.isSelectMode) {
+                  context.read<MessagesSelectCubit>().toggleMessageSelection(widget.message);
+                }
+
                 // ✅ Desktop context menu
                 if (isRightClick && !widget.isSelectMode) {
                   _openContextMenu(context, event.position);

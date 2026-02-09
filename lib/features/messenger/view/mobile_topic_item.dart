@@ -13,16 +13,22 @@ import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class MobileTopicItem extends StatelessWidget {
+  MobileTopicItem({
+    super.key,
+    required this.selectedChat,
+    required this.topic,
+  });
+
   final ChatEntity selectedChat;
   final TopicEntity topic;
-  MobileTopicItem({super.key, required this.selectedChat, required this.topic});
 
   final GlobalKey<CustomPopupState> popupKey = GlobalKey<CustomPopupState>();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final TextColors textColors = theme.extension<TextColors>()!;
+    final textColors = theme.extension<TextColors>()!;
+
     return CustomPopup(
       key: popupKey,
       backgroundColor: theme.colorScheme.surfaceDim,
@@ -30,25 +36,25 @@ class MobileTopicItem extends StatelessWidget {
       rootNavigator: true,
       isLongPress: true,
       contentDecoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceDim,
-        borderRadius: BorderRadius.circular(12),
+        color: theme.colorScheme.surfaceDim,
+        borderRadius: .circular(12),
         boxShadow: kElevationToShadow[3],
       ),
       content: Container(
         width: 240,
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: .circular(12),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: .min,
+          crossAxisAlignment: .stretch,
           spacing: 4,
           children: [
             TextButton(
               child: Text(
                 context.t.readAllMessages,
-                textAlign: TextAlign.center,
+                textAlign: .center,
               ),
               onPressed: () async {
                 context.pop();
@@ -62,9 +68,7 @@ class MobileTopicItem extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: EdgeInsetsGeometry.only(
-          left: 38,
-        ),
+        padding: .only(left: 38),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -82,36 +86,32 @@ class MobileTopicItem extends StatelessWidget {
             child: Ink(
               height: 76,
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: .end,
                 children: [
                   Expanded(
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: .center,
                       children: [
                         Container(
                           width: 3,
                           height: 47,
                           decoration: BoxDecoration(
                             color: Colors.yellow,
-                            borderRadius: BorderRadiusGeometry.circular(
-                              4,
-                            ),
+                            borderRadius: .circular(4),
                           ),
                         ),
-                        SizedBox(
-                          width: 12,
-                        ),
+                        SizedBox(width: 12),
                         Expanded(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: .center,
+                            crossAxisAlignment: .start,
                             children: [
                               Tooltip(
                                 message: topic.name,
                                 child: Text(
                                   "# ${topic.name}",
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  overflow: .ellipsis,
                                   style: theme.textTheme.labelMedium?.copyWith(
                                     fontSize: 14,
                                     color: textColors.text100,
@@ -134,7 +134,7 @@ class MobileTopicItem extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const .all(12.0),
                     child: Skeleton.ignore(
                       child: SizedBox(
                         height: 21,

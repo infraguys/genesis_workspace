@@ -126,6 +126,12 @@ Size? extractDimensionsFromUrl(String url) {
   return null;
 }
 
+String? extractFileExtension(String path) {
+  final fileName = Uri.parse(path).pathSegments.last;
+  if (!fileName.contains('.')) return null;
+  return fileName.split('.').last.toLowerCase();
+}
+
 void updateBrowserUrlPath(String path, {bool addToHistory = true}) {
   final normalizedPath = path.startsWith('/') ? path : '/$path';
   platformUpdateBrowserUrlPath(normalizedPath, addToHistory: addToHistory);

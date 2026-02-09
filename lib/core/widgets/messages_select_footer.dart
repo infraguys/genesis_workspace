@@ -55,7 +55,7 @@ class MessagesSelectFooter extends StatelessWidget {
                 if (!isTabletOrSmaller)
                   OutlinedButton(
                     onPressed: () {
-                      context.read<MessagesSelectCubit>().setSelectMode(false);
+                      context.read<MessagesSelectCubit>().clearForwardMessages();
                     },
                     child: Text(
                       context.t.general.cancel,

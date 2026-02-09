@@ -47,9 +47,9 @@ class MessengerView extends StatefulWidget {
 
 class _MessengerViewState extends State<MessengerView>
     with SingleTickerProviderStateMixin, OpenChatMixin, WidgetsBindingObserver {
-  static const Duration _searchAnimationDuration = Duration(milliseconds: 220);
+  static const _searchAnimationDuration = Duration(milliseconds: 220);
   Future<void>? _future;
-  final TextEditingController _searchController = TextEditingController();
+  final _searchController = TextEditingController();
   bool _isSearchVisible = true;
   late final AnimationController _searchBarController;
   late final Animation<double> _searchBarAnimation;
@@ -60,7 +60,7 @@ class _MessengerViewState extends State<MessengerView>
   List<PinnedChatOrderUpdate> _updatedPinnedChats = [];
 
   bool _showTopics = false;
-  final GlobalKey _activeCallKey = GlobalKey();
+  final _activeCallKey = GlobalKey();
   Rect? _lastReportedDockRect;
 
   OverlayEntry? _createChatMenuEntry;
@@ -359,10 +359,10 @@ class _MessengerViewState extends State<MessengerView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final ScreenSize screenSize = currentSize(context);
-    final bool isLargeScreen = screenSize > ScreenSize.tablet;
-    final bool isTabletOrSmaller = !isLargeScreen;
-    final double searchVisibility = _searchBarAnimation.value;
+    final screenSize = currentSize(context);
+    final isLargeScreen = screenSize > ScreenSize.tablet;
+    final isTabletOrSmaller = !isLargeScreen;
+    final searchVisibility = _searchBarAnimation.value;
 
     final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: isTabletOrSmaller ? 20 : 8).copyWith(
       top: isTabletOrSmaller ? 20 : 0,
@@ -480,9 +480,7 @@ class _MessengerViewState extends State<MessengerView>
                                   selfUserId: state.selfUser?.userId ?? -1,
                                 ),
                               ),
-                              MyActivityItems(
-                                mySelfChatId: state.mySelfChatId ?? -1,
-                              ),
+                              MyActivityItems(),
                               SizedBox(
                                 height: 8,
                               ),
@@ -530,7 +528,7 @@ class _MessengerViewState extends State<MessengerView>
                                       showTopics: isTabletOrSmaller ? _showTopics : false,
                                       isPending: state.selectedChat?.topics == null,
                                       selectedChat: state.selectedChat,
-                                      listPadding: _isSearchVisible ? 350 : 300,
+                                      listPadding: _isSearchVisible ? 430 : 300,
                                     ),
                                     Align(
                                       alignment: AlignmentGeometry.bottomCenter,

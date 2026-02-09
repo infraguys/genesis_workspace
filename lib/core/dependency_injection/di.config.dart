@@ -329,6 +329,8 @@ import 'package:genesis_workspace/services/token_storage/token_storage.dart'
     as _i958;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:media_kit/media_kit.dart' as _i230;
+import 'package:media_kit_video/media_kit_video.dart' as _i150;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import 'package:talker_flutter/talker_flutter.dart' as _i207;
 
@@ -378,6 +380,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i163.FlutterLocalNotificationsPlugin>(
       () => coreModule.flutterLocalNotificationsPlugin(),
     );
+    gh.lazySingleton<_i230.Player>(() => coreModule.mediaKitPlayer());
     gh.lazySingleton<_i144.EmojiKeyboardCubit>(
       () => _i144.EmojiKeyboardCubit(),
     );
@@ -524,6 +527,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i951.OrganizationAuthResolver>(
       () => _i951.OrganizationAuthResolver(gh<_i958.TokenStorage>()),
+    );
+    gh.lazySingleton<_i150.VideoController>(
+      () => coreModule.mediaKitVideoController(gh<_i230.Player>()),
     );
     gh.lazySingleton<_i951.RealTimeConnectionFactory>(
       () => _i951.RealTimeConnectionFactoryImpl(

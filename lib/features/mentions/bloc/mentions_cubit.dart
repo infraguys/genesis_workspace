@@ -18,7 +18,12 @@ part 'mentions_state.dart';
 class MentionsCubit extends Cubit<MentionsState> {
   MentionsCubit(this._getMessagesUseCase, this._realTimeService)
     : super(
-        MentionsState(messages: [], isLoadingMore: false, isAllLoaded: false, lastMessageId: null),
+        MentionsState(
+          messages: [],
+          isLoadingMore: false,
+          isAllLoaded: false,
+          lastMessageId: null,
+        ),
       ) {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
   }

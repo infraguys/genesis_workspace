@@ -28,6 +28,8 @@
   "login": "Войти",
   "typing": "Печатает",
   "online": "В сети",
+  "showLess": "Показать меньше",
+  "showMore": "Показать больше",
   "nav_bar": {
     "all_chats": "Все чаты",
     "direct_messages": "Личные сообщения",
@@ -144,6 +146,7 @@
     "find": "Найти",
     "close": "Закрыть",
     "cancel": "Отменить",
+    "audio_hint": "Если нет звука, проверьте системный микшер (PipeWire/PulseAudio): приложение может быть приглушено или направлено на другой выход.",
     "forward_messages": "Переслать сообщения",
     "messages_count": {
       "one": "{n} сообщение",
@@ -205,7 +208,8 @@
       "urlInvalid": "Некорректная ссылка",
       "submit": "Добавить"
     },
-    "delete_organization": "Удалить организацию"
+    "delete_organization": "Удалить организацию",
+    "title": "Организации"
   },
   "channel": {
     "channelName": "Название канала",

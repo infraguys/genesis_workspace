@@ -12,12 +12,12 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:intl/intl.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../i18n/generated/strings.g.dart';
 
-typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
+// typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
 
 class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
@@ -61,20 +61,26 @@ class _MessagesListState extends State<MessagesList> {
   int? _firstUnreadIndexInReversed;
 
   late final UserEntity? _myUser;
-  late final AutoScrollController _autoScrollController;
+  late final ItemScrollController _itemScrollController;
+  late final ItemPositionsListener _itemPositionsListener;
+  late final ScrollOffsetListener _scrollOffsetListener;
+  StreamSubscription<double>? _scrollOffsetSubscription;
 
   bool showEmojiPicker = false;
 
   late List<MessageEntity> _reversed;
+  bool _isLoadMoreInFlight = false;
 
   @override
   void initState() {
     super.initState();
     _reversed = widget.messages.reversed.toList(growable: false);
 
-    _autoScrollController = AutoScrollController(axis: Axis.vertical);
-
-    _autoScrollController.addListener(_onScroll);
+    _itemScrollController = ItemScrollController();
+    _itemPositionsListener = ItemPositionsListener.create();
+    _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
+    _scrollOffsetListener = ScrollOffsetListener.create();
+    _scrollOffsetSubscription = _scrollOffsetListener.changes.listen(_onScrollOffsetChanged);
 
     _myUser = context.read<ProfileCubit>().state.user;
 
@@ -95,7 +101,8 @@ class _MessagesListState extends State<MessagesList> {
   @override
   void dispose() {
     if (kIsWeb) BrowserContextMenu.enableContextMenu();
-    _autoScrollController.removeListener(_onScroll);
+    _itemPositionsListener.itemPositions.removeListener(_onItemPositionsChanged);
+    _scrollOffsetSubscription?.cancel();
     _dayLabelTimer?.cancel();
     super.dispose();
   }
@@ -106,13 +113,16 @@ class _MessagesListState extends State<MessagesList> {
     _firstUnreadIndexInReversed = _findFirstUnreadBoundaryIndex(reversedMessages);
 
     if (_firstUnreadIndexInReversed != null) {
-      _autoScrollController.scrollToIndex(
-        _firstUnreadIndexInReversed!,
-        preferPosition: AutoScrollPosition.end, // начало экрана
-        duration: const Duration(milliseconds: 300),
-      );
+      if (_itemScrollController.isAttached) {
+        _itemScrollController.jumpTo(
+          index: _firstUnreadIndexInReversed!,
+          alignment: 0.5,
+        );
+      }
     } else {
-      _autoScrollController.jumpTo(0);
+      if (_itemScrollController.isAttached) {
+        _itemScrollController.jumpTo(index: 0);
+      }
     }
   }
 
@@ -133,38 +143,85 @@ class _MessagesListState extends State<MessagesList> {
     return null;
   }
 
-  void _onScroll() async {
-    final scrollController = _autoScrollController;
-    if (scrollController.offset >= scrollController.position.maxScrollExtent && !widget.isLoadingMore) {
-      if (widget.loadMore != null) {
-        await widget.loadMore!();
-      }
+  void _onItemPositionsChanged() {
+    if (!mounted) {
+      return;
     }
+    final positions = _itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty || _reversed.isEmpty) {
+      return;
+    }
+
+    _updateScrollToBottom(positions);
+  }
+
+  void _onScrollOffsetChanged(double _) {
+    if (!mounted) {
+      return;
+    }
+    _handleScrollActivity();
+    final positions = _itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty || _reversed.isEmpty) {
+      return;
+    }
+    _maybeLoadMore(positions);
+  }
+
+  void _handleScrollActivity() {
     if (!_showDayLabel) {
       setState(() => _showDayLabel = true);
     }
     _dayLabelTimer?.cancel();
     _dayLabelTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) {
+        return;
+      }
       setState(() => _showDayLabel = false);
     });
+  }
 
-    final showScrollToBottomOffset = 200.0;
-    final isNearBottom =
-        scrollController.offset <= scrollController.position.minScrollExtent + showScrollToBottomOffset;
+  void _updateScrollToBottom(Iterable<ItemPosition> positions) {
+    final isNearBottom = positions.any((position) => position.index == 0);
+    final shouldShow = !isNearBottom;
+    if (_showScrollToBottom != shouldShow) {
+      setState(() => _showScrollToBottom = shouldShow);
+    }
+  }
 
-    if (_showScrollToBottom == isNearBottom) {
-      setState(() {
-        _showScrollToBottom = !isNearBottom;
-      });
+  void _maybeLoadMore(Iterable<ItemPosition> positions) {
+    if (_isLoadMoreInFlight || widget.isLoadingMore || widget.loadMore == null) {
+      return;
+    }
+    final lastIndex = _reversed.length - 1;
+    final isTopVisible = positions.any((position) => position.index == lastIndex);
+    if (isTopVisible) {
+      _triggerLoadMore();
+    }
+  }
+
+  Future<void> _triggerLoadMore() async {
+    if (_isLoadMoreInFlight || widget.loadMore == null) {
+      return;
+    }
+    _isLoadMoreInFlight = true;
+    try {
+      await widget.loadMore!();
+    } finally {
+      if (mounted) {
+        _isLoadMoreInFlight = false;
+      }
     }
   }
 
   void _scrollToBottom() {
-    _autoScrollController.animateTo(
-      _autoScrollController.position.minScrollExtent,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
+    if (_itemScrollController.isAttached) {
+      _itemScrollController.scrollTo(
+        index: 0,
+        alignment: 0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
     if (widget.onReadAll != null) {
       widget.onReadAll!();
     }
@@ -189,85 +246,85 @@ class _MessagesListState extends State<MessagesList> {
         Expanded(
           child: Stack(
             children: [
-              ListView.separated(
-                controller: _autoScrollController,
-                reverse: true,
-                itemCount: _reversed.length,
-                padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
-                separatorBuilder: (BuildContext context, int index) {
-                  final currentMessage = _reversed[index];
-                  final nextMessage = _reversed[index + 1];
+              ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: ScrollablePositionedList.separated(
+                  reverse: true,
+                  itemCount: _reversed.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 12, top: 12),
+                  itemScrollController: _itemScrollController,
+                  itemPositionsListener: _itemPositionsListener,
+                  scrollOffsetListener: _scrollOffsetListener,
+                  separatorBuilder: (BuildContext context, int index) {
+                    final currentMessage = _reversed[index];
+                    final nextMessage = _reversed[index + 1];
 
-                  final messageDate = DateTime.fromMillisecondsSinceEpoch(currentMessage.timestamp * 1000);
-                  final isNewDay = _dayInt(currentMessage.timestamp) != _dayInt(nextMessage.timestamp);
-                  final unreadCount = _reversed.where((message) => message.isUnread).length;
-                  //   final isNewUser = message.senderId != nextMessage.senderId;
+                    final messageDate = DateTime.fromMillisecondsSinceEpoch(currentMessage.timestamp * 1000);
+                    final isNewDay = _dayInt(currentMessage.timestamp) != _dayInt(nextMessage.timestamp);
+                    final unreadCount = _reversed.where((message) => message.isUnread).length;
+                    //   final isNewUser = message.senderId != nextMessage.senderId;
 
-                  final bool isNewTopic = currentMessage.subject != nextMessage.subject;
+                    final bool isNewTopic = currentMessage.subject != nextMessage.subject;
 
-                  return Padding(
-                    padding: (!isNewTopic && !isNewDay) ? const .symmetric(vertical: 4) : const .all(16.0),
-                    child: Column(
-                      mainAxisSize: .min,
-                      spacing: 8.0,
-                      children: [
-                        if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
-                          UnreadMessagesMarker(unreadCount: unreadCount),
-                        if (isNewTopic) TopicSeparator(message: currentMessage),
-                        if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
-                      ],
-                    ),
-                  );
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  final message = _reversed[index];
-                  final MessageEntity? nextMessage = (_reversed.length > 1 && index != _reversed.length - 1)
-                      ? _reversed[index + 1]
-                      : null;
-                  final MessageEntity? prevMessage = index != 0 ? _reversed[index - 1] : null;
-
-                  final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
-                  final isMyMessage = message.senderId == _myUser?.userId;
-
-                  final isNewUser = message.senderId != nextMessage?.senderId;
-                  final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
-                  final isMessageMiddle =
-                      message.senderId == nextMessage?.senderId && message.senderId == prevMessage?.senderId;
-                  final isSingle = prevOtherUser && isNewUser;
-
-                  MessageUIOrder messageOrder;
-                  if (index == 0) {
-                    messageOrder = isNewUser ? MessageUIOrder.lastSingle : MessageUIOrder.last;
-                  } else if (isSingle) {
-                    messageOrder = MessageUIOrder.single;
-                  } else if (isNewUser) {
-                    messageOrder = MessageUIOrder.first;
-                  } else if (isMessageMiddle) {
-                    messageOrder = MessageUIOrder.middle;
-                  } else if (prevOtherUser) {
-                    messageOrder = MessageUIOrder.last;
-                  } else {
-                    messageOrder = MessageUIOrder.middle;
-                  }
-
-                  bool isNewDay = false;
-
-                  if (prevMessage != null) {
-                    final prevMessageDate = DateTime.fromMillisecondsSinceEpoch(
-                      prevMessage.timestamp * 1000,
+                    return Padding(
+                      padding: (!isNewTopic && !isNewDay) ? const .symmetric(vertical: 4) : const .all(16.0),
+                      child: Column(
+                        mainAxisSize: .min,
+                        spacing: 8.0,
+                        children: [
+                          if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
+                            UnreadMessagesMarker(unreadCount: unreadCount),
+                          if (isNewTopic) TopicSeparator(message: currentMessage),
+                          if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
+                        ],
+                      ),
                     );
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    final message = _reversed[index];
+                    final MessageEntity? nextMessage = (_reversed.length > 1 && index != _reversed.length - 1)
+                        ? _reversed[index + 1]
+                        : null;
+                    final MessageEntity? prevMessage = index != 0 ? _reversed[index - 1] : null;
 
-                    isNewDay =
-                        messageDate.day != prevMessageDate.day ||
-                        messageDate.month != prevMessageDate.month ||
-                        messageDate.year != prevMessageDate.year;
-                  }
+                    final messageDate = DateTime.fromMillisecondsSinceEpoch(message.timestamp * 1000);
+                    final isMyMessage = message.senderId == _myUser?.userId;
 
-                  return AutoScrollTag(
-                    index: index,
-                    key: ValueKey(index),
-                    controller: _autoScrollController,
-                    child: VisibilityDetector(
+                    final isNewUser = message.senderId != nextMessage?.senderId;
+                    final prevOtherUser = index != 0 && prevMessage?.senderId != message.senderId;
+                    final isMessageMiddle =
+                        message.senderId == nextMessage?.senderId && message.senderId == prevMessage?.senderId;
+                    final isSingle = prevOtherUser && isNewUser;
+
+                    MessageUIOrder messageOrder;
+                    if (index == 0) {
+                      messageOrder = isNewUser ? MessageUIOrder.lastSingle : MessageUIOrder.last;
+                    } else if (isSingle) {
+                      messageOrder = MessageUIOrder.single;
+                    } else if (isNewUser) {
+                      messageOrder = MessageUIOrder.first;
+                    } else if (isMessageMiddle) {
+                      messageOrder = MessageUIOrder.middle;
+                    } else if (prevOtherUser) {
+                      messageOrder = MessageUIOrder.last;
+                    } else {
+                      messageOrder = MessageUIOrder.middle;
+                    }
+
+                    bool isNewDay = false;
+
+                    if (prevMessage != null) {
+                      final prevMessageDate = DateTime.fromMillisecondsSinceEpoch(
+                        prevMessage.timestamp * 1000,
+                      );
+
+                      isNewDay =
+                          messageDate.day != prevMessageDate.day ||
+                          messageDate.month != prevMessageDate.month ||
+                          messageDate.year != prevMessageDate.year;
+                    }
+
+                    return VisibilityDetector(
                       key: ValueKey('msg-${message.id}'),
                       onVisibilityChanged: (info) {
                         final visiblePercentage = info.visibleFraction * 100;
@@ -298,9 +355,9 @@ class _MessagesListState extends State<MessagesList> {
                           (selectedMessage) => selectedMessage.id == message.id,
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
               // Лейбл даты при скролле
               Positioned(

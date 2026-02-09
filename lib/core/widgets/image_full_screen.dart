@@ -13,9 +13,10 @@ import 'package:go_router/go_router.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ImageFullScreen extends StatefulWidget {
-  const ImageFullScreen({super.key, required this.imageUrl});
+  const ImageFullScreen({super.key, required this.imageUrl, this.bytes});
 
   final String imageUrl;
+  final Uint8List? bytes;
 
   @override
   State<ImageFullScreen> createState() => _ImageFullScreenState();
@@ -40,6 +41,12 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
   }
 
   Future<void> _loadImage() async {
+    if (widget.bytes != null) {
+      setState(() {
+        _imageBytes = widget.bytes;
+      });
+      return;
+    }
     try {
       final response = await _dio.get<List<int>>(
         widget.imageUrl,
@@ -72,7 +79,9 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
         SingleActivator(.escape): const CloseFullscreenImageIntent(),
       },
       child: Actions(
-        actions: {CloseFullscreenImageIntent: CloseFullscreenImageAction()},
+        actions: {
+          CloseFullscreenImageIntent: CloseFullscreenImageAction(),
+        },
         child: Focus(
           autofocus: true,
           child: Scaffold(
