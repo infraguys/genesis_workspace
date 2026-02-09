@@ -28,6 +28,8 @@
   "login": "Login",
   "typing": "Typing",
   "online": "Online",
+  "showLess": "Show less",
+  "showMore": "Show More",
   "nav_bar": {
     "all_chats": "All chats",
     "direct_messages": "Direct Messages",
