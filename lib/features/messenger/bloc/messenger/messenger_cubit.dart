@@ -867,10 +867,11 @@ class MessengerCubit extends Cubit<MessengerState> {
         final targetIndexInTopics = chat.topics!.indexWhere((it) => it.name == event.message.subject);
         if (targetIndexInTopics != -1) {
           final targetTopic = chat.topics![targetIndexInTopics];
-          final updatedTopic = targetTopic.copyWith(lastMessagePreview: messagePreview);
+          final updatedTopic = targetTopic.copyWith(lastMessagePreview: messagePreview, maxId: _lastMessageId);
           copiedTopicList[targetIndexInTopics] = updatedTopic;
         }
       }
+
 
       updatedChat = updatedChat.copyWith(
         lastMessageId: message.id,

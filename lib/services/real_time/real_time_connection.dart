@@ -8,6 +8,7 @@ import 'package:genesis_workspace/data/real_time_events/dto/event/event_type.dar
 import 'package:genesis_workspace/domain/channels/entities/user_topic_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_stream_settings_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/connection_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -47,10 +48,15 @@ class RealTimeConnection {
   List<UserTopicEntity> _userTopics = [];
 
   bool get isActive => _isActive;
+
   int get lastEventId => _lastEventId;
+
   String? get queueId => _queueId;
+
   int get maxStreamNameLength => _maxStreamNameLength;
+
   int get maxStreamDescriptionLength => _maxStreamDescriptionLength;
+
   List<UserTopicEntity> get userTopics => _userTopics;
 
   RealTimeConnection({
@@ -71,6 +77,7 @@ class RealTimeConnection {
        _initialRetryDelay = initialRetryDelay,
        _maxRetryDelay = maxRetryDelay;
 
+  final StreamController<ConnectionEntity> _connectionStatusController = StreamController<ConnectionEntity>.broadcast();
   final StreamController<TypingEventEntity> _typingEventsController = StreamController<TypingEventEntity>.broadcast();
   final StreamController<MessageEventEntity> _messageEventsController =
       StreamController<MessageEventEntity>.broadcast();
@@ -88,6 +95,8 @@ class RealTimeConnection {
       StreamController<SubscriptionEventEntity>.broadcast();
   final StreamController<UserTopicEventEntity> _userTopicEventsController =
       StreamController<UserTopicEventEntity>.broadcast();
+
+  Stream<ConnectionEntity> get connectionStatusStream => _connectionStatusController.stream;
 
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
 
@@ -108,18 +117,25 @@ class RealTimeConnection {
   Stream<UserTopicEventEntity> get userTopicEventsStream => _userTopicEventsController.stream;
 
   Future<void> start() async {
-    if (_isActive) return;
+    if (_isActive) {
+      _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .active));
+      return;
+    }
     try {
+      _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .connecting));
       await _registerQueue();
       _isActive = true;
+      _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .active));
       _pollingTask = _pollLoop();
     } catch (e) {
+      _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .inactive));
       inspect(e);
     }
   }
 
   Future<void> stop() async {
     _isActive = false;
+    _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .inactive));
     if (_queueId != null) {
       await _deleteQueueUseCase.call(_queueId);
     }
@@ -134,11 +150,14 @@ class RealTimeConnection {
         final body = EventsByQueueIdRequestBodyEntity(queueId: _queueId!, lastEventId: _lastEventId, dontBlock: true);
         final response = await _getEventsByQueueIdUseCase.call(body);
         if (response.result == 'success') {
+          _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .active));
           return true;
         } else {
+          _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .inactive));
           return false;
         }
       } catch (e) {
+        _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .inactive));
         return false;
       }
     }

@@ -25,6 +25,12 @@ class ChatTopicsList extends StatefulWidget {
 class _ChatTopicsListState extends State<ChatTopicsList> {
   late final ScrollController _topicsController;
 
+  List<TopicEntity> get sortedTopics {
+    final topics = widget.selectedChat?.topics ?? const [];
+    final list = List<TopicEntity>.of(topics)..sort((a, b) => b.maxId.compareTo(a.maxId));
+    return list;
+  }
+
   @override
   void initState() {
     _topicsController = ScrollController();
@@ -59,9 +65,9 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
                   controller: _topicsController,
                   shrinkWrap: true,
                   padding: EdgeInsets.only(bottom: widget.listPadding),
-                  itemCount: widget.selectedChat!.isTopicsLoading ? 4 : widget.selectedChat!.topics!.length,
+                  itemCount: widget.selectedChat!.isTopicsLoading ? 4 : sortedTopics.length,
                   itemBuilder: (context, index) {
-                    final topic = widget.selectedChat?.topics?[index] ?? TopicEntity.fake();
+                    final topic = sortedTopics[index];
                     return MobileTopicItem(selectedChat: widget.selectedChat!, topic: topic);
                   },
                 ),

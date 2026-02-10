@@ -1,6 +1,6 @@
 # Changelog
 
-# 1.8.1
+# 1.8.2
 - Fixed multi select messages on desktop
 - Added badges for my activity
 - Added multi organizations on mobile

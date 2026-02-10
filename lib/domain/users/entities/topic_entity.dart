@@ -2,16 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/topic_visibility_policy.dart';
 
 class TopicEntity extends Equatable {
-  final int maxId;
-  final String name;
-  final String lastMessageSenderName;
-  final String lastMessagePreview;
-  final TopicVisibilityPolicy visibilityPolicy;
-  Set<int> unreadMessages;
-
-  bool get isMuted => visibilityPolicy == .muted;
-
-  TopicEntity({
+  const TopicEntity({
     required this.maxId,
     required this.name,
     required this.unreadMessages,
@@ -19,6 +10,15 @@ class TopicEntity extends Equatable {
     this.lastMessagePreview = '',
     this.visibilityPolicy = .none,
   });
+
+  final int maxId;
+  final String name;
+  final String lastMessageSenderName;
+  final String lastMessagePreview;
+  final TopicVisibilityPolicy visibilityPolicy;
+  final Set<int> unreadMessages;
+
+  bool get isMuted => visibilityPolicy == .muted;
 
   TopicEntity copyWith({
     int? maxId,
@@ -31,7 +31,7 @@ class TopicEntity extends Equatable {
     return TopicEntity(
       maxId: maxId ?? this.maxId,
       name: name ?? this.name,
-      unreadMessages: unreadMessages ?? Set<int>.from(this.unreadMessages),
+      unreadMessages: unreadMessages ?? Set<int>.of(this.unreadMessages),
       lastMessageSenderName: lastMessageSenderName ?? this.lastMessageSenderName,
       lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
       visibilityPolicy: visibilityPolicy ?? this.visibilityPolicy,
@@ -41,12 +41,15 @@ class TopicEntity extends Equatable {
   @override
   List<Object> get props => [name];
 
-  factory TopicEntity.fake({int? index, int? maxId, String? name, Set<int>? unreadMessages}) {
-    final int topicIndex = index ?? 0;
-
+  factory TopicEntity.fake({
+    int index = 0,
+    int? maxId,
+    String? name,
+    Set<int>? unreadMessages,
+  }) {
     return TopicEntity(
-      maxId: maxId ?? (topicIndex + 1) * 100,
-      name: name ?? "Topic $topicIndex",
+      maxId: maxId ?? (index + 1) * 100,
+      name: name ?? "Topic $index",
       unreadMessages: unreadMessages ?? {1, 2},
     );
   }

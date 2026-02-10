@@ -1,17 +1,26 @@
 part of 'real_time_cubit.dart';
 
 class RealTimeState {
-  final bool isConnecting;
+  final bool isCheckingConnection;
+  final Map<int, ConnectionEntity> connections;
+
+  ConnectionStatus get connectionStatus {
+    final selectedOrganizationId = AppConstants.selectedOrganizationId;
+    return connections[selectedOrganizationId]?.status ?? .inactive;
+  }
 
   RealTimeState({
-    required this.isConnecting,
+    required this.isCheckingConnection,
+    required this.connections,
   });
 
   RealTimeState copyWith({
-    bool? isConnecting,
+    bool? isCheckingConnection,
+    Map<int, ConnectionEntity>? connections,
   }) {
     return RealTimeState(
-      isConnecting: isConnecting ?? this.isConnecting,
+      isCheckingConnection: isCheckingConnection ?? this.isCheckingConnection,
+      connections: connections ?? this.connections,
     );
   }
 }
