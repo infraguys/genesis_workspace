@@ -11,6 +11,7 @@ import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
+import 'package:genesis_workspace/core/widgets/message/message_input_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/toggle_emoji_keyboard_button.dart';
 import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -330,6 +331,12 @@ class _MessageInputState extends State<MessageInput> {
                                                 );
                                               }
                                             },
+                                            contextMenuBuilder:
+                                                (BuildContext context, EditableTextState editableTextState) {
+                                                  return MessageInputContextMenu(
+                                                    editableTextState: editableTextState,
+                                                  );
+                                                },
                                             textInputAction: platformInfo.isDesktop ? .send : null,
                                             textCapitalization: platformInfo.isMobile
                                                 ? TextCapitalization.sentences
