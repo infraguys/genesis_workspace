@@ -247,7 +247,7 @@ class _MessagesListState extends State<MessagesList> {
           child: Stack(
             children: [
               ScrollConfiguration(
-                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: true),
                 child: ScrollablePositionedList.separated(
                   reverse: true,
                   itemCount: _reversed.length,

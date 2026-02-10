@@ -77,11 +77,11 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
       builder: (context, state) {
         return isLargeScreen
             ? Text(
-                state.isConnecting ? "${context.t.connecting}..." : largeScreenTitle,
+                state.connectionStatus == .connecting ? "${context.t.connecting}..." : largeScreenTitle,
                 style: theme.textTheme.labelLarge?.copyWith(fontSize: 16),
               )
             : Text(
-                state.isConnecting
+                state.connectionStatus == .connecting
                     ? "${context.t.connecting}..."
                     : showTopics
                     ? selectedChatLabel!
@@ -177,7 +177,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                                     alignment: Alignment.centerLeft,
                                     child: titleWidget,
                                   ),
-                            if (isLoadingMore || state.isConnecting)
+                            if (isLoadingMore || state.connectionStatus == .connecting)
                               SizedBox(
                                 height: 14,
                                 child: CupertinoActivityIndicator(
