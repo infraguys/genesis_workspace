@@ -191,19 +191,14 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _insertSpoiler() {
-    final selection = widget.controller.selection;
-    final text = widget.controller.text;
-    final start = selection.isValid ? selection.start : text.length;
-    final end = selection.isValid ? selection.end : text.length;
-    final hasSelection = selection.isValid && !selection.isCollapsed;
-    final selectedText = hasSelection ? text.substring(start, end) : '';
-    final replacement = hasSelection ? '\n```spoiler Header\n$selectedText\n```\n' : '```spoiler Header\n\n```';
-    final newText = text.replaceRange(start, end, replacement);
-    final cursorOffset = hasSelection ? start + replacement.length : start + '```spoiler Header\n'.length;
+    final result = buildSpoilerInsertion(
+      text: widget.controller.text,
+      selection: widget.controller.selection,
+    );
 
     widget.controller.value = widget.controller.value.copyWith(
-      text: newText,
-      selection: TextSelection.collapsed(offset: cursorOffset),
+      text: result.text,
+      selection: TextSelection.collapsed(offset: result.cursorOffset),
       composing: TextRange.empty,
     );
     widget.focusNode.requestFocus();
@@ -566,10 +561,10 @@ class _MessageInputState extends State<MessageInput> {
                       ),
                     ),
                     AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
+                      duration: const Duration(milliseconds: 250),
                       curve: Curves.easeInOut,
                       child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 250),
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeIn,
                         transitionBuilder: (child, animation) {
