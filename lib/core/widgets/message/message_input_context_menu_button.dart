@@ -97,9 +97,7 @@ String _resolveMenuLabel(BuildContext context, MessageInputContextMenuItem item)
 }
 
 bool _isDesktopPlatform(TargetPlatform platform) {
-  return platform == TargetPlatform.macOS ||
-      platform == TargetPlatform.windows ||
-      platform == TargetPlatform.linux;
+  return platform == TargetPlatform.macOS || platform == TargetPlatform.windows || platform == TargetPlatform.linux;
 }
 
 Widget _wrapWithClickCursor(BuildContext context, Widget child) {
