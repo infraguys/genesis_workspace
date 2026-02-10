@@ -4,6 +4,7 @@ import 'package:genesis_workspace/domain/organizations/entities/organization_ent
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_stream_settings_use_case.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/connection_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/presence_event_entity.dart';
@@ -47,6 +48,7 @@ class MultiPollingService {
 
   final Map<int, RealTimeConnection> _activeConnections = {};
 
+  final StreamController<ConnectionEntity> _connectionStatusController = StreamController<ConnectionEntity>.broadcast();
   final StreamController<TypingEventEntity> _typingEventsController = StreamController<TypingEventEntity>.broadcast();
   final StreamController<MessageEventEntity> _messageEventsController =
       StreamController<MessageEventEntity>.broadcast();
@@ -64,6 +66,8 @@ class MultiPollingService {
       StreamController<SubscriptionEventEntity>.broadcast();
   final StreamController<UserTopicEventEntity> _userTopicEventsController =
       StreamController<UserTopicEventEntity>.broadcast();
+
+  Stream<ConnectionEntity> get connectionStatusStream => _connectionStatusController.stream;
 
   Stream<TypingEventEntity> get typingEventsStream => _typingEventsController.stream;
 
@@ -140,6 +144,7 @@ class MultiPollingService {
       updateStreamSettingsUseCase: _updateStreamSettingsUseCase,
     );
 
+    connection.connectionStatusStream.listen(_connectionStatusController.add, onError: (_) {});
     connection.typingEventsStream.listen(_typingEventsController.add, onError: (_) {});
     connection.messageEventsStream.listen(_messageEventsController.add, onError: (_) {});
     connection.messageFlagsEventsStream.listen(_messageFlagsEventsController.add, onError: (_) {});
@@ -179,6 +184,7 @@ class MultiPollingService {
   Future<void> _closeAggregatedControllers() async {
     // Обычно мультисервис живёт дольше всего, но если нужно полностью уничтожить — закрываем.
     await Future.wait([
+      _connectionStatusController.close(),
       _typingEventsController.close(),
       _messageEventsController.close(),
       _messageFlagsEventsController.close(),
@@ -194,7 +200,7 @@ class MultiPollingService {
   void deleteConnection(int id) async {
     final connection = _activeConnections[id];
     await connection?.stop();
-    _activeConnections.remove(id);
+    // _activeConnections.remove(id);
   }
 
   Future<List<OrganizationEntity>> _fetchAuthorizedOrganizations() async {
