@@ -67,7 +67,7 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
                   padding: EdgeInsets.only(bottom: widget.listPadding),
                   itemCount: widget.selectedChat!.isTopicsLoading ? 4 : sortedTopics.length,
                   itemBuilder: (context, index) {
-                    final topic = sortedTopics[index];
+                    final topic = sortedTopics.isEmpty ? TopicEntity.fake() : sortedTopics[index];
                     return MobileTopicItem(selectedChat: widget.selectedChat!, topic: topic);
                   },
                 ),
