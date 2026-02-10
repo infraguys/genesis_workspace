@@ -27,7 +27,6 @@ class MessengerChatListView extends StatelessWidget with OpenChatMixin {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return ListView.separated(
       padding: padding,
       itemCount: chats.length,

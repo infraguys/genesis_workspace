@@ -203,19 +203,14 @@ class _ChatItemState extends State<ChatItem> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = Theme.of(context).extension<TextColors>()!;
-    final cardColors = Theme.of(context).extension<CardColors>()!;
-    const BorderRadius materialBorderRadius = BorderRadius.all(Radius.circular(8));
-    double rightContainerHeight;
+    final textColors = theme.extension<TextColors>()!;
+    final cardColors = theme.extension<CardColors>()!;
 
-    switch (widget.chat.type) {
-      case ChatType.channel:
-        rightContainerHeight = 52;
-        break;
-      default:
-        rightContainerHeight = 49;
-        break;
-    }
+    final rightContainerHeight = switch (widget.chat.type) {
+      ChatType.channel => 52.0,
+      _ => 49.0,
+    };
+
     final bool shouldShowLeftBorder = widget.showTopics && widget.chat.id == widget.selectedChatId;
     final bool isSelected = widget.chat.id == widget.selectedChatId;
 
@@ -229,16 +224,16 @@ class _ChatItemState extends State<ChatItem> {
         }
       },
       child: Material(
-        borderRadius: materialBorderRadius,
+        borderRadius: .all(.circular(8)),
         animationDuration: const Duration(milliseconds: 200),
         animateColor: true,
         color: widget.showTopics ? Colors.transparent : cardColors.base,
         child: Column(
           children: [
             Listener(
-              behavior: HitTestBehavior.deferToChild,
+              behavior: .deferToChild,
               onPointerDown: (event) {
-                if (event.kind == PointerDeviceKind.mouse && event.buttons == kSecondaryMouseButton) {
+                if (event.kind == .mouse && event.buttons == kSecondaryMouseButton) {
                   _openContextMenu(event.position);
                 }
               },
@@ -250,68 +245,57 @@ class _ChatItemState extends State<ChatItem> {
                 },
                 child: InkWell(
                   onTap: onTap,
-                  borderRadius: BorderRadius.circular(8),
-                  overlayColor: WidgetStateProperty.resolveWith(
+                  borderRadius: .circular(8),
+                  overlayColor: .resolveWith(
                     (states) => states.contains(WidgetState.hovered) ? cardColors.active : null,
                   ),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: 65,
-                    ),
+                    constraints: const BoxConstraints(minHeight: 65),
                     child: Stack(
-                      alignment: AlignmentGeometry.centerLeft,
+                      alignment: .centerLeft,
                       children: [
                         ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minHeight: 65,
-                          ),
+                          constraints: const BoxConstraints(minHeight: 65),
                           child: Ink(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8).copyWith(
-                                bottomLeft: _isExpanded ? Radius.zero : Radius.circular(8),
-                                bottomRight: _isExpanded ? Radius.zero : Radius.circular(8),
-                              ),
                               color: isSelected ? cardColors.active : cardColors.base,
+                              borderRadius: BorderRadius.circular(8).copyWith(
+                                bottomLeft: _isExpanded ? .zero : .circular(8),
+                                bottomRight: _isExpanded ? .zero : .circular(8),
+                              ),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const .symmetric(horizontal: 8),
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: .center,
                                 children: [
                                   UserAvatar(
                                     avatarUrl: widget.chat.avatarUrl,
-                                    size: currentSize(context) <= ScreenSize.tablet ? 40 : 30,
+                                    size: currentSize(context) <= .tablet ? 40 : 30,
                                     backgroundColor: widget.chat.backgroundColor,
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: .min,
+                                      crossAxisAlignment: .start,
                                       children: [
                                         Row(
                                           spacing: 4,
                                           children: [
                                             ConstrainedBox(
-                                              constraints: BoxConstraints(
-                                                maxWidth: 185,
-                                              ),
+                                              constraints: BoxConstraints(maxWidth: 185),
                                               child: Text(
                                                 widget.chat.displayTitle,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: theme.textTheme.bodyMedium?.copyWith(
                                                   color: textColors.text100,
-                                                  fontWeight: currentSize(context) <= ScreenSize.tablet
-                                                      ? FontWeight.w500
-                                                      : FontWeight.w400,
+                                                  fontWeight: currentSize(context) <= .tablet ? .w500 : .w400,
                                                 ),
                                               ),
                                             ),
-                                            if (_isPinPending)
-                                              CupertinoActivityIndicator(
-                                                radius: 6,
-                                              ),
+                                            if (_isPinPending) CupertinoActivityIndicator(radius: 6),
                                             if (widget.chat.isMuted)
                                               Icon(
                                                 Icons.headset_off,
@@ -320,7 +304,7 @@ class _ChatItemState extends State<ChatItem> {
                                               ),
                                           ],
                                         ),
-                                        if (widget.chat.type == ChatType.channel)
+                                        if (widget.chat.type == .channel)
                                           Text(
                                             widget.chat.lastMessageSenderName!,
                                             style: theme.textTheme.bodySmall?.copyWith(
@@ -334,20 +318,17 @@ class _ChatItemState extends State<ChatItem> {
                                   SizedBox(
                                     height: rightContainerHeight,
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment: .spaceAround,
+                                      crossAxisAlignment: .end,
                                       children: [
                                         Row(
                                           children: [
                                             if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
-                                            (widget.chat.type == ChatType.channel &&
-                                                    currentSize(context) > ScreenSize.tablet)
+                                            (widget.chat.type == .channel && currentSize(context) > .tablet)
                                                 ? InkWell(
-                                                    borderRadius: BorderRadius.circular(35),
+                                                    borderRadius: .circular(35),
                                                     onTap: () {
-                                                      setState(() {
-                                                        _isExpanded = !_isExpanded;
-                                                      });
+                                                      setState(() => _isExpanded = !_isExpanded);
                                                       if (_isExpanded && (widget.chat.topics?.isEmpty ?? true)) {
                                                         unawaited(
                                                           context.read<MessengerCubit>().getChannelTopics(
@@ -359,7 +340,7 @@ class _ChatItemState extends State<ChatItem> {
                                                     child: Container(
                                                       width: 35,
                                                       height: 20,
-                                                      padding: EdgeInsets.symmetric(vertical: 6),
+                                                      padding: .symmetric(vertical: 6),
                                                       child: AnimatedRotation(
                                                         duration: const Duration(milliseconds: 200),
                                                         turns: _isExpanded ? 0.5 : 0.0,
@@ -394,7 +375,7 @@ class _ChatItemState extends State<ChatItem> {
                         if (shouldShowLeftBorder)
                           IgnorePointer(
                             child: Align(
-                              alignment: Alignment.centerLeft,
+                              alignment: .centerLeft,
                               child: Container(
                                 width: 1,
                                 height: 40,
@@ -408,7 +389,7 @@ class _ChatItemState extends State<ChatItem> {
                 ),
               ),
             ),
-            if (currentSize(context) > ScreenSize.tablet)
+            if (currentSize(context) > .tablet)
               AnimatedSize(
                 duration: _animationDuration,
                 curve: _animationCurve,
@@ -430,9 +411,9 @@ class _ChatItemState extends State<ChatItem> {
                               itemBuilder: (BuildContext context, int index) {
                                 if (!isLoading && hasMoreThanLimit && index == listCount - 1) {
                                   return Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: const .symmetric(horizontal: 12, vertical: 8),
                                     child: SizedBox(
-                                      width: double.infinity,
+                                      width: .infinity,
                                       child: TextButton(
                                         style: TextButton.styleFrom(
                                           shape: RoundedRectangleBorder(
@@ -490,10 +471,10 @@ class _ChatContextMenu extends StatelessWidget {
 
     return Container(
       width: width,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const .symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: .circular(8),
       ),
       child: Column(
         mainAxisSize: .min,
@@ -566,10 +547,10 @@ class _ChatContextMenuAction extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 36.0),
       child: Material(
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: .circular(8),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+            padding: const .symmetric(horizontal: 12.0, vertical: 6.0),
             child: Row(
               spacing: 12.0,
               children: [
@@ -586,11 +567,8 @@ class _ChatContextMenuAction extends StatelessWidget {
                   child: Text(
                     label,
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: textColor,
-                    ),
+                    overflow: .ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(fontWeight: .w500, color: textColor),
                   ),
                 ),
               ],
