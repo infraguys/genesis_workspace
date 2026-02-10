@@ -17,11 +17,10 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
-import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
-import 'package:genesis_workspace/features/messenger/view/create_chat/create_topic_dialog.dart';
 import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/create_chat/create_topic_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/message_preview.dart';
 import 'package:genesis_workspace/features/messenger/view/topic_item.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -194,6 +193,11 @@ class _ChatItemState extends State<ChatItem> {
     } finally {
       setState(() => _isPinPending = false);
     }
+  }
+
+  List<TopicEntity> get sortedTopics {
+    final topics = widget.chat.topics ?? const [];
+    return List<TopicEntity>.of(topics)..sort((a, b) => b.maxId.compareTo(a.maxId));
   }
 
   @override
@@ -413,7 +417,7 @@ class _ChatItemState extends State<ChatItem> {
                         enabled: widget.chat.isTopicsLoading,
                         child: Builder(
                           builder: (context) {
-                            final int topicsCount = widget.chat.topics?.length ?? 0;
+                            final int topicsCount = sortedTopics.length;
                             final bool isLoading = widget.chat.isTopicsLoading;
                             final bool hasMoreThanLimit = topicsCount > 10;
                             final int visibleCount = hasMoreThanLimit && !_showAllTopics ? 10 : topicsCount;
@@ -443,7 +447,7 @@ class _ChatItemState extends State<ChatItem> {
                                     ),
                                   );
                                 }
-                                final topic = widget.chat.topics?[index] ?? TopicEntity.fake();
+                                final topic = isLoading ? TopicEntity.fake(index: index) : sortedTopics[index];
                                 return TopicItem(chat: widget.chat, topic: topic);
                               },
                             );
