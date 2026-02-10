@@ -68,24 +68,7 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-  EditableTextState? _editableTextState;
-  TextSelection? _lastSelection;
   bool _showMdActions = false;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_handleSelectionChange);
-  }
-
-  @override
-  void didUpdateWidget(covariant MessageInput oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_handleSelectionChange);
-      widget.controller.addListener(_handleSelectionChange);
-    }
-  }
 
   bool _isShiftPressed() {
     final keyboard = HardwareKeyboard.instance;
@@ -123,43 +106,7 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   void dispose() {
-    widget.controller.removeListener(_handleSelectionChange);
     super.dispose();
-  }
-
-  void _handleSelectionChange() {
-    if (!platformInfo.isDesktop) {
-      return;
-    }
-    if (!widget.focusNode.hasFocus) {
-      return;
-    }
-    final selection = widget.controller.selection;
-    if (!selection.isValid) {
-      return;
-    }
-
-    if (selection.isCollapsed) {
-      _editableTextState?.hideToolbar();
-      _lastSelection = selection;
-      return;
-    }
-
-    if (_lastSelection == selection) {
-      return;
-    }
-    _lastSelection = selection;
-
-    final state = _editableTextState ??= _findEditableTextState();
-    state?.showToolbar();
-  }
-
-  EditableTextState? _findEditableTextState() {
-    final context = widget.focusNode.context;
-    if (context == null) {
-      return null;
-    }
-    return context.findAncestorStateOfType<EditableTextState>();
   }
 
   void _toggleMdActions() {
