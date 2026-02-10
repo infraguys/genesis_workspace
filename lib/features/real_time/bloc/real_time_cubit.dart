@@ -108,9 +108,6 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   Future<void> _onConnectionStatusChanged(ConnectionEntity entity) async {
     final updatedConnections = {...state.connections};
     updatedConnections[entity.organizationId] = entity;
-    updatedConnections.forEach((orgId, connection) {
-      print("$orgId, ${connection.status.name}");
-    });
     emit(state.copyWith(connections: updatedConnections));
     if (entity.status == .inactive && !state.isCheckingConnection) {
       await ensureConnection();
