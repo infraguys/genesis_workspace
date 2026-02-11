@@ -13,6 +13,7 @@ import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/authorized_media.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
+import 'package:genesis_workspace/core/widgets/message/message_spoiler.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
@@ -368,6 +369,10 @@ class MessageHtml extends StatelessWidget {
               ),
             ),
           );
+        }
+        if (element.classes.contains('spoiler-content')) {
+          final _content = element.text;
+          return MessageSpoiler(content: _content);
         }
         return null;
       },

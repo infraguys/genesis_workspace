@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.8.3
+- Add sorting for topics
+- Added spoilers, bold, italic buttons for text formatting
+
 # 1.8.2
 - Fixed multi select messages on desktop
 - Added badges for my activity

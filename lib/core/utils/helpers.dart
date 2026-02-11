@@ -147,6 +147,22 @@ ${quote ?? message.content}
   return quoteText;
 }
 
+({String text, int cursorOffset}) buildSpoilerInsertion({
+  required String text,
+  required TextSelection selection,
+}) {
+  const header = 'spoiler Header';
+  final start = selection.isValid ? selection.start : text.length;
+  final end = selection.isValid ? selection.end : text.length;
+  final hasSelection = selection.isValid && !selection.isCollapsed;
+  final selectedText = hasSelection ? text.substring(start, end) : '';
+  final replacement = hasSelection ? '```$header\n$selectedText\n```' : '```$header\n\n```';
+  final newText = text.replaceRange(start, end, replacement);
+  final cursorOffset = hasSelection ? start + replacement.length : start + '```$header\n'.length;
+
+  return (text: newText, cursorOffset: cursorOffset);
+}
+
 String extensionOf(String fileName) {
   final int dotIndex = fileName.lastIndexOf('.');
   if (dotIndex == -1 || dotIndex == fileName.length - 1) return '';

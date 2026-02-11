@@ -11,6 +11,7 @@ import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_tile.dart';
 import 'package:genesis_workspace/core/widgets/message/editing_attachment_tile.dart';
+import 'package:genesis_workspace/core/widgets/message/message_input_context_menu.dart';
 import 'package:genesis_workspace/core/widgets/message/toggle_emoji_keyboard_button.dart';
 import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -67,6 +68,8 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
+  bool _showMdActions = false;
+
   bool _isShiftPressed() {
     final keyboard = HardwareKeyboard.instance;
     return keyboard.isLogicalKeyPressed(LogicalKeyboardKey.shiftLeft) ||
@@ -104,6 +107,48 @@ class _MessageInputState extends State<MessageInput> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _toggleMdActions() {
+    setState(() {
+      _showMdActions = !_showMdActions;
+    });
+  }
+
+  void _applyInlineFormat({
+    required String prefix,
+    required String suffix,
+  }) {
+    final selection = widget.controller.selection;
+    final text = widget.controller.text;
+    final start = selection.isValid ? selection.start : text.length;
+    final end = selection.isValid ? selection.end : text.length;
+    final hasSelection = selection.isValid && !selection.isCollapsed;
+    final selectedText = hasSelection ? text.substring(start, end) : '';
+    final replacement = hasSelection ? '$prefix$selectedText$suffix' : '$prefix$suffix';
+    final newText = text.replaceRange(start, end, replacement);
+    final cursorOffset = hasSelection ? start + replacement.length : start + prefix.length;
+
+    widget.controller.value = widget.controller.value.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: cursorOffset),
+      composing: TextRange.empty,
+    );
+    widget.focusNode.requestFocus();
+  }
+
+  void _insertSpoiler() {
+    final result = buildSpoilerInsertion(
+      text: widget.controller.text,
+      selection: widget.controller.selection,
+    );
+
+    widget.controller.value = widget.controller.value.copyWith(
+      text: result.text,
+      selection: TextSelection.collapsed(offset: result.cursorOffset),
+      composing: TextRange.empty,
+    );
+    widget.focusNode.requestFocus();
   }
 
   @override
@@ -330,6 +375,12 @@ class _MessageInputState extends State<MessageInput> {
                                                 );
                                               }
                                             },
+                                            contextMenuBuilder:
+                                                (BuildContext context, EditableTextState editableTextState) {
+                                                  return MessageInputContextMenu(
+                                                    editableTextState: editableTextState,
+                                                  );
+                                                },
                                             textInputAction: platformInfo.isDesktop ? .send : null,
                                             textCapitalization: platformInfo.isMobile
                                                 ? TextCapitalization.sentences
@@ -368,7 +419,12 @@ class _MessageInputState extends State<MessageInput> {
                                               disabledBorder: InputBorder.none,
                                               enabledBorder: InputBorder.none,
                                               hintText: widget.isDropOver ? "" : context.t.input.placeholder,
-                                              contentPadding: const EdgeInsets.fromLTRB(48, 14, 46, 14),
+                                              contentPadding: EdgeInsets.fromLTRB(
+                                                isTabletOrSmaller ? 48 : 78,
+                                                14,
+                                                46,
+                                                14,
+                                              ),
                                               hintStyle: theme.textTheme.bodyLarge?.copyWith(
                                                 color: textColors.text30,
                                               ),
@@ -378,9 +434,23 @@ class _MessageInputState extends State<MessageInput> {
                                             left: 8.0,
                                             top: 0.0,
                                             bottom: 0.0,
-                                            child: AttachFilesButton(
-                                              onUploadFile: widget.onUploadFile,
-                                              onUploadImage: widget.onUploadImage,
+                                            child: Row(
+                                              children: [
+                                                if (!isTabletOrSmaller)
+                                                  TapEffectIcon(
+                                                    padding: .zero,
+                                                    onTap: _toggleMdActions,
+                                                    child:
+                                                        (_showMdActions
+                                                                ? Assets.icons.bottomPanelClose
+                                                                : Assets.icons.bottomPanelOpen)
+                                                            .svg(),
+                                                  ),
+                                                AttachFilesButton(
+                                                  onUploadFile: widget.onUploadFile,
+                                                  onUploadImage: widget.onUploadImage,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                           Positioned(
@@ -437,9 +507,90 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                       ),
                     ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SizeTransition(
+                              sizeFactor: animation,
+                              axisAlignment: -1.0,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: _showMdActions
+                            ? Padding(
+                                key: const ValueKey('md-actions'),
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Row(
+                                  spacing: 16,
+                                  children: [
+                                    TapEffectIcon(
+                                      padding: .zero,
+                                      onTap: () => _applyInlineFormat(
+                                        prefix: '**',
+                                        suffix: '**',
+                                      ),
+                                      child: Assets.icons.formatBold.svg(
+                                        colorFilter: ColorFilter.mode(
+                                          theme.colorScheme.onSurface,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                    ),
+                                    TapEffectIcon(
+                                      padding: .zero,
+                                      onTap: () => _applyInlineFormat(
+                                        prefix: '*',
+                                        suffix: '*',
+                                      ),
+                                      child: Assets.icons.formatItalic.svg(
+                                        colorFilter: ColorFilter.mode(
+                                          theme.colorScheme.onSurface,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                    ),
+                                    TapEffectIcon(
+                                      padding: .zero,
+                                      onTap: () => _applyInlineFormat(
+                                        prefix: '~~',
+                                        suffix: '~~',
+                                      ),
+                                      child: Assets.icons.strikethroughS.svg(
+                                        colorFilter: ColorFilter.mode(
+                                          theme.colorScheme.onSurface,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                    ),
+                                    TapEffectIcon(
+                                      padding: .zero,
+                                      onTap: _insertSpoiler,
+                                      child: Assets.icons.spoiler.svg(
+                                        colorFilter: ColorFilter.mode(
+                                          theme.colorScheme.onSurface,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink(
+                                key: ValueKey('md-actions-empty'),
+                              ),
+                      ),
+                    ),
                     AnimatedContainer(
                       height: emojiState.keyboardHeight,
-                      duration: Duration(milliseconds: 250),
+                      duration: const Duration(milliseconds: 250),
                       child: EmojiPicker(
                         textEditingController: widget.controller,
                         onEmojiSelected: (_, _) {
