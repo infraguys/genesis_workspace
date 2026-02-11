@@ -198,7 +198,6 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
   }
 
   void _openContextMenu(BuildContext context, Offset globalPosition) {
-    HapticFeedback.mediumImpact();
     _closeOverlay();
 
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -240,6 +239,17 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
     );
 
     overlay.insert(_menuEntry!);
+  }
+
+  Future<void> _animateMessageContainer() async {
+    setState(() {
+      _messageScale = _contextMenuScale;
+    });
+    await Future.delayed(const Duration(milliseconds: 350), () {
+      setState(() {
+        _messageScale = 1.0;
+      });
+    });
   }
 
   @override
@@ -347,18 +357,18 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                 _touchMoved = false;
               },
               child: GestureDetector(
+                onLongPressDown: (details) {
+                  if (widget.isSelectMode) return;
+                  if (platformInfo.isMobile) {
+                    _animateMessageContainer();
+                  }
+                },
                 onLongPressStart: (details) {
                   if (widget.isSelectMode) return;
                   if (platformInfo.isMobile) {
                     Focus.of(context).unfocus();
-                    setState(() => _messageScale = 1.0);
+                    HapticFeedback.mediumImpact();
                     _openContextMenu(context, details.globalPosition);
-                  }
-                },
-                onLongPressDown: (_) {
-                  if (widget.isSelectMode) return;
-                  if (platformInfo.isMobile) {
-                    setState(() => _messageScale = _contextMenuScale);
                   }
                 },
                 onDoubleTap: onReplay,
