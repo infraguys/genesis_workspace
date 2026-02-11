@@ -156,7 +156,7 @@ ${quote ?? message.content}
   final end = selection.isValid ? selection.end : text.length;
   final hasSelection = selection.isValid && !selection.isCollapsed;
   final selectedText = hasSelection ? text.substring(start, end) : '';
-  final replacement = hasSelection ? '```$header\n$selectedText\n```' : '```$header\n\n```';
+  final replacement = hasSelection ? '\n```$header\n$selectedText\n```\n' : '```$header\n\n```';
   final newText = text.replaceRange(start, end, replacement);
   final cursorOffset = hasSelection ? start + replacement.length : start + '```$header\n'.length;
 
