@@ -5,6 +5,7 @@ import 'package:genesis_workspace/features/app_bar/view/organization_horizontal_
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:go_router/go_router.dart';
 
 class AppMobileDrawer extends StatelessWidget {
   const AppMobileDrawer({super.key});
@@ -42,11 +43,13 @@ class AppMobileDrawer extends StatelessWidget {
                         imagePath: organization.imageUrl,
                         isSelected: organization.id == selectedId,
                         onTap: () async {
+                          final router = GoRouter.of(context);
                           final organizationsCubit = context.read<OrganizationsCubit>();
 
                           await Future.wait([
                             organizationsCubit.selectOrganization(organization),
                           ]);
+                          router.pop();
                         },
                         onDelete: () async {
                           await context.read<OrganizationsCubit>().removeOrganization(
