@@ -524,11 +524,32 @@ class _MessengerViewState extends State<MessengerView>
                                         },
                                       ),
                                     ),
-                                    ChatTopicsList(
-                                      showTopics: isTabletOrSmaller ? _showTopics : false,
-                                      isPending: state.selectedChat?.topics == null,
-                                      selectedChat: state.selectedChat,
-                                      listPadding: _isSearchVisible ? 430 : 300,
+                                    Positioned(
+                                      right: 0,
+                                      child: AnimatedSwitcher(
+                                        duration: const Duration(milliseconds: 200),
+                                        transitionBuilder: (child, animation) {
+                                          final offsetAnimation = Tween<Offset>(
+                                            begin: const Offset(1, 0),
+                                            end: .zero,
+                                          ).animate(animation);
+                                          return SlideTransition(
+                                            position: offsetAnimation,
+                                            child: child,
+                                          );
+                                        },
+                                        child: (isTabletOrSmaller && _showTopics)
+                                            ? ChatTopicsList(
+                                                key: const ValueKey('topics_list'),
+                                                isPending: state.selectedChat?.topics == null,
+                                                selectedChat: state.selectedChat,
+                                                listPadding: _isSearchVisible ? 430 : 300,
+                                                onDismissed: () {
+                                                  setState(() => _showTopics = false);
+                                                },
+                                              )
+                                            : const SizedBox.shrink(key: ValueKey('topics_empty')),
+                                      ),
                                     ),
                                     Align(
                                       alignment: AlignmentGeometry.bottomCenter,
