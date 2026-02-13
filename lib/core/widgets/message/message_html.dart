@@ -371,8 +371,18 @@ class MessageHtml extends StatelessWidget {
           );
         }
         if (element.classes.contains('spoiler-header')) {
-          return InlineCustomWidget(
-            child: Text("SPOILER: ${element.text}"),
+          return Column(
+            children: [
+              InlineCustomWidget(
+                child: Text(
+                  "${context.t.contextMenu.spoiler}: ${element.text.replaceAll('\n', '')}",
+                  style: theme.textTheme.labelMedium,
+                ),
+              ),
+              SizedBox(
+                height: 2,
+              ),
+            ],
           );
         }
         if (element.classes.contains('spoiler-content')) {

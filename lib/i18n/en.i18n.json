@@ -379,5 +379,6 @@
     "mute": "Mute topic",
     "unmute": "Unmute topic"
   },
-  "selected_count": "Selected ({n})"
+  "selected_count": "Selected ({n})",
+  "show_spoiler": "Show spoiler"
 }
