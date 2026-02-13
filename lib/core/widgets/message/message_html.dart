@@ -370,6 +370,11 @@ class MessageHtml extends StatelessWidget {
             ),
           );
         }
+        if (element.classes.contains('spoiler-header')) {
+          return InlineCustomWidget(
+            child: Text("SPOILER: ${element.text}"),
+          );
+        }
         if (element.classes.contains('spoiler-content')) {
           final _content = element.text;
           return MessageSpoiler(content: _content);

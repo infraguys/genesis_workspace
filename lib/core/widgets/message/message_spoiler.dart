@@ -32,7 +32,6 @@ class _MessageSpoilerState extends State<MessageSpoiler> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final child = _isRevealed ? _buildRevealed(context) : _buildCollapsed(context);
-
     return GestureDetector(
       onTap: _toggle,
       behavior: HitTestBehavior.opaque,
@@ -76,9 +75,25 @@ class _MessageSpoilerState extends State<MessageSpoiler> with TickerProviderStat
   }
 
   Widget _buildRevealed(BuildContext context) {
-    return _SpoilerText(
+    final theme = Theme.of(context);
+
+    return Padding(
       key: const ValueKey('spoiler-revealed'),
-      text: widget.content,
+      padding: const EdgeInsets.only(left: 8),
+      child: Container(
+        padding: EdgeInsets.only(left: 4),
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: theme.dividerColor,
+              width: 4,
+            ),
+          ),
+        ),
+        child: _SpoilerText(
+          text: widget.content,
+        ),
+      ),
     );
   }
 }
