@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateCallDialog extends StatefulWidget {
@@ -34,6 +38,7 @@ class _CreateCallDialogState extends State<CreateCallDialog> {
   @override
   Widget build(BuildContext context) {
     final translations = context.t.call.createCallDialog;
+    final isTabletOrSmaller = currentSize(context) <= .tablet;
     return AlertDialog(
       title: Text(widget.startWithVideoMuted ? translations.title : translations.videoTitle),
       constraints: BoxConstraints(
@@ -76,6 +81,11 @@ class _CreateCallDialogState extends State<CreateCallDialog> {
             final link =
                 '${widget.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
             context.pop(link);
+            if (isTabletOrSmaller) {
+              context.pushNamed(Routes.call, extra: link);
+            } else {
+              context.read<CallCubit>().openCall(meetUrl: link, meetLocationName: '');
+            }
           },
           child: Text(translations.create),
         ),
