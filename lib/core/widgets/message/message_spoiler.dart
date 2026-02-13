@@ -1,7 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageSpoiler extends StatefulWidget {
   const MessageSpoiler({
@@ -16,8 +16,8 @@ class MessageSpoiler extends StatefulWidget {
 }
 
 class _MessageSpoilerState extends State<MessageSpoiler> with TickerProviderStateMixin {
-  static const double _collapsedWidth = 120;
-  static const double _collapsedHeight = 24;
+  // static const double _collapsedWidth = 120;
+  static const double _collapsedHeight = 30;
   static const EdgeInsets _collapsedPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 
   bool _isRevealed = false;
@@ -31,7 +31,8 @@ class _MessageSpoilerState extends State<MessageSpoiler> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final child = _isRevealed ? _buildRevealed(context) : _buildCollapsed(context);
+    final theme = Theme.of(context);
+    final TextColors textColors = theme.extension<TextColors>()!;
     return GestureDetector(
       onTap: _toggle,
       behavior: HitTestBehavior.opaque,
@@ -47,51 +48,42 @@ class _MessageSpoilerState extends State<MessageSpoiler> with TickerProviderStat
           transitionBuilder: (child, animation) {
             return FadeTransition(opacity: animation, child: child);
           },
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCollapsed(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      key: const ValueKey('spoiler-collapsed'),
-      width: _collapsedWidth,
-      height: _collapsedHeight,
-      padding: _collapsedPadding,
-      alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: _SpoilerText(
-        text: widget.content,
-        blurSigma: 6,
-        maxLines: 1,
-      ),
-    );
-  }
-
-  Widget _buildRevealed(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      key: const ValueKey('spoiler-revealed'),
-      padding: const EdgeInsets.only(left: 8),
-      child: Container(
-        padding: EdgeInsets.only(left: 4),
-        decoration: BoxDecoration(
-          border: Border(
-            left: BorderSide(
-              color: theme.dividerColor,
-              width: 4,
-            ),
-          ),
-        ),
-        child: _SpoilerText(
-          text: widget.content,
+          child: _isRevealed
+              ? Padding(
+                  key: const ValueKey('spoiler-revealed'),
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Container(
+                    padding: EdgeInsets.only(left: 4),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: theme.dividerColor,
+                          width: 4,
+                        ),
+                      ),
+                    ),
+                    child: _SpoilerText(
+                      text: widget.content,
+                    ),
+                  ),
+                )
+              : Container(
+                  key: const ValueKey('spoiler-collapsed'),
+                  padding: _collapsedPadding,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Center(
+                    child: Text(
+                      context.t.showSpoiler,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        decoration: .underline,
+                        color: textColors.text50,
+                      ),
+                    ),
+                  ),
+                ),
         ),
       ),
     );
@@ -102,28 +94,21 @@ class _SpoilerText extends StatelessWidget {
   const _SpoilerText({
     super.key,
     required this.text,
-    this.blurSigma,
     this.maxLines,
   });
 
   final String text;
-  final double? blurSigma;
   final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final sigma = blurSigma ?? 0;
-
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-      child: Text(
-        text,
-        style: theme.textTheme.bodyMedium,
-        maxLines: maxLines,
-        overflow: maxLines == null ? TextOverflow.visible : TextOverflow.ellipsis,
-      ),
+    return Text(
+      text,
+      style: theme.textTheme.bodyMedium,
+      maxLines: maxLines,
+      overflow: maxLines == null ? TextOverflow.visible : TextOverflow.ellipsis,
     );
   }
 }
