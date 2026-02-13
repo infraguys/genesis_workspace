@@ -23,6 +23,8 @@ class AppConstants {
   static const String versionConfigShaUrl =
       'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json.sha256';
 
+  static const String genesisPublicServerUrl = "https://workspace.genesis-core.tech";
+
   static final popularEmojis = [
     UnicodeEmojiDisplay(emojiName: ":thumbs_up:", emojiUnicode: "1F44D"),
     UnicodeEmojiDisplay(emojiName: ":heart:", emojiUnicode: "2764"),
