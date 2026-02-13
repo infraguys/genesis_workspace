@@ -14,13 +14,14 @@ ServerSettingsResponseDto _$ServerSettingsResponseDtoFromJson(
   realmName: json['realm_name'] as String,
   realmUri: json['realm_uri'] as String,
   realmIcon: json['realm_icon'] as String,
-  externalAuthenticationMethods: (json['external_authentication_methods'] as List<dynamic>)
-      .map(
-        (e) => ExternalAuthenticationMethodDto.fromJson(
-          e as Map<String, dynamic>,
-        ),
-      )
-      .toList(),
+  externalAuthenticationMethods:
+      (json['external_authentication_methods'] as List<dynamic>)
+          .map(
+            (e) => ExternalAuthenticationMethodDto.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
 );
 
 Map<String, dynamic> _$ServerSettingsResponseDtoToJson(

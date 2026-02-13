@@ -19,6 +19,7 @@ import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
+import 'package:genesis_workspace/features/my_activity/my_activity.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/profile/profile.dart';
 import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
@@ -26,6 +27,7 @@ import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/features/update/update.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -36,6 +38,17 @@ final _shellNavigatorMailKey = GlobalKey<NavigatorState>(debugLabel: 'shellMail'
 final _shellNavigatorServicesKey = GlobalKey<NavigatorState>(debugLabel: 'shellServices');
 final _shellNavigatorCallsKey = GlobalKey<NavigatorState>(debugLabel: 'shellCalls');
 final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
+final _shellNavigatorMyActivityKey = GlobalKey<NavigatorState>(debugLabel: 'shellMyActivity');
+
+class AppShellBranchIndex {
+  static const int messenger = 0;
+  static const int calendar = 1;
+  static const int mail = 2;
+  static const int services = 3;
+  static const int calls = 4;
+  static const int profile = 5;
+  static const int myActivity = 6;
+}
 
 class Routes {
   static const String splashScreen = '/';
@@ -48,6 +61,8 @@ class Routes {
   static const String services = '/services';
   static const String calls = '/calls';
   static const String profile = '/profile';
+  static const String myActivity = '/my-activity';
+  static const String allServices = '/all-services';
   static const String profileInfo = '/profile-info';
   static const String talkerScreen = '/talker-screen';
   static const String drafts = '/drafts';
@@ -164,6 +179,18 @@ final router = GoRouter(
                 return ProfilePersonalInfoPage(
                   onBack: () => _shellNavigatorProfileKey.currentState?.maybePop(),
                 );
+              },
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorMyActivityKey,
+          routes: [
+            GoRoute(
+              path: Routes.myActivity,
+              name: Routes.myActivity,
+              builder: (context, state) {
+                return const MyActivity();
               },
             ),
           ],
@@ -291,6 +318,21 @@ final router = GoRouter(
         ],
       ),
     ],
+    GoRoute(
+      path: Routes.allServices,
+      name: Routes.allServices,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(context.t.genesisServices.title),
+          ),
+          body: SafeArea(
+            child: const GenesisServices(showHeader: false),
+          ),
+        );
+      },
+    ),
     GoRoute(
       path: Routes.splashScreen,
       name: Routes.splashScreen,

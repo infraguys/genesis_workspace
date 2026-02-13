@@ -25,7 +25,6 @@ import 'package:genesis_workspace/features/messenger/view/create_chat/create_cha
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
-import 'package:genesis_workspace/features/messenger/view/my_activity_items.dart';
 import 'package:genesis_workspace/features/messenger/view/update_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/active_call_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/messenger_folder_rail.dart';
@@ -479,10 +478,6 @@ class _MessengerViewState extends State<MessengerView>
                                   position,
                                   selfUserId: state.selfUser?.userId ?? -1,
                                 ),
-                              ),
-                              MyActivityItems(),
-                              SizedBox(
-                                height: 8,
                               ),
                               Expanded(
                                 child: Stack(
