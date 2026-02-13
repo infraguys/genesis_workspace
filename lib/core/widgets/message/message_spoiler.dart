@@ -71,7 +71,7 @@ class _MessageSpoilerState extends State<MessageSpoiler> with TickerProviderStat
                   key: const ValueKey('spoiler-collapsed'),
                   padding: _collapsedPadding,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Center(
