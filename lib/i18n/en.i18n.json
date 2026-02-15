@@ -13,13 +13,6 @@
     "token_hint": "Your code here…",
     "paste": "Paste",
     "clear": "Clear",
-    "paste_base_url_here": "Paste Base URL",
-    "enter_or_paste_base_url_title": "Enter or paste the server address",
-    "base_url_usage_hint": "Specify your server URL (for example, https://zulip.example.com). Only https is supported.",
-    "base_url_label": "Base URL",
-    "base_url_hint": "https://your-domain.com",
-    "base_url_invalid": "Invalid address. Use https.",
-    "save_and_continue": "Save and continue",
     "logout_from_organization": "Logout from organization",
     "current_base_url": "Current server"
   },
@@ -196,9 +189,10 @@
       "description": "Provide the organization link to add it to the list.",
       "urlLabel": "Organization link",
       "urlHint": "https://example.com",
-      "urlRequired": "Enter the organization link",
       "urlInvalid": "Link is not valid",
-      "submit": "Add"
+      "submit": "Add",
+      "publicServerDescription": "Or connect to our public server:",
+      "publicServerTitle": "Genesis Core public"
     },
     "delete_organization": "Delete organization",
     "title": "Organizations"
@@ -380,5 +374,6 @@
     "mute": "Mute topic",
     "unmute": "Unmute topic"
   },
-  "selected_count": "Selected ({n})"
+  "selected_count": "Selected ({n})",
+  "show_spoiler": "Show spoiler"
 }

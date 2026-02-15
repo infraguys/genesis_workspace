@@ -73,7 +73,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
 
   late final MessagesCubit messagesCubit;
 
-  static const double _contextMenuScale = 0.95;
+  static const double _contextMenuScale = 0.98;
   static const Duration _contextMenuScaleDuration = Duration(milliseconds: 120);
 
   double _messageScale = 1.0;
@@ -242,10 +242,12 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
   }
 
   Future<void> _animateMessageContainer() async {
+    if (!mounted) return;
     setState(() {
       _messageScale = _contextMenuScale;
     });
     await Future.delayed(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
       setState(() {
         _messageScale = 1.0;
       });
@@ -310,6 +312,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
             child: Listener(
               behavior: widget.isSelectMode ? .translucent : .deferToChild,
               onPointerDown: (event) {
+                inspect(event);
                 final isMouse = event.kind == PointerDeviceKind.mouse;
                 final isRightClick = isMouse && event.buttons == kSecondaryMouseButton;
 
@@ -357,15 +360,14 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                 _touchMoved = false;
               },
               child: GestureDetector(
-                onLongPressDown: (details) {
-                  if (widget.isSelectMode) return;
-                  if (platformInfo.isMobile) {
-                    _animateMessageContainer();
-                  }
+                onTap: () {
+                  inspect(widget.message);
+                  print(widget.message.content);
                 },
                 onLongPressStart: (details) {
                   if (widget.isSelectMode) return;
                   if (platformInfo.isMobile) {
+                    _animateMessageContainer();
                     Focus.of(context).unfocus();
                     HapticFeedback.mediumImpact();
                     _openContextMenu(context, details.globalPosition);
