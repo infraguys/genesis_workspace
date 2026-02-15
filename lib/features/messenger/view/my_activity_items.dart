@@ -148,7 +148,7 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
       mySelfChatId: mySelfChatId,
     );
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
       itemCount: items.length,
       separatorBuilder: (_, __) => const SizedBox(height: 4),
       itemBuilder: (context, index) {
