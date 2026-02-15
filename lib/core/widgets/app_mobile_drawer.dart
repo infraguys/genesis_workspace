@@ -4,7 +4,9 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/features/app_bar/view/organization_horizontal_item.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
 class AppMobileDrawer extends StatelessWidget {
@@ -81,6 +83,30 @@ class AppMobileDrawer extends StatelessWidget {
                   label: Text(
                     context.t.organizations.addDialog.title,
                     style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    context.pop();
+                    context.pushNamed(Routes.allServices);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Assets.icons.dashboardCustomize.svg(),
+                        Text(
+                          context.t.services,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

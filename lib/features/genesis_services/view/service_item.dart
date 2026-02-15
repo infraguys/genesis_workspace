@@ -38,19 +38,9 @@ class ServiceItem extends StatelessWidget {
                   width: 64,
                   height: 64,
                   placeholderBuilder: (BuildContext context) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        borderRadius: .circular(8),
-                        color: theme.colorScheme.surface,
-                      ),
-                      width: 64,
-                      height: 64,
-                      child: Icon(
-                        Icons.interests,
-                        size: 32,
-                      ),
-                    );
+                    return _serviceIconFallback(theme);
                   },
+                  errorBuilder: (context, error, stackTrace) => _serviceIconFallback(theme),
                 ),
               ),
               // TapEffectIcon(
@@ -100,6 +90,21 @@ class ServiceItem extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _serviceIconFallback(ThemeData theme) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: .circular(8),
+        color: theme.colorScheme.surface,
+      ),
+      width: 64,
+      height: 64,
+      child: const Icon(
+        Icons.interests,
+        size: 32,
       ),
     );
   }

@@ -9,9 +9,10 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class GenesisServicesView extends StatelessWidget {
-  const GenesisServicesView({super.key});
+  const GenesisServicesView({super.key, this.showHeader = true});
 
   static const double spacing = 20;
+  final bool showHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -37,28 +38,25 @@ class GenesisServicesView extends StatelessWidget {
     return Column(
       crossAxisAlignment: .stretch,
       children: [
-        if (isTabletOrSmaller)
-          SizedBox(
-            height: 30,
-          ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            crossAxisAlignment: .start,
-            children: [
-              Text(
-                genesisServicesTexts.title,
-                style: theme.textTheme.titleLarge?.copyWith(fontSize: 32, fontWeight: .w500),
-              ),
-              Text(
-                genesisServicesTexts.subtitle,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: textColors.text30,
+        if (showHeader)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  genesisServicesTexts.title,
+                  style: theme.textTheme.titleLarge?.copyWith(fontSize: 32, fontWeight: .w500),
                 ),
-              ),
-            ],
+                Text(
+                  genesisServicesTexts.subtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: textColors.text30,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         Expanded(
           child: BlocBuilder<GenesisServicesCubit, GenesisServicesState>(
             builder: (context, state) {

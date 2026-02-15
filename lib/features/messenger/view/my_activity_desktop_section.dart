@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
+import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/activity_chat_item.dart';
@@ -29,8 +30,22 @@ class _ActivityItem {
   });
 }
 
-class MyActivityItems extends StatelessWidget with OpenChatMixin {
-  const MyActivityItems({super.key});
+class MyActivityDesktopSection extends StatefulWidget {
+  const MyActivityDesktopSection({super.key});
+
+  @override
+  State<MyActivityDesktopSection> createState() => _MyActivityDesktopSectionState();
+}
+
+class _MyActivityDesktopSectionState extends State<MyActivityDesktopSection> with OpenChatMixin {
+  final ExpansibleController _controller = ExpansibleController();
+  bool _isExpanded = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   List<_ActivityItem> _activityItems(
     BuildContext context, {
@@ -43,20 +58,7 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
       _ActivityItem(
         title: context.t.favorite.title,
         onTap: () {
-          if (myUserId == null) {
-            return;
-          }
-          if (currentSize(context) <= ScreenSize.lTablet) {
-            context.pushNamed(
-              Routes.chat,
-              pathParameters: {
-                'chatId': (mySelfChatId ?? -1).toString(),
-                'userId': myUserId.toString(),
-              },
-              extra: {'unreadMessagesCount': 0},
-            );
-            return;
-          }
+          if (myUserId == null) return;
           openChat(
             context,
             chatId: mySelfChatId ?? -1,
@@ -64,9 +66,9 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
           );
         },
         icon: Assets.icons.home.svg(
-          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         ),
-        color: Color(0xff58A7F7),
+        color: const Color(0xff58A7F7),
       ),
       _ActivityItem(
         title: context.t.starred.title,
@@ -78,9 +80,9 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
           }
         },
         icon: Assets.icons.selectedBookmarkIcon.svg(
-          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         ),
-        color: Color(0xffF04C4C),
+        color: const Color(0xffF04C4C),
       ),
       _ActivityItem(
         title: context.t.mentions.title,
@@ -91,11 +93,11 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
             context.read<MessengerCubit>().openSection(.mentions);
           }
         },
-        icon: Icon(
+        icon: const Icon(
           Icons.alternate_email,
           color: Colors.white,
         ),
-        color: Color(0xfff0ca4c),
+        color: const Color(0xfff0ca4c),
         unreadCount: mentionsUnreadCount,
       ),
       _ActivityItem(
@@ -107,11 +109,11 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
             context.read<MessengerCubit>().openSection(.reactions);
           }
         },
-        icon: Icon(
+        icon: const Icon(
           Icons.emoji_emotions_outlined,
           color: Colors.white,
         ),
-        color: Color(0xff58a333),
+        color: const Color(0xff58a333),
       ),
       _ActivityItem(
         title: context.t.drafts.title,
@@ -123,9 +125,9 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
           }
         },
         icon: Assets.icons.pencilFilled.svg(
-          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         ),
-        color: Color(0xffB86BEF),
+        color: const Color(0xffB86BEF),
         unreadCount: draftsCount,
         isMuted: true,
       ),
@@ -135,11 +137,11 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
   @override
   Widget build(BuildContext context) {
     final messengerState = context.select((MessengerCubit cubit) => cubit.state);
-    final mentionsUnreadCount = messengerState.mentionsUnreadCount;
-    final mySelfChatId = messengerState.mySelfChatId;
-    final myUserId = context.select((ProfileCubit cubit) => cubit.state.user?.userId);
+    final int mentionsUnreadCount = messengerState.mentionsUnreadCount;
+    final int? mySelfChatId = messengerState.mySelfChatId;
+    final int? myUserId = context.select((ProfileCubit cubit) => cubit.state.user?.userId);
+    final int draftsCount = context.select((DraftsCubit cubit) => cubit.state.drafts.length);
 
-    final draftsCount = context.select((DraftsCubit cubit) => cubit.state.drafts.length);
     final items = _activityItems(
       context,
       mentionsUnreadCount: mentionsUnreadCount,
@@ -147,21 +149,47 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
       myUserId: myUserId,
       mySelfChatId: mySelfChatId,
     );
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 4),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return ActivityChatItem(
-          title: item.title,
-          onTap: item.onTap,
-          icon: item.icon,
-          color: item.color,
-          unreadCount: item.unreadCount,
-          isMuted: item.isMuted,
-        );
+
+    return ExpansionTile(
+      title: Text(context.t.myActivity),
+      controller: _controller,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 12,
+        children: [
+          SizedBox(
+            height: 20,
+            width: 20,
+            child: UnreadBadge(count: mentionsUnreadCount),
+          ),
+          AnimatedRotation(
+            turns: _isExpanded ? 0.5 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            child: Assets.icons.arrowDown.svg(),
+          ),
+        ],
+      ),
+      childrenPadding: const EdgeInsets.symmetric(horizontal: 8),
+      onExpansionChanged: (bool isExpanded) {
+        setState(() => _isExpanded = isExpanded);
       },
+      children: items
+          .expand(
+            (item) => [
+              ActivityChatItem(
+                title: item.title,
+                onTap: item.onTap,
+                icon: item.icon,
+                color: item.color,
+                unreadCount: item.unreadCount,
+                isMuted: item.isMuted,
+              ),
+              const SizedBox(height: 4),
+            ],
+          )
+          .toList(),
     );
   }
 }

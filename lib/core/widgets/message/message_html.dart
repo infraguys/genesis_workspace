@@ -313,7 +313,7 @@ class MessageHtml extends StatelessWidget {
                                   onTap: () {
                                     context.pop();
                                     if (currentSize(context) > ScreenSize.lTablet) {
-                                      appShellController.goToBranch(0);
+                                      appShellController.goToBranch(AppShellBranchIndex.messenger);
                                       context.read<AllChatsCubit>().selectDmChat(user);
                                     } else {
                                       context.pushNamed(

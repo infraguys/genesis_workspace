@@ -5,13 +5,15 @@ import 'package:genesis_workspace/features/genesis_services/bloc/genesis_service
 import 'package:genesis_workspace/features/genesis_services/view/genesis_services_view.dart';
 
 class GenesisServices extends StatelessWidget {
-  const GenesisServices({super.key});
+  const GenesisServices({super.key, this.showHeader = true});
+
+  final bool showHeader;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<GenesisServicesCubit>()..loadServices(),
-      child: GenesisServicesView(),
+      child: GenesisServicesView(showHeader: showHeader),
     );
   }
 }
