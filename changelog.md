@@ -1,5 +1,15 @@
 # Changelog
 
+# 1.8.4
+- Refactor opening context menu
+- Add swipe for topics
+- Updated flutter version for the project
+- Added close drawer after select organization
+- Refactored spoiler
+- Added Genesis Organization as default
+- Refactored My activity section
+- Fixed first message layout in DM chat
+
 # 1.8.3
 - Add sorting for topics
 - Added spoilers, bold, italic buttons for text formatting
