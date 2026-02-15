@@ -1052,13 +1052,13 @@ class MessengerCubit extends Cubit<MessengerState> {
     ChatEntity updatedChat = updatedChats.firstWhere((chat) => chat.id == message.recipientId);
     updatedMessages.removeWhere((message) => message.id == messageId);
 
-    final List<MessageEntity> chatMessages =
-        state.messages.where((message) => message.recipientId == updatedChat.id).toList()
-          ..sort((firstMessage, secondMessage) => firstMessage.timestamp.compareTo(secondMessage.timestamp));
-
     updatedUnreadMessages.removeWhere((message) => message.id == messageId);
 
-    if (chatMessages.length == 1) {
+    final List<MessageEntity> remainingMessagesForChat =
+        updatedMessages.where((message) => message.recipientId == updatedChat.id).toList()
+          ..sort((firstMessage, secondMessage) => firstMessage.timestamp.compareTo(secondMessage.timestamp));
+
+    if (remainingMessagesForChat.isEmpty) {
       updatedChats.removeWhere((chat) => chat.id == updatedChat.id);
       final updatedFolders = _recalculateUnreadMessagesForFolders(
         folders: state.folders,
@@ -1074,7 +1074,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       );
       return;
     }
-    final prevMessage = chatMessages[chatMessages.length - 1];
+    final prevMessage = remainingMessagesForChat.last;
     if (_lastMessageId == messageId) {
       _lastMessageId = prevMessage.id;
     }
@@ -1084,20 +1084,35 @@ class MessengerCubit extends Cubit<MessengerState> {
     updatedChat.topics?.forEach((topic) {
       topic.unreadMessages.remove(messageId);
     });
-    updatedChat = updatedChat.updateLastMessage(
-      prevMessage,
-      isMyMessage: prevMessage.isMyMessage(state.selfUser?.userId),
-      forceUpdateLastMessage: true,
-    );
+    final bool shouldUpdateChatLastMessage =
+        updatedChat.lastMessageId == messageId || updatedChat.lastMessageDate == message.messageDate;
+    if (shouldUpdateChatLastMessage) {
+      updatedChat = updatedChat.updateLastMessage(
+        prevMessage,
+        isMyMessage: prevMessage.isMyMessage(state.selfUser?.userId),
+        forceUpdateLastMessage: true,
+      );
+    }
     if (updatedChat.topics?.any((topic) => topic.name == message.subject) ?? false) {
       final topic = updatedChat.topics!.firstWhere((topic) => topic.name == message.subject);
       final indexOfTopic = updatedChat.topics!.indexOf(topic);
       updatedChat.topics![indexOfTopic].unreadMessages.remove(message.id);
-      final updatedTopic = updatedChat.topics![indexOfTopic].copyWith(
-        lastMessageSenderName: prevMessage.senderFullName,
-        lastMessagePreview: prevMessage.content,
-      );
-      updatedChat.topics![indexOfTopic] = updatedTopic;
+
+      if (topic.maxId == messageId) {
+        final List<MessageEntity> remainingTopicMessages =
+            updatedMessages
+                .where((message) => message.recipientId == updatedChat.id && message.subject == topic.name)
+                .toList()
+              ..sort((firstMessage, secondMessage) => firstMessage.timestamp.compareTo(secondMessage.timestamp));
+
+        final lastTopicMessage = remainingTopicMessages.last;
+        final updatedTopic = updatedChat.topics![indexOfTopic].copyWith(
+          maxId: lastTopicMessage.id,
+          lastMessageSenderName: lastTopicMessage.senderFullName,
+          lastMessagePreview: lastTopicMessage.content,
+        );
+        updatedChat.topics![indexOfTopic] = updatedTopic;
+      }
     }
     updatedChats[indexOfChat] = updatedChat;
     final updatedFolders = _recalculateUnreadMessagesForFolders(
@@ -1107,6 +1122,7 @@ class MessengerCubit extends Cubit<MessengerState> {
     emit(
       state.copyWith(
         chats: updatedChats,
+        messages: updatedMessages,
         unreadMessages: updatedUnreadMessages,
         folders: updatedFolders,
       ),

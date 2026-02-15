@@ -25,7 +25,7 @@ import 'package:genesis_workspace/features/messenger/view/create_chat/create_cha
 import 'package:genesis_workspace/features/messenger/view/create_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/messenger_app_bar.dart';
-import 'package:genesis_workspace/features/messenger/view/my_activity_items.dart';
+import 'package:genesis_workspace/features/messenger/view/my_activity_desktop_section.dart';
 import 'package:genesis_workspace/features/messenger/view/update_folder_dialog.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/active_call_panel.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/messenger_folder_rail.dart';
@@ -480,10 +480,10 @@ class _MessengerViewState extends State<MessengerView>
                                   selfUserId: state.selfUser?.userId ?? -1,
                                 ),
                               ),
-                              MyActivityItems(),
-                              SizedBox(
-                                height: 8,
-                              ),
+                              if (!isTabletOrSmaller) ...[
+                                const MyActivityDesktopSection(),
+                                const SizedBox(height: 8),
+                              ],
                               Expanded(
                                 child: Stack(
                                   children: [
@@ -524,11 +524,32 @@ class _MessengerViewState extends State<MessengerView>
                                         },
                                       ),
                                     ),
-                                    ChatTopicsList(
-                                      showTopics: isTabletOrSmaller ? _showTopics : false,
-                                      isPending: state.selectedChat?.topics == null,
-                                      selectedChat: state.selectedChat,
-                                      listPadding: _isSearchVisible ? 430 : 300,
+                                    Positioned(
+                                      right: 0,
+                                      child: AnimatedSwitcher(
+                                        duration: const Duration(milliseconds: 200),
+                                        transitionBuilder: (child, animation) {
+                                          final offsetAnimation = Tween<Offset>(
+                                            begin: const Offset(1, 0),
+                                            end: .zero,
+                                          ).animate(animation);
+                                          return SlideTransition(
+                                            position: offsetAnimation,
+                                            child: child,
+                                          );
+                                        },
+                                        child: (isTabletOrSmaller && _showTopics)
+                                            ? ChatTopicsList(
+                                                key: const ValueKey('topics_list'),
+                                                isPending: state.selectedChat?.topics == null,
+                                                selectedChat: state.selectedChat,
+                                                listPadding: _isSearchVisible ? 430 : 300,
+                                                onDismissed: () {
+                                                  setState(() => _showTopics = false);
+                                                },
+                                              )
+                                            : const SizedBox.shrink(key: ValueKey('topics_empty')),
+                                      ),
                                     ),
                                     Align(
                                       alignment: AlignmentGeometry.bottomCenter,

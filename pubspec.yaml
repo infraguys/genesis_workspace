@@ -2,7 +2,7 @@ name: genesis_workspace
 description: "Genesis Workspace application."
 publish_to: 'none'
 
-version: 1.8.2+8
+version: 1.8.4+10
 
 environment:
   sdk: ^3.10.0
@@ -53,6 +53,10 @@ dependencies:
   audioplayers: ^6.5.0
   package_info_plus: ^8.0.2
   window_manager: ^0.3.9
+  scrollable_positioned_list: ^0.3.8
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_video: ^1.0.7
 
 
   #data
@@ -83,10 +87,7 @@ dependencies:
   talker_flutter: ^5.1.9
   talker_dio_logger: ^5.1.9
   talker_bloc_logger: ^5.1.9
-  scrollable_positioned_list: ^0.3.8
-  media_kit: ^1.2.6
-  media_kit_video: ^2.0.1
-  media_kit_libs_video: ^1.0.7
+
 
 dev_dependencies:
   flutter_test:

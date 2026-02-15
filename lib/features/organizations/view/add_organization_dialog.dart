@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class AddOrganizationDialog extends StatefulWidget {
@@ -49,7 +52,7 @@ class _AddOrganizationDialogState extends State<AddOrganizationDialog> {
     final Uri? uri = Uri.tryParse(value);
     final bool isValidHttps = uri != null && uri.hasAuthority && uri.isScheme('https');
 
-    _urlError = isValidHttps ? null : context.t.auth.baseUrlInvalid;
+    _urlError = isValidHttps ? null : context.t.organizations.addDialog.urlInvalid;
     setState(() {});
   }
 
@@ -64,10 +67,15 @@ class _AddOrganizationDialogState extends State<AddOrganizationDialog> {
     Navigator.of(context).pop(_urlController.text.trim());
   }
 
+  void _addGenesisOrg() {
+    Navigator.of(context).pop(AppConstants.genesisPublicServerUrl);
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.t;
     final ThemeData theme = Theme.of(context);
+    final CardColors cardColors = theme.extension<CardColors>()!;
     final BorderRadius borderRadius = BorderRadius.circular(16);
 
     return Dialog(
@@ -100,7 +108,7 @@ class _AddOrganizationDialogState extends State<AddOrganizationDialog> {
                 Text(
                   t.organizations.addDialog.description,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -145,7 +153,7 @@ class _AddOrganizationDialogState extends State<AddOrganizationDialog> {
                     );
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 SizedBox(
                   height: 48,
                   child: ElevatedButton(
@@ -154,6 +162,42 @@ class _AddOrganizationDialogState extends State<AddOrganizationDialog> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(t.organizations.addDialog.submit),
+                  ),
+                ),
+                Divider(
+                  color: theme.dividerColor,
+                  height: 20,
+                ),
+                Text(
+                  t.organizations.addDialog.publicServerDescription,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: _addGenesisOrg,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cardColors.base.withValues(alpha: .02),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Assets.images.genesisLogoPng.image(
+                            width: 36,
+                            height: 36,
+                          ),
+                        ),
+                        Text(
+                          t.organizations.addDialog.publicServerTitle,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

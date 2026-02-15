@@ -479,82 +479,100 @@ class _ChatViewState extends State<ChatView>
                         }
                         return Column(
                           children: [
-                            state.messages.isEmpty && snapshot.connectionState != .waiting
-                                ? Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
-                                : Expanded(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        if (currentSize(context) < ScreenSize.lTablet) {
-                                          FocusScope.of(context).unfocus();
-                                          context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                            false,
-                                            closeKeyboard: true,
-                                          );
-                                        }
-                                      },
-                                      child: snapshot.connectionState == .waiting
-                                          ? Skeletonizer(
-                                              enabled: true,
-                                              child: ListView.separated(
-                                                itemCount: 20,
-                                                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                ).copyWith(bottom: 12),
-                                                itemBuilder: (context, index) {
-                                                  return MessageItem(
-                                                    isMyMessage: index % 2 == 0,
-                                                    message: MessageEntity.fake(),
-                                                    isSkeleton: true,
-                                                    myUserId: _myUser.userId,
-                                                    onTapQuote: (_, {quote}) {},
-                                                    onTapEditMessage: (_) {},
+                            if (state.messages.isEmpty && snapshot.connectionState == ConnectionState.done)
+                              Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
+                            else
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    if (currentSize(context) < ScreenSize.lTablet) {
+                                      FocusScope.of(context).unfocus();
+                                      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                        false,
+                                        closeKeyboard: true,
+                                      );
+                                    }
+                                  },
+                                  child: snapshot.connectionState == .waiting
+                                      ? Skeletonizer(
+                                          enabled: true,
+                                          child: ListView.separated(
+                                            itemCount: 20,
+                                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ).copyWith(bottom: 12),
+                                            itemBuilder: (context, index) {
+                                              return MessageItem(
+                                                isMyMessage: index % 2 == 0,
+                                                message: MessageEntity.fake(),
+                                                isSkeleton: true,
+                                                myUserId: _myUser.userId,
+                                                onTapQuote: (_, {quote}) {},
+                                                onTapEditMessage: (_) {},
+                                              );
+                                            },
+                                          ),
+                                        )
+                                      : Stack(
+                                          children: [
+                                            MessagesList(
+                                              messages: state.messages,
+                                              isLoadingMore: state.isLoadingMore,
+                                              controller: _controller,
+                                              onRead: (id) {
+                                                context.read<ChatCubit>().scheduleMarkAsReadCommon(id);
+                                              },
+                                              loadMore: context.read<ChatCubit>().loadMoreMessages,
+                                              showTopic: true,
+                                              myUserId: _myUser.userId,
+                                              onTapQuote: onTapQuote,
+                                              onTapEditMessage: onTapEditMessage,
+                                              onReadAll: () async {
+                                                if (widget.chatId != null) {
+                                                  await context.read<MessengerCubit>().readAllMessages(
+                                                    widget.chatId!,
                                                   );
-                                                },
-                                              ),
-                                            )
-                                          : Stack(
-                                              children: [
-                                                MessagesList(
-                                                  messages: state.messages,
-                                                  isLoadingMore: state.isLoadingMore,
-                                                  controller: _controller,
-                                                  onRead: (id) {
-                                                    context.read<ChatCubit>().scheduleMarkAsReadCommon(id);
-                                                  },
-                                                  loadMore: context.read<ChatCubit>().loadMoreMessages,
-                                                  showTopic: true,
-                                                  myUserId: _myUser.userId,
-                                                  onTapQuote: onTapQuote,
-                                                  onTapEditMessage: onTapEditMessage,
-                                                  onReadAll: () async {
-                                                    if (widget.chatId != null) {
-                                                      await context.read<MessengerCubit>().readAllMessages(
-                                                        widget.chatId!,
-                                                      );
-                                                    }
-                                                  },
-                                                  isSelectMode: messagesSelectState.isActive,
-                                                  selectedMessages: selectedMessages,
-                                                ),
-                                                Positioned(
-                                                  bottom: 0,
-                                                  left: 50,
-                                                  child: MentionSuggestions(
-                                                    key: _mentionKey,
-                                                    mentionFocusNode: mentionFocusNode,
-                                                    showPopup: state.showMentionPopup,
-                                                    suggestedMentions: state.suggestedMentions,
-                                                    isSuggestionsPending: state.isSuggestionsPending,
-                                                    filteredSuggestedMentions: state.filteredSuggestedMentions,
-                                                    onSelectMention: onMentionSelected,
-                                                    inputFocusNode: messageInputFocusNode,
-                                                  ),
-                                                ),
-                                              ],
+                                                }
+                                              },
+                                              isSelectMode: messagesSelectState.isActive,
+                                              selectedMessages: selectedMessages,
                                             ),
-                                    ),
-                                  ),
+                                            Positioned(
+                                              bottom: 0,
+                                              left: 50,
+                                              child: MentionSuggestions(
+                                                key: _mentionKey,
+                                                mentionFocusNode: mentionFocusNode,
+                                                showPopup: state.showMentionPopup,
+                                                suggestedMentions: state.suggestedMentions,
+                                                isSuggestionsPending: state.isSuggestionsPending,
+                                                filteredSuggestedMentions: state.filteredSuggestedMentions,
+                                                onSelectMention: onMentionSelected,
+                                                inputFocusNode: messageInputFocusNode,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                ),
+                              ),
+                            // state.messages.isEmpty && snapshot.connectionState != .waiting
+                            //     ? Expanded(child: Center(child: Text(context.t.noMessagesHereYet)))
+                            //     : Expanded(
+                            //         child: GestureDetector(
+                            //           onTap: () {
+                            //             if (currentSize(context) < ScreenSize.lTablet) {
+                            //               FocusScope.of(context).unfocus();
+                            //               context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                            //                 false,
+                            //                 closeKeyboard: true,
+                            //               );
+                            //             }
+                            //           },
+                            //           child: snapshot.connectionState == .waiting
+                            //               ?                                           : ,
+                            //         ),
+                            //       ),
                             AnimatedCrossFade(
                               duration: const Duration(milliseconds: 200),
                               firstCurve: Curves.easeOut,

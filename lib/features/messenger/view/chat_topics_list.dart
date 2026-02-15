@@ -7,16 +7,16 @@ import 'package:skeletonizer/skeletonizer.dart';
 class ChatTopicsList extends StatefulWidget {
   const ChatTopicsList({
     super.key,
-    required this.showTopics,
     required this.isPending,
     this.selectedChat,
     required this.listPadding,
+    required this.onDismissed,
   });
 
-  final bool showTopics;
   final bool isPending;
   final ChatEntity? selectedChat;
   final double listPadding;
+  final VoidCallback onDismissed;
 
   @override
   State<ChatTopicsList> createState() => _ChatTopicsListState();
@@ -48,29 +48,30 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
     final theme = Theme.of(context);
     final sizeOf = MediaQuery.sizeOf(context);
 
-    return Positioned(
-      right: 0,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+    return Dismissible(
+      key: const ValueKey('topics_list'),
+      direction: DismissDirection.startToEnd,
+      onDismissed: (_) => widget.onDismissed(),
+      child: SizedBox(
+        width: sizeOf.width - 70,
         height: sizeOf.height,
-        decoration: BoxDecoration(color: theme.colorScheme.background),
-        constraints: BoxConstraints(
-          maxWidth: widget.showTopics ? sizeOf.width - 70 : 0,
-        ),
-        child: Skeletonizer(
-          enabled: widget.isPending,
-          child: widget.selectedChat == null
-              ? SizedBox.shrink()
-              : ListView.builder(
-                  controller: _topicsController,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.only(bottom: widget.listPadding),
-                  itemCount: widget.selectedChat!.isTopicsLoading ? 4 : sortedTopics.length,
-                  itemBuilder: (context, index) {
-                    final topic = sortedTopics[index];
-                    return MobileTopicItem(selectedChat: widget.selectedChat!, topic: topic);
-                  },
-                ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: theme.colorScheme.background),
+          child: Skeletonizer(
+            enabled: widget.isPending,
+            child: widget.selectedChat == null
+                ? SizedBox.shrink()
+                : ListView.builder(
+                    controller: _topicsController,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.only(bottom: widget.listPadding),
+                    itemCount: widget.selectedChat!.isTopicsLoading ? 4 : sortedTopics.length,
+                    itemBuilder: (context, index) {
+                      final topic = sortedTopics.isEmpty ? TopicEntity.fake() : sortedTopics[index];
+                      return MobileTopicItem(selectedChat: widget.selectedChat!, topic: topic);
+                    },
+                  ),
+          ),
         ),
       ),
     );

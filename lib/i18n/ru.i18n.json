@@ -13,13 +13,6 @@
     "token_hint": "Ваш код…",
     "paste": "Вставить",
     "clear": "Очистить",
-    "paste_base_url_here": "Вставьте Base URL",
-    "enter_or_paste_base_url_title": "Введите или вставьте адрес сервера",
-    "base_url_usage_hint": "Укажите URL вашего сервера (например, https://zulip.example.com). Поддерживается только https.",
-    "base_url_label": "Base URL",
-    "base_url_hint": "https://your-domain.com",
-    "base_url_invalid": "Некорректный адрес. Используйте https.",
-    "save_and_continue": "Сохранить и продолжить",
     "logout_from_organization": "Выйти из организации",
     "current_base_url": "Текущий сервер"
   },
@@ -201,12 +194,13 @@
   "organizations": {
     "addDialog": {
       "title": "Добавить организацию",
-      "description": "Укажите ссылку на организацию, чтобы добавить её в список.",
+      "description": "Укажите ссылку на организацию, чтобы добавить её в список",
       "urlLabel": "Ссылка на организацию",
       "urlHint": "https://example.com",
-      "urlRequired": "Введите ссылку на организацию",
       "urlInvalid": "Некорректная ссылка",
-      "submit": "Добавить"
+      "submit": "Добавить",
+      "publicServerDescription": "Или можете подключиться к нашему публичному серверу:",
+      "publicServerTitle": "Genesis Core public"
     },
     "delete_organization": "Удалить организацию",
     "title": "Организации"
@@ -301,6 +295,7 @@
   "email": "Почта",
   "groups": "Группы",
   "calls": "Звонки",
+  "services": "Сервисы",
   "information": "Информация",
   "username": "Имя пользователя",
   "role": "Роль",
@@ -328,6 +323,10 @@
     "edit": "Редактировать",
     "delete": "Удалить",
     "copy": "Копировать",
+    "spoiler": "Спойлер",
+    "bold": "Жирный",
+    "italic": "Курсив",
+    "strikethrough": "Перечеркнутый",
     "mark_as_important": "Пометить как важное",
     "unmark_as_important": "Убрать из важного",
     "forward": "Переслать",
@@ -385,5 +384,6 @@
     "mute": "Заглушить тему",
     "unmute": "Включить уведомления в теме"
   },
-  "selected_count": "Выбрано ({n})"
+  "selected_count": "Выбрано ({n})",
+  "show_spoiler": "Показать спойлер"
 }

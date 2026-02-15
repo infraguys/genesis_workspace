@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
+import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +63,7 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
     final Uri? uri = Uri.tryParse(value);
     final bool isValidHttps = uri != null && uri.hasAuthority && uri.isScheme('https');
 
-    _validationError = isValidHttps ? null : context.t.auth.baseUrlInvalid;
+    _validationError = isValidHttps ? null : context.t.organizations.addDialog.urlInvalid;
     setState(() {});
   }
 
@@ -82,10 +85,23 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
     }
   }
 
+  Future<void> _addGenesisOrg() async {
+    setState(() => _submitting = true);
+    try {
+      await context.read<AuthCubit>().saveBaseUrl(baseUrl: AppConstants.genesisPublicServerUrl);
+    } finally {
+      if (mounted) {
+        setState(() => _submitting = false);
+        context.go(Routes.auth);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.t;
     final ThemeData theme = Theme.of(context);
+    final CardColors cardColors = theme.extension<CardColors>()!;
 
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
@@ -101,15 +117,18 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(t.auth.enterOrPasteBaseUrlTitle, style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 8),
                   Text(
-                    t.auth.baseUrlUsageHint,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    t.organizations.addDialog.title,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontSize: 16,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
+                  Text(
+                    t.organizations.addDialog.description,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,
                     builder: (context, value, _) {
@@ -124,8 +143,8 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                         onSubmitted: (_) => _submit(),
                         onChanged: _validate,
                         decoration: InputDecoration(
-                          labelText: t.auth.baseUrlLabel, // добавьте ключ
-                          hintText: t.auth.baseUrlHint,
+                          labelText: t.organizations.addDialog.urlLabel,
+                          hintText: t.organizations.addDialog.urlHint,
                           errorText: _validationError,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           focusedBorder: OutlineInputBorder(
@@ -156,15 +175,7 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                       );
                     },
                   ),
-                  const SizedBox(height: 16),
-                  if (kDebugMode)
-                    TextButton(
-                      onPressed: () {
-                        context.read<SettingsCubit>().clearLocalDatabase();
-                        context.read<SettingsCubit>().clearSharedPreferences();
-                      },
-                      child: Text("clear data"),
-                    ),
+                  const SizedBox(height: 20),
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,
                     builder: (context, value, _) {
@@ -183,10 +194,56 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
                                   width: 22,
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : Text(t.auth.saveAndContinue),
+                              : Text(t.organizations.addDialog.submit),
                         ).pending(isPending),
                       );
                     },
+                  ),
+                  if (kDebugMode)
+                    TextButton(
+                      onPressed: () {
+                        context.read<SettingsCubit>().clearLocalDatabase();
+                        context.read<SettingsCubit>().clearSharedPreferences();
+                      },
+                      child: Text("clear data"),
+                    ),
+                  Divider(
+                    color: theme.dividerColor,
+                    height: 20,
+                  ),
+                  Text(
+                    t.organizations.addDialog.publicServerDescription,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  InkWell(
+                    onTap: _addGenesisOrg,
+                    borderRadius: .circular(8),
+                    child: Container(
+                      padding: .all(8),
+                      decoration: BoxDecoration(
+                        color: cardColors.base.withValues(alpha: .02),
+                        borderRadius: .circular(8),
+                      ),
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          ClipRRect(
+                            borderRadius: .circular(8),
+                            child: Assets.images.genesisLogoPng.image(
+                              width: 36,
+                              height: 36,
+                            ),
+                          ),
+                          Text(
+                            t.organizations.addDialog.publicServerTitle,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

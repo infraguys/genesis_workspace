@@ -8,7 +8,7 @@ class PasteBaseUrl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(t.auth.pasteBaseUrlHere)),
+      appBar: AppBar(title: Text(context.t.organizations.addDialog.title)),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
-import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/widgets/activity_chat_item.dart';
@@ -30,41 +29,39 @@ class _ActivityItem {
   });
 }
 
-class MyActivityItems extends StatefulWidget {
+class MyActivityItems extends StatelessWidget with OpenChatMixin {
   const MyActivityItems({super.key});
-
-  @override
-  State<MyActivityItems> createState() => _MyActivityItemsState();
-}
-
-class _MyActivityItemsState extends State<MyActivityItems> with OpenChatMixin {
-  final ExpansibleController _controller = ExpansibleController();
-  bool _isExpanded = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   List<_ActivityItem> _activityItems(
     BuildContext context, {
     required int mentionsUnreadCount,
     required int draftsCount,
+    required int? myUserId,
+    required int? mySelfChatId,
   }) {
     return <_ActivityItem>[
       _ActivityItem(
         title: context.t.favorite.title,
         onTap: () {
-          final myUserId = context.select((ProfileCubit cubit) => cubit.state.user?.userId);
-          final mySelfChatId = context.select((MessengerCubit cubit) => cubit.state.mySelfChatId);
-          if (myUserId != null) {
-            openChat(
-              context,
-              chatId: mySelfChatId ?? -1,
-              membersIds: {myUserId},
-            );
+          if (myUserId == null) {
+            return;
           }
+          if (currentSize(context) <= ScreenSize.lTablet) {
+            context.pushNamed(
+              Routes.chat,
+              pathParameters: {
+                'chatId': (mySelfChatId ?? -1).toString(),
+                'userId': myUserId.toString(),
+              },
+              extra: {'unreadMessagesCount': 0},
+            );
+            return;
+          }
+          openChat(
+            context,
+            chatId: mySelfChatId ?? -1,
+            membersIds: {myUserId},
+          );
         },
         icon: Assets.icons.home.svg(
           colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
@@ -137,53 +134,34 @@ class _MyActivityItemsState extends State<MyActivityItems> with OpenChatMixin {
 
   @override
   Widget build(BuildContext context) {
-    final mentionsUnreadCount = context.select((MessengerCubit cubit) {
-      return cubit.state.mentionsUnreadCount;
-    });
+    final messengerState = context.select((MessengerCubit cubit) => cubit.state);
+    final mentionsUnreadCount = messengerState.mentionsUnreadCount;
+    final mySelfChatId = messengerState.mySelfChatId;
+    final myUserId = context.select((ProfileCubit cubit) => cubit.state.user?.userId);
 
     final draftsCount = context.select((DraftsCubit cubit) => cubit.state.drafts.length);
-    return ExpansionTile(
-      title: Text(context.t.myActivity),
-      controller: _controller,
-      trailing: Row(
-        mainAxisSize: .min,
-        crossAxisAlignment: .center,
-        spacing: 12,
-        children: [
-          SizedBox(
-            height: 20,
-            width: 20,
-            child: UnreadBadge(count: mentionsUnreadCount),
-          ),
-          AnimatedRotation(
-            turns: _isExpanded ? 0.5 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            child: Assets.icons.arrowDown.svg(),
-          ),
-        ],
-      ),
-      childrenPadding: .symmetric(horizontal: 8),
-      onExpansionChanged: (bool isExpanded) {
-        setState(() => _isExpanded = isExpanded);
+    final items = _activityItems(
+      context,
+      mentionsUnreadCount: mentionsUnreadCount,
+      draftsCount: draftsCount,
+      myUserId: myUserId,
+      mySelfChatId: mySelfChatId,
+    );
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 4),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ActivityChatItem(
+          title: item.title,
+          onTap: item.onTap,
+          icon: item.icon,
+          color: item.color,
+          unreadCount: item.unreadCount,
+          isMuted: item.isMuted,
+        );
       },
-      children: _activityItems(context, mentionsUnreadCount: mentionsUnreadCount, draftsCount: draftsCount)
-          .expand(
-            (item) => [
-              ActivityChatItem(
-                title: item.title,
-                onTap: item.onTap,
-                icon: item.icon,
-                color: item.color,
-                unreadCount: item.unreadCount,
-                isMuted: item.isMuted,
-              ),
-              SizedBox(
-                height: 4,
-              ),
-            ],
-          )
-          .toList(),
     );
   }
 }
