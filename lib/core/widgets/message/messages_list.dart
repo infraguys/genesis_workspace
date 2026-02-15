@@ -15,9 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import '../../../i18n/generated/strings.g.dart';
-
-// typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
@@ -130,10 +128,16 @@ class _MessagesListState extends State<MessagesList> {
     for (int index = reversedMessages.length - 1; index >= 0; index--) {
       final MessageEntity message = reversedMessages[index];
       final bool isRead = message.flags?.contains('read') ?? false;
+      final bool isOwnMessage = message.senderId == widget.myUserId;
 
-      if (!isRead) {
+      // Do not center the list around unread messages sent by the current user.
+      if (!isRead && !isOwnMessage) {
         final MessageEntity? previous = (index + 1 < reversedMessages.length) ? reversedMessages[index + 1] : null;
-        final bool previousIsRead = previous == null ? true : (previous.flags?.contains('read') ?? false);
+        final bool previousIsRead = switch (previous) {
+          null => true,
+          _ when previous.senderId == widget.myUserId => true,
+          _ => previous.flags?.contains('read') ?? false,
+        };
 
         if (previousIsRead) {
           return index;
@@ -234,8 +238,6 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Column(
       children: [
         if (widget.isLoadingMore)

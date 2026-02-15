@@ -312,7 +312,6 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
             child: Listener(
               behavior: widget.isSelectMode ? .translucent : .deferToChild,
               onPointerDown: (event) {
-                inspect(event);
                 final isMouse = event.kind == PointerDeviceKind.mouse;
                 final isRightClick = isMouse && event.buttons == kSecondaryMouseButton;
 
