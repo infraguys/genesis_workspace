@@ -137,7 +137,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
           Padding(
             padding: isLargeScreen
                 ? EdgeInsets.symmetric(horizontal: 8).copyWith(top: 20, bottom: 8)
-                : EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                : EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 14),
             child: Row(
               children: [
                 if (isTabletOrSmaller) ...[
@@ -214,7 +214,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                 child: Padding(
                   padding: isLargeScreen
                       ? EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12)
-                      : EdgeInsets.symmetric(horizontal: 20).copyWith(top: 14, bottom: 20),
+                      : EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),
                   child: Row(
                     spacing: 8,
                     children: [
