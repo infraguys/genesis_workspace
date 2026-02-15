@@ -103,6 +103,18 @@ final router = GoRouter(
       },
       branches: [
         StatefulShellBranch(
+          navigatorKey: _shellNavigatorMyActivityKey,
+          routes: [
+            GoRoute(
+              path: Routes.myActivity,
+              name: Routes.myActivity,
+              builder: (context, state) {
+                return const MyActivity();
+              },
+            ),
+          ],
+        ),
+        StatefulShellBranch(
           navigatorKey: _shellNavigatorMessengerKey,
           routes: [
             GoRoute(
@@ -138,18 +150,18 @@ final router = GoRouter(
             ),
           ],
         ),
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorServicesKey,
-          routes: [
-            GoRoute(
-              path: Routes.services,
-              name: Routes.services,
-              builder: (context, state) {
-                return GenesisServices();
-              },
-            ),
-          ],
-        ),
+        // StatefulShellBranch(
+        //   navigatorKey: _shellNavigatorServicesKey,
+        //   routes: [
+        //     GoRoute(
+        //       path: Routes.services,
+        //       name: Routes.services,
+        //       builder: (context, state) {
+        //         return GenesisServices();
+        //       },
+        //     ),
+        //   ],
+        // ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorCallsKey,
           routes: [
@@ -179,18 +191,6 @@ final router = GoRouter(
                 return ProfilePersonalInfoPage(
                   onBack: () => _shellNavigatorProfileKey.currentState?.maybePop(),
                 );
-              },
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorMyActivityKey,
-          routes: [
-            GoRoute(
-              path: Routes.myActivity,
-              name: Routes.myActivity,
-              builder: (context, state) {
-                return const MyActivity();
               },
             ),
           ],
