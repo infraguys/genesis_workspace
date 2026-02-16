@@ -364,7 +364,7 @@ class _MessengerViewState extends State<MessengerView>
     final isTabletOrSmaller = !isLargeScreen;
     final searchVisibility = _searchBarAnimation.value;
 
-    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: isTabletOrSmaller ? 20 : 8).copyWith(
+    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: isTabletOrSmaller ? 12 : 8).copyWith(
       top: isTabletOrSmaller ? 20 : 0,
       bottom: 20,
     );
