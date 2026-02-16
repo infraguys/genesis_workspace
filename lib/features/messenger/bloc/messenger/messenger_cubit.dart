@@ -82,7 +82,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<UpdateMessageEventEntity> _updateMessageEventsSubscription;
   late final StreamSubscription<UserTopicEventEntity> _userTopicEventsSubscription;
 
-  static const Duration _loadFoldersShortPollingInterval = Duration(minutes: 1);
+  static const Duration _loadFoldersShortPollingInterval = Duration(seconds: 15);
 
   String _searchQuery = '';
   int _oldestMessageId = 0;
@@ -487,9 +487,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       }
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
       List<FolderEntity> initialFolders = [...folders];
-      if (initialFolders.length == state.folders.length) {
-        return;
-      }
       final bool hasAllFolder = folders.any((folder) => folder.systemType == FolderSystemType.all);
       if (!hasAllFolder) {
         final allFolderBody = CreateFolderEntity(
@@ -505,10 +502,17 @@ class MessengerCubit extends Cubit<MessengerState> {
         initialFolders.remove(allFolder);
         initialFolders = [allFolder, ...initialFolders];
       }
-      emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
-      await _loadFoldersMembers();
-      await getPinnedChats();
-      _loadUnreadMessagesForFolders();
+      final existingFolderUuids = state.folders.map((folder) => folder.uuid).toSet();
+      final fetchedFolderUuids = initialFolders.map((folder) => folder.uuid).toSet();
+      final hasNewFolders = initialFolders.any((folder) => !existingFolderUuids.contains(folder.uuid));
+      final hasDeletedFolders = existingFolderUuids.any((uuid) => !fetchedFolderUuids.contains(uuid));
+
+      if (hasNewFolders || hasDeletedFolders) {
+        emit(state.copyWith(folders: initialFolders));
+        await _loadFoldersMembers();
+        await getPinnedChats();
+        _loadUnreadMessagesForFolders();
+      }
     } catch (e) {
       if (kDebugMode) {
         inspect(e);

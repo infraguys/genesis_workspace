@@ -141,9 +141,7 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                           setState(() {
                             _isSavePending = true;
                           });
-                          if (mounted) {
-                            await widget.onSave(_selectedIds);
-                          }
+                          await widget.onSave(_selectedIds);
                           setState(() {
                             _isSavePending = false;
                           });
