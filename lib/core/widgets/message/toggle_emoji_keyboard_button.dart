@@ -36,9 +36,12 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
           } else {
             FocusScope.of(context).unfocus();
             if (emojiState.keyboardHeight == 0) {
+              // context.read<EmojiKeyboardCubit>().setHeight(335);
               context.read<EmojiKeyboardCubit>().setHeight(300);
             }
-            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
+            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+              true,
+            );
           }
         }
       },

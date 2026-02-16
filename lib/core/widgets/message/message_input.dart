@@ -91,20 +91,6 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   @override
-  void didChangeDependencies() {
-    if (currentSize(context) >= ScreenSize.lTablet) {
-      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
-    } else {
-      context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false, closeKeyboard: true);
-      final height = MediaQuery.of(context).viewInsets.bottom;
-      if (height > 0) {
-        context.read<EmojiKeyboardCubit>().setHeight(height);
-      }
-    }
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     super.dispose();
   }
@@ -162,447 +148,448 @@ class _MessageInputState extends State<MessageInput> {
         if (!isTabletOrSmaller) {
           bottomPadding = 12;
         } else if (!emojiState.showEmojiKeyboard && widget.focusNode.hasFocus) {
-          bottomPadding = 4;
+          bottomPadding = MediaQuery.of(context).viewInsets.bottom + 4;
         } else {
           bottomPadding = 20;
         }
-        return AnimatedSize(
-          duration: const Duration(milliseconds: 200),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.all(12).copyWith(bottom: bottomPadding),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12).copyWith(
-                bottomLeft: isTabletOrSmaller ? .zero : null,
-                bottomRight: isTabletOrSmaller ? .zero : null,
-              ),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.decelerate,
+          padding: EdgeInsets.all(12).copyWith(bottom: bottomPadding),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12).copyWith(
+              bottomLeft: isTabletOrSmaller ? .zero : null,
+              bottomRight: isTabletOrSmaller ? .zero : null,
             ),
-            child: BlocBuilder<MessagesSelectCubit, MessagesSelectState>(
-              builder: (context, messagesSelectState) {
-                return Column(
-                  crossAxisAlignment: .start,
-                  mainAxisSize: .min,
-                  children: [
-                    if (messagesSelectState.selectedMessages.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          mainAxisAlignment: .spaceBetween,
-                          children: [
-                            Column(
-                              spacing: 4,
-                              crossAxisAlignment: .start,
-                              children: [
-                                Text(
-                                  context.t.general.forwardMessages,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: .w500,
-                                  ),
+          ),
+          child: BlocBuilder<MessagesSelectCubit, MessagesSelectState>(
+            builder: (context, messagesSelectState) {
+              return Column(
+                crossAxisAlignment: .start,
+                mainAxisSize: .min,
+                children: [
+                  if (messagesSelectState.selectedMessages.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: .spaceBetween,
+                        children: [
+                          Column(
+                            spacing: 4,
+                            crossAxisAlignment: .start,
+                            children: [
+                              Text(
+                                context.t.general.forwardMessages,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: .w500,
                                 ),
-                                Text(
-                                  context.t.general.messagesCount(
-                                    n: messagesSelectState.selectedMessages.length,
-                                  ),
-                                  style: theme.textTheme.bodyMedium,
+                              ),
+                              Text(
+                                context.t.general.messagesCount(
+                                  n: messagesSelectState.selectedMessages.length,
                                 ),
-                              ],
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                context.read<MessagesSelectCubit>().clearForwardMessages();
-                              },
-                              icon: Assets.icons.close.svg(),
-                            ),
-                          ],
-                        ),
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              context.read<MessagesSelectCubit>().clearForwardMessages();
+                            },
+                            icon: Assets.icons.close.svg(),
+                          ),
+                        ],
                       ),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
+                    ),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SizeTransition(sizeFactor: animation, child: child),
+                      );
+                    },
+                    child: widget.isEdit
+                        ? Material(
+                            color: Colors.transparent,
+                            child: Container(
+                              margin: const .fromLTRB(6, 6, 6, 8),
+                              padding: const .symmetric(horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surfaceContainerHighest,
+                                borderRadius: .circular(12),
+                                border: .all(color: theme.colorScheme.primary, width: 2),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: .start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: .center,
+                                    children: [
+                                      Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          widget.editingMessage?.content ?? '',
+                                          maxLines: 1,
+                                          overflow: .ellipsis,
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        tooltip: context.t.cancelEditing,
+                                        visualDensity: .compact,
+                                        icon: const Icon(Icons.close_rounded, size: 20),
+                                        onPressed: widget.onCancelEdit,
+                                      ),
+                                    ],
+                                  ),
+                                  if (widget.editingFiles != null && widget.editingFiles!.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      height: 96,
+                                      child: ListView.separated(
+                                        scrollDirection: .horizontal,
+                                        itemCount: widget.editingFiles!.length,
+                                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                                        itemBuilder: (_, index) {
+                                          final attachment = widget.editingFiles![index];
+                                          return EditingAttachmentTile(
+                                            attachment: attachment,
+                                            onRemove: widget.onRemoveEditingAttachment == null
+                                                ? null
+                                                : () => widget.onRemoveEditingAttachment!(attachment),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                  if (widget.files != null && widget.files!.isNotEmpty) ...[
+                    SizedBox(
+                      height: 92,
+                      child: ListView.separated(
+                        scrollDirection: .horizontal,
+                        padding: const .symmetric(horizontal: 6),
+                        itemCount: widget.files!.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 8),
+                        itemBuilder: (_, index) {
+                          final UploadFileEntity entity = widget.files![index];
+                          final String fileExtension = extensionOf(entity.filename);
+                          return switch (entity) {
+                            UploadingFileEntity(:final size, :final bytesSent, :final bytesTotal) => AttachmentTile(
+                              file: entity,
+                              extension: fileExtension,
+                              fileSize: size,
+                              isUploading: true,
+                              bytesSent: bytesSent,
+                              bytesTotal: bytesTotal,
+                              onCancelUploading: () => widget.onCancelUpload(entity.localId),
+                            ),
+                            UploadedFileEntity(:final size) => AttachmentTile(
+                              file: entity,
+                              extension: fileExtension,
+                              fileSize: size,
+                              isUploading: false,
+                              onRemove: () => widget.onRemoveFile(entity.localId),
+                            ),
+                          };
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                  ],
+                  Shortcuts(
+                    shortcuts: {
+                      if (widget.isEdit) SingleActivator(LogicalKeyboardKey.escape): const CancelEditMessageIntent(),
+                    },
+                    child: Actions(
+                      actions: {
+                        CancelEditMessageIntent: CallbackAction<CancelEditMessageIntent>(
+                          onInvoke: (_) {
+                            if (widget.isEdit) {
+                              widget.onCancelEdit?.call();
+                            }
+                            return null;
+                          },
+                        ),
+                      },
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.background,
+                                borderRadius: .circular(12),
+                              ),
+                              child: Stack(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 150),
+                                    clipBehavior: .hardEdge,
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.background,
+                                      borderRadius: .circular(12),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        TextField(
+                                          enableInteractiveSelection: true,
+                                          textAlignVertical: .center,
+                                          controller: widget.controller,
+                                          focusNode: widget.focusNode,
+                                          minLines: 1,
+                                          maxLines: 4,
+                                          autofocus: platformInfo.isDesktop,
+                                          clipBehavior: .none,
+                                          onTap: () {
+                                            if (currentSize(context) < ScreenSize.lTablet) {
+                                              context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+                                                false,
+                                              );
+                                            }
+                                          },
+                                          contextMenuBuilder:
+                                              (BuildContext context, EditableTextState editableTextState) {
+                                                return MessageInputContextMenu(
+                                                  editableTextState: editableTextState,
+                                                );
+                                              },
+                                          textInputAction: platformInfo.isDesktop ? .send : null,
+                                          textCapitalization: platformInfo.isMobile
+                                              ? TextCapitalization.sentences
+                                              : TextCapitalization.none,
+                                          onSubmitted: (_) {
+                                            if (_isShiftPressed()) {
+                                              _insertNewLine();
+                                              widget.focusNode.requestFocus();
+                                              return;
+                                            }
+                                            if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
+                                              if (platformInfo.isDesktop) {
+                                                widget.focusNode.requestFocus();
+                                              }
+                                              return;
+                                            }
+
+                                            switch (widget.isEdit) {
+                                              case true:
+                                                widget.onEdit?.call();
+                                              default:
+                                                widget.onSend?.call();
+                                            }
+
+                                            if (platformInfo.isDesktop) {
+                                              widget.focusNode.requestFocus();
+                                            }
+                                          },
+                                          decoration: InputDecoration(
+                                            isCollapsed: true,
+                                            border: InputBorder.none,
+                                            fillColor: theme.colorScheme.background,
+                                            focusColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            focusedBorder: InputBorder.none,
+                                            disabledBorder: InputBorder.none,
+                                            enabledBorder: InputBorder.none,
+                                            hintText: widget.isDropOver ? "" : context.t.input.placeholder,
+                                            contentPadding: EdgeInsets.fromLTRB(
+                                              isTabletOrSmaller ? 48 : 78,
+                                              14,
+                                              46,
+                                              14,
+                                            ),
+                                            hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                              color: textColors.text30,
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          left: 8.0,
+                                          top: 0.0,
+                                          bottom: 0.0,
+                                          child: Row(
+                                            children: [
+                                              if (!isTabletOrSmaller)
+                                                TapEffectIcon(
+                                                  padding: .zero,
+                                                  onTap: _toggleMdActions,
+                                                  child:
+                                                      (_showMdActions
+                                                              ? Assets.icons.bottomPanelClose
+                                                              : Assets.icons.bottomPanelOpen)
+                                                          .svg(),
+                                                ),
+                                              AttachFilesButton(
+                                                onUploadFile: widget.onUploadFile,
+                                                onUploadImage: widget.onUploadImage,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 8.0,
+                                          top: 0.0,
+                                          bottom: 0.0,
+                                          child: Row(
+                                            mainAxisSize: .min,
+                                            spacing: 24,
+                                            children: [
+                                              ToggleEmojiKeyboardButton(
+                                                emojiState: emojiState,
+                                                focusNode: widget.focusNode,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (widget.isDropOver)
+                                    Positioned.fill(
+                                      child: IgnorePointer(
+                                        child: AnimatedOpacity(
+                                          duration: const Duration(milliseconds: 120),
+                                          opacity: 1.0,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: theme.colorScheme.primary.withOpacity(0.06),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              context.t.dropFilesToUpload,
+                                              textAlign: TextAlign.center,
+                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                                color: theme.colorScheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          _SubmitButton(
+                            isEdit: widget.isEdit,
+                            onTap: widget.isEdit ? widget.onEdit : widget.onSend,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
                       switchInCurve: Curves.easeOut,
                       switchOutCurve: Curves.easeIn,
                       transitionBuilder: (child, animation) {
                         return FadeTransition(
                           opacity: animation,
-                          child: SizeTransition(sizeFactor: animation, child: child),
+                          child: SizeTransition(
+                            sizeFactor: animation,
+                            axisAlignment: -1.0,
+                            child: child,
+                          ),
                         );
                       },
-                      child: widget.isEdit
-                          ? Material(
-                              color: Colors.transparent,
-                              child: Container(
-                                margin: const .fromLTRB(6, 6, 6, 8),
-                                padding: const .symmetric(horizontal: 12, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHighest,
-                                  borderRadius: .circular(12),
-                                  border: .all(color: theme.colorScheme.primary, width: 2),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: .start,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment: .center,
-                                      children: [
-                                        Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            widget.editingMessage?.content ?? '',
-                                            maxLines: 1,
-                                            overflow: .ellipsis,
-                                            style: theme.textTheme.bodyMedium,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        IconButton(
-                                          tooltip: context.t.cancelEditing,
-                                          visualDensity: .compact,
-                                          icon: const Icon(Icons.close_rounded, size: 20),
-                                          onPressed: widget.onCancelEdit,
-                                        ),
-                                      ],
+                      child: _showMdActions
+                          ? Padding(
+                              key: const ValueKey('md-actions'),
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                spacing: 16,
+                                children: [
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: () => _applyInlineFormat(
+                                      prefix: '**',
+                                      suffix: '**',
                                     ),
-                                    if (widget.editingFiles != null && widget.editingFiles!.isNotEmpty) ...[
-                                      const SizedBox(height: 8),
-                                      SizedBox(
-                                        height: 96,
-                                        child: ListView.separated(
-                                          scrollDirection: .horizontal,
-                                          itemCount: widget.editingFiles!.length,
-                                          separatorBuilder: (_, __) => const SizedBox(width: 10),
-                                          itemBuilder: (_, index) {
-                                            final attachment = widget.editingFiles![index];
-                                            return EditingAttachmentTile(
-                                              attachment: attachment,
-                                              onRemove: widget.onRemoveEditingAttachment == null
-                                                  ? null
-                                                  : () => widget.onRemoveEditingAttachment!(attachment),
-                                            );
-                                          },
-                                        ),
+                                    child: Assets.icons.formatBold.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        theme.colorScheme.onSurface,
+                                        BlendMode.srcIn,
                                       ),
-                                    ],
-                                  ],
-                                ),
+                                    ),
+                                  ),
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: () => _applyInlineFormat(
+                                      prefix: '*',
+                                      suffix: '*',
+                                    ),
+                                    child: Assets.icons.formatItalic.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        theme.colorScheme.onSurface,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: () => _applyInlineFormat(
+                                      prefix: '~~',
+                                      suffix: '~~',
+                                    ),
+                                    child: Assets.icons.strikethroughS.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        theme.colorScheme.onSurface,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: _insertSpoiler,
+                                    child: Assets.icons.spoiler.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        theme.colorScheme.onSurface,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             )
-                          : const SizedBox.shrink(),
+                          : const SizedBox.shrink(
+                              key: ValueKey('md-actions-empty'),
+                            ),
                     ),
-                    if (widget.files != null && widget.files!.isNotEmpty) ...[
-                      SizedBox(
-                        height: 92,
-                        child: ListView.separated(
-                          scrollDirection: .horizontal,
-                          padding: const .symmetric(horizontal: 6),
-                          itemCount: widget.files!.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 8),
-                          itemBuilder: (_, index) {
-                            final UploadFileEntity entity = widget.files![index];
-                            final String fileExtension = extensionOf(entity.filename);
-                            return switch (entity) {
-                              UploadingFileEntity(:final size, :final bytesSent, :final bytesTotal) => AttachmentTile(
-                                file: entity,
-                                extension: fileExtension,
-                                fileSize: size,
-                                isUploading: true,
-                                bytesSent: bytesSent,
-                                bytesTotal: bytesTotal,
-                                onCancelUploading: () => widget.onCancelUpload(entity.localId),
-                              ),
-                              UploadedFileEntity(:final size) => AttachmentTile(
-                                file: entity,
-                                extension: fileExtension,
-                                fileSize: size,
-                                isUploading: false,
-                                onRemove: () => widget.onRemoveFile(entity.localId),
-                              ),
-                            };
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                    ],
-                    Shortcuts(
-                      shortcuts: {
-                        if (widget.isEdit) SingleActivator(LogicalKeyboardKey.escape): const CancelEditMessageIntent(),
+                  ),
+                  AnimatedContainer(
+                    height: (emojiState.showEmojiKeyboard && !widget.focusNode.hasFocus)
+                        ? emojiState.keyboardHeight
+                        : 0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: EmojiPicker(
+                      textEditingController: widget.controller,
+                      onEmojiSelected: (_, _) {
+                        widget.focusNode.requestFocus();
                       },
-                      child: Actions(
-                        actions: {
-                          CancelEditMessageIntent: CallbackAction<CancelEditMessageIntent>(
-                            onInvoke: (_) {
-                              if (widget.isEdit) {
-                                widget.onCancelEdit?.call();
-                              }
-                              return null;
-                            },
-                          ),
-                        },
-                        child: Row(
-                          spacing: 8,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.background,
-                                  borderRadius: .circular(12),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    AnimatedContainer(
-                                      duration: const Duration(milliseconds: 150),
-                                      clipBehavior: .hardEdge,
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.background,
-                                        borderRadius: .circular(12),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          TextField(
-                                            enableInteractiveSelection: true,
-                                            textAlignVertical: .center,
-                                            controller: widget.controller,
-                                            focusNode: widget.focusNode,
-                                            minLines: 1,
-                                            maxLines: 4,
-                                            autofocus: platformInfo.isDesktop,
-                                            clipBehavior: .none,
-                                            onTap: () {
-                                              if (currentSize(context) < ScreenSize.lTablet) {
-                                                context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
-                                                  false,
-                                                );
-                                              }
-                                            },
-                                            contextMenuBuilder:
-                                                (BuildContext context, EditableTextState editableTextState) {
-                                                  return MessageInputContextMenu(
-                                                    editableTextState: editableTextState,
-                                                  );
-                                                },
-                                            textInputAction: platformInfo.isDesktop ? .send : null,
-                                            textCapitalization: platformInfo.isMobile
-                                                ? TextCapitalization.sentences
-                                                : TextCapitalization.none,
-                                            onSubmitted: (_) {
-                                              if (_isShiftPressed()) {
-                                                _insertNewLine();
-                                                widget.focusNode.requestFocus();
-                                                return;
-                                              }
-                                              if (widget.onSubmitIntercept != null && widget.onSubmitIntercept!()) {
-                                                if (platformInfo.isDesktop) {
-                                                  widget.focusNode.requestFocus();
-                                                }
-                                                return;
-                                              }
-
-                                              switch (widget.isEdit) {
-                                                case true:
-                                                  widget.onEdit?.call();
-                                                default:
-                                                  widget.onSend?.call();
-                                              }
-
-                                              if (platformInfo.isDesktop) {
-                                                widget.focusNode.requestFocus();
-                                              }
-                                            },
-                                            decoration: InputDecoration(
-                                              isCollapsed: true,
-                                              border: InputBorder.none,
-                                              fillColor: theme.colorScheme.background,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              focusedBorder: InputBorder.none,
-                                              disabledBorder: InputBorder.none,
-                                              enabledBorder: InputBorder.none,
-                                              hintText: widget.isDropOver ? "" : context.t.input.placeholder,
-                                              contentPadding: EdgeInsets.fromLTRB(
-                                                isTabletOrSmaller ? 48 : 78,
-                                                14,
-                                                46,
-                                                14,
-                                              ),
-                                              hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                                color: textColors.text30,
-                                              ),
-                                            ),
-                                          ),
-                                          Positioned(
-                                            left: 8.0,
-                                            top: 0.0,
-                                            bottom: 0.0,
-                                            child: Row(
-                                              children: [
-                                                if (!isTabletOrSmaller)
-                                                  TapEffectIcon(
-                                                    padding: .zero,
-                                                    onTap: _toggleMdActions,
-                                                    child:
-                                                        (_showMdActions
-                                                                ? Assets.icons.bottomPanelClose
-                                                                : Assets.icons.bottomPanelOpen)
-                                                            .svg(),
-                                                  ),
-                                                AttachFilesButton(
-                                                  onUploadFile: widget.onUploadFile,
-                                                  onUploadImage: widget.onUploadImage,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Positioned(
-                                            right: 8.0,
-                                            top: 0.0,
-                                            bottom: 0.0,
-                                            child: Row(
-                                              mainAxisSize: .min,
-                                              spacing: 24,
-                                              children: [
-                                                ToggleEmojiKeyboardButton(
-                                                  emojiState: emojiState,
-                                                  focusNode: widget.focusNode,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (widget.isDropOver)
-                                      Positioned.fill(
-                                        child: IgnorePointer(
-                                          child: AnimatedOpacity(
-                                            duration: const Duration(milliseconds: 120),
-                                            opacity: 1.0,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: theme.colorScheme.primary.withOpacity(0.06),
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                context.t.dropFilesToUpload,
-                                                textAlign: TextAlign.center,
-                                                style: theme.textTheme.bodyMedium?.copyWith(
-                                                  color: theme.colorScheme.primary,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            _SubmitButton(
-                              isEdit: widget.isEdit,
-                              onTap: widget.isEdit ? widget.onEdit : widget.onSend,
-                            ),
-                          ],
-                        ),
-                      ),
+                      config: emojiPickerConfig(context, theme: theme),
                     ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 250),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        transitionBuilder: (child, animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: SizeTransition(
-                              sizeFactor: animation,
-                              axisAlignment: -1.0,
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: _showMdActions
-                            ? Padding(
-                                key: const ValueKey('md-actions'),
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Row(
-                                  spacing: 16,
-                                  children: [
-                                    TapEffectIcon(
-                                      padding: .zero,
-                                      onTap: () => _applyInlineFormat(
-                                        prefix: '**',
-                                        suffix: '**',
-                                      ),
-                                      child: Assets.icons.formatBold.svg(
-                                        colorFilter: ColorFilter.mode(
-                                          theme.colorScheme.onSurface,
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
-                                    TapEffectIcon(
-                                      padding: .zero,
-                                      onTap: () => _applyInlineFormat(
-                                        prefix: '*',
-                                        suffix: '*',
-                                      ),
-                                      child: Assets.icons.formatItalic.svg(
-                                        colorFilter: ColorFilter.mode(
-                                          theme.colorScheme.onSurface,
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
-                                    TapEffectIcon(
-                                      padding: .zero,
-                                      onTap: () => _applyInlineFormat(
-                                        prefix: '~~',
-                                        suffix: '~~',
-                                      ),
-                                      child: Assets.icons.strikethroughS.svg(
-                                        colorFilter: ColorFilter.mode(
-                                          theme.colorScheme.onSurface,
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
-                                    TapEffectIcon(
-                                      padding: .zero,
-                                      onTap: _insertSpoiler,
-                                      child: Assets.icons.spoiler.svg(
-                                        colorFilter: ColorFilter.mode(
-                                          theme.colorScheme.onSurface,
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : const SizedBox.shrink(
-                                key: ValueKey('md-actions-empty'),
-                              ),
-                      ),
-                    ),
-                    AnimatedContainer(
-                      height: emojiState.keyboardHeight,
-                      duration: const Duration(milliseconds: 250),
-                      child: EmojiPicker(
-                        textEditingController: widget.controller,
-                        onEmojiSelected: (_, _) {
-                          widget.focusNode.requestFocus();
-                        },
-                        config: emojiPickerConfig(context, theme: theme),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },
