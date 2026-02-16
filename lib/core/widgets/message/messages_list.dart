@@ -11,11 +11,10 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
@@ -114,7 +113,6 @@ class _MessagesListState extends State<MessagesList> {
       if (_itemScrollController.isAttached) {
         _itemScrollController.jumpTo(
           index: _firstUnreadIndexInReversed!,
-          alignment: 0.5,
         );
       }
     } else {
