@@ -82,7 +82,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   late final StreamSubscription<UpdateMessageEventEntity> _updateMessageEventsSubscription;
   late final StreamSubscription<UserTopicEventEntity> _userTopicEventsSubscription;
 
-  static const Duration _loadFoldersShortPollingInterval = Duration(seconds: 15);
+  static const Duration _loadFoldersShortPollingInterval = Duration(minutes: 1);
 
   String _searchQuery = '';
   int _oldestMessageId = 0;
