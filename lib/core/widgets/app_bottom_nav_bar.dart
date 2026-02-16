@@ -101,7 +101,7 @@ class _NavSvgIcon extends StatelessWidget {
 
           icon,
           colorFilter: ColorFilter.mode(
-            _isSelected ? Colors.white : textColors.text30,
+            _isSelected ? textColors.text100 : textColors.text30,
             BlendMode.srcIn,
           ),
         ),
@@ -127,7 +127,7 @@ class _NavIconDataIcon extends StatelessWidget {
         scale: _isSelected ? 1.08 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOut,
-        child: Icon(Icons.library_books_sharp, size: 28, color: _isSelected ? Colors.white : textColors.text30),
+        child: Icon(Icons.library_books_sharp, size: 28, color: _isSelected ? textColors.text100 : textColors.text30),
       ),
     );
   }
