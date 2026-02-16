@@ -872,7 +872,6 @@ class MessengerCubit extends Cubit<MessengerState> {
         }
       }
 
-
       updatedChat = updatedChat.copyWith(
         lastMessageId: message.id,
         lastMessageSenderName: messageSenderName,
