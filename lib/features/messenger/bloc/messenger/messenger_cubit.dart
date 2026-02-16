@@ -506,6 +506,7 @@ class MessengerCubit extends Cubit<MessengerState> {
       emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
       await _loadFoldersMembers();
       await getPinnedChats();
+      _loadUnreadMessagesForFolders();
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -871,7 +872,6 @@ class MessengerCubit extends Cubit<MessengerState> {
           copiedTopicList[targetIndexInTopics] = updatedTopic;
         }
       }
-
 
       updatedChat = updatedChat.copyWith(
         lastMessageId: message.id,

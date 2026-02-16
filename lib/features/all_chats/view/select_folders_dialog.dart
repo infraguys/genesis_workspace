@@ -48,13 +48,17 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
           future: _initFuture,
           builder: (_, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Column(
-                mainAxisSize: .min,
-                children: [
-                  Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ],
+              return SizedBox(
+                height: 200,
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .center,
+                  children: [
+                    Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+                ),
               );
             }
             return Column(
@@ -137,7 +141,9 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
                           setState(() {
                             _isSavePending = true;
                           });
-                          await widget.onSave(_selectedIds);
+                          if (mounted) {
+                            await widget.onSave(_selectedIds);
+                          }
                           setState(() {
                             _isSavePending = false;
                           });
