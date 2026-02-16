@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
+import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -48,13 +49,15 @@ class _SelectFoldersDialogState extends State<SelectFoldersDialog> {
           future: _initFuture,
           builder: (_, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Column(
-                mainAxisSize: .min,
-                children: [
-                  Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ],
+              return SizedBox(
+                height: 200,
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .center,
+                  children: [
+                    AppProgressIndicator(),
+                  ],
+                ),
               );
             }
             return Column(

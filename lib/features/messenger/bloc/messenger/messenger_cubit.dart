@@ -485,7 +485,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (organizationId == null) {
         return;
       }
-
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
       List<FolderEntity> initialFolders = [...folders];
       final bool hasAllFolder = folders.any((folder) => folder.systemType == FolderSystemType.all);
@@ -503,9 +502,17 @@ class MessengerCubit extends Cubit<MessengerState> {
         initialFolders.remove(allFolder);
         initialFolders = [allFolder, ...initialFolders];
       }
-      emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
-      await _loadFoldersMembers();
-      await getPinnedChats();
+      final existingFolderUuids = state.folders.map((folder) => folder.uuid).toSet();
+      final fetchedFolderUuids = initialFolders.map((folder) => folder.uuid).toSet();
+      final hasNewFolders = initialFolders.any((folder) => !existingFolderUuids.contains(folder.uuid));
+      final hasDeletedFolders = existingFolderUuids.any((uuid) => !fetchedFolderUuids.contains(uuid));
+
+      if (hasNewFolders || hasDeletedFolders) {
+        emit(state.copyWith(folders: initialFolders));
+        await _loadFoldersMembers();
+        await getPinnedChats();
+        _loadUnreadMessagesForFolders();
+      }
     } catch (e) {
       if (kDebugMode) {
         inspect(e);

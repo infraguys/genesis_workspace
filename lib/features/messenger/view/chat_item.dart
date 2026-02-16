@@ -105,16 +105,17 @@ class _ChatItemState extends State<ChatItem> {
             chat: widget.chat,
             onAddToFolder: () async {
               _closeOverlay();
+              final folders = context.read<MessengerCubit>().state.folders;
               await showDialog(
                 context: context,
-                builder: (_) => SelectFoldersDialog(
+                builder: (context) => SelectFoldersDialog(
                   onSave: (selectedFolderIds) async {
                     await context.read<MessengerCubit>().setFoldersForChat(
                       selectedFolderIds,
                       widget.chat.id,
                     );
                   },
-                  folders: context.read<MessengerCubit>().state.folders,
+                  folders: folders,
                   loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
                     widget.chat.id,
                   ),
