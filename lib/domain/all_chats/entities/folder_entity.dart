@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_dto.dart';
 
@@ -36,7 +37,7 @@ class DeleteFolderEntity {
   DeleteFolderEntity({required this.folderId});
 }
 
-class FolderEntity {
+class FolderEntity extends Equatable {
   final int? id;
   final String uuid;
   final String createdAt;
@@ -81,4 +82,7 @@ class FolderEntity {
     systemType: systemType ?? this.systemType,
     folderItems: folderItems ?? this.folderItems,
   );
+
+  @override
+  List<Object?> get props => [uuid];
 }

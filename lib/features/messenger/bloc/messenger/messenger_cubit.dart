@@ -485,9 +485,11 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (organizationId == null) {
         return;
       }
-
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
       List<FolderEntity> initialFolders = [...folders];
+      if (initialFolders.length == state.folders.length) {
+        return;
+      }
       final bool hasAllFolder = folders.any((folder) => folder.systemType == FolderSystemType.all);
       if (!hasAllFolder) {
         final allFolderBody = CreateFolderEntity(
