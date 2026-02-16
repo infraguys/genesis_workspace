@@ -91,14 +91,6 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   @override
-  void didChangeDependencies() {
-    // if (currentSize(context) >= ScreenSize.lTablet) {
-    //   context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(false);
-    // }
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     super.dispose();
   }
