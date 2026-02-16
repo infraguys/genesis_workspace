@@ -17,6 +17,7 @@ class LkView extends StatefulWidget {
 class _LkViewState extends State<LkView> {
   late final Future<String> _future;
   final GetServiceByIdUseCase _getServiceByIdUseCase = getIt<GetServiceByIdUseCase>();
+  InAppWebViewController? webViewController;
 
   Future<String> getLkUrl() async {
     try {
@@ -39,6 +40,18 @@ class _LkViewState extends State<LkView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final url = await getLkUrl();
+              webViewController?.loadUrl(urlRequest: URLRequest(url: WebUri.uri(Uri.parse(url))));
+            },
+            icon: Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: FutureBuilder<String>(
         future: _future,
         builder: (BuildContext context, snapshot) {
@@ -49,6 +62,9 @@ class _LkViewState extends State<LkView> {
             if (snapshot.hasData) {
               return SafeArea(
                 child: InAppWebView(
+                  onWebViewCreated: (InAppWebViewController controller) {
+                    webViewController = controller;
+                  },
                   initialUrlRequest: URLRequest(
                     url: WebUri.uri(
                       Uri.parse(snapshot.data ?? ''),
