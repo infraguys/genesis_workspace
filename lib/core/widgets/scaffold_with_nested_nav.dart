@@ -21,8 +21,6 @@ import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
-import 'package:genesis_workspace/gen/assets.gen.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -133,24 +131,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     final Color selectedIconColor = textColors.text100;
     final Color unselectedIconColor = textColors.text30;
     final Color selectedBackgroundColor = theme.colorScheme.onSurface.withOpacity(0.05);
-    // final mobileNavigationBranchIndices = <int>[
-    //   AppShellBranchIndex.myActivity,
-    //   AppShellBranchIndex.messenger,
-    //   AppShellBranchIndex.calendar,
-    //   AppShellBranchIndex.mail,
-    //   AppShellBranchIndex.calls,
-    //   AppShellBranchIndex.profile,
-    // ];
-    // final mobileNavigationModels = <({SvgGenImage icon, String Function(BuildContext) title})>[
-    //   (icon: Assets.icons.homeOutline, title: (BuildContext context) => context.t.myActivity),
-    //   (icon: Assets.icons.chatBubble, title: (BuildContext context) => context.t.chats),
-    //   (icon: Assets.icons.calendarMonth, title: (BuildContext context) => context.t.calendar),
-    //   (icon: Assets.icons.mail, title: (BuildContext context) => context.t.email),
-    //   (icon: Assets.icons.call, title: (BuildContext context) => context.t.calls),
-    // ];
-    // final int selectedMobileNavigationIndex = mobileNavigationBranchIndices.indexOf(
-    //   widget.navigationShell.currentIndex,
-    // );
+
     final screenSize = currentSize(context);
     final bool isTabletOrSmaller = screenSize <= ScreenSize.tablet;
     return Scaffold(
