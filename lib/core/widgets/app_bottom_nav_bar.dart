@@ -12,66 +12,49 @@ class AppBottomNavBar extends StatelessWidget {
   final int shellIndex;
   final Function(int index) goBranch;
 
+  static final _icons = [
+    Assets.icons.homeS36,
+    Assets.icons.chatBubbleS36,
+    Assets.icons.calendarS36,
+    Assets.icons.mailS36,
+    Assets.icons.callS36,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: .circular(12.0)),
-      child: ColoredBox(
-        color: theme.colorScheme.surface,
-        child: Padding(
-          padding: const .only(bottom: 8),
-          child: NavigationBar(
-            labelPadding: .zero,
-            labelBehavior: .alwaysHide,
-            selectedIndex: shellIndex,
-            onDestinationSelected: goBranch,
-            backgroundColor: Colors.transparent,
-            indicatorColor: Colors.transparent,
-            indicatorShape: RoundedRectangleBorder(borderRadius: .all(.circular(12))),
-            destinations: [
-              NavigationDestination(
-                label: '',
-                icon: _NavSvgIcon(icon: Assets.icons.homeS36.path),
-                selectedIcon: _NavSvgIcon.selected(icon: Assets.icons.homeS36.path),
+
+    return SizedBox(
+      height: 80,
+      child: ClipRRect(
+        borderRadius: const .vertical(top: .circular(12)),
+        child: ColoredBox(
+          color: theme.colorScheme.surface,
+          child: Padding(
+            padding: const .only(right: 12, left: 12, top: 8),
+            child: Row(
+              crossAxisAlignment: .start,
+              mainAxisAlignment: .spaceBetween,
+              children: .generate(
+                6,
+                (index) {
+                  final isSelected = index == shellIndex;
+
+                  if (index < 5) {
+                    final icon = _icons[index].path;
+                    return _BottomBarItem(
+                      onTap: () => goBranch(index),
+                      child: isSelected ? _ActiveIcon(icon: icon) : _InactiveIcon(icon: icon),
+                    );
+                  }
+
+                  return _BottomBarItem(
+                    onTap: () => goBranch(index),
+                    child: isSelected ? _ActiveProfileIcon() : _InactiveProfileIcon(),
+                  );
+                },
               ),
-              NavigationDestination(
-                label: '',
-                icon: _NavSvgIcon(icon: Assets.icons.chatBubbleS36.path),
-                selectedIcon: _NavSvgIcon.selected(icon: Assets.icons.chatBubbleS36.path),
-              ),
-              NavigationDestination(
-                label: '',
-                icon: _NavSvgIcon(icon: Assets.icons.calendarS36.path),
-                selectedIcon: _NavSvgIcon.selected(icon: Assets.icons.calendarS36.path),
-              ),
-              NavigationDestination(
-                label: '',
-                icon: _NavSvgIcon(icon: Assets.icons.mailS36.path),
-                selectedIcon: _NavSvgIcon.selected(icon: Assets.icons.mailS36.path),
-              ),
-              // NavigationDestination(
-              //   label: '',
-              //   icon: _NavIcon(icon: Assets.icons.groupS36.path),
-              //   selectedIcon: _NavIcon.selected(icon: Assets.icons.groupS36.path),
-              // ),
-              // NavigationDestination(
-              //   label: '',
-              //   icon: _NavIcon(icon: Assets.icons.callS36.keyName),
-              //   selectedIcon: _NavIcon.selected(icon: Assets.icons.callS36.path),
-              // ),
-              NavigationDestination(
-                label: '',
-                icon: _NavIconDataIcon(),
-                selectedIcon: _NavIconDataIcon.selected(),
-              ),
-              NavigationDestination(
-                label: '',
-                icon: _NavWidgetIcon(),
-                selectedIcon: _NavWidgetIcon.selected(),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -79,88 +62,116 @@ class AppBottomNavBar extends StatelessWidget {
   }
 }
 
-class _NavSvgIcon extends StatelessWidget {
-  const _NavSvgIcon({super.key, required this.icon}) : _isSelected = false;
+class _BottomBarItem extends StatelessWidget {
+  const _BottomBarItem({required this.child, required this.onTap});
 
-  const _NavSvgIcon.selected({super.key, required this.icon}) : _isSelected = true;
+  final Widget child;
+  final VoidCallback onTap;
 
-  final bool _isSelected;
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 56,
+      height: 56,
+      child: Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: .circular(12.0)),
+        clipBehavior: .antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _ActiveIcon extends StatelessWidget {
+  const _ActiveIcon({required this.icon});
+
   final String icon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: AnimatedScale(
-        scale: _isSelected ? 1.08 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOut,
+    return Ink(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: .circular(12.0),
+        color: textColors.text100.withValues(alpha: 0.05),
+      ),
+      child: Center(
         child: SvgPicture.asset(
-
           icon,
-          colorFilter: ColorFilter.mode(
-            _isSelected ? textColors.text100 : textColors.text30,
-            BlendMode.srcIn,
-          ),
+          colorFilter: .mode(textColors.text100, .srcIn),
         ),
       ),
     );
   }
 }
 
-class _NavIconDataIcon extends StatelessWidget {
-  const _NavIconDataIcon({super.key}) : _isSelected = false;
+class _InactiveIcon extends StatelessWidget {
+  const _InactiveIcon({required this.icon});
 
-  const _NavIconDataIcon.selected({super.key}) : _isSelected = true;
-
-  final bool _isSelected;
+  final String icon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: AnimatedScale(
-        scale: _isSelected ? 1.08 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOut,
-        child: Icon(Icons.library_books_sharp, size: 28, color: _isSelected ? textColors.text100 : textColors.text30),
+    return Center(
+      child: SvgPicture.asset(
+        icon,
+        colorFilter: .mode(textColors.text30, .srcIn),
       ),
     );
   }
 }
 
-class _NavWidgetIcon extends StatelessWidget {
-  const _NavWidgetIcon({super.key}) : _isSelected = false;
-
-  const _NavWidgetIcon.selected({super.key}) : _isSelected = true;
-
-  final bool _isSelected;
+class _ActiveProfileIcon extends StatelessWidget {
+  const _ActiveProfileIcon();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
+    return Ink(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: .circular(12.0),
+        color: textColors.text100.withValues(alpha: 0.05),
+      ),
+      child: Center(
+        child: BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (_, state) {
+            return Center(
+              child: UserAvatar(
+                size: 36,
+                avatarUrl: state.user?.avatarUrl,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _InactiveProfileIcon extends StatelessWidget {
+  const _InactiveProfileIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
       child: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, profileState) {
-          return Container(
-            padding: const EdgeInsets.all(2),
-            decoration: _isSelected
-                ? const BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.fromBorderSide(
-                      BorderSide(color: Colors.white, width: 2),
-                    ),
-                  )
-                : null,
+        builder: (_, state) {
+          return Center(
             child: UserAvatar(
               size: 36,
-              avatarUrl: profileState.user?.avatarUrl,
+              avatarUrl: state.user?.avatarUrl,
             ),
           );
         },
