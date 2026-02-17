@@ -1,6 +1,7 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
@@ -265,6 +266,7 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = TextTheme.of(context);
+    final textColors = Theme.of(context).extension<TextColors>()!;
 
     return SizedBox(
       height: 36.0,
@@ -277,7 +279,14 @@ class _ActionTile extends StatelessWidget {
             child: Row(
               spacing: 12.0,
               children: [
-                icon.svg(width: 28, height: 28),
+                icon.svg(
+                  width: 28,
+                  height: 28,
+                  colorFilter: ColorFilter.mode(
+                    textColors.text30,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 Text(
                   label,
                   style: textTheme.bodyMedium?.copyWith(fontWeight: .w500),

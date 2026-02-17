@@ -198,7 +198,12 @@ class _MessageInputState extends State<MessageInput> {
                             onPressed: () {
                               context.read<MessagesSelectCubit>().clearForwardMessages();
                             },
-                            icon: Assets.icons.close.svg(),
+                            icon: Assets.icons.close.svg(
+                              colorFilter: ColorFilter.mode(
+                                textColors.text30,
+                                BlendMode.srcIn,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -244,7 +249,11 @@ class _MessageInputState extends State<MessageInput> {
                                       IconButton(
                                         tooltip: context.t.cancelEditing,
                                         visualDensity: .compact,
-                                        icon: const Icon(Icons.close_rounded, size: 20),
+                                        icon: Icon(
+                                          Icons.close_rounded,
+                                          size: 20,
+                                          color: textColors.text30,
+                                        ),
                                         onPressed: widget.onCancelEdit,
                                       ),
                                     ],
@@ -429,7 +438,12 @@ class _MessageInputState extends State<MessageInput> {
                                                       (_showMdActions
                                                               ? Assets.icons.bottomPanelClose
                                                               : Assets.icons.bottomPanelOpen)
-                                                          .svg(),
+                                                          .svg(
+                                                            colorFilter: ColorFilter.mode(
+                                                              textColors.text30,
+                                                              BlendMode.srcIn,
+                                                            ),
+                                                          ),
                                                 ),
                                               AttachFilesButton(
                                                 onUploadFile: widget.onUploadFile,

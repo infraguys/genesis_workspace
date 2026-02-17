@@ -20,11 +20,13 @@ import 'package:genesis_workspace/features/organizations/bloc/organizations_cubi
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
+import 'package:genesis_workspace/features/theme/bloc/theme_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/config/theme.dart';
+import 'package:genesis_workspace/core/config/theme.dart';
 
 class WorkspaceApp extends StatelessWidget {
   const WorkspaceApp({super.key});
@@ -42,6 +44,7 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<AllChatsCubit>()),
         BlocProvider(create: (_) => getIt<OrganizationsCubit>()),
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
+        BlocProvider(create: (_) => ThemeCubit(getIt<SharedPreferences>())),
         BlocProvider(create: (_) => getIt<DownloadFilesCubit>()),
         BlocProvider(create: (_) => getIt<CallCubit>()),
         BlocProvider(create: (context) => getIt<ChannelChatCubit>()),
@@ -54,11 +57,23 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<MuteCubit>()),
         BlocProvider(create: (_) => getIt<MessagesSelectCubit>()),
       ],
-      child: MaterialApp.router(
-        locale: TranslationProvider.of(context).flutterLocale,
-        title: 'Workspace',
-        routerConfig: router,
-        theme: darkTheme,
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp.router(
+            locale: TranslationProvider.of(context).flutterLocale,
+            title: 'Workspace',
+            routerConfig: router,
+            theme: buildThemeForPalette(
+              palette: state.selectedPalette,
+              brightness: Brightness.light,
+            ),
+            darkTheme: buildThemeForPalette(
+              palette: state.selectedPalette,
+              brightness: Brightness.dark,
+            ),
+            themeMode: state.themeMode,
+          );
+        },
       ),
     );
   }
