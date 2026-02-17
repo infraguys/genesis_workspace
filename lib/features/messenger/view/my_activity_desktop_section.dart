@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
@@ -136,6 +137,8 @@ class _MyActivityDesktopSectionState extends State<MyActivityDesktopSection> wit
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
     final messengerState = context.select((MessengerCubit cubit) => cubit.state);
     final int mentionsUnreadCount = messengerState.mentionsUnreadCount;
     final int? mySelfChatId = messengerState.mySelfChatId;
@@ -167,7 +170,9 @@ class _MyActivityDesktopSectionState extends State<MyActivityDesktopSection> wit
             turns: _isExpanded ? 0.5 : 0.0,
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
-            child: Assets.icons.arrowDown.svg(),
+            child: Assets.icons.arrowDown.svg(
+              colorFilter: ColorFilter.mode(textColors.text100, BlendMode.srcIn),
+            ),
           ),
         ],
       ),

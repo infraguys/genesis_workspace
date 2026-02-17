@@ -135,6 +135,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     final screenSize = currentSize(context);
     final bool isTabletOrSmaller = screenSize <= ScreenSize.tablet;
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       drawer: AppMobileDrawer(),
       bottomNavigationBar: isTabletOrSmaller
           ? MediaQuery.removeViewPadding(

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 
+part 'blue_cold_palette.dart';
 part 'orange_warm_palette.dart';
 
-enum AppThemePalette { orangeWarm }
+enum AppThemePalette { orangeWarm, blueCold }
 
 extension AppThemePaletteX on AppThemePalette {
   String get id => switch (this) {
     AppThemePalette.orangeWarm => 'orange_warm',
+    AppThemePalette.blueCold => 'blue_cold',
   };
 
   String get title => switch (this) {
     AppThemePalette.orangeWarm => 'Orange Warm',
+    AppThemePalette.blueCold => 'Blue Cold',
   };
 }
 

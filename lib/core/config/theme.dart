@@ -4,23 +4,20 @@ import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/gen/fonts.gen.dart';
 
 const orangeWarmPalette = OrangeWarmPalette();
-const darkOrangeWarmPalette = DarkOrangeWarmPalette();
-const lightOrangeWarmPalette = LightOrangeWarmPalette();
-const supportedThemePalettes = [AppThemePalette.orangeWarm];
+const blueColdPalette = BlueColdPalette();
+const supportedThemePalettes = [
+  AppThemePalette.orangeWarm,
+  AppThemePalette.blueCold,
+];
 
-final darkOrangeWarmTheme = buildThemeFromPalette(
-  palette: darkOrangeWarmPalette,
-  brightness: Brightness.dark,
-);
+final darkOrangeWarmTheme = orangeWarmPalette.dark();
 
-final lightOrangeWarmTheme = buildThemeFromPalette(
-  palette: lightOrangeWarmPalette,
-  brightness: Brightness.light,
-);
+final lightOrangeWarmTheme = orangeWarmPalette.light();
 
 ThemePalette resolveThemePalette(AppThemePalette palette) {
   return switch (palette) {
     AppThemePalette.orangeWarm => orangeWarmPalette,
+    AppThemePalette.blueCold => blueColdPalette,
   };
 }
 
@@ -34,6 +31,22 @@ ThemeData buildThemeForPalette({
   );
 }
 
+extension ThemePaletteThemeX on ThemePalette {
+  ThemeData dark() {
+    return buildThemeFromPalette(
+      palette: this,
+      brightness: Brightness.dark,
+    );
+  }
+
+  ThemeData light() {
+    return buildThemeFromPalette(
+      palette: this,
+      brightness: Brightness.light,
+    );
+  }
+}
+
 ThemeData buildThemeFromPalette({
   required ThemePalette palette,
   required Brightness brightness,
@@ -45,7 +58,7 @@ ThemeData buildThemeFromPalette({
     brightness: brightness,
     colorScheme: colorScheme,
     badgeTheme: _badgeTheme,
-    scaffoldBackgroundColor: isDark ? const Color(0xFF1B1B1D) : colorScheme.surfaceContainer,
+    scaffoldBackgroundColor: colorScheme.background,
     inputDecorationTheme: _inputDecorationTheme(colorScheme, isDark: isDark),
     textTheme: (isDark ? ThemeData.dark() : ThemeData.light()).textTheme
         .withLetterSpacing(0)

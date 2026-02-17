@@ -345,7 +345,13 @@ class _ChatItemState extends State<ChatItem> {
                                                       child: AnimatedRotation(
                                                         duration: const Duration(milliseconds: 200),
                                                         turns: _isExpanded ? 0.5 : 0.0,
-                                                        child: Assets.icons.arrowDown.svg(height: 8),
+                                                        child: Assets.icons.arrowDown.svg(
+                                                          height: 8,
+                                                          colorFilter: ColorFilter.mode(
+                                                            textColors.text100,
+                                                            BlendMode.srcIn,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
                                                   )

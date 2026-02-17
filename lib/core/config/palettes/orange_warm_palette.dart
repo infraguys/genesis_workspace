@@ -82,11 +82,3 @@ class OrangeWarmPalette extends ThemePalette {
         darkCardColors: _orangeWarmDarkCardColors,
       );
 }
-
-class DarkOrangeWarmPalette extends OrangeWarmPalette {
-  const DarkOrangeWarmPalette();
-}
-
-class LightOrangeWarmPalette extends OrangeWarmPalette {
-  const LightOrangeWarmPalette();
-}
