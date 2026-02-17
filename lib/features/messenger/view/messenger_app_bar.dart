@@ -99,7 +99,14 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
           onTapDown: (details) => onShowChats(details.globalPosition),
           child: Padding(
             padding: const EdgeInsets.all(4.0),
-            child: Assets.icons.editSquare.svg(width: 32, height: 32),
+            child: Assets.icons.editSquare.svg(
+              width: 32,
+              height: 32,
+              colorFilter: ColorFilter.mode(
+                textColors.text30,
+                BlendMode.srcIn,
+              ),
+            ),
           ),
         ),
       );
@@ -247,6 +254,10 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                                       child: Assets.icons.search.svg(
                                         width: 20,
                                         height: 20,
+                                        colorFilter: ColorFilter.mode(
+                                          textColors.text30,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     )
                                   : null,
@@ -257,6 +268,10 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                                       child: Assets.icons.search.svg(
                                         width: 20,
                                         height: 20,
+                                        colorFilter: ColorFilter.mode(
+                                          textColors.text30,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     )
                                   : null,
@@ -275,7 +290,12 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                               onTapDown: (details) => onShowChats(details.globalPosition),
                               child: Padding(
                                 padding: const EdgeInsets.all(4.0),
-                                child: Assets.icons.newWindow.svg(),
+                                child: Assets.icons.newWindow.svg(
+                                  colorFilter: ColorFilter.mode(
+                                    textColors.text30,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

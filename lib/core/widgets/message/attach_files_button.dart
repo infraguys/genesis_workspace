@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
 import 'package:genesis_workspace/core/widgets/message/attachment_action.dart';
 import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
@@ -95,9 +96,16 @@ class _AttachFilesButtonState extends State<AttachFilesButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
     return TapEffectIcon(
       onTapDown: (details) => _openContextMenu(details.globalPosition),
-      child: Assets.icons.attachFile.svg(),
+      child: Assets.icons.attachFile.svg(
+        colorFilter: ColorFilter.mode(
+          textColors.text30,
+          .srcIn,
+        ),
+      ),
     );
   }
 }
