@@ -26,6 +26,7 @@ import 'package:genesis_workspace/features/profile/view/profile_personal_info_pa
 import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
+import 'package:genesis_workspace/features/theme/theme_settings.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -84,6 +85,7 @@ class Routes {
   static const String imageFullScreen = '/image-full-screen';
   static const String pasteBaseUrl = '/paste-base-url';
   static const String forceUpdate = '/force-update';
+  static const String themeSettings = '/theme-settings';
   static const String notifications = '/notifications';
   static const String call = '/call';
   static const String chatInfo = 'chat-info';
@@ -439,6 +441,11 @@ final router = GoRouter(
       path: Routes.forceUpdate,
       name: Routes.forceUpdate,
       builder: (context, state) => const UpdateForce(),
+    ),
+    GoRoute(
+      path: Routes.themeSettings,
+      name: Routes.themeSettings,
+      builder: (context, state) => const ThemeSettings(),
     ),
     GoRoute(
       path: Routes.talkerScreen,

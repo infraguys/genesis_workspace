@@ -98,6 +98,8 @@ class SharedPrefsKeys {
   static const String isWebAuth = 'isWebAuth';
   static const String selectedOrganizationId = 'selectedOrganizationId';
   static const String baseUrl = 'baseUrl';
+  static const String themeMode = 'themeMode';
+  static const String themePalette = 'themePalette';
   static const String notificationSound = 'notificationSound';
   static const String prioritizePersonalUnread = 'prioritizePersonalUnread';
   static const String prioritizeUnmutedUnreadChannels = 'prioritizeUnmutedUnreadChannels';
