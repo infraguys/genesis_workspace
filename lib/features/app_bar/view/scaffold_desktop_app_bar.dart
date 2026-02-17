@@ -144,7 +144,14 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                 }),
                                 child: Padding(
                                   padding: const EdgeInsets.all(10),
-                                  child: Center(child: Assets.icons.add.svg()),
+                                  child: Center(
+                                    child: Assets.icons.add.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        textColors.text100,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

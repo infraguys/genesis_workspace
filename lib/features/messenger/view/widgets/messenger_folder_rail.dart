@@ -50,12 +50,25 @@ class MessengerFolderRail extends StatelessWidget {
                   final String title = index == 0 ? context.t.folders.all : folder.title!;
                   if (index == 0) {
                     icon = Assets.icons.allChats.svg(
-                      colorFilter: isSelected ? ColorFilter.mode(textColors.text100, BlendMode.srcIn) : null,
+                      colorFilter: ColorFilter.mode(
+                        isSelected ? folder.backgroundColor : textColors.text30,
+                        BlendMode.srcIn,
+                      ),
                     );
                   } else if (isSelected) {
-                    icon = Assets.icons.folderOpen.svg();
+                    icon = Assets.icons.folderOpen.svg(
+                      colorFilter: ColorFilter.mode(
+                        isSelected ? folder.backgroundColor : textColors.text30,
+                        BlendMode.srcIn,
+                      ),
+                    );
                   } else {
-                    icon = Assets.icons.folder.svg();
+                    icon = Assets.icons.folder.svg(
+                      colorFilter: ColorFilter.mode(
+                        isSelected ? folder.backgroundColor : textColors.text30,
+                        BlendMode.srcIn,
+                      ),
+                    );
                   }
                   return FolderItem(
                     title: title,
