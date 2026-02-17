@@ -349,7 +349,20 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   void handleCaptured(dynamic captured) {
     switch (captured.runtimeType) {
       case String:
-        messageController.text = '${messageController.text}$captured';
+        final pasteText = captured as String;
+        final selection = messageController.value.selection;
+        final text = messageController.value.text;
+
+        final start = selection.isValid ? selection.start : text.length;
+        final end = selection.isValid ? selection.end : text.length;
+        final nextText = text.replaceRange(start, end, pasteText);
+        final nextOffset = start + pasteText.length;
+
+        messageController.value = messageController.value.copyWith(
+          text: nextText,
+          selection: TextSelection.collapsed(offset: nextOffset),
+          composing: TextRange.empty,
+        );
         break;
 
       case PlatformFile:
