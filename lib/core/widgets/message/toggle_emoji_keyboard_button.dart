@@ -59,7 +59,12 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
                 color: textColors.text30,
                 key: ValueKey('keyboard'),
               )
-            : Assets.icons.smile.svg(),
+            : Assets.icons.smile.svg(
+                colorFilter: ColorFilter.mode(
+                  textColors.text30,
+                  .srcIn,
+                ),
+              ),
       ),
     );
   }

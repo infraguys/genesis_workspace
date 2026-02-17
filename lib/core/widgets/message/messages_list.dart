@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
 import 'package:genesis_workspace/core/widgets/topic_separator.dart';
@@ -436,6 +437,13 @@ class MessageDayLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(label, style: Theme.of(context).textTheme.labelMedium);
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
+    return Text(
+      label,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: textColors.text100,
+      ),
+    );
   }
 }
