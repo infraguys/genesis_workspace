@@ -299,6 +299,8 @@ import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart'
     as _i155;
 import 'package:genesis_workspace/features/starred/bloc/starred_cubit.dart'
     as _i1068;
+import 'package:genesis_workspace/features/theme/bloc/theme_cubit.dart'
+    as _i575;
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart'
     as _i326;
 import 'package:genesis_workspace/navigation/app_shell_controller.dart'
@@ -474,6 +476,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i690.GetVersionConfigShaUseCase>(),
       ),
       dispose: _i326.disposeUpdateCubit,
+    );
+    gh.factory<_i575.ThemeCubit>(
+      () => _i575.ThemeCubit(gh<_i460.SharedPreferences>()),
     );
     gh.factory<_i483.FolderDao>(() => _i483.FolderDao(gh<_i606.AppDatabase>()));
     gh.factory<_i909.FolderItemDao>(

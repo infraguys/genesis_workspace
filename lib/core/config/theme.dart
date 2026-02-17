@@ -1,34 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
+import 'package:genesis_workspace/domain/entities/theme_palette_entity.dart';
 import 'package:genesis_workspace/gen/fonts.gen.dart';
 
 const orangeWarmPalette = OrangeWarmPalette();
 const blueColdPalette = BlueColdPalette();
-const supportedThemePalettes = [
-  AppThemePalette.orangeWarm,
-  AppThemePalette.blueCold,
+const orangeWarmPaletteEntity = ThemePaletteEntity(
+  paletteId: 'orange_warm',
+  title: 'Orange Warm',
+  palette: orangeWarmPalette,
+);
+const blueColdPaletteEntity = ThemePaletteEntity(
+  paletteId: 'blue_cold',
+  title: 'Blue Cold',
+  palette: blueColdPalette,
+);
+const supportedThemePalettes = <ThemePaletteEntity>[
+  orangeWarmPaletteEntity,
+  blueColdPaletteEntity,
 ];
+const defaultThemePaletteEntity = orangeWarmPaletteEntity;
 
 final darkOrangeWarmTheme = orangeWarmPalette.dark();
 
 final lightOrangeWarmTheme = orangeWarmPalette.light();
 
-ThemePalette resolveThemePalette(AppThemePalette palette) {
-  return switch (palette) {
-    AppThemePalette.orangeWarm => orangeWarmPalette,
-    AppThemePalette.blueCold => blueColdPalette,
-  };
-}
-
 ThemeData buildThemeForPalette({
-  required AppThemePalette palette,
+  required String paletteId,
   required Brightness brightness,
+  List<ThemePaletteEntity>? palettes,
 }) {
+  final paletteEntity = resolveThemePaletteById(
+    paletteId: paletteId,
+    palettes: palettes,
+  );
   return buildThemeFromPalette(
-    palette: resolveThemePalette(palette),
+    palette: paletteEntity.palette,
     brightness: brightness,
   );
+}
+
+ThemePaletteEntity resolveThemePaletteById({
+  required String paletteId,
+  List<ThemePaletteEntity>? palettes,
+}) {
+  final normalizedPaletteId = normalizePaletteId(paletteId);
+  final source = palettes ?? supportedThemePalettes;
+  for (final palette in source) {
+    if (palette.paletteId == normalizedPaletteId) {
+      return palette;
+    }
+  }
+  return source.isNotEmpty ? source.first : defaultThemePaletteEntity;
+}
+
+String normalizePaletteId(String? paletteId) {
+  if (paletteId == null || paletteId.isEmpty) {
+    return defaultThemePaletteEntity.paletteId;
+  }
+  if (paletteId == 'dark_orange_warm') {
+    return 'orange_warm';
+  }
+  return paletteId;
 }
 
 extension ThemePaletteThemeX on ThemePalette {
@@ -58,7 +92,7 @@ ThemeData buildThemeFromPalette({
     brightness: brightness,
     colorScheme: colorScheme,
     badgeTheme: _badgeTheme,
-    scaffoldBackgroundColor: colorScheme.background,
+    scaffoldBackgroundColor: isDark ? const Color(0xFF1B1B1D) : colorScheme.surfaceContainer,
     inputDecorationTheme: _inputDecorationTheme(colorScheme, isDark: isDark),
     textTheme: (isDark ? ThemeData.dark() : ThemeData.light()).textTheme
         .withLetterSpacing(0)

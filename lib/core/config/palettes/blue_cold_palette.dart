@@ -11,7 +11,6 @@ const _blueColdLightColorScheme = ColorScheme.light(
   surfaceContainerHighest: Color(0xFFE2E6F6),
   error: Color(0xFFBA1A1A),
   onError: Color(0xFFFFFFFF),
-  background: Color(0xFFFFFFFF),
 );
 
 const _blueColdDarkColorScheme = ColorScheme.dark(
@@ -25,7 +24,6 @@ const _blueColdDarkColorScheme = ColorScheme.dark(
   surfaceContainerHighest: Color(0xFF33384D),
   error: Color(0xFFFFB4AB),
   onError: Color(0xFF690005),
-  background: Color(0xFF13151A),
 );
 
 const _blueColdLightTextColors = TextColors(
@@ -73,7 +71,8 @@ const _blueColdDarkCardColors = CardColors(
 class BlueColdPalette extends ThemePalette {
   const BlueColdPalette()
     : super(
-        palette: AppThemePalette.blueCold,
+        id: 'blue_cold',
+        title: 'Blue Cold',
         lightColorScheme: _blueColdLightColorScheme,
         darkColorScheme: _blueColdDarkColorScheme,
         lightTextColors: _blueColdLightTextColors,

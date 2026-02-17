@@ -3,32 +3,9 @@ import 'package:flutter/material.dart';
 part 'blue_cold_palette.dart';
 part 'orange_warm_palette.dart';
 
-enum AppThemePalette { orangeWarm, blueCold }
-
-extension AppThemePaletteX on AppThemePalette {
-  String get id => switch (this) {
-    AppThemePalette.orangeWarm => 'orange_warm',
-    AppThemePalette.blueCold => 'blue_cold',
-  };
-
-  String get title => switch (this) {
-    AppThemePalette.orangeWarm => 'Orange Warm',
-    AppThemePalette.blueCold => 'Blue Cold',
-  };
-}
-
-AppThemePalette appThemePaletteFromId(String? id) {
-  if (id == 'dark_orange_warm') {
-    return AppThemePalette.orangeWarm;
-  }
-  return AppThemePalette.values.firstWhere(
-    (palette) => palette.id == id,
-    orElse: () => AppThemePalette.orangeWarm,
-  );
-}
-
-sealed class ThemePalette {
-  final AppThemePalette palette;
+abstract interface class ThemePalette {
+  final String id;
+  final String title;
   final ColorScheme lightColorScheme;
   final ColorScheme darkColorScheme;
   final TextColors lightTextColors;
@@ -39,7 +16,8 @@ sealed class ThemePalette {
   final CardColors darkCardColors;
 
   const ThemePalette({
-    required this.palette,
+    required this.id,
+    required this.title,
     required this.lightColorScheme,
     required this.darkColorScheme,
     required this.lightTextColors,

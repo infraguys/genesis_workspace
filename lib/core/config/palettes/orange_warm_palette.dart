@@ -71,7 +71,8 @@ const _orangeWarmDarkCardColors = CardColors(
 class OrangeWarmPalette extends ThemePalette {
   const OrangeWarmPalette()
     : super(
-        palette: AppThemePalette.orangeWarm,
+        id: 'orange_warm',
+        title: 'Orange Warm',
         lightColorScheme: _orangeWarmLightColorScheme,
         darkColorScheme: _orangeWarmDarkColorScheme,
         lightTextColors: _orangeWarmLightTextColors,
