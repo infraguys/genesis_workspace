@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/config/palettes/palette.dart';
-import 'package:genesis_workspace/core/config/theme.dart';
 import 'package:genesis_workspace/features/theme/bloc/theme_cubit.dart';
 
 class ThemeSettingsView extends StatelessWidget {
@@ -43,15 +41,15 @@ class ThemeSettingsView extends StatelessWidget {
                 ),
               ),
               ...state.availablePalettes.map((palette) {
-                final colorScheme = resolveThemePalette(palette).colorSchemeFor(
+                final colorScheme = palette.palette.colorSchemeFor(
                   isDark ? Brightness.dark : Brightness.light,
                 );
-                final isSelected = state.selectedPalette == palette;
+                final isSelected = state.selectedPaletteId == palette.paletteId;
                 return ListTile(
                   leading: _PalettePreview(colorScheme: colorScheme),
                   title: Text(palette.title),
                   trailing: isSelected ? const Icon(Icons.check_circle) : null,
-                  onTap: () => cubit.setPalette(palette),
+                  onTap: () => cubit.setPalette(palette.paletteId),
                 );
               }),
             ],

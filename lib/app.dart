@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/theme.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
@@ -24,9 +25,6 @@ import 'package:genesis_workspace/features/theme/bloc/theme_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:genesis_workspace/core/config/theme.dart';
 
 class WorkspaceApp extends StatelessWidget {
   const WorkspaceApp({super.key});
@@ -44,7 +42,7 @@ class WorkspaceApp extends StatelessWidget {
         BlocProvider(create: (_) => getIt<AllChatsCubit>()),
         BlocProvider(create: (_) => getIt<OrganizationsCubit>()),
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
-        BlocProvider(create: (_) => ThemeCubit(getIt<SharedPreferences>())),
+        BlocProvider(create: (_) => getIt<ThemeCubit>()),
         BlocProvider(create: (_) => getIt<DownloadFilesCubit>()),
         BlocProvider(create: (_) => getIt<CallCubit>()),
         BlocProvider(create: (context) => getIt<ChannelChatCubit>()),
@@ -64,12 +62,14 @@ class WorkspaceApp extends StatelessWidget {
             title: 'Workspace',
             routerConfig: router,
             theme: buildThemeForPalette(
-              palette: state.selectedPalette,
+              paletteId: state.selectedPaletteId,
               brightness: Brightness.light,
+              palettes: state.availablePalettes,
             ),
             darkTheme: buildThemeForPalette(
-              palette: state.selectedPalette,
+              paletteId: state.selectedPaletteId,
               brightness: Brightness.dark,
+              palettes: state.availablePalettes,
             ),
             themeMode: state.themeMode,
           );

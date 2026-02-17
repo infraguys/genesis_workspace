@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
-import 'package:genesis_workspace/core/config/palettes/palette.dart';
 import 'package:genesis_workspace/core/config/theme.dart';
+import 'package:genesis_workspace/domain/entities/theme_palette_entity.dart';
+import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'theme_state.dart';
 
+@injectable
 class ThemeCubit extends Cubit<ThemeState> {
   ThemeCubit(SharedPreferences sharedPreferences)
     : _sharedPreferences = sharedPreferences,
       super(
         ThemeState(
           themeMode: _parseThemeMode(sharedPreferences.getString(SharedPrefsKeys.themeMode)),
-          selectedPalette: _restorePalette(sharedPreferences.getString(SharedPrefsKeys.themePalette)),
+          selectedPaletteId: _restorePaletteId(
+            sharedPreferences.getString(SharedPrefsKeys.themePalette),
+            palettes: supportedThemePalettes,
+          ),
           availablePalettes: supportedThemePalettes,
         ),
       );
@@ -30,10 +35,12 @@ class ThemeCubit extends Cubit<ThemeState> {
     await setThemeMode(brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light);
   }
 
-  Future<void> setPalette(AppThemePalette palette) async {
-    if (!state.availablePalettes.contains(palette) || state.selectedPalette == palette) return;
-    await _sharedPreferences.setString(SharedPrefsKeys.themePalette, palette.id);
-    emit(state.copyWith(selectedPalette: palette));
+  Future<void> setPalette(String paletteId) async {
+    final normalizedPaletteId = normalizePaletteId(paletteId);
+    final exists = state.availablePalettes.any((palette) => palette.paletteId == normalizedPaletteId);
+    if (!exists || state.selectedPaletteId == normalizedPaletteId) return;
+    await _sharedPreferences.setString(SharedPrefsKeys.themePalette, normalizedPaletteId);
+    emit(state.copyWith(selectedPaletteId: normalizedPaletteId));
   }
 
   static ThemeMode _parseThemeMode(String? storedValue) {
@@ -52,11 +59,15 @@ class ThemeCubit extends Cubit<ThemeState> {
     };
   }
 
-  static AppThemePalette _restorePalette(String? storedValue) {
-    final restoredPalette = appThemePaletteFromId(storedValue);
-    if (!supportedThemePalettes.contains(restoredPalette)) {
-      return supportedThemePalettes.first;
+  static String _restorePaletteId(
+    String? storedValue, {
+    required List<ThemePaletteEntity> palettes,
+  }) {
+    final normalizedPaletteId = normalizePaletteId(storedValue);
+    final exists = palettes.any((palette) => palette.paletteId == normalizedPaletteId);
+    if (exists) {
+      return normalizedPaletteId;
     }
-    return restoredPalette;
+    return palettes.isNotEmpty ? palettes.first.paletteId : defaultThemePaletteEntity.paletteId;
   }
 }
