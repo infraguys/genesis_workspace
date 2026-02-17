@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.8.5
+- Input open animation refactor for mobile devices
+- Fixed folders badges
+- Refactored bottom navigation bar layout for mobile
+- Refactored app bars layouts for mobile
+- Fixed close topic bug on select another channel
+- Fixed paste text by hotkey
+
 # 1.8.4
 - Refactor opening context menu
 - Add swipe for topics
