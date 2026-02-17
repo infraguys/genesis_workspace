@@ -504,7 +504,7 @@ class _MessengerViewState extends State<MessengerView>
                                           if (isTabletOrSmaller) {
                                             if (chat.type == ChatType.channel) {
                                               setState(() {
-                                                _showTopics = !_showTopics;
+                                                _showTopics = true;
                                               });
                                             } else {
                                               openChat(
