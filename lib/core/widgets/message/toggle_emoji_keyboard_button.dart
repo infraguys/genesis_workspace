@@ -14,7 +14,7 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     return TapEffectIcon(
       onTapDown: (_) {
         if (currentSize(context) >= ScreenSize.lTablet) {
@@ -56,12 +56,12 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
         child: emojiState.showEmojiKeyboard
             ? Icon(
                 Icons.keyboard,
-                color: textColors.text30,
+                color: iconColors.base,
                 key: ValueKey('keyboard'),
               )
             : Assets.icons.smile.svg(
                 colorFilter: ColorFilter.mode(
-                  textColors.text30,
+                  iconColors.base,
                   .srcIn,
                 ),
               ),

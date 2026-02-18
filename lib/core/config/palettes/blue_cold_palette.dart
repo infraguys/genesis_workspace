@@ -56,9 +56,9 @@ const _blueColdDarkMessageColors = MessageColors(
   selectedMessageForeground: Color(0x335051F5),
 );
 
-const _blueColdLightCardColors = CardColors(
+final _blueColdLightCardColors = CardColors(
   base: Color(0xFFEAF5FF),
-  active: Color(0xFFDBEEFF),
+  active: Color(0xFF51ABFF).withValues(alpha: 0.1),
   onBackgroundCard: Color(0xFFFFFFFF),
 );
 
@@ -68,8 +68,16 @@ const _blueColdDarkCardColors = CardColors(
   onBackgroundCard: Color(0xFF1F2235),
 );
 
+const _blueColdLightIconColors = IconColors(
+  base: Color(0xFF58A7F7),
+);
+
+final _blueColdDarkIconColors = IconColors(
+  base: Color(0xFFFFFFFF).withValues(alpha: .3),
+);
+
 class BlueColdPalette extends ThemePalette {
-  const BlueColdPalette()
+  BlueColdPalette()
     : super(
         id: 'blue_cold',
         title: 'Blue Cold',
@@ -81,5 +89,7 @@ class BlueColdPalette extends ThemePalette {
         darkMessageColors: _blueColdDarkMessageColors,
         lightCardColors: _blueColdLightCardColors,
         darkCardColors: _blueColdDarkCardColors,
+        lightIconColors: _blueColdLightIconColors,
+        darkIconColors: _blueColdDarkIconColors,
       );
 }

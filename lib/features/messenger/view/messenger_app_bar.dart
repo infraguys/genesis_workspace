@@ -68,6 +68,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     final t = context.t;
     final String largeScreenTitle = selectedFolderIndex != 0
         ? folders[selectedFolderIndex].title
@@ -103,7 +104,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
               width: 32,
               height: 32,
               colorFilter: ColorFilter.mode(
-                textColors.text30,
+                iconColors.base,
                 BlendMode.srcIn,
               ),
             ),

@@ -141,6 +141,7 @@ class _MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final iconColors = Theme.of(context).extension<IconColors>()!;
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
       builder: (context, emojiState) {
@@ -200,7 +201,7 @@ class _MessageInputState extends State<MessageInput> {
                             },
                             icon: Assets.icons.close.svg(
                               colorFilter: ColorFilter.mode(
-                                textColors.text30,
+                                iconColors.base,
                                 BlendMode.srcIn,
                               ),
                             ),

@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -262,6 +261,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final iconColors = Theme.of(context).extension<IconColors>()!;
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocConsumer<ChannelChatCubit, ChannelChatState>(
       listenWhen: (prev, current) =>
@@ -340,7 +340,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
                               leading: isTabletOrSmaller
                                   ? IconButton(
                                       onPressed: context.pop,
-                                      icon: Icon(CupertinoIcons.back, color: textColors.text30),
+                                      icon: Assets.icons.arrowLeft.svg(
+                                        colorFilter: ColorFilter.mode(
+                                          iconColors.base,
+                                          .srcIn,
+                                        ),
+                                      ),
                                     )
                                   : null,
                               // : IconButton(
@@ -373,7 +378,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   icon: Assets.icons.call.svg(
                                     width: 28,
                                     height: 28,
-                                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
                                 // if (!isTabletOrSmaller)
@@ -389,7 +394,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     }
                                   },
                                   icon: Assets.icons.videocam.svg(
-                                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
                               ],

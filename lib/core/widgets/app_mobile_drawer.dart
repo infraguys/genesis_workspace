@@ -16,6 +16,7 @@ class AppMobileDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final TextColors textColors = theme.extension<TextColors>()!;
+    final IconColors iconColors = theme.extension<IconColors>()!;
     return Drawer(
       child: SafeArea(
         child: Padding(
@@ -100,7 +101,12 @@ class AppMobileDrawer extends StatelessWidget {
                     child: Row(
                       spacing: 8,
                       children: [
-                        Assets.icons.dashboardCustomize.svg(),
+                        Assets.icons.dashboardCustomize.svg(
+                          colorFilter: ColorFilter.mode(
+                            iconColors.base,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                         Text(
                           context.t.services,
                           style: theme.textTheme.bodyMedium,

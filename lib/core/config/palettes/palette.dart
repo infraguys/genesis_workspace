@@ -14,6 +14,8 @@ abstract interface class ThemePalette {
   final MessageColors darkMessageColors;
   final CardColors lightCardColors;
   final CardColors darkCardColors;
+  final IconColors lightIconColors;
+  final IconColors darkIconColors;
 
   const ThemePalette({
     required this.id,
@@ -26,6 +28,8 @@ abstract interface class ThemePalette {
     required this.darkMessageColors,
     required this.lightCardColors,
     required this.darkCardColors,
+    required this.lightIconColors,
+    required this.darkIconColors,
   });
 
   ColorScheme colorSchemeFor(Brightness brightness) {
@@ -40,6 +44,10 @@ abstract interface class ThemePalette {
     return brightness == Brightness.dark ? darkMessageColors : lightMessageColors;
   }
 
+  IconColors iconColorsFor(Brightness brightness) {
+    return brightness == Brightness.dark ? darkIconColors : lightIconColors;
+  }
+
   CardColors cardColorsFor(Brightness brightness) {
     return brightness == Brightness.dark ? darkCardColors : lightCardColors;
   }
@@ -49,7 +57,34 @@ abstract interface class ThemePalette {
       textColorsFor(brightness),
       cardColorsFor(brightness),
       messageColorsFor(brightness),
+      iconColorsFor(brightness),
     ];
+  }
+}
+
+@immutable
+class IconColors extends ThemeExtension<IconColors> {
+  final Color base;
+
+  const IconColors({
+    required this.base,
+  });
+
+  @override
+  IconColors copyWith({
+    Color? base,
+  }) {
+    return IconColors(
+      base: base ?? this.base,
+    );
+  }
+
+  @override
+  IconColors lerp(ThemeExtension<IconColors>? other, double t) {
+    if (other is! IconColors) return this;
+    return IconColors(
+      base: Color.lerp(base, other.base, t)!,
+    );
   }
 }
 

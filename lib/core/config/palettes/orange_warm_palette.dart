@@ -68,8 +68,16 @@ const _orangeWarmDarkCardColors = CardColors(
   onBackgroundCard: Color(0xFF202022),
 );
 
+const _orangeWarmLightIconColors = IconColors(
+  base: Color(0xFFF7A858),
+);
+
+final _orangeWarmDarkIconColors = IconColors(
+  base: Color(0xFFFFFFFF).withValues(alpha: .3),
+);
+
 class OrangeWarmPalette extends ThemePalette {
-  const OrangeWarmPalette()
+  OrangeWarmPalette()
     : super(
         id: 'orange_warm',
         title: 'Orange Warm',
@@ -81,5 +89,7 @@ class OrangeWarmPalette extends ThemePalette {
         darkMessageColors: _orangeWarmDarkMessageColors,
         lightCardColors: _orangeWarmLightCardColors,
         darkCardColors: _orangeWarmDarkCardColors,
+        darkIconColors: _orangeWarmDarkIconColors,
+        lightIconColors: _orangeWarmLightIconColors,
       );
 }
