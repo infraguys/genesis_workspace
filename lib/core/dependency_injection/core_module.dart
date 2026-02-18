@@ -100,7 +100,7 @@ class DioFactory {
       ..add(BaseUrlInterceptor(sharedPreferences))
       ..add(TokenInterceptor(tokenStorage))
       ..add(SessionIdInterceptor(tokenStorage))
-      ..add(CsrfCookieInterceptor(tokenStorage, dio))
+      ..add(CsrfCookieInterceptor(tokenStorage))
       ..add(EnumInterceptor())
       ..add(
         TalkerDioLogger(
