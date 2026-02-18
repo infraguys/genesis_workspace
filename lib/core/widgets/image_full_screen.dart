@@ -34,7 +34,7 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
     _dio = Dio();
     _dio.interceptors
       ..add(SessionIdInterceptor(getIt<TokenStorage>()))
-      ..add(CsrfCookieInterceptor(getIt<TokenStorage>()))
+      ..add(CsrfCookieInterceptor(getIt<TokenStorage>(), _dio))
       ..add(TokenInterceptor(getIt<TokenStorage>()));
     _future = _loadImage();
     scaleStateController = PhotoViewScaleStateController();
