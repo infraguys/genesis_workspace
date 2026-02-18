@@ -97,12 +97,12 @@ class _AttachFilesButtonState extends State<AttachFilesButton> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     return TapEffectIcon(
       onTapDown: (details) => _openContextMenu(details.globalPosition),
       child: Assets.icons.attachFile.svg(
         colorFilter: ColorFilter.mode(
-          textColors.text30,
+          iconColors.base,
           .srcIn,
         ),
       ),

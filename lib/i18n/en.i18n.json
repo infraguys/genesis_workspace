@@ -67,7 +67,8 @@
     "chat_sorting_description": "Choose how unread chats are prioritized.",
     "chat_sorting_title": "Chat sorting settings",
     "chat_sorting_prioritize_directs": "Show unread personal chats above other unread chats",
-    "chat_sorting_prioritize_unmuted": "Show unread unmuted channels above muted unread ones"
+    "chat_sorting_prioritize_unmuted": "Show unread unmuted channels above muted unread ones",
+    "theme_settings": "Theme settings"
   },
   "date_labels": {
     "today": "Today",

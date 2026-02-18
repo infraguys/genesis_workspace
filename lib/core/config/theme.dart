@@ -4,23 +4,23 @@ import 'package:genesis_workspace/core/config/extensions.dart';
 import 'package:genesis_workspace/domain/entities/theme_palette_entity.dart';
 import 'package:genesis_workspace/gen/fonts.gen.dart';
 
-const orangeWarmPalette = OrangeWarmPalette();
-const blueColdPalette = BlueColdPalette();
-const orangeWarmPaletteEntity = ThemePaletteEntity(
+final orangeWarmPalette = OrangeWarmPalette();
+final blueColdPalette = BlueColdPalette();
+final orangeWarmPaletteEntity = ThemePaletteEntity(
   paletteId: 'orange_warm',
   title: 'Orange Warm',
   palette: orangeWarmPalette,
 );
-const blueColdPaletteEntity = ThemePaletteEntity(
+final blueColdPaletteEntity = ThemePaletteEntity(
   paletteId: 'blue_cold',
   title: 'Blue Cold',
   palette: blueColdPalette,
 );
-const supportedThemePalettes = <ThemePaletteEntity>[
+final supportedThemePalettes = <ThemePaletteEntity>[
   orangeWarmPaletteEntity,
   blueColdPaletteEntity,
 ];
-const defaultThemePaletteEntity = orangeWarmPaletteEntity;
+final defaultThemePaletteEntity = orangeWarmPaletteEntity;
 
 final darkOrangeWarmTheme = orangeWarmPalette.dark();
 
@@ -92,8 +92,8 @@ ThemeData buildThemeFromPalette({
     brightness: brightness,
     colorScheme: colorScheme,
     badgeTheme: _badgeTheme,
-    scaffoldBackgroundColor: isDark ? const Color(0xFF1B1B1D) : colorScheme.surfaceContainer,
     inputDecorationTheme: _inputDecorationTheme(colorScheme, isDark: isDark),
+    scaffoldBackgroundColor: colorScheme.background,
     textTheme: (isDark ? ThemeData.dark() : ThemeData.light()).textTheme
         .withLetterSpacing(0)
         .apply(

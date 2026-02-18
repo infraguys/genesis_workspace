@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -207,6 +206,7 @@ class _ChatViewState extends State<ChatView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final iconColors = Theme.of(context).extension<IconColors>()!;
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocConsumer<ChatCubit, ChatState>(
       listenWhen: (prev, current) =>
@@ -295,15 +295,17 @@ class _ChatViewState extends State<ChatView>
                                       onPressed: () {
                                         context.pop();
                                       },
-                                      icon: Icon(
-                                        CupertinoIcons.back,
-                                        color: textColors.text30,
+                                      icon: Assets.icons.arrowLeft.svg(
+                                        colorFilter: ColorFilter.mode(
+                                          iconColors.base,
+                                          .srcIn,
+                                        ),
                                       ),
                                     )
                                   : IconButton(
                                       onPressed: widget.leadingOnPressed,
                                       icon: Assets.icons.moreVert.svg(
-                                        colorFilter: ColorFilter.mode(textColors.text30, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                       ),
                                     ),
                               actions: [
@@ -318,7 +320,7 @@ class _ChatViewState extends State<ChatView>
                                   icon: Assets.icons.call.svg(
                                     width: 28,
                                     height: 28,
-                                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
                                 // if (!isTabletOrSmaller)
@@ -330,7 +332,7 @@ class _ChatViewState extends State<ChatView>
                                     }
                                   },
                                   icon: Assets.icons.videocam.svg(
-                                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
                               ],

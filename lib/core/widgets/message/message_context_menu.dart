@@ -265,8 +265,10 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    final textColors = Theme.of(context).extension<TextColors>()!;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
 
     return SizedBox(
       height: 36.0,
@@ -283,7 +285,7 @@ class _ActionTile extends StatelessWidget {
                   width: 28,
                   height: 28,
                   colorFilter: ColorFilter.mode(
-                    textColors.text30,
+                    iconColors.base,
                     BlendMode.srcIn,
                   ),
                 ),

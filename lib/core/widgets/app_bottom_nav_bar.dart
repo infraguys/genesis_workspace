@@ -95,17 +95,18 @@ class _ActiveIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     return Ink(
       width: 56,
       height: 56,
       decoration: BoxDecoration(
         borderRadius: .circular(12.0),
-        color: textColors.text100.withValues(alpha: 0.05),
+        color: theme.colorScheme.primary,
       ),
       child: Center(
         child: SvgPicture.asset(
           icon,
-          colorFilter: .mode(textColors.text100, .srcIn),
+          colorFilter: .mode(theme.colorScheme.onPrimary, .srcIn),
         ),
       ),
     );
@@ -120,11 +121,11 @@ class _InactiveIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     return Center(
       child: SvgPicture.asset(
         icon,
-        colorFilter: .mode(textColors.text30, .srcIn),
+        colorFilter: .mode(iconColors.base, .srcIn),
       ),
     );
   }

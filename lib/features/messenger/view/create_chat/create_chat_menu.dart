@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/palettes/palette.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/features/direct_messages/bloc/direct_messages_cubit.dart';
@@ -23,6 +24,8 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColors = theme.extension<IconColors>()!;
     return Container(
       decoration: BoxDecoration(
         borderRadius: .circular(8),
@@ -48,7 +51,12 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
                 openChannel(context, channelId: channelId);
               }
             },
-            icon: Assets.icons.personAdd.svg(),
+            icon: Assets.icons.personAdd.svg(
+              colorFilter: ColorFilter.mode(
+                iconColors.base,
+                BlendMode.srcIn,
+              ),
+            ),
             label: context.t.messengerView.createChatMenu.startChat,
           ),
           _CreateChatItem(
@@ -67,7 +75,12 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
                 },
               );
             },
-            icon: Assets.icons.campaign.svg(),
+            icon: Assets.icons.campaign.svg(
+              colorFilter: ColorFilter.mode(
+                iconColors.base,
+                BlendMode.srcIn,
+              ),
+            ),
             label: context.t.messengerView.createChatMenu.createChannel,
           ),
           _CreateChatItem(
@@ -94,6 +107,10 @@ class CreateChatMenu extends StatelessWidget with OpenChatMixin {
             },
             icon: Assets.icons.group.svg(
               width: 25,
+              colorFilter: ColorFilter.mode(
+                iconColors.base,
+                BlendMode.srcIn,
+              ),
             ),
             label: context.t.messengerView.createChatMenu.createGroupChat,
           ),
@@ -112,6 +129,7 @@ class _CreateChatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
       child: InkWell(
         onTap: onCreate,
@@ -122,7 +140,12 @@ class _CreateChatItem extends StatelessWidget {
             spacing: 16,
             children: [
               icon,
-              Text(label),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: 16,
+                ),
+              ),
             ],
           ),
         ),

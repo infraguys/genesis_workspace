@@ -473,8 +473,9 @@ class _ChatContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const textColor = Colors.white;
-    const iconColor = ColorFilter.mode(Colors.white, BlendMode.srcIn);
+    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
+    final iconColor = ColorFilter.mode(iconColors.base, BlendMode.srcIn);
 
     return Container(
       width: width,
@@ -488,14 +489,14 @@ class _ChatContextMenu extends StatelessWidget {
         crossAxisAlignment: .stretch,
         children: [
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.folder,
             iconColor: iconColor,
             label: context.t.folders.addToFolder,
             onTap: onAddToFolder,
           ),
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.pinned,
             iconColor: iconColor,
             label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
@@ -503,7 +504,7 @@ class _ChatContextMenu extends StatelessWidget {
           ),
           if (onToggleMute != null) ...[
             _ChatContextMenuAction(
-              textColor: textColor,
+              textColor: textColors.text100,
               icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
               iconColor: iconColor,
               label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
@@ -511,14 +512,14 @@ class _ChatContextMenu extends StatelessWidget {
             ),
           ],
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.readReceipt,
             iconColor: iconColor,
             label: context.t.readAllMessages,
             onTap: onReadAll,
           ),
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.allChats,
             iconColor: iconColor,
             label: context.t.topic.createTopic,
