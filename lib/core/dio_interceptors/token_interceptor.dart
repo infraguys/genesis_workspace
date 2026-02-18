@@ -15,7 +15,7 @@ class TokenInterceptor extends Interceptor {
 
   static bool _isHandlingAuthExpired = false;
 
-  static const Set<int> _authExpiredStatusCodes = <int>{401, 419};
+  static const Set<int> _authExpiredStatusCodes = <int>{401, 403, 419};
   static const List<String> _authExcludedPaths = <String>[
     '/fetch_api_key',
     '/server_settings',
@@ -30,7 +30,7 @@ class TokenInterceptor extends Interceptor {
       // --- 1) Basic auth, если доступно — короткий путь, CSRF не нужен ---
       if (token != null && token.contains(':')) {
         final auth = base64Encode(utf8.encode(token));
-        options.headers['Authorization'] = 'Basic ${auth}dwwcwc';
+        options.headers['Authorization'] = 'Basic ${auth}';
         options.headers['Accept'] = 'application/json, text/javascript, */*; q=0.01';
         return handler.next(options);
       }
