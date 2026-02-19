@@ -54,13 +54,13 @@ class ChatView extends StatefulWidget {
     super.key,
     this.chatId = -1,
     required this.userIds,
-    this.unreadMessagesCount = 0,
+    this.firstMessageId,
     this.leadingOnPressed,
   });
 
   final int? chatId;
   final List<int> userIds;
-  final int? unreadMessagesCount;
+  final int? firstMessageId;
   final VoidCallback? leadingOnPressed;
 
   @override
@@ -75,6 +75,7 @@ class _ChatViewState extends State<ChatView>
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
   DraftEntity? draftForThisChat;
+  int? focusedMessageId;
 
   Future<void> sendMessage({required List<MessageEntity> selectedMessages}) async {
     final messageContent = messageController.text;
@@ -98,6 +99,14 @@ class _ChatViewState extends State<ChatView>
     }
   }
 
+  resetFocusedMessage() async {
+    await Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        focusedMessageId = null;
+      });
+    });
+  }
+
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
@@ -105,7 +114,7 @@ class _ChatViewState extends State<ChatView>
     _future = context.read<ChatCubit>().getInitialData(
       userIds: widget.userIds,
       myUserId: _myUser.userId,
-      unreadMessagesCount: widget.unreadMessagesCount,
+      firstMessageId: widget.firstMessageId,
     );
     context.read<MessagesSelectCubit>().setSelectMode(false);
     _controller = ScrollController();
@@ -122,6 +131,7 @@ class _ChatViewState extends State<ChatView>
       messageController.text = draftForThisChat!.content;
       isDraftPasted = true;
     }
+    focusedMessageId = widget.firstMessageId;
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -309,6 +319,12 @@ class _ChatViewState extends State<ChatView>
                                       ),
                                     ),
                               actions: [
+                                TextButton(
+                                  child: Text("Get"),
+                                  onPressed: () {
+                                    context.read<ChatCubit>().getMessagesNear();
+                                  },
+                                ),
                                 DownloadFilesButton(),
                                 IconButton(
                                   onPressed: () async {
@@ -475,6 +491,7 @@ class _ChatViewState extends State<ChatView>
                       future: _future,
                       builder: (BuildContext context, snapshot) {
                         if (snapshot.connectionState == .done) {
+                          resetFocusedMessage();
                           if (snapshot.hasError) {
                             return Center(child: Text("Error"));
                           }
@@ -525,7 +542,8 @@ class _ChatViewState extends State<ChatView>
                                               onRead: (id) {
                                                 context.read<ChatCubit>().scheduleMarkAsReadCommon(id);
                                               },
-                                              loadMore: context.read<ChatCubit>().loadMoreMessages,
+                                              loadMorePrev: context.read<ChatCubit>().loadMorePrevMessages,
+                                              loadMoreNext: context.read<ChatCubit>().loadMoreNextMessages,
                                               showTopic: true,
                                               myUserId: _myUser.userId,
                                               onTapQuote: onTapQuote,
@@ -539,6 +557,7 @@ class _ChatViewState extends State<ChatView>
                                               },
                                               isSelectMode: messagesSelectState.isActive,
                                               selectedMessages: selectedMessages,
+                                              focusedMessageId: focusedMessageId,
                                             ),
                                             Positioned(
                                               bottom: 0,

@@ -21,7 +21,8 @@ class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
   final ScrollController controller;
   final void Function(int id)? onRead;
-  final Future<void> Function()? loadMore;
+  final Future<void> Function()? loadMorePrev;
+  final Future<void> Function()? loadMoreNext;
   final VoidCallback? onReadAll;
   final bool showTopic;
   final bool isLoadingMore;
@@ -30,13 +31,15 @@ class MessagesList extends StatefulWidget {
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
   final bool isSelectMode;
   final List<MessageEntity> selectedMessages;
+  final int? focusedMessageId;
 
   const MessagesList({
     super.key,
     required this.messages,
     required this.controller,
     this.onRead,
-    this.loadMore,
+    this.loadMorePrev,
+    this.loadMoreNext,
     this.showTopic = false,
     required this.isLoadingMore,
     required this.myUserId,
@@ -45,6 +48,7 @@ class MessagesList extends StatefulWidget {
     this.onReadAll,
     this.isSelectMode = false,
     this.selectedMessages = const <MessageEntity>[],
+    this.focusedMessageId,
   });
 
   @override
@@ -192,7 +196,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void _maybeLoadMore(Iterable<ItemPosition> positions) {
-    if (_isLoadMoreInFlight || widget.isLoadingMore || widget.loadMore == null) {
+    if (_isLoadMoreInFlight || widget.isLoadingMore || widget.loadMorePrev == null) {
       return;
     }
     final lastIndex = _reversed.length - 1;
@@ -203,12 +207,12 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   Future<void> _triggerLoadMore() async {
-    if (_isLoadMoreInFlight || widget.loadMore == null) {
+    if (_isLoadMoreInFlight || widget.loadMorePrev == null) {
       return;
     }
     _isLoadMoreInFlight = true;
     try {
-      await widget.loadMore!();
+      await widget.loadMorePrev!();
     } finally {
       if (mounted) {
         _isLoadMoreInFlight = false;
@@ -355,6 +359,7 @@ class _MessagesListState extends State<MessagesList> {
                         isSelected: widget.selectedMessages.any(
                           (selectedMessage) => selectedMessage.id == message.id,
                         ),
+                        isFocused: widget.focusedMessageId == message.id,
                       ),
                     );
                   },

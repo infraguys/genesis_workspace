@@ -47,6 +47,7 @@ class MessageItem extends StatefulWidget {
     required this.onTapEditMessage,
     this.isSelectMode = false,
     this.isSelected = false,
+    this.isFocused = false,
   });
 
   final bool isMyMessage;
@@ -60,6 +61,7 @@ class MessageItem extends StatefulWidget {
   final bool isSelected;
   final void Function(int messageId, {String? quote}) onTapQuote;
   final Function(UpdateMessageRequestEntity body) onTapEditMessage;
+  final bool isFocused;
 
   @override
   State<MessageItem> createState() => _MessageItemState();
@@ -293,6 +295,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
     };
 
     Color messageBgColor = switch (widget.isMyMessage) {
+      _ when widget.isFocused => theme.colorScheme.primary,
       _ when widget.message.isCall => messageColors.activeCallBackground,
       true => messageColors.ownBackground,
       _ => messageColors.background,
@@ -361,7 +364,6 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
               child: GestureDetector(
                 onTap: () {
                   inspect(widget.message);
-                  print(widget.message.content);
                 },
                 onLongPressStart: (details) {
                   if (widget.isSelectMode) return;
@@ -386,7 +388,9 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                         scale: _messageScale,
                         duration: _contextMenuScaleDuration,
                         curve: Curves.easeOut,
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeInOut,
                           padding: const EdgeInsets.all(12),
                           constraints: (showAvatar)
                               ? BoxConstraints(

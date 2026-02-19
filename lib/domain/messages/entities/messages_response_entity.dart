@@ -6,6 +6,7 @@ class MessagesResponseEntity {
   final List<MessageEntity> messages;
   final int? anchor;
   final bool foundOldest;
+  final bool foundNewest;
 
   MessagesResponseEntity({
     required this.msg,
@@ -13,5 +14,6 @@ class MessagesResponseEntity {
     required this.messages,
     this.anchor,
     required this.foundOldest,
+    required this.foundNewest,
   });
 }

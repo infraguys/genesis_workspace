@@ -8,9 +8,11 @@ class ChatState {
   int? typingId;
   int? myUserId;
   int? lastMessageId;
+  int? firstMessageId;
   bool isMessagePending;
   bool isLoadingMore;
-  bool isAllMessagesLoaded;
+  bool isFoundNewestMessage;
+  bool isFoundOldestMessage;
   TypingEventOp selfTypingOp;
   Set<int> pendingToMarkAsRead;
   DmUserEntity? userEntity;
@@ -34,9 +36,11 @@ class ChatState {
     this.typingId,
     this.myUserId,
     this.lastMessageId,
+    this.firstMessageId,
     required this.isMessagePending,
     required this.isLoadingMore,
-    required this.isAllMessagesLoaded,
+    required this.isFoundNewestMessage,
+    required this.isFoundOldestMessage,
     required this.selfTypingOp,
     required this.pendingToMarkAsRead,
     this.userEntity,
@@ -61,9 +65,11 @@ class ChatState {
     int? typingId,
     int? myUserId,
     int? lastMessageId,
+    int? firstMessageId,
     bool? isMessagePending,
     bool? isLoadingMore,
-    bool? isAllMessagesLoaded,
+    bool? isFoundNewestMessage,
+    bool? isFoundOldestMessage,
     TypingEventOp? selfTypingOp,
     Set<int>? pendingToMarkAsRead,
     DmUserEntity? userEntity,
@@ -87,9 +93,11 @@ class ChatState {
       typingId: typingId ?? this.typingId,
       myUserId: myUserId ?? this.myUserId,
       lastMessageId: lastMessageId ?? this.lastMessageId,
+      firstMessageId: firstMessageId ?? this.firstMessageId,
       isMessagePending: isMessagePending ?? this.isMessagePending,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      isAllMessagesLoaded: isAllMessagesLoaded ?? this.isAllMessagesLoaded,
+      isFoundNewestMessage: isFoundNewestMessage ?? this.isFoundNewestMessage,
+      isFoundOldestMessage: isFoundOldestMessage ?? this.isFoundOldestMessage,
       selfTypingOp: selfTypingOp ?? this.selfTypingOp,
       pendingToMarkAsRead: pendingToMarkAsRead ?? this.pendingToMarkAsRead,
       userEntity: userEntity ?? this.userEntity,

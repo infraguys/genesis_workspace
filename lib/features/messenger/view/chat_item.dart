@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -167,6 +168,8 @@ class _ChatItemState extends State<ChatItem> {
   }
 
   onTap() async {
+    inspect(widget.chat);
+    // return;
     if (widget.chat.type == ChatType.channel) {
       if (mounted && currentSize(context) > ScreenSize.tablet) {
         setState(() {
