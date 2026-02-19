@@ -162,7 +162,7 @@ class _MessagesListState extends State<MessagesList> {
     _updateScrollToBottom(positions);
   }
 
-  void _onScrollOffsetChanged(double _) {
+  void _onScrollOffsetChanged(double offsetDelta) {
     if (!mounted) {
       return;
     }
@@ -171,7 +171,7 @@ class _MessagesListState extends State<MessagesList> {
     if (positions.isEmpty || _reversed.isEmpty) {
       return;
     }
-    _maybeLoadMore(positions);
+    _maybeLoadMore(positions, offsetDelta);
   }
 
   void _handleScrollActivity() {
@@ -195,28 +195,37 @@ class _MessagesListState extends State<MessagesList> {
     }
   }
 
-  void _maybeLoadMore(Iterable<ItemPosition> positions) {
-    if (_isLoadMoreInFlight || widget.isLoadingMore || widget.loadMorePrev == null) {
+  void _maybeLoadMore(Iterable<ItemPosition> positions, double offsetDelta) {
+    if (_isLoadMoreInFlight || widget.isLoadingMore) {
       return;
     }
-    final lastIndex = _reversed.length - 1;
-    final isTopVisible = positions.any((position) => position.index == lastIndex);
-    if (isTopVisible) {
-      _triggerLoadMore();
+
+    if (offsetDelta > 0 && widget.loadMorePrev != null) {
+      final lastIndex = _reversed.length - 1;
+      final isTopVisible = positions.any((position) => position.index == lastIndex);
+      if (isTopVisible) {
+        _triggerLoadMore(widget.loadMorePrev);
+      }
+      return;
+    }
+
+    if (offsetDelta < 0 && widget.loadMoreNext != null) {
+      final isBottomVisible = positions.any((position) => position.index == 0);
+      if (isBottomVisible) {
+        _triggerLoadMore(widget.loadMoreNext);
+      }
     }
   }
 
-  Future<void> _triggerLoadMore() async {
-    if (_isLoadMoreInFlight || widget.loadMorePrev == null) {
+  Future<void> _triggerLoadMore(Future<void> Function()? loadMore) async {
+    if (_isLoadMoreInFlight || loadMore == null) {
       return;
     }
     _isLoadMoreInFlight = true;
     try {
-      await widget.loadMorePrev!();
+      await loadMore();
     } finally {
-      if (mounted) {
-        _isLoadMoreInFlight = false;
-      }
+      _isLoadMoreInFlight = false;
     }
   }
 
