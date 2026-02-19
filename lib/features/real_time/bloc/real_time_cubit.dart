@@ -33,6 +33,7 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   final RealTimeService _realTimeService = getIt<RealTimeService>();
   final MultiPollingService _multiPollingService;
   final OrganizationsCubit _organizationsCubit;
+  bool _recheckQueued = false;
 
   late final StreamSubscription<ConnectionEntity> _connectionStatusSubscription;
 
@@ -79,13 +80,23 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   }
 
   Future<void> ensureConnection() async {
+    if (state.isCheckingConnection) {
+      _recheckQueued = true;
+      return;
+    }
     emit(state.copyWith(isCheckingConnection: true));
     try {
       await _multiPollingService.ensureAllConnections();
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     } finally {
       emit(state.copyWith(isCheckingConnection: false));
+      if (_recheckQueued) {
+        _recheckQueued = false;
+        unawaited(Future<void>.delayed(const Duration(seconds: 2), ensureConnection));
+      }
     }
   }
 
@@ -109,7 +120,11 @@ class RealTimeCubit extends Cubit<RealTimeState> {
     final updatedConnections = {...state.connections};
     updatedConnections[entity.organizationId] = entity;
     emit(state.copyWith(connections: updatedConnections));
-    if (entity.status == .inactive && !state.isCheckingConnection) {
+    if (entity.status == .inactive) {
+      if (state.isCheckingConnection) {
+        _recheckQueued = true;
+        return;
+      }
       await ensureConnection();
     }
   }
