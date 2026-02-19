@@ -271,6 +271,7 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
       final response = await _getMessagesUseCase.call(body);
       if (response.messages.isNotEmpty) {
         state.firstMessageId = response.messages.first.id;
+        state.lastMessageId = response.messages.last.id;
       }
       emit(
         state.copyWith(
@@ -301,7 +302,11 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
       final response = await _getMessagesUseCase(body);
       final updatedMessages = [...state.messages];
       updatedMessages.addAll(response.messages);
-      emit(state.copyWith(messages: updatedMessages, firstMessageId: updatedMessages.first.id));
+      if (updatedMessages.isNotEmpty) {
+        state.firstMessageId = updatedMessages.first.id;
+        state.lastMessageId = updatedMessages.last.id;
+      }
+      emit(state.copyWith(messages: updatedMessages));
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -324,7 +329,9 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
         includeAnchor: false,
       );
       final response = await _getMessagesUseCase.call(body);
-      state.firstMessageId = response.messages.first.id;
+      if (response.messages.isNotEmpty) {
+        state.firstMessageId = response.messages.first.id;
+      }
       final messages = [...response.messages, ...state.messages];
       emit(
         state.copyWith(
@@ -347,19 +354,21 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
     try {
       final operand = state.chatIds!.toList();
       final body = MessagesRequestEntity(
-        anchor: MessageAnchor.id(state.firstMessageId ?? 0),
+        anchor: MessageAnchor.id(state.lastMessageId ?? state.firstMessageId ?? 0),
         narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
         numBefore: 0,
         numAfter: 25,
         includeAnchor: false,
       );
       final response = await _getMessagesUseCase.call(body);
-      state.lastMessageId = response.messages.last.id;
+      if (response.messages.isNotEmpty) {
+        state.lastMessageId = response.messages.last.id;
+      }
       final messages = [...state.messages, ...response.messages];
       emit(
         state.copyWith(
           messages: messages,
-          isFoundOldestMessage: response.foundOldest,
+          isFoundNewestMessage: response.foundNewest,
         ),
       );
     } catch (e) {
