@@ -30,7 +30,9 @@ class PerOrganizationDioFactory {
 
     final BaseOptions baseOptions = BaseOptions(
       baseUrl: resolvedBaseUrl,
-      receiveTimeout: const Duration(seconds: 90),
+      // Zulip /events is a long-poll request and can hold the response for ~90s.
+      // Keep client timeout above that to avoid false disconnects on healthy queues.
+      receiveTimeout: const Duration(minutes: 3),
       // validateStatus: (int? statusCode) =>
       //     statusCode != null && statusCode >= 200 && statusCode < 600,
     );
