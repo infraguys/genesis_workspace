@@ -35,7 +35,6 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
-    final cardColors = Theme.of(context).extension<CardColors>()!;
 
     return Container(
       width: double.infinity,
@@ -101,53 +100,53 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
               ],
             ),
           ),
-          Padding(
-            padding: const .symmetric(horizontal: 8.0),
-            child: Row(
-              spacing: 8.0,
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: .circular(8.0),
-                    clipBehavior: .hardEdge,
-                    child: Material(
-                      shape: RoundedRectangleBorder(borderRadius: .circular(8.0)),
-                      color: cardColors.base,
-                      child: InkWell(
-                        onTap: () {},
-                        child: SizedBox(
-                          height: 56.0,
-                          child: Center(
-                            child: Assets.icons.call.svg(
-                              width: 40,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: .circular(8.0),
-                    child: Material(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: .circular(8.0),
-                      ),
-                      color: cardColors.base,
-                      child: InkWell(
-                        onTap: () {},
-                        child: SizedBox(
-                          height: 56.0,
-                          child: Center(child: Assets.icons.search.svg(width: 40)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const .symmetric(horizontal: 8.0),
+          //   child: Row(
+          //     spacing: 8.0,
+          //     children: [
+          //       Expanded(
+          //         child: ClipRRect(
+          //           borderRadius: .circular(8.0),
+          //           clipBehavior: .hardEdge,
+          //           child: Material(
+          //             shape: RoundedRectangleBorder(borderRadius: .circular(8.0)),
+          //             color: cardColors.base,
+          //             child: InkWell(
+          //               onTap: () {},
+          //               child: SizedBox(
+          //                 height: 56.0,
+          //                 child: Center(
+          //                   child: Assets.icons.call.svg(
+          //                     width: 40,
+          //                   ),
+          //                 ),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //       Expanded(
+          //         child: ClipRRect(
+          //           borderRadius: .circular(8.0),
+          //           child: Material(
+          //             shape: RoundedRectangleBorder(
+          //               borderRadius: .circular(8.0),
+          //             ),
+          //             color: cardColors.base,
+          //             child: InkWell(
+          //               onTap: () {},
+          //               child: SizedBox(
+          //                 height: 56.0,
+          //                 child: Center(child: Assets.icons.search.svg(width: 40)),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           Expanded(
             child: Column(
               children: [

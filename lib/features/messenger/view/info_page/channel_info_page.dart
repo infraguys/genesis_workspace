@@ -5,7 +5,6 @@ import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -31,9 +30,7 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
-    final cardColors = Theme.of(context).extension<CardColors>()!;
 
     return Scaffold(
       appBar: AppBarContainer(
@@ -90,49 +87,49 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                 ],
               ),
             ),
-            Padding(
-              padding: const .symmetric(horizontal: 8.0),
-              child: Row(
-                spacing: 8.0,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: .circular(8.0),
-                      clipBehavior: .hardEdge,
-                      child: Material(
-                        shape: RoundedRectangleBorder(borderRadius: .circular(8.0)),
-                        color: cardColors.base,
-                        child: InkWell(
-                          onTap: () {},
-                          child: SizedBox(
-                            height: 56.0,
-                            child: Center(child: Assets.icons.call.svg(width: 40)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: .circular(8.0),
-                      child: Material(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: .circular(8.0),
-                        ),
-                        color: cardColors.base,
-                        child: InkWell(
-                          onTap: () {},
-                          child: SizedBox(
-                            height: 56.0,
-                            child: Center(child: Assets.icons.search.svg(width: 40)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Padding(
+            //   padding: const .symmetric(horizontal: 8.0),
+            //   child: Row(
+            //     spacing: 8.0,
+            //     children: [
+            //       Expanded(
+            //         child: ClipRRect(
+            //           borderRadius: .circular(8.0),
+            //           clipBehavior: .hardEdge,
+            //           child: Material(
+            //             shape: RoundedRectangleBorder(borderRadius: .circular(8.0)),
+            //             color: cardColors.base,
+            //             child: InkWell(
+            //               onTap: () {},
+            //               child: SizedBox(
+            //                 height: 56.0,
+            //                 child: Center(child: Assets.icons.call.svg(width: 40)),
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //       Expanded(
+            //         child: ClipRRect(
+            //           borderRadius: .circular(8.0),
+            //           child: Material(
+            //             shape: RoundedRectangleBorder(
+            //               borderRadius: .circular(8.0),
+            //             ),
+            //             color: cardColors.base,
+            //             child: InkWell(
+            //               onTap: () {},
+            //               child: SizedBox(
+            //                 height: 56.0,
+            //                 child: Center(child: Assets.icons.search.svg(width: 40)),
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             Column(
               children: [
                 Padding(
