@@ -132,7 +132,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
       isDraftPasted = true;
     }
     // focusedMessageId = widget.firstMessageId;
-    super.initState();''
+    super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
         targetKey: dropAreaKey,
