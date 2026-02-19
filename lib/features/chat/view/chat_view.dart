@@ -75,7 +75,6 @@ class _ChatViewState extends State<ChatView>
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
   DraftEntity? draftForThisChat;
-  int? focusedMessageId;
 
   Future<void> sendMessage({required List<MessageEntity> selectedMessages}) async {
     final messageContent = messageController.text;
@@ -97,14 +96,6 @@ class _ChatViewState extends State<ChatView>
         messageInputFocusNode.requestFocus();
       }
     }
-  }
-
-  resetFocusedMessage() async {
-    await Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        focusedMessageId = null;
-      });
-    });
   }
 
   @override
@@ -131,7 +122,7 @@ class _ChatViewState extends State<ChatView>
       messageController.text = draftForThisChat!.content;
       isDraftPasted = true;
     }
-    focusedMessageId = widget.firstMessageId;
+    // focusedMessageId = widget.firstMessageId;
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -319,12 +310,6 @@ class _ChatViewState extends State<ChatView>
                                       ),
                                     ),
                               actions: [
-                                TextButton(
-                                  child: Text("Get"),
-                                  onPressed: () {
-                                    context.read<ChatCubit>().getMessagesNear();
-                                  },
-                                ),
                                 DownloadFilesButton(),
                                 IconButton(
                                   onPressed: () async {
@@ -491,7 +476,6 @@ class _ChatViewState extends State<ChatView>
                       future: _future,
                       builder: (BuildContext context, snapshot) {
                         if (snapshot.connectionState == .done) {
-                          resetFocusedMessage();
                           if (snapshot.hasError) {
                             return Center(child: Text("Error"));
                           }

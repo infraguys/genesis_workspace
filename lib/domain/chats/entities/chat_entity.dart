@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -27,6 +28,8 @@ class ChatEntity extends Equatable {
   final String? colorString;
 
   int? get firstUnreadMessageId => unreadMessages.firstOrNull;
+  int? topicFirstUnreadMessageId(String topicName) =>
+      topics?.firstWhereOrNull((topic) => topic.name == topicName)?.firstUnreadMessageId;
 
   bool get isTopicsLoading => topics == null;
 

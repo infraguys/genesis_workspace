@@ -40,7 +40,7 @@ mixin OpenChatMixin {
     BuildContext context, {
     required int channelId,
     String? topicName,
-    int? unreadMessagesCount,
+    int? messageId,
     bool replace = false,
   }) {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
@@ -57,7 +57,7 @@ mixin OpenChatMixin {
               'channelId': channelId.toString(),
               'topicName': topicName,
             },
-            extra: {'unreadMessagesCount': unreadMessagesCount},
+            extra: {'messageId': messageId},
           );
         } else {
           context.pushNamed(
@@ -67,7 +67,7 @@ mixin OpenChatMixin {
               'channelId': channelId.toString(),
               'topicName': topicName,
             },
-            extra: {'unreadMessagesCount': unreadMessagesCount},
+            extra: {'messageId': messageId},
           );
         }
       } else {
@@ -77,7 +77,7 @@ mixin OpenChatMixin {
             'chatId': chat.id.toString(),
             'channelId': channelId.toString(),
           },
-          extra: {'unreadMessagesCount': unreadMessagesCount},
+          extra: {'messageId': messageId},
         );
       }
     }

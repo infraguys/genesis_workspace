@@ -55,14 +55,14 @@ class ChannelChatView extends StatefulWidget {
     required this.chatId,
     required this.channelId,
     this.topicName,
-    this.unreadMessagesCount = 0,
+    this.firstMessageId,
     this.leadingOnPressed,
   });
 
   final int chatId;
   final int channelId;
   final String? topicName;
-  final int? unreadMessagesCount;
+  final int? firstMessageId;
   final VoidCallback? leadingOnPressed;
 
   @override
@@ -114,7 +114,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     _future = context.read<ChannelChatCubit>().getInitialData(
       streamId: widget.channelId,
       topicName: widget.topicName,
-      unreadMessagesCount: widget.unreadMessagesCount,
+      firstMessageId: widget.firstMessageId,
       myUserId: _myUser.userId,
     );
     context.read<MessagesSelectCubit>().setSelectMode(false);
@@ -131,7 +131,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
       messageController.text = draftForThisChat!.content;
       isDraftPasted = true;
     }
-    super.initState();
+    // focusedMessageId = widget.firstMessageId;
+    super.initState();''
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
         targetKey: dropAreaKey,
@@ -219,7 +220,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         _,
       ) {
         context.read<ChannelChatCubit>().getChannelMessages(
-          unreadMessagesCount: widget.unreadMessagesCount,
+          firstMessageId: widget.firstMessageId,
         );
       });
       final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
@@ -474,7 +475,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               onRead: (id) {
                                                 context.read<ChannelChatCubit>().scheduleMarkAsReadCommon(id);
                                               },
-                                              loadMorePrev: context.read<ChannelChatCubit>().loadMoreMessages,
+                                              loadMorePrev: context.read<ChannelChatCubit>().loadMorePrevMessages,
+                                              loadMoreNext: context.read<ChannelChatCubit>().loadMoreNextMessages,
                                               myUserId: _myUser.userId,
                                               onTapQuote: onTapQuote,
                                               onTapEditMessage: onTapEditMessage,
@@ -486,6 +488,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               },
                                               isSelectMode: messagesSelectState.isActive,
                                               selectedMessages: selectedMessages,
+                                              focusedMessageId: focusedMessageId,
                                             ),
                                             Positioned(
                                               bottom: 0,

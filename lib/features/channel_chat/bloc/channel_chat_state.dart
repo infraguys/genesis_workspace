@@ -6,8 +6,10 @@ class ChannelChatState {
   List<MessageEntity> messages;
   bool isMessagePending;
   bool isLoadingMore;
-  bool isAllMessagesLoaded;
+  bool isFoundOldestMessage;
+  bool isFoundNewestMessage;
   int? lastMessageId;
+  int? firstMessageId;
   StreamEntity? channel;
   TopicEntity? topic;
   int? typingUserId;
@@ -29,10 +31,12 @@ class ChannelChatState {
 
   ChannelChatState({
     required this.messages,
-    required this.isAllMessagesLoaded,
+    required this.isFoundOldestMessage,
+    required this.isFoundNewestMessage,
     required this.isLoadingMore,
     required this.isMessagePending,
     this.lastMessageId,
+    this.firstMessageId,
     this.channel,
     this.typingUserId,
     required this.selfTypingOp,
@@ -55,10 +59,12 @@ class ChannelChatState {
 
   ChannelChatState copyWith({
     List<MessageEntity>? messages,
-    bool? isAllMessagesLoaded,
+    bool? isFoundOldestMessage,
+    bool? isFoundNewestMessage,
     bool? isLoadingMore,
     bool? isMessagePending,
-    int? lastMessageId,
+    Object? lastMessageId,
+    Object? firstMessageId,
     Object? channel = _notSpecified,
     int? typingUserId,
     TypingEventOp? selfTypingOp,
@@ -80,10 +86,12 @@ class ChannelChatState {
   }) {
     return ChannelChatState(
       messages: messages ?? this.messages,
-      isAllMessagesLoaded: isAllMessagesLoaded ?? this.isAllMessagesLoaded,
+      isFoundOldestMessage: isFoundOldestMessage ?? this.isFoundOldestMessage,
+      isFoundNewestMessage: isFoundNewestMessage ?? this.isFoundNewestMessage,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       isMessagePending: isMessagePending ?? this.isMessagePending,
-      lastMessageId: lastMessageId ?? this.lastMessageId,
+      lastMessageId: identical(lastMessageId, _notSpecified) ? this.lastMessageId : lastMessageId as int?,
+      firstMessageId: identical(firstMessageId, _notSpecified) ? this.firstMessageId : firstMessageId as int?,
       channel: identical(channel, _notSpecified) ? this.channel : channel as StreamEntity?,
       typingUserId: typingUserId ?? this.typingUserId,
       selfTypingOp: selfTypingOp ?? this.selfTypingOp,
