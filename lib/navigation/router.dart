@@ -256,13 +256,13 @@ final router = GoRouter(
           assert(chatId != null, 'chatId must be int');
 
           final extra = state.extra as Map<String, dynamic>?;
-          final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+          final messageId = extra?['messageId'];
 
           return NoTransitionPage(
             child: ChannelChat(
               chatId: chatId!,
               channelId: channelId!,
-              unreadMessagesCount: unreadMessagesCount,
+              firstMessageId: messageId,
             ),
           );
 
@@ -290,13 +290,13 @@ final router = GoRouter(
           assert(chatId != null, 'chatId must be int');
 
           final extra = state.extra as Map<String, dynamic>?;
-          final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+          final messageId = extra?['messageId'];
 
           return ChannelChat(
             chatId: chatId!,
             channelId: channelId!,
             topicName: topicName,
-            unreadMessagesCount: unreadMessagesCount,
+            firstMessageId: messageId,
           );
 
           // if (currentSize(context) > ScreenSize.lTablet) {

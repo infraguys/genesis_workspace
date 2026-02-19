@@ -644,7 +644,9 @@ class _MessengerViewState extends State<MessengerView>
                                     chatId: state.selectedChat!.id,
                                     channelId: state.selectedChat!.streamId!,
                                     topicName: state.selectedTopic,
-                                    unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                    firstMessageId: state.selectedTopic != null
+                                        ? state.selectedChat?.topicFirstUnreadMessageId(state.selectedTopic!)
+                                        : state.selectedChat?.firstUnreadMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);

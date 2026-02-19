@@ -80,7 +80,7 @@ class MobileTopicItem extends StatelessWidget {
                   'channelId': selectedChat.streamId.toString(),
                   'topicName': topic.name,
                 },
-                extra: {'unreadMessagesCount': topic.unreadMessages.length},
+                extra: {'messageId': topic.firstUnreadMessageId},
               );
             },
             child: Ink(

@@ -67,6 +67,19 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   final GlobalKey dropAreaKey = GlobalKey();
   RemoveDropHandlers? removeWebDnD;
 
+  int? focusedMessageId;
+
+  setFocusedMessage(int messageId) async {
+    setState(() {
+      focusedMessageId = messageId;
+    });
+    await Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        focusedMessageId = null;
+      });
+    });
+  }
+
   void focusOnInit() {
     if (platformInfo.isDesktop) {
       messageInputFocusNode.requestFocus();
