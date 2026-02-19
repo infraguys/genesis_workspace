@@ -69,6 +69,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
         await setIdleStatus();
       },
       onActive: () async {
+        await context.read<RealTimeCubit>().ensureConnection();
         await setActiveStatus();
       },
     );
