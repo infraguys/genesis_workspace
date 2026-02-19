@@ -91,7 +91,7 @@ class _StarredViewState extends State<StarredView> {
                 messages: state.messages,
                 isLoadingMore: state.isLoadingMore,
                 myUserId: myUserId ?? -1,
-                loadMore: context.read<StarredCubit>().loadMoreMessages,
+                loadMorePrev: context.read<StarredCubit>().loadMoreMessages,
               );
             },
           ),

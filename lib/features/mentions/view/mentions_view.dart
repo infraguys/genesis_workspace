@@ -98,7 +98,7 @@ class _MentionsViewState extends State<MentionsView> {
                 messages: state.messages,
                 isLoadingMore: state.isLoadingMore,
                 myUserId: myUserId ?? -1,
-                loadMore: context.read<MentionsCubit>().loadMoreMessages,
+                loadMorePrev: context.read<MentionsCubit>().loadMoreMessages,
                 showTopic: true,
               );
             },

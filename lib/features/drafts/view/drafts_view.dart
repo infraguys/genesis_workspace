@@ -145,7 +145,12 @@ class DraftsView extends StatelessWidget with OpenChatMixin {
                     final updatedDraft = draft.copyWith(to: updatedDraftTo);
                     final chat = chats.firstWhereOrNull((chat) => updatedDraft.matchesUsers(chat.dmIds ?? []));
                     if (chat != null) {
-                      openChat(context, membersIds: chat.dmIds!.toSet(), chatId: chat.id);
+                      openChat(
+                        context,
+                        membersIds: chat.dmIds!.toSet(),
+                        chatId: chat.id,
+                        messageId: chat.firstUnreadMessageId,
+                      );
                     }
                   } else {
                     final chat = chats.firstWhereOrNull((chat) => chat.streamId == draft.to.first);

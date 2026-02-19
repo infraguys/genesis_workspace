@@ -208,7 +208,7 @@ final router = GoRouter(
           final chatIdString = state.pathParameters['chatId'];
           final userId = int.parse(state.pathParameters['userId']!);
           final extra = state.extra as Map<String, dynamic>?;
-          final unread = extra?['unreadMessagesCount'] ?? 0;
+          final int? messageId = extra?['messageId'];
           final chatId = int.tryParse(chatIdString ?? '');
           assert(chatId != null, 'chatId must be int');
 
@@ -216,7 +216,7 @@ final router = GoRouter(
             // На десктопе в идеале сюда не приходим, но на всякий случай
             return SizedBox.shrink();
           } else {
-            return Chat(chatId: chatId!, userIds: [userId], unreadMessagesCount: unread);
+            return Chat(chatId: chatId!, userIds: [userId], firstMessageId: messageId);
           }
         },
       ),
@@ -228,11 +228,11 @@ final router = GoRouter(
           final chatIdString = state.pathParameters['chatId'];
           final List<int> userIds = state.pathParameters['userIds']?.split(',').map(int.parse).toList() ?? [];
           final extra = state.extra as Map<String, dynamic>?;
-          final unread = extra?['unreadMessagesCount'] ?? 0;
+          final int? messageId = extra?['messageId'];
           final chatId = int.tryParse(chatIdString ?? '');
           assert(chatId != null, 'chatId must be int');
 
-          return Chat(chatId: chatId!, userIds: userIds, unreadMessagesCount: unread);
+          return Chat(chatId: chatId!, userIds: userIds, firstMessageId: messageId);
         },
         routes: [
           GoRoute(

@@ -92,7 +92,7 @@ class _ReactionsViewState extends State<ReactionsView> {
                 messages: state.messages,
                 isLoadingMore: state.isLoadingMore,
                 myUserId: _myUserId,
-                loadMore: () async {
+                loadMorePrev: () async {
                   context.read<ReactionsCubit>().loadMoreMessages(_myUserId);
                 },
               );

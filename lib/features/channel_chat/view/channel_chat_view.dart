@@ -474,7 +474,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               onRead: (id) {
                                                 context.read<ChannelChatCubit>().scheduleMarkAsReadCommon(id);
                                               },
-                                              loadMore: context.read<ChannelChatCubit>().loadMoreMessages,
+                                              loadMorePrev: context.read<ChannelChatCubit>().loadMoreMessages,
                                               myUserId: _myUser.userId,
                                               onTapQuote: onTapQuote,
                                               onTapEditMessage: onTapEditMessage,

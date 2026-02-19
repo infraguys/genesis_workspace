@@ -511,6 +511,7 @@ class _MessengerViewState extends State<MessengerView>
                                                 context,
                                                 chatId: chat.id,
                                                 membersIds: chat.dmIds?.toSet() ?? {},
+                                                messageId: chat.firstUnreadMessageId,
                                               );
                                             }
                                           } else {
@@ -625,7 +626,7 @@ class _MessengerViewState extends State<MessengerView>
                                     ),
                                     chatId: state.selectedChat?.id,
                                     userIds: state.selectedChat!.dmIds!,
-                                    unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                    firstMessageId: state.selectedChat?.firstUnreadMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);

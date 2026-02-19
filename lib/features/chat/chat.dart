@@ -8,14 +8,14 @@ import 'package:genesis_workspace/features/chat/view/chat_view.dart';
 class Chat extends StatelessWidget {
   final int? chatId;
   final List<int> userIds;
-  final int? unreadMessagesCount;
+  final int? firstMessageId;
   final VoidCallback? leadingOnPressed;
 
   const Chat({
     super.key,
     this.chatId = -1,
     required this.userIds,
-    this.unreadMessagesCount = 0,
+    this.firstMessageId,
     this.leadingOnPressed,
   });
 
@@ -28,7 +28,7 @@ class Chat extends StatelessWidget {
         final chat = ChatView(
           chatId: chatId,
           userIds: userIds,
-          unreadMessagesCount: unreadMessagesCount,
+          firstMessageId: firstMessageId,
           leadingOnPressed: leadingOnPressed,
         );
 

@@ -12,6 +12,8 @@ class MessagesResponseDto {
   final int? anchor;
   @JsonKey(name: 'found_oldest')
   final bool foundOldest;
+  @JsonKey(name: 'found_newest')
+  final bool foundNewest;
 
   MessagesResponseDto({
     required this.result,
@@ -19,6 +21,7 @@ class MessagesResponseDto {
     required this.messages,
     this.anchor,
     required this.foundOldest,
+    required this.foundNewest,
   });
 
   factory MessagesResponseDto.fromJson(Map<String, dynamic> json) => _$MessagesResponseDtoFromJson(json);
@@ -29,5 +32,6 @@ class MessagesResponseDto {
     messages: messages.map((m) => m.toEntity()).toList(),
     anchor: anchor,
     foundOldest: foundOldest,
+    foundNewest: foundNewest,
   );
 }
