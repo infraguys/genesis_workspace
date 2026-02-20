@@ -325,7 +325,8 @@
     "forward": "Forward",
     "forward_count": "Forward ({n})",
     "select": "Select",
-    "viewedBy": "Viewed by"
+    "viewedBy": "Viewed by",
+    "open_in_chat": "Open in chat"
   },
   "input": {
     "banner": "Select a topic to send messages to the channel",

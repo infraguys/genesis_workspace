@@ -198,7 +198,6 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
     required List<int> userIds,
     required int myUserId,
     int? firstMessageId,
-    // int? unreadMessagesCount,
   }) async {
     emit(
       state.copyWith(
