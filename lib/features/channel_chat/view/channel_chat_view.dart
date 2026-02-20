@@ -206,6 +206,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         streamId: widget.channelId,
         topicName: widget.topicName,
         didUpdateWidget: (oldWidget.topicName != widget.topicName || oldWidget.channelId != widget.channelId),
+        firstMessageId: widget.firstMessageId ?? widget.focusedMessageId,
       );
       context.read<MessagesSelectCubit>().setSelectMode(false);
       messageController.clear();
