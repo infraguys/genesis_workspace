@@ -250,7 +250,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                       _ActionTile(
                         textColor: textColor,
                         icon: Assets.icons.arrowRightUp,
-                        label: "Go to message",
+                        label: context.t.contextMenu.openInChat,
                         onTap: _onGoToMessage,
                       ),
                   ],

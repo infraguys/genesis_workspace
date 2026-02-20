@@ -385,9 +385,6 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin, Ope
                 _touchMoved = false;
               },
               child: GestureDetector(
-                onTap: () {
-                  inspect(widget.message);
-                },
                 onLongPressStart: (details) {
                   if (widget.isSelectMode) return;
                   if (platformInfo.isMobile) {
