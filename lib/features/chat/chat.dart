@@ -9,6 +9,7 @@ class Chat extends StatelessWidget {
   final int? chatId;
   final List<int> userIds;
   final int? firstMessageId;
+  final int? focusedMessageId;
   final VoidCallback? leadingOnPressed;
 
   const Chat({
@@ -16,6 +17,7 @@ class Chat extends StatelessWidget {
     this.chatId = -1,
     required this.userIds,
     this.firstMessageId,
+    this.focusedMessageId,
     this.leadingOnPressed,
   });
 
@@ -29,6 +31,7 @@ class Chat extends StatelessWidget {
           chatId: chatId,
           userIds: userIds,
           firstMessageId: firstMessageId,
+          focusedMessageId: focusedMessageId,
           leadingOnPressed: leadingOnPressed,
         );
 

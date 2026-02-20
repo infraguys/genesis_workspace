@@ -69,7 +69,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
 
   int? focusedMessageId;
 
-  setFocusedMessage(int messageId) async {
+  setFocusedMessage(int? messageId) async {
     setState(() {
       focusedMessageId = messageId;
     });

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/core/mixins/message/forward_message_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
@@ -67,7 +68,7 @@ class MessageItem extends StatefulWidget {
   State<MessageItem> createState() => _MessageItemState();
 }
 
-class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
+class _MessageItemState extends State<MessageItem> with ForwardMessageMixin, OpenChatMixin {
   late final GlobalObjectKey messageKey;
   late final MenuController _menuController;
 
@@ -189,6 +190,27 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
     _menuController.close();
   }
 
+  void onGoToMessage() {
+    if (widget.message.displayRecipient is DirectMessageRecipients) {
+      final memberIds = widget.message.displayRecipient.recipients.map((e) => e.userId).toSet();
+      openChat(
+        context,
+        membersIds: memberIds,
+        chatId: widget.message.recipientId,
+        focusedMessageId: widget.message.id,
+      );
+    } else {
+      final channelId = widget.message.streamId!;
+      openChannel(
+        context,
+        channelId: channelId,
+        topicName: widget.message.subject,
+        focusedMessageId: widget.message.id,
+      );
+    }
+    _menuController.close();
+  }
+
   void onCopy() async {
     final message = await messagesCubit.getMessageById(messageId: widget.message.id, applyMarkdown: false);
     await Clipboard.setData(ClipboardData(text: message.content));
@@ -236,6 +258,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
             );
           },
           onSelect: onSelect,
+          onGoToMessage: onGoToMessage,
         );
       },
     );
@@ -369,7 +392,10 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                   if (widget.isSelectMode) return;
                   if (platformInfo.isMobile) {
                     _animateMessageContainer();
-                    Focus.of(context).unfocus();
+                    final FocusNode? currentFocus = FocusManager.instance.primaryFocus;
+                    if (currentFocus != null && currentFocus.hasFocus) {
+                      currentFocus.unfocus();
+                    }
                     HapticFeedback.mediumImpact();
                     _openContextMenu(context, details.globalPosition);
                   }

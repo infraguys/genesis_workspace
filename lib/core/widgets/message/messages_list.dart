@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -113,7 +114,17 @@ class _MessagesListState extends State<MessagesList> {
     final List<MessageEntity> reversedMessages = widget.messages.reversed.toList();
 
     _firstUnreadIndexInReversed = _findFirstUnreadBoundaryIndex(reversedMessages);
-
+    final focusedMessage = reversedMessages.firstWhereOrNull((message) => message.id == widget.focusedMessageId);
+    if (focusedMessage != null) {
+      final focusedMessageIndex = reversedMessages.indexOf(focusedMessage);
+      if (_itemScrollController.isAttached) {
+        _itemScrollController.jumpTo(
+          index: focusedMessageIndex,
+          alignment: 0.5,
+        );
+      }
+      return;
+    }
     if (_firstUnreadIndexInReversed != null) {
       if (_itemScrollController.isAttached) {
         _itemScrollController.jumpTo(

@@ -28,6 +28,7 @@ class MessengerState {
   final bool isFolderDeleting;
   final Set<int> usersIds;
   final OpenedSection openedSection;
+  final int? focusedMessageId;
 
   MessengerState({
     this.selfUser,
@@ -47,6 +48,7 @@ class MessengerState {
     this.isFolderDeleting = false,
     Set<int>? usersIds,
     required this.openedSection,
+    this.focusedMessageId,
   }) : usersIds = usersIds ?? {};
 
   int? get mySelfChatId =>
@@ -69,6 +71,7 @@ class MessengerState {
     isFolderSaving: false,
     isFolderDeleting: false,
     openedSection: .chat,
+    focusedMessageId: null,
   );
 
   MessengerState copyWith({
@@ -89,6 +92,7 @@ class MessengerState {
     bool? isFolderDeleting,
     Set<int>? usersIds,
     OpenedSection? openedSection,
+    Object? focusedMessageId,
   }) {
     return MessengerState(
       selfUser: selfUser ?? this.selfUser,
@@ -108,6 +112,7 @@ class MessengerState {
       isFolderDeleting: isFolderDeleting ?? this.isFolderDeleting,
       usersIds: usersIds ?? this.usersIds,
       openedSection: openedSection ?? this.openedSection,
+      focusedMessageId: identical(focusedMessageId, _notSpecified) ? this.focusedMessageId : focusedMessageId as int?,
     );
   }
 }
