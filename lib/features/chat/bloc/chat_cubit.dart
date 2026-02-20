@@ -249,8 +249,8 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
 
   Future<void> getMessages({required int myUserId, int? firstMessageId}) async {
     state.myUserId = myUserId;
-    final int numBefore = 25;
-    final int numAfter = firstMessageId != null ? 25 : 0;
+    final int numBefore = AppConstants.messagesLazyLoadCount;
+    final int numAfter = firstMessageId != null ? AppConstants.messagesLazyLoadCount : 0;
     try {
       final operand = state.chatIds!.toList();
       final body = MessagesRequestEntity(
