@@ -543,7 +543,7 @@ class _MessengerViewState extends State<MessengerView>
                                                 key: const ValueKey('topics_list'),
                                                 isPending: state.selectedChat?.topics == null,
                                                 selectedChat: state.selectedChat,
-                                                listPadding: _isSearchVisible ? 430 : 300,
+                                                listPadding: _isSearchVisible ? 350 : 300,
                                                 onDismissed: () {
                                                   setState(() => _showTopics = false);
                                                 },

@@ -96,7 +96,7 @@ class MobileTopicItem extends StatelessWidget {
                           width: 3,
                           height: 47,
                           decoration: BoxDecoration(
-                            color: Colors.yellow,
+                            color: selectedChat.backgroundColor,
                             borderRadius: .circular(4),
                           ),
                         ),
