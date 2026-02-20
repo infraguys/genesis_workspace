@@ -22,6 +22,7 @@ class MessageContextMenu extends StatefulWidget {
     this.onClose,
     this.onForward,
     this.onSelect,
+    this.onGoToMessage,
     required this.offset,
     required this.isMyMessage,
     required this.messageId,
@@ -37,6 +38,7 @@ class MessageContextMenu extends StatefulWidget {
   final ValueChanged<String> onEmojiSelected;
   final VoidCallback? onClose;
   final VoidCallback? onSelect;
+  final VoidCallback? onGoToMessage;
   final Offset offset;
   final bool isMyMessage;
   final int messageId;
@@ -87,6 +89,11 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
 
   void _onSelect() {
     widget.onSelect?.call();
+    _close();
+  }
+
+  void _onGoToMessage() {
+    widget.onGoToMessage?.call();
     _close();
   }
 
@@ -239,6 +246,13 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                       label: context.t.contextMenu.select,
                       onTap: _onSelect,
                     ),
+                    if (widget.onGoToMessage != null)
+                      _ActionTile(
+                        textColor: textColor,
+                        icon: Assets.icons.arrowRightUp,
+                        label: "Go to message",
+                        onTap: _onGoToMessage,
+                      ),
                   ],
                 );
               },

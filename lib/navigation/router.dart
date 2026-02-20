@@ -209,6 +209,7 @@ final router = GoRouter(
           final userId = int.parse(state.pathParameters['userId']!);
           final extra = state.extra as Map<String, dynamic>?;
           final int? messageId = extra?['messageId'];
+          final int? focusedMessageId = extra?['focusedMessageId'];
           final chatId = int.tryParse(chatIdString ?? '');
           assert(chatId != null, 'chatId must be int');
 
@@ -216,7 +217,12 @@ final router = GoRouter(
             // На десктопе в идеале сюда не приходим, но на всякий случай
             return SizedBox.shrink();
           } else {
-            return Chat(chatId: chatId!, userIds: [userId], firstMessageId: messageId);
+            return Chat(
+              chatId: chatId!,
+              userIds: [userId],
+              firstMessageId: messageId,
+              focusedMessageId: focusedMessageId,
+            );
           }
         },
       ),
@@ -229,10 +235,16 @@ final router = GoRouter(
           final List<int> userIds = state.pathParameters['userIds']?.split(',').map(int.parse).toList() ?? [];
           final extra = state.extra as Map<String, dynamic>?;
           final int? messageId = extra?['messageId'];
+          final int? focusedMessageId = extra?['focusedMessageId'];
           final chatId = int.tryParse(chatIdString ?? '');
           assert(chatId != null, 'chatId must be int');
 
-          return Chat(chatId: chatId!, userIds: userIds, firstMessageId: messageId);
+          return Chat(
+            chatId: chatId!,
+            userIds: userIds,
+            firstMessageId: messageId,
+            focusedMessageId: focusedMessageId,
+          );
         },
         routes: [
           GoRoute(
@@ -257,12 +269,14 @@ final router = GoRouter(
 
           final extra = state.extra as Map<String, dynamic>?;
           final messageId = extra?['messageId'];
+          final focusedMessageId = extra?['focusedMessageId'];
 
           return NoTransitionPage(
             child: ChannelChat(
               chatId: chatId!,
               channelId: channelId!,
               firstMessageId: messageId,
+              focusedMessageId: focusedMessageId,
             ),
           );
 
@@ -291,12 +305,14 @@ final router = GoRouter(
 
           final extra = state.extra as Map<String, dynamic>?;
           final messageId = extra?['messageId'];
+          final focusedMessageId = extra?['focusedMessageId'];
 
           return ChannelChat(
             chatId: chatId!,
             channelId: channelId!,
             topicName: topicName,
             firstMessageId: messageId,
+            focusedMessageId: focusedMessageId,
           );
 
           // if (currentSize(context) > ScreenSize.lTablet) {

@@ -458,11 +458,25 @@ class MessengerCubit extends Cubit<MessengerState> {
     );
   }
 
-  void selectChat(ChatEntity chat, {String? selectedTopic}) {
+  void selectChat(ChatEntity chat, {String? selectedTopic, int? focusedMessageId}) {
     if (selectedTopic == null) {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: null, openedSection: .chat));
+      emit(
+        state.copyWith(
+          selectedChat: chat,
+          selectedTopic: null,
+          openedSection: .chat,
+          focusedMessageId: focusedMessageId,
+        ),
+      );
     } else {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic, openedSection: .chat));
+      emit(
+        state.copyWith(
+          selectedChat: chat,
+          selectedTopic: selectedTopic,
+          openedSection: .chat,
+          focusedMessageId: focusedMessageId,
+        ),
+      );
     }
   }
 
@@ -1328,8 +1342,15 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  void createEmptyChat(Set<int> membersIds) async {
-    emit(state.copyWith(usersIds: membersIds, openedSection: .chat, selectedChat: null));
+  void createEmptyChat(Set<int> membersIds, {int? focusedMessageId}) async {
+    emit(
+      state.copyWith(
+        usersIds: membersIds,
+        openedSection: .chat,
+        selectedChat: null,
+        focusedMessageId: focusedMessageId,
+      ),
+    );
   }
 
   void unselectChat() {

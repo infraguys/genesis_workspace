@@ -56,6 +56,7 @@ class ChannelChatView extends StatefulWidget {
     required this.channelId,
     this.topicName,
     this.firstMessageId,
+    this.focusedMessageId,
     this.leadingOnPressed,
   });
 
@@ -63,6 +64,7 @@ class ChannelChatView extends StatefulWidget {
   final int channelId;
   final String? topicName;
   final int? firstMessageId;
+  final int? focusedMessageId;
   final VoidCallback? leadingOnPressed;
 
   @override
@@ -114,7 +116,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     _future = context.read<ChannelChatCubit>().getInitialData(
       streamId: widget.channelId,
       topicName: widget.topicName,
-      firstMessageId: widget.firstMessageId,
+      firstMessageId: widget.focusedMessageId ?? widget.firstMessageId,
       myUserId: _myUser.userId,
     );
     context.read<MessagesSelectCubit>().setSelectMode(false);
@@ -131,7 +133,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
       messageController.text = draftForThisChat!.content;
       isDraftPasted = true;
     }
-    // focusedMessageId = widget.firstMessageId;
+    setFocusedMessage(widget.focusedMessageId);
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(

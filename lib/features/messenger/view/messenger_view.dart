@@ -610,6 +610,8 @@ class _MessengerViewState extends State<MessengerView>
                                     key: ObjectKey(state.usersIds),
                                     chatId: state.selectedChat?.id,
                                     userIds: state.usersIds.toList(),
+                                    firstMessageId: state.selectedChat?.firstUnreadMessageId,
+                                    focusedMessageId: state.focusedMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);
@@ -627,6 +629,7 @@ class _MessengerViewState extends State<MessengerView>
                                     chatId: state.selectedChat?.id,
                                     userIds: state.selectedChat!.dmIds!,
                                     firstMessageId: state.selectedChat?.firstUnreadMessageId,
+                                    focusedMessageId: state.focusedMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);
@@ -647,6 +650,7 @@ class _MessengerViewState extends State<MessengerView>
                                     firstMessageId: state.selectedTopic != null
                                         ? state.selectedChat?.topicFirstUnreadMessageId(state.selectedTopic!)
                                         : state.selectedChat?.firstUnreadMessageId,
+                                    focusedMessageId: state.focusedMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);

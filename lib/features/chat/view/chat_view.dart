@@ -55,12 +55,14 @@ class ChatView extends StatefulWidget {
     this.chatId = -1,
     required this.userIds,
     this.firstMessageId,
+    this.focusedMessageId,
     this.leadingOnPressed,
   });
 
   final int? chatId;
   final List<int> userIds;
   final int? firstMessageId;
+  final int? focusedMessageId;
   final VoidCallback? leadingOnPressed;
 
   @override
@@ -105,7 +107,7 @@ class _ChatViewState extends State<ChatView>
     _future = context.read<ChatCubit>().getInitialData(
       userIds: widget.userIds,
       myUserId: _myUser.userId,
-      firstMessageId: widget.firstMessageId,
+      firstMessageId: widget.focusedMessageId ?? widget.firstMessageId,
     );
     context.read<MessagesSelectCubit>().setSelectMode(false);
     _controller = ScrollController();
@@ -122,7 +124,7 @@ class _ChatViewState extends State<ChatView>
       messageController.text = draftForThisChat!.content;
       isDraftPasted = true;
     }
-    // focusedMessageId = widget.firstMessageId;
+    setFocusedMessage(widget.focusedMessageId);
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(

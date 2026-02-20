@@ -12,6 +12,7 @@ class ChannelChat extends StatelessWidget {
     required this.channelId,
     this.topicName,
     this.firstMessageId,
+    this.focusedMessageId,
     this.leadingOnPressed,
   });
 
@@ -19,6 +20,7 @@ class ChannelChat extends StatelessWidget {
   final int channelId;
   final String? topicName;
   final int? firstMessageId;
+  final int? focusedMessageId;
   final VoidCallback? leadingOnPressed;
 
   @override
@@ -32,6 +34,7 @@ class ChannelChat extends StatelessWidget {
           channelId: channelId,
           topicName: topicName,
           firstMessageId: firstMessageId,
+          focusedMessageId: focusedMessageId,
           leadingOnPressed: leadingOnPressed,
         );
 
