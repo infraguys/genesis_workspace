@@ -320,10 +320,11 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
     emit(state.copyWith(isLoadingMore: true));
     try {
       final operand = state.chatIds!.toList();
+      final numBefore = AppConstants.messagesLazyLoadCount;
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.id(anchorId),
         narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
-        numBefore: 25,
+        numBefore: numBefore,
         numAfter: 0,
         includeAnchor: false,
       );
@@ -362,11 +363,12 @@ class ChatCubit extends Cubit<ChatState> with ChatCubitMixin<ChatState> implemen
     emit(state.copyWith(isLoadingMore: true));
     try {
       final operand = state.chatIds!.toList();
+      final numAfter = AppConstants.messagesLazyLoadCount;
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.id(anchorId),
         narrow: [MessageNarrowEntity(operator: NarrowOperator.dm, operand: operand)],
         numBefore: 0,
-        numAfter: 25,
+        numAfter: numAfter,
         includeAnchor: false,
       );
       final response = await _getMessagesUseCase.call(body);
