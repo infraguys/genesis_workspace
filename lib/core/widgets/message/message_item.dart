@@ -429,6 +429,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                                           showTopic: widget.showTopic,
                                           isStarred: isStarred,
                                           maxMessageWidth: maxWidthMessage,
+                                          messageBackgroundColor: messageBgColor,
                                           onSelectedTextChanged: onSelectedTextChanged,
                                         ),
                                   if (widget.message.aggregatedReactions.isEmpty)
