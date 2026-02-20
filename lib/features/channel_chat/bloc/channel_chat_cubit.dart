@@ -518,9 +518,9 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     emit(state.copyWith(isMessagePending: value));
   }
 
-  void _onTypingEvents(TypingEventEntity _) {
-    state.typingUserId = null;
-    emit(state.copyWith(typingUserId: state.typingUserId));
+  void _onTypingEvents(_) {
+    // state.typingUserId = null;
+    // emit(state.copyWith(typingUserId: state.typingUserId));
   }
 
   void _onMessageEvents(MessageEventEntity event) {
