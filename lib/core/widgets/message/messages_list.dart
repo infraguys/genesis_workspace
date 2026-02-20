@@ -54,7 +54,7 @@ class MessagesList extends StatefulWidget {
     this.selectedMessages = const <MessageEntity>[],
     this.focusedMessageId,
     this.foundNewest = true,
-    this.foundOldest = true,
+    this.foundOldest = false,
   });
 
   @override
@@ -86,7 +86,7 @@ class _MessagesListState extends State<MessagesList> {
 
     _itemScrollController = ItemScrollController();
     _itemPositionsListener = ItemPositionsListener.create();
-    // _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
+    _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
     _scrollOffsetListener = ScrollOffsetListener.create();
     _scrollOffsetSubscription = _scrollOffsetListener.changes.listen(_onScrollOffsetChanged);
 
@@ -245,7 +245,7 @@ class _MessagesListState extends State<MessagesList> {
       if (isNext) {
         _itemScrollController.jumpTo(
           // first loaded message index after loadMoreNext request
-          index: AppConstants.messagesLazyLoadCount - 1,
+          index: widget.foundNewest ? 0 : AppConstants.messagesLazyLoadCount,
           alignment: 0,
         );
       }
