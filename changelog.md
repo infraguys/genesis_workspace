@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.9.0
+- Added light/dark themes, palettes
+- Improved real-time connection functionality
+- Removed unused buttons
+- Small UI/logic fixes
+
 # 1.8.5
 - Input open animation refactor for mobile devices
 - Fixed folders badges
