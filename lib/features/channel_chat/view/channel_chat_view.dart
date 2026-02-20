@@ -491,6 +491,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               isSelectMode: messagesSelectState.isActive,
                                               selectedMessages: selectedMessages,
                                               focusedMessageId: focusedMessageId,
+                                              foundNewest: state.isFoundNewestMessage,
+                                              foundOldest: state.isFoundOldestMessage,
                                             ),
                                             Positioned(
                                               bottom: 0,

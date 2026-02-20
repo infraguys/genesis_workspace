@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
 import 'package:genesis_workspace/core/widgets/topic_separator.dart';
@@ -33,6 +34,8 @@ class MessagesList extends StatefulWidget {
   final bool isSelectMode;
   final List<MessageEntity> selectedMessages;
   final int? focusedMessageId;
+  final bool foundNewest;
+  final bool foundOldest;
 
   const MessagesList({
     super.key,
@@ -50,6 +53,8 @@ class MessagesList extends StatefulWidget {
     this.isSelectMode = false,
     this.selectedMessages = const <MessageEntity>[],
     this.focusedMessageId,
+    this.foundNewest = true,
+    this.foundOldest = true,
   });
 
   @override
@@ -77,11 +82,11 @@ class _MessagesListState extends State<MessagesList> {
   @override
   void initState() {
     super.initState();
-    _reversed = widget.messages.reversed.toList(growable: false);
+    _reversed = widget.messages.reversed.toList(growable: true);
 
     _itemScrollController = ItemScrollController();
     _itemPositionsListener = ItemPositionsListener.create();
-    _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
+    // _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
     _scrollOffsetListener = ScrollOffsetListener.create();
     _scrollOffsetSubscription = _scrollOffsetListener.changes.listen(_onScrollOffsetChanged);
 
@@ -96,7 +101,7 @@ class _MessagesListState extends State<MessagesList> {
   void didUpdateWidget(covariant MessagesList oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.messages, widget.messages)) {
-      _reversed = widget.messages.reversed.toList(growable: false);
+      _reversed = widget.messages.reversed.toList(growable: true);
       // _scrollToFirstUnreadIfNeeded();
     }
   }
@@ -130,10 +135,12 @@ class _MessagesListState extends State<MessagesList> {
         _itemScrollController.jumpTo(
           index: _firstUnreadIndexInReversed!,
         );
+        return;
       }
     } else {
       if (_itemScrollController.isAttached) {
         _itemScrollController.jumpTo(index: 0);
+        return;
       }
     }
   }
@@ -214,7 +221,7 @@ class _MessagesListState extends State<MessagesList> {
     if (offsetDelta > 0 && widget.loadMorePrev != null) {
       final lastIndex = _reversed.length - 1;
       final isTopVisible = positions.any((position) => position.index == lastIndex);
-      if (isTopVisible) {
+      if (isTopVisible && !widget.foundOldest) {
         _triggerLoadMore(widget.loadMorePrev);
       }
       return;
@@ -222,19 +229,26 @@ class _MessagesListState extends State<MessagesList> {
 
     if (offsetDelta < 0 && widget.loadMoreNext != null) {
       final isBottomVisible = positions.any((position) => position.index == 0);
-      if (isBottomVisible) {
-        _triggerLoadMore(widget.loadMoreNext);
+      if (isBottomVisible && !widget.foundNewest) {
+        _triggerLoadMore(widget.loadMoreNext, isNext: true);
       }
     }
   }
 
-  Future<void> _triggerLoadMore(Future<void> Function()? loadMore) async {
+  Future<void> _triggerLoadMore(Future<void> Function()? loadMore, {bool isNext = false}) async {
     if (_isLoadMoreInFlight || loadMore == null) {
       return;
     }
     _isLoadMoreInFlight = true;
     try {
       await loadMore();
+      if (isNext) {
+        _itemScrollController.jumpTo(
+          // first loaded message index after loadMoreNext request
+          index: AppConstants.messagesLazyLoadCount - 1,
+          alignment: 0,
+        );
+      }
     } finally {
       _isLoadMoreInFlight = false;
     }

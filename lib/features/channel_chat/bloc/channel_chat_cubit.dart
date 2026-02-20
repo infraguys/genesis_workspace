@@ -354,13 +354,14 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
     emit(state.copyWith(isLoadingMore: true));
     try {
+      final numBefore = AppConstants.messagesLazyLoadCount;
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.id(anchorId),
         narrow: [
           MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
           if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
         ],
-        numBefore: 25,
+        numBefore: numBefore,
         numAfter: 0,
         includeAnchor: false,
       );
@@ -399,6 +400,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
     emit(state.copyWith(isLoadingMore: true));
     try {
+      final numAfter = AppConstants.messagesLazyLoadCount;
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.id(anchorId),
         narrow: [
@@ -406,7 +408,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
         ],
         numBefore: 0,
-        numAfter: 25,
+        numAfter: numAfter,
         includeAnchor: false,
       );
       final response = await _getMessagesUseCase.call(body);
