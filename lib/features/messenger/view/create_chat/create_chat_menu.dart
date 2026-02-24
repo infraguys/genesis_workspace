@@ -132,6 +132,7 @@ class _CreateChatItem extends StatelessWidget {
     final theme = Theme.of(context);
     return Material(
       child: InkWell(
+        mouseCursor: SystemMouseCursors.click,
         onTap: onCreate,
         child: Container(
           padding: .symmetric(vertical: 4, horizontal: 12),

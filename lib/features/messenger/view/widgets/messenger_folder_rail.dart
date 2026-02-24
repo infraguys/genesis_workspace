@@ -28,7 +28,8 @@ class MessengerFolderRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColors = Theme.of(context).extension<TextColors>()!;
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -44,7 +45,9 @@ class MessengerFolderRail extends StatelessWidget {
                 itemCount: folders.length,
                 separatorBuilder: (_, __) => SizedBox(height: 28),
                 itemBuilder: (BuildContext context, int index) {
-                  final FolderEntity folder = folders[index];
+                  final FolderEntity folder = folders[index].copyWith(
+                    backgroundColor: folders[index].systemType == .all ? theme.colorScheme.primary : null,
+                  );
                   final bool isSelected = selectedFolderIndex == index;
                   Widget icon;
                   final String title = index == 0 ? context.t.folders.all : folder.title!;

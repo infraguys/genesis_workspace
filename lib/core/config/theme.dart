@@ -109,6 +109,18 @@ ThemeData buildThemeFromPalette({
     ),
     elevatedButtonTheme: _elevatedButtonTheme(colorScheme),
     outlinedButtonTheme: _outlinedButtonTheme(colorScheme),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        enabledMouseCursor: SystemMouseCursors.click,
+        disabledMouseCursor: SystemMouseCursors.basic,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        enabledMouseCursor: SystemMouseCursors.click,
+        disabledMouseCursor: SystemMouseCursors.basic,
+      ),
+    ),
     dividerColor: colorScheme.onSurface.withValues(alpha: 0.1),
     appBarTheme: AppBarThemeData(
       surfaceTintColor: Colors.transparent,
@@ -161,6 +173,8 @@ InputDecorationTheme _inputDecorationTheme(
 ElevatedButtonThemeData _elevatedButtonTheme(ColorScheme colorScheme) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
+      enabledMouseCursor: SystemMouseCursors.click,
+      disabledMouseCursor: SystemMouseCursors.basic,
       backgroundColor: colorScheme.primary,
       foregroundColor: colorScheme.onPrimary,
       shape: RoundedRectangleBorder(
@@ -173,6 +187,8 @@ ElevatedButtonThemeData _elevatedButtonTheme(ColorScheme colorScheme) {
 OutlinedButtonThemeData _outlinedButtonTheme(ColorScheme colorScheme) {
   return OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
+      enabledMouseCursor: SystemMouseCursors.click,
+      disabledMouseCursor: SystemMouseCursors.basic,
       backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
       foregroundColor: colorScheme.primary,
       side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),

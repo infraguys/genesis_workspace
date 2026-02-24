@@ -69,6 +69,7 @@ class _FolderItemState extends State<FolderItem> {
         ),
       ),
       child: InkWell(
+        mouseCursor: SystemMouseCursors.click,
         borderRadius: BorderRadius.circular(10),
         onTap: widget.onTap,
         onSecondaryTap: () {
