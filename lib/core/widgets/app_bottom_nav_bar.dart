@@ -101,7 +101,7 @@ class _ActiveIcon extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(
         borderRadius: .circular(12.0),
-        color: theme.colorScheme.primary,
+        color: textColors.text100.withValues(alpha: 0.05),
       ),
       child: Center(
         child: SvgPicture.asset(
