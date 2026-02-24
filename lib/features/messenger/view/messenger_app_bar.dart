@@ -287,6 +287,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
+                              mouseCursor: SystemMouseCursors.click,
                               customBorder: const CircleBorder(),
                               onTapDown: (details) => onShowChats(details.globalPosition),
                               child: Padding(

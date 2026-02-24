@@ -245,6 +245,7 @@ class _ChatItemState extends State<ChatItem> {
                   }
                 },
                 child: InkWell(
+                  mouseCursor: SystemMouseCursors.click,
                   onTap: onTap,
                   borderRadius: .circular(8),
                   overlayColor: .resolveWith(
@@ -328,6 +329,7 @@ class _ChatItemState extends State<ChatItem> {
                                             (widget.chat.type == .channel && currentSize(context) > .tablet)
                                                 ? InkWell(
                                                     borderRadius: .circular(35),
+                                                    mouseCursor: SystemMouseCursors.click,
                                                     onTap: () {
                                                       setState(() => _isExpanded = !_isExpanded);
                                                       if (_isExpanded && (widget.chat.topics?.isEmpty ?? true)) {

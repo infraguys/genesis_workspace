@@ -152,6 +152,8 @@ class _TopicItemState extends State<TopicItem> {
           }
         },
         child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          mouseCursor: SystemMouseCursors.click,
           onTap: () {
             context.read<MessengerCubit>().selectChat(
               widget.chat,

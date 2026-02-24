@@ -290,6 +290,7 @@ class _ActionTile extends StatelessWidget {
         child: InkWell(
           borderRadius: .circular(8),
           onTap: onTap,
+          mouseCursor: SystemMouseCursors.click,
           child: Padding(
             padding: const .symmetric(horizontal: 12.0),
             child: Row(
@@ -338,6 +339,7 @@ class _ReactionsRow extends StatelessWidget {
             for (final emoji in AppConstants.popularEmojis)
               Material(
                 child: InkWell(
+                  mouseCursor: SystemMouseCursors.click,
                   borderRadius: .circular(20),
                   onTap: () => onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
                   child: Padding(
@@ -348,6 +350,7 @@ class _ReactionsRow extends StatelessWidget {
               ),
             Material(
               child: InkWell(
+                mouseCursor: SystemMouseCursors.click,
                 borderRadius: .circular(20.0),
                 onTap: onOpenEmojiPicker,
                 child: Padding(
