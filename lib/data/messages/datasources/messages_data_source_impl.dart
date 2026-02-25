@@ -29,7 +29,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   final Dio dio = getIt<Dio>();
 
   @override
-  Future<MessagesResponseContextDto> getMessages(MessagesRequestDto body) async {
+  Future<MessagesResponseDto> getMessages(MessagesRequestDto body) async {
     try {
       final anchor = body.anchor;
       final narrowString = jsonEncode(body.narrow?.map((e) => e.toJson()).toList());
@@ -59,10 +59,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
         throw StateError('Empty /messages response payload');
       }
 
-      return MessagesResponseContextDto(
-        data: MessagesResponseDto.fromJson(payload),
-        requestBaseUrl: response.requestOptions.baseUrl,
-      );
+      return MessagesResponseDto.fromJson(payload).withRequestBaseUrl(response.requestOptions.baseUrl);
     } catch (e) {
       rethrow;
     }

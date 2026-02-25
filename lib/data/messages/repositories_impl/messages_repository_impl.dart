@@ -27,12 +27,12 @@ class MessagesRepositoryImpl implements MessagesRepository {
   @override
   Future<MessagesResponseEntity> getMessages(MessagesRequestEntity body) async {
     try {
-      final response = await dataSource.getMessages(body.toDto());
-      final String requestOrganizationBaseUrl = _extractOrganizationBaseUrl(response.requestBaseUrl);
+      final dto = await dataSource.getMessages(body.toDto());
+      final String requestOrganizationBaseUrl = _extractOrganizationBaseUrl(dto.requestBaseUrl);
       final int? organizationId = await organizationsLocalDataSource.getOrganizationIdByBaseUrl(
         requestOrganizationBaseUrl,
       );
-      return response.data.toEntity(organizationId: organizationId);
+      return dto.toEntity(organizationId: organizationId);
     } catch (e) {
       rethrow;
     }

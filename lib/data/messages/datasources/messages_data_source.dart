@@ -11,18 +11,8 @@ import 'package:genesis_workspace/data/messages/dto/update_messages_flags_narrow
 import 'package:genesis_workspace/data/messages/dto/update_messages_flags_request_dto.dart';
 import 'package:genesis_workspace/data/messages/dto/upload_file_dto.dart';
 
-class MessagesResponseContextDto {
-  final MessagesResponseDto data;
-  final String requestBaseUrl;
-
-  const MessagesResponseContextDto({
-    required this.data,
-    required this.requestBaseUrl,
-  });
-}
-
 abstract class MessagesDataSource {
-  Future<MessagesResponseContextDto> getMessages(MessagesRequestDto body);
+  Future<MessagesResponseDto> getMessages(MessagesRequestDto body);
   Future<SingleMessageResponseDto> getMessageById(SingleMessageRequestDto body);
   Future<void> sendMessage(SendMessageRequestDto body);
   Future<void> updateMessagesFlags(UpdateMessagesFlagsRequestDto body);
