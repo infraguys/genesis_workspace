@@ -313,7 +313,10 @@ class _ChatItemState extends State<ChatItem> {
                                               color: theme.colorScheme.primary,
                                             ),
                                           ),
-                                        MessagePreview(messagePreview: widget.chat.lastMessagePreview),
+                                        MessagePreview(
+                                          messagePreview: widget.chat.lastMessagePreview,
+                                          interactive: false,
+                                        ),
                                       ],
                                     ),
                                   ),
