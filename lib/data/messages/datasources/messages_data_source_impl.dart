@@ -29,25 +29,39 @@ class MessagesDataSourceImpl implements MessagesDataSource {
   final Dio dio = getIt<Dio>();
 
   @override
-  Future<MessagesResponseDto> getMessages(MessagesRequestDto body) async {
+  Future<MessagesResponseContextDto> getMessages(MessagesRequestDto body) async {
     try {
       final anchor = body.anchor;
       final narrowString = jsonEncode(body.narrow?.map((e) => e.toJson()).toList());
       final bool applyMarkdown = body.applyMarkdown;
       final bool clientGravatar = body.clientGravatar;
       final bool includeAnchor = body.includeAnchor;
-      // final String? messageIds = "[${body.messageIds?.join(',')}]";
-      final String? messageIds = jsonEncode(body.messageIds);
+      final String messageIds = jsonEncode(body.messageIds);
 
-      return await apiClient.getMessages(
-        anchor,
-        narrowString,
-        body.numBefore,
-        body.numAfter,
-        applyMarkdown,
-        clientGravatar,
-        includeAnchor,
-        messageIds,
+      final queryParameters = <String, dynamic>{
+        'anchor': anchor,
+        'narrow': narrowString,
+        'num_before': body.numBefore,
+        'num_after': body.numAfter,
+        'apply_markdown': applyMarkdown,
+        'client_gravatar': clientGravatar,
+        'include_anchor': includeAnchor,
+        'message_ids': messageIds,
+      }..removeWhere((key, value) => value == null);
+
+      final response = await dio.get<Map<String, dynamic>>(
+        '/messages',
+        queryParameters: queryParameters,
+      );
+
+      final payload = response.data;
+      if (payload == null) {
+        throw StateError('Empty /messages response payload');
+      }
+
+      return MessagesResponseContextDto(
+        data: MessagesResponseDto.fromJson(payload),
+        requestBaseUrl: response.requestOptions.baseUrl,
       );
     } catch (e) {
       rethrow;
@@ -272,7 +286,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final String pathId = map['path_id'] as String? ?? '';
       final int ts = map['create_time'] as int? ?? 0;
       if (name == expectedName && size == expectedSize) {
-        if (best == null || ts > best!.createTime) {
+        if (best == null || ts > best.createTime) {
           best = _AttachmentMatch(filename: name, pathId: pathId, createTime: ts);
         }
       }
@@ -280,7 +294,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
     if (best == null) {
       throw StateError('TUS: uploaded file not found in attachments');
     }
-    return best!;
+    return best;
   }
 
   Future<int> _tusHead(String uploadUrl, CancelToken? cancelToken) async {

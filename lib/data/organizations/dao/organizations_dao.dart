@@ -8,7 +8,7 @@ part 'organizations_dao.g.dart';
 @injectable
 @DriftAccessor(tables: [Organizations])
 class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$OrganizationsDaoMixin {
-  OrganizationsDao(AppDatabase db) : super(db);
+  OrganizationsDao(super.db);
 
   Future<int> insertOrganization({
     required String name,
@@ -69,6 +69,12 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     return (select(organizations)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
+  Future<int?> getOrganizationIdByBaseUrl(String baseUrl) async {
+    final normalized = _normalizeBaseUrl(baseUrl);
+    final org = await (select(organizations)..where((t) => t.baseUrl.equals(normalized))).getSingleOrNull();
+    return org?.id;
+  }
+
   Future<void> updateMeetingUrl({
     required int organizationId,
     required String? meetingUrl,
@@ -91,5 +97,12 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
         maxStreamDescriptionLength: Value(streamDescriptionMaxLength),
       ),
     );
+  }
+
+  String _normalizeBaseUrl(String value) {
+    if (value.endsWith('/')) {
+      return value.substring(0, value.length - 1);
+    }
+    return value;
   }
 }

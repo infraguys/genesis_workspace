@@ -26,12 +26,13 @@ class MessagesResponseDto {
 
   factory MessagesResponseDto.fromJson(Map<String, dynamic> json) => _$MessagesResponseDtoFromJson(json);
 
-  MessagesResponseEntity toEntity() => MessagesResponseEntity(
+  MessagesResponseEntity toEntity({int? organizationId}) => MessagesResponseEntity(
     msg: msg,
     result: result,
     messages: messages.map((m) => m.toEntity()).toList(),
     anchor: anchor,
     foundOldest: foundOldest,
     foundNewest: foundNewest,
+    organizationId: organizationId,
   );
 }

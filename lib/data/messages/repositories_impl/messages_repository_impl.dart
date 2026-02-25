@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
+import 'package:genesis_workspace/data/organizations/datasources/organizations_local_data_source.dart';
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart';
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/delete_message_entity.dart';
@@ -21,12 +22,17 @@ import 'package:injectable/injectable.dart';
 class MessagesRepositoryImpl implements MessagesRepository {
   final dataSource = getIt<MessagesDataSource>();
   final usersDataSource = getIt<UsersRemoteDataSource>();
+  final organizationsLocalDataSource = getIt<OrganizationsLocalDataSource>();
 
   @override
   Future<MessagesResponseEntity> getMessages(MessagesRequestEntity body) async {
     try {
-      final dto = await dataSource.getMessages(body.toDto());
-      return dto.toEntity();
+      final response = await dataSource.getMessages(body.toDto());
+      final String requestOrganizationBaseUrl = _extractOrganizationBaseUrl(response.requestBaseUrl);
+      final int? organizationId = await organizationsLocalDataSource.getOrganizationIdByBaseUrl(
+        requestOrganizationBaseUrl,
+      );
+      return response.data.toEntity(organizationId: organizationId);
     } catch (e) {
       rethrow;
     }
@@ -139,5 +145,18 @@ class MessagesRepositoryImpl implements MessagesRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  String _extractOrganizationBaseUrl(String requestBaseUrl) {
+    String normalized = requestBaseUrl;
+    if (normalized.endsWith('/api/v1')) {
+      normalized = normalized.substring(0, normalized.length - '/api/v1'.length);
+    } else if (normalized.endsWith('/json')) {
+      normalized = normalized.substring(0, normalized.length - '/json'.length);
+    }
+    if (normalized.endsWith('/')) {
+      normalized = normalized.substring(0, normalized.length - 1);
+    }
+    return normalized;
   }
 }
