@@ -10,6 +10,8 @@ class MessagesResponseDto {
   final String result;
   final List<MessageDto> messages;
   final int? anchor;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final String requestBaseUrl;
   @JsonKey(name: 'found_oldest')
   final bool foundOldest;
   @JsonKey(name: 'found_newest')
@@ -20,11 +22,22 @@ class MessagesResponseDto {
     required this.msg,
     required this.messages,
     this.anchor,
+    this.requestBaseUrl = '',
     required this.foundOldest,
     required this.foundNewest,
   });
 
   factory MessagesResponseDto.fromJson(Map<String, dynamic> json) => _$MessagesResponseDtoFromJson(json);
+
+  MessagesResponseDto withRequestBaseUrl(String value) => MessagesResponseDto(
+    result: result,
+    msg: msg,
+    messages: messages,
+    anchor: anchor,
+    requestBaseUrl: value,
+    foundOldest: foundOldest,
+    foundNewest: foundNewest,
+  );
 
   MessagesResponseEntity toEntity({int? organizationId}) => MessagesResponseEntity(
     msg: msg,
