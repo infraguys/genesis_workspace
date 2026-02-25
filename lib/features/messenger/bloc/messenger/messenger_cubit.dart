@@ -93,7 +93,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   Timer? _loadFoldersShortPollingTimer;
   bool _isLoadFoldersInProgress = false;
   final Set<int> _topicsRefreshInProgress = <int>{};
-  int _selectedOrganizationId = -1;
+  int _selectedOrganizationId = AppConstants.selectedOrganizationId ?? -1;
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -237,7 +237,7 @@ class MessengerCubit extends Cubit<MessengerState> {
         clientGravatar: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
-      if (response.organizationId != AppConstants.selectedOrganizationId) {
+      if (response.organizationId != _selectedOrganizationId) {
         return;
       }
       final channelsResponse = await _getSubscribedChannelsUseCase.call(false);
@@ -274,7 +274,7 @@ class MessengerCubit extends Cubit<MessengerState> {
           includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
-        if (response.organizationId != AppConstants.selectedOrganizationId) {
+        if (response.organizationId != _selectedOrganizationId) {
           return;
         }
         _oldestMessageId = response.messages.first.id;
@@ -318,6 +318,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         includeAnchor: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      if (response.organizationId != _selectedOrganizationId) {
+        return;
+      }
       final updatedMessages = {...state.messages, ...response.messages}.toList();
       _lastMessageId = response.messages.last.id;
       emit(state.copyWith(messages: updatedMessages));
@@ -339,6 +342,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      if (response.organizationId != _selectedOrganizationId) {
+        return;
+      }
       if (response.messages.isEmpty) {
         List<ChatEntity> updatedChats = [...state.chats];
         for (var chat in updatedChats) {
