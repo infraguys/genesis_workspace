@@ -13,16 +13,18 @@ class UnreadBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     if (count <= 0) return const SizedBox.shrink();
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextStyle textStyle = Theme.of(
-      context,
-    ).textTheme.labelSmall!.copyWith(color: AppColors.onBadge, fontSize: 12);
+    final theme = Theme.of(context);
+    final noticeColors = theme.extension<NoticeColors>()!;
+    final TextStyle textStyle = theme.textTheme.labelSmall!.copyWith(
+      color: noticeColors.onBadge,
+      fontSize: 12,
+    );
 
     return IntrinsicWidth(
       child: Container(
         padding: EdgeInsetsGeometry.symmetric(horizontal: 6, vertical: 1),
         decoration: BoxDecoration(
-          color: isMuted ? AppColors.noticeDisabled : AppColors.counterBadge,
+          color: isMuted ? noticeColors.noticeDisable : noticeColors.counterBadge,
           borderRadius: BorderRadius.circular(999),
         ),
         alignment: Alignment.center,

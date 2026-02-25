@@ -53,7 +53,7 @@ class MessageBody extends StatelessWidget {
                       : Text(
                           message.senderFullName,
                           style: theme.textTheme.titleSmall?.copyWith(
-                            color: messageColors.senderNameColor,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                   if (showTopic && message.subject.isNotEmpty)
@@ -245,8 +245,7 @@ class _ExpandableMessageContentState extends State<_ExpandableMessageContent> {
               },
               style: FilledButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.primary,
-                backgroundColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 textStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,

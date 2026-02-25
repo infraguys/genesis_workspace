@@ -92,7 +92,7 @@ ThemeData buildThemeFromPalette({
     brightness: brightness,
     colorScheme: colorScheme,
     badgeTheme: _badgeTheme,
-    inputDecorationTheme: _inputDecorationTheme(colorScheme, isDark: isDark),
+    inputDecorationTheme: _inputDecorationTheme(colorScheme, palette: palette, isDark: isDark),
     scaffoldBackgroundColor: colorScheme.background,
     textTheme: (isDark ? ThemeData.dark() : ThemeData.light()).textTheme
         .withLetterSpacing(0)
@@ -144,11 +144,13 @@ const _badgeTheme = BadgeThemeData(
 
 InputDecorationTheme _inputDecorationTheme(
   ColorScheme colorScheme, {
+  required ThemePalette palette,
   required bool isDark,
 }) {
   return InputDecorationTheme(
     filled: true,
-    fillColor: colorScheme.onSurface.withValues(alpha: isDark ? 0.1 : 0.04),
+    //TODO replace with light lightTextFieldBackground
+    fillColor: isDark ? palette.darkTextFieldBackground : colorScheme.onSurface.withValues(alpha: isDark ? 0.1 : 0.04),
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),

@@ -16,6 +16,9 @@ abstract interface class ThemePalette {
   final CardColors darkCardColors;
   final IconColors lightIconColors;
   final IconColors darkIconColors;
+  final NoticeColors lightNoticeColors;
+  final NoticeColors darkNoticeColors;
+  final Color darkTextFieldBackground;
 
   const ThemePalette({
     required this.id,
@@ -30,6 +33,9 @@ abstract interface class ThemePalette {
     required this.darkCardColors,
     required this.lightIconColors,
     required this.darkIconColors,
+    required this.lightNoticeColors,
+    required this.darkNoticeColors,
+    required this.darkTextFieldBackground,
   });
 
   ColorScheme colorSchemeFor(Brightness brightness) {
@@ -52,12 +58,17 @@ abstract interface class ThemePalette {
     return brightness == Brightness.dark ? darkCardColors : lightCardColors;
   }
 
+  NoticeColors noticeColorsFor(Brightness brightness) {
+    return brightness == Brightness.dark ? darkNoticeColors : lightNoticeColors;
+  }
+
   List<ThemeExtension<dynamic>> extensionsFor(Brightness brightness) {
     return [
       textColorsFor(brightness),
       cardColorsFor(brightness),
       messageColorsFor(brightness),
       iconColorsFor(brightness),
+      noticeColorsFor(brightness),
     ];
   }
 }
@@ -65,17 +76,29 @@ abstract interface class ThemePalette {
 @immutable
 class IconColors extends ThemeExtension<IconColors> {
   final Color base;
+  final Color disable;
+  final Color hover;
+  final Color active;
 
   const IconColors({
     required this.base,
+    required this.disable,
+    required this.hover,
+    required this.active,
   });
 
   @override
   IconColors copyWith({
     Color? base,
+    Color? disable,
+    Color? hover,
+    Color? active,
   }) {
     return IconColors(
       base: base ?? this.base,
+      disable: disable ?? this.disable,
+      hover: hover ?? this.hover,
+      active: active ?? this.active,
     );
   }
 
@@ -84,6 +107,9 @@ class IconColors extends ThemeExtension<IconColors> {
     if (other is! IconColors) return this;
     return IconColors(
       base: Color.lerp(base, other.base, t)!,
+      disable: Color.lerp(disable, other.disable, t)!,
+      hover: Color.lerp(hover, other.hover, t)!,
+      active: Color.lerp(active, other.active, t)!,
     );
   }
 }
@@ -165,7 +191,6 @@ class MessageColors extends ThemeExtension<MessageColors> {
   final Color background;
   final Color ownBackground;
   final Color timeColor;
-  final Color senderNameColor;
   final Color activeCallBackground;
   final Color selectedMessageForeground;
 
@@ -173,7 +198,6 @@ class MessageColors extends ThemeExtension<MessageColors> {
     required this.background,
     required this.ownBackground,
     required this.timeColor,
-    required this.senderNameColor,
     required this.activeCallBackground,
     required this.selectedMessageForeground,
   });
@@ -191,7 +215,6 @@ class MessageColors extends ThemeExtension<MessageColors> {
       background: background ?? this.background,
       ownBackground: ownBackground ?? this.ownBackground,
       timeColor: timeColor ?? this.timeColor,
-      senderNameColor: senderNameColor ?? this.senderNameColor,
       activeCallBackground: activeCallBackground ?? this.activeCallBackground,
       selectedMessageForeground: selectedMessageForeground ?? this.selectedMessageForeground,
     );
@@ -204,9 +227,49 @@ class MessageColors extends ThemeExtension<MessageColors> {
       background: Color.lerp(background, other.background, t)!,
       ownBackground: Color.lerp(ownBackground, other.ownBackground, t)!,
       timeColor: Color.lerp(timeColor, other.timeColor, t)!,
-      senderNameColor: Color.lerp(senderNameColor, other.senderNameColor, t)!,
       activeCallBackground: Color.lerp(activeCallBackground, other.activeCallBackground, t)!,
       selectedMessageForeground: Color.lerp(selectedMessageForeground, other.selectedMessageForeground, t)!,
+    );
+  }
+}
+
+@immutable
+class NoticeColors extends ThemeExtension<NoticeColors> {
+  final Color noticeBase;
+  final Color noticeDisable;
+  final Color onBadge;
+  final Color counterBadge;
+
+  const NoticeColors({
+    required this.noticeBase,
+    required this.noticeDisable,
+    required this.onBadge,
+    required this.counterBadge,
+  });
+
+  @override
+  NoticeColors copyWith({
+    Color? noticeBase,
+    Color? noticeDisable,
+    Color? onBadge,
+    Color? counterBadge,
+  }) {
+    return NoticeColors(
+      noticeBase: noticeBase ?? this.noticeBase,
+      noticeDisable: noticeDisable ?? this.noticeDisable,
+      onBadge: onBadge ?? this.onBadge,
+      counterBadge: counterBadge ?? this.counterBadge,
+    );
+  }
+
+  @override
+  NoticeColors lerp(ThemeExtension<NoticeColors>? other, double t) {
+    if (other is! NoticeColors) return this;
+    return NoticeColors(
+      noticeBase: Color.lerp(noticeBase, other.noticeBase, t)!,
+      noticeDisable: Color.lerp(noticeDisable, other.noticeDisable, t)!,
+      onBadge: Color.lerp(onBadge, other.onBadge, t)!,
+      counterBadge: Color.lerp(counterBadge, other.counterBadge, t)!,
     );
   }
 }
