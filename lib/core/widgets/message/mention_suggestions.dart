@@ -184,29 +184,27 @@ class _MentionSuggestionsState extends State<MentionSuggestions> {
                             final UserEntity user = widget.filteredSuggestedMentions[index];
                             final bool isFocused = index == focusedMentionIndex;
 
-                            return MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: InkWell(
-                                onTap: () => selectMention(index),
-                                onHover: (hover) {
-                                  if (hover) setState(() => focusedMentionIndex = index);
-                                },
-                                child: Container(
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: isFocused
-                                        ? theme.colorScheme.primary.withValues(alpha: 0.10)
-                                        : Colors.transparent,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  alignment: Alignment.centerLeft,
-                                  child: ListTile(
-                                    leading: UserAvatar(avatarUrl: user.avatarUrl, size: 24),
-                                    title: Text(
-                                      user.fullName,
-                                      style: theme.textTheme.bodyMedium!.copyWith(
-                                        color: isFocused ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                                      ),
+                            return InkWell(
+                              onTap: () => selectMention(index),
+                              mouseCursor: SystemMouseCursors.click,
+                              onHover: (hover) {
+                                if (hover) setState(() => focusedMentionIndex = index);
+                              },
+                              child: Container(
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: isFocused
+                                      ? theme.colorScheme.primary.withValues(alpha: 0.10)
+                                      : Colors.transparent,
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                alignment: Alignment.centerLeft,
+                                child: ListTile(
+                                  leading: UserAvatar(avatarUrl: user.avatarUrl, size: 24),
+                                  title: Text(
+                                    user.fullName,
+                                    style: theme.textTheme.bodyMedium!.copyWith(
+                                      color: isFocused ? theme.colorScheme.primary : theme.colorScheme.onSurface,
                                     ),
                                   ),
                                 ),

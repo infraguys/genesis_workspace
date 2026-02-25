@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
+import 'package:genesis_workspace/data/organizations/datasources/organizations_local_data_source.dart';
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart';
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/delete_message_entity.dart';
@@ -21,12 +23,17 @@ import 'package:injectable/injectable.dart';
 class MessagesRepositoryImpl implements MessagesRepository {
   final dataSource = getIt<MessagesDataSource>();
   final usersDataSource = getIt<UsersRemoteDataSource>();
+  final organizationsLocalDataSource = getIt<OrganizationsLocalDataSource>();
 
   @override
   Future<MessagesResponseEntity> getMessages(MessagesRequestEntity body) async {
     try {
       final dto = await dataSource.getMessages(body.toDto());
-      return dto.toEntity();
+      final String requestOrganizationBaseUrl = extractOrganizationBaseUrl(dto.requestBaseUrl);
+      final int? organizationId = await organizationsLocalDataSource.getOrganizationIdByBaseUrl(
+        requestOrganizationBaseUrl,
+      );
+      return dto.toEntity(organizationId: organizationId);
     } catch (e) {
       rethrow;
     }

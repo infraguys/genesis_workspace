@@ -193,7 +193,7 @@ class RealTimeConnection {
       _lastEventId = registerQueueEntity.lastEventId;
       _maxStreamNameLength = registerQueueEntity.maxStreamNameLength ?? 20;
       _maxStreamDescriptionLength = registerQueueEntity.maxStreamDescriptionLength ?? 256;
-      _userTopics.addAll(registerQueueEntity.userTopics ?? []);
+      _userTopics = [...(registerQueueEntity.userTopics ?? <UserTopicEntity>[])];
       await Future.wait([
         _updateOrganizationMeetingUrlUseCase.call(
           organizationId: organizationId,
@@ -213,22 +213,37 @@ class RealTimeConnection {
   Future<void> _pollLoop() async {
     Duration retryDelay = _initialRetryDelay;
     final Random random = Random();
+    bool connectionInterrupted = false;
 
     while (_isActive) {
       try {
         await _fetchAndDispatch();
+        if (connectionInterrupted) {
+          _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .active));
+          connectionInterrupted = false;
+        }
         retryDelay = _initialRetryDelay;
       } on DioException catch (error) {
-        _isActive = false;
+        if (!connectionInterrupted) {
+          _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .inactive));
+          connectionInterrupted = true;
+        }
         final bool isBadQueueId =
             error.response?.statusCode == 400 && error.response?.data?['code'] == 'BAD_EVENT_QUEUE_ID';
         if (isBadQueueId) {
-          await start();
-          break;
+          await _registerQueue();
+          _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .active));
+          connectionInterrupted = false;
+          retryDelay = _initialRetryDelay;
+          continue;
         }
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
       } catch (e) {
+        if (!connectionInterrupted) {
+          _connectionStatusController.add(ConnectionEntity(organizationId: organizationId, status: .inactive));
+          connectionInterrupted = true;
+        }
         await _sleepWithJitter(retryDelay, random);
         retryDelay = _nextDelay(retryDelay);
       }
@@ -237,8 +252,7 @@ class RealTimeConnection {
 
   Future<void> _fetchAndDispatch() async {
     if (_queueId == null) {
-      _isActive = false;
-      await start();
+      await _registerQueue();
       return;
     }
     final String queueIdValue = _queueId!;
@@ -280,7 +294,6 @@ class RealTimeConnection {
       }
       _lastEventId = response.events.last.id;
     } catch (e) {
-      _isActive = false;
       rethrow;
     }
   }

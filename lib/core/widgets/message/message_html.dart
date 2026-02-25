@@ -319,9 +319,6 @@ class MessageHtml extends StatelessWidget {
                                       context.pushNamed(
                                         Routes.chat,
                                         pathParameters: {'userId': user.userId.toString()},
-                                        extra: {
-                                          'unreadMessagesCount': user.unreadMessages.length,
-                                        },
                                       );
                                     }
                                   },

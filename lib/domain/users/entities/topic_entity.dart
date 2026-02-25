@@ -20,6 +20,8 @@ class TopicEntity extends Equatable {
 
   bool get isMuted => visibilityPolicy == .muted;
 
+  int? get firstUnreadMessageId => unreadMessages.firstOrNull;
+
   TopicEntity copyWith({
     int? maxId,
     String? name,

@@ -10,13 +10,14 @@ mixin OpenChatMixin {
     BuildContext context, {
     required Set<int> membersIds,
     required int chatId,
-    int? unreadMessagesCount,
+    int? messageId,
+    int? focusedMessageId,
     bool replace = false,
   }) {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
 
     if (isDesktop) {
-      context.read<MessengerCubit>().createEmptyChat(membersIds);
+      context.read<MessengerCubit>().createEmptyChat(membersIds, focusedMessageId: focusedMessageId);
     } else {
       final userIds = membersIds.toList();
       final userIdsString = userIds.join(',');
@@ -24,13 +25,19 @@ mixin OpenChatMixin {
         context.pushReplacementNamed(
           Routes.groupChat,
           pathParameters: {'userIds': userIdsString, 'chatId': chatId.toString()},
-          extra: {'unreadMessagesCount': unreadMessagesCount},
+          extra: {
+            'messageId': messageId,
+            'focusedMessageId': focusedMessageId,
+          },
         );
       } else {
         context.pushNamed(
           Routes.groupChat,
           pathParameters: {'userIds': userIdsString, 'chatId': chatId.toString()},
-          extra: {'unreadMessagesCount': unreadMessagesCount},
+          extra: {
+            'messageId': messageId,
+            'focusedMessageId': focusedMessageId,
+          },
         );
       }
     }
@@ -40,13 +47,14 @@ mixin OpenChatMixin {
     BuildContext context, {
     required int channelId,
     String? topicName,
-    int? unreadMessagesCount,
+    int? messageId,
+    int? focusedMessageId,
     bool replace = false,
   }) {
     final isDesktop = currentSize(context) > ScreenSize.tablet;
     final chat = context.read<MessengerCubit>().state.chats.firstWhere((chat) => chat.streamId == channelId);
     if (isDesktop) {
-      context.read<MessengerCubit>().selectChat(chat, selectedTopic: topicName);
+      context.read<MessengerCubit>().selectChat(chat, selectedTopic: topicName, focusedMessageId: focusedMessageId);
     } else {
       if (topicName != null && topicName.isNotEmpty) {
         if (replace) {
@@ -57,7 +65,10 @@ mixin OpenChatMixin {
               'channelId': channelId.toString(),
               'topicName': topicName,
             },
-            extra: {'unreadMessagesCount': unreadMessagesCount},
+            extra: {
+              'messageId': messageId,
+              'focusedMessageId': focusedMessageId,
+            },
           );
         } else {
           context.pushNamed(
@@ -67,7 +78,10 @@ mixin OpenChatMixin {
               'channelId': channelId.toString(),
               'topicName': topicName,
             },
-            extra: {'unreadMessagesCount': unreadMessagesCount},
+            extra: {
+              'messageId': messageId,
+              'focusedMessageId': focusedMessageId,
+            },
           );
         }
       } else {
@@ -77,7 +91,10 @@ mixin OpenChatMixin {
             'chatId': chat.id.toString(),
             'channelId': channelId.toString(),
           },
-          extra: {'unreadMessagesCount': unreadMessagesCount},
+          extra: {
+            'messageId': messageId,
+            'focusedMessageId': focusedMessageId,
+          },
         );
       }
     }

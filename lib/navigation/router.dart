@@ -26,6 +26,7 @@ import 'package:genesis_workspace/features/profile/view/profile_personal_info_pa
 import 'package:genesis_workspace/features/reactions/reactions.dart';
 import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
+import 'package:genesis_workspace/features/theme/theme_settings.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
@@ -84,6 +85,7 @@ class Routes {
   static const String imageFullScreen = '/image-full-screen';
   static const String pasteBaseUrl = '/paste-base-url';
   static const String forceUpdate = '/force-update';
+  static const String themeSettings = '/theme-settings';
   static const String notifications = '/notifications';
   static const String call = '/call';
   static const String chatInfo = 'chat-info';
@@ -102,6 +104,18 @@ final router = GoRouter(
         return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
       },
       branches: [
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorMyActivityKey,
+          routes: [
+            GoRoute(
+              path: Routes.myActivity,
+              name: Routes.myActivity,
+              builder: (context, state) {
+                return const MyActivity();
+              },
+            ),
+          ],
+        ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorMessengerKey,
           routes: [
@@ -138,18 +152,18 @@ final router = GoRouter(
             ),
           ],
         ),
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorServicesKey,
-          routes: [
-            GoRoute(
-              path: Routes.services,
-              name: Routes.services,
-              builder: (context, state) {
-                return GenesisServices();
-              },
-            ),
-          ],
-        ),
+        // StatefulShellBranch(
+        //   navigatorKey: _shellNavigatorServicesKey,
+        //   routes: [
+        //     GoRoute(
+        //       path: Routes.services,
+        //       name: Routes.services,
+        //       builder: (context, state) {
+        //         return GenesisServices();
+        //       },
+        //     ),
+        //   ],
+        // ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorCallsKey,
           routes: [
@@ -206,7 +220,8 @@ final router = GoRouter(
           final chatIdString = state.pathParameters['chatId'];
           final userId = int.parse(state.pathParameters['userId']!);
           final extra = state.extra as Map<String, dynamic>?;
-          final unread = extra?['unreadMessagesCount'] ?? 0;
+          final int? messageId = extra?['messageId'];
+          final int? focusedMessageId = extra?['focusedMessageId'];
           final chatId = int.tryParse(chatIdString ?? '');
           assert(chatId != null, 'chatId must be int');
 
@@ -214,7 +229,12 @@ final router = GoRouter(
             // На десктопе в идеале сюда не приходим, но на всякий случай
             return SizedBox.shrink();
           } else {
-            return Chat(chatId: chatId!, userIds: [userId], unreadMessagesCount: unread);
+            return Chat(
+              chatId: chatId!,
+              userIds: [userId],
+              firstMessageId: messageId,
+              focusedMessageId: focusedMessageId,
+            );
           }
         },
       ),
@@ -226,11 +246,17 @@ final router = GoRouter(
           final chatIdString = state.pathParameters['chatId'];
           final List<int> userIds = state.pathParameters['userIds']?.split(',').map(int.parse).toList() ?? [];
           final extra = state.extra as Map<String, dynamic>?;
-          final unread = extra?['unreadMessagesCount'] ?? 0;
+          final int? messageId = extra?['messageId'];
+          final int? focusedMessageId = extra?['focusedMessageId'];
           final chatId = int.tryParse(chatIdString ?? '');
           assert(chatId != null, 'chatId must be int');
 
-          return Chat(chatId: chatId!, userIds: userIds, unreadMessagesCount: unread);
+          return Chat(
+            chatId: chatId!,
+            userIds: userIds,
+            firstMessageId: messageId,
+            focusedMessageId: focusedMessageId,
+          );
         },
         routes: [
           GoRoute(
@@ -254,13 +280,15 @@ final router = GoRouter(
           assert(chatId != null, 'chatId must be int');
 
           final extra = state.extra as Map<String, dynamic>?;
-          final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+          final messageId = extra?['messageId'];
+          final focusedMessageId = extra?['focusedMessageId'];
 
           return NoTransitionPage(
             child: ChannelChat(
               chatId: chatId!,
               channelId: channelId!,
-              unreadMessagesCount: unreadMessagesCount,
+              firstMessageId: messageId,
+              focusedMessageId: focusedMessageId,
             ),
           );
 
@@ -288,13 +316,15 @@ final router = GoRouter(
           assert(chatId != null, 'chatId must be int');
 
           final extra = state.extra as Map<String, dynamic>?;
-          final unreadMessagesCount = extra?['unreadMessagesCount'] ?? 0;
+          final messageId = extra?['messageId'];
+          final focusedMessageId = extra?['focusedMessageId'];
 
           return ChannelChat(
             chatId: chatId!,
             channelId: channelId!,
             topicName: topicName,
-            unreadMessagesCount: unreadMessagesCount,
+            firstMessageId: messageId,
+            focusedMessageId: focusedMessageId,
           );
 
           // if (currentSize(context) > ScreenSize.lTablet) {
@@ -439,6 +469,11 @@ final router = GoRouter(
       path: Routes.forceUpdate,
       name: Routes.forceUpdate,
       builder: (context, state) => const UpdateForce(),
+    ),
+    GoRoute(
+      path: Routes.themeSettings,
+      name: Routes.themeSettings,
+      builder: (context, state) => const ThemeSettings(),
     ),
     GoRoute(
       path: Routes.talkerScreen,

@@ -36,10 +36,9 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final bool applyMarkdown = body.applyMarkdown;
       final bool clientGravatar = body.clientGravatar;
       final bool includeAnchor = body.includeAnchor;
-      // final String? messageIds = "[${body.messageIds?.join(',')}]";
-      final String? messageIds = jsonEncode(body.messageIds);
+      final String? messageIds = body.messageIds == null ? null : jsonEncode(body.messageIds);
 
-      return await apiClient.getMessages(
+      final response = await apiClient.getMessages(
         anchor,
         narrowString,
         body.numBefore,
@@ -49,6 +48,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
         includeAnchor,
         messageIds,
       );
+      return response.data.withRequestBaseUrl(response.response.requestOptions.baseUrl);
     } catch (e) {
       rethrow;
     }
@@ -272,7 +272,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final String pathId = map['path_id'] as String? ?? '';
       final int ts = map['create_time'] as int? ?? 0;
       if (name == expectedName && size == expectedSize) {
-        if (best == null || ts > best!.createTime) {
+        if (best == null || ts > best.createTime) {
           best = _AttachmentMatch(filename: name, pathId: pathId, createTime: ts);
         }
       }
@@ -280,7 +280,7 @@ class MessagesDataSourceImpl implements MessagesDataSource {
     if (best == null) {
       throw StateError('TUS: uploaded file not found in attachments');
     }
-    return best!;
+    return best;
   }
 
   Future<int> _tusHead(String uploadUrl, CancelToken? cancelToken) async {

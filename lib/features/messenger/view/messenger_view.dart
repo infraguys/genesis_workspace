@@ -364,7 +364,7 @@ class _MessengerViewState extends State<MessengerView>
     final isTabletOrSmaller = !isLargeScreen;
     final searchVisibility = _searchBarAnimation.value;
 
-    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: isTabletOrSmaller ? 20 : 8).copyWith(
+    final EdgeInsets listPadding = EdgeInsets.symmetric(horizontal: isTabletOrSmaller ? 12 : 8).copyWith(
       top: isTabletOrSmaller ? 20 : 0,
       bottom: 20,
     );
@@ -382,7 +382,7 @@ class _MessengerViewState extends State<MessengerView>
       child: BlocListener<OrganizationsCubit, OrganizationsState>(
         listenWhen: (previous, current) => previous.selectedOrganizationId != current.selectedOrganizationId,
         listener: (context, state) {
-          context.read<MessengerCubit>().resetState();
+          context.read<MessengerCubit>().resetState(state.selectedOrganizationId ?? -1);
           context.read<MessengerCubit>().searchChats('');
           setState(() {
             _searchQuery = '';
@@ -504,13 +504,14 @@ class _MessengerViewState extends State<MessengerView>
                                           if (isTabletOrSmaller) {
                                             if (chat.type == ChatType.channel) {
                                               setState(() {
-                                                _showTopics = !_showTopics;
+                                                _showTopics = true;
                                               });
                                             } else {
                                               openChat(
                                                 context,
                                                 chatId: chat.id,
                                                 membersIds: chat.dmIds?.toSet() ?? {},
+                                                messageId: chat.firstUnreadMessageId,
                                               );
                                             }
                                           } else {
@@ -543,7 +544,7 @@ class _MessengerViewState extends State<MessengerView>
                                                 key: const ValueKey('topics_list'),
                                                 isPending: state.selectedChat?.topics == null,
                                                 selectedChat: state.selectedChat,
-                                                listPadding: _isSearchVisible ? 430 : 300,
+                                                listPadding: _isSearchVisible ? 350 : 300,
                                                 onDismissed: () {
                                                   setState(() => _showTopics = false);
                                                 },
@@ -609,6 +610,8 @@ class _MessengerViewState extends State<MessengerView>
                                     key: ObjectKey(state.usersIds),
                                     chatId: state.selectedChat?.id,
                                     userIds: state.usersIds.toList(),
+                                    firstMessageId: state.selectedChat?.firstUnreadMessageId,
+                                    focusedMessageId: state.focusedMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);
@@ -625,7 +628,8 @@ class _MessengerViewState extends State<MessengerView>
                                     ),
                                     chatId: state.selectedChat?.id,
                                     userIds: state.selectedChat!.dmIds!,
-                                    unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                    firstMessageId: state.selectedChat?.firstUnreadMessageId,
+                                    focusedMessageId: state.focusedMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);
@@ -643,7 +647,10 @@ class _MessengerViewState extends State<MessengerView>
                                     chatId: state.selectedChat!.id,
                                     channelId: state.selectedChat!.streamId!,
                                     topicName: state.selectedTopic,
-                                    unreadMessagesCount: state.selectedChat?.unreadMessages.length,
+                                    firstMessageId: state.selectedTopic != null
+                                        ? state.selectedChat?.topicFirstUnreadMessageId(state.selectedTopic!)
+                                        : state.selectedChat?.firstUnreadMessageId,
+                                    focusedMessageId: state.focusedMessageId,
                                     leadingOnPressed: () {
                                       if (panelState.status != .closed) {
                                         context.read<InfoPanelCubit>().setInfoPanelState(.closed);

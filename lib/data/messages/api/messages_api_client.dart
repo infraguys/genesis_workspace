@@ -19,7 +19,7 @@ abstract class MessagesApiClient {
   factory MessagesApiClient(Dio dio, {String? baseUrl}) = _MessagesApiClient;
 
   @GET('/messages')
-  Future<MessagesResponseDto> getMessages(
+  Future<HttpResponse<MessagesResponseDto>> getMessages(
     @Query("anchor") String? anchor,
     @Query("narrow") String? narrow,
     @Query("num_before") int? numBefore,

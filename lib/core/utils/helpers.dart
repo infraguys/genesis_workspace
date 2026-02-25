@@ -380,6 +380,19 @@ Uri? parseUrlWithBase(String? raw) {
   return baseUri.resolveUri(parsed);
 }
 
+String extractOrganizationBaseUrl(String requestBaseUrl) {
+  String normalized = requestBaseUrl.trim();
+  if (normalized.endsWith('/api/v1')) {
+    normalized = normalized.substring(0, normalized.length - '/api/v1'.length);
+  } else if (normalized.endsWith('/json')) {
+    normalized = normalized.substring(0, normalized.length - '/json'.length);
+  }
+  if (normalized.endsWith('/')) {
+    normalized = normalized.substring(0, normalized.length - 1);
+  }
+  return normalized;
+}
+
 bool isAllowedUrlScheme(Uri uri, {bool allowContactSchemes = true}) {
   const baseSchemes = {'http', 'https'};
   const contactSchemes = {'mailto', 'tel'};

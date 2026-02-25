@@ -8,9 +8,11 @@ class ChatState {
   int? typingId;
   int? myUserId;
   int? lastMessageId;
+  int? firstMessageId;
   bool isMessagePending;
   bool isLoadingMore;
-  bool isAllMessagesLoaded;
+  bool isFoundNewestMessage;
+  bool isFoundOldestMessage;
   TypingEventOp selfTypingOp;
   Set<int> pendingToMarkAsRead;
   DmUserEntity? userEntity;
@@ -34,9 +36,11 @@ class ChatState {
     this.typingId,
     this.myUserId,
     this.lastMessageId,
+    this.firstMessageId,
     required this.isMessagePending,
     required this.isLoadingMore,
-    required this.isAllMessagesLoaded,
+    required this.isFoundNewestMessage,
+    required this.isFoundOldestMessage,
     required this.selfTypingOp,
     required this.pendingToMarkAsRead,
     this.userEntity,
@@ -60,10 +64,12 @@ class ChatState {
     Set<int>? chatIds,
     int? typingId,
     int? myUserId,
-    int? lastMessageId,
+    Object? lastMessageId,
+    Object? firstMessageId,
     bool? isMessagePending,
     bool? isLoadingMore,
-    bool? isAllMessagesLoaded,
+    bool? isFoundNewestMessage,
+    bool? isFoundOldestMessage,
     TypingEventOp? selfTypingOp,
     Set<int>? pendingToMarkAsRead,
     DmUserEntity? userEntity,
@@ -86,10 +92,12 @@ class ChatState {
       chatIds: chatIds ?? this.chatIds,
       typingId: typingId ?? this.typingId,
       myUserId: myUserId ?? this.myUserId,
-      lastMessageId: lastMessageId ?? this.lastMessageId,
+      lastMessageId: identical(lastMessageId, _notSpecified) ? this.lastMessageId : lastMessageId as int?,
+      firstMessageId: identical(firstMessageId, _notSpecified) ? this.firstMessageId : firstMessageId as int?,
       isMessagePending: isMessagePending ?? this.isMessagePending,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      isAllMessagesLoaded: isAllMessagesLoaded ?? this.isAllMessagesLoaded,
+      isFoundNewestMessage: isFoundNewestMessage ?? this.isFoundNewestMessage,
+      isFoundOldestMessage: isFoundOldestMessage ?? this.isFoundOldestMessage,
       selfTypingOp: selfTypingOp ?? this.selfTypingOp,
       pendingToMarkAsRead: pendingToMarkAsRead ?? this.pendingToMarkAsRead,
       userEntity: userEntity ?? this.userEntity,

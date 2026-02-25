@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
 import 'package:genesis_workspace/core/mixins/message/forward_message_mixin.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
@@ -47,6 +48,7 @@ class MessageItem extends StatefulWidget {
     required this.onTapEditMessage,
     this.isSelectMode = false,
     this.isSelected = false,
+    this.isFocused = false,
   });
 
   final bool isMyMessage;
@@ -60,12 +62,13 @@ class MessageItem extends StatefulWidget {
   final bool isSelected;
   final void Function(int messageId, {String? quote}) onTapQuote;
   final Function(UpdateMessageRequestEntity body) onTapEditMessage;
+  final bool isFocused;
 
   @override
   State<MessageItem> createState() => _MessageItemState();
 }
 
-class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
+class _MessageItemState extends State<MessageItem> with ForwardMessageMixin, OpenChatMixin {
   late final GlobalObjectKey messageKey;
   late final MenuController _menuController;
 
@@ -187,6 +190,27 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
     _menuController.close();
   }
 
+  void onGoToMessage() {
+    if (widget.message.displayRecipient is DirectMessageRecipients) {
+      final memberIds = widget.message.displayRecipient.recipients.map((e) => e.userId).toSet();
+      openChat(
+        context,
+        membersIds: memberIds,
+        chatId: widget.message.recipientId,
+        focusedMessageId: widget.message.id,
+      );
+    } else {
+      final channelId = widget.message.streamId!;
+      openChannel(
+        context,
+        channelId: channelId,
+        topicName: widget.message.subject,
+        focusedMessageId: widget.message.id,
+      );
+    }
+    _menuController.close();
+  }
+
   void onCopy() async {
     final message = await messagesCubit.getMessageById(messageId: widget.message.id, applyMarkdown: false);
     await Clipboard.setData(ClipboardData(text: message.content));
@@ -234,6 +258,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
             );
           },
           onSelect: onSelect,
+          onGoToMessage: onGoToMessage,
         );
       },
     );
@@ -293,6 +318,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
     };
 
     Color messageBgColor = switch (widget.isMyMessage) {
+      _ when widget.isFocused => theme.colorScheme.primary,
       _ when widget.message.isCall => messageColors.activeCallBackground,
       true => messageColors.ownBackground,
       _ => messageColors.background,
@@ -359,15 +385,14 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                 _touchMoved = false;
               },
               child: GestureDetector(
-                onTap: () {
-                  inspect(widget.message);
-                  print(widget.message.content);
-                },
                 onLongPressStart: (details) {
                   if (widget.isSelectMode) return;
                   if (platformInfo.isMobile) {
                     _animateMessageContainer();
-                    Focus.of(context).unfocus();
+                    final FocusNode? currentFocus = FocusManager.instance.primaryFocus;
+                    if (currentFocus != null && currentFocus.hasFocus) {
+                      currentFocus.unfocus();
+                    }
                     HapticFeedback.mediumImpact();
                     _openContextMenu(context, details.globalPosition);
                   }
@@ -386,7 +411,9 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                         scale: _messageScale,
                         duration: _contextMenuScaleDuration,
                         curve: Curves.easeOut,
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeInOut,
                           padding: const EdgeInsets.all(12),
                           constraints: (showAvatar)
                               ? BoxConstraints(
@@ -429,6 +456,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin {
                                           showTopic: widget.showTopic,
                                           isStarred: isStarred,
                                           maxMessageWidth: maxWidthMessage,
+                                          messageBackgroundColor: messageBgColor,
                                           onSelectedTextChanged: onSelectedTextChanged,
                                         ),
                                   if (widget.message.aggregatedReactions.isEmpty)

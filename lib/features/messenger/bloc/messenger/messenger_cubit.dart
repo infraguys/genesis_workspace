@@ -93,6 +93,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   Timer? _loadFoldersShortPollingTimer;
   bool _isLoadFoldersInProgress = false;
   final Set<int> _topicsRefreshInProgress = <int>{};
+  int _selectedOrganizationId = AppConstants.selectedOrganizationId ?? -1;
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -236,6 +237,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         clientGravatar: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      if (response.organizationId != _selectedOrganizationId) {
+        return;
+      }
       final channelsResponse = await _getSubscribedChannelsUseCase.call(false);
       if (response.messages.isNotEmpty) {
         _oldestMessageId = response.messages.first.id;
@@ -270,6 +274,9 @@ class MessengerCubit extends Cubit<MessengerState> {
           includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
+        if (response.organizationId != _selectedOrganizationId) {
+          return;
+        }
         _oldestMessageId = response.messages.first.id;
         final foundOldest = response.foundOldest;
         final messages = [...state.messages];
@@ -311,6 +318,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         includeAnchor: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      if (response.organizationId != _selectedOrganizationId) {
+        return;
+      }
       final updatedMessages = {...state.messages, ...response.messages}.toList();
       _lastMessageId = response.messages.last.id;
       emit(state.copyWith(messages: updatedMessages));
@@ -332,6 +342,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         numAfter: 0,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      if (response.organizationId != _selectedOrganizationId) {
+        return;
+      }
       if (response.messages.isEmpty) {
         List<ChatEntity> updatedChats = [...state.chats];
         for (var chat in updatedChats) {
@@ -458,11 +471,25 @@ class MessengerCubit extends Cubit<MessengerState> {
     );
   }
 
-  void selectChat(ChatEntity chat, {String? selectedTopic}) {
+  void selectChat(ChatEntity chat, {String? selectedTopic, int? focusedMessageId}) {
     if (selectedTopic == null) {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: null, openedSection: .chat));
+      emit(
+        state.copyWith(
+          selectedChat: chat,
+          selectedTopic: null,
+          openedSection: .chat,
+          focusedMessageId: focusedMessageId,
+        ),
+      );
     } else {
-      emit(state.copyWith(selectedChat: chat, selectedTopic: selectedTopic, openedSection: .chat));
+      emit(
+        state.copyWith(
+          selectedChat: chat,
+          selectedTopic: selectedTopic,
+          openedSection: .chat,
+          focusedMessageId: focusedMessageId,
+        ),
+      );
     }
   }
 
@@ -485,7 +512,6 @@ class MessengerCubit extends Cubit<MessengerState> {
       if (organizationId == null) {
         return;
       }
-
       final List<FolderEntity> folders = await _getFoldersUseCase.call(organizationId);
       List<FolderEntity> initialFolders = [...folders];
       final bool hasAllFolder = folders.any((folder) => folder.systemType == FolderSystemType.all);
@@ -503,9 +529,17 @@ class MessengerCubit extends Cubit<MessengerState> {
         initialFolders.remove(allFolder);
         initialFolders = [allFolder, ...initialFolders];
       }
-      emit(state.copyWith(folders: initialFolders, selectedFolderIndex: 0));
-      await _loadFoldersMembers();
-      await getPinnedChats();
+      final existingFolderUuids = state.folders.map((folder) => folder.uuid).toSet();
+      final fetchedFolderUuids = initialFolders.map((folder) => folder.uuid).toSet();
+      final hasNewFolders = initialFolders.any((folder) => !existingFolderUuids.contains(folder.uuid));
+      final hasDeletedFolders = existingFolderUuids.any((uuid) => !fetchedFolderUuids.contains(uuid));
+
+      if (hasNewFolders || hasDeletedFolders) {
+        emit(state.copyWith(folders: initialFolders));
+        await _loadFoldersMembers();
+        await getPinnedChats();
+        _loadUnreadMessagesForFolders();
+      }
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -820,8 +854,9 @@ class MessengerCubit extends Cubit<MessengerState> {
     );
   }
 
-  void resetState() {
+  void resetState(int organizationId) {
     _searchQuery = '';
+    _selectedOrganizationId = organizationId;
     emit(MessengerState.initial);
     _onProfileStateChanged(_profileCubit.state);
   }
@@ -871,7 +906,6 @@ class MessengerCubit extends Cubit<MessengerState> {
           copiedTopicList[targetIndexInTopics] = updatedTopic;
         }
       }
-
 
       updatedChat = updatedChat.copyWith(
         lastMessageId: message.id,
@@ -1322,8 +1356,15 @@ class MessengerCubit extends Cubit<MessengerState> {
     }
   }
 
-  void createEmptyChat(Set<int> membersIds) async {
-    emit(state.copyWith(usersIds: membersIds, openedSection: .chat, selectedChat: null));
+  void createEmptyChat(Set<int> membersIds, {int? focusedMessageId}) async {
+    emit(
+      state.copyWith(
+        usersIds: membersIds,
+        openedSection: .chat,
+        selectedChat: null,
+        focusedMessageId: focusedMessageId,
+      ),
+    );
   }
 
   void unselectChat() {

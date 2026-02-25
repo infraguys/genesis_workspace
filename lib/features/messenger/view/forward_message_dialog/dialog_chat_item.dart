@@ -79,6 +79,7 @@ class _DialogChatItemState extends State<_DialogChatItem> with OpenChatMixin {
                       chatId: chatId,
                       membersIds: userIds,
                       replace: true,
+                      messageId: widget.chat.firstUnreadMessageId,
                     );
                   }
                 } on DioException catch (e) {

@@ -69,6 +69,7 @@ class _FolderItemState extends State<FolderItem> {
         ),
       ),
       child: InkWell(
+        mouseCursor: SystemMouseCursors.click,
         borderRadius: BorderRadius.circular(10),
         onTap: widget.onTap,
         onSecondaryTap: () {
@@ -105,7 +106,9 @@ class _FolderItemState extends State<FolderItem> {
                       border: widget.isSelected
                           ? Border(
                               bottom: BorderSide(
-                                color: Colors.white,
+                                color: widget.folder.systemType == .all
+                                    ? theme.colorScheme.primary
+                                    : widget.folder.backgroundColor,
                                 width: 1,
                               ),
                             )

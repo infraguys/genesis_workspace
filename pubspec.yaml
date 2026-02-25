@@ -2,7 +2,7 @@ name: genesis_workspace
 description: "Genesis Workspace application."
 publish_to: 'none'
 
-version: 1.8.4+10
+version: 1.9.1+13
 
 environment:
   sdk: ^3.10.0

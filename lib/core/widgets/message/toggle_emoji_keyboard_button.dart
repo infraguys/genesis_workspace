@@ -14,7 +14,7 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     return TapEffectIcon(
       onTapDown: (_) {
         if (currentSize(context) >= ScreenSize.lTablet) {
@@ -36,9 +36,12 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
           } else {
             FocusScope.of(context).unfocus();
             if (emojiState.keyboardHeight == 0) {
+              // context.read<EmojiKeyboardCubit>().setHeight(335);
               context.read<EmojiKeyboardCubit>().setHeight(300);
             }
-            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(true);
+            context.read<EmojiKeyboardCubit>().setShowEmojiKeyboard(
+              true,
+            );
           }
         }
       },
@@ -53,10 +56,15 @@ class ToggleEmojiKeyboardButton extends StatelessWidget {
         child: emojiState.showEmojiKeyboard
             ? Icon(
                 Icons.keyboard,
-                color: textColors.text30,
+                color: iconColors.base,
                 key: ValueKey('keyboard'),
               )
-            : Assets.icons.smile.svg(),
+            : Assets.icons.smile.svg(
+                colorFilter: ColorFilter.mode(
+                  iconColors.base,
+                  .srcIn,
+                ),
+              ),
       ),
     );
   }

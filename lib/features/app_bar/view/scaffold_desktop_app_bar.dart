@@ -40,7 +40,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final iconColors = theme.extension<IconColors>()!;
     final textColors = Theme.of(context).extension<TextColors>()!;
     return Column(
       children: [
@@ -144,7 +144,14 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                 }),
                                 child: Padding(
                                   padding: const EdgeInsets.all(10),
-                                  child: Center(child: Assets.icons.add.svg()),
+                                  child: Center(
+                                    child: Assets.icons.add.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        textColors.text100,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -159,10 +166,19 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                       shrinkWrap: true,
                       separatorBuilder: (_, _) => SizedBox(width: 2),
                       itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return const SizedBox.shrink();
+                        }
                         final model = branchModels[index];
+                        final isSelected = index == widget.selectedIndex;
                         return BranchItem(
-                          icon: model.icon.svg(),
-                          isSelected: index == widget.selectedIndex,
+                          icon: model.icon.svg(
+                            colorFilter: ColorFilter.mode(
+                              isSelected ? iconColors.active : iconColors.base,
+                              .srcIn,
+                            ),
+                          ),
+                          isSelected: isSelected,
                           onPressed: () {
                             mainTitleNotifier.value = model.title(context);
                             widget.onSelectBranch(index);
@@ -243,6 +259,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
 }
 
 final List<({SvgGenImage icon, String Function(BuildContext) title})> branchModels = [
+  (icon: Assets.icons.home, title: (BuildContext context) => context.t.myActivity),
   (icon: Assets.icons.chatBubble, title: (BuildContext context) => context.t.chats),
   (icon: Assets.icons.calendarMonth, title: (BuildContext context) => context.t.calendar),
   (icon: Assets.icons.mail, title: (BuildContext context) => context.t.email),

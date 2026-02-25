@@ -11,15 +11,15 @@ class EmojiKeyboardCubit extends Cubit<EmojiKeyboardState> {
     emit(state.copyWith(keyboardHeight: height));
   }
 
-  setShowEmojiKeyboard(bool show, {bool? closeKeyboard}) {
-    state.showEmojiKeyboard = show;
+  setShowEmojiKeyboard(bool show, {bool? closeKeyboard = false}) {
+    double updatedHeight = state.keyboardHeight;
     if (closeKeyboard == true) {
-      state.keyboardHeight = 0;
+      updatedHeight = 0;
     }
     emit(
       state.copyWith(
-        showEmojiKeyboard: state.showEmojiKeyboard,
-        keyboardHeight: state.keyboardHeight,
+        showEmojiKeyboard: show,
+        keyboardHeight: updatedHeight,
       ),
     );
   }

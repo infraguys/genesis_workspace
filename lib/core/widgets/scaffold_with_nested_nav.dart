@@ -8,8 +8,9 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/core/widgets/app_bottom_nav_bar.dart';
 import 'package:genesis_workspace/core/widgets/app_mobile_drawer.dart';
-import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
@@ -20,8 +21,6 @@ import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
-import 'package:genesis_workspace/gen/assets.gen.dart';
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -70,6 +69,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
         await setIdleStatus();
       },
       onActive: () async {
+        await context.read<RealTimeCubit>().ensureConnection();
         await setActiveStatus();
       },
     );
@@ -132,166 +132,86 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     final Color selectedIconColor = textColors.text100;
     final Color unselectedIconColor = textColors.text30;
     final Color selectedBackgroundColor = theme.colorScheme.onSurface.withOpacity(0.05);
-    final mobileNavigationBranchIndices = <int>[
-      AppShellBranchIndex.myActivity,
-      AppShellBranchIndex.messenger,
-      AppShellBranchIndex.calendar,
-      AppShellBranchIndex.mail,
-      AppShellBranchIndex.calls,
-      AppShellBranchIndex.profile,
-    ];
-    final mobileNavigationModels = <({SvgGenImage icon, String Function(BuildContext) title})>[
-      (icon: Assets.icons.homeOutline, title: (BuildContext context) => context.t.myActivity),
-      (icon: Assets.icons.chatBubble, title: (BuildContext context) => context.t.chats),
-      (icon: Assets.icons.calendarMonth, title: (BuildContext context) => context.t.calendar),
-      (icon: Assets.icons.mail, title: (BuildContext context) => context.t.email),
-      (icon: Assets.icons.call, title: (BuildContext context) => context.t.calls),
-    ];
-    final int selectedMobileNavigationIndex = mobileNavigationBranchIndices.indexOf(
-      widget.navigationShell.currentIndex,
-    );
+
     final screenSize = currentSize(context);
     final bool isTabletOrSmaller = screenSize <= ScreenSize.tablet;
-    return BlocListener<AuthCubit, AuthState>(
-      listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-      listener: (context, state) {
-        setState(() {
-          _future = getInitialData();
-        });
-      },
-      child: BlocListener<UpdateCubit, UpdateState>(
-        listener: (context, updateState) {
-          if (updateState.isUpdateRequired) {
-            context.goNamed(Routes.forceUpdate);
-          }
+    return Scaffold(
+      backgroundColor: theme.colorScheme.background,
+      drawer: AppMobileDrawer(),
+      bottomNavigationBar: isTabletOrSmaller
+          ? MediaQuery.removeViewPadding(
+              context: context,
+              removeBottom: true,
+              removeTop: true,
+              child: AppBottomNavBar(
+                shellIndex: widget.navigationShell.currentIndex,
+                goBranch: _goBranch,
+              ),
+            )
+          : null,
+      body: BlocListener<AuthCubit, AuthState>(
+        listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+        listener: (context, state) {
+          setState(() {
+            _future = getInitialData();
+          });
         },
-        child: FutureBuilder(
-          future: _future,
-          builder: (context, snapshot) {
-            return BlocBuilder<CallCubit, CallState>(
-              builder: (context, callState) {
-                return Stack(
-                  children: [
-                    Scaffold(
-                      drawer: AppMobileDrawer(),
-                      bottomNavigationBar: isTabletOrSmaller
-                          ? ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                topRight: Radius.circular(12),
-                              ),
-                              child: BottomNavigationBar(
-                                type: BottomNavigationBarType.fixed,
-                                backgroundColor: theme.colorScheme.surface,
-                                currentIndex: selectedMobileNavigationIndex == -1 ? 1 : selectedMobileNavigationIndex,
-                                onTap: (index) => _goBranch(mobileNavigationBranchIndices[index]),
-                                selectedItemColor: selectedIconColor,
-                                unselectedItemColor: unselectedIconColor,
-                                showSelectedLabels: false,
-                                showUnselectedLabels: false,
-                                items: [
-                                  for (final model in mobileNavigationModels)
-                                    BottomNavigationBarItem(
-                                      label: model.title(context),
-                                      icon: Container(
-                                        width: 56,
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Center(
-                                          child: model.icon.svg(
-                                            colorFilter: ColorFilter.mode(unselectedIconColor, BlendMode.srcIn),
-                                          ),
-                                        ),
-                                      ),
-                                      activeIcon: Container(
-                                        width: 56,
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          color: selectedBackgroundColor,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Center(
-                                          child: model.icon.svg(
-                                            colorFilter: ColorFilter.mode(selectedIconColor, BlendMode.srcIn),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  BottomNavigationBarItem(
-                                    label: context.t.profile,
-                                    icon: BlocBuilder<ProfileCubit, ProfileState>(
-                                      builder: (context, profileState) {
-                                        return UserAvatar(
-                                          size: 36,
-                                          avatarUrl: profileState.user?.avatarUrl,
-                                        );
-                                      },
-                                    ),
-                                    activeIcon: BlocBuilder<ProfileCubit, ProfileState>(
-                                      builder: (context, profileState) {
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: theme.colorScheme.onSurface,
-                                              width: 1,
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: UserAvatar(
-                                            size: 36,
-                                            avatarUrl: profileState.user?.avatarUrl,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : null,
-                      body: snapshot.connectionState == .waiting
-                          ? Center(child: CircularProgressIndicator())
-                          : Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Column(
-                                  spacing: 4.0,
-                                  children: [
-                                    if (!isTabletOrSmaller)
-                                      ScaffoldDesktopAppBar(
-                                        onSelectBranch: _goBranch,
-                                        selectedIndex: widget.navigationShell.currentIndex,
-                                      ),
-                                    BlocBuilder<AuthCubit, AuthState>(
-                                      buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                                      builder: (_, state) {
-                                        return Expanded(child: state.isAuthorized ? widget.navigationShell : Auth());
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                    ),
-                    if (callState.isCallActive)
-                      DraggableResizableCallModal(
-                        meetingLink: callState.meetUrl,
-                        isMinimized: callState.isMinimized,
-                        isFullscreen: callState.isFullscreen,
-                        dockRect: callState.dockRect,
-                        onClose: () => context.read<CallCubit>().closeCall(),
-                        onMinimize: () => context.read<CallCubit>().minimizeCall(),
-                        onRestore: () => context.read<CallCubit>().restoreCall(),
-                        onToggleFullscreen: () => context.read<CallCubit>().toggleFullscreen(),
-                      ),
-                  ],
-                );
-              },
-            );
+        child: BlocListener<UpdateCubit, UpdateState>(
+          listener: (context, updateState) {
+            if (updateState.isUpdateRequired) {
+              context.goNamed(Routes.forceUpdate);
+            }
           },
+          child: FutureBuilder(
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == .waiting) {
+                return AppProgressIndicator();
+              }
+              return BlocBuilder<CallCubit, CallState>(
+                builder: (context, callState) {
+                  return Stack(
+                    children: [
+                      Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Column(
+                            spacing: 4.0,
+                            children: [
+                              if (!isTabletOrSmaller)
+                                ScaffoldDesktopAppBar(
+                                  onSelectBranch: _goBranch,
+                                  selectedIndex: widget.navigationShell.currentIndex,
+                                ),
+                              BlocBuilder<AuthCubit, AuthState>(
+                                buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                                builder: (_, state) {
+                                  return Expanded(
+                                    child: state.isAuthorized ? widget.navigationShell : Auth(),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      if (callState.isCallActive)
+                        DraggableResizableCallModal(
+                          meetingLink: callState.meetUrl,
+                          isMinimized: callState.isMinimized,
+                          isFullscreen: callState.isFullscreen,
+                          dockRect: callState.dockRect,
+                          onClose: () => context.read<CallCubit>().closeCall(),
+                          onMinimize: () => context.read<CallCubit>().minimizeCall(),
+                          onRestore: () => context.read<CallCubit>().restoreCall(),
+                          onToggleFullscreen: () => context.read<CallCubit>().toggleFullscreen(),
+                        ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

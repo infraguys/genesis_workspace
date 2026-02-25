@@ -1,6 +1,7 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
@@ -21,6 +22,7 @@ class MessageContextMenu extends StatefulWidget {
     this.onClose,
     this.onForward,
     this.onSelect,
+    this.onGoToMessage,
     required this.offset,
     required this.isMyMessage,
     required this.messageId,
@@ -36,6 +38,7 @@ class MessageContextMenu extends StatefulWidget {
   final ValueChanged<String> onEmojiSelected;
   final VoidCallback? onClose;
   final VoidCallback? onSelect;
+  final VoidCallback? onGoToMessage;
   final Offset offset;
   final bool isMyMessage;
   final int messageId;
@@ -86,6 +89,11 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
 
   void _onSelect() {
     widget.onSelect?.call();
+    _close();
+  }
+
+  void _onGoToMessage() {
+    widget.onGoToMessage?.call();
     _close();
   }
 
@@ -238,6 +246,13 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                       label: context.t.contextMenu.select,
                       onTap: _onSelect,
                     ),
+                    if (widget.onGoToMessage != null)
+                      _ActionTile(
+                        textColor: textColor,
+                        icon: Assets.icons.arrowRightUp,
+                        label: context.t.contextMenu.openInChat,
+                        onTap: _onGoToMessage,
+                      ),
                   ],
                 );
               },
@@ -264,7 +279,10 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = TextTheme.of(context);
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
 
     return SizedBox(
       height: 36.0,
@@ -272,12 +290,20 @@ class _ActionTile extends StatelessWidget {
         child: InkWell(
           borderRadius: .circular(8),
           onTap: onTap,
+          mouseCursor: SystemMouseCursors.click,
           child: Padding(
             padding: const .symmetric(horizontal: 12.0),
             child: Row(
               spacing: 12.0,
               children: [
-                icon.svg(width: 28, height: 28),
+                icon.svg(
+                  width: 28,
+                  height: 28,
+                  colorFilter: ColorFilter.mode(
+                    iconColors.base,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 Text(
                   label,
                   style: textTheme.bodyMedium?.copyWith(fontWeight: .w500),
@@ -313,6 +339,7 @@ class _ReactionsRow extends StatelessWidget {
             for (final emoji in AppConstants.popularEmojis)
               Material(
                 child: InkWell(
+                  mouseCursor: SystemMouseCursors.click,
                   borderRadius: .circular(20),
                   onTap: () => onEmojiSelected(emoji.emojiName.replaceAll(':', '')),
                   child: Padding(
@@ -323,6 +350,7 @@ class _ReactionsRow extends StatelessWidget {
               ),
             Material(
               child: InkWell(
+                mouseCursor: SystemMouseCursors.click,
                 borderRadius: .circular(20.0),
                 onTap: onOpenEmojiPicker,
                 child: Padding(

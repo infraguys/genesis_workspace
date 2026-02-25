@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
@@ -25,7 +26,10 @@ class ChatEntity extends Equatable {
   final int? streamId;
   final List<int>? dmIds;
   final String? colorString;
-  final int? firstUnreadMessageId;
+
+  int? get firstUnreadMessageId => unreadMessages.firstOrNull;
+  int? topicFirstUnreadMessageId(String topicName) =>
+      topics?.firstWhereOrNull((topic) => topic.name == topicName)?.firstUnreadMessageId;
 
   bool get isTopicsLoading => topics == null;
 
@@ -100,7 +104,6 @@ class ChatEntity extends Equatable {
       dmIds: message.isDirectMessage || message.isGroupChatMessage
           ? message.displayRecipient.recipients.map((recipient) => recipient.userId).toList()
           : null,
-      firstUnreadMessageId: message.isUnread ? message.id : null,
     );
   }
 
@@ -120,7 +123,6 @@ class ChatEntity extends Equatable {
     this.streamId,
     this.dmIds,
     this.colorString,
-    this.firstUnreadMessageId,
   });
 
   ChatEntity copyWith({
@@ -157,9 +159,6 @@ class ChatEntity extends Equatable {
       streamId: streamId ?? this.streamId,
       dmIds: dmIds ?? this.dmIds,
       colorString: colorString ?? this.colorString,
-      firstUnreadMessageId: identical(firstUnreadMessageId, _notSpecified)
-          ? this.firstUnreadMessageId
-          : firstUnreadMessageId as int?,
     );
   }
 

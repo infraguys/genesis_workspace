@@ -1,5 +1,27 @@
 # Changelog
 
+# 1.9.1
+- Open chat from message feature
+- Updated flutter version
+- Fixed cursors on desktop
+- Ignore links in chat preview
+- Fixed mixed chats on switch organizations
+- Palettes refactor
+
+# 1.9.0
+- Added light/dark themes, palettes
+- Improved real-time connection functionality
+- Removed unused buttons
+- Small UI/logic fixes
+
+# 1.8.5
+- Input open animation refactor for mobile devices
+- Fixed folders badges
+- Refactored bottom navigation bar layout for mobile
+- Refactored app bars layouts for mobile
+- Fixed close topic bug on select another channel
+- Fixed paste text by hotkey
+
 # 1.8.4
 - Refactor opening context menu
 - Add swipe for topics

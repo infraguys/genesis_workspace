@@ -15,7 +15,7 @@ Config emojiPickerConfig(
       dialogBackgroundColor: theme.colorScheme.surface,
     ),
     bottomActionBarConfig: BottomActionBarConfig(
-      enabled: true,
+      enabled: false,
       backgroundColor: theme.colorScheme.surface,
       buttonColor: theme.colorScheme.primary,
       buttonIconColor: theme.colorScheme.onSurface,

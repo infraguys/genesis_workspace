@@ -67,6 +67,19 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   final GlobalKey dropAreaKey = GlobalKey();
   RemoveDropHandlers? removeWebDnD;
 
+  int? focusedMessageId;
+
+  setFocusedMessage(int? messageId) async {
+    setState(() {
+      focusedMessageId = messageId;
+    });
+    await Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        focusedMessageId = null;
+      });
+    });
+  }
+
   void focusOnInit() {
     if (platformInfo.isDesktop) {
       messageInputFocusNode.requestFocus();
@@ -349,7 +362,20 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
   void handleCaptured(dynamic captured) {
     switch (captured.runtimeType) {
       case String:
-        messageController.text = '${messageController.text}$captured';
+        final pasteText = captured as String;
+        final selection = messageController.value.selection;
+        final text = messageController.value.text;
+
+        final start = selection.isValid ? selection.start : text.length;
+        final end = selection.isValid ? selection.end : text.length;
+        final nextText = text.replaceRange(start, end, pasteText);
+        final nextOffset = start + pasteText.length;
+
+        messageController.value = messageController.value.copyWith(
+          text: nextText,
+          selection: TextSelection.collapsed(offset: nextOffset),
+          composing: TextRange.empty,
+        );
         break;
 
       case PlatformFile:

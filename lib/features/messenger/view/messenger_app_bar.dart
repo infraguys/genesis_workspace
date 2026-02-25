@@ -68,6 +68,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     final t = context.t;
     final String largeScreenTitle = selectedFolderIndex != 0
         ? folders[selectedFolderIndex].title
@@ -99,7 +100,14 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
           onTapDown: (details) => onShowChats(details.globalPosition),
           child: Padding(
             padding: const EdgeInsets.all(4.0),
-            child: Assets.icons.editSquare.svg(width: 32, height: 32),
+            child: Assets.icons.editSquare.svg(
+              width: 32,
+              height: 32,
+              colorFilter: ColorFilter.mode(
+                iconColors.base,
+                BlendMode.srcIn,
+              ),
+            ),
           ),
         ),
       );
@@ -130,18 +138,16 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: 20.0,
-            width: double.infinity,
-          ),
           Padding(
             padding: isLargeScreen
                 ? EdgeInsets.symmetric(horizontal: 8).copyWith(top: 20, bottom: 8)
-                : EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 14),
+                : EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
                 if (isTabletOrSmaller) ...[
                   IconButton(
+                    // visualDensity: VisualDensity.comfortable,
+                    padding: .zero,
                     onPressed: () {
                       if (showTopics) {
                         onTapBack();
@@ -160,7 +166,6 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                             ),
                           ),
                   ),
-                  SizedBox(width: 8),
                 ],
                 Expanded(
                   child: Padding(
@@ -168,11 +173,12 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                     child: BlocBuilder<RealTimeCubit, RealTimeState>(
                       builder: (context, state) {
                         return Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          crossAxisAlignment: .center,
+                          mainAxisAlignment: isLargeScreen ? .start : .center,
                           spacing: 4,
                           children: [
                             isTabletOrSmaller
-                                ? Center(child: titleWidget)
+                                ? titleWidget
                                 : Align(
                                     alignment: Alignment.centerLeft,
                                     child: titleWidget,
@@ -214,7 +220,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                 child: Padding(
                   padding: isLargeScreen
                       ? EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 12)
-                      : EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),
+                      : EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 20, top: 8),
                   child: Row(
                     spacing: 8,
                     children: [
@@ -226,7 +232,13 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                             style: TextStyle(fontSize: 14),
                             onChanged: onSearchChanged,
                             decoration: InputDecoration(
+                              fillColor: textColors.text100.withValues(alpha: .05),
                               hintText: t.general.find,
+                              contentPadding: .symmetric(vertical: 8, horizontal: isLargeScreen ? 8 : 0),
+                              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: .w500,
+                                color: textColors.text30,
+                              ),
                               suffixIcon: searchQuery.isNotEmpty
                                   ? IconButton(
                                       onPressed: onClearSearch,
@@ -243,6 +255,10 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                                       child: Assets.icons.search.svg(
                                         width: 20,
                                         height: 20,
+                                        colorFilter: ColorFilter.mode(
+                                          textColors.text30,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     )
                                   : null,
@@ -253,6 +269,10 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                                       child: Assets.icons.search.svg(
                                         width: 20,
                                         height: 20,
+                                        colorFilter: ColorFilter.mode(
+                                          textColors.text30,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     )
                                   : null,
@@ -267,11 +287,17 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
+                              mouseCursor: SystemMouseCursors.click,
                               customBorder: const CircleBorder(),
                               onTapDown: (details) => onShowChats(details.globalPosition),
                               child: Padding(
                                 padding: const EdgeInsets.all(4.0),
-                                child: Assets.icons.newWindow.svg(),
+                                child: Assets.icons.newWindow.svg(
+                                  colorFilter: ColorFilter.mode(
+                                    textColors.text30,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -296,7 +322,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
               child: ListView.separated(
                 shrinkWrap: true,
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
                 scrollDirection: Axis.horizontal,
                 itemCount: folders.length + 1,
                 separatorBuilder: (_, int index) => SizedBox(width: index == folders.length - 1 ? 8 : 32),

@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
 import 'package:genesis_workspace/core/widgets/topic_separator.dart';
@@ -11,17 +14,17 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
-import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessagesList extends StatefulWidget {
   final List<MessageEntity> messages;
   final ScrollController controller;
   final void Function(int id)? onRead;
-  final Future<void> Function()? loadMore;
+  final Future<void> Function()? loadMorePrev;
+  final Future<void> Function()? loadMoreNext;
   final VoidCallback? onReadAll;
   final bool showTopic;
   final bool isLoadingMore;
@@ -30,13 +33,17 @@ class MessagesList extends StatefulWidget {
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
   final bool isSelectMode;
   final List<MessageEntity> selectedMessages;
+  final int? focusedMessageId;
+  final bool foundNewest;
+  final bool foundOldest;
 
   const MessagesList({
     super.key,
     required this.messages,
     required this.controller,
     this.onRead,
-    this.loadMore,
+    this.loadMorePrev,
+    this.loadMoreNext,
     this.showTopic = false,
     required this.isLoadingMore,
     required this.myUserId,
@@ -45,6 +52,9 @@ class MessagesList extends StatefulWidget {
     this.onReadAll,
     this.isSelectMode = false,
     this.selectedMessages = const <MessageEntity>[],
+    this.focusedMessageId,
+    this.foundNewest = true,
+    this.foundOldest = false,
   });
 
   @override
@@ -72,7 +82,7 @@ class _MessagesListState extends State<MessagesList> {
   @override
   void initState() {
     super.initState();
-    _reversed = widget.messages.reversed.toList(growable: false);
+    _reversed = widget.messages.reversed.toList(growable: true);
 
     _itemScrollController = ItemScrollController();
     _itemPositionsListener = ItemPositionsListener.create();
@@ -91,7 +101,7 @@ class _MessagesListState extends State<MessagesList> {
   void didUpdateWidget(covariant MessagesList oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.messages, widget.messages)) {
-      _reversed = widget.messages.reversed.toList(growable: false);
+      _reversed = widget.messages.reversed.toList(growable: true);
       // _scrollToFirstUnreadIfNeeded();
     }
   }
@@ -109,17 +119,28 @@ class _MessagesListState extends State<MessagesList> {
     final List<MessageEntity> reversedMessages = widget.messages.reversed.toList();
 
     _firstUnreadIndexInReversed = _findFirstUnreadBoundaryIndex(reversedMessages);
-
+    final focusedMessage = reversedMessages.firstWhereOrNull((message) => message.id == widget.focusedMessageId);
+    if (focusedMessage != null) {
+      final focusedMessageIndex = reversedMessages.indexOf(focusedMessage);
+      if (_itemScrollController.isAttached) {
+        _itemScrollController.jumpTo(
+          index: focusedMessageIndex,
+          alignment: 0.5,
+        );
+      }
+      return;
+    }
     if (_firstUnreadIndexInReversed != null) {
       if (_itemScrollController.isAttached) {
         _itemScrollController.jumpTo(
           index: _firstUnreadIndexInReversed!,
-          alignment: 0.5,
         );
+        return;
       }
     } else {
       if (_itemScrollController.isAttached) {
         _itemScrollController.jumpTo(index: 0);
+        return;
       }
     }
   }
@@ -159,7 +180,7 @@ class _MessagesListState extends State<MessagesList> {
     _updateScrollToBottom(positions);
   }
 
-  void _onScrollOffsetChanged(double _) {
+  void _onScrollOffsetChanged(double offsetDelta) {
     if (!mounted) {
       return;
     }
@@ -168,7 +189,7 @@ class _MessagesListState extends State<MessagesList> {
     if (positions.isEmpty || _reversed.isEmpty) {
       return;
     }
-    _maybeLoadMore(positions);
+    _maybeLoadMore(positions, offsetDelta);
   }
 
   void _handleScrollActivity() {
@@ -192,28 +213,44 @@ class _MessagesListState extends State<MessagesList> {
     }
   }
 
-  void _maybeLoadMore(Iterable<ItemPosition> positions) {
-    if (_isLoadMoreInFlight || widget.isLoadingMore || widget.loadMore == null) {
+  void _maybeLoadMore(Iterable<ItemPosition> positions, double offsetDelta) {
+    if (_isLoadMoreInFlight || widget.isLoadingMore) {
       return;
     }
-    final lastIndex = _reversed.length - 1;
-    final isTopVisible = positions.any((position) => position.index == lastIndex);
-    if (isTopVisible) {
-      _triggerLoadMore();
+
+    if (offsetDelta > 0 && widget.loadMorePrev != null) {
+      final lastIndex = _reversed.length - 1;
+      final isTopVisible = positions.any((position) => position.index == lastIndex);
+      if (isTopVisible && !widget.foundOldest) {
+        _triggerLoadMore(widget.loadMorePrev);
+      }
+      return;
+    }
+
+    if (offsetDelta < 0 && widget.loadMoreNext != null) {
+      final isBottomVisible = positions.any((position) => position.index == 0);
+      if (isBottomVisible && !widget.foundNewest) {
+        _triggerLoadMore(widget.loadMoreNext, isNext: true);
+      }
     }
   }
 
-  Future<void> _triggerLoadMore() async {
-    if (_isLoadMoreInFlight || widget.loadMore == null) {
+  Future<void> _triggerLoadMore(Future<void> Function()? loadMore, {bool isNext = false}) async {
+    if (_isLoadMoreInFlight || loadMore == null) {
       return;
     }
     _isLoadMoreInFlight = true;
     try {
-      await widget.loadMore!();
-    } finally {
-      if (mounted) {
-        _isLoadMoreInFlight = false;
+      await loadMore();
+      if (isNext) {
+        _itemScrollController.jumpTo(
+          // first loaded message index after loadMoreNext request
+          index: widget.foundNewest ? 0 : AppConstants.messagesLazyLoadCount,
+          alignment: 0,
+        );
       }
+    } finally {
+      _isLoadMoreInFlight = false;
     }
   }
 
@@ -356,6 +393,7 @@ class _MessagesListState extends State<MessagesList> {
                         isSelected: widget.selectedMessages.any(
                           (selectedMessage) => selectedMessage.id == message.id,
                         ),
+                        isFocused: widget.focusedMessageId == message.id,
                       ),
                     );
                   },
@@ -438,6 +476,13 @@ class MessageDayLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(label, style: Theme.of(context).textTheme.labelMedium);
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
+    return Text(
+      label,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: textColors.text100,
+      ),
+    );
   }
 }

@@ -23,7 +23,7 @@ class BranchItem extends StatelessWidget {
     final Color baseOverlay = theme.colorScheme.onSurface;
 
     return Material(
-      color: isSelected ? theme.colorScheme.onSurface.withOpacity(0.05) : Colors.transparent,
+      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),
@@ -48,11 +48,6 @@ class BranchItem extends StatelessWidget {
           dimension: size,
           child: Center(
             child: icon,
-            // child: SvgPicture.asset(
-            //   Assets.icons.calendarMonth.path,
-            //   // Чуть ярче при выборе, иначе — приглушённо.
-            //   color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
-            // ),
           ),
         ),
       ),

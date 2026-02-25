@@ -5,7 +5,6 @@ import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
-import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class PrivateInfoPage extends StatelessWidget {
@@ -15,9 +14,7 @@ class PrivateInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
-    final cardColors = Theme.of(context).extension<CardColors>()!;
 
     return Scaffold(
       appBar: AppBarContainer(
@@ -111,49 +108,6 @@ class PrivateInfoPage extends StatelessWidget {
                       }
                       return SizedBox.shrink();
                     },
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const .symmetric(horizontal: 8.0),
-              child: Row(
-                spacing: 8.0,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: .circular(8.0),
-                      clipBehavior: .hardEdge,
-                      child: Material(
-                        shape: RoundedRectangleBorder(borderRadius: .circular(8.0)),
-                        color: cardColors.base,
-                        child: InkWell(
-                          onTap: () {},
-                          child: SizedBox(
-                            height: 56.0,
-                            child: Center(child: Assets.icons.call.svg(width: 40)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: .circular(8.0),
-                      child: Material(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: .circular(8.0),
-                        ),
-                        color: cardColors.base,
-                        child: InkWell(
-                          onTap: () {},
-                          child: SizedBox(
-                            height: 56.0,
-                            child: Center(child: Assets.icons.search.svg(width: 40)),
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),

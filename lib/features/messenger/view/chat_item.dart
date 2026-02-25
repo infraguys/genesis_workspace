@@ -105,16 +105,17 @@ class _ChatItemState extends State<ChatItem> {
             chat: widget.chat,
             onAddToFolder: () async {
               _closeOverlay();
+              final folders = context.read<MessengerCubit>().state.folders;
               await showDialog(
                 context: context,
-                builder: (_) => SelectFoldersDialog(
+                builder: (context) => SelectFoldersDialog(
                   onSave: (selectedFolderIds) async {
                     await context.read<MessengerCubit>().setFoldersForChat(
                       selectedFolderIds,
                       widget.chat.id,
                     );
                   },
-                  folders: context.read<MessengerCubit>().state.folders,
+                  folders: folders,
                   loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
                     widget.chat.id,
                   ),
@@ -244,6 +245,7 @@ class _ChatItemState extends State<ChatItem> {
                   }
                 },
                 child: InkWell(
+                  mouseCursor: SystemMouseCursors.click,
                   onTap: onTap,
                   borderRadius: .circular(8),
                   overlayColor: .resolveWith(
@@ -311,7 +313,10 @@ class _ChatItemState extends State<ChatItem> {
                                               color: theme.colorScheme.primary,
                                             ),
                                           ),
-                                        MessagePreview(messagePreview: widget.chat.lastMessagePreview),
+                                        MessagePreview(
+                                          messagePreview: widget.chat.lastMessagePreview,
+                                          interactive: false,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -327,6 +332,7 @@ class _ChatItemState extends State<ChatItem> {
                                             (widget.chat.type == .channel && currentSize(context) > .tablet)
                                                 ? InkWell(
                                                     borderRadius: .circular(35),
+                                                    mouseCursor: SystemMouseCursors.click,
                                                     onTap: () {
                                                       setState(() => _isExpanded = !_isExpanded);
                                                       if (_isExpanded && (widget.chat.topics?.isEmpty ?? true)) {
@@ -344,7 +350,13 @@ class _ChatItemState extends State<ChatItem> {
                                                       child: AnimatedRotation(
                                                         duration: const Duration(milliseconds: 200),
                                                         turns: _isExpanded ? 0.5 : 0.0,
-                                                        child: Assets.icons.arrowDown.svg(height: 8),
+                                                        child: Assets.icons.arrowDown.svg(
+                                                          height: 8,
+                                                          colorFilter: ColorFilter.mode(
+                                                            textColors.text100,
+                                                            BlendMode.srcIn,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
                                                   )
@@ -466,8 +478,9 @@ class _ChatContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const textColor = Colors.white;
-    const iconColor = ColorFilter.mode(Colors.white, BlendMode.srcIn);
+    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
+    final iconColor = ColorFilter.mode(iconColors.base, BlendMode.srcIn);
 
     return Container(
       width: width,
@@ -481,14 +494,14 @@ class _ChatContextMenu extends StatelessWidget {
         crossAxisAlignment: .stretch,
         children: [
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.folder,
             iconColor: iconColor,
             label: context.t.folders.addToFolder,
             onTap: onAddToFolder,
           ),
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.pinned,
             iconColor: iconColor,
             label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
@@ -496,7 +509,7 @@ class _ChatContextMenu extends StatelessWidget {
           ),
           if (onToggleMute != null) ...[
             _ChatContextMenuAction(
-              textColor: textColor,
+              textColor: textColors.text100,
               icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
               iconColor: iconColor,
               label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
@@ -504,14 +517,14 @@ class _ChatContextMenu extends StatelessWidget {
             ),
           ],
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.readReceipt,
             iconColor: iconColor,
             label: context.t.readAllMessages,
             onTap: onReadAll,
           ),
           _ChatContextMenuAction(
-            textColor: textColor,
+            textColor: textColors.text100,
             icon: Assets.icons.allChats,
             iconColor: iconColor,
             label: context.t.topic.createTopic,

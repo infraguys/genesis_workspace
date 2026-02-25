@@ -43,6 +43,7 @@ class ProfileSettingsView extends StatelessWidget {
     final theme = Theme.of(context);
     final localizationService = getIt<LocalizationService>();
     final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     final cardColors = theme.extension<CardColors>()!;
     final isMobile = currentSize(context) <= .tablet;
 
@@ -97,12 +98,24 @@ class ProfileSettingsView extends StatelessWidget {
                 ),
               ],
               ListTile(
-                leading: Assets.icons.accountCircle.svg(),
+                leading: Assets.icons.accountCircle.svg(
+                  colorFilter: ColorFilter.mode(
+                    iconColors.base,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 title: Text(
                   context.t.profilePersonalInfo.title,
                   style: theme.textTheme.bodyMedium,
                 ),
-                trailing: isMobile ? Assets.icons.arrowRight.svg() : null,
+                trailing: isMobile
+                    ? Assets.icons.arrowRight.svg(
+                        colorFilter: ColorFilter.mode(
+                          iconColors.base,
+                          BlendMode.srcIn,
+                        ),
+                      )
+                    : null,
                 onTap: () {
                   if (isMobile) {
                     context.pushNamed(Routes.profileInfo);
@@ -117,7 +130,12 @@ class ProfileSettingsView extends StatelessWidget {
                     crossAxisAlignment: .stretch,
                     children: [
                       ListTile(
-                        leading: Assets.icons.info.svg(),
+                        leading: Assets.icons.info.svg(
+                          colorFilter: ColorFilter.mode(
+                            iconColors.base,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                         title: Text(
                           context.t.settings.appVersion,
                           style: theme.textTheme.bodyMedium,
@@ -206,7 +224,12 @@ class ProfileSettingsView extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Assets.icons.arrowRight.svg(),
+                          Assets.icons.arrowRight.svg(
+                            colorFilter: ColorFilter.mode(
+                              iconColors.base,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -220,7 +243,12 @@ class ProfileSettingsView extends StatelessWidget {
               leading: TapEffectIcon(
                 onTap: onPlaySound,
                 padding: .zero,
-                child: Assets.icons.volumeUp.svg(),
+                child: Assets.icons.volumeUp.svg(
+                  colorFilter: ColorFilter.mode(
+                    iconColors.base,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
               title: Text(
                 context.t.settings.notificationSound,
@@ -239,7 +267,7 @@ class ProfileSettingsView extends StatelessWidget {
                     },
                     icon: Icon(
                       Icons.arrow_drop_down,
-                      color: textColors.text30,
+                      color: iconColors.base,
                     ),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: textColors.text30,
@@ -259,7 +287,12 @@ class ProfileSettingsView extends StatelessWidget {
               ),
             ),
           ListTile(
-            leading: Assets.icons.language.svg(),
+            leading: Assets.icons.language.svg(
+              colorFilter: ColorFilter.mode(
+                iconColors.base,
+                BlendMode.srcIn,
+              ),
+            ),
             title: Text(
               context.t.settings.language,
               style: theme.textTheme.bodyMedium,
@@ -269,7 +302,7 @@ class ProfileSettingsView extends StatelessWidget {
               underline: const SizedBox.shrink(),
               icon: Icon(
                 Icons.arrow_drop_down,
-                color: textColors.text30,
+                color: iconColors.base,
               ),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: textColors.text30,
@@ -289,8 +322,19 @@ class ProfileSettingsView extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(
+              Icons.palette_outlined,
+              color: iconColors.base,
+            ),
+            title: Text(
+              context.t.settings.themeSettings,
+              style: theme.textTheme.bodyMedium,
+            ),
+            onTap: () => context.pushNamed(Routes.themeSettings),
+          ),
+          ListTile(
+            leading: Icon(
               Icons.sort,
-              color: textColors.text30,
+              color: iconColors.base,
             ),
             title: Text(
               context.t.settings.chatSortingAction,

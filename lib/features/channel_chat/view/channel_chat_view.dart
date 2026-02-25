@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,14 +55,16 @@ class ChannelChatView extends StatefulWidget {
     required this.chatId,
     required this.channelId,
     this.topicName,
-    this.unreadMessagesCount = 0,
+    this.firstMessageId,
+    this.focusedMessageId,
     this.leadingOnPressed,
   });
 
   final int chatId;
   final int channelId;
   final String? topicName;
-  final int? unreadMessagesCount;
+  final int? firstMessageId;
+  final int? focusedMessageId;
   final VoidCallback? leadingOnPressed;
 
   @override
@@ -115,7 +116,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
     _future = context.read<ChannelChatCubit>().getInitialData(
       streamId: widget.channelId,
       topicName: widget.topicName,
-      unreadMessagesCount: widget.unreadMessagesCount,
+      firstMessageId: widget.focusedMessageId ?? widget.firstMessageId,
       myUserId: _myUser.userId,
     );
     context.read<MessagesSelectCubit>().setSelectMode(false);
@@ -132,6 +133,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
       messageController.text = draftForThisChat!.content;
       isDraftPasted = true;
     }
+    setFocusedMessage(widget.focusedMessageId);
     super.initState();
     if (kIsWeb) {
       removeWebDnD = attachWebDropHandlersForKey(
@@ -204,6 +206,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         streamId: widget.channelId,
         topicName: widget.topicName,
         didUpdateWidget: (oldWidget.topicName != widget.topicName || oldWidget.channelId != widget.channelId),
+        firstMessageId: widget.firstMessageId ?? widget.focusedMessageId,
       );
       context.read<MessagesSelectCubit>().setSelectMode(false);
       messageController.clear();
@@ -220,7 +223,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
         _,
       ) {
         context.read<ChannelChatCubit>().getChannelMessages(
-          unreadMessagesCount: widget.unreadMessagesCount,
+          firstMessageId: widget.firstMessageId,
         );
       });
       final draftForThisChat = context.read<DraftsCubit>().getDraftForChat(
@@ -262,6 +265,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final iconColors = Theme.of(context).extension<IconColors>()!;
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return BlocConsumer<ChannelChatCubit, ChannelChatState>(
       listenWhen: (prev, current) =>
@@ -340,7 +344,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
                               leading: isTabletOrSmaller
                                   ? IconButton(
                                       onPressed: context.pop,
-                                      icon: Icon(CupertinoIcons.back, color: textColors.text30),
+                                      icon: Assets.icons.arrowLeft.svg(
+                                        colorFilter: ColorFilter.mode(
+                                          iconColors.base,
+                                          .srcIn,
+                                        ),
+                                      ),
                                     )
                                   : null,
                               // : IconButton(
@@ -373,7 +382,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   icon: Assets.icons.call.svg(
                                     width: 28,
                                     height: 28,
-                                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
                                 // if (!isTabletOrSmaller)
@@ -389,7 +398,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     }
                                   },
                                   icon: Assets.icons.videocam.svg(
-                                    colorFilter: ColorFilter.mode(textColors.text50, BlendMode.srcIn),
+                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
                               ],
@@ -469,7 +478,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               onRead: (id) {
                                                 context.read<ChannelChatCubit>().scheduleMarkAsReadCommon(id);
                                               },
-                                              loadMore: context.read<ChannelChatCubit>().loadMoreMessages,
+                                              loadMorePrev: context.read<ChannelChatCubit>().loadMorePrevMessages,
+                                              loadMoreNext: context.read<ChannelChatCubit>().loadMoreNextMessages,
                                               myUserId: _myUser.userId,
                                               onTapQuote: onTapQuote,
                                               onTapEditMessage: onTapEditMessage,
@@ -481,6 +491,9 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               },
                                               isSelectMode: messagesSelectState.isActive,
                                               selectedMessages: selectedMessages,
+                                              focusedMessageId: focusedMessageId,
+                                              foundNewest: state.isFoundNewestMessage,
+                                              foundOldest: state.isFoundOldestMessage,
                                             ),
                                             Positioned(
                                               bottom: 0,

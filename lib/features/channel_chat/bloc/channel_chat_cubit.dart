@@ -64,8 +64,10 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
           messages: [],
           isLoadingMore: false,
           isMessagePending: false,
-          isAllMessagesLoaded: false,
+          isFoundOldestMessage: false,
+          isFoundNewestMessage: false,
           lastMessageId: null,
+          firstMessageId: null,
           channel: null,
           typingUserId: null,
           selfTypingOp: TypingEventOp.stop,
@@ -203,7 +205,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     required int streamId,
     String? topicName,
     bool? didUpdateWidget,
-    int? unreadMessagesCount,
+    int? firstMessageId,
     int? myUserId,
   }) async {
     emit(
@@ -212,6 +214,11 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         topic: null,
         messages: [],
         channelMembers: {},
+        isLoadingMore: false,
+        isFoundOldestMessage: false,
+        isFoundNewestMessage: false,
+        firstMessageId: null,
+        lastMessageId: null,
         myUserId: myUserId,
       ),
     );
@@ -222,7 +229,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
       ]);
       await getChannelMessages(
         didUpdateWidget: didUpdateWidget,
-        unreadMessagesCount: unreadMessagesCount,
+        firstMessageId: firstMessageId,
       );
     } catch (e) {
       inspect(e);
@@ -264,25 +271,19 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     }
   }
 
-  Future<void> getChannelMessages({bool? didUpdateWidget, int? unreadMessagesCount}) async {
+  Future<void> getChannelMessages({bool? didUpdateWidget, int? firstMessageId}) async {
     emit(state.copyWith(isMessagesPending: true));
-    if (didUpdateWidget == true) {
-      state.isMessagesPending = true;
-      emit(state.copyWith(isMessagesPending: state.isMessagesPending));
-    }
     try {
-      int numBefore = 25;
-      if (unreadMessagesCount != null && unreadMessagesCount > 25) {
-        numBefore = unreadMessagesCount + 10;
-      }
+      final int numBefore = 25;
+      final int numAfter = firstMessageId != null ? 25 : 0;
       final body = MessagesRequestEntity(
-        anchor: MessageAnchor.newest(),
+        anchor: firstMessageId != null ? MessageAnchor.id(firstMessageId) : MessageAnchor.newest(),
         narrow: [
           MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
           if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
         ],
         numBefore: numBefore,
-        numAfter: 0,
+        numAfter: numAfter,
       );
       final response = await _getMessagesUseCase.call(body);
       final Set<int> channelMembers = {...state.channelMembers};
@@ -291,13 +292,16 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         recentSenderIds: response.messages.reversed.map((message) => message.senderId).toList(),
       );
 
-      final newState = state.copyWith(
-        messages: response.messages,
-        isAllMessagesLoaded: response.foundOldest,
-        lastMessageId: response.messages.isNotEmpty ? response.messages.first.id : null,
-        channelMembers: sortedChannelMembers,
+      emit(
+        state.copyWith(
+          messages: response.messages,
+          isFoundOldestMessage: response.foundOldest,
+          isFoundNewestMessage: response.foundNewest,
+          lastMessageId: response.messages.isNotEmpty ? response.messages.last.id : null,
+          firstMessageId: response.messages.isNotEmpty ? response.messages.first.id : null,
+          channelMembers: sortedChannelMembers,
+        ),
       );
-      emit(newState);
     } catch (e) {
       inspect(e);
     } finally {
@@ -308,7 +312,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
   Future<void> getUnreadMessages() async {
     final organizationId = AppConstants.selectedOrganizationId;
     final connection = _realTimeService.activeConnections[organizationId];
-    if (connection?.isActive ?? false) return;
+    if (connection?.isActive ?? false || state.channel == null) return;
     try {
       final body = MessagesRequestEntity(
         anchor: MessageAnchor.newest(),
@@ -321,9 +325,16 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
         numAfter: 0,
       );
       final response = await _getMessagesUseCase(body);
-      final updatedMessages = [...state.messages];
-      updatedMessages.addAll(response.messages);
-      emit(state.copyWith(messages: updatedMessages, lastMessageId: updatedMessages.first.id));
+      final updatedMessages = _mergeUniqueMessages(state.messages, response.messages);
+      final int? firstMessageId = updatedMessages.isNotEmpty ? updatedMessages.first.id : null;
+      final int? lastMessageId = updatedMessages.isNotEmpty ? updatedMessages.last.id : null;
+      emit(
+        state.copyWith(
+          messages: updatedMessages,
+          firstMessageId: firstMessageId,
+          lastMessageId: lastMessageId,
+        ),
+      );
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -331,37 +342,103 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     }
   }
 
-  Future<void> loadMoreMessages() async {
-    if (!state.isAllMessagesLoaded) {
-      emit(state.copyWith(isLoadingMore: true));
-      try {
-        final body = MessagesRequestEntity(
-          anchor: MessageAnchor.id(state.lastMessageId ?? 0),
-          narrow: [
-            MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
-            if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
-          ],
-          numBefore: 25,
-          numAfter: 0,
-          includeAnchor: false,
-        );
-        final response = await _getMessagesUseCase.call(body);
-        state.lastMessageId = response.messages.first.id;
-        List<MessageEntity> messages = [...state.messages];
-        messages = [...response.messages, ...messages];
-        emit(
-          state.copyWith(
-            messages: messages,
-            isLoadingMore: false,
-            isAllMessagesLoaded: response.foundOldest,
-          ),
-        );
-      } catch (e) {
-        inspect(e);
-      } finally {
-        emit(state.copyWith(isLoadingMore: false));
-      }
+  Future<void> loadMorePrevMessages() async {
+    if (state.isFoundOldestMessage || state.channel == null) {
+      return;
     }
+    _restoreMessageBoundsFromStateMessages();
+    final int? anchorId = state.firstMessageId ?? (state.messages.isNotEmpty ? state.messages.first.id : null);
+    if (anchorId == null) {
+      return;
+    }
+
+    emit(state.copyWith(isLoadingMore: true));
+    try {
+      final numBefore = AppConstants.messagesLazyLoadCount;
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.id(anchorId),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
+          if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+        ],
+        numBefore: numBefore,
+        numAfter: 0,
+        includeAnchor: false,
+      );
+      final response = await _getMessagesUseCase.call(body);
+      if (response.messages.isNotEmpty) {
+        state.firstMessageId = response.messages.first.id;
+      }
+      final List<MessageEntity> messages = _mergeUniqueMessages(response.messages, state.messages);
+      final int? firstMessageId = messages.isNotEmpty ? messages.first.id : null;
+      final int? lastMessageId = messages.isNotEmpty ? messages.last.id : null;
+      emit(
+        state.copyWith(
+          messages: messages,
+          firstMessageId: firstMessageId,
+          lastMessageId: lastMessageId,
+          isFoundOldestMessage: response.foundOldest,
+        ),
+      );
+    } catch (e) {
+      inspect(e);
+    } finally {
+      emit(state.copyWith(isLoadingMore: false));
+    }
+  }
+
+  Future<void> loadMoreNextMessages() async {
+    if (state.isFoundNewestMessage || state.channel == null) {
+      return;
+    }
+
+    _restoreMessageBoundsFromStateMessages();
+    final int? anchorId = state.lastMessageId ?? (state.messages.isNotEmpty ? state.messages.last.id : null);
+    if (anchorId == null) {
+      return;
+    }
+
+    emit(state.copyWith(isLoadingMore: true));
+    try {
+      final numAfter = AppConstants.messagesLazyLoadCount;
+      final body = MessagesRequestEntity(
+        anchor: MessageAnchor.id(anchorId),
+        narrow: [
+          MessageNarrowEntity(operator: NarrowOperator.channel, operand: state.channel!.name),
+          if (state.topic != null) MessageNarrowEntity(operator: NarrowOperator.topic, operand: state.topic!.name),
+        ],
+        numBefore: 0,
+        numAfter: numAfter,
+        includeAnchor: false,
+      );
+      final response = await _getMessagesUseCase.call(body);
+      if (response.messages.isNotEmpty) {
+        state.lastMessageId = response.messages.last.id;
+      }
+      final List<MessageEntity> messages = _mergeUniqueMessages(state.messages, response.messages);
+      final int? firstMessageId = messages.isNotEmpty ? messages.first.id : null;
+      final int? lastMessageId = messages.isNotEmpty ? messages.last.id : null;
+      emit(
+        state.copyWith(
+          messages: messages,
+          firstMessageId: firstMessageId,
+          lastMessageId: lastMessageId,
+          isFoundNewestMessage: response.foundNewest,
+        ),
+      );
+    } catch (e) {
+      inspect(e);
+    } finally {
+      emit(state.copyWith(isLoadingMore: false));
+    }
+  }
+
+  void _restoreMessageBoundsFromStateMessages() {
+    if (state.messages.isEmpty) {
+      return;
+    }
+    state.firstMessageId ??= state.messages.first.id;
+    state.lastMessageId ??= state.messages.last.id;
   }
 
   Future<void> sendMessage({required int streamId, required String content, String? topic}) async {
@@ -441,33 +518,51 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     emit(state.copyWith(isMessagePending: value));
   }
 
-  void _onTypingEvents(TypingEventEntity event) {
-    final senderId = event.sender.userId;
-    // final isWriting = event.op == TypingEventOp.start && senderId == state.chatId;
-
-    if (false) {
-      state.typingUserId = senderId;
-    } else {
-      state.typingUserId = null;
-    }
-    emit(state.copyWith(typingUserId: state.typingUserId));
+  void _onTypingEvents(_) {
+    // state.typingUserId = null;
+    // emit(state.copyWith(typingUserId: state.typingUserId));
   }
 
   void _onMessageEvents(MessageEventEntity event) {
     final int? organizationId = AppConstants.selectedOrganizationId;
-    if (organizationId != event.organizationId) return;
+    if (organizationId != event.organizationId || state.channel == null) return;
     final message = event.message.copyWith(flags: event.flags);
     bool isThisChatMessage = message.displayRecipient.streamName == state.channel!.name;
     String messageSubject = message.subject;
     if (isThisChatMessage) {
       final updatedMessages = [...state.messages];
       if (state.topic == null) {
-        updatedMessages.add(message);
+        if (!updatedMessages.any((current) => current.id == message.id)) {
+          updatedMessages.add(message);
+        }
       } else if (state.topic!.name == messageSubject) {
-        updatedMessages.add(message);
+        if (!updatedMessages.any((current) => current.id == message.id)) {
+          updatedMessages.add(message);
+        }
       }
-      emit(state.copyWith(messages: updatedMessages));
+      final int? firstMessageId = updatedMessages.isNotEmpty ? updatedMessages.first.id : null;
+      final int? lastMessageId = updatedMessages.isNotEmpty ? updatedMessages.last.id : null;
+      emit(
+        state.copyWith(
+          messages: updatedMessages,
+          firstMessageId: firstMessageId,
+          lastMessageId: lastMessageId,
+        ),
+      );
     }
+  }
+
+  List<MessageEntity> _mergeUniqueMessages(List<MessageEntity> left, List<MessageEntity> right) {
+    if (left.isEmpty) {
+      return [...right];
+    }
+    if (right.isEmpty) {
+      return [...left];
+    }
+
+    final List<MessageEntity> merged = [...left, ...right];
+    final Set<int> seenMessageIds = <int>{};
+    return merged.where((message) => seenMessageIds.add(message.id)).toList(growable: false);
   }
 
   @override

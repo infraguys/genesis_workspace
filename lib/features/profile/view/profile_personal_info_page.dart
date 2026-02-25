@@ -39,8 +39,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
-    final cardColors = theme.extension<CardColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
     final isMobile = currentSize(context) <= .tablet;
 
     return BlocBuilder<ProfileCubit, ProfileState>(
@@ -52,7 +51,9 @@ class ProfilePersonalInfoPage extends StatelessWidget {
           appBar: AppBar(
             leading: IconButton(
               onPressed: onBack,
-              icon: Assets.icons.arrowLeft.svg(),
+              icon: Assets.icons.arrowLeft.svg(
+                colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+              ),
             ),
             backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
             centerTitle: isMobile,
@@ -64,7 +65,9 @@ class ProfilePersonalInfoPage extends StatelessWidget {
               if (!isMobile)
                 IconButton(
                   onPressed: onClose,
-                  icon: Assets.icons.close.svg(),
+                  icon: Assets.icons.close.svg(
+                    colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                  ),
                 ),
               if (isMobile) ...[
                 IconButton(
@@ -73,7 +76,10 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                           await shareProfile(context, userId: user!.userId);
                         }
                       : null,
-                  icon: Assets.icons.link.svg(width: 24),
+                  icon: Assets.icons.link.svg(
+                    width: 24,
+                    colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                  ),
                 ),
               ],
             ],
@@ -139,7 +145,10 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                     value: user.email,
                     icon: SizedBox(
                       width: 32,
-                      child: Assets.icons.mail.svg(width: 24),
+                      child: Assets.icons.mail.svg(
+                        width: 24,
+                        colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                      ),
                     ),
                   ),
                   const SizedBox(
@@ -148,7 +157,9 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   _InfoTile(
                     label: context.t.profilePersonalInfo.userId,
                     value: user.userId.toString(),
-                    icon: Assets.icons.alternateEmail.svg(),
+                    icon: Assets.icons.alternateEmail.svg(
+                      colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                    ),
                   ),
                   const SizedBox(
                     height: 12,
@@ -156,7 +167,9 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   _InfoTile(
                     label: context.t.profilePersonalInfo.timezone,
                     value: user.timezone,
-                    icon: Assets.icons.schedule.svg(),
+                    icon: Assets.icons.schedule.svg(
+                      colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                    ),
                   ),
                   const SizedBox(
                     height: 12,
@@ -164,7 +177,9 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   _InfoTile(
                     label: context.t.profilePersonalInfo.teamAndPosition,
                     value: user.jobTitle,
-                    icon: Assets.icons.businessCenter.svg(),
+                    icon: Assets.icons.businessCenter.svg(
+                      colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                    ),
                   ),
                   const SizedBox(
                     height: 12,
@@ -172,7 +187,9 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   _InfoTile(
                     label: context.t.profilePersonalInfo.manager,
                     value: user.bossName,
-                    icon: Assets.icons.handshake.svg(),
+                    icon: Assets.icons.handshake.svg(
+                      colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                    ),
                   ),
                 ],
               );

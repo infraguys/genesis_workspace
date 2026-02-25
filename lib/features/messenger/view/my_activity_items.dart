@@ -53,7 +53,6 @@ class MyActivityItems extends StatelessWidget with OpenChatMixin {
                 'chatId': (mySelfChatId ?? -1).toString(),
                 'userId': myUserId.toString(),
               },
-              extra: {'unreadMessagesCount': 0},
             );
             return;
           }
