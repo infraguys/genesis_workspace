@@ -197,18 +197,6 @@ final router = GoRouter(
             ),
           ],
         ),
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorMyActivityKey,
-          routes: [
-            GoRoute(
-              path: Routes.myActivity,
-              name: Routes.myActivity,
-              builder: (context, state) {
-                return const MyActivity();
-              },
-            ),
-          ],
-        ),
       ],
     ),
     if (!kIsWeb) ...[
