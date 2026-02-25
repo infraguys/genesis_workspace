@@ -93,6 +93,7 @@ class MessengerCubit extends Cubit<MessengerState> {
   Timer? _loadFoldersShortPollingTimer;
   bool _isLoadFoldersInProgress = false;
   final Set<int> _topicsRefreshInProgress = <int>{};
+  int _selectedOrganizationId = -1;
 
   MessengerCubit(
     this._addFolderUseCase,
@@ -236,6 +237,9 @@ class MessengerCubit extends Cubit<MessengerState> {
         clientGravatar: false,
       );
       final response = await _getMessagesUseCase.call(messagesBody);
+      if (response.organizationId != AppConstants.selectedOrganizationId) {
+        return;
+      }
       final channelsResponse = await _getSubscribedChannelsUseCase.call(false);
       if (response.messages.isNotEmpty) {
         _oldestMessageId = response.messages.first.id;
@@ -270,6 +274,9 @@ class MessengerCubit extends Cubit<MessengerState> {
           includeAnchor: false,
         );
         final response = await _getMessagesUseCase.call(body);
+        if (response.organizationId != AppConstants.selectedOrganizationId) {
+          return;
+        }
         _oldestMessageId = response.messages.first.id;
         final foundOldest = response.foundOldest;
         final messages = [...state.messages];
@@ -841,8 +848,9 @@ class MessengerCubit extends Cubit<MessengerState> {
     );
   }
 
-  void resetState() {
+  void resetState(int organizationId) {
     _searchQuery = '';
+    _selectedOrganizationId = organizationId;
     emit(MessengerState.initial);
     _onProfileStateChanged(_profileCubit.state);
   }
