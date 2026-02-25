@@ -36,30 +36,19 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final bool applyMarkdown = body.applyMarkdown;
       final bool clientGravatar = body.clientGravatar;
       final bool includeAnchor = body.includeAnchor;
-      final String messageIds = jsonEncode(body.messageIds);
+      final String? messageIds = body.messageIds == null ? null : jsonEncode(body.messageIds);
 
-      final queryParameters = <String, dynamic>{
-        'anchor': anchor,
-        'narrow': narrowString,
-        'num_before': body.numBefore,
-        'num_after': body.numAfter,
-        'apply_markdown': applyMarkdown,
-        'client_gravatar': clientGravatar,
-        'include_anchor': includeAnchor,
-        'message_ids': messageIds,
-      }..removeWhere((key, value) => value == null);
-
-      final response = await dio.get<Map<String, dynamic>>(
-        '/messages',
-        queryParameters: queryParameters,
+      final response = await apiClient.getMessages(
+        anchor,
+        narrowString,
+        body.numBefore,
+        body.numAfter,
+        applyMarkdown,
+        clientGravatar,
+        includeAnchor,
+        messageIds,
       );
-
-      final payload = response.data;
-      if (payload == null) {
-        throw StateError('Empty /messages response payload');
-      }
-
-      return MessagesResponseDto.fromJson(payload).withRequestBaseUrl(response.requestOptions.baseUrl);
+      return response.data.withRequestBaseUrl(response.response.requestOptions.baseUrl);
     } catch (e) {
       rethrow;
     }

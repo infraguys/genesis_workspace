@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/data/messages/datasources/messages_data_source.dart';
 import 'package:genesis_workspace/data/organizations/datasources/organizations_local_data_source.dart';
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart';
@@ -28,7 +29,7 @@ class MessagesRepositoryImpl implements MessagesRepository {
   Future<MessagesResponseEntity> getMessages(MessagesRequestEntity body) async {
     try {
       final dto = await dataSource.getMessages(body.toDto());
-      final String requestOrganizationBaseUrl = _extractOrganizationBaseUrl(dto.requestBaseUrl);
+      final String requestOrganizationBaseUrl = extractOrganizationBaseUrl(dto.requestBaseUrl);
       final int? organizationId = await organizationsLocalDataSource.getOrganizationIdByBaseUrl(
         requestOrganizationBaseUrl,
       );
@@ -145,18 +146,5 @@ class MessagesRepositoryImpl implements MessagesRepository {
     } catch (e) {
       rethrow;
     }
-  }
-
-  String _extractOrganizationBaseUrl(String requestBaseUrl) {
-    String normalized = requestBaseUrl;
-    if (normalized.endsWith('/api/v1')) {
-      normalized = normalized.substring(0, normalized.length - '/api/v1'.length);
-    } else if (normalized.endsWith('/json')) {
-      normalized = normalized.substring(0, normalized.length - '/json'.length);
-    }
-    if (normalized.endsWith('/')) {
-      normalized = normalized.substring(0, normalized.length - 1);
-    }
-    return normalized;
   }
 }
