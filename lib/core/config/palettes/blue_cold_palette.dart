@@ -42,7 +42,6 @@ const _blueColdLightMessageColors = MessageColors(
   background: Color(0xFFDFEFFF),
   ownBackground: Color(0xFFE1E6FF),
   timeColor: Color(0xFF748CFF),
-  senderNameColor: Color(0xFF51ABFF),
   activeCallBackground: Color(0xFFE4ECFF),
   selectedMessageForeground: Color(0x335051F5),
 );
@@ -51,7 +50,6 @@ const _blueColdDarkMessageColors = MessageColors(
   background: Color(0xFF222328),
   ownBackground: Color(0xFF252942),
   timeColor: Color(0xFFFFFFFF),
-  senderNameColor: Color(0xFF4C6EC2),
   activeCallBackground: Color(0xFF1D2642),
   selectedMessageForeground: Color(0x335051F5),
 );
@@ -70,10 +68,30 @@ const _blueColdDarkCardColors = CardColors(
 
 const _blueColdLightIconColors = IconColors(
   base: Color(0xFF58A7F7),
+  disable: Color(0xFF474747),
+  hover: Color(0xFF999999),
+  active: Color(0xFFFFFFFF),
 );
 
-final _blueColdDarkIconColors = IconColors(
-  base: Color(0xFFFFFFFF).withValues(alpha: .3),
+const _blueColdDarkIconColors = IconColors(
+  base: Color(0xFF707070),
+  disable: Color(0xFF474747),
+  hover: Color(0xFF999999),
+  active: Color(0xFFFFFFFF),
+);
+
+const _blueColdLightNoticeColors = NoticeColors(
+  noticeBase: Color(0xFFFF0000),
+  noticeDisable: Color(0xFF5c5855),
+  onBadge: Color(0xFFFFFFFF),
+  counterBadge: Color(0xFF3D5EFF),
+);
+
+const _blueColdDarkNoticeColors = NoticeColors(
+  noticeBase: Color(0xFFFF0000),
+  noticeDisable: Color(0xFF5c5855),
+  onBadge: Color(0xFFFFFFFF),
+  counterBadge: Color(0xFF3D5EFF),
 );
 
 class BlueColdPalette extends ThemePalette {
@@ -91,5 +109,8 @@ class BlueColdPalette extends ThemePalette {
         darkCardColors: _blueColdDarkCardColors,
         lightIconColors: _blueColdLightIconColors,
         darkIconColors: _blueColdDarkIconColors,
+        lightNoticeColors: _blueColdLightNoticeColors,
+        darkNoticeColors: _blueColdDarkNoticeColors,
+        darkTextFieldBackground: const Color(0xFF222328),
       );
 }

@@ -174,7 +174,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                         return BranchItem(
                           icon: model.icon.svg(
                             colorFilter: ColorFilter.mode(
-                              isSelected ? theme.colorScheme.onPrimary : iconColors.base,
+                              isSelected ? iconColors.active : iconColors.base,
                               .srcIn,
                             ),
                           ),
