@@ -6,8 +6,15 @@ import 'package:genesis_workspace/core/models/emoji.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 
 class MessagePreview extends StatelessWidget {
+  const MessagePreview({
+    super.key,
+    required this.messagePreview,
+    this.interactive = true,
+  });
+
   final String messagePreview;
-  const MessagePreview({super.key, required this.messagePreview});
+  final bool interactive;
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +33,8 @@ class MessagePreview extends StatelessWidget {
           minHeight: 0,
           maxHeight: double.infinity,
           child: HtmlWidget(
+
+            onTapUrl: interactive ? null : (_) => true,
             messagePreview,
             customStylesBuilder: (element) {
               return {
