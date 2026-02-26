@@ -14,13 +14,14 @@ class Splash extends StatelessWidget {
       builder: (context, state) {
         return SplashView(
           onInitializationComplete: () {
-            if (state.isAuthorized) {
-              context.go(Routes.messenger);
-            } else if (state.hasBaseUrl) {
-              context.go(Routes.auth);
-            } else {
-              context.go(Routes.pasteBaseUrl);
-            }
+            context.go(Routes.messenger);
+            // if (state.isAuthorized) {
+            //   context.go(Routes.messenger);
+            // } else if (state.hasBaseUrl) {
+            //   context.go(Routes.auth);
+            // } else {
+            //   context.go(Routes.pasteBaseUrl);
+            // }
           },
         );
       },

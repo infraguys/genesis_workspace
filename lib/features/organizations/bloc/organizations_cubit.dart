@@ -37,6 +37,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
         OrganizationsState(
           organizations: [],
           selectedOrganizationId: null,
+          selfUser: null,
         ),
       ) {
     _organizationsSubscription = _watchOrganizationsUseCase().listen(
@@ -80,7 +81,12 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
       nextSelection = organizations.isNotEmpty ? organizations.first.id : null;
     }
 
-    emit(state.copyWith(organizations: organizations, selectedOrganizationId: nextSelection));
+    emit(
+      state.copyWith(
+        organizations: organizations,
+        selectedOrganizationId: nextSelection,
+      ),
+    );
   }
 
   Future<void> addOrganization(String baseUrl) async {
@@ -95,7 +101,7 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
         baseUrl: baseUrl,
         unreadMessages: {},
       );
-      final organization = await _addOrganizationUseCase.call(body);
+      await _addOrganizationUseCase.call(body);
     } catch (e) {
       inspect(e);
     }
@@ -116,7 +122,9 @@ class OrganizationsCubit extends Cubit<OrganizationsState> {
   }
 
   Future<void> selectOrganization(OrganizationEntity organization) async {
-    if (state.selectedOrganizationId == organization.id) return;
+    if (state.selectedOrganizationId == organization.id) {
+      return;
+    }
     final int? previousSelection = state.selectedOrganizationId;
     emit(state.copyWith(selectedOrganizationId: organization.id));
     try {
