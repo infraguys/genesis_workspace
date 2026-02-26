@@ -90,12 +90,10 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                     imagePath: organization.imageUrl,
                                     isSelected: organization.id == selectedId,
                                     onTap: () async {
-                                      final profileCubit = context.read<ProfileCubit>();
+                                      // final profileCubit = context.read<ProfileCubit>();
                                       final organizationsCubit = context.read<OrganizationsCubit>();
 
-                                      await Future.wait([
-                                        organizationsCubit.selectOrganization(organization),
-                                      ]);
+                                      await organizationsCubit.selectOrganization(organization);
                                     },
                                     onDelete: () async {
                                       if (context.canPop()) {

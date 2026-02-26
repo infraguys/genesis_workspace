@@ -316,6 +316,10 @@ class _MessengerViewState extends State<MessengerView>
 
   @override
   void initState() {
+    final selectedOrganizationId = context.read<OrganizationsCubit>().state.selectedOrganizationId;
+    if (selectedOrganizationId != null) {
+      context.read<MessengerCubit>().syncSelectedOrganization(selectedOrganizationId);
+    }
     _applySortingPreferences();
     _checkUser();
     _future = getInitialData();
@@ -380,7 +384,10 @@ class _MessengerViewState extends State<MessengerView>
         );
       },
       child: BlocListener<OrganizationsCubit, OrganizationsState>(
-        listenWhen: (previous, current) => previous.selectedOrganizationId != current.selectedOrganizationId,
+        listenWhen: (previous, current) {
+          print("prev id: ${previous.selectedOrganizationId}, current: ${current.selectedOrganizationId}");
+          return previous.selectedOrganizationId != current.selectedOrganizationId;
+        },
         listener: (context, state) {
           context.read<MessengerCubit>().resetState(state.selectedOrganizationId ?? -1);
           context.read<MessengerCubit>().searchChats('');
