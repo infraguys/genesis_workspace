@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/extensions.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/domain/entities/theme_palette_entity.dart';
 import 'package:genesis_workspace/gen/fonts.gen.dart';
 
@@ -123,6 +124,7 @@ ThemeData buildThemeFromPalette({
     ),
     dividerColor: colorScheme.onSurface.withValues(alpha: 0.1),
     appBarTheme: AppBarThemeData(
+      centerTitle: platformInfo.isMobile,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
