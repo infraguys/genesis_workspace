@@ -18,6 +18,8 @@ import 'package:genesis_workspace/features/authentication/presentation/bloc/auth
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/call/view/draggable_resizable_call_modal.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
@@ -187,7 +189,33 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                                 buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
                                 builder: (_, state) {
                                   return Expanded(
-                                    child: state.isAuthorized ? widget.navigationShell : Auth(),
+                                    child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
+                                      builder: (context, panelState) {
+                                        final bool showProfilePanel =
+                                            !isTabletOrSmaller &&
+                                            state.isAuthorized &&
+                                            panelState.status == InfoPanelStatus.profileInfo;
+
+                                        return Row(
+                                          children: [
+                                            Expanded(
+                                              child: state.isAuthorized ? widget.navigationShell : Auth(),
+                                            ),
+                                            if (showProfilePanel) ...[
+                                              const SizedBox(width: 4.0),
+                                              SizedBox(
+                                                width: 315,
+                                                child: InfoPanel(
+                                                  onClose: () {
+                                                    context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        );
+                                      },
+                                    ),
                                   );
                                 },
                               ),

@@ -678,9 +678,9 @@ class _MessengerViewState extends State<MessengerView>
                       const SizedBox(width: 4.0),
                       BlocBuilder<InfoPanelCubit, InfoPanelState>(
                         builder: (context, panelState) {
-                          if (state.selectedChat?.dmIds != null ||
-                              state.selectedChat?.streamId != null ||
-                              panelState.status == .profileInfo) {
+                          final bool hasSelectedChatInfo =
+                              state.selectedChat?.dmIds != null || state.selectedChat?.streamId != null;
+                          if (hasSelectedChatInfo && panelState.status != .profileInfo) {
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
