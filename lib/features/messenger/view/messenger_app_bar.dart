@@ -281,7 +281,6 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                             style: TextStyle(fontSize: 14),
                             onChanged: onSearchChanged,
                             decoration: InputDecoration(
-                              fillColor: textColors.text100.withValues(alpha: .05),
                               hintText: t.general.find,
                               contentPadding: .symmetric(vertical: 8, horizontal: isLargeScreen ? 8 : 0),
                               hintStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -343,7 +342,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                                 padding: const EdgeInsets.all(4.0),
                                 child: Assets.icons.newWindow.svg(
                                   colorFilter: ColorFilter.mode(
-                                    textColors.text30,
+                                    iconColors.base,
                                     BlendMode.srcIn,
                                   ),
                                 ),

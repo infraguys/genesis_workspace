@@ -206,6 +206,7 @@ class _ChatItemState extends State<ChatItem> {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
     final cardColors = theme.extension<CardColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
 
     final rightContainerHeight = switch (widget.chat.type) {
       ChatType.channel => 52.0,
@@ -298,6 +299,13 @@ class _ChatItemState extends State<ChatItem> {
                                               ),
                                             ),
                                             if (_isPinPending) CupertinoActivityIndicator(radius: 6),
+                                            // if (widget.chat.isPinned)
+                                            //   Assets.icons.pinned.svg(
+                                            //     colorFilter: ColorFilter.mode(
+                                            //       iconColors.active,
+                                            //       .srcIn,
+                                            //     ),
+                                            //   ),
                                             if (widget.chat.isMuted)
                                               Icon(
                                                 Icons.headset_off,
@@ -328,7 +336,14 @@ class _ChatItemState extends State<ChatItem> {
                                       children: [
                                         Row(
                                           children: [
-                                            if (widget.chat.isPinned) Assets.icons.pinned.svg(height: 20),
+                                            if (widget.chat.isPinned)
+                                              Assets.icons.pinned.svg(
+                                                height: 20,
+                                                colorFilter: ColorFilter.mode(
+                                                  iconColors.active,
+                                                  BlendMode.srcIn,
+                                                ),
+                                              ),
                                             (widget.chat.type == .channel && currentSize(context) > .tablet)
                                                 ? InkWell(
                                                     borderRadius: .circular(35),
@@ -560,6 +575,7 @@ class _ChatContextMenuAction extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 36.0),
       child: Material(
         child: InkWell(
+          mouseCursor: SystemMouseCursors.click,
           borderRadius: .circular(8),
           onTap: onTap,
           child: Padding(

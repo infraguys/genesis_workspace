@@ -7,6 +7,7 @@ import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_
 import 'package:genesis_workspace/features/profile/view/profile_personal_info_page.dart';
 import 'package:genesis_workspace/features/profile/view/profile_settings_view.dart';
 import 'package:genesis_workspace/features/settings/bloc/settings_cubit.dart';
+import 'package:genesis_workspace/features/theme/theme_settings.dart';
 import 'package:genesis_workspace/features/update/update.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,7 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   static const String _personalInfoRoute = '/personal-info';
   static const String _versionChooseRoute = '/version-choose';
+  static const String _themeSettingsRoute = '/theme-settings';
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   String _selectedSound = AssetsConstants.audioPop;
   SharedPreferences? _prefs;
@@ -131,6 +133,10 @@ class _ProfileViewState extends State<ProfileView> {
     _navigatorKey.currentState?.pushNamed(_personalInfoRoute);
   }
 
+  void _openThemeSettings() {
+    _navigatorKey.currentState?.pushNamed(_themeSettingsRoute);
+  }
+
   void _openVersionChoose() {
     _navigatorKey.currentState?.pushNamed(_versionChooseRoute);
   }
@@ -159,6 +165,7 @@ class _ProfileViewState extends State<ProfileView> {
                   onClosePanel: () => pageContext.read<InfoPanelCubit>().setInfoPanelState(.closed),
                   onOpenPersonalInfo: _openPersonalInfo,
                   onOpenVersionChoose: _openVersionChoose,
+                  onOpenThemeSettings: _openThemeSettings,
                   showSoundSettings: _prefs != null,
                   selectedSound: _selectedSound,
                   onSoundChanged: _handleSoundChanged,
@@ -182,12 +189,18 @@ class _ProfileViewState extends State<ProfileView> {
                 builder: (pageContext) => UpdateForce(),
                 settings: settings,
               );
+            case _themeSettingsRoute:
+              return MaterialPageRoute(
+                builder: (pageContext) => ThemeSettings(),
+                settings: settings,
+              );
             default:
               return MaterialPageRoute(
                 builder: (pageContext) => ProfileSettingsView(
                   onClosePanel: () => pageContext.read<InfoPanelCubit>().setInfoPanelState(.closed),
                   onOpenVersionChoose: _openVersionChoose,
                   onOpenPersonalInfo: _openPersonalInfo,
+                  onOpenThemeSettings: _openThemeSettings,
                   showSoundSettings: _prefs != null,
                   selectedSound: _selectedSound,
                   onSoundChanged: _handleSoundChanged,

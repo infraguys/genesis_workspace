@@ -195,15 +195,18 @@ class _TopicItemState extends State<TopicItem> {
                                 Row(
                                   spacing: 4,
                                   children: [
-                                    Tooltip(
-                                      message: widget.topic.name,
-                                      child: Text(
-                                        "# ${widget.topic.name}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.labelMedium?.copyWith(
-                                          fontSize: 14,
-                                          color: textColors.text100,
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(maxWidth: 235),
+                                      child: Tooltip(
+                                        message: widget.topic.name,
+                                        child: Text(
+                                          "# ${widget.topic.name}",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelMedium?.copyWith(
+                                            fontSize: 14,
+                                            color: textColors.text100,
+                                          ),
                                         ),
                                       ),
                                     ),

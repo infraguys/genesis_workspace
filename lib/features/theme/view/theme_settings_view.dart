@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/features/theme/bloc/theme_cubit.dart';
 
 class ThemeSettingsView extends StatelessWidget {
@@ -8,8 +9,10 @@ class ThemeSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = currentSize(context) <= .tablet;
 
     return Scaffold(
+      backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('Theme Settings'),
       ),

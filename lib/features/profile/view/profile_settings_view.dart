@@ -22,6 +22,7 @@ class ProfileSettingsView extends StatelessWidget {
     required this.onClosePanel,
     required this.onOpenPersonalInfo,
     required this.onOpenVersionChoose,
+    required this.onOpenThemeSettings,
     required this.showSoundSettings,
     required this.selectedSound,
     required this.onSoundChanged,
@@ -32,6 +33,7 @@ class ProfileSettingsView extends StatelessWidget {
   final VoidCallback onClosePanel;
   final VoidCallback onOpenPersonalInfo;
   final VoidCallback onOpenVersionChoose;
+  final VoidCallback onOpenThemeSettings;
   final bool showSoundSettings;
   final String selectedSound;
   final ValueChanged<String> onSoundChanged;
@@ -329,7 +331,13 @@ class ProfileSettingsView extends StatelessWidget {
               context.t.settings.themeSettings,
               style: theme.textTheme.bodyMedium,
             ),
-            onTap: () => context.pushNamed(Routes.themeSettings),
+            onTap: () {
+              if (isMobile) {
+                context.pushNamed(Routes.themeSettings);
+              } else {
+                onOpenThemeSettings();
+              }
+            },
           ),
           ListTile(
             leading: Icon(
