@@ -19,6 +19,7 @@ class PrivateInfoPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
+    final iconColors = Theme.of(context).extension<IconColors>()!;
 
     return Container(
       width: double.infinity,
@@ -42,7 +43,12 @@ class PrivateInfoPanel extends StatelessWidget {
                       context.t.information,
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
-                    IconButton(onPressed: onClose, icon: Assets.icons.close.svg()),
+                    IconButton(
+                      onPressed: onClose,
+                      icon: Assets.icons.close.svg(
+                        colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                      ),
+                    ),
                   ],
                 ),
                 BlocBuilder<ChatCubit, ChatState>(

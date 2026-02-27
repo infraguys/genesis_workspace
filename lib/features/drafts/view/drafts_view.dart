@@ -203,7 +203,7 @@ class _DraftCard extends StatelessWidget {
     return Container(
       padding: .all(16),
       decoration: BoxDecoration(
-        color: cardColors.onBackgroundCard,
+        color: cardColors.active,
         borderRadius: .circular(12),
         border: Border.all(
           color: theme.dividerColor,

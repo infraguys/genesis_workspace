@@ -30,6 +30,7 @@ class MessengerFolderRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -54,21 +55,21 @@ class MessengerFolderRail extends StatelessWidget {
                   if (index == 0) {
                     icon = Assets.icons.allChats.svg(
                       colorFilter: ColorFilter.mode(
-                        isSelected ? folder.backgroundColor : textColors.text30,
+                        isSelected ? folder.backgroundColor : iconColors.base,
                         BlendMode.srcIn,
                       ),
                     );
                   } else if (isSelected) {
                     icon = Assets.icons.folderOpen.svg(
                       colorFilter: ColorFilter.mode(
-                        isSelected ? folder.backgroundColor : textColors.text30,
+                        isSelected ? folder.backgroundColor : iconColors.base,
                         BlendMode.srcIn,
                       ),
                     );
                   } else {
                     icon = Assets.icons.folder.svg(
                       colorFilter: ColorFilter.mode(
-                        isSelected ? folder.backgroundColor : textColors.text30,
+                        isSelected ? folder.backgroundColor : iconColors.base,
                         BlendMode.srcIn,
                       ),
                     );
@@ -97,7 +98,9 @@ class MessengerFolderRail extends StatelessWidget {
             SizedBox(height: 28),
             IconButton(
               onPressed: onCreateFolder,
-              icon: Assets.icons.add.svg(),
+              icon: Assets.icons.add.svg(
+                colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+              ),
             ),
           ],
         ),
