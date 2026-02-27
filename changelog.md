@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.9.2
+- Refactored appbar on mobile
+- Fixed switch unauthorized organization toggle
+- Open profile info from all branches
+- Theme refactor: icons replaced, colors
+
 # 1.9.1
 - Open chat from message feature
 - Updated flutter version
