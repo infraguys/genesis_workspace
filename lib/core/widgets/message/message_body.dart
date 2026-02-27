@@ -149,7 +149,7 @@ class _ExpandableMessageContent extends StatefulWidget {
 }
 
 class _ExpandableMessageContentState extends State<_ExpandableMessageContent> {
-  static const double _collapsedHeight = 320;
+  static const double _collapsedHeight = 500;
   bool _isExpanded = false;
   final GlobalKey _measureKey = GlobalKey();
   bool _measureScheduled = false;
