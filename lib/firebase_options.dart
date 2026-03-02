@@ -50,19 +50,19 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA5drputG5jJGXIZWA7TCmWqex0l-Ukv38',
-    appId: '1:84165506338:android:43984d3d330575c334a17b',
-    messagingSenderId: '84165506338',
-    projectId: 'genesis-workspace',
-    storageBucket: 'genesis-workspace.firebasestorage.app',
+    apiKey: 'AIzaSyB0E2PkBUUVYbx0JWXT_ATFBrKXxoeMMDg',
+    appId: '1:313579879000:android:f8556564ea20fe8be3e82d',
+    messagingSenderId: '313579879000',
+    projectId: 'genesis-workspace-59e6a',
+    storageBucket: 'genesis-workspace-59e6a.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB7vhg-golKIN7IFw8OBxHOkpokwHbLiPU',
-    appId: '1:84165506338:ios:e08e8262d6baf80e34a17b',
-    messagingSenderId: '84165506338',
-    projectId: 'genesis-workspace',
-    storageBucket: 'genesis-workspace.firebasestorage.app',
+    apiKey: 'AIzaSyA36Aw99xw1Aaht3Lk34kMmiBT_3mimyvE',
+    appId: '1:313579879000:ios:ceb1a4b0833dbc90e3e82d',
+    messagingSenderId: '313579879000',
+    projectId: 'genesis-workspace-59e6a',
+    storageBucket: 'genesis-workspace-59e6a.firebasestorage.app',
     iosBundleId: 'genesis.workspace',
   );
 
