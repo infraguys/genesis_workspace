@@ -57,7 +57,7 @@ class _AttachFilesButtonState extends State<AttachFilesButton> {
           alignment: .bottomLeft,
           closeOverlay: _closeOverlay,
           child: Container(
-            width: 220,
+            width: 240,
             height: 100,
             padding: .all(8),
             decoration: BoxDecoration(
