@@ -110,6 +110,7 @@ ThemeData buildThemeFromPalette({
     ),
     elevatedButtonTheme: _elevatedButtonTheme(colorScheme),
     outlinedButtonTheme: _outlinedButtonTheme(colorScheme),
+    segmentedButtonTheme: _segmentedButtonTheme(colorScheme),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
         enabledMouseCursor: SystemMouseCursors.click,
@@ -120,6 +121,9 @@ ThemeData buildThemeFromPalette({
       style: TextButton.styleFrom(
         enabledMouseCursor: SystemMouseCursors.click,
         disabledMouseCursor: SystemMouseCursors.basic,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     ),
     dividerColor: colorScheme.onSurface.withValues(alpha: 0.1),
@@ -133,6 +137,36 @@ ThemeData buildThemeFromPalette({
     dialogTheme: DialogThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(12.0),
+      ),
+    ),
+    listTileTheme: ListTileThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      inputDecorationTheme:
+          _inputDecorationTheme(
+            colorScheme,
+            palette: palette,
+            isDark: isDark,
+          ).copyWith(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+      menuStyle: MenuStyle(
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
       ),
     ),
   );
@@ -151,8 +185,7 @@ InputDecorationTheme _inputDecorationTheme(
 }) {
   return InputDecorationTheme(
     filled: true,
-    //TODO replace with light lightTextFieldBackground
-    fillColor: isDark ? palette.darkTextFieldBackground : colorScheme.onSurface.withValues(alpha: isDark ? 0.1 : 0.04),
+    fillColor: isDark ? palette.darkTextFieldBackground : palette.lightTextFieldBackground,
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
@@ -197,6 +230,22 @@ OutlinedButtonThemeData _outlinedButtonTheme(ColorScheme colorScheme) {
       foregroundColor: colorScheme.primary,
       side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+  );
+}
+
+SegmentedButtonThemeData _segmentedButtonTheme(ColorScheme colorScheme) {
+  return SegmentedButtonThemeData(
+    style: SegmentedButton.styleFrom(
+      enabledMouseCursor: SystemMouseCursors.click,
+      disabledMouseCursor: SystemMouseCursors.basic,
+      selectedBackgroundColor: colorScheme.primary,
+      selectedForegroundColor: colorScheme.onPrimary,
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),

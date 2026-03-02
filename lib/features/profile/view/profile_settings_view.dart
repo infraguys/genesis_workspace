@@ -187,20 +187,20 @@ class ProfileSettingsView extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                child: InkWell(
-                  onTap: () {
-                    if (isMobile) {
-                      context.pushNamed(Routes.forceUpdate);
-                    } else {
-                      onOpenVersionChoose();
-                    }
-                  },
+                child: Material(
+                  color: cardColors.base,
                   borderRadius: BorderRadius.circular(8),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: cardColors.base,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                  child: InkWell(
+                    mouseCursor: SystemMouseCursors.click,
+                    hoverColor: cardColors.active,
+                    onTap: () {
+                      if (isMobile) {
+                        context.pushNamed(Routes.forceUpdate);
+                      } else {
+                        onOpenVersionChoose();
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(8),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: Row(
@@ -244,7 +244,7 @@ class ProfileSettingsView extends StatelessWidget {
             ListTile(
               leading: TapEffectIcon(
                 onTap: onPlaySound,
-                padding: .zero,
+                padding: EdgeInsets.zero,
                 child: Assets.icons.volumeUp.svg(
                   colorFilter: ColorFilter.mode(
                     iconColors.base,
@@ -256,36 +256,37 @@ class ProfileSettingsView extends StatelessWidget {
                 context.t.settings.notificationSound,
                 style: theme.textTheme.bodyMedium,
               ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButton<String>(
-                    value: selectedSound,
-                    underline: const SizedBox.shrink(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        onSoundChanged(value);
-                      }
-                    },
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      color: iconColors.base,
-                    ),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: textColors.text30,
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: AssetsConstants.audioPop,
-                        child: Text(context.t.profileView.notificationSoundPop),
-                      ),
-                      DropdownMenuItem(
-                        value: AssetsConstants.audioWhoop,
-                        child: Text(context.t.profileView.notificationSoundWhoop),
-                      ),
-                    ],
+              trailing: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 100, maxWidth: 100),
+                child: DropdownMenu<String>(
+                  initialSelection: selectedSound,
+                  requestFocusOnTap: false,
+                  trailingIcon: Icon(
+                    Icons.arrow_drop_down,
+                    color: iconColors.base,
                   ),
-                ],
+                  textStyle: theme.textTheme.bodyMedium?.copyWith(
+                    color: textColors.text30,
+                  ),
+                  dropdownMenuEntries: [
+                    DropdownMenuEntry(
+                      value: AssetsConstants.audioPop,
+                      label: context.t.profileView.notificationSoundPop,
+                    ),
+                    DropdownMenuEntry(
+                      value: AssetsConstants.audioWhoop,
+                      label: context.t.profileView.notificationSoundWhoop,
+                    ),
+                  ],
+                  onSelected: (String? value) {
+                    if (value == null) return;
+                    onSoundChanged(value);
+                  },
+                  inputDecorationTheme: const InputDecorationTheme(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
               ),
             ),
           ListTile(
@@ -299,27 +300,36 @@ class ProfileSettingsView extends StatelessWidget {
               context.t.settings.language,
               style: theme.textTheme.bodyMedium,
             ),
-            trailing: DropdownButton<Locale>(
-              value: localizationService.locale.flutterLocale,
-              underline: const SizedBox.shrink(),
-              icon: Icon(
-                Icons.arrow_drop_down,
-                color: iconColors.base,
-              ),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: textColors.text30,
-              ),
-              onChanged: (locale) {
-                if (locale != null) {
+            trailing: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 140, maxWidth: 140),
+              child: DropdownMenu<Locale>(
+                initialSelection: localizationService.locale.flutterLocale,
+                requestFocusOnTap: false,
+                textStyle: theme.textTheme.bodyMedium?.copyWith(color: textColors.text30),
+                trailingIcon: Icon(Icons.arrow_drop_down, color: iconColors.base),
+                dropdownMenuEntries: [
+                  DropdownMenuEntry(
+                    value: const Locale('en'),
+                    label: context.t.profileView.languageEnglish,
+                  ),
+                  DropdownMenuEntry(
+                    value: const Locale('ru'),
+                    label: context.t.profileView.languageRussian,
+                  ),
+                ],
+                onSelected: (Locale? locale) {
+                  if (locale == null) return;
                   localizationService.setLocale(
-                    AppLocale.values.firstWhere((l) => l.languageCode == locale.languageCode),
+                    AppLocale.values.firstWhere(
+                      (language) => language.languageCode == locale.languageCode,
+                    ),
                   );
-                }
-              },
-              items: [
-                DropdownMenuItem(value: const Locale('en'), child: Text(context.t.profileView.languageEnglish)),
-                DropdownMenuItem(value: const Locale('ru'), child: Text(context.t.profileView.languageRussian)),
-              ],
+                },
+                inputDecorationTheme: const InputDecorationTheme(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+              ),
             ),
           ),
           ListTile(
