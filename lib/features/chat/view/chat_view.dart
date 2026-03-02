@@ -20,6 +20,7 @@ import 'package:genesis_workspace/core/utils/message_input_intents/mention_navig
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
+import 'package:genesis_workspace/core/widgets/buttons/open_infopanel_button.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -305,12 +306,13 @@ class _ChatViewState extends State<ChatView>
                                         ),
                                       ),
                                     )
-                                  : IconButton(
-                                      onPressed: widget.leadingOnPressed,
-                                      icon: Assets.icons.moreVert.svg(
-                                        colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
-                                      ),
-                                    ),
+                                  : null,
+                              // : IconButton(
+                              //     onPressed: widget.leadingOnPressed,
+                              //     icon: Assets.icons.moreVert.svg(
+                              //       colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
+                              //     ),
+                              //   ),
                               actions: [
                                 DownloadFilesButton(),
                                 IconButton(
@@ -338,6 +340,7 @@ class _ChatViewState extends State<ChatView>
                                     colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
+                                if (!isTabletOrSmaller) OpenInfoPanelButton(onPressed: widget.leadingOnPressed),
                               ],
                               title: Builder(
                                 builder: (context) {

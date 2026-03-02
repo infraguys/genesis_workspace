@@ -20,6 +20,7 @@ import 'package:genesis_workspace/core/utils/message_input_intents/mention_navig
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
+import 'package:genesis_workspace/core/widgets/buttons/open_infopanel_button.dart';
 import 'package:genesis_workspace/core/widgets/channel_app_bar_title.dart';
 import 'package:genesis_workspace/core/widgets/input_banner.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
@@ -466,6 +467,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
+                                if (!isTabletOrSmaller) OpenInfoPanelButton(onPressed: widget.leadingOnPressed),
                               ],
                               title: Skeletonizer(
                                 enabled: state.channel == null,
@@ -481,7 +483,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               Routes.channelInfo,
                                               pathParameters: GoRouterState.of(context).pathParameters,
                                             )
-                                          : widget.leadingOnPressed,
+                                          : null,
                                     ),
                                   ],
                                 ),
