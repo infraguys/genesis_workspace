@@ -78,7 +78,67 @@ class _ChannelChatViewState extends State<ChannelChatView>
   late final ScrollController _scrollController;
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
+  bool _isOpeningNextUnreadTopic = false;
   DraftEntity? draftForThisChat;
+
+  bool _isTextInputFocused() {
+    final focusedContext = FocusManager.instance.primaryFocus?.context;
+    if (focusedContext == null) return false;
+    return focusedContext.widget is EditableText;
+  }
+
+  Future<void> _openNextUnreadTopic() async {
+    if (!mounted || _isOpeningNextUnreadTopic) return;
+
+    _isOpeningNextUnreadTopic = true;
+    try {
+      final messengerCubit = context.read<MessengerCubit>();
+      final messengerState = messengerCubit.state;
+
+      int chatIndex = messengerState.chats.indexWhere((chat) => chat.id == widget.chatId);
+      if (chatIndex == -1) {
+        chatIndex = messengerState.chats.indexWhere((chat) => chat.streamId == widget.channelId);
+      }
+      if (chatIndex == -1) return;
+
+      var chat = messengerState.chats[chatIndex];
+      final streamId = chat.streamId;
+      if (streamId == null) return;
+
+      if (chat.topics == null) {
+        await messengerCubit.getChannelTopics(streamId);
+        if (!mounted) return;
+        final refreshedIndex = messengerCubit.state.chats.indexWhere((item) => item.id == chat.id);
+        if (refreshedIndex == -1) return;
+        chat = messengerCubit.state.chats[refreshedIndex];
+      }
+
+      final topics = chat.topics ?? const [];
+      final unreadTopics = topics.where((topic) => topic.unreadMessages.isNotEmpty).toList();
+      if (unreadTopics.isEmpty) return;
+
+      final currentTopicName = widget.topicName;
+      final currentIndex = unreadTopics.indexWhere((topic) => topic.name == currentTopicName);
+      final nextTopic = unreadTopics[currentIndex == -1 ? 0 : (currentIndex + 1) % unreadTopics.length];
+
+      final isDesktop = currentSize(context) > ScreenSize.tablet;
+      if (isDesktop) {
+        messengerCubit.selectChat(chat, selectedTopic: nextTopic.name);
+      } else {
+        context.pushReplacementNamed(
+          Routes.channelChatTopic,
+          pathParameters: {
+            'chatId': widget.chatId.toString(),
+            'channelId': widget.channelId.toString(),
+            'topicName': nextTopic.name,
+          },
+          extra: {'unreadMessagesCount': nextTopic.unreadMessages.length},
+        );
+      }
+    } finally {
+      _isOpeningNextUnreadTopic = false;
+    }
+  }
 
   Future<void> sendMessage({
     required int streamId,
@@ -314,11 +374,23 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): isSelectMode
                     ? CancelSelectModeIntent()
                     : UnselectChatIntent(),
+                SingleActivator(LogicalKeyboardKey.keyN, numLock: LockState.ignored): const _NextUnreadTopicIntent(),
               },
               child: Actions(
                 actions: {
                   CancelSelectModeIntent: CancelSelectModeAction(),
                   UnselectChatIntent: UnselectChatAction(),
+                  _NextUnreadTopicIntent: CallbackAction<_NextUnreadTopicIntent>(
+                    onInvoke: (intent) {
+                      final keyboard = HardwareKeyboard.instance;
+                      if (_isTextInputFocused()) return null;
+                      if (keyboard.isAltPressed || keyboard.isControlPressed || keyboard.isMetaPressed) {
+                        return null;
+                      }
+                      unawaited(_openNextUnreadTopic());
+                      return null;
+                    },
+                  ),
                 },
                 child: Focus(
                   autofocus: true,
@@ -789,4 +861,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
       },
     );
   }
+}
+
+class _NextUnreadTopicIntent extends Intent {
+  const _NextUnreadTopicIntent();
 }
