@@ -67,6 +67,7 @@ android {
                 name = "app_name",
                 value = "Workspace App (Stage)")
             applicationIdSuffix = ".stage"
+//            applicationIdSuffix = ""
         }
         create("prod") {
             dimension = "default"
@@ -75,6 +76,7 @@ android {
                 name = "app_name",
                 value = "Workspace App")
             applicationIdSuffix = ".prod"
+//            applicationIdSuffix = ""
         }
     }
 }

@@ -41,6 +41,8 @@ class RealTimeCubit extends Cubit<RealTimeState> {
     try {
       if (isFirebaseSupported) {
         FirebaseMessaging messaging = FirebaseMessaging.instance;
+        final apnTokens = await messaging.getAPNSToken();
+        inspect(apnTokens);
         await messaging.requestPermission(
           alert: true,
           announcement: false,
@@ -51,7 +53,7 @@ class RealTimeCubit extends Cubit<RealTimeState> {
           sound: true,
         );
         final token = await messaging.getToken();
-        // print("fcm token: ${token}");
+        print("fcm token: ${token}");
       }
     } catch (e) {
       if (kDebugMode) {
@@ -65,6 +67,12 @@ class RealTimeCubit extends Cubit<RealTimeState> {
         inspect(e);
       }
     }
+  }
+
+  Future<String> getFcmToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    final token = await messaging.getToken();
+    return token ?? '';
   }
 
   Future<void> addConnection() async {
