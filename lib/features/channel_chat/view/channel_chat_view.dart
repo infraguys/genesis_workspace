@@ -12,6 +12,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/mixins/message/forward_message_mixin.dart';
 import 'package:genesis_workspace/core/shortcuts/cancel_select_mode_intent.dart';
+import 'package:genesis_workspace/core/shortcuts/read_next_unread_topic.dart';
 import 'package:genesis_workspace/core/shortcuts/unselect_chat_shortcut.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
@@ -78,7 +79,66 @@ class _ChannelChatViewState extends State<ChannelChatView>
   late final ScrollController _scrollController;
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
+  bool _isOpeningNextUnreadTopic = false;
   DraftEntity? draftForThisChat;
+
+  bool _isTextInputFocused() {
+    final focusedContext = FocusManager.instance.primaryFocus?.context;
+    return focusedContext?.widget is EditableText;
+  }
+
+  Future<void> _openNextUnreadTopic() async {
+    if (!mounted || _isOpeningNextUnreadTopic) return;
+
+    _isOpeningNextUnreadTopic = true;
+    try {
+      final messengerCubit = context.read<MessengerCubit>();
+      final messengerState = messengerCubit.state;
+
+      int chatIndex = messengerState.chats.indexWhere((chat) => chat.id == widget.chatId);
+      if (chatIndex == -1) {
+        chatIndex = messengerState.chats.indexWhere((chat) => chat.streamId == widget.channelId);
+      }
+      if (chatIndex == -1) return;
+
+      var chat = messengerState.chats[chatIndex];
+      final streamId = chat.streamId;
+      if (streamId == null) return;
+
+      if (chat.topics == null) {
+        await messengerCubit.getChannelTopics(streamId);
+        if (!mounted) return;
+        final refreshedIndex = messengerCubit.state.chats.indexWhere((item) => item.id == chat.id);
+        if (refreshedIndex == -1) return;
+        chat = messengerCubit.state.chats[refreshedIndex];
+      }
+
+      final topics = chat.topics ?? const [];
+      final unreadTopics = topics.where((topic) => topic.unreadMessages.isNotEmpty).toList();
+      if (unreadTopics.isEmpty) return;
+
+      final currentTopicName = widget.topicName;
+      final currentIndex = unreadTopics.indexWhere((topic) => topic.name == currentTopicName);
+      final nextTopic = unreadTopics[currentIndex == -1 ? 0 : (currentIndex + 1) % unreadTopics.length];
+
+      final isDesktop = currentSize(context) > ScreenSize.tablet;
+      if (isDesktop) {
+        messengerCubit.selectChat(chat, selectedTopic: nextTopic.name);
+      } else {
+        context.pushReplacementNamed(
+          Routes.channelChatTopic,
+          pathParameters: {
+            'chatId': widget.chatId.toString(),
+            'channelId': widget.channelId.toString(),
+            'topicName': nextTopic.name,
+          },
+          extra: {'unreadMessagesCount': nextTopic.unreadMessages.length},
+        );
+      }
+    } finally {
+      _isOpeningNextUnreadTopic = false;
+    }
+  }
 
   Future<void> sendMessage({
     required int streamId,
@@ -314,11 +374,16 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): isSelectMode
                     ? CancelSelectModeIntent()
                     : UnselectChatIntent(),
+                SingleActivator(LogicalKeyboardKey.keyN, numLock: LockState.ignored): const NextUnreadTopicIntent(),
               },
               child: Actions(
                 actions: {
                   CancelSelectModeIntent: CancelSelectModeAction(),
                   UnselectChatIntent: UnselectChatAction(),
+                  NextUnreadTopicIntent: NextUnreadTopicAction(
+                    isTextInputFocused: _isTextInputFocused,
+                    openNextUnreadTopic: _openNextUnreadTopic,
+                  ),
                 },
                 child: Focus(
                   autofocus: true,
