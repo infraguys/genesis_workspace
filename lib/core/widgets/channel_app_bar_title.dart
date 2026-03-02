@@ -3,6 +3,8 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/topic_title.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+import 'package:genesis_workspace/navigation/router.dart';
+import 'package:go_router/go_router.dart';
 
 class ChannelAppBarTitle extends StatelessWidget {
   const ChannelAppBarTitle({
@@ -21,15 +23,9 @@ class ChannelAppBarTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: isTabletOrSmaller
-            ? _MobileTitle(channelName: channelName, topicName: topicName, count: count)
-            : _Desktop(channelName: channelName, topicName: topicName, count: count),
-      ),
-    );
+    return isTabletOrSmaller
+        ? _MobileTitle(channelName: channelName, topicName: topicName, count: count)
+        : _Desktop(channelName: channelName, topicName: topicName, count: count);
   }
 }
 
@@ -50,20 +46,28 @@ class _MobileTitle extends StatelessWidget {
     final textTheme = TextTheme.of(context);
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     final textColors = Theme.of(context).extension<TextColors>()!;
-    return Column(
-      crossAxisAlignment: .start,
-      children: [
-        Text(
-          channelName,
-          style: textTheme.labelLarge?.copyWith(fontSize: isTabletOrSmaller ? 14 : 16),
-        ),
-        TopicTitle(topicName: topicName),
-        SizedBox(height: 4.0),
-        Text(
-          context.t.group.membersCount(count: count),
-          style: textTheme.bodySmall?.copyWith(color: textColors.text30),
-        ),
-      ],
+    return GestureDetector(
+      onTap: () {
+        context.pushNamed(
+          Routes.channelInfo,
+          pathParameters: GoRouterState.of(context).pathParameters,
+        );
+      },
+      child: Column(
+        crossAxisAlignment: .start,
+        children: [
+          Text(
+            channelName,
+            style: textTheme.labelLarge?.copyWith(fontSize: isTabletOrSmaller ? 14 : 16),
+          ),
+          TopicTitle(topicName: topicName),
+          SizedBox(height: 4.0),
+          Text(
+            context.t.group.membersCount(count: count),
+            style: textTheme.bodySmall?.copyWith(color: textColors.text30),
+          ),
+        ],
+      ),
     );
   }
 }

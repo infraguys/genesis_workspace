@@ -538,13 +538,14 @@ class _ChatContextMenu extends StatelessWidget {
             label: context.t.readAllMessages,
             onTap: onReadAll,
           ),
-          _ChatContextMenuAction(
-            textColor: textColors.text100,
-            icon: Assets.icons.allChats,
-            iconColor: iconColor,
-            label: context.t.topic.createTopic,
-            onTap: onCreateTopic,
-          ),
+          if (chat.type == ChatType.channel)
+            _ChatContextMenuAction(
+              textColor: textColors.text100,
+              icon: Assets.icons.allChats,
+              iconColor: iconColor,
+              label: context.t.topic.createTopic,
+              onTap: onCreateTopic,
+            ),
         ],
       ),
     );
