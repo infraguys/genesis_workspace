@@ -18,7 +18,7 @@ class OpenInfoPanelButton extends StatelessWidget {
         builder: (context, state) {
           final color = switch (state.status) {
             .closed => iconColors.base,
-            _ => Colors.white,
+            _ => iconColors.active,
           };
           return Assets.icons.dock.svg(
             colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
