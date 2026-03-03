@@ -68,3 +68,5 @@ update_script.sh
 firebase-debug.log
 
 .agents/
+
+lib/firebase_options.dart
