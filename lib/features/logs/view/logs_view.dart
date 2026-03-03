@@ -96,7 +96,7 @@ class _LogsViewState extends State<LogsView> {
               ),
             ],
           ),
-          Text("FCM Token: $_fcmToken"),
+          SelectableText("FCM Token: $_fcmToken"),
         ],
       ),
       // body: ListView.separated(
