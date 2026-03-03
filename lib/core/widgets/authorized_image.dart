@@ -115,7 +115,7 @@ class _AuthorizedImageState extends State<AuthorizedImage> {
   }
 
   Future<void> _loadImage() async {
-    final Uri? targetUri = _resolveUri(widget.thumbnailUrl);
+    final Uri? targetUri = _resolveUri(widget.url);
 
     if (targetUri == null || !_isHttpScheme(targetUri)) {
       setState(() {

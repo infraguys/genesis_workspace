@@ -17,10 +17,7 @@ class FirebaseService {
   static Future<void> initialize() async {
     if (!isFirebaseSupported || _initialized) return;
 
-    await Firebase.initializeApp(
-      name: 'genesis_workspace',
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     await FirebaseMessaging.instance.setAutoInitEnabled(true);
 
     _initialized = true;

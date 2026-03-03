@@ -33,6 +33,8 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   final RealTimeService _realTimeService = getIt<RealTimeService>();
   final MultiPollingService _multiPollingService;
   final OrganizationsCubit _organizationsCubit;
+  static const int _maxApnsTokenAttempts = 12;
+  static const Duration _apnsTokenRetryDelay = Duration(milliseconds: 500);
   bool _recheckQueued = false;
 
   late final StreamSubscription<ConnectionEntity> _connectionStatusSubscription;
@@ -40,20 +42,10 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   Future<void> init() async {
     try {
       if (isFirebaseSupported) {
-        FirebaseMessaging messaging = FirebaseMessaging.instance;
-        final apnTokens = await messaging.getAPNSToken();
-        inspect(apnTokens);
-        await messaging.requestPermission(
-          alert: true,
-          announcement: false,
-          badge: true,
-          carPlay: false,
-          criticalAlert: false,
-          provisional: false,
-          sound: true,
-        );
-        final token = await messaging.getToken();
-        print("fcm token: ${token}");
+        final token = await _requestFcmToken();
+        if (kDebugMode) {
+          print("fcm token: $token");
+        }
       }
     } catch (e) {
       if (kDebugMode) {
@@ -70,9 +62,73 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   }
 
   Future<String> getFcmToken() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    if (!isFirebaseSupported) {
+      throw StateError('Firebase messaging is not supported on this platform.');
+    }
+    return _requestFcmToken();
+  }
+
+  Future<String> _requestFcmToken() async {
+    final messaging = FirebaseMessaging.instance;
+    final settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    final isPermissionGranted =
+        settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+    if (!isPermissionGranted) {
+      throw StateError(
+        'Notification permission is ${_authorizationStatusLabel(settings.authorizationStatus)}. '
+        'Allow notifications in iOS Settings for this app.',
+      );
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      String? apnsToken = await _safeGetApnsToken(messaging);
+      for (int attempt = 0; apnsToken == null && attempt < _maxApnsTokenAttempts; attempt++) {
+        await Future<void>.delayed(_apnsTokenRetryDelay);
+        apnsToken = await _safeGetApnsToken(messaging);
+      }
+      if (apnsToken == null) {
+        throw StateError(
+          'APNS token was not received. Check iOS Push capability/signing/provisioning and run on a physical device.',
+        );
+      }
+    }
+
     final token = await messaging.getToken();
-    return token ?? '';
+    if (token == null || token.isEmpty) {
+      throw StateError('FCM token is empty.');
+    }
+    return token;
+  }
+
+  Future<String?> _safeGetApnsToken(FirebaseMessaging messaging) async {
+    try {
+      return await messaging.getAPNSToken();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _authorizationStatusLabel(AuthorizationStatus status) {
+    switch (status) {
+      case AuthorizationStatus.authorized:
+        return 'authorized';
+      case AuthorizationStatus.denied:
+        return 'denied';
+      case AuthorizationStatus.notDetermined:
+        return 'notDetermined';
+      case AuthorizationStatus.provisional:
+        return 'provisional';
+    }
   }
 
   Future<void> addConnection() async {
