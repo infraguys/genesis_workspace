@@ -262,10 +262,7 @@ class _ChatItemState extends State<ChatItem> {
                           child: Ink(
                             decoration: BoxDecoration(
                               color: isSelected ? cardColors.active : cardColors.base,
-                              borderRadius: BorderRadius.circular(8).copyWith(
-                                bottomLeft: _isExpanded ? .zero : .circular(8),
-                                bottomRight: _isExpanded ? .zero : .circular(8),
-                              ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Padding(
                               padding: const .symmetric(horizontal: 8),
