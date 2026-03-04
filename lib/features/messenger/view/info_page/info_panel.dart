@@ -20,25 +20,31 @@ class InfoPanel extends StatelessWidget {
           create: (context) => getIt<ChannelMembersInfoCubit>(),
         ),
       ],
-      child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
-        builder: (BuildContext context, state) {
-          switch (state.status) {
-            case .channelInfo:
-              return ChannelInfoPanel(onClose: onClose);
-            case .dmInfo:
-              return PrivateInfoPanel(onClose: onClose);
-            case .profileInfo:
-              return Profile();
-            default:
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: .circular(12.0),
-                  color: theme.colorScheme.surface,
-                ),
-                child: SizedBox.expand(),
-              );
-          }
-        },
+      child: Container(
+        clipBehavior: .hardEdge,
+        decoration: BoxDecoration(
+          borderRadius: .circular(12),
+          color: theme.colorScheme.surface,
+        ),
+        child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
+          builder: (BuildContext context, state) {
+            switch (state.status) {
+              case .channelInfo:
+                return ChannelInfoPanel(onClose: onClose);
+              case .dmInfo:
+                return PrivateInfoPanel(onClose: onClose);
+              case .profileInfo:
+                return Profile();
+              default:
+                return Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                  ),
+                  child: SizedBox.expand(),
+                );
+            }
+          },
+        ),
       ),
     );
   }
