@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/widgets/profile_info_tile.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -96,28 +97,48 @@ class PrivateInfoPanel extends StatelessWidget {
                 BlocBuilder<ChatCubit, ChatState>(
                   builder: (context, state) {
                     if (state.userEntity != null) {
+                      final user = state.userEntity!;
                       return Column(
-                        spacing: 8.0,
+                        spacing: 12.0,
                         children: [
-                          _InfoWidget(
-                            iconData: Icons.call,
-                            title: context.t.phone,
-                            value: '+5456546546',
+                          ProfileInfoTile(
+                            label: context.t.profilePersonalInfo.userId,
+                            value: user.userId.toString(),
+                            icon: Assets.icons.alternateEmail.svg(
+                              colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                            ),
                           ),
-                          _InfoWidget(
-                            iconData: Icons.person,
-                            title: context.t.username,
-                            value: state.userEntity?.fullName ?? '',
+                          ProfileInfoTile(
+                            label: context.t.email,
+                            value: user.email,
+                            icon: SizedBox(
+                              width: 32,
+                              child: Assets.icons.mail.svg(
+                                width: 24,
+                                colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                              ),
+                            ),
                           ),
-                          _InfoWidget(
-                            iconData: Icons.account_circle,
-                            title: context.t.role,
-                            value: state.userEntity!.role.humanReadable(context),
+                          ProfileInfoTile(
+                            label: context.t.profilePersonalInfo.timezone,
+                            value: user.timezone,
+                            icon: Assets.icons.schedule.svg(
+                              colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                            ),
                           ),
-                          _InfoWidget(
-                            iconData: Icons.date_range,
-                            title: context.t.birthday,
-                            value: '25 июля 1984',
+                          ProfileInfoTile(
+                            label: context.t.profilePersonalInfo.teamAndPosition,
+                            value: user.jobTitle,
+                            icon: Assets.icons.businessCenter.svg(
+                              colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                            ),
+                          ),
+                          ProfileInfoTile(
+                            label: context.t.profilePersonalInfo.manager,
+                            value: user.bossName,
+                            icon: Assets.icons.handshake.svg(
+                              colorFilter: ColorFilter.mode(iconColors.base, .srcIn),
+                            ),
                           ),
                         ],
                       );

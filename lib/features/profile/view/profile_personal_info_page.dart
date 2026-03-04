@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/widgets/profile_info_tile.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -133,14 +134,8 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                       color: theme.dividerColor.withValues(alpha: 0.1),
                     ),
                   ],
-
-                  // _InfoTile(
-                  //   label: "Статус",
-                  //   value: user.email,
-                  //   icon: Assets.icons.work.svg(),
-                  // ),
                   const SizedBox(height: 12),
-                  _InfoTile(
+                  ProfileInfoTile(
                     label: context.t.email,
                     value: user.email,
                     icon: SizedBox(
@@ -154,7 +149,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   const SizedBox(
                     height: 12,
                   ),
-                  _InfoTile(
+                  ProfileInfoTile(
                     label: context.t.profilePersonalInfo.userId,
                     value: user.userId.toString(),
                     icon: Assets.icons.alternateEmail.svg(
@@ -164,7 +159,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   const SizedBox(
                     height: 12,
                   ),
-                  _InfoTile(
+                  ProfileInfoTile(
                     label: context.t.profilePersonalInfo.timezone,
                     value: user.timezone,
                     icon: Assets.icons.schedule.svg(
@@ -174,7 +169,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   const SizedBox(
                     height: 12,
                   ),
-                  _InfoTile(
+                  ProfileInfoTile(
                     label: context.t.profilePersonalInfo.teamAndPosition,
                     value: user.jobTitle,
                     icon: Assets.icons.businessCenter.svg(
@@ -184,7 +179,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   const SizedBox(
                     height: 12,
                   ),
-                  _InfoTile(
+                  ProfileInfoTile(
                     label: context.t.profilePersonalInfo.manager,
                     value: user.bossName,
                     icon: Assets.icons.handshake.svg(
@@ -197,50 +192,6 @@ class ProfilePersonalInfoPage extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  const _InfoTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final Widget icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textColors = theme.extension<TextColors>()!;
-
-    return Row(
-      crossAxisAlignment: .center,
-      children: [
-        icon,
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 4,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: textColors.text30,
-                ),
-              ),
-              Text(
-                value,
-                style: theme.textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
