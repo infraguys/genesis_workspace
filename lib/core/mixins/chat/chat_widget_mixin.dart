@@ -233,7 +233,7 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
         final String quoteText = generateMessageQuote(singleMessage, quote: quote);
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          insertQuoteAndFocus(textToInsert: quoteText);
+          insertQuoteAndFocus(textToInsert: quoteText, append: true);
         });
       } else {
         replyMultiMessages([messageId]);
@@ -270,26 +270,6 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     messageController.selection = TextSelection.collapsed(offset: nextText.length);
     messageInputFocusNode.requestFocus();
   }
-
-  // Future<void> quoteMessageById({
-  //   required int messageId,
-  //   required String Function(MessageEntity) quoteBuilder,
-  //   required Future<void> Function(bool isPending) setPending,
-  // }) async {
-  //   try {
-  //     await setPending(true);
-  //     final MessageEntity message = await context.read<MessagesCubit>().getMessageById(
-  //       messageId: messageId,
-  //       applyMarkdown: false,
-  //     );
-  //     final String quote = quoteBuilder(message);
-  //     WidgetsBinding.instance.addPostFrameCallback((_) {
-  //       insertQuoteAndFocus(textToInsert: quote);
-  //     });
-  //   } finally {
-  //     await setPending(false);
-  //   }
-  // }
 
   //Edit message
 
