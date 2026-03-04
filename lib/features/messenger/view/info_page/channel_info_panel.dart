@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
@@ -67,7 +67,7 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
                     UserAvatar.group(size: 64),
                     BlocConsumer<ChannelChatCubit, ChannelChatState>(
                       listener: (context, state) {
-                        if (state.channelMembers.isNotEmpty) {
+                        if (state.channelMembers.isEmpty) {
                           context.read<ChannelMembersInfoCubit>().getUsers(state.channelMembers);
                         }
                       },
