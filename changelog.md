@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.9.3
+- Design review
+- Add open/close infopanel button
+- Firebase reconfigure
+- Rate limits fix
+- Added N shortcut
+- Refactored reply message logic
+
 # 1.9.2
 - Refactored appbar on mobile
 - Fixed switch unauthorized organization toggle
