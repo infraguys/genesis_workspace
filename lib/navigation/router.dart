@@ -42,13 +42,13 @@ final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellPr
 final _shellNavigatorMyActivityKey = GlobalKey<NavigatorState>(debugLabel: 'shellMyActivity');
 
 class AppShellBranchIndex {
-  static const int messenger = 0;
-  static const int calendar = 1;
-  static const int mail = 2;
-  static const int services = 3;
-  static const int calls = 4;
-  static const int profile = 5;
-  static const int myActivity = 6;
+  static const int messenger = 1;
+  static const int calendar = 2;
+  static const int mail = 3;
+  // static const int services = 3;
+  // static const int calls = 4;
+  static const int profile = 4;
+  static const int myActivity = 0;
 }
 
 class Routes {
