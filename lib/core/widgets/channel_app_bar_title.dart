@@ -46,27 +46,30 @@ class _MobileTitle extends StatelessWidget {
     final textTheme = TextTheme.of(context);
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     final textColors = Theme.of(context).extension<TextColors>()!;
-    return GestureDetector(
-      onTap: () {
-        context.pushNamed(
-          Routes.channelInfo,
-          pathParameters: GoRouterState.of(context).pathParameters,
-        );
-      },
-      child: Column(
-        crossAxisAlignment: .start,
-        children: [
-          Text(
-            channelName,
-            style: textTheme.labelLarge?.copyWith(fontSize: isTabletOrSmaller ? 14 : 16),
-          ),
-          TopicTitle(topicName: topicName),
-          SizedBox(height: 4.0),
-          Text(
-            context.t.group.membersCount(count: count),
-            style: textTheme.bodySmall?.copyWith(color: textColors.text30),
-          ),
-        ],
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          context.pushNamed(
+            Routes.channelInfo,
+            pathParameters: GoRouterState.of(context).pathParameters,
+          );
+        },
+        child: Column(
+          crossAxisAlignment: .start,
+          children: [
+            Text(
+              channelName,
+              style: textTheme.labelLarge?.copyWith(fontSize: isTabletOrSmaller ? 14 : 16),
+            ),
+            TopicTitle(topicName: topicName),
+            SizedBox(height: 4.0),
+            Text(
+              context.t.group.membersCount(count: count),
+              style: textTheme.bodySmall?.copyWith(color: textColors.text30),
+            ),
+          ],
+        ),
       ),
     );
   }
