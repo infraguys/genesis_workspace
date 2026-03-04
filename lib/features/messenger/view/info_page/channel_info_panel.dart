@@ -110,7 +110,7 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
                           context.t.group.members,
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
-                        IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
+                        // IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
                       ],
                     ),
                   ),
