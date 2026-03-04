@@ -9,6 +9,7 @@ import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
 import 'package:go_router/go_router.dart';
@@ -102,7 +103,7 @@ class _UserPopupProfileState extends State<UserPopupProfile> with OpenChatMixin 
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Open chat",
+                            context.t.openChat,
                             style: theme.textTheme.labelLarge!.copyWith(
                               fontWeight: FontWeight.w500,
                               color: theme.colorScheme.primary,

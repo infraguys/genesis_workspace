@@ -377,5 +377,6 @@
     "unmute": "Unmute topic"
   },
   "selected_count": "Selected ({n})",
-  "show_spoiler": "Show spoiler"
+  "show_spoiler": "Show spoiler",
+  "open_chat": "Open chat"
 }
