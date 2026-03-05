@@ -8,6 +8,8 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/connection_status.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/connection_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/fcm_token_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/register_fcm_token_use_case.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/services/firebase/firebase_service.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
@@ -18,7 +20,7 @@ part 'real_time_state.dart';
 
 @lazySingleton
 class RealTimeCubit extends Cubit<RealTimeState> {
-  RealTimeCubit(this._multiPollingService, this._organizationsCubit)
+  RealTimeCubit(this._multiPollingService, this._organizationsCubit, this._registerFcmTokenUseCase)
     : super(
         RealTimeState(
           isCheckingConnection: false,
@@ -37,23 +39,29 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   static const Duration _apnsTokenRetryDelay = Duration(milliseconds: 500);
   bool _recheckQueued = false;
 
+  final RegisterFcmTokenUseCase _registerFcmTokenUseCase;
+
   late final StreamSubscription<ConnectionEntity> _connectionStatusSubscription;
 
   Future<void> init() async {
     try {
-      if (isFirebaseSupported) {
-        final token = await _requestFcmToken();
-        if (kDebugMode) {
-          print("fcm token: $token");
-        }
-      }
+      await _multiPollingService.init();
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
       }
     }
+  }
+
+  Future<void> registerFcmToken() async {
     try {
-      await _multiPollingService.init();
+      if (isFirebaseSupported) {
+        final token = await _requestFcmToken();
+        await _registerFcmTokenUseCase(RegisterFcmTokenEntity(token: token));
+        if (kDebugMode) {
+          print("fcm token: $token");
+        }
+      }
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
