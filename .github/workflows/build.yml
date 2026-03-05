@@ -60,7 +60,7 @@ jobs:
           BUILD_TARGET="${UI_BUILD_ENV_BUILD_TARGET:-ci_stage}"
 
           python3 ./genesis/images/make_ui_build_env.py
-          make ci_prod_windows
+          make ci_windows
           cd build/windows/x64/runner/Release
           7z a -tzip ./../../../../../${ARTIFACTS_PATH}/bundle_win.zip .
           cd -
@@ -118,13 +118,13 @@ jobs:
           mkdir -p "${WEB_DIR}"
 
           python3 /usr/local/bin/make_ui_build_env
-          make ci_prod_linux
+          make ci_linux
           cd build/linux/x64/release/
           tar -czf ./../../../../${ARTIFACTS_PATH}/bundle_linux.tar.gz bundle
           cd -
-          make ci_prod_apk
-          mv build/app/outputs/flutter-apk/app-prod-release.apk ./${ARTIFACTS_PATH}/
-          make ci_prod_web
+          make ci_apk
+          mv build/app/outputs/flutter-apk/app-release.apk ./${ARTIFACTS_PATH}/
+          make ci_web
 
           find "build/web/" -maxdepth 1 -type f -exec mv -t "$WEB_DIR/" {} +
           cp -r "build/web/assets" "$WEB_DIR/"
@@ -188,7 +188,7 @@ jobs:
             $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/bundle_win.zip
           curl -X PUT --upload-file ./artifacts/build_artifacts/bundle_linux.tar.gz \
             $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/bundle_linux.tar.gz
-          curl -X PUT --upload-file ./artifacts/build_artifacts/app-prod-release.apk \
+          curl -X PUT --upload-file ./artifacts/build_artifacts/app-release.apk \
             $REPO_ENDPOINT_PUT/${PROJECT_NAME}/${VERSION}/workspace-app.apk
       - name: Update repo index
         run: |

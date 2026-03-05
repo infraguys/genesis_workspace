@@ -55,7 +55,7 @@ class RealTimeCubit extends Cubit<RealTimeState> {
 
   Future<void> registerFcmToken() async {
     try {
-      if (isFirebaseSupported) {
+      if (isFirebaseSupported && FirebaseService.isMessagingAvailable) {
         final token = await _requestFcmToken();
         await _registerFcmTokenUseCase(RegisterFcmTokenEntity(token: token));
         if (kDebugMode) {
@@ -72,6 +72,9 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   Future<String> getFcmToken() async {
     if (!isFirebaseSupported) {
       throw StateError('Firebase messaging is not supported on this platform.');
+    }
+    if (!FirebaseService.isMessagingAvailable) {
+      throw StateError('FCM is unavailable on this device. Check Google Play Services/network and try again.');
     }
     return _requestFcmToken();
   }
