@@ -121,6 +121,28 @@ class LocalNotificationsService {
     );
   }
 
+  Future<void> showNotificationFromPush({
+    required int messageId,
+    required String displayTitle,
+    required int organizationId,
+    required String content,
+  }) async {
+    NotificationDetails notificationDetails = NotificationDetails(
+      iOS: DarwinNotificationDetails(),
+    );
+
+    final payload = jsonEncode({
+      'organizationId': organizationId,
+    });
+    await _flutterLocalNotificationsPlugin.show(
+      messageId,
+      displayTitle,
+      content,
+      notificationDetails,
+      payload: payload,
+    );
+  }
+
   void cancelNotification(int id) {
     _flutterLocalNotificationsPlugin.cancel(id);
   }

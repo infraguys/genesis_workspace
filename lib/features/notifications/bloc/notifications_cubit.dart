@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
@@ -15,7 +12,6 @@ import 'package:genesis_workspace/domain/real_time_events/entities/event/update_
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
-import 'package:genesis_workspace/firebase_options.dart';
 import 'package:genesis_workspace/services/notifications/local_notifications_service.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:injectable/injectable.dart';
@@ -45,7 +41,6 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     _messagesEventsSubscription = _realTimeService.messageEventsStream.listen(_onMessageEvents);
     _messageFlagsEventsSubscription = _realTimeService.messageFlagsEventsStream.listen(_onMessageFlagsEvents);
     _deleteMessageEventsSubscription = _realTimeService.deleteMessageEventsStream.listen(_onDeleteMessageEvents);
-    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
   final _player = AudioPlayer();
@@ -103,18 +98,6 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   _onDeleteMessageEvents(DeleteMessageEventEntity event) {
     _localNotificationsService.cancelNotification(event.messageId);
   }
-
-  // @pragma('vm:entry-point')
-  // Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  //   // If you're going to use other Firebase services in the background, such as Firestore,
-  //   // make sure you call `initializeApp` before using other Firebase services.
-  //   await Firebase.initializeApp(
-  //     name: "workspace",
-  //     options: DefaultFirebaseOptions.currentPlatform,
-  //   );
-  //   inspect(message);
-  //   print("Handling a background message: ${message.messageId}");
-  // }
 
   @override
   Future<void> close() {

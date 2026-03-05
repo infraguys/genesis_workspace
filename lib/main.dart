@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:genesis_workspace/app.dart';
@@ -37,11 +38,27 @@ class Main {
   }
 }
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await AppConstants.init();
+  await configureDependencies();
+  inspect(message);
+  print("Handling a background message: ${message.messageId}");
+  final _localNotificationsService = getIt<LocalNotificationsService>();
+  final organizationId = AppConstants.selectedOrganizationId;
+  await _localNotificationsService.showNotificationFromPush(
+    messageId: int.parse(message.data['message_id']),
+    displayTitle: message.data['sender_full_name'],
+    content: message.data['content'],
+    organizationId: organizationId ?? -1,
+  );
+}
+
 void main() async {
   runZonedGuarded(
     () {
       WidgetsFlutterBinding.ensureInitialized();
-      // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
       return Main.startApp();
     },
     (error, stackTrace) {

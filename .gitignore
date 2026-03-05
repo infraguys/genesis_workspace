@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .tool_home/
+.gradle-home/
 
 # IntelliJ related
 *.iml

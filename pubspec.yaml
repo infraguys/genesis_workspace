@@ -128,7 +128,7 @@ desktop_updater:
       - --release
     linux:
       - -t
-      - lib/prod.dart
+      - lib/main.dart
       - --dart-define-from-file=env.json
 
 flutter:
