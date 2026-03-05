@@ -87,6 +87,9 @@ class DioFactory {
     final Dio dio = Dio(
       BaseOptions(
         baseUrl: baseUrl.isEmpty ? 'http://placeholder.local' : '$baseUrl$basePath',
+        headers: {
+          'User-Agent': 'Workspace/flutter/${AppConstants.appVersion}',
+        },
         receiveTimeout: const Duration(seconds: 10),
       ),
     );
