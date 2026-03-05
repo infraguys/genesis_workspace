@@ -133,7 +133,6 @@ desktop_updater:
 
 flutter:
   uses-material-design: true
-  default-flavor: stage
   assets:
     - assets/images/
     - assets/icons/

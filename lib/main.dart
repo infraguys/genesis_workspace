@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -16,7 +17,6 @@ import 'package:window_manager/window_manager.dart';
 
 class Main {
   static Future<void> startApp() async {
-    WidgetsFlutterBinding.ensureInitialized();
     MediaKit.ensureInitialized();
     if (platformInfo.isDesktop && !platformInfo.isWeb) {
       await windowManager.ensureInitialized();
@@ -33,7 +33,20 @@ class Main {
 
     // TalkerFlutter.init(settings: TalkerSettings(useConsoleLogs: false));
     getIt<Talker>();
-
     runApp(TranslationProvider(child: const WorkspaceApp()));
   }
+}
+
+void main() async {
+  runZonedGuarded(
+    () {
+      WidgetsFlutterBinding.ensureInitialized();
+      // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      return Main.startApp();
+    },
+    (error, stackTrace) {
+      inspect(error);
+      inspect(stackTrace);
+    },
+  );
 }

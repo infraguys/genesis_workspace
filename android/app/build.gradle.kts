@@ -58,27 +58,6 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
-    flavorDimensions += "default"
-    productFlavors {
-        create("stage") {
-            dimension = "default"
-            resValue(
-                type = "string",
-                name = "app_name",
-                value = "Workspace App (Stage)")
-            applicationIdSuffix = ".stage"
-//            applicationIdSuffix = ""
-        }
-        create("prod") {
-            dimension = "default"
-            resValue(
-                type = "string",
-                name = "app_name",
-                value = "Workspace App")
-            applicationIdSuffix = ".prod"
-//            applicationIdSuffix = ""
-        }
-    }
 }
 
 dependencies {
