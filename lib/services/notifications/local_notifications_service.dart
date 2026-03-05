@@ -48,6 +48,25 @@ class NotificationPayload {
 
 @injectable
 class LocalNotificationsService {
+  static const String _pushChannelId = 'workspace_push_messages';
+  static const String _pushChannelName = 'Workspace messages';
+  static const String _pushChannelDescription = 'Push notifications for new messages';
+  static const NotificationDetails _pushNotificationDetails = NotificationDetails(
+    android: AndroidNotificationDetails(
+      _pushChannelId,
+      _pushChannelName,
+      channelDescription: _pushChannelDescription,
+      importance: Importance.max,
+      priority: Priority.high,
+    ),
+    iOS: DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    ),
+  );
+  static final FlutterLocalNotificationsPlugin _backgroundNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static bool _isBackgroundNotificationsPluginInitialized = false;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
   final MessengerCubit _messengerCubit;
   final OrganizationsCubit _organizationsCubit;
@@ -121,26 +140,47 @@ class LocalNotificationsService {
     );
   }
 
-  Future<void> showNotificationFromPush({
+  static Future<void> showBackgroundPushNotification({
     required int messageId,
     required String displayTitle,
     required int organizationId,
     required String content,
   }) async {
-    NotificationDetails notificationDetails = NotificationDetails(
-      iOS: DarwinNotificationDetails(),
-    );
-
+    await _ensureBackgroundPluginInitialized();
     final payload = jsonEncode({
       'organizationId': organizationId,
     });
-    await _flutterLocalNotificationsPlugin.show(
+    await _backgroundNotificationsPlugin.show(
       messageId,
       displayTitle,
       content,
-      notificationDetails,
+      _pushNotificationDetails,
       payload: payload,
     );
+  }
+
+  static Future<void> _ensureBackgroundPluginInitialized() async {
+    if (_isBackgroundNotificationsPluginInitialized) return;
+
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      iOS: DarwinInitializationSettings(),
+      macOS: DarwinInitializationSettings(),
+    );
+    await _backgroundNotificationsPlugin.initialize(initializationSettings);
+
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation = _backgroundNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    await androidImplementation?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _pushChannelId,
+        _pushChannelName,
+        description: _pushChannelDescription,
+        importance: Importance.max,
+      ),
+    );
+
+    _isBackgroundNotificationsPluginInitialized = true;
   }
 
   void cancelNotification(int id) {

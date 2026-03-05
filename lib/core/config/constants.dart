@@ -18,7 +18,7 @@ class AppConstants {
 
   static const String mailCalendarUuid = "00000000-0000-0000-0000-000000000001";
 
-  static late String baseUrl;
+  static String baseUrl = '';
   static int? selectedOrganizationId;
 
   static const String versionConfigUrl = 'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
