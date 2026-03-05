@@ -227,7 +227,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
                     ),
                     _ActionTile(
                       textColor: textColor,
-                      icon: widget.isStarred ? Assets.icons.selectedBookmarkIcon : Assets.icons.newBookmark,
+                      icon: widget.isStarred ? Assets.icons.selectedBookmarkIcon : Assets.icons.markAsImportant,
                       label: widget.isStarred
                           ? context.t.contextMenu.unmarkAsImportant
                           : context.t.contextMenu.markAsImportant,
