@@ -54,6 +54,7 @@ class CallWebView extends StatelessWidget {
             initialSettings: InAppWebViewSettings(
               mediaPlaybackRequiresUserGesture: false,
               iframeAllow: "camera; microphone",
+              allowsInlineMediaPlayback: true,
             ),
             onPermissionRequest: (controller, request) async {
               return PermissionResponse(

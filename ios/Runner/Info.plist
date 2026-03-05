@@ -98,5 +98,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>$(APP_DISPLAY_NAME) requires access to microphone.</string>
+
+    <key>NSCameraUsageDescription</key>
+    <string>$(APP_DISPLAY_NAME) requires access to camera.</string>
 </dict>
 </plist>
