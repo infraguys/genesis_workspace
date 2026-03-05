@@ -206,10 +206,10 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                         //     ),
                         //   ),
                         // ),
-                        TapEffectIcon(
-                          onTap: () {},
-                          child: Assets.icons.notif.svg(),
-                        ),
+                        // TapEffectIcon(
+                        //   onTap: () {},
+                        //   child: Assets.icons.notif.svg(),
+                        // ),
                         GestureDetector(
                           onTap: () {
                             context.read<InfoPanelCubit>().toggleProfilePanel();
