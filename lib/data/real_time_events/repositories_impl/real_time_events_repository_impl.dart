@@ -1,6 +1,7 @@
 import 'package:genesis_workspace/data/real_time_events/datasources/real_time_events_data_soure.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/events_by_queue_id_response_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/fcm_token_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/register_queue_request_body_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/repositories/real_time_events_repository.dart';
@@ -37,6 +38,15 @@ class RealTimeEventsRepositoryImpl implements RealTimeEventsRepository {
   Future<void> deleteQueue(String queueId) async {
     try {
       await _dataSource.deleteQueue(queueId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> registerFcmToken(RegisterFcmTokenEntity body) async {
+    try {
+      await _dataSource.registerFcmToken(body.toDto());
     } catch (e) {
       rethrow;
     }

@@ -157,6 +157,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           setState(() {
             _future = getInitialData();
           });
+          if (state.isAuthorized) {
+            print("authorized, register");
+            unawaited(context.read<RealTimeCubit>().registerFcmToken());
+          }
         },
         child: BlocListener<UpdateCubit, UpdateState>(
           listener: (context, updateState) {

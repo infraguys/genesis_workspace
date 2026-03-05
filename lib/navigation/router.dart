@@ -164,18 +164,18 @@ final router = GoRouter(
         //     ),
         //   ],
         // ),
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorCallsKey,
-          routes: [
-            GoRoute(
-              path: Routes.calls,
-              name: Routes.calls,
-              builder: (context, state) {
-                return Logs();
-              },
-            ),
-          ],
-        ),
+        // StatefulShellBranch(
+        //   navigatorKey: _shellNavigatorCallsKey,
+        //   routes: [
+        //     GoRoute(
+        //       path: Routes.calls,
+        //       name: Routes.calls,
+        //       builder: (context, state) {
+        //         return Logs();
+        //       },
+        //     ),
+        //   ],
+        // ),
         StatefulShellBranch(
           navigatorKey: _shellNavigatorProfileKey,
           routes: [

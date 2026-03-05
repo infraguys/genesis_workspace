@@ -184,6 +184,8 @@ import 'package:genesis_workspace/domain/real_time_events/usecases/delete_queue_
     as _i435;
 import 'package:genesis_workspace/domain/real_time_events/usecases/get_events_by_queue_id_use_case.dart'
     as _i1039;
+import 'package:genesis_workspace/domain/real_time_events/usecases/register_fcm_token_use_case.dart'
+    as _i648;
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_queue_use_case.dart'
     as _i477;
 import 'package:genesis_workspace/domain/users/repositories/recent_dm_repository.dart'
@@ -639,6 +641,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i703.RealTimeEventsRepository>(),
       ),
     );
+    gh.factory<_i648.RegisterFcmTokenUseCase>(
+      () => _i648.RegisterFcmTokenUseCase(gh<_i703.RealTimeEventsRepository>()),
+    );
     gh.factory<_i477.RegisterQueueUseCase>(
       () => _i477.RegisterQueueUseCase(gh<_i703.RealTimeEventsRepository>()),
     );
@@ -959,12 +964,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
-    gh.lazySingleton<_i573.RealTimeCubit>(
-      () => _i573.RealTimeCubit(
-        gh<_i823.MultiPollingService>(),
-        gh<_i214.OrganizationsCubit>(),
-      ),
-    );
     gh.factory<_i404.AllChatsCubit>(
       () => _i404.AllChatsCubit(
         gh<_i125.AddFolderUseCase>(),
@@ -979,6 +978,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1012.PinChatUseCase>(),
         gh<_i631.UnpinChatUseCase>(),
         gh<_i1057.UpdatePinnedChatOrderUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i573.RealTimeCubit>(
+      () => _i573.RealTimeCubit(
+        gh<_i823.MultiPollingService>(),
+        gh<_i214.OrganizationsCubit>(),
+        gh<_i648.RegisterFcmTokenUseCase>(),
       ),
     );
     gh.lazySingleton<_i240.MessengerCubit>(

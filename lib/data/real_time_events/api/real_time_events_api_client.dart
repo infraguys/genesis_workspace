@@ -26,4 +26,10 @@ abstract class RealTimeEventsApiClient {
 
   @DELETE('/events')
   Future<void> deleteQueue(@Query('queue_id') String queueId);
+
+  @FormUrlEncoded()
+  @POST('/users/me/android_gcm_reg_id')
+  Future<void> registerFCMToken({
+    @Field("token") required String token,
+  });
 }
