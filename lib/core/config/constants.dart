@@ -19,7 +19,7 @@ class AppConstants {
 
   static const String mailCalendarUuid = "00000000-0000-0000-0000-000000000001";
 
-  static late String baseUrl;
+  static String baseUrl = '';
   static int? selectedOrganizationId;
   static late String appVersion;
 

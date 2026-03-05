@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -40,18 +41,29 @@ class Main {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await AppConstants.init();
-  await configureDependencies();
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  await FirebaseService.initialize();
   inspect(message);
-  print("Handling a background message: ${message.messageId}");
-  final _localNotificationsService = getIt<LocalNotificationsService>();
-  final organizationId = AppConstants.selectedOrganizationId;
-  await _localNotificationsService.showNotificationFromPush(
-    messageId: int.parse(message.data['message_id']),
-    displayTitle: message.data['sender_full_name'],
-    content: message.data['content'],
-    organizationId: organizationId ?? -1,
+  final int notificationId =
+      int.tryParse(message.data['message_id']?.toString() ?? '') ??
+      (message.messageId?.hashCode ?? DateTime.now().millisecondsSinceEpoch).abs();
+  final String displayTitle =
+      _nonEmptyString(message.data['sender_full_name']) ?? message.notification?.title ?? 'Workspace';
+  final String content = _nonEmptyString(message.data['content']) ?? message.notification?.body ?? 'New message';
+  final int organizationId = int.tryParse(message.data['organization_id']?.toString() ?? '') ?? -1;
+  await LocalNotificationsService.showBackgroundPushNotification(
+    messageId: notificationId,
+    displayTitle: displayTitle,
+    content: content,
+    organizationId: organizationId,
   );
+}
+
+String? _nonEmptyString(Object? value) {
+  final String normalized = value?.toString().trim() ?? '';
+  if (normalized.isEmpty) return null;
+  return normalized;
 }
 
 void main() async {
