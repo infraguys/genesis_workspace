@@ -17,7 +17,7 @@ class AppBottomNavBar extends StatelessWidget {
     Assets.icons.chatBubbleS36,
     Assets.icons.calendarS36,
     Assets.icons.mailS36,
-    Assets.icons.callS36,
+    // Assets.icons.callS36,
   ];
 
   @override
@@ -36,11 +36,11 @@ class AppBottomNavBar extends StatelessWidget {
               crossAxisAlignment: .start,
               mainAxisAlignment: .spaceBetween,
               children: .generate(
-                6,
+                _icons.length + 1,
                 (index) {
                   final isSelected = index == shellIndex;
 
-                  if (index < 5) {
+                  if (index < _icons.length) {
                     final icon = _icons[index].path;
                     return _BottomBarItem(
                       onTap: () => goBranch(index),
