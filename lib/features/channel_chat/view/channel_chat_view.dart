@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/mixins/chat/chat_widget_mixin.dart';
 import 'package:genesis_workspace/core/mixins/message/forward_message_mixin.dart';
 import 'package:genesis_workspace/core/shortcuts/cancel_select_mode_intent.dart';
@@ -22,6 +23,8 @@ import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/buttons/open_infopanel_button.dart';
 import 'package:genesis_workspace/core/widgets/channel_app_bar_title.dart';
+import 'package:genesis_workspace/core/widgets/chat_context_menu_action.dart';
+import 'package:genesis_workspace/core/widgets/chat_context_menu_overlay.dart';
 import 'package:genesis_workspace/core/widgets/input_banner.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
@@ -31,17 +34,21 @@ import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/messages_select_app_bar.dart';
 import 'package:genesis_workspace/core/widgets/messages_select_footer.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
+import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/create_chat/create_topic_dialog.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -139,6 +146,66 @@ class _ChannelChatViewState extends State<ChannelChatView>
     } finally {
       _isOpeningNextUnreadTopic = false;
     }
+  }
+
+  void _openContextMenu(BuildContext context, Offset globalPosition) {
+    final chat = context.read<MessengerCubit>().state.selectedChat!;
+    ChatContextMenuOverlay.show(
+      context: context,
+      globalPosition: globalPosition,
+      child: _ChannelChatContextMenu(
+        chat: chat,
+        onAddToFolder: () async {
+          ChatContextMenuOverlay.close();
+          final folders = context.read<MessengerCubit>().state.folders;
+          await showDialog(
+            context: context,
+            builder: (context) => SelectFoldersDialog(
+              onSave: (selectedFolderIds) async {
+                await context.read<MessengerCubit>().setFoldersForChat(
+                  selectedFolderIds,
+                  chat.id,
+                );
+              },
+              folders: folders,
+              loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
+                chat.id,
+              ),
+            ),
+          );
+        },
+        onToggleMute: () async {
+          // try {
+          //   _closeOverlay();
+          //   if (widget.chat.isMuted) {
+          //     await context.read<MuteCubit>().unmuteChannel(widget.chat);
+          //   } else {
+          //     await context.read<MuteCubit>().muteChannel(widget.chat);
+          //   }
+          // } on DioException catch (e) {
+          //   showErrorSnackBar(context, exception: e);
+          // }
+        },
+        onReadAll: () async {
+          ChatContextMenuOverlay.close();
+          await context.read<MessengerCubit>().readAllMessages(chat.id);
+        },
+        onCreateTopic: () async {
+          ChatContextMenuOverlay.close();
+          await showDialog(
+            context: context,
+            builder: (_) {
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => getIt<CreateChatCubit>()),
+                ],
+                child: CreateTopicDialog(channelId: chat.streamId),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   Future<void> sendMessage({
@@ -417,13 +484,30 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                         ),
                                       ),
                                     )
-                                  : null,
-                              // : IconButton(
-                              //     onPressed: widget.leadingOnPressed,
-                              //     icon: Assets.icons.moreVert.svg(
-                              //       colorFilter: ColorFilter.mode(textColors.text30, .srcIn),
-                              //     ),
-                              //   ),
+                                  : Center(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        shape: CircleBorder(),
+                                        clipBehavior: .hardEdge,
+                                        child: InkResponse(
+                                          onTapDown: (details) {
+                                            _openContextMenu(context, details.globalPosition);
+                                          },
+                                          containedInkWell: true,
+                                          child: SizedBox.square(
+                                            dimension: 48,
+                                            child: Center(
+                                              child: Assets.icons.moreVert.svg(
+                                                colorFilter: ColorFilter.mode(
+                                                  textColors.text30,
+                                                  BlendMode.srcIn,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                               actions: [
                                 DownloadFilesButton(),
                                 // IconButton(
@@ -448,22 +532,6 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   icon: Assets.icons.call.svg(
                                     width: 28,
                                     height: 28,
-                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
-                                  ),
-                                ),
-                                // if (!isTabletOrSmaller)
-                                IconButton(
-                                  onPressed: () async {
-                                    final meetingLink = await createCall(context, startWithVideoMuted: false);
-                                    if (meetingLink.isNotEmpty) {
-                                      await context.read<ChannelChatCubit>().sendMessage(
-                                        streamId: widget.channelId,
-                                        topic: widget.topicName,
-                                        content: meetingLink,
-                                      );
-                                    }
-                                  },
-                                  icon: Assets.icons.videocam.svg(
                                     colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
@@ -857,3 +925,78 @@ class _ChannelChatViewState extends State<ChannelChatView>
     );
   }
 }
+
+class _ChannelChatContextMenu extends StatelessWidget {
+  const _ChannelChatContextMenu({
+    super.key,
+    required this.chat,
+    this.onAddToFolder,
+    this.onTogglePin,
+    this.onReadAll,
+    this.onCreateTopic,
+    this.onToggleMute,
+  });
+
+  final ChatEntity chat;
+  final VoidCallback? onAddToFolder;
+  final VoidCallback? onTogglePin;
+  final VoidCallback? onToggleMute;
+  final VoidCallback? onReadAll;
+  final VoidCallback? onCreateTopic;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
+    final iconColor = ColorFilter.mode(iconColors.base, BlendMode.srcIn);
+
+    return Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
+      children: [
+        ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.folder,
+          iconColor: iconColor,
+          label: context.t.folders.addToFolder,
+          onTap: onAddToFolder,
+        ),
+        if (onTogglePin != null) ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.pinned,
+          iconColor: iconColor,
+          label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
+          onTap: onTogglePin,
+        ),
+        if (onToggleMute != null) ...[
+          ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
+            iconColor: iconColor,
+            label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
+            onTap: onToggleMute,
+          ),
+        ],
+        if (onReadAll != null) ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.readReceipt,
+          iconColor: iconColor,
+          label: context.t.readAllMessages,
+          onTap: onReadAll,
+        ),
+        if (onCreateTopic != null)
+          ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.allChats,
+            iconColor: iconColor,
+            label: context.t.topic.createTopic,
+            onTap: onCreateTopic,
+          ),
+      ],
+    );
+  }
+}
+
+
+
