@@ -10,6 +10,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/core/widgets/chat_context_menu_action.dart';
 import 'package:genesis_workspace/core/widgets/chat_context_menu_overlay.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
@@ -421,19 +422,19 @@ class ChatContextMenu extends StatelessWidget {
   const ChatContextMenu({
     super.key,
     required this.chat,
-    required this.onAddToFolder,
+    this.onAddToFolder,
     this.onTogglePin,
-    required this.onReadAll,
-    required this.onCreateTopic,
+    this.onReadAll,
+    this.onCreateTopic,
     this.onToggleMute,
   });
 
   final ChatEntity chat;
-  final VoidCallback onAddToFolder;
+  final VoidCallback? onAddToFolder;
   final VoidCallback? onTogglePin;
   final VoidCallback? onToggleMute;
-  final VoidCallback onReadAll;
-  final VoidCallback onCreateTopic;
+  final VoidCallback? onReadAll;
+  final VoidCallback? onCreateTopic;
 
   @override
   Widget build(BuildContext context) {
@@ -446,38 +447,37 @@ class ChatContextMenu extends StatelessWidget {
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
-        _ChatContextMenuAction(
+        ChatContextMenuAction(
           textColor: textColors.text100,
           icon: Assets.icons.folder,
           iconColor: iconColor,
           label: context.t.folders.addToFolder,
           onTap: onAddToFolder,
         ),
-        if (onTogglePin != null) _ChatContextMenuAction(
+        if (onTogglePin != null) ChatContextMenuAction(
           textColor: textColors.text100,
           icon: Assets.icons.pinned,
           iconColor: iconColor,
           label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
           onTap: onTogglePin,
         ),
-        if (onToggleMute != null) ...[
-          _ChatContextMenuAction(
+        if (onToggleMute != null)
+          ChatContextMenuAction(
             textColor: textColors.text100,
             icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
             iconColor: iconColor,
             label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
             onTap: onToggleMute,
           ),
-        ],
-        _ChatContextMenuAction(
+        if (onReadAll != null) ChatContextMenuAction(
           textColor: textColors.text100,
           icon: Assets.icons.readReceipt,
           iconColor: iconColor,
           label: context.t.readAllMessages,
           onTap: onReadAll,
         ),
-        if (chat.type == ChatType.channel)
-          _ChatContextMenuAction(
+        if (chat.type == ChatType.channel && onCreateTopic != null)
+          ChatContextMenuAction(
             textColor: textColors.text100,
             icon: Assets.icons.allChats,
             iconColor: iconColor,
@@ -485,64 +485,6 @@ class ChatContextMenu extends StatelessWidget {
             onTap: onCreateTopic,
           ),
       ],
-    );
-  }
-}
-
-class _ChatContextMenuAction extends StatelessWidget {
-  const _ChatContextMenuAction({
-    required this.textColor,
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    this.onTap,
-  });
-
-  final Color textColor;
-  final SvgGenImage icon;
-  final ColorFilter iconColor;
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    const iconSize = 20.0;
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 36.0),
-      child: Material(
-        child: InkWell(
-          mouseCursor: SystemMouseCursors.click,
-          borderRadius: .circular(8),
-          onTap: onTap,
-          child: Padding(
-            padding: const .symmetric(horizontal: 12.0, vertical: 6.0),
-            child: Row(
-              spacing: 12.0,
-              children: [
-                SizedBox(
-                  width: iconSize,
-                  height: iconSize,
-                  child: icon.svg(
-                    width: iconSize,
-                    height: iconSize,
-                    colorFilter: iconColor,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: .ellipsis,
-                    style: textTheme.bodyMedium?.copyWith(fontWeight: .w500, color: textColor),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

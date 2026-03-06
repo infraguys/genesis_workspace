@@ -17,7 +17,6 @@ class ChatContextMenuOverlay {
     double itemHeight = 36,
     double itemSpacing = 4,
     double padding = 8,
-    int itemsCount = 3,
   }) {
     close();
 
@@ -28,7 +27,7 @@ class ChatContextMenuOverlay {
 
     final local = overlayBox.globalToLocal(globalPosition);
     final screenSize = MediaQuery.sizeOf(context);
-    final estimatedHeight = (itemsCount * itemHeight) + (itemSpacing * (itemsCount - 1)) + (padding * 2);
+    final estimatedHeight = itemHeight + itemSpacing + (padding * 2);
     final openDown = (screenSize.height - local.dy - padding) > estimatedHeight;
 
     final left = local.dx.clamp(

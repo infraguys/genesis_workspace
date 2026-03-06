@@ -627,9 +627,7 @@ class _MessengerViewState extends State<MessengerView>
                                 }
                                 if (state.selectedChat?.dmIds != null) {
                                   return Chat(
-                                    key: ObjectKey(
-                                      state.selectedChat!.id,
-                                    ),
+                                    key: ObjectKey(state.selectedChat!.id),
                                     chatId: state.selectedChat?.id,
                                     userIds: state.selectedChat!.dmIds!,
                                     firstMessageId: state.selectedChat?.firstUnreadMessageId,
