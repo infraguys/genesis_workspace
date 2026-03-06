@@ -10,7 +10,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
-import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
+import 'package:genesis_workspace/core/widgets/chat_context_menu_overlay.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
@@ -29,11 +29,6 @@ import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatItem extends StatefulWidget {
-  final ChatEntity chat;
-  final VoidCallback onTap;
-  final bool showTopics;
-  final int? selectedChatId;
-
   const ChatItem({
     super.key,
     required this.chat,
@@ -41,6 +36,12 @@ class ChatItem extends StatefulWidget {
     required this.showTopics,
     this.selectedChatId,
   });
+
+  final ChatEntity chat;
+  final VoidCallback onTap;
+  final bool showTopics;
+  final int? selectedChatId;
+
 
   @override
   State<ChatItem> createState() => _ChatItemState();
@@ -53,117 +54,65 @@ class _ChatItemState extends State<ChatItem> {
 
   static const Duration _animationDuration = Duration(milliseconds: 220);
   static const Curve _animationCurve = Curves.easeInOut;
-  static const double _menuPadding = 8.0;
-  static const double _menuItemHeight = 36.0;
-  static const double _menuItemSpacing = 4.0;
 
-  static OverlayEntry? _menuEntry;
-
-  void _closeOverlay() {
-    _menuEntry?.remove();
-    _menuEntry = null;
-  }
-
-  void _openContextMenu(Offset globalPosition) {
-    _closeOverlay();
-
-    if (!mounted) {
-      return;
-    }
-
-    final overlay = Overlay.of(context, rootOverlay: true);
-
-    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
-    if (overlayBox == null) {
-      return;
-    }
-
-    final localInOverlay = overlayBox.globalToLocal(globalPosition);
-    final screenSize = MediaQuery.sizeOf(context);
-
-    final double menuWidth = 270;
-    const itemHeight = _menuItemHeight;
-    const itemSpacing = _menuItemSpacing;
-    const verticalPadding = _menuPadding;
-
-    final itemsCount = 3 + (widget.chat.type == ChatType.channel ? 1 : 0);
-    final estimatedHeight = (itemsCount * itemHeight) + (itemSpacing * (itemsCount - 1)) + (verticalPadding * 2);
-    final openDown = (screenSize.height - localInOverlay.dy - _menuPadding) > estimatedHeight;
-
-    final left = localInOverlay.dx.clamp(_menuPadding, screenSize.width - menuWidth - _menuPadding);
-
-    _menuEntry = OverlayEntry(
-      builder: (context) {
-        return AnimatedOverlay(
-          left: left,
-          top: openDown ? localInOverlay.dy : null,
-          bottom: openDown ? null : (screenSize.height - localInOverlay.dy),
-          alignment: openDown ? Alignment.topLeft : Alignment.bottomLeft,
-          closeOverlay: _closeOverlay,
-          child: _ChatContextMenu(
-            width: menuWidth,
-            chat: widget.chat,
-            onAddToFolder: () async {
-              _closeOverlay();
-              final folders = context.read<MessengerCubit>().state.folders;
-              await showDialog(
-                context: context,
-                builder: (context) => SelectFoldersDialog(
-                  onSave: (selectedFolderIds) async {
-                    await context.read<MessengerCubit>().setFoldersForChat(
-                      selectedFolderIds,
-                      widget.chat.id,
-                    );
-                  },
-                  folders: folders,
-                  loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
-                    widget.chat.id,
-                  ),
-                ),
-              );
-            },
-            onTogglePin: () async {
-              _closeOverlay();
-              await onTogglePin();
-            },
-            onToggleMute: widget.chat.type == ChatType.channel
-                ? () async {
-                    try {
-                      _closeOverlay();
-                      if (widget.chat.isMuted) {
-                        await context.read<MuteCubit>().unmuteChannel(widget.chat);
-                      } else {
-                        await context.read<MuteCubit>().muteChannel(widget.chat);
-                      }
-                    } on DioException catch (e) {
-                      showErrorSnackBar(context, exception: e);
-                    }
+  void _showContextMenu(BuildContext context, Offset globalPosition) {
+    ChatContextMenuOverlay.show(
+      context: context,
+      globalPosition: globalPosition,
+      child: ChatContextMenu(
+        chat: widget.chat,
+        onAddToFolder: () async {
+          final folders = context.read<MessengerCubit>().state.folders;
+          await showDialog(
+            context: context,
+            builder: (context) => SelectFoldersDialog(
+              onSave: (selectedFolderIds) async {
+                await context.read<MessengerCubit>().setFoldersForChat(
+                  selectedFolderIds,
+                  widget.chat.id,
+                );
+              },
+              folders: folders,
+              loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
+                widget.chat.id,
+              ),
+            ),
+          );
+        },
+        onTogglePin: () async {
+          await onTogglePin();
+        },
+        onToggleMute: widget.chat.type == ChatType.channel
+            ? () async {
+                try {
+                  if (widget.chat.isMuted) {
+                    await context.read<MuteCubit>().unmuteChannel(widget.chat);
+                  } else {
+                    await context.read<MuteCubit>().muteChannel(widget.chat);
                   }
-                : null,
-            onReadAll: () async {
-              _closeOverlay();
-              await context.read<MessengerCubit>().readAllMessages(widget.chat.id);
-            },
-            onCreateTopic: () async {
-              _closeOverlay();
-              await showDialog(
-                context: context,
-                builder: (_) {
-                  return MultiBlocProvider(
-                    providers: [
-                      BlocProvider(create: (_) => getIt<CreateChatCubit>()),
-                    ],
-                    child: CreateTopicDialog(channelId: widget.chat.streamId),
-                  );
-                },
+                } on DioException catch (e) {
+                  showErrorSnackBar(context, exception: e);
+                }
+              }
+            : null,
+        onReadAll: () async {
+          await context.read<MessengerCubit>().readAllMessages(widget.chat.id);
+        },
+        onCreateTopic: () async {
+          await showDialog(
+            context: context,
+            builder: (_) {
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => getIt<CreateChatCubit>()),
+                ],
+                child: CreateTopicDialog(channelId: widget.chat.streamId),
               );
             },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
-
-    overlay.insert(_menuEntry!);
   }
 
   onTap() async {
@@ -236,13 +185,13 @@ class _ChatItemState extends State<ChatItem> {
               behavior: .deferToChild,
               onPointerDown: (event) {
                 if (event.kind == .mouse && event.buttons == kSecondaryMouseButton) {
-                  _openContextMenu(event.position);
+                  _showContextMenu(context, event.position);
                 }
               },
               child: GestureDetector(
                 onLongPressStart: (details) {
                   if (platformInfo.isMobile) {
-                    _openContextMenu(details.globalPosition);
+                    _showContextMenu(context, details.globalPosition);
                   }
                 },
                 child: InkWell(
@@ -468,21 +417,20 @@ class _ChatItemState extends State<ChatItem> {
   }
 }
 
-class _ChatContextMenu extends StatelessWidget {
-  const _ChatContextMenu({
+class ChatContextMenu extends StatelessWidget {
+  const ChatContextMenu({
+    super.key,
     required this.chat,
-    required this.width,
     required this.onAddToFolder,
-    required this.onTogglePin,
+    this.onTogglePin,
     required this.onReadAll,
     required this.onCreateTopic,
     this.onToggleMute,
   });
 
   final ChatEntity chat;
-  final double width;
   final VoidCallback onAddToFolder;
-  final VoidCallback onTogglePin;
+  final VoidCallback? onTogglePin;
   final VoidCallback? onToggleMute;
   final VoidCallback onReadAll;
   final VoidCallback onCreateTopic;
@@ -494,57 +442,49 @@ class _ChatContextMenu extends StatelessWidget {
     final iconColors = theme.extension<IconColors>()!;
     final iconColor = ColorFilter.mode(iconColors.base, BlendMode.srcIn);
 
-    return Container(
-      width: width,
-      padding: const .symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: .circular(8),
-      ),
-      child: Column(
-        mainAxisSize: .min,
-        crossAxisAlignment: .stretch,
-        children: [
+    return Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
+      children: [
+        _ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.folder,
+          iconColor: iconColor,
+          label: context.t.folders.addToFolder,
+          onTap: onAddToFolder,
+        ),
+        if (onTogglePin != null) _ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.pinned,
+          iconColor: iconColor,
+          label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
+          onTap: onTogglePin,
+        ),
+        if (onToggleMute != null) ...[
           _ChatContextMenuAction(
             textColor: textColors.text100,
-            icon: Assets.icons.folder,
+            icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
             iconColor: iconColor,
-            label: context.t.folders.addToFolder,
-            onTap: onAddToFolder,
+            label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
+            onTap: onToggleMute,
           ),
-          _ChatContextMenuAction(
-            textColor: textColors.text100,
-            icon: Assets.icons.pinned,
-            iconColor: iconColor,
-            label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
-            onTap: onTogglePin,
-          ),
-          if (onToggleMute != null) ...[
-            _ChatContextMenuAction(
-              textColor: textColors.text100,
-              icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
-              iconColor: iconColor,
-              label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
-              onTap: onToggleMute,
-            ),
-          ],
-          _ChatContextMenuAction(
-            textColor: textColors.text100,
-            icon: Assets.icons.readReceipt,
-            iconColor: iconColor,
-            label: context.t.readAllMessages,
-            onTap: onReadAll,
-          ),
-          if (chat.type == ChatType.channel)
-            _ChatContextMenuAction(
-              textColor: textColors.text100,
-              icon: Assets.icons.allChats,
-              iconColor: iconColor,
-              label: context.t.topic.createTopic,
-              onTap: onCreateTopic,
-            ),
         ],
-      ),
+        _ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.readReceipt,
+          iconColor: iconColor,
+          label: context.t.readAllMessages,
+          onTap: onReadAll,
+        ),
+        if (chat.type == ChatType.channel)
+          _ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.allChats,
+            iconColor: iconColor,
+            label: context.t.topic.createTopic,
+            onTap: onCreateTopic,
+          ),
+      ],
     );
   }
 }
