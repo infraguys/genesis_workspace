@@ -6,12 +6,6 @@ import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/chat/view/chat_view.dart';
 
 class Chat extends StatelessWidget {
-  final int? chatId;
-  final List<int> userIds;
-  final int? firstMessageId;
-  final int? focusedMessageId;
-  final VoidCallback? leadingOnPressed;
-
   const Chat({
     super.key,
     this.chatId = -1,
@@ -21,13 +15,20 @@ class Chat extends StatelessWidget {
     this.leadingOnPressed,
   });
 
+  final int? chatId;
+  final List<int> userIds;
+  final int? firstMessageId;
+  final int? focusedMessageId;
+  final VoidCallback? leadingOnPressed;
+
+
   @override
   Widget build(BuildContext context) {
     final existing = context.maybeRead<ChatCubit>();
 
     return Builder(
       builder: (context) {
-        final chat = ChatView(
+        final chatView = ChatView(
           chatId: chatId,
           userIds: userIds,
           firstMessageId: firstMessageId,
@@ -36,11 +37,11 @@ class Chat extends StatelessWidget {
         );
 
         if (existing != null) {
-          return chat;
+          return chatView;
         }
         return BlocProvider(
           create: (context) => getIt<ChatCubit>(),
-          child: chat,
+          child: chatView,
         );
       },
     );
