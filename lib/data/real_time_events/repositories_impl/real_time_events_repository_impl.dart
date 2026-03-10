@@ -51,4 +51,13 @@ class RealTimeEventsRepositoryImpl implements RealTimeEventsRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> registerApnsToken(RegisterApnsTokenEntity body) async {
+    try {
+      await _dataSource.registerApnsToken(body.toDto());
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

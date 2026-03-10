@@ -12,4 +12,5 @@ abstract class RealTimeEventsDataSource {
   Future<EventByQueueIdResponseDto> getEventsByQueueId(GetEventsByQueueIdBodyDto body);
   Future<void> deleteQueue(String queueId);
   Future<void> registerFcmToken(RegisterFcmTokenDto body);
+  Future<void> registerApnsToken(RegisterApnsTokenDto body);
 }

@@ -9,6 +9,7 @@ import 'package:genesis_workspace/app.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/data/real_time_events/dto/push_data_dto.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/services/firebase/firebase_service.dart';
 import 'package:genesis_workspace/services/localization/localization_service.dart';
@@ -29,7 +30,7 @@ class Main {
     usePathUrlStrategy();
     final LocalizationService localizationService = getIt<LocalizationService>();
     await localizationService.init();
-    if (platformInfo.isDesktop) {
+    if (!platformInfo.isWeb) {
       await getIt<LocalNotificationsService>().init();
     }
 
@@ -41,22 +42,21 @@ class Main {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  inspect(message);
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   await FirebaseService.initialize();
-  inspect(message);
-  final int notificationId =
-      int.tryParse(message.data['message_id']?.toString() ?? '') ??
-      (message.messageId?.hashCode ?? DateTime.now().millisecondsSinceEpoch).abs();
-  final String displayTitle =
-      _nonEmptyString(message.data['sender_full_name']) ?? message.notification?.title ?? 'Workspace';
-  final String content = _nonEmptyString(message.data['content']) ?? message.notification?.body ?? 'New message';
-  final int organizationId = int.tryParse(message.data['organization_id']?.toString() ?? '') ?? -1;
+  final PushDataDto data = PushDataDto.fromJson(message.data);
+
+  //mocked fields will be replaced with parsed data data
   await LocalNotificationsService.showBackgroundPushNotification(
-    messageId: notificationId,
-    displayTitle: displayTitle,
-    content: content,
-    organizationId: organizationId,
+    messageId: 0,
+    displayTitle: "123",
+    content: "123",
+    organizationId: 1,
+    recipientId: 10,
+    topic: "topic",
+    senderId: int.tryParse(message.data['sender_id']?.toString() ?? ''),
   );
 }
 

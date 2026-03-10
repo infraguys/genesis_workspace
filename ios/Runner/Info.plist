@@ -48,7 +48,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>“$(APP_DISPLAY_NAME)” needs access to the camera to take photos and videos to share.</string>
+	<string>$(APP_DISPLAY_NAME) requires access to camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>$(APP_DISPLAY_NAME) requires access to microphone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>“$(APP_DISPLAY_NAME)” needs access to your Photos to choose and attach images and videos to messages and update your profile picture.</string>
 	<key>UIApplicationSceneManifest</key>
@@ -78,6 +80,7 @@
 	<array>
 		<string>remote-notification</string>
 		<string>fetch</string>
+		<string>processing</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
@@ -98,10 +101,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSMicrophoneUsageDescription</key>
-    <string>$(APP_DISPLAY_NAME) requires access to microphone.</string>
-
-    <key>NSCameraUsageDescription</key>
-    <string>$(APP_DISPLAY_NAME) requires access to camera.</string>
 </dict>
 </plist>

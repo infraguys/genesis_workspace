@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/domain/channels/entities/user_topic_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/delete_message_event_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/event/message_event_entity.dart';
@@ -76,6 +77,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     final isTopicMuted =
         userTopics?.any((topic) => topic.topicName == event.message.subject && topic.visibilityPolicy == .muted) ??
         false;
+    if (platformInfo.isMobile) return;
     if (isOtherMessage && !isChatMuted && !isTopicMuted) {
       final selected = _prefs.getString(SharedPrefsKeys.notificationSound) ?? AssetsConstants.audioPop;
       _player.play(AssetSource(selected));
