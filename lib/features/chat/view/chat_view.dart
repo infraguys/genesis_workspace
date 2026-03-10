@@ -581,6 +581,7 @@ class _ChatViewState extends State<ChatView>
                                               messages: state.messages,
                                               isLoadingMore: state.isLoadingMore,
                                               controller: _controller,
+                                              inputFocusNode: messageInputFocusNode,
                                               onRead: (id) {
                                                 context.read<ChatCubit>().scheduleMarkAsReadCommon(id);
                                               },
