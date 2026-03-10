@@ -1,24 +1,66 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_message_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/notification_payload_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
+import 'package:genesis_workspace/navigation/router.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 @pragma('vm:entry-point')
-void notificationTapBackgroundHandler(NotificationResponse notificationResponse) {
-  //navigate to mobile
+Future<void> notificationTapBackgroundHandler(NotificationResponse notificationResponse) async {
+  final String payloadString = notificationResponse.payload ?? '';
+  if (payloadString.isEmpty || tryDecodePayloadMap(payloadString) == null) {
+    return;
+  }
+
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    DartPluginRegistrant.ensureInitialized();
+    await _savePendingBackgroundTapPayload(payloadString);
+    if (getIt.isRegistered<LocalNotificationsService>()) {
+      unawaited(getIt<LocalNotificationsService>().processPendingBackgroundTapPayload());
+    }
+  } catch (error, stackTrace) {
+    log(
+      'Failed to persist notification tap payload from background callback',
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
+}
+
+Future<void> _savePendingBackgroundTapPayload(String payloadString) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString(LocalNotificationsService._pendingBackgroundTapPayloadKey, payloadString);
+}
+
+Map<String, dynamic>? tryDecodePayloadMap(String payloadString) {
+  try {
+    final decoded = jsonDecode(payloadString);
+    if (decoded is Map<String, dynamic>) return decoded;
+    if (decoded is Map) {
+      return Map<String, dynamic>.from(decoded);
+    }
+    return null;
+  } catch (_) {
+    return null;
+  }
 }
 
 @injectable
@@ -26,6 +68,7 @@ class LocalNotificationsService {
   static const String _pushChannelId = 'workspace_push_messages';
   static const String _pushChannelName = 'Workspace messages';
   static const String _pushChannelDescription = 'Push notifications for new messages';
+  static const String _pendingBackgroundTapPayloadKey = 'pending_background_notification_tap_payload';
   static const NotificationDetails _pushNotificationDetails = NotificationDetails(
     android: AndroidNotificationDetails(
       _pushChannelId,
@@ -179,8 +222,12 @@ class LocalNotificationsService {
     _flutterLocalNotificationsPlugin.cancel(id);
   }
 
+  Future<void> openChatFromPushPayload(PushNotificationTapPayloadEntity payload) async {
+    await _openChatFromPushPayloadWithRetry(payload);
+  }
+
   Future<void> _handleNotificationPayloadEntityString(String payloadString) async {
-    final Map<String, dynamic>? payloadMap = _tryDecodePayloadMap(payloadString);
+    final Map<String, dynamic>? payloadMap = tryDecodePayloadMap(payloadString);
     if (payloadMap == null) return;
     if (payloadMap.containsKey('message')) {
       final NotificationPayloadEntity payload = NotificationPayloadEntity.fromJson(payloadMap);
@@ -237,7 +284,6 @@ class LocalNotificationsService {
   }
 
   Future<bool> _tryOpenChatFromPushPayload(PushNotificationTapPayloadEntity payload) async {
-    inspect(payload);
     final int organizationId = payload.organizationId;
     final int? selectedOrganizationId = AppConstants.selectedOrganizationId;
     if (organizationId > 0 && organizationId != selectedOrganizationId) {
@@ -255,18 +301,14 @@ class LocalNotificationsService {
     if (recipientId != null) {
       final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == recipientId);
       if (chat != null) {
-        if (platformInfo.isMobile) {
-          //navigate to Routes.chat
-          inspect(chat);
-        } else {
-          _messengerCubit.selectChat(
-            chat,
-            selectedTopic: payload.topic,
-            focusedMessageId: payload.messageId,
-          );
-          return true;
-        }
+        return _openResolvedChat(chat, payload);
       }
+    }
+
+    final List<int> dmMemberIds = _extractDmMemberIdsFromPayload(payload);
+    final ChatEntity? chatByMembers = _findDmChatByMemberIds(dmMemberIds);
+    if (chatByMembers != null) {
+      return _openResolvedChat(chatByMembers, payload);
     }
 
     final int? messageId = payload.messageId;
@@ -283,14 +325,25 @@ class LocalNotificationsService {
         SingleMessageRequestEntity(messageId: messageId, applyMarkdown: false),
       );
       final message = response.message;
+      if (!message.isDirectMessage && !message.isGroupChatMessage) {
+        return false;
+      }
       _messengerCubit.openChatFromMessage(message);
       final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == message.recipientId);
       if (chat != null) {
-        _messengerCubit.selectChat(
-          chat,
-          selectedTopic: topic ?? message.subject,
-          focusedMessageId: messageId,
-        );
+        if (platformInfo.isMobile) {
+          await _openMobileDmChat(
+            chatId: chat.id,
+            memberIds: _extractDmMemberIdsFromMessage(message),
+            focusedMessageId: messageId,
+          );
+        } else {
+          _messengerCubit.selectChat(
+            chat,
+            selectedTopic: topic ?? message.subject,
+            focusedMessageId: messageId,
+          );
+        }
       }
       return true;
     } catch (error, stackTrace) {
@@ -303,35 +356,110 @@ class LocalNotificationsService {
     }
   }
 
-  Future<void> _processTappedNotificationAfterLaunch() async {
-    // String? launchPayload;
-    // final NotificationAppLaunchDetails? launchDetails = await _flutterLocalNotificationsPlugin
-    //     .getNotificationAppLaunchDetails();
-    // final NotificationResponse? launchResponse = launchDetails?.notificationResponse;
-    // if (launchResponse?.payload case final String payload when payload.isNotEmpty) {
-    //   launchPayload = payload;
-    //   await _handleNotificationPayloadEntityString(payload);
-    // }
-    //
-    // final String? pendingPayload = await _takePendingBackgroundTapPayload();
-    // if (pendingPayload == null || pendingPayload == launchPayload) return;
-    // await _handleNotificationPayloadEntityString(pendingPayload);
-    // router.pushNamed(
-    //   Routes.chat,
-    //   pathParameters: {'userId': "16"},
-    // );
+  Future<bool> _openResolvedChat(ChatEntity chat, PushNotificationTapPayloadEntity payload) async {
+    if (platformInfo.isMobile) {
+      final List<int> memberIds = chat.dmIds ?? _extractDmMemberIdsFromPayload(payload);
+      await _openMobileDmChat(
+        chatId: chat.id,
+        memberIds: memberIds,
+        focusedMessageId: payload.messageId,
+      );
+      return true;
+    }
+    _messengerCubit.selectChat(
+      chat,
+      selectedTopic: payload.topic,
+      focusedMessageId: payload.messageId,
+    );
+    return true;
   }
 
-  Map<String, dynamic>? _tryDecodePayloadMap(String payloadString) {
-    try {
-      final decoded = jsonDecode(payloadString);
-      if (decoded is Map<String, dynamic>) return decoded;
-      if (decoded is Map) {
-        return Map<String, dynamic>.from(decoded);
-      }
-      return null;
-    } catch (_) {
+  Future<void> _openMobileDmChat({
+    required int chatId,
+    required List<int> memberIds,
+    required int? focusedMessageId,
+  }) async {
+    if (chatId <= 0) return;
+    final List<int> normalizedMemberIds = memberIds.where((id) => id > 0).toSet().toList()..sort();
+    if (normalizedMemberIds.isEmpty) return;
+
+    router.go(Routes.messenger);
+    router.pushNamed(
+      Routes.groupChat,
+      pathParameters: {
+        'chatId': chatId.toString(),
+        'userIds': normalizedMemberIds.join(','),
+      },
+      extra: {
+        'messageId': focusedMessageId,
+        'focusedMessageId': focusedMessageId,
+      },
+    );
+  }
+
+  ChatEntity? _findDmChatByMemberIds(List<int> memberIds) {
+    if (memberIds.isEmpty) return null;
+    final Set<int> targetMemberIds = memberIds.toSet();
+    return _messengerCubit.state.chats.firstWhereOrNull((chat) {
+      final List<int>? chatMemberIds = chat.dmIds;
+      if (chatMemberIds == null || chatMemberIds.isEmpty) return false;
+      final Set<int> chatMembersSet = chatMemberIds.toSet();
+      return chatMembersSet.length == targetMemberIds.length && chatMembersSet.containsAll(targetMemberIds);
+    });
+  }
+
+  List<int> _extractDmMemberIdsFromPayload(PushNotificationTapPayloadEntity payload) {
+    final Set<int> memberIds = <int>{};
+    if (payload.userId > 0) {
+      memberIds.add(payload.userId);
+    }
+    final int? senderId = payload.senderId;
+    if (senderId != null && senderId > 0) {
+      memberIds.add(senderId);
+    }
+    return memberIds.toList();
+  }
+
+  List<int> _extractDmMemberIdsFromMessage(MessageEntity message) {
+    final displayRecipient = message.displayRecipient;
+    if (displayRecipient is! DirectMessageRecipients) {
+      return const <int>[];
+    }
+    return displayRecipient.recipients.map((recipient) => recipient.userId).where((id) => id > 0).toSet().toList();
+  }
+
+  Future<void> processPendingBackgroundTapPayload() async {
+    final String? pendingPayload = await _takePendingBackgroundTapPayload();
+    if (pendingPayload == null || pendingPayload.isEmpty) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_handleNotificationPayloadEntityString(pendingPayload));
+    });
+  }
+
+  Future<String?> _takePendingBackgroundTapPayload() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? pendingPayload = prefs.getString(_pendingBackgroundTapPayloadKey);
+    if (pendingPayload == null || pendingPayload.isEmpty) {
       return null;
     }
+    await prefs.remove(_pendingBackgroundTapPayloadKey);
+    return pendingPayload;
+  }
+
+  Future<void> _processTappedNotificationAfterLaunch() async {
+    final NotificationAppLaunchDetails? launchDetails = await _flutterLocalNotificationsPlugin
+        .getNotificationAppLaunchDetails();
+    final NotificationResponse? launchResponse = launchDetails?.notificationResponse;
+    final String? launchPayload = launchResponse?.payload;
+    final String? pendingPayload = await _takePendingBackgroundTapPayload();
+    final String? payloadToHandle = (launchPayload != null && launchPayload.isNotEmpty)
+        ? launchPayload
+        : pendingPayload;
+    if (payloadToHandle == null || payloadToHandle.isEmpty) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_handleNotificationPayloadEntityString(payloadToHandle));
+    });
   }
 }

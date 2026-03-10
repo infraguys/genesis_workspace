@@ -104,6 +104,14 @@ class OrganizationsLocalDataSource {
     }
   }
 
+  Future<int?> getOrganizationIdByComparableUrl(String url) async {
+    try {
+      return await _dao.getOrganizationIdByComparableUrl(url);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateMeetingUrl({
     required int organizationId,
     required String? meetingUrl,

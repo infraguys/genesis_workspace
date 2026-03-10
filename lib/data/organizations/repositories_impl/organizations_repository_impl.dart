@@ -36,6 +36,11 @@ class OrganizationsRepositoryImpl implements OrganizationsRepository {
   }
 
   @override
+  Future<int?> getOrganizationIdByComparableUrl(String url) {
+    return _localDataSource.getOrganizationIdByComparableUrl(url);
+  }
+
+  @override
   Stream<List<OrganizationEntity>> watchOrganizations() {
     return _localDataSource.watchOrganizations().map(
       (organizations) => organizations.map((org) => org.toEntity()).toList(),
