@@ -48,7 +48,6 @@ class AppMobileDrawer extends StatelessWidget {
                         onTap: () async {
                           final router = GoRouter.of(context);
                           final organizationsCubit = context.read<OrganizationsCubit>();
-
                           await Future.wait([
                             organizationsCubit.selectOrganization(organization),
                           ]);

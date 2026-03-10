@@ -9,4 +9,5 @@ abstract class RealTimeEventsRepository {
   Future<EventsByQueueIdResponseEntity> getEventsByQueueId(EventsByQueueIdRequestBodyEntity body);
   Future<void> deleteQueue(String queueId);
   Future<void> registerFcmToken(RegisterFcmTokenEntity body);
+  Future<void> registerApnsToken(RegisterApnsTokenEntity body);
 }

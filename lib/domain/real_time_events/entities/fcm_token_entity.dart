@@ -6,3 +6,12 @@ class RegisterFcmTokenEntity {
 
   RegisterFcmTokenDto toDto() => RegisterFcmTokenDto(token: token);
 }
+
+class RegisterApnsTokenEntity {
+  final String token;
+  final String appId;
+
+  RegisterApnsTokenEntity({required this.token, required this.appId});
+
+  RegisterApnsTokenDto toDto() => RegisterApnsTokenDto(token: token, appId: appId);
+}

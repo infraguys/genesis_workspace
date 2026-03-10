@@ -32,4 +32,11 @@ abstract class RealTimeEventsApiClient {
   Future<void> registerFCMToken({
     @Field("token") required String token,
   });
+
+  @FormUrlEncoded()
+  @POST('/users/me/apns_device_token')
+  Future<void> registerApnsToken({
+    @Field("token") required String token,
+    @Field("appid") required String appId,
+  });
 }

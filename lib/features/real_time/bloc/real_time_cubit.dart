@@ -9,6 +9,7 @@ import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/connection_status.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/connection_entity.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/fcm_token_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/usecases/register_apns_token_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/usecases/register_fcm_token_use_case.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/services/firebase/firebase_service.dart';
@@ -20,8 +21,12 @@ part 'real_time_state.dart';
 
 @lazySingleton
 class RealTimeCubit extends Cubit<RealTimeState> {
-  RealTimeCubit(this._multiPollingService, this._organizationsCubit, this._registerFcmTokenUseCase)
-    : super(
+  RealTimeCubit(
+    this._multiPollingService,
+    this._organizationsCubit,
+    this._registerFcmTokenUseCase,
+    this._registerApnsTokenUseCase,
+  ) : super(
         RealTimeState(
           isCheckingConnection: false,
           connections: {},
@@ -40,6 +45,7 @@ class RealTimeCubit extends Cubit<RealTimeState> {
   bool _recheckQueued = false;
 
   final RegisterFcmTokenUseCase _registerFcmTokenUseCase;
+  final RegisterApnsTokenUseCase _registerApnsTokenUseCase;
 
   late final StreamSubscription<ConnectionEntity> _connectionStatusSubscription;
 
@@ -60,6 +66,23 @@ class RealTimeCubit extends Cubit<RealTimeState> {
         await _registerFcmTokenUseCase(RegisterFcmTokenEntity(token: token));
         if (kDebugMode) {
           print("fcm token: $token");
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> registerApnsToken() async {
+    try {
+      if (isFirebaseSupported && FirebaseService.isMessagingAvailable) {
+        final messaging = FirebaseMessaging.instance;
+        final token = await _safeGetApnsToken(messaging) ?? '';
+        await _registerApnsTokenUseCase(RegisterApnsTokenEntity(token: token, appId: "genesis.workspace"));
+        if (kDebugMode) {
+          print("apns token: $token");
         }
       }
     } catch (e) {

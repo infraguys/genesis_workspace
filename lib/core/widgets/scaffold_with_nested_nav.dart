@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/app_bottom_nav_bar.dart';
 import 'package:genesis_workspace/core/widgets/app_mobile_drawer.dart';
 import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
@@ -160,6 +161,9 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           if (state.isAuthorized) {
             print("authorized, register");
             unawaited(context.read<RealTimeCubit>().registerFcmToken());
+            if (platformInfo.isIos) {
+              unawaited(context.read<RealTimeCubit>().registerApnsToken());
+            }
           }
         },
         child: BlocListener<UpdateCubit, UpdateState>(
