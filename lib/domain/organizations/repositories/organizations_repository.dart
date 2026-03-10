@@ -10,6 +10,8 @@ abstract class OrganizationsRepository {
 
   Future<OrganizationEntity> getOrganizationById(int id);
 
+  Future<int?> getOrganizationIdByComparableUrl(String url);
+
   Stream<List<OrganizationEntity>> watchOrganizations();
 
   Future<ServerSettingsEntity> getOrganizationSettings(String url);

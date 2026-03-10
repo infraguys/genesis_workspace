@@ -6,6 +6,7 @@ class PushDataDto {
   final String senderFullName;
   final int messageId;
   final String realmUrl;
+  final int? organizationId;
   final int time;
   final String senderId;
   final String content;
@@ -16,21 +17,25 @@ class PushDataDto {
     required this.senderFullName,
     required this.messageId,
     required this.realmUrl,
+    required this.organizationId,
     required this.time,
     required this.senderId,
     required this.content,
   });
 
   factory PushDataDto.fromJson(Map<String, dynamic> json) {
+    final Object? rawRealmUrl = json['real_url'] ?? json['realm_url'];
+    final Object? rawMessageId = json['workspace_message_id'] ?? json['message_id'];
     return PushDataDto(
-      userId: int.parse(json['user_id'] as String),
-      kind: json['kind'] as String,
-      senderFullName: json['sender_full_name'] as String,
-      messageId: int.parse(json['workspace_message_id'] as String),
-      realmUrl: json['realm_url'] as String,
-      time: int.parse(json['time'].toString()),
-      senderId: json['sender_id'] as String,
-      content: json['content'] as String,
+      userId: _parseRequiredInt(json['user_id']),
+      kind: json['kind']?.toString() ?? 'unknown',
+      senderFullName: json['sender_full_name']?.toString() ?? '',
+      messageId: _parseRequiredInt(rawMessageId),
+      realmUrl: rawRealmUrl?.toString() ?? '',
+      organizationId: _parseOptionalInt(json['organization_id']),
+      time: _parseRequiredInt(json['time']),
+      senderId: json['sender_id']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
     );
   }
 
@@ -41,9 +46,24 @@ class PushDataDto {
       kind: kind,
       senderFullName: senderFullName,
       realmUrl: realmUrl,
+      organizationId: organizationId,
       time: DateTime.fromMillisecondsSinceEpoch(time * 1000),
       senderId: senderId,
       content: content,
     );
+  }
+
+  static int _parseRequiredInt(Object? value) {
+    final int? parsed = _parseOptionalInt(value);
+    if (parsed == null) {
+      throw FormatException('Cannot parse int from value: $value');
+    }
+    return parsed;
+  }
+
+  static int? _parseOptionalInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '');
   }
 }

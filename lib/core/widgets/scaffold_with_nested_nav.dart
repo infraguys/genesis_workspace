@@ -26,6 +26,7 @@ import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/features/update/bloc/update_cubit.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
 import 'package:genesis_workspace/navigation/router.dart';
+import 'package:genesis_workspace/services/notifications/local_notifications_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_idle_detector/in_app_idle_detector.dart';
 
@@ -121,6 +122,9 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
       case AppLifecycleState.resumed:
         await setActiveStatus();
         await context.read<RealTimeCubit>().ensureConnection();
+        if (getIt.isRegistered<LocalNotificationsService>()) {
+          unawaited(getIt<LocalNotificationsService>().processPendingBackgroundTapPayload());
+        }
         break;
       default:
         break;
