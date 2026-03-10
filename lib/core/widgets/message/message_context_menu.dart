@@ -47,7 +47,7 @@ class MessageContextMenu extends StatefulWidget {
   State<MessageContextMenu> createState() => _MessageContextMenuState();
 }
 
-class _MessageContextMenuState extends State<MessageContextMenu> with SingleTickerProviderStateMixin {
+class _MessageContextMenuState extends State<MessageContextMenu> {
   final isEmoji = ValueNotifier(false);
 
   final parser = EmojiParser();
@@ -115,7 +115,6 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final textColor = colors.onSurface.withValues(alpha: 0.9);
     final screenSize = MediaQuery.sizeOf(context);
 
     const padding = 8.0;
@@ -154,108 +153,123 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
       child: ValueListenableBuilder(
         valueListenable: isEmoji,
         builder: (context, value, _) {
-          final width = value ? 300 : 240;
-          return Container(
-            width: width.toDouble(),
+          final width = value ? 300.0 : 240.0;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            width: width,
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: .circular(8.0),
             ),
-            child: ValueListenableBuilder(
-              valueListenable: isEmoji,
-              builder: (_, value, _) {
-                if (value) {
-                  return EmojiPicker(
-                    onEmojiSelected: (category, emoji) {
-                      final selected = parser.getEmoji(emoji.emoji);
-                      _onEmojiSelected(selected.name);
-                    },
-                    config: Config(
-                      height: 300,
-                      emojiViewConfig: const EmojiViewConfig(
-                        emojiSizeMax: 22,
-                        backgroundColor: Colors.transparent,
+            child: ClipRRect(
+              borderRadius: .circular(8.0),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeOut,
+                layoutBuilder: (currentChild, previousChildren) {
+                  return currentChild ?? const SizedBox.shrink();
+                },
+                transitionBuilder: (child, animation) {
+                  return ClipRect(
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      axisAlignment: -1,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, -0.04),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
                       ),
-                      categoryViewConfig: CategoryViewConfig(
-                        tabIndicatorAnimDuration: const Duration(milliseconds: 500),
-                        backgroundColor: theme.colorScheme.surface,
-                        iconColorSelected: theme.colorScheme.primary,
-                        iconColor: theme.colorScheme.outline,
-                      ),
-                      bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
                     ),
                   );
-                }
-                return Column(
-                  mainAxisSize: .min,
-                  children: [
-                    _ReactionsRow(
-                      onEmojiSelected: _onEmojiSelected,
-                      onOpenEmojiPicker: () => isEmoji.value = !isEmoji.value,
-                    ),
-                    const SizedBox(height: 10),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: Assets.icons.visibility,
-                      label: context.t.contextMenu.viewedBy,
-                      onTap: _showMessageReaders,
-                    ),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: Assets.icons.replyIcon,
-                      label: context.t.contextMenu.reply,
-                      onTap: _onReplay,
-                    ),
-                    if (widget.onEdit != null)
-                      _ActionTile(
-                        textColor: textColor,
-                        icon: Assets.icons.editIcon,
-                        label: context.t.contextMenu.edit,
-                        onTap: _onEdit,
+                },
+                child: value
+                    ? EmojiPicker(
+                        key: const ValueKey('emojiPicker'),
+                        onEmojiSelected: (category, emoji) {
+                          final selected = parser.getEmoji(emoji.emoji);
+                          _onEmojiSelected(selected.name);
+                        },
+                        config: Config(
+                          height: 300,
+                          emojiViewConfig: const EmojiViewConfig(
+                            emojiSizeMax: 22,
+                            backgroundColor: Colors.transparent,
+                          ),
+                          categoryViewConfig: CategoryViewConfig(
+                            tabIndicatorAnimDuration: const Duration(milliseconds: 500),
+                            backgroundColor: theme.colorScheme.surface,
+                            iconColorSelected: theme.colorScheme.primary,
+                            iconColor: theme.colorScheme.outline,
+                          ),
+                          bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
+                        ),
+                      )
+                    : Column(
+                        key: const ValueKey('menuActions'),
+                        mainAxisSize: .min,
+                        children: [
+                          _ReactionsRow(
+                            onEmojiSelected: _onEmojiSelected,
+                            onOpenEmojiPicker: () => isEmoji.value = !isEmoji.value,
+                          ),
+                          const SizedBox(height: 10),
+                          _ActionTile(
+                            icon: Assets.icons.visibility,
+                            label: context.t.contextMenu.viewedBy,
+                            onTap: _showMessageReaders,
+                          ),
+                          _ActionTile(
+                            icon: Assets.icons.replyIcon,
+                            label: context.t.contextMenu.reply,
+                            onTap: _onReplay,
+                          ),
+                          if (widget.onEdit != null)
+                            _ActionTile(
+                              icon: Assets.icons.editIcon,
+                              label: context.t.contextMenu.edit,
+                              onTap: _onEdit,
+                            ),
+                          _ActionTile(
+                            icon: Assets.icons.fileCopyIcon,
+                            label: context.t.contextMenu.copy,
+                            onTap: _onCopy,
+                          ),
+                          _ActionTile(
+                            icon: Assets.icons.forwardIcon,
+                            label: context.t.contextMenu.forward,
+                            onTap: _onForward,
+                          ),
+                          _ActionTile(
+                            icon: widget.isStarred ? Assets.icons.selectedBookmarkIcon : Assets.icons.markAsImportant,
+                            label: widget.isStarred
+                                ? context.t.contextMenu.unmarkAsImportant
+                                : context.t.contextMenu.markAsImportant,
+                            onTap: _onToggleStar,
+                          ),
+                          if (widget.onDelete != null)
+                            _ActionTile(
+                              icon: Assets.icons.deleteIcon,
+                              label: context.t.contextMenu.delete,
+                              onTap: _onDelete,
+                            ),
+                          _ActionTile(
+                            icon: Assets.icons.checkCircle,
+                            label: context.t.contextMenu.select,
+                            onTap: _onSelect,
+                          ),
+                          if (widget.onGoToMessage != null)
+                            _ActionTile(
+                              icon: Assets.icons.arrowRightUp,
+                              label: context.t.contextMenu.openInChat,
+                              onTap: _onGoToMessage,
+                            ),
+                        ],
                       ),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: Assets.icons.fileCopyIcon,
-                      label: context.t.contextMenu.copy,
-                      onTap: _onCopy,
-                    ),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: Assets.icons.forwardIcon,
-                      label: context.t.contextMenu.forward,
-                      onTap: _onForward,
-                    ),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: widget.isStarred ? Assets.icons.selectedBookmarkIcon : Assets.icons.markAsImportant,
-                      label: widget.isStarred
-                          ? context.t.contextMenu.unmarkAsImportant
-                          : context.t.contextMenu.markAsImportant,
-                      onTap: _onToggleStar,
-                    ),
-                    if (widget.onDelete != null)
-                      _ActionTile(
-                        textColor: textColor,
-                        icon: Assets.icons.deleteIcon,
-                        label: context.t.contextMenu.delete,
-                        onTap: _onDelete,
-                      ),
-                    _ActionTile(
-                      textColor: textColor,
-                      icon: Assets.icons.checkCircle,
-                      label: context.t.contextMenu.select,
-                      onTap: _onSelect,
-                    ),
-                    if (widget.onGoToMessage != null)
-                      _ActionTile(
-                        textColor: textColor,
-                        icon: Assets.icons.arrowRightUp,
-                        label: context.t.contextMenu.openInChat,
-                        onTap: _onGoToMessage,
-                      ),
-                  ],
-                );
-              },
+              ),
             ),
           );
         },
@@ -266,13 +280,11 @@ class _MessageContextMenuState extends State<MessageContextMenu> with SingleTick
 
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
-    required this.textColor,
     required this.icon,
     required this.label,
     this.onTap,
   });
 
-  final Color textColor;
   final SvgGenImage icon;
   final String label;
   final VoidCallback? onTap;
@@ -281,7 +293,6 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final textColors = theme.extension<TextColors>()!;
     final iconColors = theme.extension<IconColors>()!;
 
     return SizedBox(
