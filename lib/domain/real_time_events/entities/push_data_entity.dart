@@ -1,5 +1,5 @@
 class PushDataEntity {
-  final String userId;
+  final int userId;
   final String kind;
   final String senderFullName;
   final int messageId;

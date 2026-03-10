@@ -14,12 +14,11 @@ import 'package:genesis_workspace/domain/real_time_events/entities/notification_
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 @pragma('vm:entry-point')
 void notificationTapBackgroundHandler(NotificationResponse notificationResponse) {
-  unawaited(LocalNotificationsService.cacheBackgroundTapPayload(notificationResponse.payload));
+  //navigate to mobile
 }
 
 @injectable
@@ -121,6 +120,7 @@ class LocalNotificationsService {
     required String displayTitle,
     required int organizationId,
     required String content,
+    required int userId,
     int? recipientId,
     String? topic,
     int? senderId,
@@ -135,6 +135,7 @@ class LocalNotificationsService {
         content: content,
         senderId: senderId,
         senderFullName: displayTitle,
+        userId: userId,
       ).toJson(),
     );
     await _backgroundNotificationsPlugin.show(
@@ -156,10 +157,7 @@ class LocalNotificationsService {
     );
     await _backgroundNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (data) {
-        print("onDidReceiveNotificationResponse");
-        notificationTapBackgroundHandler(data);
-      },
+      onDidReceiveNotificationResponse: notificationTapBackgroundHandler,
       onDidReceiveBackgroundNotificationResponse: notificationTapBackgroundHandler,
     );
 
@@ -184,7 +182,6 @@ class LocalNotificationsService {
   Future<void> _handleNotificationPayloadEntityString(String payloadString) async {
     final Map<String, dynamic>? payloadMap = _tryDecodePayloadMap(payloadString);
     if (payloadMap == null) return;
-    inspect(payloadMap);
     if (payloadMap.containsKey('message')) {
       final NotificationPayloadEntity payload = NotificationPayloadEntity.fromJson(payloadMap);
       await _selectChatFromPayload(payload);
@@ -323,22 +320,6 @@ class LocalNotificationsService {
     //   Routes.chat,
     //   pathParameters: {'userId': "16"},
     // );
-  }
-
-  static Future<void> cacheBackgroundTapPayload(String? payload) async {
-    inspect(payload);
-    if (payload == null || payload.isEmpty) return;
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('cacheBackgroundTapPayload: $payload');
-    await prefs.setString(SharedPrefsKeys.pendingNotificationTapPayload, payload);
-  }
-
-  static Future<String?> _takePendingBackgroundTapPayload() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? payload = prefs.getString(SharedPrefsKeys.pendingNotificationTapPayload);
-    if (payload == null || payload.isEmpty) return null;
-    await prefs.remove(SharedPrefsKeys.pendingNotificationTapPayload);
-    return payload;
   }
 
   Map<String, dynamic>? _tryDecodePayloadMap(String payloadString) {

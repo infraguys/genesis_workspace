@@ -46,12 +46,14 @@ class PushNotificationTapPayloadEntity {
   final String? senderFullName;
   final int? recipientId;
   final String? topic;
+  final int userId;
 
   const PushNotificationTapPayloadEntity({
     required this.organizationId,
     required this.messageId,
     required this.recipientId,
     required this.topic,
+    required this.userId,
     this.content,
     this.senderId,
     this.senderFullName,
@@ -61,8 +63,12 @@ class PushNotificationTapPayloadEntity {
     return {
       'organizationId': organizationId,
       'messageId': messageId,
+      'senderId': senderId,
+      'senderFullName': senderFullName,
+      'content': content,
       'recipientId': recipientId,
       'topic': topic,
+      'userId': userId,
     };
   }
 
@@ -75,6 +81,7 @@ class PushNotificationTapPayloadEntity {
       content: _toNonEmptyString(json['content']),
       senderId: _toInt(json['senderId']),
       senderFullName: _toNonEmptyString(json['senderFullName']),
+      userId: _toInt(json['userId']) ?? -1,
     );
   }
 

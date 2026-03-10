@@ -52,6 +52,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     displayTitle: data.senderFullName,
     content: data.content,
     organizationId: 1,
+    userId: data.userId,
     recipientId: int.parse(data.senderId),
     senderId: int.parse(data.senderId),
   );
