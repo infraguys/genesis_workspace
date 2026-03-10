@@ -46,12 +46,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   await FirebaseService.initialize();
-  final PushDataDto data = PushDataDto.fromJson(
-    int.parse(
-      message.messageId ?? '-1',
-    ),
-    message.data,
-  );
+  final PushDataDto data = PushDataDto.fromJson(message.data);
   await LocalNotificationsService.showBackgroundPushNotification(
     messageId: data.messageId,
     displayTitle: data.senderFullName,

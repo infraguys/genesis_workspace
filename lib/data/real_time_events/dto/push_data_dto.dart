@@ -21,12 +21,12 @@ class PushDataDto {
     required this.content,
   });
 
-  factory PushDataDto.fromJson(int messageId, Map<String, dynamic> json) {
+  factory PushDataDto.fromJson(Map<String, dynamic> json) {
     return PushDataDto(
       userId: json['user_id'] as String,
       kind: json['kind'] as String,
       senderFullName: json['sender_full_name'] as String,
-      messageId: messageId,
+      messageId: int.parse(json['workspace_message_id'] as String),
       realmUrl: json['realm_url'] as String,
       time: int.parse(json['time'].toString()),
       senderId: json['sender_id'] as String,
