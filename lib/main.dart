@@ -46,24 +46,20 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   await FirebaseService.initialize();
-  final PushDataDto data = PushDataDto.fromJson(message.data);
-
-  //mocked fields will be replaced with parsed data data
-  await LocalNotificationsService.showBackgroundPushNotification(
-    messageId: 0,
-    displayTitle: "123",
-    content: "123",
-    organizationId: 1,
-    recipientId: 10,
-    topic: "topic",
-    senderId: int.tryParse(message.data['sender_id']?.toString() ?? ''),
+  final PushDataDto data = PushDataDto.fromJson(
+    int.parse(
+      message.messageId ?? '-1',
+    ),
+    message.data,
   );
-}
-
-String? _nonEmptyString(Object? value) {
-  final String normalized = value?.toString().trim() ?? '';
-  if (normalized.isEmpty) return null;
-  return normalized;
+  await LocalNotificationsService.showBackgroundPushNotification(
+    messageId: data.messageId,
+    displayTitle: data.senderFullName,
+    content: data.content,
+    organizationId: 1,
+    recipientId: int.parse(data.senderId),
+    senderId: int.parse(data.senderId),
+  );
 }
 
 void main() async {
@@ -71,6 +67,10 @@ void main() async {
     () {
       WidgetsFlutterBinding.ensureInitialized();
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        print("main");
+        inspect(message);
+      });
       return Main.startApp();
     },
     (error, stackTrace) {

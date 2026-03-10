@@ -13,7 +13,6 @@ import 'package:genesis_workspace/domain/messages/usecases/get_message_by_id_use
 import 'package:genesis_workspace/domain/real_time_events/entities/notification_payload_entity.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
-import 'package:genesis_workspace/navigation/router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
@@ -157,6 +156,10 @@ class LocalNotificationsService {
     );
     await _backgroundNotificationsPlugin.initialize(
       initializationSettings,
+      onDidReceiveNotificationResponse: (data) {
+        print("onDidReceiveNotificationResponse");
+        notificationTapBackgroundHandler(data);
+      },
       onDidReceiveBackgroundNotificationResponse: notificationTapBackgroundHandler,
     );
 

@@ -15,7 +15,6 @@ import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/drafts/drafts.dart';
 import 'package:genesis_workspace/features/genesis_services/genesis_services.dart';
 import 'package:genesis_workspace/features/lk/lk.dart';
-import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
@@ -98,6 +97,7 @@ final router = GoRouter(
   initialLocation: Routes.splashScreen,
   navigatorKey: _rootNavigatorKey,
   observers: [TalkerRouteObserver(getIt<Talker>())],
+  // onEnter: (context, state, router) {},
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

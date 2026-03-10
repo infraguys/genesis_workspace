@@ -4,7 +4,7 @@ class PushDataDto {
   final String userId;
   final String kind;
   final String senderFullName;
-  final String messageId;
+  final int messageId;
   final String realmUrl;
   final int time;
   final String senderId;
@@ -21,12 +21,12 @@ class PushDataDto {
     required this.content,
   });
 
-  factory PushDataDto.fromJson(Map<String, dynamic> json) {
+  factory PushDataDto.fromJson(int messageId, Map<String, dynamic> json) {
     return PushDataDto(
       userId: json['user_id'] as String,
       kind: json['kind'] as String,
       senderFullName: json['sender_full_name'] as String,
-      messageId: json['message_id'] as String,
+      messageId: messageId,
       realmUrl: json['realm_url'] as String,
       time: int.parse(json['time'].toString()),
       senderId: json['sender_id'] as String,
@@ -36,10 +36,10 @@ class PushDataDto {
 
   PushDataEntity toEntity() {
     return PushDataEntity(
+      messageId: messageId,
       userId: userId,
       kind: kind,
       senderFullName: senderFullName,
-      messageId: messageId,
       realmUrl: realmUrl,
       time: DateTime.fromMillisecondsSinceEpoch(time * 1000),
       senderId: senderId,

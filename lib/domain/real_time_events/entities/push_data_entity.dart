@@ -2,7 +2,7 @@ class PushDataEntity {
   final String userId;
   final String kind;
   final String senderFullName;
-  final String messageId;
+  final int messageId;
   final String realmUrl;
   final DateTime time;
   final String senderId;
