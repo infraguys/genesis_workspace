@@ -1,7 +1,7 @@
 import 'package:genesis_workspace/domain/real_time_events/entities/push_data_entity.dart';
 
 class PushDataDto {
-  final String userId;
+  final int userId;
   final String kind;
   final String senderFullName;
   final int messageId;
@@ -23,7 +23,7 @@ class PushDataDto {
 
   factory PushDataDto.fromJson(Map<String, dynamic> json) {
     return PushDataDto(
-      userId: json['user_id'] as String,
+      userId: int.parse(json['user_id'] as String),
       kind: json['kind'] as String,
       senderFullName: json['sender_full_name'] as String,
       messageId: int.parse(json['workspace_message_id'] as String),
