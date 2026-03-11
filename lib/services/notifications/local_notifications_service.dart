@@ -15,6 +15,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_message_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/notification_payload_entity.dart';
+import 'package:genesis_workspace/domain/real_time_events/entities/push_message_kind.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -159,12 +160,14 @@ class LocalNotificationsService {
   }
 
   static Future<void> showBackgroundPushNotification({
+    required PushMessageKind kind,
     required int messageId,
     required String displayTitle,
     required int organizationId,
     required String content,
     required int userId,
     int? recipientId,
+    int? streamId,
     String? topic,
     int? senderId,
   }) async {
@@ -172,8 +175,10 @@ class LocalNotificationsService {
     final payload = jsonEncode(
       PushNotificationTapPayloadEntity(
         organizationId: organizationId,
+        kind: kind,
         messageId: messageId,
         recipientId: recipientId,
+        streamId: streamId,
         topic: topic,
         content: content,
         senderId: senderId,
@@ -297,6 +302,10 @@ class LocalNotificationsService {
       AppConstants.setSelectedOrganizationId(organization.id);
     }
 
+    if (payload.kind.isStreamChatMessage || payload.streamId != null) {
+      return _openChannelFromPushPayload(payload);
+    }
+
     final int? recipientId = payload.recipientId;
     if (recipientId != null) {
       final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == recipientId);
@@ -319,24 +328,75 @@ class LocalNotificationsService {
     );
   }
 
+  Future<bool> _openChannelFromPushPayload(PushNotificationTapPayloadEntity payload) async {
+    final int? streamId = payload.streamId;
+    final String? topic = payload.topic;
+    final int? messageId = payload.messageId;
+
+    if (streamId == null || streamId <= 0) {
+      if (messageId == null) return false;
+      return _openChatByMessageId(messageId, topic: topic);
+    }
+
+    ChatEntity? chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.streamId == streamId);
+    if (chat == null) {
+      await _messengerCubit.addChannelById(streamId);
+      chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.streamId == streamId);
+    }
+
+    if (chat == null) {
+      if (messageId == null) return false;
+      return _openChatByMessageId(messageId, topic: topic);
+    }
+
+    if (platformInfo.isMobile) {
+      await _openMobileChannelChat(
+        chatId: chat.id,
+        channelId: streamId,
+        topicName: topic,
+        focusedMessageId: messageId,
+      );
+      return true;
+    }
+    _messengerCubit.selectChat(
+      chat,
+      selectedTopic: topic,
+      focusedMessageId: messageId,
+    );
+    return true;
+  }
+
   Future<bool> _openChatByMessageId(int messageId, {String? topic}) async {
     try {
       final response = await getIt<GetMessageByIdUseCase>().call(
         SingleMessageRequestEntity(messageId: messageId, applyMarkdown: false),
       );
       final message = response.message;
-      if (!message.isDirectMessage && !message.isGroupChatMessage) {
+      if (!message.isDirectMessage && !message.isGroupChatMessage && !message.isChannelMessage) {
         return false;
       }
       _messengerCubit.openChatFromMessage(message);
       final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == message.recipientId);
       if (chat != null) {
         if (platformInfo.isMobile) {
-          await _openMobileDmChat(
-            chatId: chat.id,
-            memberIds: _extractDmMemberIdsFromMessage(message),
-            focusedMessageId: messageId,
-          );
+          if (message.isChannelMessage) {
+            final int? channelId = chat.streamId ?? message.streamId;
+            if (channelId == null || channelId <= 0) {
+              return false;
+            }
+            await _openMobileChannelChat(
+              chatId: chat.id,
+              channelId: channelId,
+              topicName: topic ?? message.subject,
+              focusedMessageId: messageId,
+            );
+          } else {
+            await _openMobileDmChat(
+              chatId: chat.id,
+              memberIds: _extractDmMemberIdsFromMessage(message),
+              focusedMessageId: messageId,
+            );
+          }
         } else {
           _messengerCubit.selectChat(
             chat,
@@ -389,6 +449,45 @@ class LocalNotificationsService {
       pathParameters: {
         'chatId': chatId.toString(),
         'userIds': normalizedMemberIds.join(','),
+      },
+      extra: {
+        'messageId': focusedMessageId,
+        'focusedMessageId': focusedMessageId,
+      },
+    );
+  }
+
+  Future<void> _openMobileChannelChat({
+    required int chatId,
+    required int channelId,
+    required String? topicName,
+    required int? focusedMessageId,
+  }) async {
+    if (chatId <= 0 || channelId <= 0) return;
+    router.go(Routes.messenger);
+
+    final String? normalizedTopic = topicName?.trim();
+    if (normalizedTopic != null && normalizedTopic.isNotEmpty) {
+      router.pushNamed(
+        Routes.channelChatTopic,
+        pathParameters: {
+          'chatId': chatId.toString(),
+          'channelId': channelId.toString(),
+          'topicName': normalizedTopic,
+        },
+        extra: {
+          'messageId': focusedMessageId,
+          'focusedMessageId': focusedMessageId,
+        },
+      );
+      return;
+    }
+
+    router.pushNamed(
+      Routes.channelChat,
+      pathParameters: {
+        'chatId': chatId.toString(),
+        'channelId': channelId.toString(),
       },
       extra: {
         'messageId': focusedMessageId,
