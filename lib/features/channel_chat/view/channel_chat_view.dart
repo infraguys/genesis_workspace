@@ -25,6 +25,7 @@ import 'package:genesis_workspace/core/widgets/buttons/open_infopanel_button.dar
 import 'package:genesis_workspace/core/widgets/channel_app_bar_title.dart';
 import 'package:genesis_workspace/core/widgets/chat_context_menu_action.dart';
 import 'package:genesis_workspace/core/widgets/chat_context_menu_overlay.dart';
+import 'package:genesis_workspace/core/widgets/click_cursor.dart';
 import 'package:genesis_workspace/core/widgets/input_banner.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
@@ -494,13 +495,15 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                             _openContextMenu(context, details.globalPosition);
                                           },
                                           containedInkWell: true,
-                                          child: SizedBox.square(
-                                            dimension: 48,
-                                            child: Center(
-                                              child: Assets.icons.moreVert.svg(
-                                                colorFilter: ColorFilter.mode(
-                                                  textColors.text30,
-                                                  BlendMode.srcIn,
+                                          child: ClickCursor(
+                                            child: SizedBox.square(
+                                              dimension: 48,
+                                              child: Center(
+                                                child: Assets.icons.moreVert.svg(
+                                                  colorFilter: ColorFilter.mode(
+                                                    textColors.text30,
+                                                    BlendMode.srcIn,
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -542,16 +545,15 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ChannelAppBarTitle(
-                                      channelName: state.channel?.name ?? context.t.channel.channelName,
-                                      topicName: widget.topicName,
-                                      count: state.channel?.subscriberCount ?? 0,
-                                      onTap: isTabletOrSmaller
-                                          ? () => context.pushNamed(
-                                              Routes.channelInfo,
-                                              pathParameters: GoRouterState.of(context).pathParameters,
-                                            )
-                                          : null,
+                                    ClickCursor(
+                                      child: GestureDetector(
+                                        onTap: widget.leadingOnPressed,
+                                        child: ChannelAppBarTitle(
+                                          channelName: state.channel?.name ?? context.t.channel.channelName,
+                                          topicName: widget.topicName,
+                                          count: state.channel?.subscriberCount ?? 0,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),

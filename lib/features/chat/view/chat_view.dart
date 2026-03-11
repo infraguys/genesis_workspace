@@ -464,22 +464,30 @@ class _ChatViewState extends State<ChatView>
                                         if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
                                         BlocBuilder<ChatCubit, ChatState>(
                                           builder: (context, state) {
-                                            return GestureDetector(
-                                              onTap: () {
-                                                context.pushNamed(
-                                                  Routes.chatInfo,
-                                                  pathParameters: GoRouterState.of(context).pathParameters,
-                                                );
-                                              },
-                                              child: Column(
-                                                crossAxisAlignment: .start,
-                                                children: [
-                                                  Text(
-                                                    userEntity.fullName,
-                                                    style: titleTextStyle,
-                                                  ),
-                                                  userStatus,
-                                                ],
+                                            return ClickCursor(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  if (isTabletOrSmaller) {
+                                                    context.pushNamed(
+                                                      Routes.chatInfo,
+                                                      pathParameters: GoRouterState
+                                                          .of(context)
+                                                          .pathParameters,
+                                                    );
+                                                  } else {
+                                                    widget.leadingOnPressed?.call();
+                                                  }
+                                                },
+                                                child: Column(
+                                                  crossAxisAlignment: .start,
+                                                  children: [
+                                                    Text(
+                                                      userEntity.fullName,
+                                                      style: titleTextStyle,
+                                                    ),
+                                                    userStatus,
+                                                  ],
+                                                ),
                                               ),
                                             );
                                           },
