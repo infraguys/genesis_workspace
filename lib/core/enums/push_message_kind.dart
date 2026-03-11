@@ -1,7 +1,8 @@
 enum PushMessageKind {
   privateMessage('private_message'),
   streamChatMessage('stream_chat_message'),
-  unknown('unknown');
+  unknown('unknown')
+  ;
 
   const PushMessageKind(this.rawValue);
 

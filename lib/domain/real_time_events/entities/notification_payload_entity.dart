@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:genesis_workspace/core/enums/push_message_kind.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/push_message_kind.dart';
 
 class NotificationPayloadEntity {
   final MessageEntity message;
@@ -46,19 +46,17 @@ class PushNotificationTapPayloadEntity {
   final String? content;
   final int? senderId;
   final String? senderFullName;
-  final int? recipientId;
   final int? streamId;
   final String? topic;
-  final int userId;
+  final int? userId;
 
   const PushNotificationTapPayloadEntity({
     required this.organizationId,
     required this.kind,
     required this.messageId,
-    required this.recipientId,
     required this.streamId,
     required this.topic,
-    required this.userId,
+    this.userId,
     this.content,
     this.senderId,
     this.senderFullName,
@@ -72,7 +70,6 @@ class PushNotificationTapPayloadEntity {
       'senderId': senderId,
       'senderFullName': senderFullName,
       'content': content,
-      'recipientId': recipientId,
       'streamId': streamId,
       'topic': topic,
       'userId': userId,
@@ -84,7 +81,6 @@ class PushNotificationTapPayloadEntity {
       organizationId: _toInt(json['organizationId']) ?? -1,
       kind: PushMessageKind.fromJson(json['kind']),
       messageId: _toInt(json['messageId']),
-      recipientId: _toInt(json['recipientId']),
       streamId: _toInt(json['streamId']),
       topic: _toNonEmptyString(json['topic']),
       content: _toNonEmptyString(json['content']),
