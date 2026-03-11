@@ -443,7 +443,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): isSelectMode
                     ? CancelSelectModeIntent()
                     : UnselectChatIntent(),
-                // SingleActivator(LogicalKeyboardKey.keyN, numLock: LockState.ignored): const NextUnreadTopicIntent(),
+                SingleActivator(LogicalKeyboardKey.keyN, shift: true, numLock: LockState.ignored): const NextUnreadTopicIntent(),
               },
               child: Actions(
                 actions: {
