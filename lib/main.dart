@@ -50,12 +50,14 @@ Future<PushNotificationTapPayloadEntity?> _buildPushTapPayload(RemoteMessage mes
   final int organizationId = data.organizationId ?? await _resolveOrganizationIdByRealUrl(data.realmUrl, fallback: -1);
   return PushNotificationTapPayloadEntity(
     organizationId: organizationId,
+    kind: data.kind,
     messageId: data.messageId,
-    recipientId: null,
-    topic: null,
+    recipientId: data.recipientId,
+    streamId: data.streamId,
+    topic: data.topicName,
     userId: data.userId,
     content: data.content,
-    senderId: int.tryParse(data.senderId),
+    senderId: data.senderId,
     senderFullName: data.senderFullName,
   );
 }
@@ -67,13 +69,16 @@ Future<void> _handleForegroundMessage(RemoteMessage message) async {
     final int organizationId =
         data.organizationId ?? await _resolveOrganizationIdByRealUrl(data.realmUrl, fallback: -1);
     await LocalNotificationsService.showBackgroundPushNotification(
+      kind: data.kind,
       messageId: data.messageId,
       displayTitle: data.senderFullName,
       content: data.content,
       organizationId: organizationId,
       userId: data.userId,
-      recipientId: null,
-      senderId: int.tryParse(data.senderId),
+      recipientId: data.recipientId,
+      streamId: data.streamId,
+      topic: data.topicName,
+      senderId: data.senderId,
     );
   } catch (error, stackTrace) {
     log('Failed to handle foreground FCM message', error: error, stackTrace: stackTrace);
@@ -147,13 +152,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final int organizationId =
         data.organizationId ?? await _resolveOrganizationIdByRealUrl(data.realmUrl, fallback: -1);
     await LocalNotificationsService.showBackgroundPushNotification(
+      kind: data.kind,
       messageId: data.messageId,
       displayTitle: data.senderFullName,
       content: data.content,
       organizationId: organizationId,
       userId: data.userId,
-      recipientId: null,
-      senderId: int.tryParse(data.senderId),
+      recipientId: data.recipientId,
+      streamId: data.streamId,
+      topic: data.topicName,
+      senderId: data.senderId,
     );
   } catch (error, stackTrace) {
     log('Failed to handle background FCM message', error: error, stackTrace: stackTrace);
