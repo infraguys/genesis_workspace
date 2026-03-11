@@ -12,13 +12,11 @@ class ChannelAppBarTitle extends StatelessWidget {
     required this.topicName,
     required this.channelName,
     required this.count,
-    required this.onTap,
   });
 
   final String channelName;
   final String? topicName;
   final int count;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
