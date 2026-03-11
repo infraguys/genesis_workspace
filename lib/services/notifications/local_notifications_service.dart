@@ -159,10 +159,6 @@ class LocalNotificationsService {
     );
   }
 
-  static void cancelBackgroundPushNotification(int id) {
-    _backgroundNotificationsPlugin.cancel(id);
-  }
-
   static Future<void> showBackgroundPushNotification({
     required PushMessageKind kind,
     required int messageId,
@@ -198,6 +194,10 @@ class LocalNotificationsService {
     );
   }
 
+  static void cancelBackgroundPushNotification(int id) {
+    _backgroundNotificationsPlugin.cancel(id);
+  }
+
   static Future<void> _ensureBackgroundPluginInitialized() async {
     if (_isBackgroundNotificationsPluginInitialized) return;
 
@@ -228,10 +228,6 @@ class LocalNotificationsService {
 
   void cancelNotification(int id) {
     _flutterLocalNotificationsPlugin.cancel(id);
-  }
-
-  Future<void> openChatFromPushPayload(PushNotificationTapPayloadEntity payload) async {
-    await _openChatFromPushPayloadWithRetry(payload);
   }
 
   Future<void> _handleNotificationPayloadEntityString(String payloadString) async {
