@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/enums/push_message_kind.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/display_recipient.dart';
@@ -15,7 +16,6 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/single_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_message_by_id_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/notification_payload_entity.dart';
-import 'package:genesis_workspace/domain/real_time_events/entities/push_message_kind.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -159,13 +159,17 @@ class LocalNotificationsService {
     );
   }
 
+  static void cancelBackgroundPushNotification(int id) {
+    _backgroundNotificationsPlugin.cancel(id);
+  }
+
   static Future<void> showBackgroundPushNotification({
     required PushMessageKind kind,
     required int messageId,
     required String displayTitle,
     required int organizationId,
     required String content,
-    required int userId,
+    int? userId,
     int? recipientId,
     int? streamId,
     String? topic,
@@ -177,7 +181,6 @@ class LocalNotificationsService {
         organizationId: organizationId,
         kind: kind,
         messageId: messageId,
-        recipientId: recipientId,
         streamId: streamId,
         topic: topic,
         content: content,
@@ -304,14 +307,6 @@ class LocalNotificationsService {
 
     if (payload.kind.isStreamChatMessage || payload.streamId != null) {
       return _openChannelFromPushPayload(payload);
-    }
-
-    final int? recipientId = payload.recipientId;
-    if (recipientId != null) {
-      final chat = _messengerCubit.state.chats.firstWhereOrNull((chat) => chat.id == recipientId);
-      if (chat != null) {
-        return _openResolvedChat(chat, payload);
-      }
     }
 
     final List<int> dmMemberIds = _extractDmMemberIdsFromPayload(payload);
@@ -509,8 +504,8 @@ class LocalNotificationsService {
 
   List<int> _extractDmMemberIdsFromPayload(PushNotificationTapPayloadEntity payload) {
     final Set<int> memberIds = <int>{};
-    if (payload.userId > 0) {
-      memberIds.add(payload.userId);
+    if ((payload.userId ?? -1) > 0) {
+      memberIds.add(payload.userId!);
     }
     final int? senderId = payload.senderId;
     if (senderId != null && senderId > 0) {

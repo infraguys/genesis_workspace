@@ -168,6 +168,8 @@ import 'package:genesis_workspace/domain/organizations/usecases/get_all_organiza
     as _i535;
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_by_id_use_case.dart'
     as _i401;
+import 'package:genesis_workspace/domain/organizations/usecases/get_organization_id_by_url_use_case.dart'
+    as _i51;
 import 'package:genesis_workspace/domain/organizations/usecases/get_organization_settings_use_case.dart'
     as _i286;
 import 'package:genesis_workspace/domain/organizations/usecases/remove_organization_use_case.dart'
@@ -711,6 +713,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i401.GetOrganizationByIdUseCase>(
       () =>
           _i401.GetOrganizationByIdUseCase(gh<_i654.OrganizationsRepository>()),
+    );
+    gh.factory<_i51.GetOrganizationIdByUrlUseCase>(
+      () => _i51.GetOrganizationIdByUrlUseCase(
+        gh<_i654.OrganizationsRepository>(),
+      ),
     );
     gh.factory<_i286.GetOrganizationSettingsUseCase>(
       () => _i286.GetOrganizationSettingsUseCase(
