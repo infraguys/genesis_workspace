@@ -110,7 +110,7 @@ class SharedPrefsKeys {
   static const String prioritizePersonalUnread = 'prioritizePersonalUnread';
   static const String prioritizeUnmutedUnreadChannels = 'prioritizeUnmutedUnreadChannels';
   static const String videoAudioHintDismissed = 'videoAudioHintDismissed';
-  static const String pendingNotificationTapPayload = 'pending_notification_tap_payload';
+  static const String pendingNotificationTapPayload = 'pendingNotificationTapPayload';
 }
 
 class AssetsConstants {

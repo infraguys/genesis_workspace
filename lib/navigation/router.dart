@@ -97,7 +97,6 @@ final router = GoRouter(
   initialLocation: Routes.splashScreen,
   navigatorKey: _rootNavigatorKey,
   observers: [TalkerRouteObserver(getIt<Talker>())],
-  // onEnter: (context, state, router) {},
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

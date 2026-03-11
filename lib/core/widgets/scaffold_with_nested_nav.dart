@@ -163,7 +163,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
             _future = getInitialData();
           });
           if (state.isAuthorized) {
-            print("authorized, register");
             unawaited(context.read<RealTimeCubit>().registerFcmToken());
             if (platformInfo.isIos) {
               unawaited(context.read<RealTimeCubit>().registerApnsToken());
