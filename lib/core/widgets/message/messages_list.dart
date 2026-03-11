@@ -10,9 +10,11 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
 import 'package:genesis_workspace/core/widgets/topic_separator.dart';
+import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
@@ -36,7 +38,6 @@ class MessagesList extends StatefulWidget {
   final int? focusedMessageId;
   final bool foundNewest;
   final bool foundOldest;
-  final FocusNode? inputFocusNode;
 
   const MessagesList({
     super.key,
@@ -56,7 +57,6 @@ class MessagesList extends StatefulWidget {
     this.focusedMessageId,
     this.foundNewest = true,
     this.foundOldest = false,
-    this.inputFocusNode,
   });
 
   @override
@@ -75,19 +75,19 @@ class _MessagesListState extends State<MessagesList> {
   late final ItemPositionsListener _itemPositionsListener;
   late final ScrollOffsetListener _scrollOffsetListener;
   StreamSubscription<double>? _scrollOffsetSubscription;
+  late final ChatEntity chat;
 
   bool showEmojiPicker = false;
 
   late List<MessageEntity> _reversed;
   bool _isLoadMoreInFlight = false;
-  int? _markerMessageId;
-  bool _isMarkerDismissedByInputFocus = false;
 
   @override
   void initState() {
     super.initState();
     _reversed = widget.messages.reversed.toList(growable: true);
 
+      chat = context.read<MessengerCubit>().state.selectedChat!;
     _itemScrollController = ItemScrollController();
     _itemPositionsListener = ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
@@ -95,68 +95,26 @@ class _MessagesListState extends State<MessagesList> {
     _scrollOffsetSubscription = _scrollOffsetListener.changes.listen(_onScrollOffsetChanged);
 
     _myUser = context.read<ProfileCubit>().state.user;
-    widget.inputFocusNode?.addListener(_onInputFocusChanged);
-    if (widget.inputFocusNode?.hasFocus == true) {
-      _isMarkerDismissedByInputFocus = true;
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToFirstUnreadIfNeeded();
-      _syncMarkerAnchor();
     });
   }
 
   @override
   void didUpdateWidget(covariant MessagesList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.inputFocusNode != widget.inputFocusNode) {
-      oldWidget.inputFocusNode?.removeListener(_onInputFocusChanged);
-      widget.inputFocusNode?.addListener(_onInputFocusChanged);
-      if (widget.inputFocusNode?.hasFocus == true) {
-        _isMarkerDismissedByInputFocus = true;
-        _markerMessageId = null;
-      }
-    }
     if (!identical(oldWidget.messages, widget.messages)) {
       _reversed = widget.messages.reversed.toList(growable: true);
-      _firstUnreadIndexInReversed = _findFirstUnreadBoundaryIndex(_reversed);
-      _syncMarkerAnchor();
     }
   }
 
   @override
   void dispose() {
     if (kIsWeb) BrowserContextMenu.enableContextMenu();
-    widget.inputFocusNode?.removeListener(_onInputFocusChanged);
     _itemPositionsListener.itemPositions.removeListener(_onItemPositionsChanged);
     _scrollOffsetSubscription?.cancel();
     _dayLabelTimer?.cancel();
     super.dispose();
-  }
-
-  void _onInputFocusChanged() {
-    if (!mounted) {
-      return;
-    }
-    if (widget.inputFocusNode?.hasFocus != true || _isMarkerDismissedByInputFocus) {
-      return;
-    }
-    setState(() {
-      _isMarkerDismissedByInputFocus = true;
-      _markerMessageId = null;
-    });
-  }
-
-  void _syncMarkerAnchor() {
-    if (_isMarkerDismissedByInputFocus) {
-      return;
-    }
-    if (_markerMessageId != null && _reversed.any((message) => message.id == _markerMessageId)) {
-      return;
-    }
-    if (_firstUnreadIndexInReversed == null) {
-      return;
-    }
-    _markerMessageId = _reversed[_firstUnreadIndexInReversed!].id;
   }
 
   void _scrollToFirstUnreadIfNeeded() {
@@ -355,7 +313,7 @@ class _MessagesListState extends State<MessagesList> {
                         mainAxisSize: .min,
                         spacing: 8.0,
                         children: [
-                          if (_markerMessageId != null && currentMessage.id == _markerMessageId)
+                          if (chat.firstUnreadMessageId == currentMessage.id)
                             UnreadMessagesMarker(unreadCount: unreadCount),
                           if (isNewTopic) TopicSeparator(message: currentMessage),
                           if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),

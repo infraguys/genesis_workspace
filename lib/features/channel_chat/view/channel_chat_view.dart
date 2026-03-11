@@ -610,7 +610,6 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                             MessagesList(
                                               messages: state.messages,
                                               controller: _scrollController,
-                                              inputFocusNode: messageInputFocusNode,
                                               showTopic: state.topic == null,
                                               isLoadingMore: state.isLoadingMore || state.isMessagesPending,
                                               onRead: (id) {
