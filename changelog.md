@@ -1,6 +1,6 @@
 # Changelog
 
-# 1.10.0
+# 1.10.1
 - Integrated push notifications
 - Layout fixes
 - Add Open/Close info panel button
