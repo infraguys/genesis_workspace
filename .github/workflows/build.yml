@@ -51,6 +51,7 @@ jobs:
             MIN_STABLE_VERSION: ${{ env.MIN_STABLE_VERSION }}
             FB_GOOGLE_SERVICES_ANDROID: ${{ secrets.FB_GOOGLE_SERVICES_ANDROID }}
             FB_GOOGLE_SERVICES_IOS: ${{ secrets.FB_GOOGLE_SERVICES_IOS }}
+            FB_OPTIONS: ${{ secrets.FB_OPTIONS }}
             UI_BUILD_ENV_firebase_api_key: ${{ secrets.FB_API_KEY }}
             UI_BUILD_ENV_lk_url: ${{ secrets.LK_URL }}
         run: |
@@ -60,6 +61,7 @@ jobs:
           BUILD_TARGET="${UI_BUILD_ENV_BUILD_TARGET:-ci_stage}"
 
           python3 ./genesis/images/make_ui_build_env.py
+          echo "${FB_OPTIONS}" | base64 -d > lib/firebase_options.dart
           make ci_windows
           cd build/windows/x64/runner/Release
           7z a -tzip ./../../../../../${ARTIFACTS_PATH}/bundle_win.zip .
@@ -99,6 +101,7 @@ jobs:
             MIN_STABLE_VERSION: ${{ env.MIN_STABLE_VERSION }}
             FB_GOOGLE_SERVICES_ANDROID: ${{ secrets.FB_GOOGLE_SERVICES_ANDROID }}
             FB_GOOGLE_SERVICES_IOS: ${{ secrets.FB_GOOGLE_SERVICES_IOS }}
+            FB_OPTIONS: ${{ secrets.FB_OPTIONS }}
             ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
             UI_BUILD_ENV_firebase_api_key: ${{ secrets.FB_API_KEY }}
             UI_BUILD_ENV_lk_url: ${{ secrets.LK_URL }}
@@ -118,6 +121,7 @@ jobs:
           mkdir -p "${WEB_DIR}"
 
           python3 /usr/local/bin/make_ui_build_env
+          echo "${FB_OPTIONS}" | base64 -d > lib/firebase_options.dart
           make ci_linux
           cd build/linux/x64/release/
           tar -czf ./../../../../${ARTIFACTS_PATH}/bundle_linux.tar.gz bundle
