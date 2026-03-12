@@ -75,7 +75,7 @@ class _MessagesListState extends State<MessagesList> {
   late final ItemPositionsListener _itemPositionsListener;
   late final ScrollOffsetListener _scrollOffsetListener;
   StreamSubscription<double>? _scrollOffsetSubscription;
-  late final ChatEntity chat;
+  ChatEntity? chat;
 
   bool showEmojiPicker = false;
 
@@ -86,8 +86,7 @@ class _MessagesListState extends State<MessagesList> {
   void initState() {
     super.initState();
     _reversed = widget.messages.reversed.toList(growable: true);
-
-      chat = context.read<MessengerCubit>().state.selectedChat!;
+    chat = context.read<MessengerCubit>().state.selectedChat;
     _itemScrollController = ItemScrollController();
     _itemPositionsListener = ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
@@ -313,7 +312,7 @@ class _MessagesListState extends State<MessagesList> {
                         mainAxisSize: .min,
                         spacing: 8.0,
                         children: [
-                          if (chat.firstUnreadMessageId == currentMessage.id)
+                          if (chat?.firstUnreadMessageId == currentMessage.id)
                             UnreadMessagesMarker(unreadCount: unreadCount),
                           if (isNewTopic) TopicSeparator(message: currentMessage),
                           if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),
