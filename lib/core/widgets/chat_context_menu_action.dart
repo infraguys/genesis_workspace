@@ -34,9 +34,8 @@ class ChatContextMenuAction extends StatelessWidget {
             child: Row(
               spacing: 12.0,
               children: [
-                SizedBox(
-                  width: iconSize,
-                  height: iconSize,
+                SizedBox.square(
+                  dimension: iconSize,
                   child: icon.svg(
                     width: iconSize,
                     height: iconSize,
