@@ -1,5 +1,15 @@
 # Changelog
 
+# 1.10.0
+- Integrated push notifications
+- Layout fixes
+- Add Open/Close info panel button
+- Fixed call crush app on iOS
+- Removed profile mocked fields
+- Fixed N hotkey
+- Fixed unread messages line
+- Added animation for emoji reactions open
+
 # 1.9.3
 - Design review
 - Add open/close infopanel button
