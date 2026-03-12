@@ -70,9 +70,8 @@ class _BottomBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 56,
-      height: 56,
+    return SizedBox.square(
+      dimension: 56.0,
       child: Material(
         color: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: .circular(12.0)),
@@ -95,7 +94,6 @@ class _ActiveIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
-    final iconColors = theme.extension<IconColors>()!;
     return Ink(
       width: 56,
       height: 56,

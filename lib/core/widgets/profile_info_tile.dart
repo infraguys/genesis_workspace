@@ -3,6 +3,7 @@ import 'package:genesis_workspace/core/config/palettes/palette.dart';
 
 class ProfileInfoTile extends StatelessWidget {
   const ProfileInfoTile({
+    super.key,
     required this.label,
     required this.value,
     required this.icon,
@@ -21,10 +22,10 @@ class ProfileInfoTile extends StatelessWidget {
       crossAxisAlignment: .center,
       children: [
         icon,
-        const SizedBox(width: 12),
+        const SizedBox(width: 12.0),
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             spacing: 4,
             children: [
               Text(
