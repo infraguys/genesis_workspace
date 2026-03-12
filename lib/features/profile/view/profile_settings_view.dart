@@ -376,6 +376,14 @@ class ProfileSettingsView extends StatelessWidget {
             onTap: () => context.pushNamed(Routes.talkerScreen),
           ),
           ListTile(
+            leading: Icon(Icons.featured_play_list),
+            title: Text(
+              "Connections",
+              style: theme.textTheme.bodyMedium,
+            ),
+            onTap: () => context.pushNamed(Routes.logsScreen),
+          ),
+          ListTile(
             leading: Assets.icons.logout.svg(
               colorFilter: ColorFilter.mode(
                 AppColors.noticeBase,

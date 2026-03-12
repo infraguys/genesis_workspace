@@ -2,12 +2,10 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/features/logs/bloc/logs_cubit.dart';
-import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
 import 'package:genesis_workspace/services/real_time/multi_polling_service.dart';
 import 'package:genesis_workspace/services/real_time/real_time_connection.dart';
 import 'package:go_router/go_router.dart';
@@ -66,77 +64,44 @@ class _LogsViewState extends State<LogsView> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Row(
+      body: ListView.separated(
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        itemCount: activeConnections.length,
+        separatorBuilder: (_, _) => SizedBox(
+          height: 12,
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          final connection = activeConnections[index];
+          return Column(
+            spacing: 4,
             children: [
-              TextButton(
-                onPressed: () async {
-                  try {
-                    final token = await context.read<RealTimeCubit>().getFcmToken();
-                    setState(() {
-                      _fcmToken = token;
-                    });
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Не удалось получить токен: ${e.toString()}')),
-                    );
-                  }
-                },
-                child: Text("Get FCM Token"),
+              Column(
+                crossAxisAlignment: .start,
+                spacing: 4,
+                children: [
+                  Text("Base url: ${connection.baseUrl}"),
+                  Text("org id: ${connection.organizationId}"),
+                  Text("lastEventId: ${connection.lastEventId}"),
+                  Text("queueId: ${connection.queueId}"),
+                  Text("isActive: ${connection.isActive}"),
+                ],
               ),
-              IconButton(
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: _fcmToken));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Токен скопирован в буфер обмена')),
-                  );
+              ElevatedButton(
+                onPressed: () {
+                  connection.stop();
                 },
-                icon: Icon(Icons.copy),
+                child: Text("Disconnect"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _multiPollingService.deleteConnection(connection.organizationId);
+                },
+                child: Text("Delete"),
               ),
             ],
-          ),
-          SelectableText("FCM Token: $_fcmToken"),
-        ],
+          );
+        },
       ),
-      // body: ListView.separated(
-      //   padding: EdgeInsets.symmetric(horizontal: 12),
-      //   itemCount: activeConnections.length,
-      //   separatorBuilder: (_, _) => SizedBox(
-      //     height: 12,
-      //   ),
-      //   itemBuilder: (BuildContext context, int index) {
-      //     final connection = activeConnections[index];
-      //     return Column(
-      //       spacing: 4,
-      //       children: [
-      //         Column(
-      //           crossAxisAlignment: .start,
-      //           spacing: 4,
-      //           children: [
-      //             Text("Base url: ${connection.baseUrl}"),
-      //             Text("org id: ${connection.organizationId}"),
-      //             Text("lastEventId: ${connection.lastEventId}"),
-      //             Text("queueId: ${connection.queueId}"),
-      //             Text("isActive: ${connection.isActive}"),
-      //           ],
-      //         ),
-      //         ElevatedButton(
-      //           onPressed: () {
-      //             connection.stop();
-      //           },
-      //           child: Text("Disconnect"),
-      //         ),
-      //         ElevatedButton(
-      //           onPressed: () {
-      //             _multiPollingService.deleteConnection(connection.organizationId);
-      //           },
-      //           child: Text("Delete"),
-      //         ),
-      //       ],
-      //     );
-      //   },
-      // ),
     );
   }
 

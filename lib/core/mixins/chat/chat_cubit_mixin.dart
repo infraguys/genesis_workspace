@@ -565,6 +565,7 @@ mixin ChatCubitMixin<S extends Object> on Cubit<S> {
   }
 
   void onReactionEvents(ReactionEventEntity event) {
+    inspect(event);
     final List<MessageEntity> current = List.of(getStateMessages(state));
     final int index = current.indexWhere((m) => m.id == event.messageId);
     if (index == -1) return;

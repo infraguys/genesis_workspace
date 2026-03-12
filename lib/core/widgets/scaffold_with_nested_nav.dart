@@ -156,32 +156,32 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               ),
             )
           : null,
-      body: BlocListener<AuthCubit, AuthState>(
-        listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-        listener: (context, state) {
-          setState(() {
-            _future = getInitialData();
-          });
-          if (state.isAuthorized) {
-            unawaited(context.read<RealTimeCubit>().registerFcmToken());
-            if (platformInfo.isIos) {
-              unawaited(context.read<RealTimeCubit>().registerApnsToken());
-            }
+      body: FutureBuilder(
+        future: _future,
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == .waiting) {
+            return AppProgressIndicator();
           }
-        },
-        child: BlocListener<UpdateCubit, UpdateState>(
-          listener: (context, updateState) {
-            if (updateState.isUpdateRequired) {
-              context.goNamed(Routes.forceUpdate);
-            }
-          },
-          child: FutureBuilder(
-            future: _future,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == .waiting) {
-                return AppProgressIndicator();
+          return BlocListener<AuthCubit, AuthState>(
+            listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+            listener: (context, state) {
+              setState(() {
+                _future = getInitialData();
+              });
+              if (state.isAuthorized) {
+                unawaited(context.read<RealTimeCubit>().registerFcmToken());
+                if (platformInfo.isIos) {
+                  unawaited(context.read<RealTimeCubit>().registerApnsToken());
+                }
               }
-              return BlocBuilder<CallCubit, CallState>(
+            },
+            child: BlocListener<UpdateCubit, UpdateState>(
+              listener: (context, updateState) {
+                if (updateState.isUpdateRequired) {
+                  context.goNamed(Routes.forceUpdate);
+                }
+              },
+              child: BlocBuilder<CallCubit, CallState>(
                 builder: (context, callState) {
                   return Stack(
                     children: [
@@ -248,10 +248,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                     ],
                   );
                 },
-              );
-            },
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

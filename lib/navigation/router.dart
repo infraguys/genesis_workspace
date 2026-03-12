@@ -15,6 +15,7 @@ import 'package:genesis_workspace/features/chat/chat.dart';
 import 'package:genesis_workspace/features/drafts/drafts.dart';
 import 'package:genesis_workspace/features/genesis_services/genesis_services.dart';
 import 'package:genesis_workspace/features/lk/lk.dart';
+import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
@@ -91,6 +92,7 @@ class Routes {
   static const String channelInfo = 'channel-info';
 
   static const String videoFullScreen = '/video-full-screen';
+  static const String logsScreen = '/logs';
 }
 
 final router = GoRouter(
@@ -486,6 +488,11 @@ final router = GoRouter(
       path: Routes.drafts,
       name: Routes.drafts,
       builder: (context, state) => Drafts(),
+    ),
+    GoRoute(
+      path: Routes.logsScreen,
+      name: Routes.logsScreen,
+      builder: (context, state) => Logs(),
     ),
   ],
 );
