@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -43,7 +44,6 @@ class ChatItem extends StatefulWidget {
   final bool showTopics;
   final int? selectedChatId;
 
-
   @override
   State<ChatItem> createState() => _ChatItemState();
 }
@@ -57,12 +57,14 @@ class _ChatItemState extends State<ChatItem> {
   static const Curve _animationCurve = Curves.easeInOut;
 
   void _showContextMenu(BuildContext context, Offset globalPosition) {
+    HapticFeedback.mediumImpact();
     ChatContextMenuOverlay.show(
       context: context,
       globalPosition: globalPosition,
       child: ChatContextMenu(
         chat: widget.chat,
         onAddToFolder: () async {
+          ChatContextMenuOverlay.close();
           final folders = context.read<MessengerCubit>().state.folders;
           await showDialog(
             context: context,
@@ -81,10 +83,12 @@ class _ChatItemState extends State<ChatItem> {
           );
         },
         onTogglePin: () async {
+          ChatContextMenuOverlay.close();
           await onTogglePin();
         },
         onToggleMute: widget.chat.type == ChatType.channel
             ? () async {
+                ChatContextMenuOverlay.close();
                 try {
                   if (widget.chat.isMuted) {
                     await context.read<MuteCubit>().unmuteChannel(widget.chat);
@@ -97,9 +101,11 @@ class _ChatItemState extends State<ChatItem> {
               }
             : null,
         onReadAll: () async {
+          ChatContextMenuOverlay.close();
           await context.read<MessengerCubit>().readAllMessages(widget.chat.id);
         },
         onCreateTopic: () async {
+          ChatContextMenuOverlay.close();
           await showDialog(
             context: context,
             builder: (_) {
@@ -454,13 +460,14 @@ class ChatContextMenu extends StatelessWidget {
           label: context.t.folders.addToFolder,
           onTap: onAddToFolder,
         ),
-        if (onTogglePin != null) ChatContextMenuAction(
-          textColor: textColors.text100,
-          icon: Assets.icons.pinned,
-          iconColor: iconColor,
-          label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
-          onTap: onTogglePin,
-        ),
+        if (onTogglePin != null)
+          ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.pinned,
+            iconColor: iconColor,
+            label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
+            onTap: onTogglePin,
+          ),
         if (onToggleMute != null)
           ChatContextMenuAction(
             textColor: textColors.text100,
@@ -469,13 +476,14 @@ class ChatContextMenu extends StatelessWidget {
             label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
             onTap: onToggleMute,
           ),
-        if (onReadAll != null) ChatContextMenuAction(
-          textColor: textColors.text100,
-          icon: Assets.icons.readReceipt,
-          iconColor: iconColor,
-          label: context.t.readAllMessages,
-          onTap: onReadAll,
-        ),
+        if (onReadAll != null)
+          ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.readReceipt,
+            iconColor: iconColor,
+            label: context.t.readAllMessages,
+            onTap: onReadAll,
+          ),
         if (chat.type == ChatType.channel && onCreateTopic != null)
           ChatContextMenuAction(
             textColor: textColors.text100,
