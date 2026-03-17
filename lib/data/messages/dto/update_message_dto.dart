@@ -2,7 +2,10 @@ import 'package:genesis_workspace/data/common/dto/response_dto.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 
 class UpdateMessageResponseDto extends ResponseDto {
-  UpdateMessageResponseDto({required super.msg, required super.result});
+  UpdateMessageResponseDto({
+    required super.msg,
+    required super.result,
+  });
 
   factory UpdateMessageResponseDto.fromJson(Map<String, dynamic> json) => UpdateMessageResponseDto(
     msg: (json['msg'] as String?) ?? '',
@@ -13,7 +16,15 @@ class UpdateMessageResponseDto extends ResponseDto {
 }
 
 class UpdateMessageRequestDto {
+  UpdateMessageRequestDto({
+    required this.messageId,
+    this.content,
+    this.topic,
+    this.propagateMode,
+  });
+
   final int messageId;
-  final String content;
-  UpdateMessageRequestDto({required this.messageId, required this.content});
+  final String? content;
+  final String? topic;
+  final String? propagateMode;
 }

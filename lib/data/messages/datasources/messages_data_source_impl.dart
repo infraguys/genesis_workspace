@@ -145,6 +145,8 @@ class MessagesDataSourceImpl implements MessagesDataSource {
       final response = await apiClient.updateMessage(
         messageId: body.messageId,
         content: body.content,
+        topic: body.topic,
+        propagateMode: body.propagateMode,
       );
       return response;
     } catch (e) {
