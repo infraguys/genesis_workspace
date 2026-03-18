@@ -34,6 +34,7 @@ import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/messages_list.dart';
 import 'package:genesis_workspace/core/widgets/messages_select_app_bar.dart';
 import 'package:genesis_workspace/core/widgets/messages_select_footer.dart';
+import 'package:genesis_workspace/core/widgets/resolved_topic_input_banner.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
@@ -837,8 +838,18 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                           },
                                           child: Container(
                                             key: dropAreaKey,
-                                            child: widget.topicName != null
-                                                ? MessageInput(
+                                            child: Builder(
+                                              builder: (context) {
+                                                final String? activeTopicName = state.topic?.name ?? widget.topicName;
+                                                if (state.topic?.name != null) {
+                                                  if (state.topic!.isResolved) {
+                                                    return ResolvedTopicInputBanner(
+                                                      isLoading: false,
+                                                      onUnresolvePressed: () async {},
+                                                    );
+                                                  }
+
+                                                  return MessageInput(
                                                     controller: messageController,
                                                     isMessagePending: state.isMessagePending,
                                                     focusNode: messageInputFocusNode,
@@ -902,9 +913,12 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                                         attachment,
                                                       );
                                                     },
-                                                    inputTitle: widget.topicName ?? state.channel?.name,
-                                                  )
-                                                : InputBanner(),
+                                                    inputTitle: activeTopicName ?? state.channel?.name,
+                                                  );
+                                                }
+                                                return InputBanner();
+                                              },
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -945,7 +959,6 @@ class _ChannelChatContextMenu extends StatelessWidget {
   final VoidCallback? onToggleMute;
   final VoidCallback? onReadAll;
   final VoidCallback? onCreateTopic;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

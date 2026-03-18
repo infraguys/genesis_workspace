@@ -258,14 +258,14 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   Future<void> getChannelTopics({required int streamId, String? topicName}) async {
     try {
-      if (topicName != null) {
-        final topic = TopicEntity.newTopic(topicName);
-        emit(state.copyWith(topic: topic));
-      } else {
+      // if (topicName != null) {
+      //   final topic = TopicEntity.newTopic(topicName);
+      //   emit(state.copyWith(topic: topic));
+      // } else {
         final response = await _getTopicsUseCase.call(streamId);
         final topic = response.where((topic) => topicName == topic.name).firstOrNull;
         emit(state.copyWith(topic: topic));
-      }
+      // }
     } catch (e) {
       inspect(e);
     }
