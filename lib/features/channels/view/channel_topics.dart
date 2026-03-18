@@ -11,8 +11,12 @@ import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ChannelTopics extends StatefulWidget {
+  const ChannelTopics({
+    super.key,
+    this.channel,
+  });
+
   final ChannelEntity? channel;
-  const ChannelTopics({super.key, this.channel});
 
   @override
   State<ChannelTopics> createState() => _ChannelTopicsState();

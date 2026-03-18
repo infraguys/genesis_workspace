@@ -5,7 +5,7 @@ import 'package:genesis_workspace/domain/messages/entities/display_recipient.dar
 import 'package:genesis_workspace/domain/messages/entities/reaction_entity.dart';
 
 class MessageEntity extends Equatable {
-  MessageEntity({
+  const MessageEntity({
     required this.id,
     required this.isMeMessage,
     this.avatarUrl,
