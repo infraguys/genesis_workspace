@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/data/all_chats/dto/create_folder_dto.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_dto.dart';
+import 'package:genesis_workspace/data/all_chats/dto/update_folder_dto.dart';
 import 'package:genesis_workspace/data/genesis/api/genesis_api_client.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:injectable/injectable.dart';

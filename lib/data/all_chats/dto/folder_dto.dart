@@ -6,61 +6,8 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'folder_dto.g.dart';
 
-@JsonSerializable()
-class CreateFolderDto {
-  final String title;
-
-  @JsonKey(name: 'background_color_value')
-  final int backgroundColorValue;
-
-  @JsonKey(name: 'unread_messages')
-  final List<int> unreadMessages;
-
-  @JsonKey(name: 'system_type')
-  final FolderSystemType systemType;
-
-  const CreateFolderDto({
-    required this.title,
-    required this.backgroundColorValue,
-    this.unreadMessages = const <int>[],
-    required this.systemType,
-  });
-
-  factory CreateFolderDto.fromJson(Map<String, dynamic> json) => _$CreateFolderDtoFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CreateFolderDtoToJson(this);
-}
-
-@JsonSerializable()
-class UpdateFolderDto {
-  final String? title;
-
-  @JsonKey(name: 'background_color_value')
-  final int? backgroundColorValue;
-
-  const UpdateFolderDto({
-    this.title,
-    this.backgroundColorValue,
-  });
-
-  Map<String, dynamic> toJson() => _$UpdateFolderDtoToJson(this);
-}
-
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class FolderDto {
-  final String uuid;
-  @JsonKey(name: 'created_at')
-  final String createdAt;
-  @JsonKey(name: 'updated_at')
-  final String updatedAt;
-  final String title;
-  @JsonKey(name: 'background_color_value')
-  final int backgroundColorValue;
-  @JsonKey(name: 'unread_messages')
-  final List<int> unreadMessages;
-  @JsonKey(name: 'system_type')
-  final FolderSystemType systemType;
-
   FolderDto({
     required this.uuid,
     required this.createdAt,
@@ -70,6 +17,21 @@ class FolderDto {
     required this.unreadMessages,
     required this.systemType,
   });
+
+  @JsonKey(name: 'uuid')
+  final String uuid;
+  @JsonKey(name: 'created_at')
+  final String createdAt;
+  @JsonKey(name: 'updated_at')
+  final String updatedAt;
+  @JsonKey(name: 'title')
+  final String title;
+  @JsonKey(name: 'background_color_value')
+  final int backgroundColorValue;
+  @JsonKey(name: 'unread_messages')
+  final List<int> unreadMessages;
+  @JsonKey(name: 'system_type')
+  final FolderSystemType systemType;
 
   factory FolderDto.fromJson(Map<String, dynamic> json) => _$FolderDtoFromJson(json);
 
