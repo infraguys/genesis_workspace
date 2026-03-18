@@ -7,14 +7,25 @@ part 'typing_request_dto.g.dart';
 
 @JsonSerializable()
 class TypingRequestDto {
+  TypingRequestDto({
+    required this.type,
+    required this.op,
+    this.to,
+    this.streamId,
+    this.topic,
+  });
+
+  @JsonKey(name: 'type')
   final SendMessageType type;
+  @JsonKey(name: 'op')
   final TypingEventOp op;
+  @JsonKey(name: 'to')
   @ToListAsJsonStringConverter()
   final List<int>? to;
   @JsonKey(name: 'stream_id')
   final int? streamId;
+  @JsonKey(name: 'topic')
   final String? topic;
-  TypingRequestDto({required this.type, required this.op, this.to, this.streamId, this.topic});
 
   Map<String, dynamic> toJson() => _$TypingRequestDtoToJson(this);
 }

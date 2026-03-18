@@ -6,12 +6,6 @@ part 'presences_response_dto.g.dart';
 
 @JsonSerializable()
 class PresencesResponseDto {
-  final String msg;
-  final String result;
-  @JsonKey(name: 'server_timestamp')
-  final double serverTimestamp;
-  final Map<String, PresenceDto> presences;
-
   PresencesResponseDto({
     required this.msg,
     required this.result,
@@ -19,7 +13,14 @@ class PresencesResponseDto {
     required this.presences,
   });
 
+  final String msg;
+  final String result;
+  @JsonKey(name: 'server_timestamp')
+  final double serverTimestamp;
+  final Map<String, PresenceDto> presences;
+
   factory PresencesResponseDto.fromJson(Map<String, dynamic> json) => _$PresencesResponseDtoFromJson(json);
+
   Map<String, dynamic> toJson() => _$PresencesResponseDtoToJson(this);
 
   PresencesResponseEntity toEntity() => PresencesResponseEntity(

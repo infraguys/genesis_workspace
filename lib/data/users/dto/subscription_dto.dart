@@ -5,15 +5,6 @@ part 'subscription_dto.g.dart';
 
 @JsonSerializable()
 class SubscriptionDto {
-  final String name;
-  final List<int>? subscribers;
-  @JsonKey(name: 'stream_id')
-  final int streamId;
-  final String description;
-  final String color;
-  @JsonKey(name: 'is_muted')
-  final bool isMuted;
-
   SubscriptionDto({
     required this.name,
     this.subscribers,
@@ -22,6 +13,20 @@ class SubscriptionDto {
     required this.color,
     required this.isMuted,
   });
+
+  @JsonKey(name: 'name')
+  final String name;
+  @JsonKey(name: 'subscribers')
+  final List<int>? subscribers;
+  @JsonKey(name: 'stream_id')
+  final int streamId;
+  @JsonKey(name: 'description')
+  final String description;
+  @JsonKey(name: 'color')
+  final String color;
+  @JsonKey(name: 'is_muted')
+  final bool isMuted;
+
 
   factory SubscriptionDto.fromJson(Map<String, dynamic> json) => _$SubscriptionDtoFromJson(json);
   Map<String, dynamic> toJson() => _$SubscriptionDtoToJson(this);

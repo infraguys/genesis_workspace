@@ -5,18 +5,30 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'channel_by_id_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ChannelByIdResponseDto extends ResponseDto {
+  ChannelByIdResponseDto({
+    required super.msg,
+    required super.result,
+    required this.stream,
+  });
+
   final StreamDto stream;
-  ChannelByIdResponseDto({required super.msg, required super.result, required this.stream});
 
   factory ChannelByIdResponseDto.fromJson(Map<String, dynamic> json) => _$ChannelByIdResponseDtoFromJson(json);
-  ChannelByIdResponseEntity toEntity() =>
-      ChannelByIdResponseEntity(stream: stream.toEntity(), msg: msg, result: result);
+
+  ChannelByIdResponseEntity toEntity() => ChannelByIdResponseEntity(
+    stream: stream.toEntity(),
+    msg: msg,
+    result: result,
+  );
 }
 
 @JsonSerializable()
 class ChannelByIdRequestDto {
+  ChannelByIdRequestDto({
+    required this.streamId,
+  });
+
   final int streamId;
-  ChannelByIdRequestDto({required this.streamId});
 }
