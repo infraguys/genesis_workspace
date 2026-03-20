@@ -212,6 +212,12 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin, Ope
   }
 
   void onCopy() async {
+    final selection = selectedText.trim();
+    if (selection.isNotEmpty) {
+      await Clipboard.setData(ClipboardData(text: selectedText));
+      return;
+    }
+
     final message = await messagesCubit.getMessageById(messageId: widget.message.id, applyMarkdown: false);
     await Clipboard.setData(ClipboardData(text: message.content));
   }
