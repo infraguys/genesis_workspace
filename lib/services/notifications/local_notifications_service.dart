@@ -125,7 +125,9 @@ class LocalNotificationsService {
       onDidReceiveNotificationResponse: notificationTap,
       onDidReceiveBackgroundNotificationResponse: notificationTapBackgroundHandler,
     );
-    await _processTappedNotificationAfterLaunch();
+    if (!platformInfo.isLinux) {
+      await _processTappedNotificationAfterLaunch();
+    }
     await _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(
