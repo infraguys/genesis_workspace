@@ -19,6 +19,7 @@ import 'package:genesis_workspace/domain/download_files/entities/download_file_e
 import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
+import 'package:html/dom.dart' as dom;
 
 class WorkspaceHtmlFactory extends WidgetFactory {}
 
@@ -28,6 +29,13 @@ class MessageHtml extends StatelessWidget {
   MessageHtml({super.key, required this.content, required this.onSelectedTextChanged});
 
   final AppShellController appShellController = getIt<AppShellController>();
+
+  String _toCssRgba(Color color) {
+    final int red = (color.r * 255).round();
+    final int green = (color.g * 255).round();
+    final int blue = (color.b * 255).round();
+    return 'rgba($red, $green, $blue, ${color.a.toStringAsFixed(3)})';
+  }
 
   String? _buildImageUrl(String? raw) {
     if (raw == null) return null;
@@ -90,6 +98,24 @@ class MessageHtml extends StatelessWidget {
     final Widget html = HtmlWidget(
       content,
       customStylesBuilder: (element) {
+        const Set<String> quoteClasses = {'quote', 'language-quote'};
+        bool hasQuoteClass(dom.Element node) => node.classes.any(quoteClasses.contains);
+        bool isQuoteCodeNode(dom.Element node) => node.localName == 'code' && hasQuoteClass(node);
+
+        final bool isQuoteCodeBlock = element.localName == 'pre' && element.children.any(isQuoteCodeNode);
+        final bool isQuoteElement = element.localName == 'blockquote' || hasQuoteClass(element) || isQuoteCodeBlock;
+
+        if (isQuoteElement) {
+          final quoteBorderColor = _toCssRgba(theme.colorScheme.primary.withValues(alpha: 0.72));
+          final quoteTextColor = _toCssRgba(theme.colorScheme.onSurface.withValues(alpha: 0.88));
+          return {
+            'margin': '8px 0',
+            'padding': '2px 0 2px 10px',
+            'border-left': '3px solid $quoteBorderColor',
+            'color': quoteTextColor,
+          };
+        }
+
         return null;
       },
       textStyle: TextStyle(overflow: TextOverflow.ellipsis),
