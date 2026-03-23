@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.10.2
+- Fix android and linux applications
+
 # 1.10.1
 - Integrated push notifications
 - Layout fixes
