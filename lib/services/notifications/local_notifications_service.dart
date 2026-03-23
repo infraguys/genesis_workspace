@@ -130,6 +130,9 @@ class LocalNotificationsService {
       print(e.toString());
     }
 
+    _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
     if (!platformInfo.isLinux) {
       await _processTappedNotificationAfterLaunch();
     }
