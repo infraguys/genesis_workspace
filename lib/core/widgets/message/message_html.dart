@@ -29,6 +29,13 @@ class MessageHtml extends StatelessWidget {
 
   final AppShellController appShellController = getIt<AppShellController>();
 
+  String _toCssRgba(Color color) {
+    final int red = (color.r * 255).round();
+    final int green = (color.g * 255).round();
+    final int blue = (color.b * 255).round();
+    return 'rgba($red, $green, $blue, ${color.a.toStringAsFixed(3)})';
+  }
+
   String? _buildImageUrl(String? raw) {
     if (raw == null) return null;
     final String trimmed = raw.trim();
@@ -90,6 +97,23 @@ class MessageHtml extends StatelessWidget {
     final Widget html = HtmlWidget(
       content,
       customStylesBuilder: (element) {
+        bool hasQuoteClass(node) => node.classes.any((className) => className.endsWith('quote'));
+        bool isQuoteCodeNode(node) => node.localName == 'code' && hasQuoteClass(node);
+
+        final bool isQuoteCodeBlock = element.localName == 'pre' && element.children.any(isQuoteCodeNode);
+        final bool isQuoteElement = element.localName == 'blockquote' || hasQuoteClass(element) || isQuoteCodeBlock;
+
+        if (isQuoteElement) {
+          final quoteBorderColor = _toCssRgba(theme.colorScheme.primary.withValues(alpha: 0.72));
+          final quoteTextColor = _toCssRgba(theme.colorScheme.onSurface.withValues(alpha: 0.88));
+          return {
+            'margin': '8px 0',
+            'padding': '2px 0 2px 10px',
+            'border-left': '3px solid $quoteBorderColor',
+            'color': quoteTextColor,
+          };
+        }
+
         return null;
       },
       textStyle: TextStyle(overflow: TextOverflow.ellipsis),
