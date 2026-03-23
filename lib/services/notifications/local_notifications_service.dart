@@ -120,11 +120,19 @@ class LocalNotificationsService {
       linux: initializationSettingsLinux,
       windows: initializationSettingsWindows,
     );
-    await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: notificationTap,
-      onDidReceiveBackgroundNotificationResponse: notificationTapBackgroundHandler,
-    );
+    try {
+      await _flutterLocalNotificationsPlugin.initialize(
+        settings: initializationSettings,
+        onDidReceiveNotificationResponse: notificationTap,
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackgroundHandler,
+      );
+    } catch (e) {
+      print(e.toString());
+    }
+
+    _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
     if (!platformInfo.isLinux) {
       await _processTappedNotificationAfterLaunch();
     }
@@ -153,10 +161,10 @@ class LocalNotificationsService {
     );
     final payload = NotificationPayloadEntity(message: message, organizationId: organizationId);
     await _flutterLocalNotificationsPlugin.show(
-      message.id,
-      message.displayTitle,
-      "New message",
-      notificationDetails,
+      id: message.id,
+      title: message.displayTitle,
+      body: "New message",
+      notificationDetails: notificationDetails,
       payload: payload.toJsonString(),
     );
   }
@@ -188,16 +196,16 @@ class LocalNotificationsService {
       ).toJson(),
     );
     await _backgroundNotificationsPlugin.show(
-      messageId,
-      displayTitle,
-      content,
-      _pushNotificationDetails,
+      id: messageId,
+      title: displayTitle,
+      body: content,
+      notificationDetails: _pushNotificationDetails,
       payload: payload,
     );
   }
 
   static void cancelBackgroundPushNotification(int id) {
-    _backgroundNotificationsPlugin.cancel(id);
+    _backgroundNotificationsPlugin.cancel(id: id);
   }
 
   static Future<void> _ensureBackgroundPluginInitialized() async {
@@ -209,7 +217,7 @@ class LocalNotificationsService {
       macOS: DarwinInitializationSettings(),
     );
     await _backgroundNotificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: notificationTapBackgroundHandler,
       onDidReceiveBackgroundNotificationResponse: notificationTapBackgroundHandler,
     );
@@ -229,7 +237,7 @@ class LocalNotificationsService {
   }
 
   void cancelNotification(int id) {
-    _flutterLocalNotificationsPlugin.cancel(id);
+    _flutterLocalNotificationsPlugin.cancel(id: id);
   }
 
   Future<void> _handleNotificationPayloadEntityString(String payloadString) async {
