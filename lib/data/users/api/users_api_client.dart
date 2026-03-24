@@ -84,9 +84,9 @@ abstract class UsersApiClient {
   @FormUrlEncoded()
   @POST('/users/me/status')
   Future<void> updateMyStatus({
-    @Field() String? statusText,
-    @Field() String? emojiName,
-    @Field() String? emojiCode,
+    @Field('status_text') String? statusText,
+    @Field('emoji_name') String? emojiName,
+    @Field('emoji_code') String? emojiCode,
   });
 
   @GET('/users/{user_id}/status')

@@ -7,11 +7,13 @@ class ProfileInfoTile extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
+    this.trailing,
   });
 
   final String label;
   final String value;
   final Widget icon;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +43,10 @@ class ProfileInfoTile extends StatelessWidget {
             ],
           ),
         ),
+        if (trailing != null) ...[
+          const SizedBox(width: 12),
+          trailing!,
+        ],
       ],
     );
   }
