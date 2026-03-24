@@ -127,4 +127,13 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<void> updateMyStatus(UpdateMyStatusRequestDto body) async {
+    return await apiClient.updateMyStatus(
+      statusText: body.statusText,
+      emojiName: body.emojiName,
+      emojiCode: body.emojiCode,
+    );
+  }
 }

@@ -220,6 +220,8 @@ import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
     as _i194;
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart'
     as _i487;
+import 'package:genesis_workspace/domain/users/usecases/update_my_status_use_case.dart'
+    as _i688;
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart'
     as _i832;
 import 'package:genesis_workspace/domain/users/usecases/update_subscription_settings_use_case.dart'
@@ -554,6 +556,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i294.OrganizationsLocalDataSource>(),
         gh<_i419.OrganizationsDataSource>(),
       ),
+    );
+    gh.factory<_i688.UpdateMyStatusUseCase>(
+      () => _i688.UpdateMyStatusUseCase(gh<_i125.UsersRepository>()),
     );
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
