@@ -5,14 +5,23 @@ part 'topic_dto.g.dart';
 
 @JsonSerializable()
 class TopicDto {
+  TopicDto({
+    required this.maxId,
+    required this.name,
+  });
+
   @JsonKey(name: 'max_id')
   final int maxId;
+  @JsonKey(name: 'name')
   final String name;
 
-  TopicDto({required this.maxId, required this.name});
-
   factory TopicDto.fromJson(Map<String, dynamic> json) => _$TopicDtoFromJson(json);
+
   Map<String, dynamic> toJson() => _$TopicDtoToJson(this);
 
-  TopicEntity toEntity() => TopicEntity(maxId: maxId, name: name, unreadMessages: {});
+  TopicEntity toEntity() => TopicEntity(
+    maxId: maxId,
+    name: name,
+    unreadMessages: {},
+  );
 }

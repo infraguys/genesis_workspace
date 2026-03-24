@@ -209,9 +209,9 @@ class _TopicItemState extends State<TopicItem> {
                                     ConstrainedBox(
                                       constraints: BoxConstraints(maxWidth: 235),
                                       child: Tooltip(
-                                        message: widget.topic.name,
+                                        message: widget.topic.displayName,
                                         child: Text(
-                                          "# ${widget.topic.name}",
+                                          "# ${widget.topic.displayName}",
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: theme.textTheme.labelMedium?.copyWith(

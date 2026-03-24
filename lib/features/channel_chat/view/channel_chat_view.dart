@@ -90,7 +90,81 @@ class _ChannelChatViewState extends State<ChannelChatView>
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
   bool _isOpeningNextUnreadTopic = false;
+  bool _isUnresolvingTopic = false;
   DraftEntity? draftForThisChat;
+
+  Future<void> _unresolveTopic() async {
+    if (_isUnresolvingTopic || !mounted) return;
+
+    setState(() {
+      _isUnresolvingTopic = true;
+    });
+    try {
+      final String? updatedTopicName = await context.read<ChannelChatCubit>().unresolveCurrentTopic();
+      if (!mounted || updatedTopicName == null) return;
+
+      final messengerCubit = context.read<MessengerCubit>();
+      await messengerCubit.getChannelTopics(widget.channelId);
+      final chat = messengerCubit.state.chats.where((chat) => chat.streamId == widget.channelId).firstOrNull;
+      if (chat != null) {
+        messengerCubit.selectChat(chat, selectedTopic: updatedTopicName);
+      }
+
+      final isMobile = currentSize(context) <= ScreenSize.tablet;
+      if (isMobile) {
+        context.pushReplacementNamed(
+          Routes.channelChatTopic,
+          pathParameters: {
+            'chatId': widget.chatId.toString(),
+            'channelId': widget.channelId.toString(),
+            'topicName': updatedTopicName,
+          },
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        showErrorSnackBar(context, exception: e);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUnresolvingTopic = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _resolveTopic() async {
+    if (!mounted) return;
+
+    try {
+      final String? updatedTopicName = await context.read<ChannelChatCubit>().resolveCurrentTopic();
+      if (!mounted || updatedTopicName == null) return;
+
+      final messengerCubit = context.read<MessengerCubit>();
+      await messengerCubit.getChannelTopics(widget.channelId);
+      final chat = messengerCubit.state.chats.where((chat) => chat.streamId == widget.channelId).firstOrNull;
+      if (chat != null) {
+        messengerCubit.selectChat(chat, selectedTopic: updatedTopicName);
+      }
+
+      final isMobile = currentSize(context) <= ScreenSize.tablet;
+      if (isMobile) {
+        context.pushReplacementNamed(
+          Routes.channelChatTopic,
+          pathParameters: {
+            'chatId': widget.chatId.toString(),
+            'channelId': widget.channelId.toString(),
+            'topicName': updatedTopicName,
+          },
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        showErrorSnackBar(context, exception: e);
+      }
+    }
+  }
 
   bool _isTextInputFocused() {
     final focusedContext = FocusManager.instance.primaryFocus?.context;
@@ -152,6 +226,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
 
   void _openContextMenu(BuildContext context, Offset globalPosition) {
     final chat = context.read<MessengerCubit>().state.selectedChat!;
+    final isTopicResolved = context.read<ChannelChatCubit>().state.topic?.isResolved ?? false;
     ChatContextMenuOverlay.show(
       context: context,
       globalPosition: globalPosition,
@@ -206,6 +281,15 @@ class _ChannelChatViewState extends State<ChannelChatView>
             },
           );
         },
+        onResolveTopic: () {
+          ChatContextMenuOverlay.close();
+          if (isTopicResolved) {
+            unawaited(_unresolveTopic());
+          } else {
+            unawaited(_resolveTopic());
+          }
+        },
+        isTopicResolved: isTopicResolved,
       ),
     );
   }
@@ -844,8 +928,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                                 if (state.topic?.name != null) {
                                                   if (state.topic!.isResolved) {
                                                     return ResolvedTopicInputBanner(
-                                                      isLoading: false,
-                                                      onUnresolvePressed: () async {},
+                                                      isLoading: _isUnresolvingTopic,
+                                                      onUnresolvePressed: _unresolveTopic,
                                                     );
                                                   }
 
@@ -951,6 +1035,8 @@ class _ChannelChatContextMenu extends StatelessWidget {
     this.onReadAll,
     this.onCreateTopic,
     this.onToggleMute,
+    this.onResolveTopic,
+    this.isTopicResolved = false,
   });
 
   final ChatEntity chat;
@@ -959,6 +1045,8 @@ class _ChannelChatContextMenu extends StatelessWidget {
   final VoidCallback? onToggleMute;
   final VoidCallback? onReadAll;
   final VoidCallback? onCreateTopic;
+  final VoidCallback? onResolveTopic;
+  final bool isTopicResolved;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1008,10 +1096,14 @@ class _ChannelChatContextMenu extends StatelessWidget {
             label: context.t.topic.createTopic,
             onTap: onCreateTopic,
           ),
+        ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.check,
+          iconColor: iconColor,
+          label: isTopicResolved ? 'Снять отметку решенной' : 'Отметить как решенную',
+          onTap: onResolveTopic,
+        ),
       ],
     );
   }
 }
-
-
-

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -41,16 +43,22 @@ class ResolvedTopicInputBanner extends StatelessWidget {
                           color: Colors.orange,
                           decoration: TextDecoration.underline,
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            print('clicked');
-                          },
+                        recognizer: isLoading
+                            ? null
+                            : (TapGestureRecognizer()
+                              ..onTap = () {
+                                unawaited(onUnresolvePressed());
+                              }),
                       ),
                       TextSpan(text: ' чтобы отправить сообщение'),
                     ],
                   ),
                 ),
               ),
+              if (isLoading) ...[
+                const SizedBox(width: 8),
+                const _ProgressIndicator(),
+              ],
             ],
           ),
         ),

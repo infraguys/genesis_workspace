@@ -22,6 +22,17 @@ class TopicEntity extends Equatable {
 
   int? get firstUnreadMessageId => unreadMessages.firstOrNull;
 
+  bool get isResolved => _resolvedTopicPrefixes.any(name.startsWith);
+
+  String get displayName {
+    for (final prefix in _resolvedTopicPrefixes) {
+      if (name.startsWith(prefix)) {
+        return name.substring(prefix.length);
+      }
+    }
+    return name;
+  }
+
   TopicEntity copyWith({
     int? maxId,
     String? name,
@@ -63,4 +74,9 @@ class TopicEntity extends Equatable {
       unreadMessages: {},
     );
   }
+
+  static const _resolvedTopicPrefixes = [
+    '✔',
+    '✓',
+  ];
 }
