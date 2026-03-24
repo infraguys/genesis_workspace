@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_item_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,11 +24,11 @@ class FolderItemDto {
   final int chatId;
   @JsonKey(name: 'order_index')
   final int? orderIndex;
-  @JsonKey(name: 'pinned_at', fromJson: DateTime.tryParse)
+  @JsonKey(name: 'pinned_at', fromJson: dateTimeFromJson)
   final DateTime? pinnedAt;
-  @JsonKey(name: 'created_at', fromJson: DateTime.tryParse)
+  @JsonKey(name: 'created_at', fromJson: dateTimeFromJson)
   final DateTime? createdAt;
-  @JsonKey(name: 'updated_at', fromJson: DateTime.tryParse)
+  @JsonKey(name: 'updated_at', fromJson: dateTimeFromJson)
   final DateTime? updatedAt;
 
   factory FolderItemDto.fromJson(Map<String, dynamic> json) => _$FolderItemDtoFromJson(json);

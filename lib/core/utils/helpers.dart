@@ -491,3 +491,10 @@ String extractMeetingName(String htmlString) {
   final Uri uri = Uri.parse(uriMatch.group(1)!);
   return uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
 }
+
+DateTime? dateTimeFromJson(String? value) {
+  if (value == null || value.isEmpty) {
+    return null;
+  }
+  return DateTime.tryParse(value);
+}
