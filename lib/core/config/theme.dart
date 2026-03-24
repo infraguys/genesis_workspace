@@ -111,6 +111,7 @@ ThemeData buildThemeFromPalette({
     elevatedButtonTheme: _elevatedButtonTheme(colorScheme),
     outlinedButtonTheme: _outlinedButtonTheme(colorScheme),
     segmentedButtonTheme: _segmentedButtonTheme(colorScheme),
+    filledButtonTheme: _filledButtonThemeData(colorScheme),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
         enabledMouseCursor: SystemMouseCursors.click,
@@ -249,6 +250,15 @@ SegmentedButtonThemeData _segmentedButtonTheme(ColorScheme colorScheme) {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
+    ),
+  );
+}
+
+FilledButtonThemeData _filledButtonThemeData(ColorScheme colorScheme) {
+  return FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+      enabledMouseCursor: SystemMouseCursors.click,
+      disabledMouseCursor: SystemMouseCursors.basic,
     ),
   );
 }
