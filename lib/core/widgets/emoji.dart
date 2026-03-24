@@ -28,8 +28,8 @@ class UnicodeEmojiWidget extends StatelessWidget {
     List<int>? codePoints;
 
     try {
-      // Убираем лишние пробелы и поддерживаем как single-codepoint hex,
-      // так и последовательность через "-" (например "1f469-200d-1f4bb").
+      // Trim extra whitespace and support both a single-codepoint hex value
+      // and a hyphen-separated sequence (e.g. "1f469-200d-1f4bb").
       final cleaned = emojiDisplay.emojiUnicode.trim();
       final hexPattern = RegExp(r'^[0-9a-fA-F]+$');
       final sequencePattern = RegExp(r'^[0-9a-fA-F]+(?:-[0-9a-fA-F]+)+$');
@@ -40,10 +40,10 @@ class UnicodeEmojiWidget extends StatelessWidget {
         codePoints = cleaned.split('-').map((hex) => int.parse(hex, radix: 16)).toList();
       }
     } catch (_) {
-      // Игнорируем — codePoints останется null
+      // Ignore parse errors and keep codePoints as null.
     }
 
-    // Если не удалось распарсить, показываем символ замены.
+    // Fall back to the replacement character if parsing fails.
     codePoints ??= [0xFFFD]; // '�'
 
     final unicode = String.fromCharCodes(codePoints);
