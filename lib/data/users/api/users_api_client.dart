@@ -79,4 +79,12 @@ abstract class UsersApiClient {
     @Query('status') PresenceStatus status,
     @Query('ping_only') bool? pingOnly,
   );
+
+  @FormUrlEncoded()
+  @POST('/users/me/status')
+  Future<void> updateMyStatus({
+    @Field() String? statusText,
+    @Field() String? emojiName,
+    @Field() String? emojiCode,
+  });
 }

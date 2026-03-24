@@ -7,6 +7,7 @@ import 'package:genesis_workspace/domain/users/entities/presences_response_entit
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
@@ -145,5 +146,10 @@ class UsersRepositoryImpl implements UsersRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  Future<void> updateMyStatus(UpdateMyStatusRequestEntity body) async {
+    return await usersRemoteDataSource.updateMyStatus(body.toDto());
   }
 }
