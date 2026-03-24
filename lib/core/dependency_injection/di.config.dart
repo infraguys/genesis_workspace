@@ -216,6 +216,8 @@ import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.
     as _i773;
 import 'package:genesis_workspace/domain/users/usecases/get_user_presence_use_case.dart'
     as _i394;
+import 'package:genesis_workspace/domain/users/usecases/get_user_status_use_case.dart'
+    as _i807;
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart'
     as _i194;
 import 'package:genesis_workspace/domain/users/usecases/set_typing_use_case.dart'
@@ -557,6 +559,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i419.OrganizationsDataSource>(),
       ),
     );
+    gh.factory<_i807.GetUserStatusUseCase>(
+      () => _i807.GetUserStatusUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i688.UpdateMyStatusUseCase>(
       () => _i688.UpdateMyStatusUseCase(gh<_i125.UsersRepository>()),
     );
@@ -672,12 +677,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i911.RecentDmRepository>(
       () => _i265.RecentDmRepositoryImpl(gh<_i38.RecentDmLocalDataSource>()),
     );
-    gh.lazySingleton<_i766.ProfileCubit>(
-      () => _i766.ProfileCubit(
-        gh<_i547.GetOwnUserUseCase>(),
-        gh<_i832.UpdatePresenceUseCase>(),
-      ),
-    );
     gh.factory<_i812.AddRecentDmUseCase>(
       () => _i812.AddRecentDmUseCase(gh<_i911.RecentDmRepository>()),
     );
@@ -765,6 +764,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i445.GetRecentDmsUseCase>(),
         gh<_i606.AppDatabase>(),
         gh<_i460.SharedPreferences>(),
+      ),
+    );
+    gh.lazySingleton<_i766.ProfileCubit>(
+      () => _i766.ProfileCubit(
+        gh<_i547.GetOwnUserUseCase>(),
+        gh<_i832.UpdatePresenceUseCase>(),
+        gh<_i807.GetUserStatusUseCase>(),
+        gh<_i688.UpdateMyStatusUseCase>(),
       ),
     );
     gh.lazySingleton<_i124.DownloadFilesService>(

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/profile_info_tile.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -134,6 +135,17 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                       color: theme.dividerColor.withValues(alpha: 0.1),
                     ),
                   ],
+                  if (user.status != null)
+                    ProfileInfoTile(
+                      label: context.t.status,
+                      value: user.status?.statusText ?? '',
+                      icon: SizedBox(
+                        width: 32,
+                        child: Center(
+                          child: UnicodeEmojiWidget(emojiDisplay: user.status!.emojiDisplay, size: 20),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 12),
                   ProfileInfoTile(
                     label: context.t.email,
