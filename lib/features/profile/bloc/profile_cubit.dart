@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
@@ -41,8 +42,30 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  Future<void> updateStatus() async {
-    try {} catch (e) {
+  Future<void> updateStatus(UpdateMyStatusRequestEntity body) async {
+    try {
+      await _updateMyStatusUseCase.call(body);
+      final user = state.user;
+      if (user == null) {
+        return;
+      }
+
+      String? normalizeStatusValue(String? value) {
+        final trimmed = value?.trim();
+        if (trimmed == null || trimmed.isEmpty) {
+          return null;
+        }
+        return trimmed;
+      }
+
+      final updatedStatus = UserStatusEntity(
+        statusText: normalizeStatusValue(body.statusText),
+        emojiName: normalizeStatusValue(body.emojiName),
+        emojiCode: normalizeStatusValue(body.emojiCode),
+      );
+
+      emit(state.copyWith(user: user.copyWith(status: updatedStatus)));
+    } catch (e) {
       inspect(e);
     }
   }
