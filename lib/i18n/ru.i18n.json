@@ -360,10 +360,25 @@
     "title": "Личная информация",
     "share_profile": "Поделиться профилем",
     "link_copied": "Ссылка на профиль скопирована в буфер обмена",
+    "no_status_text": "Нет статуса",
     "user_id": "ID пользователя",
     "timezone": "Часовой пояс",
     "team_and_position": "Команда > Должность",
-    "manager": "Руководитель"
+    "manager": "Руководитель",
+    "status_dialog": {
+      "hint": "Установите статус",
+      "cancel": "Отменить",
+      "save": "Сохранить",
+      "presets": {
+        "busy": "Занят/а",
+        "in_meeting": "На встрече",
+        "on_the_road": "В дороге",
+        "sick": "Болею",
+        "on_vacation": "В отпуске",
+        "working_remotely": "Работаю удалённо",
+        "in_office": "В офисе"
+      }
+    }
   },
   "profile": "Профиль",
   "messageReadersTitle": {

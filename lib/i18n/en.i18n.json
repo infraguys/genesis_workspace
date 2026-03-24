@@ -352,10 +352,25 @@
     "title": "Personal information",
     "share_profile": "Share profile",
     "link_copied": "Profile link copied to clipboard",
+    "no_status_text": "No status text",
     "user_id": "User ID",
     "timezone": "Time zone",
     "team_and_position": "Team > Position",
-    "manager": "Manager"
+    "manager": "Manager",
+    "status_dialog": {
+      "hint": "Set your status",
+      "cancel": "Cancel",
+      "save": "Save",
+      "presets": {
+        "busy": "Busy",
+        "in_meeting": "In a meeting",
+        "on_the_road": "On the road",
+        "sick": "Sick",
+        "on_vacation": "On vacation",
+        "working_remotely": "Working remotely",
+        "in_office": "In the office"
+      }
+    }
   },
   "profile": "Profile",
   "messageReadersTitle": {

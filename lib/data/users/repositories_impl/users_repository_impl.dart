@@ -1,6 +1,7 @@
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
+import 'package:genesis_workspace/data/common/dto/exception_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_members_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
@@ -151,7 +152,11 @@ class UsersRepositoryImpl implements UsersRepository {
 
   @override
   Future<void> updateMyStatus(UpdateMyStatusRequestEntity body) async {
-    return await usersRemoteDataSource.updateMyStatus(body.toDto());
+    try {
+      return await usersRemoteDataSource.updateMyStatus(body.toDto());
+    } on ServerExceptionDto catch (e) {
+      throw e.toEntity();
+    }
   }
 
   @override

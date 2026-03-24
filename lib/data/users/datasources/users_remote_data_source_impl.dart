@@ -130,11 +130,22 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
 
   @override
   Future<void> updateMyStatus(UpdateMyStatusRequestDto body) async {
-    return await apiClient.updateMyStatus(
-      statusText: body.statusText,
-      emojiName: body.emojiName,
-      emojiCode: body.emojiCode,
-    );
+    try {
+      return await apiClient.updateMyStatus(
+        statusText: body.statusText,
+        emojiName: body.emojiName,
+        emojiCode: body.emojiCode,
+      );
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        throw ServerExceptionDto.fromJson(data);
+      }
+      if (data is Map) {
+        throw ServerExceptionDto.fromJson(Map<String, dynamic>.from(data));
+      }
+      rethrow;
+    }
   }
 
   @override

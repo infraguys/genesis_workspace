@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +9,9 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/profile_info_tile.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/domain/common/entities/exception_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -50,17 +53,33 @@ class ProfilePersonalInfoPage extends StatelessWidget {
   }) async {
     final profileCubit = context.read<ProfileCubit>();
     final dialogResult = await _showEditStatusDialog(context, currentStatus: currentStatus);
+    if (!context.mounted) {
+      return;
+    }
+
     if (dialogResult == null) {
       return;
     }
 
-    await profileCubit.updateStatus(
-      UpdateMyStatusRequestEntity(
-        statusText: dialogResult.statusText,
-        emojiName: dialogResult.emojiName,
-        emojiCode: dialogResult.emojiCode,
-      ),
-    );
+    try {
+      await profileCubit.updateStatus(
+        UpdateMyStatusRequestEntity(
+          statusText: dialogResult.statusText,
+          emojiName: dialogResult.emojiName,
+          emojiCode: dialogResult.emojiCode,
+        ),
+      );
+    } on DioException catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+      showErrorSnackBar(context, exception: e);
+    } on ServerExceptionEntity catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+      showErrorSnackBar(context, exception: e);
+    }
   }
 
   Future<_StatusDialogResult?> _showEditStatusDialog(
@@ -126,6 +145,11 @@ class ProfilePersonalInfoPage extends StatelessWidget {
               if (user == null) {
                 return const Center(child: CircularProgressIndicator());
               }
+              final statusText = user.status?.statusText?.trim();
+              final resolvedStatusText = (statusText != null && statusText.isNotEmpty)
+                  ? statusText
+                  : context.t.profilePersonalInfo.noStatusText;
+
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -172,7 +196,7 @@ class ProfilePersonalInfoPage extends StatelessWidget {
                   ],
                   ProfileInfoTile(
                     label: context.t.status,
-                    value: user.status?.statusText ?? '',
+                    value: resolvedStatusText,
                     icon: SizedBox(
                       width: 32,
                       child: Center(
@@ -395,6 +419,8 @@ class _EditStatusDialogState extends State<_EditStatusDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final presets = _defaultStatusPresets(context);
+
     return AlertDialog(
       title: Text(context.t.status),
       content: SizedBox(
@@ -404,23 +430,26 @@ class _EditStatusDialogState extends State<_EditStatusDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _defaultStatusPresets.map((preset) {
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: presets.map((preset) {
                   final isSelected =
                       _textController.text.trim() == preset.statusText && _selectedEmojiCode == preset.emojiCode;
-                  return ChoiceChip(
-                    selected: isSelected,
-                    onSelected: (_) => _applyPreset(preset),
-                    avatar: UnicodeEmojiWidget(
-                      emojiDisplay: UserStatusEntity(
-                        emojiName: preset.emojiName,
-                        emojiCode: preset.emojiCode,
-                      ).emojiDisplay,
-                      size: 16,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ChoiceChip(
+                      selected: isSelected,
+                      mouseCursor: SystemMouseCursors.click,
+                      onSelected: (_) => _applyPreset(preset),
+                      avatar: UnicodeEmojiWidget(
+                        emojiDisplay: UserStatusEntity(
+                          emojiName: preset.emojiName,
+                          emojiCode: preset.emojiCode,
+                        ).emojiDisplay,
+                        size: 16,
+                      ),
+                      label: Text(preset.statusText),
                     ),
-                    label: Text(preset.statusText),
                   );
                 }).toList(),
               ),
@@ -430,6 +459,7 @@ class _EditStatusDialogState extends State<_EditStatusDialog> {
                   InkWell(
                     borderRadius: BorderRadius.circular(20),
                     onTap: _openEmojiPicker,
+                    mouseCursor: SystemMouseCursors.click,
                     child: Ink(
                       width: 40,
                       height: 40,
@@ -451,8 +481,8 @@ class _EditStatusDialogState extends State<_EditStatusDialog> {
                   Expanded(
                     child: TextField(
                       controller: _textController,
-                      decoration: const InputDecoration(
-                        hintText: 'Set your status',
+                      decoration: InputDecoration(
+                        hintText: context.t.profilePersonalInfo.statusDialog.hint,
                       ),
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _save(),
@@ -467,11 +497,11 @@ class _EditStatusDialogState extends State<_EditStatusDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Отменить'),
+          child: Text(context.t.profilePersonalInfo.statusDialog.cancel),
         ),
         FilledButton(
           onPressed: _save,
-          child: const Text('Сохранить'),
+          child: Text(context.t.profilePersonalInfo.statusDialog.save),
         ),
       ],
     );
@@ -512,39 +542,39 @@ class _DefaultStatusPreset {
   final String emojiCode;
 }
 
-const List<_DefaultStatusPreset> _defaultStatusPresets = [
+List<_DefaultStatusPreset> _defaultStatusPresets(BuildContext context) => [
   _DefaultStatusPreset(
-    statusText: 'Занят/а',
+    statusText: context.t.profilePersonalInfo.statusDialog.presets.busy,
     emojiName: 'working_on_it',
     emojiCode: '1f6e0',
   ),
   _DefaultStatusPreset(
-    statusText: 'На встрече',
+    statusText: context.t.profilePersonalInfo.statusDialog.presets.inMeeting,
     emojiName: 'calendar',
     emojiCode: '1f4c5',
   ),
   _DefaultStatusPreset(
-    statusText: 'В дороге',
+    statusText: context.t.profilePersonalInfo.statusDialog.presets.onTheRoad,
     emojiName: 'bus',
     emojiCode: '1f68c',
   ),
   _DefaultStatusPreset(
-    statusText: 'Болею',
+    statusText: context.t.profilePersonalInfo.statusDialog.presets.sick,
     emojiName: 'hurt',
     emojiCode: '1f915',
   ),
   _DefaultStatusPreset(
-    statusText: 'В отпуске',
+    statusText: context.t.profilePersonalInfo.statusDialog.presets.onVacation,
     emojiName: 'palm_tree',
     emojiCode: '1f334',
   ),
   _DefaultStatusPreset(
-    statusText: 'Работаю удалённо',
+    statusText: context.t.profilePersonalInfo.statusDialog.presets.workingRemotely,
     emojiName: 'house',
     emojiCode: '1f3e0',
   ),
   _DefaultStatusPreset(
-    statusText: 'В офисе',
+    statusText: context.t.profilePersonalInfo.statusDialog.presets.inOffice,
     emojiName: 'office',
     emojiCode: '1f3e2',
   ),

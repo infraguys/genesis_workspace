@@ -43,30 +43,25 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   Future<void> updateStatus(UpdateMyStatusRequestEntity body) async {
+    final user = state.user;
+    if (user == null) {
+      return;
+    }
+    final prevStatus = user.status;
+
     try {
-      await _updateMyStatusUseCase.call(body);
-      final user = state.user;
-      if (user == null) {
-        return;
-      }
-
-      String? normalizeStatusValue(String? value) {
-        final trimmed = value?.trim();
-        if (trimmed == null || trimmed.isEmpty) {
-          return null;
-        }
-        return trimmed;
-      }
-
       final updatedStatus = UserStatusEntity(
-        statusText: normalizeStatusValue(body.statusText),
-        emojiName: normalizeStatusValue(body.emojiName),
-        emojiCode: normalizeStatusValue(body.emojiCode),
+        statusText: body.statusText,
+        emojiName: body.emojiName,
+        emojiCode: body.emojiCode,
       );
 
       emit(state.copyWith(user: user.copyWith(status: updatedStatus)));
+      await _updateMyStatusUseCase.call(body);
     } catch (e) {
       inspect(e);
+      emit(state.copyWith(user: user.copyWith(status: prevStatus)));
+      rethrow;
     }
   }
 
