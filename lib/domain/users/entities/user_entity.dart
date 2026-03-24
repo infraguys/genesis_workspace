@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/data/users/dto/user_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class UserEntity extends Equatable {
@@ -20,6 +21,7 @@ class UserEntity extends Equatable {
     this.avatarUrl,
     required this.jobTitle,
     required this.bossName,
+    this.status,
   });
 
   final String email;
@@ -35,6 +37,7 @@ class UserEntity extends Equatable {
   final String? avatarUrl;
   final String jobTitle;
   final String bossName;
+  final UserStatusEntity? status;
 
   UserDto toDto() {
     return UserDto(
@@ -72,6 +75,7 @@ class UserEntity extends Equatable {
     isAdmin: isAdmin,
     jobTitle: jobTitle,
     bossName: bossName,
+    status: status,
   );
 
   factory UserEntity.fake({int? id, String? email, String? fullName, bool? isActive}) {
@@ -89,6 +93,40 @@ class UserEntity extends Equatable {
       isGuest: true,
       jobTitle: "Developer",
       bossName: "Boss name",
+    );
+  }
+
+  UserEntity copyWith({
+    String? email,
+    int? userId,
+    UserRole? role,
+    bool? isOwner,
+    bool? isAdmin,
+    bool? isGuest,
+    bool? isBot,
+    String? fullName,
+    String? timezone,
+    bool? isActive,
+    String? avatarUrl,
+    String? jobTitle,
+    String? bossName,
+    UserStatusEntity? status,
+  }) {
+    return UserEntity(
+      email: email ?? this.email,
+      userId: userId ?? this.userId,
+      role: role ?? this.role,
+      isOwner: isOwner ?? this.isOwner,
+      isAdmin: isAdmin ?? this.isAdmin,
+      isGuest: isGuest ?? this.isGuest,
+      isBot: isBot ?? this.isBot,
+      fullName: fullName ?? this.fullName,
+      timezone: timezone ?? this.timezone,
+      isActive: isActive ?? this.isActive,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      jobTitle: jobTitle ?? this.jobTitle,
+      bossName: bossName ?? this.bossName,
+      status: status ?? this.status,
     );
   }
 

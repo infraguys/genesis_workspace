@@ -136,4 +136,14 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       emojiCode: body.emojiCode,
     );
   }
+
+  @override
+  Future<UserStatusDto> getUserStatus(UserStatusRequestDto body) async {
+    try {
+      final response = await apiClient.getUserStatus(body.userId);
+      return response.status;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

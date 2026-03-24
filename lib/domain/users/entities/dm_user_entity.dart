@@ -1,5 +1,6 @@
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
 
 class DmUserEntity extends UserEntity {
   DmUserEntity({
@@ -19,6 +20,7 @@ class DmUserEntity extends UserEntity {
     required super.isGuest,
     required super.jobTitle,
     required super.bossName,
+    super.status,
   });
 
   Set<int> unreadMessages;
@@ -42,6 +44,7 @@ class DmUserEntity extends UserEntity {
     bool? isGuest,
     String? jobTitle,
     String? bossName,
+    UserStatusEntity? status,
   }) {
     return DmUserEntity(
       email: email ?? this.email,
@@ -60,6 +63,7 @@ class DmUserEntity extends UserEntity {
       isGuest: isGuest ?? this.isGuest,
       jobTitle: jobTitle ?? this.jobTitle,
       bossName: bossName ?? this.bossName,
+      status: status ?? this.status,
     );
   }
 }
