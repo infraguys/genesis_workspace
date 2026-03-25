@@ -72,6 +72,12 @@ class WorkspaceApp extends StatelessWidget {
               palettes: state.availablePalettes,
             ),
             themeMode: state.themeMode,
+            builder: (context, child) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: child,
+              );
+            },
           );
         },
       ),
