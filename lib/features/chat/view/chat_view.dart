@@ -338,32 +338,32 @@ class _ChatViewState extends State<ChatView>
                                         ),
                                       ),
                                     )
-                              : Center(
-                                child: Material(
-                                  color: Colors.transparent,
-                                  shape: CircleBorder(),
-                                  clipBehavior: .hardEdge,
-                                  child: InkResponse(
-                                    onTapDown: (details) {
-                                      _openContextMenu(context, details.globalPosition);
-                                    },
-                                    containedInkWell: true,
-                                    child: ClickCursor(
-                                      child: SizedBox.square(
-                                        dimension: 48,
-                                        child: Center(
-                                          child: Assets.icons.moreVert.svg(
-                                            colorFilter: ColorFilter.mode(
-                                              textColors.text30,
-                                              BlendMode.srcIn,
+                                  : Center(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        shape: CircleBorder(),
+                                        clipBehavior: .hardEdge,
+                                        child: InkResponse(
+                                          onTapDown: (details) {
+                                            _openContextMenu(context, details.globalPosition);
+                                          },
+                                          containedInkWell: true,
+                                          child: ClickCursor(
+                                            child: SizedBox.square(
+                                              dimension: 48,
+                                              child: Center(
+                                                child: Assets.icons.moreVert.svg(
+                                                  colorFilter: ColorFilter.mode(
+                                                    textColors.text30,
+                                                    BlendMode.srcIn,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                              ),
                               // : IconButton(
                               //     onPressed: widget.leadingOnPressed,
                               //     icon: Assets.icons.moreVert.svg(
@@ -470,9 +470,7 @@ class _ChatViewState extends State<ChatView>
                                                   if (isTabletOrSmaller) {
                                                     context.pushNamed(
                                                       Routes.chatInfo,
-                                                      pathParameters: GoRouterState
-                                                          .of(context)
-                                                          .pathParameters,
+                                                      pathParameters: GoRouterState.of(context).pathParameters,
                                                     );
                                                   } else {
                                                     widget.leadingOnPressed?.call();
@@ -596,6 +594,11 @@ class _ChatViewState extends State<ChatView>
                                                     widget.chatId!,
                                                   );
                                                 }
+                                              },
+                                              onScrollToBottomPressed: () async {
+                                                await context.read<ChatCubit>().getMessages(
+                                                  myUserId: _myUser.userId,
+                                                );
                                               },
                                               isSelectMode: messagesSelectState.isActive,
                                               selectedMessages: selectedMessages,
@@ -902,7 +905,6 @@ class _ChatViewState extends State<ChatView>
   }
 }
 
-
 class _ChatViewContextMenu extends StatelessWidget {
   const _ChatViewContextMenu({
     super.key,
@@ -931,13 +933,14 @@ class _ChatViewContextMenu extends StatelessWidget {
           label: context.t.folders.addToFolder,
           onTap: onAddToFolder,
         ),
-        if (onReadAll != null) _ChatContextMenuAction(
-          textColor: textColors.text100,
-          icon: Assets.icons.readReceipt,
-          iconColor: iconColor,
-          label: context.t.readAllMessages,
-          onTap: onReadAll,
-        ),
+        if (onReadAll != null)
+          _ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.readReceipt,
+            iconColor: iconColor,
+            label: context.t.readAllMessages,
+            onTap: onReadAll,
+          ),
       ],
     );
   }

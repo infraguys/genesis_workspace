@@ -33,6 +33,7 @@ class MessagesList extends StatefulWidget {
   final int myUserId;
   final void Function(int messageId, {String? quote})? onTapQuote;
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
+  final VoidCallback? onScrollToBottomPressed;
   final bool isSelectMode;
   final List<MessageEntity> selectedMessages;
   final int? focusedMessageId;
@@ -57,6 +58,7 @@ class MessagesList extends StatefulWidget {
     this.focusedMessageId,
     this.foundNewest = true,
     this.foundOldest = false,
+    this.onScrollToBottomPressed,
   });
 
   @override
@@ -256,6 +258,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void _scrollToBottom() {
+    widget.onScrollToBottomPressed?.call();
     if (_itemScrollController.isAttached) {
       _itemScrollController.scrollTo(
         index: 0,

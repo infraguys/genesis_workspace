@@ -443,7 +443,8 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 SingleActivator(LogicalKeyboardKey.escape, numLock: LockState.ignored): isSelectMode
                     ? CancelSelectModeIntent()
                     : UnselectChatIntent(),
-                SingleActivator(LogicalKeyboardKey.keyN, shift: true, numLock: LockState.ignored): const NextUnreadTopicIntent(),
+                SingleActivator(LogicalKeyboardKey.keyN, shift: true, numLock: LockState.ignored):
+                    const NextUnreadTopicIntent(),
               },
               child: Actions(
                 actions: {
@@ -620,6 +621,11 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                               myUserId: _myUser.userId,
                                               onTapQuote: onTapQuote,
                                               onTapEditMessage: onTapEditMessage,
+                                              onScrollToBottomPressed: () async {
+                                                await context.read<ChannelChatCubit>().getChannelMessages(
+                                                  didUpdateWidget: false,
+                                                );
+                                              },
                                               onReadAll: () async {
                                                 await context.read<MessengerCubit>().readAllMessages(
                                                   widget.chatId,
@@ -964,13 +970,14 @@ class _ChannelChatContextMenu extends StatelessWidget {
           label: context.t.folders.addToFolder,
           onTap: onAddToFolder,
         ),
-        if (onTogglePin != null) ChatContextMenuAction(
-          textColor: textColors.text100,
-          icon: Assets.icons.pinned,
-          iconColor: iconColor,
-          label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
-          onTap: onTogglePin,
-        ),
+        if (onTogglePin != null)
+          ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.pinned,
+            iconColor: iconColor,
+            label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
+            onTap: onTogglePin,
+          ),
         if (onToggleMute != null) ...[
           ChatContextMenuAction(
             textColor: textColors.text100,
@@ -980,13 +987,14 @@ class _ChannelChatContextMenu extends StatelessWidget {
             onTap: onToggleMute,
           ),
         ],
-        if (onReadAll != null) ChatContextMenuAction(
-          textColor: textColors.text100,
-          icon: Assets.icons.readReceipt,
-          iconColor: iconColor,
-          label: context.t.readAllMessages,
-          onTap: onReadAll,
-        ),
+        if (onReadAll != null)
+          ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.readReceipt,
+            iconColor: iconColor,
+            label: context.t.readAllMessages,
+            onTap: onReadAll,
+          ),
         if (onCreateTopic != null)
           ChatContextMenuAction(
             textColor: textColors.text100,
@@ -999,6 +1007,3 @@ class _ChannelChatContextMenu extends StatelessWidget {
     );
   }
 }
-
-
-
