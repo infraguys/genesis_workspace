@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 
 class CallWebView extends StatelessWidget {
   const CallWebView({
@@ -20,6 +22,9 @@ class CallWebView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userDisplayName = context.read<ProfileCubit>().state.user?.fullName ?? '';
+
+    print(meetingLink);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -52,7 +57,7 @@ class CallWebView extends StatelessWidget {
           child: InAppWebView(
             initialUrlRequest: URLRequest(
               url: WebUri.uri(
-                Uri.parse("$meetingLink&config.disableDeepLinking=true"),
+                Uri.parse('$meetingLink&config.disableDeepLinking=true&userInfo.displayName="$userDisplayName"'),
               ),
             ),
             initialSettings: InAppWebViewSettings(
