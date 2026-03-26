@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/core/widgets/group_avatars.dart';
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -56,9 +55,8 @@ class ActiveCallPanel extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
         ),
-        child: Column(
-          crossAxisAlignment: .start,
-          spacing: 8,
+        child: Row(
+          mainAxisAlignment: .spaceBetween,
           children: [
             Text(
               titleText,
@@ -67,33 +65,10 @@ class ActiveCallPanel extends StatelessWidget {
                 fontSize: 14,
               ),
             ),
-            Row(
-              mainAxisAlignment: .spaceBetween,
-              children: [
-                Row(
-                  spacing: 20,
-                  children: [
-                    Row(
-                      spacing: 4,
-                      children: [
-                        Assets.icons.arrowRightUp.svg(),
-                        Text(
-                          '0:47',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: textColors.text50,
-                          ),
-                        ),
-                      ],
-                    ),
-                    GroupAvatars(bgColor: theme.colorScheme.surface),
-                  ],
-                ),
-                IconButton(
-                  tooltip: context.t.call.resumeCall,
-                  onPressed: onRestoreCall,
-                  icon: Assets.icons.joinCall.svg(),
-                ),
-              ],
+            IconButton(
+              tooltip: context.t.call.resumeCall,
+              onPressed: onRestoreCall,
+              icon: Assets.icons.joinCall.svg(),
             ),
           ],
         ),
