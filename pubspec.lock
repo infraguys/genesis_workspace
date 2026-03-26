@@ -590,6 +590,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.1"
+  flutter_chat_core:
+    dependency: transitive
+    description:
+      name: flutter_chat_core
+      sha256: "8c46790f64f106bf6e610e2a7324b3844320e9e295867c06d45d9deb134d848d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.0"
   flutter_emoji:
     dependency: "direct main"
     description:
@@ -686,6 +694,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.14.4"
+  flutter_link_previewer:
+    dependency: "direct main"
+    description:
+      name: flutter_link_previewer
+      sha256: "346f345064e65bc8bf739bccf19d6d6ca50f8183ffc52e452afa58c06ee2cbf7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -830,6 +846,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.0"
+  freezed_annotation:
+    dependency: transitive
+    description:
+      name: freezed_annotation
+      sha256: "7294967ff0a6d98638e7acb774aac3af2550777accd8149c90af5b014e6d44d8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   fwfh_cached_network_image:
     dependency: "direct main"
     description:
@@ -1186,10 +1210,10 @@ packages:
     dependency: transitive
     description:
       name: matcher
-      sha256: "12956d0ad8390bbcc63ca2e1469c0619946ccb52809807067a7020d57e647aa6"
+      sha256: dc0b7dc7651697ea4ff3e69ef44b0407ea32c487a39fff6a4004fa585e901861
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.18"
+    version: "0.12.19"
   material_color_utilities:
     dependency: transitive
     description:
@@ -1590,6 +1614,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  punycode:
+    dependency: transitive
+    description:
+      name: punycode
+      sha256: "39b874cc1f78b94e57db17e74b3f2ba2a96e25c0bebdcc8a571614dccda0ff0c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   recase:
     dependency: transitive
     description:
@@ -1983,10 +2015,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "93167629bfc610f71560ab9312acdda4959de4df6fac7492c89ff0d3886f6636"
+      sha256: "8161c84903fd860b26bfdefb7963b3f0b68fee7adea0f59ef805ecca346f0c7a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.9"
+    version: "0.7.10"
   time:
     dependency: transitive
     description:

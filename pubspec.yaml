@@ -88,6 +88,7 @@ dependencies:
   talker_flutter: ^5.1.9
   talker_dio_logger: ^5.1.9
   talker_bloc_logger: ^5.1.9
+  flutter_link_previewer: ^4.2.0
 
 
 dev_dependencies:
