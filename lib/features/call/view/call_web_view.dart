@@ -25,8 +25,6 @@ class CallWebView extends StatelessWidget {
     final theme = Theme.of(context);
     final userDisplayName = context.read<ProfileCubit>().state.user?.fullName ?? '';
 
-    print(meetingLink);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
