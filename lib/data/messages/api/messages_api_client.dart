@@ -51,7 +51,9 @@ abstract class MessagesApiClient {
   @PATCH('/messages/{message_id}')
   Future<UpdateMessageResponseDto> updateMessage({
     @Path('message_id') required int messageId,
-    @Field("content") required String content,
+    @Field('content') String? content,
+    @Field('topic') String? topic,
+    @Field('propagate_mode') String? propagateMode,
   });
 
   @POST('/messages/flags')

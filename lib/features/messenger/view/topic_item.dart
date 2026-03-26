@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
+import 'package:genesis_workspace/core/widgets/resolve_topic_indicator.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
@@ -17,10 +18,14 @@ import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class TopicItem extends StatefulWidget {
+  const TopicItem({
+    super.key,
+    required this.chat,
+    required this.topic,
+  });
+
   final ChatEntity chat;
   final TopicEntity topic;
-
-  TopicItem({super.key, required this.chat, required this.topic});
 
   @override
   State<TopicItem> createState() => _TopicItemState();
@@ -168,20 +173,19 @@ class _TopicItemState extends State<TopicItem> {
               final isSelected = widget.topic.name == state.selectedTopic;
               return Container(
                 height: 76,
-                padding: EdgeInsets.symmetric(vertical: 8).copyWith(
-                  left: 38,
-                  right: 8,
-                ),
+                padding: .all(8.0),
                 decoration: BoxDecoration(
                   borderRadius: .circular(8),
                   color: isSelected ? cardColors.active : null,
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: .center,
                   children: [
+                    ResolveTopicIndicator(isResolved: widget.topic.isResolved),
+                    const SizedBox(width: 12.0),
                     Expanded(
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: .center,
                         children: [
                           Container(
                             width: 3,
@@ -205,9 +209,9 @@ class _TopicItemState extends State<TopicItem> {
                                     ConstrainedBox(
                                       constraints: BoxConstraints(maxWidth: 235),
                                       child: Tooltip(
-                                        message: widget.topic.name,
+                                        message: widget.topic.displayName,
                                         child: Text(
-                                          "# ${widget.topic.name}",
+                                          "# ${widget.topic.displayName}",
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: theme.textTheme.labelMedium?.copyWith(

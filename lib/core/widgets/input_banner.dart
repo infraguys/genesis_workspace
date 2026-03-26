@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class InputBanner extends StatelessWidget {
@@ -7,6 +8,7 @@ class InputBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = TextTheme.of(context);
+    final screenSize = currentSize(context);
     return SizedBox(
       height: 60.0,
       width: double.infinity,
@@ -20,7 +22,7 @@ class InputBanner extends StatelessWidget {
         child: Center(
           child: Text(
             context.t.input.banner,
-            style: textTheme.bodySmall!.copyWith(fontSize: 16),
+            style: textTheme.bodySmall!.copyWith(fontSize: screenSize.isSmallerThan(.lTablet) ? 12 : 16),
           ),
         ),
       ),

@@ -4,9 +4,9 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class UpdateMessageUseCase {
-  final MessagesRepository _repository;
-
   UpdateMessageUseCase(this._repository);
+
+  final MessagesRepository _repository;
 
   Future<UpdateMessageResponseEntity> call(UpdateMessageRequestEntity body) async {
     return await _repository.updateMessage(body);

@@ -15,6 +15,7 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_narrow_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/messages_request_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/send_message_request_entity.dart';
+import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/messages/usecases/get_messages_use_case.dart';
 import 'package:genesis_workspace/domain/messages/usecases/send_message_use_case.dart';
@@ -258,14 +259,14 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   Future<void> getChannelTopics({required int streamId, String? topicName}) async {
     try {
-      if (topicName != null) {
-        final topic = TopicEntity.newTopic(topicName);
-        emit(state.copyWith(topic: topic));
-      } else {
+      // if (topicName != null) {
+      //   final topic = TopicEntity.newTopic(topicName);
+      //   emit(state.copyWith(topic: topic));
+      // } else {
         final response = await _getTopicsUseCase.call(streamId);
         final topic = response.where((topic) => topicName == topic.name).firstOrNull;
         emit(state.copyWith(topic: topic));
-      }
+      // }
     } catch (e) {
       inspect(e);
     }
@@ -463,6 +464,72 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
     } finally {
       emit(state.copyWith(isMessagePending: false));
     }
+  }
+
+  Future<String?> unresolveCurrentTopic() async {
+    final TopicEntity? currentTopic = state.topic;
+    if (currentTopic == null || !currentTopic.isResolved) {
+      return null;
+    }
+
+    final String updatedTopicName = currentTopic.displayName.trimLeft();
+    if (updatedTopicName.isEmpty || updatedTopicName == currentTopic.name) {
+      return null;
+    }
+
+    final int? messageId = state.messages.isNotEmpty ? state.messages.last.id : null;
+    if (messageId == null) {
+      throw StateError('Cannot unresolve topic without messages loaded');
+    }
+
+    await updateMessageUseCase.call(
+      UpdateMessageRequestEntity(
+        messageId: messageId,
+        topic: updatedTopicName,
+        propagateMode: 'change_all',
+      ),
+    );
+
+    emit(
+      state.copyWith(
+        topic: currentTopic.copyWith(name: updatedTopicName),
+      ),
+    );
+
+    return updatedTopicName;
+  }
+
+  Future<String?> resolveCurrentTopic() async {
+    final TopicEntity? currentTopic = state.topic;
+    if (currentTopic == null || currentTopic.isResolved) {
+      return null;
+    }
+
+    final String updatedTopicName = '✔ ${currentTopic.name}'.trim();
+    if (updatedTopicName.isEmpty || updatedTopicName == currentTopic.name) {
+      return null;
+    }
+
+    final int? messageId = state.messages.isNotEmpty ? state.messages.last.id : null;
+    if (messageId == null) {
+      throw StateError('Cannot resolve topic without messages loaded');
+    }
+
+    await updateMessageUseCase.call(
+      UpdateMessageRequestEntity(
+        messageId: messageId,
+        topic: updatedTopicName,
+        propagateMode: 'change_all',
+      ),
+    );
+
+    emit(
+      state.copyWith(
+        topic: currentTopic.copyWith(name: updatedTopicName),
+      ),
+    );
+
+    return updatedTopicName;
   }
 
   Set<int> _sortChannelMembersByRecentMessages({

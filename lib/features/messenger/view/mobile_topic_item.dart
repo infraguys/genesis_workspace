@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
+import 'package:genesis_workspace/core/widgets/resolve_topic_indicator.dart';
 import 'package:genesis_workspace/core/widgets/unread_badge.dart';
 import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
@@ -68,7 +69,7 @@ class MobileTopicItem extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: .only(left: 38),
+        padding: .only(left: 8.0),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -92,6 +93,8 @@ class MobileTopicItem extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: .center,
                       children: [
+                        ResolveTopicIndicator(isResolved: topic.isResolved),
+                        const SizedBox(width: 12),
                         Container(
                           width: 3,
                           height: 47,
@@ -107,9 +110,9 @@ class MobileTopicItem extends StatelessWidget {
                             crossAxisAlignment: .start,
                             children: [
                               Tooltip(
-                                message: topic.name,
+                                message: topic.displayName,
                                 child: Text(
-                                  "# ${topic.name}",
+                                  "# ${topic.displayName}",
                                   maxLines: 1,
                                   overflow: .ellipsis,
                                   style: theme.textTheme.labelMedium?.copyWith(
