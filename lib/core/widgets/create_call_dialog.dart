@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
@@ -21,18 +23,36 @@ class CreateCallDialog extends StatefulWidget {
 
 class _CreateCallDialogState extends State<CreateCallDialog> {
   late final TextEditingController callNameController;
+  late final String randomCallName;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
-    callNameController = TextEditingController();
     super.initState();
+    randomCallName = _generateRandomCallName();
+    callNameController = TextEditingController();
   }
 
   @override
   void dispose() {
     callNameController.dispose();
     super.dispose();
+  }
+
+  String _generateRandomCallName() {
+    const prefixes = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'];
+    const suffixes = ['team', 'sync', 'room', 'standup', 'review', 'meeting'];
+    final random = Random();
+    final prefix = prefixes[random.nextInt(prefixes.length)];
+    final suffix = suffixes[random.nextInt(suffixes.length)];
+    final number = 1000 + random.nextInt(9000);
+    return '$prefix-$suffix-$number';
+  }
+
+  String _buildCallLink() {
+    final rawName = callNameController.text.trim().isEmpty ? randomCallName : callNameController.text.trim();
+    final sanitizedName = rawName.replaceAll(RegExp(r'\s+'), '-');
+    return '${widget.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
   }
 
   @override
@@ -52,19 +72,11 @@ class _CreateCallDialogState extends State<CreateCallDialog> {
           autofocus: true,
           decoration: InputDecoration(
             labelText: translations.nameLabel,
+            hintText: randomCallName,
           ),
           textInputAction: TextInputAction.done,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return translations.nameRequired;
-            }
-            return null;
-          },
           onFieldSubmitted: (_) {
-            if (!(formKey.currentState?.validate() ?? false)) return;
-            final sanitizedName = callNameController.text.trim().replaceAll(RegExp(r'\s+'), '-');
-            final link =
-                '${widget.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
+            final link = _buildCallLink();
             context.pop(link);
           },
         ),
@@ -76,10 +88,7 @@ class _CreateCallDialogState extends State<CreateCallDialog> {
         ),
         FilledButton(
           onPressed: () {
-            if (!(formKey.currentState?.validate() ?? false)) return;
-            final sanitizedName = callNameController.text.trim().replaceAll(RegExp(r'\s+'), '-');
-            final link =
-                '${widget.meetingBaseUrl}/$sanitizedName#config.startWithVideoMuted=${widget.startWithVideoMuted}';
+            final link = _buildCallLink();
             context.pop(link);
             if (isTabletOrSmaller) {
               context.pushNamed(Routes.call, extra: link);
