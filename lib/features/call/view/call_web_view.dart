@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class CallWebView extends StatelessWidget {
   const CallWebView({
@@ -46,7 +47,7 @@ class CallWebView extends StatelessWidget {
                 IconButton(
                   onPressed: onClose ?? () {},
                   icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Close',
+                  tooltip: context.t.general.close,
                 ),
               ],
             ),
