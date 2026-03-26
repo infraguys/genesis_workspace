@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/core/widgets/group_avatars.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
-import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class MessageCallBody extends StatelessWidget {
@@ -15,9 +13,12 @@ class MessageCallBody extends StatelessWidget {
     final textColors = theme.extension<TextColors>()!;
     final messageColors = theme.extension<MessageColors>()!;
     return Column(
-      spacing: 8,
+      // spacing: 8,
       crossAxisAlignment: .start,
       children: [
+        SizedBox(
+          height: 12,
+        ),
         Row(
           spacing: 12,
           children: [
@@ -38,24 +39,24 @@ class MessageCallBody extends StatelessWidget {
             ),
           ],
         ),
-        Row(
-          spacing: 16,
-          children: [
-            Row(
-              spacing: 4,
-              children: [
-                Assets.icons.arrowLeftDown.svg(),
-                Text(
-                  '0:47',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: textColors.text50),
-                ),
-              ],
-            ),
-            GroupAvatars(
-              bgColor: messageColors.activeCallBackground,
-            ),
-          ],
-        ),
+        // Row(
+        //   spacing: 16,
+        //   children: [
+        //     Row(
+        //       spacing: 4,
+        //       children: [
+        //         Assets.icons.arrowLeftDown.svg(),
+        //         Text(
+        //           '0:47',
+        //           style: theme.textTheme.bodyMedium?.copyWith(color: textColors.text50),
+        //         ),
+        //       ],
+        //     ),
+        //     GroupAvatars(
+        //       bgColor: messageColors.activeCallBackground,
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }

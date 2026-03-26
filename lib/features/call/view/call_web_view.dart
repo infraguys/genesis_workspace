@@ -50,7 +50,11 @@ class CallWebView extends StatelessWidget {
         ],
         Expanded(
           child: InAppWebView(
-            initialUrlRequest: URLRequest(url: WebUri.uri(Uri.parse(meetingLink))),
+            initialUrlRequest: URLRequest(
+              url: WebUri.uri(
+                Uri.parse("$meetingLink&config.disableDeepLinking=true"),
+              ),
+            ),
             initialSettings: InAppWebViewSettings(
               mediaPlaybackRequiresUserGesture: false,
               iframeAllow: "camera; microphone",
