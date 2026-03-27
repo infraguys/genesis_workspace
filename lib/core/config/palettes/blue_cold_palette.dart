@@ -113,7 +113,7 @@ class BlueColdPalette extends ThemePalette {
         darkIconColors: _blueColdDarkIconColors,
         lightNoticeColors: _blueColdLightNoticeColors,
         darkNoticeColors: _blueColdDarkNoticeColors,
-        darkTextFieldBackground: const Color(0xFF222328),
+        darkTextFieldBackground: const Color(0xFF282A32),
         lightTextFieldBackground: const Color(0xFFFFFFFF),
       );
 }

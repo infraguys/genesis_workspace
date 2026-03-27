@@ -32,6 +32,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> getOwnUser() async {
     try {
       final user = await _getOwnUserUseCase.call();
+      emit(state.copyWith(user: user));
       final statusResponse = await _getUserStatusUseCase.call(UserStatusRequestEntity(userId: user.userId));
       final userWithStatus = user.copyWith(
         status: statusResponse,

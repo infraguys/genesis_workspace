@@ -116,7 +116,7 @@ class MultiPollingService {
   }
 
   Future<void> addConnection(int organizationId, String baseUrl) async {
-    if (_activeConnections.containsKey(organizationId) && (_activeConnections[organizationId]?.isActive ?? false)) {
+    if (_activeConnections[organizationId]?.isActive ?? false) {
       return;
     }
 
