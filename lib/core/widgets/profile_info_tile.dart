@@ -36,7 +36,7 @@ class ProfileInfoTile extends StatelessWidget {
                   color: textColors.text30,
                 ),
               ),
-              Text(
+              SelectableText(
                 value,
                 style: theme.textTheme.bodyMedium,
               ),

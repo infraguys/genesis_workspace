@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
@@ -125,118 +126,6 @@ class ProfileSettingsView extends StatelessWidget {
                     onOpenPersonalInfo();
                   }
                 },
-              ),
-              BlocBuilder<UpdateCubit, UpdateState>(
-                builder: (context, state) {
-                  return Column(
-                    crossAxisAlignment: .stretch,
-                    children: [
-                      ListTile(
-                        leading: Assets.icons.info.svg(
-                          colorFilter: ColorFilter.mode(
-                            iconColors.base,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        title: Text(
-                          context.t.settings.appVersion,
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        subtitle: Text(
-                          state.currentVersion,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: textColors.text30,
-                          ),
-                        ),
-                      ),
-                      if (state.isNewUpdateAvailable) ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainer,
-                              borderRadius: BorderRadiusGeometry.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              children: [
-                                Text(
-                                  context.t.updateView.newVersionAvailable,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  context.t.updateView.downloadNewVersionRn,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: textColors.text30,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                      ],
-                    ],
-                  );
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                child: Material(
-                  color: cardColors.base,
-                  borderRadius: BorderRadius.circular(8),
-                  child: InkWell(
-                    mouseCursor: SystemMouseCursors.click,
-                    hoverColor: cardColors.active,
-                    onTap: () {
-                      if (isMobile) {
-                        context.pushNamed(Routes.forceUpdate);
-                      } else {
-                        onOpenVersionChoose();
-                      }
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.t.updateView.browseBuilds,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  context.t.updateView.browseBuildsSubtitle,
-                                  maxLines: 1,
-                                  overflow: .ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: textColors.text30,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Assets.icons.arrowRight.svg(
-                            colorFilter: ColorFilter.mode(
-                              iconColors.base,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -400,8 +289,123 @@ class ProfileSettingsView extends StatelessWidget {
               await context.read<AuthCubit>().logout();
             },
           ),
+          Divider(
+            color: theme.dividerColor,
+          ),
+          BlocBuilder<UpdateCubit, UpdateState>(
+            builder: (context, state) {
+              return Column(
+                crossAxisAlignment: .stretch,
+                children: [
+                  ListTile(
+                    leading: Assets.icons.info.svg(
+                      colorFilter: ColorFilter.mode(
+                        iconColors.base,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    title: Text(
+                      context.t.settings.appVersion,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    subtitle: Text(
+                      state.currentVersion,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: textColors.text30,
+                      ),
+                    ),
+                  ),
+                  if (state.isNewUpdateAvailable) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainer,
+                          borderRadius: BorderRadiusGeometry.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: .start,
+                          children: [
+                            Text(
+                              context.t.updateView.newVersionAvailable,
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                            Text(
+                              context.t.updateView.downloadNewVersionRn,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: textColors.text30,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                  ],
+                  if (platformInfo.isLinux || platformInfo.isWindows)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                      child: Material(
+                        color: cardColors.base,
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          mouseCursor: SystemMouseCursors.click,
+                          hoverColor: cardColors.active,
+                          onTap: () {
+                            if (isMobile) {
+                              context.pushNamed(Routes.forceUpdate);
+                            } else {
+                              onOpenVersionChoose();
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        context.t.updateView.browseBuilds,
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        context.t.updateView.browseBuildsSubtitle,
+                                        maxLines: 1,
+                                        overflow: .ellipsis,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: textColors.text30,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Assets.icons.arrowRight.svg(
+                                  colorFilter: ColorFilter.mode(
+                                    iconColors.base,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           if (kDebugMode) ...[
-            const Divider(),
             ListTile(
               leading: Icon(Icons.delete),
               title: Text(context.t.profileView.clearDb),
