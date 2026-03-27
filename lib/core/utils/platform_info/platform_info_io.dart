@@ -11,6 +11,8 @@ class PlatformInfo {
 
   bool get isLinux => io.Platform.isLinux;
 
+  bool get isWindows => io.Platform.isWindows;
+
   bool get isMacos => io.Platform.isMacOS;
 
   bool get isIos => io.Platform.isIOS;
