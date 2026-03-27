@@ -1,5 +1,15 @@
 # Changelog
 
+# 1.10.3
+- Added border for quotes in messages
+- Fixed folders error
+- Added user status to profile
+- Refactored scroll to bottom functionality
+- Refactored calls flow
+- Fixed mute topics
+- Small colors refactor
+- Made profile fields selectable
+
 # 1.10.2
 - Fix android and linux applications
 
