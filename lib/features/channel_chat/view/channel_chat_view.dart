@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -40,6 +41,7 @@ import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
@@ -49,6 +51,7 @@ import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cu
 import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/mute/mute_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/create_chat/create_topic_dialog.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -150,12 +153,15 @@ class _ChannelChatViewState extends State<ChannelChatView>
   }
 
   void _openContextMenu(BuildContext context, Offset globalPosition) {
-    final chat = context.read<MessengerCubit>().state.selectedChat!;
+    final selectedChat = context.read<MessengerCubit>().state.chats.firstWhere((it) => it.id == widget.chatId);
+    final selectedTopic = selectedChat.topics?.firstWhereOrNull((it) => it.name == widget.topicName);
+
     ChatContextMenuOverlay.show(
       context: context,
       globalPosition: globalPosition,
       child: _ChannelChatContextMenu(
-        chat: chat,
+        chat: selectedChat,
+        selectedTopic: selectedTopic,
         onAddToFolder: () async {
           ChatContextMenuOverlay.close();
           final folders = context.read<MessengerCubit>().state.folders;
@@ -165,31 +171,31 @@ class _ChannelChatViewState extends State<ChannelChatView>
               onSave: (selectedFolderIds) async {
                 await context.read<MessengerCubit>().setFoldersForChat(
                   selectedFolderIds,
-                  chat.id,
+                  selectedChat.id,
                 );
               },
               folders: folders,
               loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
-                chat.id,
+                selectedChat.id,
               ),
             ),
           );
         },
         onToggleMute: () async {
-          // try {
-          //   _closeOverlay();
-          //   if (widget.chat.isMuted) {
-          //     await context.read<MuteCubit>().unmuteChannel(widget.chat);
-          //   } else {
-          //     await context.read<MuteCubit>().muteChannel(widget.chat);
-          //   }
-          // } on DioException catch (e) {
-          //   showErrorSnackBar(context, exception: e);
-          // }
+          final muteCubit = context.read<MuteCubit>();
+          try {
+            if (selectedTopic != null && selectedTopic.isMuted) {
+              await muteCubit.unmuteTopic(streamId: selectedChat.streamId!, topic: widget.topicName!);
+            } else {
+              await muteCubit.muteTopic(streamId: selectedChat.streamId!, topic: widget.topicName!);
+            }
+          } finally {
+            ChatContextMenuOverlay.close();
+          }
         },
         onReadAll: () async {
           ChatContextMenuOverlay.close();
-          await context.read<MessengerCubit>().readAllMessages(chat.id);
+          await context.read<MessengerCubit>().readAllMessages(selectedChat.id);
         },
         onCreateTopic: () async {
           ChatContextMenuOverlay.close();
@@ -200,7 +206,7 @@ class _ChannelChatViewState extends State<ChannelChatView>
                 providers: [
                   BlocProvider(create: (_) => getIt<CreateChatCubit>()),
                 ],
-                child: CreateTopicDialog(channelId: chat.streamId),
+                child: CreateTopicDialog(channelId: selectedChat.streamId),
               );
             },
           );
@@ -938,6 +944,7 @@ class _ChannelChatContextMenu extends StatelessWidget {
   const _ChannelChatContextMenu({
     super.key,
     required this.chat,
+    required this.selectedTopic,
     this.onAddToFolder,
     this.onTogglePin,
     this.onReadAll,
@@ -946,6 +953,7 @@ class _ChannelChatContextMenu extends StatelessWidget {
   });
 
   final ChatEntity chat;
+  final TopicEntity? selectedTopic;
   final VoidCallback? onAddToFolder;
   final VoidCallback? onTogglePin;
   final VoidCallback? onToggleMute;
@@ -978,12 +986,12 @@ class _ChannelChatContextMenu extends StatelessWidget {
             label: chat.isPinned ? context.t.chat.unpinChat : context.t.chat.pinChat,
             onTap: onTogglePin,
           ),
-        if (onToggleMute != null) ...[
+        if (onToggleMute != null && selectedTopic != null) ...[
           ChatContextMenuAction(
             textColor: textColors.text100,
-            icon: chat.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
+            icon: selectedTopic!.isMuted ? Assets.icons.volumeUp : Assets.icons.notif,
             iconColor: iconColor,
-            label: chat.isMuted ? context.t.channel.unmuteChannel : context.t.channel.muteChannel,
+            label: selectedTopic!.isMuted ? context.t.topicItem.unmute : context.t.topicItem.mute,
             onTap: onToggleMute,
           ),
         ],
