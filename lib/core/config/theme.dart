@@ -21,7 +21,7 @@ final supportedThemePalettes = <ThemePaletteEntity>[
   orangeWarmPaletteEntity,
   blueColdPaletteEntity,
 ];
-final defaultThemePaletteEntity = orangeWarmPaletteEntity;
+final defaultThemePaletteEntity = blueColdPaletteEntity;
 
 final darkOrangeWarmTheme = orangeWarmPalette.dark();
 
