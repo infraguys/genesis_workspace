@@ -12,6 +12,7 @@ import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/app_bottom_nav_bar.dart';
 import 'package:genesis_workspace/core/widgets/app_mobile_drawer.dart';
 import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
+import 'package:genesis_workspace/core/widgets/desktop_app_bar.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/features/app_bar/view/scaffold_desktop_app_bar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/auth.dart';
@@ -156,104 +157,111 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
               ),
             )
           : null,
-      body: BlocConsumer<AuthCubit, AuthState>(
-        listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-        listener: (context, state) {
-          setState(() {
-            _future = getInitialData();
-          });
-          if (state.isAuthorized) {
-            unawaited(context.read<RealTimeCubit>().registerFcmToken());
-            if (platformInfo.isIos) {
-              unawaited(context.read<RealTimeCubit>().registerApnsToken());
-            }
-          }
-        },
-        builder: (context, state) {
-          return FutureBuilder(
-            future: _future,
-            builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == .waiting && state.isPending) {
-                return AppProgressIndicator();
+      body: Stack(
+        children: [
+          BlocConsumer<AuthCubit, AuthState>(
+            listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+            listener: (context, state) {
+              setState(() {
+                _future = getInitialData();
+              });
+              if (state.isAuthorized) {
+                unawaited(context.read<RealTimeCubit>().registerFcmToken());
+                if (platformInfo.isIos) {
+                  unawaited(context.read<RealTimeCubit>().registerApnsToken());
+                }
               }
-              return BlocListener<UpdateCubit, UpdateState>(
-                listener: (context, updateState) {
-                  if (updateState.isUpdateRequired) {
-                    context.goNamed(Routes.forceUpdate);
+            },
+            builder: (context, state) {
+              return FutureBuilder(
+                future: _future,
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.connectionState == .waiting && state.isPending) {
+                    return AppProgressIndicator();
                   }
-                },
-                child: BlocBuilder<CallCubit, CallState>(
-                  builder: (context, callState) {
-                    return Stack(
-                      children: [
-                        Stack(
-                          fit: StackFit.expand,
+                  return BlocListener<UpdateCubit, UpdateState>(
+                    listener: (context, updateState) {
+                      if (updateState.isUpdateRequired) {
+                        context.goNamed(Routes.forceUpdate);
+                      }
+                    },
+                    child: BlocBuilder<CallCubit, CallState>(
+                      builder: (context, callState) {
+                        return Stack(
                           children: [
-                            Column(
-                              spacing: 4.0,
+                            Stack(
+                              fit: StackFit.expand,
                               children: [
-                                if (!isTabletOrSmaller)
-                                  ScaffoldDesktopAppBar(
-                                    onSelectBranch: _goBranch,
-                                    selectedIndex: widget.navigationShell.currentIndex,
-                                  ),
-                                BlocBuilder<AuthCubit, AuthState>(
-                                  buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
-                                  builder: (_, state) {
-                                    return Expanded(
-                                      child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
-                                        builder: (context, panelState) {
-                                          final bool showProfilePanel =
-                                              !isTabletOrSmaller &&
-                                              state.isAuthorized &&
-                                              panelState.status == InfoPanelStatus.profileInfo;
-
-                                          return Row(
-                                            children: [
-                                              Expanded(
-                                                child: state.isAuthorized ? widget.navigationShell : Auth(),
-                                              ),
-                                              if (showProfilePanel) ...[
-                                                const SizedBox(width: 4.0),
-                                                SizedBox(
-                                                  width: 315,
-                                                  child: InfoPanel(
-                                                    onClose: () {
-                                                      context.read<InfoPanelCubit>().setInfoPanelState(.closed);
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
-                                          );
-                                        },
+                                Column(
+                                  spacing: 4.0,
+                                  children: [
+                                    if (!isTabletOrSmaller)
+                                      ScaffoldDesktopAppBar(
+                                        onSelectBranch: _goBranch,
+                                        selectedIndex: widget.navigationShell.currentIndex,
                                       ),
-                                    );
-                                  },
+                                    BlocBuilder<AuthCubit, AuthState>(
+                                      buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                                      builder: (_, state) {
+                                        return Expanded(
+                                          child: BlocBuilder<InfoPanelCubit, InfoPanelState>(
+                                            builder: (context, panelState) {
+                                              final bool showProfilePanel =
+                                                  !isTabletOrSmaller &&
+                                                  state.isAuthorized &&
+                                                  panelState.status == InfoPanelStatus.profileInfo;
+
+                                              return Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: state.isAuthorized ? widget.navigationShell : Auth(),
+                                                  ),
+                                                  if (showProfilePanel) ...[
+                                                    const SizedBox(width: 4.0),
+                                                    SizedBox(
+                                                      width: 315,
+                                                      child: InfoPanel(
+                                                        onClose: () {
+                                                          context.read<InfoPanelCubit>().setInfoPanelState(.closed);
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
+                            if (callState.isCallActive)
+                              DraggableResizableCallModal(
+                                meetingLink: callState.meetUrl,
+                                isMinimized: callState.isMinimized,
+                                isFullscreen: callState.isFullscreen,
+                                dockRect: callState.dockRect,
+                                onClose: () => context.read<CallCubit>().closeCall(),
+                                onMinimize: () => context.read<CallCubit>().minimizeCall(),
+                                onRestore: () => context.read<CallCubit>().restoreCall(),
+                                onToggleFullscreen: () => context.read<CallCubit>().toggleFullscreen(),
+                              ),
                           ],
-                        ),
-                        if (callState.isCallActive)
-                          DraggableResizableCallModal(
-                            meetingLink: callState.meetUrl,
-                            isMinimized: callState.isMinimized,
-                            isFullscreen: callState.isFullscreen,
-                            dockRect: callState.dockRect,
-                            onClose: () => context.read<CallCubit>().closeCall(),
-                            onMinimize: () => context.read<CallCubit>().minimizeCall(),
-                            onRestore: () => context.read<CallCubit>().restoreCall(),
-                            onToggleFullscreen: () => context.read<CallCubit>().toggleFullscreen(),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+          if (platformInfo.isDesktop) ...[
+            DesktopAppBar(),
+          ],
+        ],
       ),
     );
   }
