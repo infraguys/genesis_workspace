@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -163,7 +162,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           if (platformInfo.isWindows || platformInfo.isLinux && screenSize <= .tablet)
             SizedBox(
               height: 40,
-              child: MoveWindow(),
             ),
           Expanded(
             child: Stack(
