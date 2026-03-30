@@ -2,6 +2,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
+import 'package:genesis_workspace/core/widgets/desktop_app_bar.dart';
 
 class SplashView extends StatefulWidget {
   final VoidCallback onInitializationComplete;
@@ -61,25 +63,32 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
     return FutureBuilder(
       future: _future,
       builder: (BuildContext context, snapshot) {
-        return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          body: Center(
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Text(
-                  "Workspace",
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    letterSpacing: 1.5,
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              body: Center(
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Text(
+                      "Workspace",
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+            if (platformInfo.isDesktop) ...[
+              DesktopAppBar(),
+            ],
+          ],
         );
       },
     );
