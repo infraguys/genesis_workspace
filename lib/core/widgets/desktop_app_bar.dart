@@ -34,25 +34,27 @@ class DesktopAppBar extends StatelessWidget {
   }
 }
 
-final buttonColors = WindowButtonColors(
-  iconNormal: const Color(0xFF805306),
-  mouseOver: const Color(0xFFF6A00C),
-  mouseDown: const Color(0xFF805306),
-  iconMouseOver: const Color(0xFF805306),
-  iconMouseDown: const Color(0xFFFFD500),
-);
-
-final closeButtonColors = WindowButtonColors(
-  mouseOver: const Color(0xFFD32F2F),
-  mouseDown: const Color(0xFFB71C1C),
-  iconNormal: const Color(0xFF805306),
-  iconMouseOver: Colors.white,
-);
-
 class WindowButtons extends StatelessWidget {
   const WindowButtons({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final buttonColors = WindowButtonColors(
+      iconNormal: theme.colorScheme.primary,
+      mouseOver: theme.colorScheme.onPrimary,
+      mouseDown: const Color(0xFF805306),
+      iconMouseOver: theme.colorScheme.primary,
+      iconMouseDown: theme.colorScheme.primary,
+    );
+
+    final closeButtonColors = WindowButtonColors(
+      mouseOver: const Color(0xFFD32F2F),
+      mouseDown: const Color(0xFFB71C1C),
+      iconNormal: theme.colorScheme.primary,
+      iconMouseOver: theme.colorScheme.onSurface,
+    );
+
     return Row(
       children: [
         MinimizeWindowButton(colors: buttonColors),
