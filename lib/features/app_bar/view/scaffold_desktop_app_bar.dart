@@ -1,8 +1,8 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
-import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/app_bar/view/branch_item.dart';
 import 'package:genesis_workspace/features/app_bar/view/organization_item.dart';
@@ -13,6 +13,7 @@ import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
+import 'package:window_manager/window_manager.dart';
 
 class ScaffoldDesktopAppBar extends StatefulWidget {
   final Function(int index) onSelectBranch;
@@ -48,12 +49,22 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
           height: 40.0,
           width: double.infinity,
           color: theme.colorScheme.surface,
-          child: Center(
-            child: ValueListenableBuilder(
-              valueListenable: mainTitleNotifier,
-              builder: (_, value, _) => Text(
-                value,
-                style: theme.textTheme.bodyMedium,
+          child: MoveWindow(
+            onDoubleTap: () async {
+              final isMaximized = await windowManager.isMaximized();
+              if (isMaximized) {
+                windowManager.unmaximize();
+              } else {
+                windowManager.maximize();
+              }
+            },
+            child: Center(
+              child: ValueListenableBuilder(
+                valueListenable: mainTitleNotifier,
+                builder: (_, value, _) => Text(
+                  value,
+                  style: theme.textTheme.bodyMedium,
+                ),
               ),
             ),
           ),

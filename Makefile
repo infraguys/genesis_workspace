@@ -2,7 +2,7 @@ NAME := $(shell grep '^name:' pubspec.yaml | awk '{print $$2}')
 VERSION := $(shell grep '^version:' pubspec.yaml | awk -F "+" '{print $$1}' | awk '{print $$2}')
 BUILD_NUMBER := $(shell grep '^version:' pubspec.yaml | awk -F "+" '{print $$2}' | xargs)
 APK_RELEASE_PATH := build/app/outputs/flutter-apk/app-release.apk
-APK_DIR := build/app/outputs/flutter-apk/
+APK_DIR := build/app/outputs/bundle/release/
 
 generate:
 	flutter pub run build_runner build --delete-conflicting-outputs
