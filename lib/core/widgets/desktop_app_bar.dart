@@ -7,20 +7,26 @@ class DesktopAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: SizedBox(
-        height: 40,
-        width: double.maxFinite,
-        child: MoveWindow(
-          onDoubleTap: () async {
-            final isMaximized = await windowManager.isMaximized();
-            if (isMaximized) {
-              windowManager.unmaximize();
-            } else {
-              windowManager.maximize();
-            }
-          },
+    return ClipRRect(
+      borderRadius: .only(
+        topLeft: Radius.circular(12),
+        topRight: Radius.circular(12),
+      ),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: SizedBox(
+          height: 40,
+          width: double.maxFinite,
+          child: MoveWindow(
+            onDoubleTap: () async {
+              final isMaximized = await windowManager.isMaximized();
+              if (isMaximized) {
+                windowManager.unmaximize();
+              } else {
+                windowManager.maximize();
+              }
+            },
+          ),
         ),
       ),
     );
