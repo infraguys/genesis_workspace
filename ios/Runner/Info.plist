@@ -101,11 +101,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-    <key>UIBackgroundModes</key>
-    <array>
-        <string>processing</string>
-    </array>
-
     <key>BGTaskSchedulerPermittedIdentifiers</key>
     <array>
         <string>genesis.workspace.processing</string>

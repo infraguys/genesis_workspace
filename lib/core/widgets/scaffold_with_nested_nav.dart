@@ -175,7 +175,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                     if (state.isAuthorized) {
                       unawaited(context.read<RealTimeCubit>().registerFcmToken());
                       if (platformInfo.isIos) {
-                        unawaited(context.read<RealTimeCubit>().registerApnsToken());
+                        // unawaited(context.read<RealTimeCubit>().registerApnsToken());
                       }
                     }
                   },
