@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/domain/genesis/entities/genesis_service_entity.dart';
 import 'package:genesis_workspace/domain/genesis/usecases/get_service_by_id_use_case.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
+import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class LkView extends StatefulWidget {
@@ -64,6 +67,30 @@ class _LkViewState extends State<LkView> {
                 child: InAppWebView(
                   onWebViewCreated: (InAppWebViewController controller) {
                     webViewController = controller;
+                  },
+                  onLoadStart: (controller, uri) {
+                    final OrganizationsCubit? organizationsCubit = context.read<OrganizationsCubit>();
+                    String? meetingBaseUrl;
+
+                    if (organizationsCubit != null) {
+                      final selectedId = organizationsCubit.state.selectedOrganizationId;
+                      for (final organization in organizationsCubit.state.organizations) {
+                        if (organization.id == selectedId) {
+                          meetingBaseUrl = organization.meetingUrl;
+                          break;
+                        }
+                      }
+                    }
+
+                    meetingBaseUrl = meetingBaseUrl?.replaceAll(RegExp(r'/+$'), '');
+
+                    if (meetingBaseUrl == null || meetingBaseUrl.isEmpty) {
+                      return;
+                    }
+                    final CallCubit callCubit = context.read<CallCubit>();
+                    if (uri.toString().contains(meetingBaseUrl)) {
+                      if (callCubit.state.isCallActive) {}
+                    }
                   },
                   initialUrlRequest: URLRequest(
                     url: WebUri.uri(
