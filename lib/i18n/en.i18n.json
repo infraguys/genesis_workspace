@@ -109,6 +109,12 @@
     "active_call_in": "Call in \"{name}\"",
     "active_call": "Active call",
     "resume_call": "Return to call",
+    "switch_call_dialog": {
+      "title": "An active call is already running",
+      "description": "Stay in the current call or end it and join the new one?",
+      "stay_in_current": "Stay in current call",
+      "end_and_join": "End and join new call"
+    },
     "create_call_dialog": {
       "title": "Create call",
       "video_title": "Create video call",
