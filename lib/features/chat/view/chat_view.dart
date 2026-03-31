@@ -38,6 +38,7 @@ import 'package:genesis_workspace/domain/messages/entities/update_message_entity
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
@@ -376,6 +377,20 @@ class _ChatViewState extends State<ChatView>
                                   onPressed: () async {
                                     final meetingLink = await createCall(context, startWithVideoMuted: true);
                                     if (meetingLink.isNotEmpty) {
+                                      if (platformInfo.isLinux) {
+                                        await launchUrlSafely(
+                                          context,
+                                          Uri.parse(meetingLink),
+                                          allowContactSchemes: false,
+                                        );
+                                      } else if (isTabletOrSmaller) {
+                                        context.pushNamed(Routes.call, extra: meetingLink);
+                                      } else {
+                                        context.read<CallCubit>().openCall(
+                                          meetUrl: meetingLink,
+                                          meetLocationName: '',
+                                        );
+                                      }
                                       await context.read<ChatCubit>().sendMessage(content: meetingLink);
                                     }
                                   },
