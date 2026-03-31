@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +12,6 @@ import 'package:genesis_workspace/core/enums/typing_event_op.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop_types.dart';
-import 'package:genesis_workspace/core/widgets/create_call_dialog.dart';
 import 'package:genesis_workspace/domain/drafts/entities/create_drafts_entity.dart';
 import 'package:genesis_workspace/domain/drafts/entities/draft_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
@@ -392,25 +392,22 @@ mixin ChatWidgetMixin<TChatCubit extends ChatCubitCapable, TWidget extends State
     if (meetingBaseUrl == null || meetingBaseUrl.isEmpty) {
       return '';
     }
-
-    String? meetingLink;
-
-    try {
-      meetingLink = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) {
-          return CreateCallDialog(
-            startWithVideoMuted: startWithVideoMuted,
-            meetingBaseUrl: meetingBaseUrl!,
-          );
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        inspect(e);
-      }
-      rethrow;
-    }
-    return meetingLink ?? '';
+    return _buildCallLink(meetingBaseUrl: meetingBaseUrl, startWithVideoMuted: startWithVideoMuted);
   }
+}
+
+String _generateRandomCallName() {
+  const prefixes = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'];
+  const suffixes = ['team', 'sync', 'room', 'standup', 'review', 'meeting'];
+  final random = Random();
+  final prefix = prefixes[random.nextInt(prefixes.length)];
+  final suffix = suffixes[random.nextInt(suffixes.length)];
+  final number = 1000 + random.nextInt(9000);
+  return '$prefix-$suffix-$number';
+}
+
+String _buildCallLink({required meetingBaseUrl, bool startWithVideoMuted = true}) {
+  final rawName = _generateRandomCallName();
+  final sanitizedName = rawName.replaceAll(RegExp(r'\s+'), '-');
+  return '$meetingBaseUrl/$sanitizedName#config.startWithVideoMuted=$startWithVideoMuted';
 }
