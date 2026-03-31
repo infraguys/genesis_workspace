@@ -44,6 +44,7 @@ import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.da
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
@@ -532,6 +533,20 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   onPressed: () async {
                                     final meetingLink = await createCall(context, startWithVideoMuted: true);
                                     if (meetingLink.isNotEmpty) {
+                                      if (platformInfo.isLinux) {
+                                        await launchUrlSafely(
+                                          context,
+                                          Uri.parse(meetingLink),
+                                          allowContactSchemes: false,
+                                        );
+                                      } else if (isTabletOrSmaller) {
+                                        context.pushNamed(Routes.call, extra: meetingLink);
+                                      } else {
+                                        context.read<CallCubit>().openCall(
+                                          meetUrl: meetingLink,
+                                          meetLocationName: '',
+                                        );
+                                      }
                                       await context.read<ChannelChatCubit>().sendMessage(
                                         streamId: widget.channelId,
                                         topic: widget.topicName,
