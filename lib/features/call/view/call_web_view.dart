@@ -54,6 +54,7 @@ class CallWebView extends StatelessWidget {
         ],
         Expanded(
           child: InAppWebView(
+            key: ValueKey<String>(meetingLink),
             initialUrlRequest: URLRequest(
               url: WebUri.uri(
                 Uri.parse('$meetingLink&config.disableDeepLinking=true&userInfo.displayName="$userDisplayName"'),
