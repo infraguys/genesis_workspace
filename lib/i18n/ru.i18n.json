@@ -115,6 +115,12 @@
     "active_call_in": "Идёт звонок в \"{name}\"",
     "active_call": "Идёт звонок",
     "resume_call": "Вернуться в звонок",
+    "switch_call_dialog": {
+      "title": "Уже есть активный звонок",
+      "description": "Остаться в текущем звонке или завершить его и перейти в новый?",
+      "stay_in_current": "Остаться в текущем",
+      "end_and_join": "Завершить и перейти"
+    },
     "create_call_dialog": {
       "title": "Создать звонок",
       "video_title": "Создать видеозвонок",
