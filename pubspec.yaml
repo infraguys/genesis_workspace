@@ -89,6 +89,7 @@ dependencies:
   talker_dio_logger: ^5.1.9
   talker_bloc_logger: ^5.1.9
   bitsdojo_window: ^0.1.6
+  any_link_preview: ^3.0.3
 
 
 dev_dependencies:
