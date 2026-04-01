@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
+import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -68,7 +69,19 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
                     spacing: 16.0,
                     children: [
                       UserAvatar.group(size: 64),
-                      BlocBuilder<ChannelChatCubit, ChannelChatState>(
+                      BlocConsumer<ChannelChatCubit, ChannelChatState>(
+                        listenWhen: (prev, current) {
+                          final panelStatus = context.read<InfoPanelCubit>().state.status;
+                          final prevLength = prev.channelMembers.length;
+                          final currentLength = current.channelMembers.length;
+                          return panelStatus == .channelInfo && (prevLength != currentLength);
+                        },
+                        listener: (context, state) {
+                          final chat = context.read<ChannelChatCubit>().state;
+                          if (chat.channelMembers.isNotEmpty) {
+                            context.read<ChannelMembersInfoCubit>().getUsers(chat.channelMembers);
+                          }
+                        },
                         builder: (context, state) {
                           final length = state.channelMembers.length;
                           return Flexible(
@@ -76,7 +89,7 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
                               crossAxisAlignment: .start,
                               children: [
                                 Text(
-                                  state.topic?.name ?? state.channel?.name ?? '',
+                                  state.channel?.name ?? '',
                                   maxLines: 1,
                                   style: TextStyle(fontWeight: .w500, fontSize: 20, overflow: TextOverflow.ellipsis),
                                 ),
