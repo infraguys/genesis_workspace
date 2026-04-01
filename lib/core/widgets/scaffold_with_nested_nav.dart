@@ -183,7 +183,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                     return FutureBuilder(
                       future: _future,
                       builder: (BuildContext context, snapshot) {
-                        if (snapshot.connectionState == .waiting && state.isPending) {
+                        if (snapshot.connectionState == .waiting || state.isPending) {
                           return AppProgressIndicator();
                         }
                         return BlocListener<UpdateCubit, UpdateState>(

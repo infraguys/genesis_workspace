@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
 import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
@@ -33,13 +34,27 @@ class ProfileCubit extends Cubit<ProfileState> {
     try {
       final user = await _getOwnUserUseCase.call();
       emit(state.copyWith(user: user));
+      await getUserStatus();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> getUserStatus() async {
+    try {
+      final user = state.user;
+      if (user == null) return;
       final statusResponse = await _getUserStatusUseCase.call(UserStatusRequestEntity(userId: user.userId));
       final userWithStatus = user.copyWith(
         status: statusResponse,
       );
       emit(state.copyWith(user: userWithStatus));
     } catch (e) {
-      inspect(e);
+      if (kDebugMode) {
+        inspect(e);
+      }
     }
   }
 
