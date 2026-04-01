@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.10.6
+- Removed native app bar for Linux, Windows, MacOS
+- Fixed push notifications for iOS and Android
+- Refactored calls logic
+- Update info panel state after changing channels
+- Fixed critical loading error
+- Small send message logic refactor
+
 # 1.10.3
 - Added border for quotes in messages
 - Fixed folders error
