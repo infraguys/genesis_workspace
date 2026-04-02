@@ -16,6 +16,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required String baseUrl,
     required Set<int> unreadMessages,
     String? meetingUrl,
+    String? emojiServerUrl,
     int? maxStreamNameLength,
     int? maxStreamDescriptionLength,
   }) {
@@ -33,6 +34,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
             baseUrl: Value(refactoredBaseUrl),
             unreadMessages: Value(unreadMessages),
             meetingUrl: meetingUrl != null ? Value(meetingUrl) : const Value.absent(),
+            emojiServerUrl: emojiServerUrl != null ? Value(emojiServerUrl) : const Value.absent(),
             maxStreamNameLength: Value(maxStreamNameLength),
             maxStreamDescriptionLength: Value(maxStreamDescriptionLength),
           ),
@@ -47,6 +49,9 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
           baseUrl: refactoredBaseUrl,
           unreadMessages: Value(unreadMessages),
           meetingUrl: Value(meetingUrl),
+          emojiServerUrl: Value(emojiServerUrl),
+          maxStreamNameLength: Value(maxStreamNameLength),
+          maxStreamDescriptionLength: Value(maxStreamDescriptionLength),
         ),
         mode: InsertMode.insert,
       );
@@ -109,6 +114,17 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
       OrganizationsCompanion(
         maxStreamNameLength: Value(streamNameMaxLength),
         maxStreamDescriptionLength: Value(streamDescriptionMaxLength),
+      ),
+    );
+  }
+
+  Future<void> updateEmojiServerUrl({
+    required int organizationId,
+    required String? emojiServerUrl,
+  }) {
+    return (update(organizations)..where((t) => t.id.equals(organizationId))).write(
+      OrganizationsCompanion(
+        emojiServerUrl: Value(emojiServerUrl),
       ),
     );
   }

@@ -9,6 +9,7 @@ class RegisterQueueEntity {
   final int? maxStreamNameLength;
   final int? maxStreamDescriptionLength;
   final List<UserTopicEntity>? userTopics;
+  final String? serverEmojiDataUrl;
 
   RegisterQueueEntity({
     required this.queueId,
@@ -19,5 +20,6 @@ class RegisterQueueEntity {
     required this.maxStreamNameLength,
     required this.maxStreamDescriptionLength,
     required this.userTopics,
+    required this.serverEmojiDataUrl,
   });
 }

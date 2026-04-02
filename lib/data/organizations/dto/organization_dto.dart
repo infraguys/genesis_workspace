@@ -6,6 +6,7 @@ class OrganizationRequestDto {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final String? emojiServerUrl;
   final int? streamNameMaxLength;
   final int? streamDescriptionMaxLength;
 
@@ -15,6 +16,7 @@ class OrganizationRequestDto {
     required this.baseUrl,
     required this.unreadMessages,
     this.meetingUrl,
+    this.emojiServerUrl,
     this.streamNameMaxLength,
     this.streamDescriptionMaxLength,
   });
@@ -27,6 +29,7 @@ class OrganizationDto {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final String? emojiServerUrl;
   final int? streamNameMaxLength;
   final int? streamDescriptionMaxLength;
 
@@ -37,6 +40,7 @@ class OrganizationDto {
     required this.baseUrl,
     required this.unreadMessages,
     this.meetingUrl,
+    this.emojiServerUrl,
     this.streamNameMaxLength,
     this.streamDescriptionMaxLength,
   });
@@ -54,6 +58,7 @@ class OrganizationDto {
       baseUrl: refactoredBaseUrl,
       unreadMessages: unreadMessages,
       meetingUrl: meetingUrl,
+      emojiServerUrl: emojiServerUrl,
       streamNameMaxLength: streamNameMaxLength,
       streamDescriptionMaxLength: streamDescriptionMaxLength,
     );

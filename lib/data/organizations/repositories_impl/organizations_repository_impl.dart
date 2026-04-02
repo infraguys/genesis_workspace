@@ -1,6 +1,7 @@
 import 'package:genesis_workspace/data/organizations/datasources/organizations_data_source.dart';
 import 'package:genesis_workspace/data/organizations/datasources/organizations_local_data_source.dart';
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
+import 'package:genesis_workspace/domain/organizations/entities/server_emoji_list_entity.dart';
 import 'package:genesis_workspace/domain/organizations/repositories/organizations_repository.dart';
 import 'package:genesis_workspace/features/authentication/domain/entities/server_settings_entity.dart';
 import 'package:injectable/injectable.dart';
@@ -69,11 +70,32 @@ class OrganizationsRepositoryImpl implements OrganizationsRepository {
   }
 
   @override
+  Future<void> updateEmojiServerUrl({
+    required int organizationId,
+    required String? emojiServerUrl,
+  }) {
+    return _localDataSource.updateEmojiServerUrl(
+      organizationId: organizationId,
+      emojiServerUrl: emojiServerUrl,
+    );
+  }
+
+  @override
   Future<void> updateStreamSettings({required int organizationId, int? maxNameLength, int? maxDescriptionLength}) {
     return _localDataSource.updateStreamSettings(
       organizationId: organizationId,
       streamNameMaxLength: maxNameLength,
       streamDescriptionMaxLength: maxDescriptionLength,
     );
+  }
+
+  @override
+  Future<ServerEmojiListEntity> getOrganizationEmojiList(String url) async {
+    try {
+      final response = await _dataSource.getOrganizationEmojiList(url);
+      return response.toEntity();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

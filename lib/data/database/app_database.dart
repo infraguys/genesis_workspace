@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -94,6 +94,14 @@ class AppDatabase extends _$AppDatabase {
               organizations.maxStreamNameLength,
               organizations.maxStreamDescriptionLength,
             ],
+          ),
+        );
+      }
+      if (from < 20) {
+        await migrator.alterTable(
+          TableMigration(
+            organizations,
+            newColumns: [organizations.emojiServerUrl],
           ),
         );
       }

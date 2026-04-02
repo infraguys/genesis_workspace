@@ -20,6 +20,8 @@ class RegisterQueueResponseDto {
   final int? maxStreamDescriptionLength;
   @JsonKey(name: "user_topics")
   final List<UserTopicDto>? userTopics;
+  @JsonKey(name: "server_emoji_data_url")
+  final String? serverEmojiDataUrl;
   RegisterQueueResponseDto({
     required this.queueId,
     required this.msg,
@@ -29,6 +31,7 @@ class RegisterQueueResponseDto {
     this.maxStreamNameLength,
     this.maxStreamDescriptionLength,
     this.userTopics,
+    this.serverEmojiDataUrl,
   });
 
   factory RegisterQueueResponseDto.fromJson(Map<String, dynamic> json) => _$RegisterQueueResponseDtoFromJson(json);
@@ -44,5 +47,6 @@ class RegisterQueueResponseDto {
     maxStreamNameLength: maxStreamNameLength,
     maxStreamDescriptionLength: maxStreamDescriptionLength,
     userTopics: userTopics?.map((dto) => dto.toEntity()).toList(),
+    serverEmojiDataUrl: serverEmojiDataUrl,
   );
 }

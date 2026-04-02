@@ -498,3 +498,7 @@ DateTime? dateTimeFromJson(String? value) {
   }
   return DateTime.tryParse(value);
 }
+
+String emojiToCode(String emojiText) {
+  return emojiText.runes.map((codePoint) => codePoint.toRadixString(16)).join('-');
+}
