@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/app_bar/view/branch_item.dart';
 import 'package:genesis_workspace/features/app_bar/view/organization_item.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
@@ -93,6 +96,7 @@ class _ScaffoldDesktopAppBarState extends State<ScaffoldDesktopAppBar> {
                                       final organizationsCubit = context.read<OrganizationsCubit>();
 
                                       await organizationsCubit.selectOrganization(organization);
+                                      unawaited(context.read<EmojiKeyboardCubit>().getEmojiForOrganization());
                                     },
                                     onDelete: () async {
                                       if (context.canPop()) {

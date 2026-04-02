@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/features/app_bar/view/organization_horizontal_item.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/organizations/bloc/organizations_cubit.dart';
 import 'package:genesis_workspace/features/organizations/view/add_organization_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -51,6 +54,7 @@ class AppMobileDrawer extends StatelessWidget {
                           await Future.wait([
                             organizationsCubit.selectOrganization(organization),
                           ]);
+                          unawaited(context.read<EmojiKeyboardCubit>().getEmojiForOrganization());
                           router.pop();
                         },
                         onDelete: () async {
