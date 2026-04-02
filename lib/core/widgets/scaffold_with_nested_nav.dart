@@ -84,9 +84,11 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     InAppIdleDetector.pause();
   }
 
-  Future<void> getInitialData() async {
+  Future<void> getInitialData({bool shouldInit = true}) async {
     if (kIsWeb) await BrowserContextMenu.disableContextMenu();
-    await context.read<RealTimeCubit>().init();
+    if (shouldInit) {
+      await context.read<RealTimeCubit>().init();
+    }
 
     await Future.wait([
       context.read<UpdateCubit>().checkUpdateNeed(),
@@ -167,10 +169,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
             child: Stack(
               children: [
                 BlocConsumer<AuthCubit, AuthState>(
-                  listenWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
+                  listenWhen: (prev, current) => (prev.isAuthorized != current.isAuthorized),
                   listener: (context, state) {
                     setState(() {
-                      _future = getInitialData();
+                      _future = getInitialData(shouldInit: false);
                     });
                     if (state.isAuthorized) {
                       unawaited(context.read<RealTimeCubit>().registerFcmToken());
