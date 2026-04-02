@@ -500,5 +500,11 @@ DateTime? dateTimeFromJson(String? value) {
 }
 
 String emojiToCode(String emojiText) {
-  return emojiText.runes.map((codePoint) => codePoint.toRadixString(16)).join('-');
+  final rawCode = emojiText.runes.map((codePoint) => codePoint.toRadixString(16)).join('-');
+  return rawCode
+      .split('-')
+      .where((part) => part.isNotEmpty)
+      .map((part) => int.tryParse(part, radix: 16)?.toRadixString(16))
+      .where((part) => part != null && part != 'fe0f' && part != 'fe0e')
+      .join('-');
 }
