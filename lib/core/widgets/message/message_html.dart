@@ -1,3 +1,4 @@
+import 'package:any_link_preview/any_link_preview.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,9 +27,35 @@ class WorkspaceHtmlFactory extends WidgetFactory {}
 class MessageHtml extends StatelessWidget {
   final String content;
   final Function(String) onSelectedTextChanged;
+
   MessageHtml({super.key, required this.content, required this.onSelectedTextChanged});
 
   final AppShellController appShellController = getIt<AppShellController>();
+
+  List<String> _extractPreviewLinks() {
+    final document = dom.Document.html(content);
+    final links = <String>{};
+
+    for (final anchor in document.querySelectorAll('a[href]')) {
+      final rawHref = anchor.attributes['href']?.trim();
+      if (rawHref == null || rawHref.isEmpty || rawHref.startsWith('/user_uploads/')) {
+        continue;
+      }
+
+      final uri = parseUrlWithBase(rawHref);
+      if (uri == null || !isAllowedUrlScheme(uri)) {
+        continue;
+      }
+
+      if (uri.path.startsWith('/user_uploads/') && !isExternalToBase(uri)) {
+        continue;
+      }
+
+      links.add(uri.toString());
+    }
+
+    return links.take(2).toList(growable: false);
+  }
 
   String _toCssRgba(Color color) {
     final int red = (color.r * 255).round();
@@ -95,6 +122,7 @@ class MessageHtml extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isTabletOrSmaller = currentSize(context) <= .tablet;
+    final previewLinks = _extractPreviewLinks();
     final Widget html = HtmlWidget(
       content,
       customStylesBuilder: (element) {
@@ -322,8 +350,10 @@ class MessageHtml extends StatelessWidget {
       },
     );
 
+    final Widget contentWidget = _MessageHtmlWithPreviews(html: html, previewLinks: previewLinks);
+
     if (platformInfo.isMobile) {
-      return html;
+      return contentWidget;
     }
 
     return SelectionArea(
@@ -333,7 +363,143 @@ class MessageHtml extends StatelessWidget {
       contextMenuBuilder: (BuildContext context, SelectableRegionState state) {
         return const SizedBox.shrink();
       },
-      child: html,
+      child: contentWidget,
+    );
+  }
+}
+
+class _MessageHtmlWithPreviews extends StatelessWidget {
+  const _MessageHtmlWithPreviews({
+    required this.html,
+    required this.previewLinks,
+  });
+
+  final Widget html;
+  final List<String> previewLinks;
+
+  @override
+  Widget build(BuildContext context) {
+    if (previewLinks.isEmpty) return html;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        html,
+        const SizedBox(height: 8),
+        ...previewLinks.map((link) => _LinkPreviewCard(link: link)),
+      ],
+    );
+  }
+}
+
+class _LinkPreviewCard extends StatelessWidget {
+  const _LinkPreviewCard({required this.link});
+
+  final String link;
+
+  Widget _buildFallbackPreviewImage(ThemeData theme) {
+    final host = Uri.tryParse(link)?.host;
+    final fallbackUrl = host == null || host.isEmpty ? null : 'https://www.google.com/s2/favicons?domain=$host&sz=128';
+
+    if (fallbackUrl == null) {
+      return Container(
+        color: theme.colorScheme.surfaceContainerHigh,
+        child: Icon(Icons.link_rounded, color: theme.colorScheme.onSurfaceVariant),
+      );
+    }
+
+    return Image.network(
+      fallbackUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: theme.colorScheme.surfaceContainerHigh,
+          child: Icon(Icons.link_rounded, color: theme.colorScheme.onSurfaceVariant),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: AnyLinkPreview.builder(
+        link: link,
+        cache: const Duration(hours: 12),
+        placeholderWidget: Container(
+          height: 104,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        itemBuilder: (context, metadata, imageProvider, svgImage) {
+          final title = (metadata.title ?? '').trim().isNotEmpty
+              ? metadata.title!.trim()
+              : (metadata.siteName ?? metadata.url ?? link);
+          final description = (metadata.desc ?? '').trim();
+
+          return InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () async {
+              final uri = Uri.tryParse(link);
+              if (uri != null) {
+                await launchUrlSafely(context, uri);
+              }
+            },
+            child: Container(
+              height: 104,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 104,
+                    height: 104,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+                      child: imageProvider != null
+                          ? Image(image: imageProvider, fit: BoxFit.cover)
+                          : (svgImage ?? _buildFallbackPreviewImage(theme)),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          if (description.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
