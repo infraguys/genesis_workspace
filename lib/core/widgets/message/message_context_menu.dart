@@ -1,11 +1,15 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/animated_overlay.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/message/message_readers_modal.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -187,26 +191,36 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                   );
                 },
                 child: value
-                    ? EmojiPicker(
-                        key: const ValueKey('emojiPicker'),
-                        onEmojiSelected: (category, emoji) {
-                          final selected = parser.getEmoji(emoji.emoji);
-                          _onEmojiSelected(selected.name);
+                    ? BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
+                        builder: (context, state) {
+                          final allowedCodes = state.organizationEmojiCodes;
+                          return EmojiPicker(
+                            key: const ValueKey('emojiPicker'),
+                            onEmojiSelected: (category, emoji) {
+                              final selected = parser.getEmoji(emoji.emoji);
+                              final emojiCode = emojiToCode(emoji.emoji);
+                              final name = state.emojiMap[emojiCode]?.first ?? selected.name;
+                              _onEmojiSelected(name);
+                            },
+                            config: Config(
+                              height: 300,
+                              emojiSet: allowedCodes.isEmpty
+                                  ? null
+                                  : (locale) => buildLimitedEmojiSet(locale, allowedCodes),
+                              emojiViewConfig: const EmojiViewConfig(
+                                emojiSizeMax: 22,
+                                backgroundColor: Colors.transparent,
+                              ),
+                              categoryViewConfig: CategoryViewConfig(
+                                tabIndicatorAnimDuration: const Duration(milliseconds: 500),
+                                backgroundColor: theme.colorScheme.surface,
+                                iconColorSelected: theme.colorScheme.primary,
+                                iconColor: theme.colorScheme.outline,
+                              ),
+                              bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
+                            ),
+                          );
                         },
-                        config: Config(
-                          height: 300,
-                          emojiViewConfig: const EmojiViewConfig(
-                            emojiSizeMax: 22,
-                            backgroundColor: Colors.transparent,
-                          ),
-                          categoryViewConfig: CategoryViewConfig(
-                            tabIndicatorAnimDuration: const Duration(milliseconds: 500),
-                            backgroundColor: theme.colorScheme.surface,
-                            iconColorSelected: theme.colorScheme.primary,
-                            iconColor: theme.colorScheme.outline,
-                          ),
-                          bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
-                        ),
                       )
                     : Column(
                         key: const ValueKey('menuActions'),

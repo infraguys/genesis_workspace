@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:genesis_workspace/data/organizations/dto/server_emoji_list_dto.dart';
 import 'package:genesis_workspace/features/authentication/data/dto/server_settings_response_dto.dart';
 import 'package:injectable/injectable.dart';
 
@@ -13,6 +14,17 @@ class OrganizationsDataSource {
         response.data as Map<String, dynamic>,
       );
       return serverSettings;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ServerEmojiListDto> getOrganizationEmojiList(String url) async {
+    try {
+      final response = await _dio.get(url);
+      return ServerEmojiListDto.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } catch (e) {
       rethrow;
     }

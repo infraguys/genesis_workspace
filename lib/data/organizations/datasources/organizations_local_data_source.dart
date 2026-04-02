@@ -17,6 +17,9 @@ class OrganizationsLocalDataSource {
       baseUrl: body.baseUrl,
       unreadMessages: body.unreadMessages,
       meetingUrl: body.meetingUrl,
+      emojiServerUrl: body.emojiServerUrl,
+      maxStreamNameLength: body.streamNameMaxLength,
+      maxStreamDescriptionLength: body.streamDescriptionMaxLength,
     );
     return OrganizationDto(
       id: id,
@@ -25,6 +28,9 @@ class OrganizationsLocalDataSource {
       baseUrl: body.baseUrl,
       unreadMessages: body.unreadMessages,
       meetingUrl: body.meetingUrl,
+      emojiServerUrl: body.emojiServerUrl,
+      streamNameMaxLength: body.streamNameMaxLength,
+      streamDescriptionMaxLength: body.streamDescriptionMaxLength,
     );
   }
 
@@ -47,6 +53,7 @@ class OrganizationsLocalDataSource {
               baseUrl: org.baseUrl,
               unreadMessages: org.unreadMessages,
               meetingUrl: org.meetingUrl,
+              emojiServerUrl: org.emojiServerUrl,
               streamNameMaxLength: org.maxStreamNameLength,
               streamDescriptionMaxLength: org.maxStreamDescriptionLength,
             ),
@@ -67,6 +74,7 @@ class OrganizationsLocalDataSource {
               baseUrl: org.baseUrl,
               unreadMessages: org.unreadMessages,
               meetingUrl: org.meetingUrl,
+              emojiServerUrl: org.emojiServerUrl,
             ),
           )
           .toList();
@@ -88,6 +96,7 @@ class OrganizationsLocalDataSource {
         baseUrl: response.baseUrl,
         unreadMessages: response.unreadMessages,
         meetingUrl: response.meetingUrl,
+        emojiServerUrl: response.emojiServerUrl,
         streamNameMaxLength: response.maxStreamNameLength,
         streamDescriptionMaxLength: response.maxStreamDescriptionLength,
       );
@@ -131,6 +140,16 @@ class OrganizationsLocalDataSource {
       organizationId: organizationId,
       streamNameMaxLength: streamNameMaxLength,
       streamDescriptionMaxLength: streamDescriptionMaxLength,
+    );
+  }
+
+  Future<void> updateEmojiServerUrl({
+    required int organizationId,
+    required String? emojiServerUrl,
+  }) {
+    return _dao.updateEmojiServerUrl(
+      organizationId: organizationId,
+      emojiServerUrl: emojiServerUrl,
     );
   }
 }

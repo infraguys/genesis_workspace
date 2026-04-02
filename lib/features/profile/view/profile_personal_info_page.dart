@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_emoji/flutter_emoji.dart' as flutter_emoji;
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
+import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/profile_info_tile.dart';
 import 'package:genesis_workspace/core/widgets/snackbar.dart';
@@ -14,6 +16,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/common/entities/exception_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -319,8 +322,6 @@ String? _normalizeStatusValue(String? value) {
   return trimmed;
 }
 
-String _emojiCodeFromUnicode(String emoji) => emoji.runes.map((rune) => rune.toRadixString(16)).join('-');
-
 class _EditStatusDialog extends StatefulWidget {
   const _EditStatusDialog({required this.currentStatus});
 
@@ -357,32 +358,27 @@ class _EditStatusDialogState extends State<_EditStatusDialog> {
       useRootNavigator: true,
       isScrollControlled: true,
       builder: (sheetContext) {
+        final theme = Theme.of(context);
         final sheetTheme = Theme.of(sheetContext);
         return SizedBox(
           height: 360,
-          child: EmojiPicker(
-            onEmojiSelected: (_, emoji) {
-              final parsedEmoji = _parser.getEmoji(emoji.emoji);
-              Navigator.of(sheetContext).pop(
-                _StatusEmojiSelection(
-                  emojiName: parsedEmoji == flutter_emoji.Emoji.None ? '' : parsedEmoji.name,
-                  emojiCode: _emojiCodeFromUnicode(emoji.emoji),
-                ),
+          child: BlocBuilder<EmojiKeyboardCubit, EmojiKeyboardState>(
+            builder: (context, state) {
+              return EmojiPicker(
+                onEmojiSelected: (_, emoji) {
+                  final selected = _parser.getEmoji(emoji.emoji);
+                  final emojiCode = emojiToCode(emoji.emoji);
+                  final name = state.emojiMap[emojiCode]?.first ?? selected.name;
+                  Navigator.of(sheetContext).pop(
+                    _StatusEmojiSelection(
+                      emojiName: name,
+                      emojiCode: emojiCode,
+                    ),
+                  );
+                },
+                config: emojiPickerConfig(context, theme: theme, allowedCodes: state.organizationEmojiCodes),
               );
             },
-            config: Config(
-              height: 360,
-              emojiViewConfig: const EmojiViewConfig(
-                emojiSizeMax: 24,
-                backgroundColor: Colors.transparent,
-              ),
-              categoryViewConfig: CategoryViewConfig(
-                backgroundColor: sheetTheme.colorScheme.surface,
-                iconColorSelected: sheetTheme.colorScheme.primary,
-                iconColor: sheetTheme.colorScheme.outline,
-              ),
-              bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
-            ),
           ),
         );
       },

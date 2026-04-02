@@ -20,6 +20,7 @@ import 'package:genesis_workspace/features/authentication/presentation/bloc/auth
 import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/call/view/draggable_resizable_call_modal.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
+import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_panel.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
@@ -176,6 +177,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                     });
                     if (state.isAuthorized) {
                       unawaited(context.read<RealTimeCubit>().registerFcmToken());
+                      unawaited(context.read<EmojiKeyboardCubit>().getEmojiForOrganization());
                       if (platformInfo.isIos) {
                         // unawaited(context.read<RealTimeCubit>().registerApnsToken());
                       }
