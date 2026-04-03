@@ -29,6 +29,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
     required this.showSearchField,
     required this.selfUserId,
     required this.showTopics,
+    required this.topicsDismissProgress,
     required this.onTapBack,
     required this.onClearSearch,
     required this.searchController,
@@ -54,6 +55,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
   final bool showSearchField;
   final int selfUserId;
   final bool showTopics;
+  final double topicsDismissProgress;
   final VoidCallback onTapBack;
   final String? selectedChatLabel;
   final VoidCallback onClearSearch;
@@ -72,6 +74,10 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
     final iconColors = theme.extension<IconColors>()!;
     final t = context.t;
     final bool centerMobileTitle = platformInfo.isMobile;
+    final double dismissProgress = topicsDismissProgress.clamp(0.0, 1.0);
+    final bool showBackIcon = showTopics && dismissProgress <= 0.25;
+    final double targetTurns = showTopics ? (dismissProgress <= 0.5 ? dismissProgress : 0.5) : 0;
+    final Duration flipDuration = showTopics ? Duration.zero : const Duration(milliseconds: 220);
     final String largeScreenTitle = selectedFolderIndex != 0
         ? folders[selectedFolderIndex].title
         : t.messengerView.chatsAndChannels;
@@ -174,37 +180,36 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                           }
                           Scaffold.of(context).openDrawer();
                         },
-                        icon: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          switchInCurve: Curves.easeOut,
-                          switchOutCurve: Curves.easeIn,
-                          transitionBuilder: (Widget child, Animation<double> animation) {
-                            return RotationTransition(
-                              turns: Tween<double>(
-                                begin: 0.75,
-                                end: 1.0,
-                              ).animate(animation),
-                              child: FadeTransition(
+                        icon: AnimatedRotation(
+                          turns: targetTurns,
+                          duration: flipDuration,
+                          curve: Curves.easeOutCubic,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 120),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            transitionBuilder: (Widget child, Animation<double> animation) {
+                              return FadeTransition(
                                 opacity: animation,
                                 child: child,
-                              ),
-                            );
-                          },
-                          child: showTopics
-                              ? Icon(
-                                  Icons.arrow_back_ios,
-                                  key: const ValueKey<String>('back_icon'),
-                                  color: theme.colorScheme.primary,
-                                )
-                              : Assets.icons.menu.svg(
-                                  key: const ValueKey<String>('menu_icon'),
-                                  width: 32,
-                                  height: 32,
-                                  colorFilter: ColorFilter.mode(
-                                    theme.colorScheme.primary,
-                                    BlendMode.srcIn,
+                              );
+                            },
+                            child: showBackIcon
+                                ? Icon(
+                                    Icons.arrow_back_ios,
+                                    key: const ValueKey<String>('back_icon'),
+                                    color: theme.colorScheme.primary,
+                                  )
+                                : Assets.icons.menu.svg(
+                                    key: const ValueKey<String>('menu_icon'),
+                                    width: 32,
+                                    height: 32,
+                                    colorFilter: ColorFilter.mode(
+                                      theme.colorScheme.primary,
+                                      BlendMode.srcIn,
+                                    ),
                                   ),
-                                ),
+                          ),
                         ),
                       ),
                     ),

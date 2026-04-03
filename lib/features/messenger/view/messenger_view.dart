@@ -60,6 +60,7 @@ class _MessengerViewState extends State<MessengerView>
   List<PinnedChatOrderUpdate> _updatedPinnedChats = [];
 
   bool _showTopics = false;
+  double _topicsDismissProgress = 0;
   final _activeCallKey = GlobalKey();
   Rect? _lastReportedDockRect;
 
@@ -445,9 +446,11 @@ class _MessengerViewState extends State<MessengerView>
                               MessengerAppBar(
                                 selectedChatLabel: state.selectedChat?.displayTitle,
                                 showTopics: _showTopics,
+                                topicsDismissProgress: _topicsDismissProgress,
                                 onTapBack: () {
                                   setState(() {
                                     _showTopics = false;
+                                    _topicsDismissProgress = 0;
                                   });
                                   context.read<MessengerCubit>().unselectChat();
                                 },
@@ -499,6 +502,7 @@ class _MessengerViewState extends State<MessengerView>
                                           if (_showTopics) {
                                             setState(() {
                                               _showTopics = false;
+                                              _topicsDismissProgress = 0;
                                             });
                                           }
                                         },
@@ -518,6 +522,7 @@ class _MessengerViewState extends State<MessengerView>
                                               if (chat.type == ChatType.channel) {
                                                 setState(() {
                                                   _showTopics = true;
+                                                  _topicsDismissProgress = 0;
                                                 });
                                               } else {
                                                 openChat(
@@ -559,8 +564,18 @@ class _MessengerViewState extends State<MessengerView>
                                                 isPending: state.selectedChat?.topics == null,
                                                 selectedChat: state.selectedChat,
                                                 listPadding: _isSearchVisible ? 350 : 300,
+                                                onUpdate: (details) {
+                                                  final progress = details.progress.clamp(0.0, 1.0);
+                                                  if ((_topicsDismissProgress - progress).abs() < 0.001) {
+                                                    return;
+                                                  }
+                                                  setState(() => _topicsDismissProgress = progress);
+                                                },
                                                 onDismissed: () {
-                                                  setState(() => _showTopics = false);
+                                                  setState(() {
+                                                    _showTopics = false;
+                                                    _topicsDismissProgress = 0;
+                                                  });
                                                 },
                                               )
                                             : const SizedBox.shrink(key: ValueKey('topics_empty')),
