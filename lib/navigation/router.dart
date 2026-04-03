@@ -19,6 +19,7 @@ import 'package:genesis_workspace/features/logs/logs.dart';
 import 'package:genesis_workspace/features/mentions/mentions.dart';
 import 'package:genesis_workspace/features/messenger/messenger.dart';
 import 'package:genesis_workspace/features/messenger/view/info_page/info_page.dart';
+import 'package:genesis_workspace/features/messenger/view/info_page/channel_info_page.dart';
 import 'package:genesis_workspace/features/my_activity/my_activity.dart';
 import 'package:genesis_workspace/features/paste_base_url/paste_base_url.dart';
 import 'package:genesis_workspace/features/profile/profile.dart';
@@ -28,6 +29,7 @@ import 'package:genesis_workspace/features/splash/splash.dart';
 import 'package:genesis_workspace/features/starred/starred.dart';
 import 'package:genesis_workspace/features/theme/theme_settings.dart';
 import 'package:genesis_workspace/features/update/update.dart';
+import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -90,6 +92,7 @@ class Routes {
   static const String call = '/call';
   static const String chatInfo = 'chat-info';
   static const String channelInfo = 'channel-info';
+  static const String channelInfoMember = 'channel-info-member';
 
   static const String videoFullScreen = '/video-full-screen';
   static const String logsScreen = '/logs';
@@ -333,6 +336,17 @@ final router = GoRouter(
             builder: (context, state) {
               return InfoPage(isChannel: true);
             },
+            routes: [
+              GoRoute(
+                path: 'member/:userId',
+                name: Routes.channelInfoMember,
+                builder: (context, state) {
+                  final user = state.extra;
+                  assert(user is DmUserEntity, 'Expected DmUserEntity in route extra');
+                  return ChannelMemberDetailsPage(user: user as DmUserEntity);
+                },
+              ),
+            ],
           ),
         ],
       ),
