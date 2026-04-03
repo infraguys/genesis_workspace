@@ -61,6 +61,7 @@ class WorkspaceApp extends StatelessWidget {
             locale: TranslationProvider.of(context).flutterLocale,
             title: 'Workspace',
             routerConfig: router,
+            // debugShowMaterialGrid: true,
             theme: buildThemeForPalette(
               paletteId: state.selectedPaletteId,
               brightness: Brightness.light,

@@ -222,9 +222,13 @@ class ProfileSettingsView extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: Icon(
-              Icons.palette_outlined,
-              color: iconColors.base,
+            leading: Padding(
+              padding: .all(3),
+              child: Icon(
+                size: 29,
+                Icons.palette_outlined,
+                color: iconColors.base,
+              ),
             ),
             title: Text(
               context.t.settings.themeSettings,
@@ -239,9 +243,13 @@ class ProfileSettingsView extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(
-              Icons.sort,
-              color: iconColors.base,
+            leading: Padding(
+              padding: .all(3),
+              child: Icon(
+                size: 29,
+                Icons.sort,
+                color: iconColors.base,
+              ),
             ),
             title: Text(
               context.t.settings.chatSortingAction,
@@ -274,6 +282,7 @@ class ProfileSettingsView extends StatelessWidget {
           ),
           ListTile(
             leading: Assets.icons.logout.svg(
+              width: 32,
               colorFilter: ColorFilter.mode(
                 AppColors.noticeBase,
                 BlendMode.srcIn,
