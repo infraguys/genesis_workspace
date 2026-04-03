@@ -162,10 +162,6 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
           : null,
       body: Column(
         children: [
-          if (platformInfo.isWindows || platformInfo.isLinux && screenSize <= .tablet)
-            SizedBox(
-              height: 40,
-            ),
           Expanded(
             child: Stack(
               children: [
@@ -210,6 +206,10 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
                                             ScaffoldDesktopAppBar(
                                               onSelectBranch: _goBranch,
                                               selectedIndex: widget.navigationShell.currentIndex,
+                                            ),
+                                          if ((platformInfo.isWindows || platformInfo.isLinux) && isTabletOrSmaller)
+                                            SizedBox(
+                                              height: 40,
                                             ),
                                           BlocBuilder<AuthCubit, AuthState>(
                                             buildWhen: (prev, current) => prev.isAuthorized != current.isAuthorized,
