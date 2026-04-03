@@ -1,5 +1,12 @@
 # Changelog
 
+# 1.10.7
+- Links preview in message body
+- Emoji list synced with backend list
+- Fixed Windows app bar issue
+- Handled android back action
+- Added click action on channel member
+
 # 1.10.6
 - Removed native app bar for Linux, Windows, MacOS
 - Fixed push notifications for iOS and Android
