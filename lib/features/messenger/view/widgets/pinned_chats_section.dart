@@ -97,16 +97,16 @@ class PinnedChatsSectionState extends State<PinnedChatsSection> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.folderUuid != widget.folderUuid) {
       // cancelEditing();
+      // _optimisticPinnedChats = _pinnedChatsForEdit(widget.visibleChats, widget.pinnedMeta);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final pinnedChatsForEdit = _optimisticPinnedChats ?? _pinnedChatsForEdit(widget.visibleChats, widget.pinnedMeta);
-
+    final pinnedChats = _optimisticPinnedChats ?? _pinnedChatsForEdit(widget.visibleChats, widget.pinnedMeta);
     if (widget.isEditPinning) {
       return PinnedChatsReorderableList(
-        pinnedChats: pinnedChatsForEdit,
+        pinnedChats: pinnedChats,
         pinnedMeta: widget.pinnedMeta,
         padding: widget.listPadding,
         absorbing: _isPinnedReorderInProgress || _isSavingPinnedOrder,

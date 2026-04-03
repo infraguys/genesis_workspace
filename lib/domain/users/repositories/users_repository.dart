@@ -4,11 +4,13 @@ import 'package:genesis_workspace/domain/users/entities/presences_response_entit
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_presence_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 
 abstract class UsersRepository {
@@ -26,4 +28,6 @@ abstract class UsersRepository {
   Future<UpdateSubscriptionResponseEntity> updateSubscriptionSettings(
     UpdateSubscriptionRequestEntity body,
   );
+  Future<void> updateMyStatus(UpdateMyStatusRequestEntity body);
+  Future<UserStatusEntity> getUserStatus(UserStatusRequestEntity body);
 }

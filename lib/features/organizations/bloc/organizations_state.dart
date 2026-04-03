@@ -1,8 +1,10 @@
 part of 'organizations_cubit.dart';
 
 class OrganizationsState {
+  static const Object _notSpecified = Object();
+
   final List<OrganizationEntity> organizations;
-  int? selectedOrganizationId;
+  final int? selectedOrganizationId;
   final UserEntity? selfUser;
 
   OrganizationsState({
@@ -13,13 +15,15 @@ class OrganizationsState {
 
   OrganizationsState copyWith({
     List<OrganizationEntity>? organizations,
-    int? selectedOrganizationId,
-    UserEntity? selfUser,
+    Object? selectedOrganizationId = _notSpecified,
+    Object? selfUser = _notSpecified,
   }) {
     return OrganizationsState(
       organizations: organizations ?? this.organizations,
-      selectedOrganizationId: selectedOrganizationId ?? this.selectedOrganizationId,
-      selfUser: selfUser ?? this.selfUser,
+      selectedOrganizationId: identical(selectedOrganizationId, _notSpecified)
+          ? this.selectedOrganizationId
+          : selectedOrganizationId as int?,
+      selfUser: identical(selfUser, _notSpecified) ? this.selfUser : selfUser as UserEntity?,
     );
   }
 }

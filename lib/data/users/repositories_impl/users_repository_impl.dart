@@ -1,17 +1,20 @@
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
+import 'package:genesis_workspace/data/common/dto/exception_dto.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_members_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/subscription_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/topic_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/typing_request_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_subscription_settings_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_presence_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/repositories/users_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -141,6 +144,25 @@ class UsersRepositoryImpl implements UsersRepository {
   ) async {
     try {
       final response = await usersRemoteDataSource.updateSubscriptionSettings(body.toDto());
+      return response.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateMyStatus(UpdateMyStatusRequestEntity body) async {
+    try {
+      return await usersRemoteDataSource.updateMyStatus(body.toDto());
+    } on ServerExceptionDto catch (e) {
+      throw e.toEntity();
+    }
+  }
+
+  @override
+  Future<UserStatusEntity> getUserStatus(UserStatusRequestEntity body) async {
+    try {
+      final response = await usersRemoteDataSource.getUserStatus(body.toDto());
       return response.toEntity();
     } catch (e) {
       rethrow;

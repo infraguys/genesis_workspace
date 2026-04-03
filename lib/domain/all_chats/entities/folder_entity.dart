@@ -2,7 +2,8 @@ import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
-import 'package:genesis_workspace/data/all_chats/dto/folder_dto.dart';
+import 'package:genesis_workspace/data/all_chats/dto/create_folder_dto.dart';
+import 'package:genesis_workspace/data/all_chats/dto/update_folder_dto.dart';
 
 class CreateFolderEntity {
   final String title;

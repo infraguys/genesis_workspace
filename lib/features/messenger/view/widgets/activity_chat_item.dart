@@ -32,6 +32,7 @@ class ActivityChatItem extends StatelessWidget {
       color: cardColors.base,
       child: InkWell(
         onTap: onTap,
+        mouseCursor: SystemMouseCursors.click,
         borderRadius: BorderRadius.circular(8),
         overlayColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.hovered) ? cardColors.active : null,

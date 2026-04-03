@@ -80,7 +80,7 @@ class _PasteBaseUrlViewState extends State<PasteBaseUrlView> {
     } finally {
       if (mounted) {
         setState(() => _submitting = false);
-        context.go(Routes.auth);
+        context.go(Routes.messenger);
       }
     }
   }

@@ -130,6 +130,10 @@ class _UpdateViewState extends State<UpdateView> {
             ),
           )
         : ListView.separated(
+            itemCount: versionEntries.length,
+            separatorBuilder: (_, _) => Divider(
+              color: theme.dividerColor,
+            ),
             itemBuilder: (context, index) {
               final version = versionEntries[index];
               final isSelected = state.selectedVersion?.version == version.version;
@@ -179,6 +183,7 @@ class _UpdateViewState extends State<UpdateView> {
 
               return ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 title: Row(
                   children: [
                     Expanded(
@@ -206,8 +211,6 @@ class _UpdateViewState extends State<UpdateView> {
                 onTap: isBusy ? null : () => context.read<UpdateCubit>().installVersion(version),
               );
             },
-            separatorBuilder: (_, __) => const Divider(),
-            itemCount: versionEntries.length,
           );
 
     return Column(
@@ -326,7 +329,15 @@ class _ReleaseChannelToggle extends StatelessWidget {
     return SegmentedButton<_ReleaseChannel>(
       segments: [
         ButtonSegment(value: _ReleaseChannel.dev, label: Text(devLabel)),
-        ButtonSegment(value: _ReleaseChannel.stable, label: Text(stableLabel)),
+        ButtonSegment(
+          value: _ReleaseChannel.stable,
+          label: Text(
+            stableLabel,
+            style: TextStyle(
+              fontSize: 12,
+            ),
+          ),
+        ),
       ],
       selected: <_ReleaseChannel>{selectedChannel},
       onSelectionChanged: (selection) {
@@ -373,8 +384,8 @@ class _LatestBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(999),
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

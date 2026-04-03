@@ -1,5 +1,57 @@
 # Changelog
 
+# 1.10.7
+- Links preview in message body
+- Emoji list synced with backend list
+- Fixed Windows app bar issue
+- Handled android back action
+- Added click action on channel member
+
+# 1.10.6
+- Removed native app bar for Linux, Windows, MacOS
+- Fixed push notifications for iOS and Android
+- Refactored calls logic
+- Update info panel state after changing channels
+- Fixed critical loading error
+- Small send message logic refactor
+
+# 1.10.3
+- Added border for quotes in messages
+- Fixed folders error
+- Added user status to profile
+- Refactored scroll to bottom functionality
+- Refactored calls flow
+- Fixed mute topics
+- Small colors refactor
+- Made profile fields selectable
+
+# 1.10.2
+- Fix android and linux applications
+
+# 1.10.1
+- Integrated push notifications
+- Layout fixes
+- Add Open/Close info panel button
+- Fixed call crush app on iOS
+- Removed profile mocked fields
+- Fixed N hotkey
+- Fixed unread messages line
+- Added animation for emoji reactions open
+
+# 1.9.3
+- Design review
+- Add open/close infopanel button
+- Firebase reconfigure
+- Rate limits fix
+- Added N shortcut
+- Refactored reply message logic
+
+# 1.9.2
+- Refactored appbar on mobile
+- Fixed switch unauthorized organization toggle
+- Open profile info from all branches
+- Theme refactor: icons replaced, colors
+
 # 1.9.1
 - Open chat from message feature
 - Updated flutter version

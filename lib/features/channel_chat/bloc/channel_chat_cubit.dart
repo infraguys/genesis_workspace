@@ -443,7 +443,7 @@ class ChannelChatCubit extends Cubit<ChannelChatState>
 
   Future<void> sendMessage({required int streamId, required String content, String? topic}) async {
     emit(state.copyWith(isMessagePending: true));
-    final String composed = buildMessageContent(content: content);
+    final String composed = buildMessageContent(content: content, stripExistingAttachmentsFromContent: false,);
 
     final body = SendMessageRequestEntity(
       type: SendMessageType.stream,

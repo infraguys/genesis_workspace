@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/core/mixins/chat/open_chat_mixin.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_entity.dart';
 import 'package:genesis_workspace/features/messenger/view/folder_item.dart';
 import 'package:genesis_workspace/features/real_time/bloc/real_time_cubit.dart';
@@ -28,6 +29,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
     required this.showSearchField,
     required this.selfUserId,
     required this.showTopics,
+    required this.topicsDismissProgress,
     required this.onTapBack,
     required this.onClearSearch,
     required this.searchController,
@@ -53,6 +55,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
   final bool showSearchField;
   final int selfUserId;
   final bool showTopics;
+  final double topicsDismissProgress;
   final VoidCallback onTapBack;
   final String? selectedChatLabel;
   final VoidCallback onClearSearch;
@@ -70,6 +73,11 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
     final textColors = theme.extension<TextColors>()!;
     final iconColors = theme.extension<IconColors>()!;
     final t = context.t;
+    final bool centerMobileTitle = platformInfo.isMobile;
+    final double dismissProgress = topicsDismissProgress.clamp(0.0, 1.0);
+    final bool showBackIcon = showTopics && dismissProgress <= 0.25;
+    final double targetTurns = showTopics ? (dismissProgress <= 0.5 ? dismissProgress : 0.5) : 0;
+    final Duration flipDuration = showTopics ? Duration.zero : const Duration(milliseconds: 220);
     final String largeScreenTitle = selectedFolderIndex != 0
         ? folders[selectedFolderIndex].title
         : t.messengerView.chatsAndChannels;
@@ -95,17 +103,23 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
     final List<Widget> actions = [];
     if (isTabletOrSmaller) {
       actions.add(
-        InkWell(
-          customBorder: const CircleBorder(),
-          onTapDown: (details) => onShowChats(details.globalPosition),
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Assets.icons.editSquare.svg(
-              width: 32,
-              height: 32,
-              colorFilter: ColorFilter.mode(
-                iconColors.base,
-                BlendMode.srcIn,
+        SizedBox(
+          width: kToolbarHeight,
+          height: kToolbarHeight,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTapDown: (details) => onShowChats(details.globalPosition),
+              child: Center(
+                child: Assets.icons.editSquare.svg(
+                  width: 32,
+                  height: 32,
+                  colorFilter: ColorFilter.mode(
+                    iconColors.base,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
             ),
           ),
@@ -116,15 +130,25 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
       actions.add(
         isSavingPinnedOrder
             ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                width: kToolbarHeight,
+                height: kToolbarHeight,
+                child: Center(
+                  child: SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
               )
-            : IconButton(
-                onPressed: onStopEditingPins,
-                icon: Icon(
-                  Icons.check,
-                  color: Colors.green,
+            : SizedBox(
+                width: kToolbarHeight,
+                height: kToolbarHeight,
+                child: IconButton(
+                  onPressed: onStopEditingPins,
+                  icon: Icon(
+                    Icons.check,
+                    color: Colors.green,
+                  ),
                 ),
               ),
       );
@@ -139,76 +163,106 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: isLargeScreen
-                ? EdgeInsets.symmetric(horizontal: 8).copyWith(top: 20, bottom: 8)
-                : EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children: [
-                if (isTabletOrSmaller) ...[
-                  IconButton(
-                    // visualDensity: VisualDensity.comfortable,
-                    padding: .zero,
-                    onPressed: () {
-                      if (showTopics) {
-                        onTapBack();
-                        return;
-                      }
-                      Scaffold.of(context).openDrawer();
-                    },
-                    icon: showTopics
-                        ? Icon(Icons.arrow_back_ios)
-                        : Assets.icons.menu.svg(
-                            width: 32,
-                            height: 32,
-                            colorFilter: ColorFilter.mode(
-                              theme.colorScheme.primary,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                  ),
-                ],
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: BlocBuilder<RealTimeCubit, RealTimeState>(
-                      builder: (context, state) {
-                        return Row(
-                          crossAxisAlignment: .center,
-                          mainAxisAlignment: isLargeScreen ? .start : .center,
-                          spacing: 4,
-                          children: [
-                            isTabletOrSmaller
-                                ? titleWidget
-                                : Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: titleWidget,
+            padding: isLargeScreen ? EdgeInsets.symmetric(horizontal: 8).copyWith(top: 20, bottom: 8) : EdgeInsets.zero,
+            child: SizedBox(
+              height: isTabletOrSmaller ? kToolbarHeight : null,
+              child: Row(
+                children: [
+                  if (isTabletOrSmaller) ...[
+                    SizedBox(
+                      width: kToolbarHeight,
+                      height: kToolbarHeight,
+                      child: IconButton(
+                        onPressed: () {
+                          if (showTopics) {
+                            onTapBack();
+                            return;
+                          }
+                          Scaffold.of(context).openDrawer();
+                        },
+                        icon: AnimatedRotation(
+                          turns: targetTurns,
+                          duration: flipDuration,
+                          curve: Curves.easeOutCubic,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 120),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            transitionBuilder: (Widget child, Animation<double> animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
+                            child: showBackIcon
+                                ? Icon(
+                                    Icons.arrow_back_ios,
+                                    key: const ValueKey<String>('back_icon'),
+                                    color: theme.colorScheme.primary,
+                                  )
+                                : Assets.icons.menu.svg(
+                                    key: const ValueKey<String>('menu_icon'),
+                                    width: 32,
+                                    height: 32,
+                                    colorFilter: ColorFilter.mode(
+                                      theme.colorScheme.primary,
+                                      BlendMode.srcIn,
+                                    ),
                                   ),
-                            if (isLoadingMore || state.connectionStatus == .connecting)
-                              SizedBox(
-                                height: 14,
-                                child: CupertinoActivityIndicator(
-                                  radius: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.only(start: isTabletOrSmaller ? 16 : 8, end: 8),
+                      child: BlocBuilder<RealTimeCubit, RealTimeState>(
+                        builder: (context, state) {
+                          return Row(
+                            crossAxisAlignment: .center,
+                            mainAxisAlignment: isLargeScreen
+                                ? .start
+                                : centerMobileTitle
+                                ? .center
+                                : .start,
+                            spacing: 4,
+                            children: [
+                              isTabletOrSmaller
+                                  ? titleWidget
+                                  : Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: titleWidget,
+                                    ),
+                              if (isLoadingMore || state.connectionStatus == .connecting)
+                                SizedBox(
+                                  height: 14,
+                                  child: CupertinoActivityIndicator(
+                                    radius: 7,
+                                  ),
                                 ),
-                              ),
-                          ],
-                        );
-                      },
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                if (actions.isNotEmpty)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: actions
-                        .map(
-                          (action) => Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 4),
-                            child: action,
-                          ),
-                        )
-                        .toList(),
-                  ),
-              ],
+                  if (actions.isNotEmpty)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: actions
+                          .map(
+                            (action) => isTabletOrSmaller
+                                ? action
+                                : Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 4),
+                                    child: action,
+                                  ),
+                          )
+                          .toList(),
+                    ),
+                ],
+              ),
             ),
           ),
           ClipRect(
@@ -232,7 +286,6 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                             style: TextStyle(fontSize: 14),
                             onChanged: onSearchChanged,
                             decoration: InputDecoration(
-                              fillColor: textColors.text100.withValues(alpha: .05),
                               hintText: t.general.find,
                               contentPadding: .symmetric(vertical: 8, horizontal: isLargeScreen ? 8 : 0),
                               hintStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -294,7 +347,7 @@ class MessengerAppBar extends StatelessWidget with OpenChatMixin {
                                 padding: const EdgeInsets.all(4.0),
                                 child: Assets.icons.newWindow.svg(
                                   colorFilter: ColorFilter.mode(
-                                    textColors.text30,
+                                    iconColors.base,
                                     BlendMode.srcIn,
                                   ),
                                 ),

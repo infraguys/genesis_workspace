@@ -7,6 +7,7 @@ class OrganizationEntity {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final String? emojiServerUrl;
   final int? streamNameMaxLength;
   final int? streamDescriptionMaxLength;
 
@@ -19,6 +20,7 @@ class OrganizationEntity {
     required this.baseUrl,
     required this.unreadMessages,
     required this.meetingUrl,
+    required this.emojiServerUrl,
     required this.streamNameMaxLength,
     required this.streamDescriptionMaxLength,
   });
@@ -26,6 +28,7 @@ class OrganizationEntity {
   OrganizationEntity copyWith({
     Set<int>? unreadMessages,
     String? meetingUrl,
+    String? emojiServerUrl,
     int? streamNameMaxLength,
     int? streamDescriptionMaxLength,
   }) {
@@ -36,6 +39,7 @@ class OrganizationEntity {
       baseUrl: baseUrl,
       unreadMessages: unreadMessages ?? this.unreadMessages,
       meetingUrl: meetingUrl ?? this.meetingUrl,
+      emojiServerUrl: emojiServerUrl ?? this.emojiServerUrl,
       streamNameMaxLength: streamNameMaxLength ?? this.streamNameMaxLength,
       streamDescriptionMaxLength: streamDescriptionMaxLength ?? this.streamDescriptionMaxLength,
     );
@@ -48,6 +52,7 @@ class OrganizationRequestEntity {
   final String baseUrl;
   final Set<int> unreadMessages;
   final String? meetingUrl;
+  final String? emojiServerUrl;
   final int? streamNameMaxLength;
   final int? streamDescriptionMaxLength;
 
@@ -57,6 +62,7 @@ class OrganizationRequestEntity {
     required this.baseUrl,
     required this.unreadMessages,
     this.meetingUrl,
+    this.emojiServerUrl,
     this.streamNameMaxLength,
     this.streamDescriptionMaxLength,
   });
@@ -67,5 +73,8 @@ class OrganizationRequestEntity {
     baseUrl: baseUrl,
     unreadMessages: unreadMessages,
     meetingUrl: meetingUrl,
+    emojiServerUrl: emojiServerUrl,
+    streamNameMaxLength: streamNameMaxLength,
+    streamDescriptionMaxLength: streamDescriptionMaxLength,
   );
 }

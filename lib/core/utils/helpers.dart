@@ -491,3 +491,20 @@ String extractMeetingName(String htmlString) {
   final Uri uri = Uri.parse(uriMatch.group(1)!);
   return uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
 }
+
+DateTime? dateTimeFromJson(String? value) {
+  if (value == null || value.isEmpty) {
+    return null;
+  }
+  return DateTime.tryParse(value);
+}
+
+String emojiToCode(String emojiText) {
+  final rawCode = emojiText.runes.map((codePoint) => codePoint.toRadixString(16)).join('-');
+  return rawCode
+      .split('-')
+      .where((part) => part.isNotEmpty)
+      .map((part) => int.tryParse(part, radix: 16)?.toRadixString(16))
+      .where((part) => part != null && part != 'fe0f' && part != 'fe0e')
+      .join('-');
+}

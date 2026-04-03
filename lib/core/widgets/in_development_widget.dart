@@ -16,11 +16,6 @@ class InDevelopmentWidget extends StatelessWidget {
     final Color outline = theme.colorScheme.outline.withValues(alpha: 0.15);
     final Color descriptionColor =
         textColors?.text50 ?? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.white70;
-    final List<String> tips = [
-      t.tipOne,
-      t.tipTwo,
-    ];
-    final VoidCallback effectiveBack = onBack ?? () => Navigator.of(context).maybePop();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -75,18 +70,6 @@ class InDevelopmentWidget extends StatelessWidget {
                         style: theme.textTheme.bodyLarge?.copyWith(color: descriptionColor),
                       ),
                       const SizedBox(height: 28),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: tips.map((tip) => _InfoPill(text: tip)).toList(growable: false),
-                      ),
-                      const SizedBox(height: 36),
-                      // TextButton.icon(
-                      //   onPressed: effectiveBack,
-                      //   icon: const Icon(Icons.arrow_back_rounded),
-                      //   label: Text(t.cta),
-                      // ),
                     ],
                   ),
                 ),
@@ -140,43 +123,6 @@ class _Badge extends StatelessWidget {
               ),
             ),
             child: const Icon(Icons.construction_rounded, color: Colors.white, size: 56),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoPill extends StatelessWidget {
-  const _InfoPill({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (text.trim().isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.auto_awesome_rounded, color: theme.colorScheme.primary, size: 16),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              text,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ),
         ],
       ),

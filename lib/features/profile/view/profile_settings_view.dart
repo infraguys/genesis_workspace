@@ -5,6 +5,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/tap_effect_icon.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/features/authentication/presentation/bloc/auth_cubit.dart';
@@ -22,6 +23,7 @@ class ProfileSettingsView extends StatelessWidget {
     required this.onClosePanel,
     required this.onOpenPersonalInfo,
     required this.onOpenVersionChoose,
+    required this.onOpenThemeSettings,
     required this.showSoundSettings,
     required this.selectedSound,
     required this.onSoundChanged,
@@ -32,6 +34,7 @@ class ProfileSettingsView extends StatelessWidget {
   final VoidCallback onClosePanel;
   final VoidCallback onOpenPersonalInfo;
   final VoidCallback onOpenVersionChoose;
+  final VoidCallback onOpenThemeSettings;
   final bool showSoundSettings;
   final String selectedSound;
   final ValueChanged<String> onSoundChanged;
@@ -124,125 +127,13 @@ class ProfileSettingsView extends StatelessWidget {
                   }
                 },
               ),
-              BlocBuilder<UpdateCubit, UpdateState>(
-                builder: (context, state) {
-                  return Column(
-                    crossAxisAlignment: .stretch,
-                    children: [
-                      ListTile(
-                        leading: Assets.icons.info.svg(
-                          colorFilter: ColorFilter.mode(
-                            iconColors.base,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        title: Text(
-                          context.t.settings.appVersion,
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        subtitle: Text(
-                          state.currentVersion,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: textColors.text30,
-                          ),
-                        ),
-                      ),
-                      if (state.isNewUpdateAvailable) ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainer,
-                              borderRadius: BorderRadiusGeometry.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              children: [
-                                Text(
-                                  context.t.updateView.newVersionAvailable,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  context.t.updateView.downloadNewVersionRn,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: textColors.text30,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                      ],
-                    ],
-                  );
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                child: InkWell(
-                  onTap: () {
-                    if (isMobile) {
-                      context.pushNamed(Routes.forceUpdate);
-                    } else {
-                      onOpenVersionChoose();
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: cardColors.base,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.t.updateView.browseBuilds,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  context.t.updateView.browseBuildsSubtitle,
-                                  maxLines: 1,
-                                  overflow: .ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: textColors.text30,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Assets.icons.arrowRight.svg(
-                            colorFilter: ColorFilter.mode(
-                              iconColors.base,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
           if (showSoundSettings)
             ListTile(
               leading: TapEffectIcon(
                 onTap: onPlaySound,
-                padding: .zero,
+                padding: EdgeInsets.zero,
                 child: Assets.icons.volumeUp.svg(
                   colorFilter: ColorFilter.mode(
                     iconColors.base,
@@ -254,36 +145,37 @@ class ProfileSettingsView extends StatelessWidget {
                 context.t.settings.notificationSound,
                 style: theme.textTheme.bodyMedium,
               ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButton<String>(
-                    value: selectedSound,
-                    underline: const SizedBox.shrink(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        onSoundChanged(value);
-                      }
-                    },
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      color: iconColors.base,
-                    ),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: textColors.text30,
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: AssetsConstants.audioPop,
-                        child: Text(context.t.profileView.notificationSoundPop),
-                      ),
-                      DropdownMenuItem(
-                        value: AssetsConstants.audioWhoop,
-                        child: Text(context.t.profileView.notificationSoundWhoop),
-                      ),
-                    ],
+              trailing: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 100, maxWidth: 100),
+                child: DropdownMenu<String>(
+                  initialSelection: selectedSound,
+                  requestFocusOnTap: false,
+                  trailingIcon: Icon(
+                    Icons.arrow_drop_down,
+                    color: iconColors.base,
                   ),
-                ],
+                  textStyle: theme.textTheme.bodyMedium?.copyWith(
+                    color: textColors.text30,
+                  ),
+                  dropdownMenuEntries: [
+                    DropdownMenuEntry(
+                      value: AssetsConstants.audioPop,
+                      label: context.t.profileView.notificationSoundPop,
+                    ),
+                    DropdownMenuEntry(
+                      value: AssetsConstants.audioWhoop,
+                      label: context.t.profileView.notificationSoundWhoop,
+                    ),
+                  ],
+                  onSelected: (String? value) {
+                    if (value == null) return;
+                    onSoundChanged(value);
+                  },
+                  inputDecorationTheme: const InputDecorationTheme(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
               ),
             ),
           ListTile(
@@ -297,44 +189,67 @@ class ProfileSettingsView extends StatelessWidget {
               context.t.settings.language,
               style: theme.textTheme.bodyMedium,
             ),
-            trailing: DropdownButton<Locale>(
-              value: localizationService.locale.flutterLocale,
-              underline: const SizedBox.shrink(),
-              icon: Icon(
-                Icons.arrow_drop_down,
-                color: iconColors.base,
-              ),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: textColors.text30,
-              ),
-              onChanged: (locale) {
-                if (locale != null) {
+            trailing: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 140, maxWidth: 140),
+              child: DropdownMenu<Locale>(
+                initialSelection: localizationService.locale.flutterLocale,
+                requestFocusOnTap: false,
+                textStyle: theme.textTheme.bodyMedium?.copyWith(color: textColors.text30),
+                trailingIcon: Icon(Icons.arrow_drop_down, color: iconColors.base),
+                dropdownMenuEntries: [
+                  DropdownMenuEntry(
+                    value: const Locale('en'),
+                    label: context.t.profileView.languageEnglish,
+                  ),
+                  DropdownMenuEntry(
+                    value: const Locale('ru'),
+                    label: context.t.profileView.languageRussian,
+                  ),
+                ],
+                onSelected: (Locale? locale) {
+                  if (locale == null) return;
                   localizationService.setLocale(
-                    AppLocale.values.firstWhere((l) => l.languageCode == locale.languageCode),
+                    AppLocale.values.firstWhere(
+                      (language) => language.languageCode == locale.languageCode,
+                    ),
                   );
-                }
-              },
-              items: [
-                DropdownMenuItem(value: const Locale('en'), child: Text(context.t.profileView.languageEnglish)),
-                DropdownMenuItem(value: const Locale('ru'), child: Text(context.t.profileView.languageRussian)),
-              ],
+                },
+                inputDecorationTheme: const InputDecorationTheme(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+              ),
             ),
           ),
           ListTile(
-            leading: Icon(
-              Icons.palette_outlined,
-              color: iconColors.base,
+            leading: Padding(
+              padding: .all(3),
+              child: Icon(
+                size: 29,
+                Icons.palette_outlined,
+                color: iconColors.base,
+              ),
             ),
             title: Text(
               context.t.settings.themeSettings,
               style: theme.textTheme.bodyMedium,
             ),
-            onTap: () => context.pushNamed(Routes.themeSettings),
+            onTap: () {
+              if (isMobile) {
+                context.pushNamed(Routes.themeSettings);
+              } else {
+                onOpenThemeSettings();
+              }
+            },
           ),
           ListTile(
-            leading: Icon(
-              Icons.sort,
-              color: iconColors.base,
+            leading: Padding(
+              padding: .all(3),
+              child: Icon(
+                size: 29,
+                Icons.sort,
+                color: iconColors.base,
+              ),
             ),
             title: Text(
               context.t.settings.chatSortingAction,
@@ -358,7 +273,16 @@ class ProfileSettingsView extends StatelessWidget {
             onTap: () => context.pushNamed(Routes.talkerScreen),
           ),
           ListTile(
+            leading: Icon(Icons.featured_play_list),
+            title: Text(
+              "Connections",
+              style: theme.textTheme.bodyMedium,
+            ),
+            onTap: () => context.pushNamed(Routes.logsScreen),
+          ),
+          ListTile(
             leading: Assets.icons.logout.svg(
+              width: 32,
               colorFilter: ColorFilter.mode(
                 AppColors.noticeBase,
                 BlendMode.srcIn,
@@ -374,8 +298,123 @@ class ProfileSettingsView extends StatelessWidget {
               await context.read<AuthCubit>().logout();
             },
           ),
+          Divider(
+            color: theme.dividerColor,
+          ),
+          BlocBuilder<UpdateCubit, UpdateState>(
+            builder: (context, state) {
+              return Column(
+                crossAxisAlignment: .stretch,
+                children: [
+                  ListTile(
+                    leading: Assets.icons.info.svg(
+                      colorFilter: ColorFilter.mode(
+                        iconColors.base,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    title: Text(
+                      context.t.settings.appVersion,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    subtitle: Text(
+                      state.currentVersion,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: textColors.text30,
+                      ),
+                    ),
+                  ),
+                  if (state.isNewUpdateAvailable) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainer,
+                          borderRadius: BorderRadiusGeometry.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: .start,
+                          children: [
+                            Text(
+                              context.t.updateView.newVersionAvailable,
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                            Text(
+                              context.t.updateView.downloadNewVersionRn,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: textColors.text30,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                  ],
+                  if (platformInfo.isLinux || platformInfo.isWindows)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                      child: Material(
+                        color: cardColors.base,
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          mouseCursor: SystemMouseCursors.click,
+                          hoverColor: cardColors.active,
+                          onTap: () {
+                            if (isMobile) {
+                              context.pushNamed(Routes.forceUpdate);
+                            } else {
+                              onOpenVersionChoose();
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        context.t.updateView.browseBuilds,
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        context.t.updateView.browseBuildsSubtitle,
+                                        maxLines: 1,
+                                        overflow: .ellipsis,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: textColors.text30,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Assets.icons.arrowRight.svg(
+                                  colorFilter: ColorFilter.mode(
+                                    iconColors.base,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           if (kDebugMode) ...[
-            const Divider(),
             ListTile(
               leading: Icon(Icons.delete),
               title: Text(context.t.profileView.clearDb),

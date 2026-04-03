@@ -60,6 +60,7 @@ class _MessengerViewState extends State<MessengerView>
   List<PinnedChatOrderUpdate> _updatedPinnedChats = [];
 
   bool _showTopics = false;
+  double _topicsDismissProgress = 0;
   final _activeCallKey = GlobalKey();
   Rect? _lastReportedDockRect;
 
@@ -316,6 +317,10 @@ class _MessengerViewState extends State<MessengerView>
 
   @override
   void initState() {
+    final selectedOrganizationId = context.read<OrganizationsCubit>().state.selectedOrganizationId;
+    if (selectedOrganizationId != null) {
+      context.read<MessengerCubit>().syncSelectedOrganization(selectedOrganizationId);
+    }
     _applySortingPreferences();
     _checkUser();
     _future = getInitialData();
@@ -441,9 +446,11 @@ class _MessengerViewState extends State<MessengerView>
                               MessengerAppBar(
                                 selectedChatLabel: state.selectedChat?.displayTitle,
                                 showTopics: _showTopics,
+                                topicsDismissProgress: _topicsDismissProgress,
                                 onTapBack: () {
                                   setState(() {
                                     _showTopics = false;
+                                    _topicsDismissProgress = 0;
                                   });
                                   context.read<MessengerCubit>().unselectChat();
                                 },
@@ -489,40 +496,52 @@ class _MessengerViewState extends State<MessengerView>
                                   children: [
                                     NotificationListener<UserScrollNotification>(
                                       onNotification: _onUserScroll,
-                                      child: PinnedChatsSection(
-                                        visibleChats: visibleChats,
-                                        pinnedMeta: state.pinnedChats,
-                                        listPadding: listPadding,
-                                        chatsController: _chatsController,
-                                        selectedChatId: state.selectedChat?.id,
-                                        showTopics: _showTopics,
-                                        isEditPinning: _isEditPinning,
-                                        folderUuid: state.selectedFolderIndex < state.folders.length
-                                            ? state.folders[state.selectedFolderIndex].uuid
-                                            : null,
-                                        onChatTap: (chat) async {
-                                          if (isTabletOrSmaller) {
-                                            if (chat.type == ChatType.channel) {
-                                              setState(() {
-                                                _showTopics = true;
-                                              });
-                                            } else {
-                                              openChat(
-                                                context,
-                                                chatId: chat.id,
-                                                membersIds: chat.dmIds?.toSet() ?? {},
-                                                messageId: chat.firstUnreadMessageId,
-                                              );
-                                            }
-                                          } else {
-                                            context.read<MessengerCubit>().selectChat(chat);
+                                      child: PopScope(
+                                        canPop: _showTopics == false,
+                                        onPopInvokedWithResult: (didPop, result) {
+                                          if (_showTopics) {
+                                            setState(() {
+                                              _showTopics = false;
+                                              _topicsDismissProgress = 0;
+                                            });
                                           }
                                         },
-                                        onPinningSaved: (chats) {
-                                          setState(() {
-                                            _updatedPinnedChats = chats;
-                                          });
-                                        },
+                                        child: PinnedChatsSection(
+                                          visibleChats: visibleChats,
+                                          pinnedMeta: state.pinnedChats,
+                                          listPadding: listPadding,
+                                          chatsController: _chatsController,
+                                          selectedChatId: state.selectedChat?.id,
+                                          showTopics: _showTopics,
+                                          isEditPinning: _isEditPinning,
+                                          folderUuid: state.selectedFolderIndex < state.folders.length
+                                              ? state.folders[state.selectedFolderIndex].uuid
+                                              : null,
+                                          onChatTap: (chat) async {
+                                            if (isTabletOrSmaller) {
+                                              if (chat.type == ChatType.channel) {
+                                                setState(() {
+                                                  _showTopics = true;
+                                                  _topicsDismissProgress = 0;
+                                                });
+                                              } else {
+                                                openChat(
+                                                  context,
+                                                  chatId: chat.id,
+                                                  membersIds: chat.dmIds?.toSet() ?? {},
+                                                  messageId: chat.firstUnreadMessageId,
+                                                );
+                                              }
+                                            } else {
+                                              context.read<MessengerCubit>().selectChat(chat);
+                                            }
+                                          },
+                                          onPinningSaved: (chats) {
+                                            setState(() {
+                                              _updatedPinnedChats = chats;
+                                            });
+                                          },
+                                        ),
                                       ),
                                     ),
                                     Positioned(
@@ -545,8 +564,18 @@ class _MessengerViewState extends State<MessengerView>
                                                 isPending: state.selectedChat?.topics == null,
                                                 selectedChat: state.selectedChat,
                                                 listPadding: _isSearchVisible ? 350 : 300,
+                                                onUpdate: (details) {
+                                                  final progress = details.progress.clamp(0.0, 1.0);
+                                                  if ((_topicsDismissProgress - progress).abs() < 0.001) {
+                                                    return;
+                                                  }
+                                                  setState(() => _topicsDismissProgress = progress);
+                                                },
                                                 onDismissed: () {
-                                                  setState(() => _showTopics = false);
+                                                  setState(() {
+                                                    _showTopics = false;
+                                                    _topicsDismissProgress = 0;
+                                                  });
                                                 },
                                               )
                                             : const SizedBox.shrink(key: ValueKey('topics_empty')),
@@ -623,9 +652,7 @@ class _MessengerViewState extends State<MessengerView>
                                 }
                                 if (state.selectedChat?.dmIds != null) {
                                   return Chat(
-                                    key: ObjectKey(
-                                      state.selectedChat!.id,
-                                    ),
+                                    key: ObjectKey(state.selectedChat!.id),
                                     chatId: state.selectedChat?.id,
                                     userIds: state.selectedChat!.dmIds!,
                                     firstMessageId: state.selectedChat?.firstUnreadMessageId,
@@ -678,9 +705,9 @@ class _MessengerViewState extends State<MessengerView>
                       const SizedBox(width: 4.0),
                       BlocBuilder<InfoPanelCubit, InfoPanelState>(
                         builder: (context, panelState) {
-                          if (state.selectedChat?.dmIds != null ||
-                              state.selectedChat?.streamId != null ||
-                              panelState.status == .profileInfo) {
+                          final bool hasSelectedChatInfo =
+                              state.selectedChat?.dmIds != null || state.selectedChat?.streamId != null;
+                          if (hasSelectedChatInfo && panelState.status != .profileInfo) {
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class CallWebView extends StatelessWidget {
   const CallWebView({
@@ -20,6 +23,7 @@ class CallWebView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userDisplayName = context.read<ProfileCubit>().state.user?.fullName ?? '';
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -41,7 +45,7 @@ class CallWebView extends StatelessWidget {
                 IconButton(
                   onPressed: onClose ?? () {},
                   icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Close',
+                  tooltip: context.t.general.close,
                 ),
               ],
             ),
@@ -50,10 +54,16 @@ class CallWebView extends StatelessWidget {
         ],
         Expanded(
           child: InAppWebView(
-            initialUrlRequest: URLRequest(url: WebUri.uri(Uri.parse(meetingLink))),
+            key: ValueKey<String>(meetingLink),
+            initialUrlRequest: URLRequest(
+              url: WebUri.uri(
+                Uri.parse('$meetingLink&config.disableDeepLinking=true&userInfo.displayName="$userDisplayName"'),
+              ),
+            ),
             initialSettings: InAppWebViewSettings(
               mediaPlaybackRequiresUserGesture: false,
               iframeAllow: "camera; microphone",
+              allowsInlineMediaPlayback: true,
             ),
             onPermissionRequest: (controller, request) async {
               return PermissionResponse(

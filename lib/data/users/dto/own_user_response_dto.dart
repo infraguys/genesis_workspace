@@ -5,8 +5,25 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'own_user_response_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class OwnUserResponseDto extends ResponseDto {
+  OwnUserResponseDto({
+    required super.result,
+    required super.msg,
+    required this.userId,
+    required this.isBot,
+    required this.fullName,
+    required this.timezone,
+    this.avatarUrl,
+    required this.email,
+    required this.role,
+    required this.isActive,
+    required this.isOwner,
+    required this.isAdmin,
+    required this.isGuest,
+    required this.profileData,
+  });
+
   @JsonKey(name: "user_id")
   final int userId;
   @JsonKey(name: "is_owner")
@@ -30,22 +47,6 @@ class OwnUserResponseDto extends ResponseDto {
   @JsonKey(name: "profile_data")
   final Map<int, Map<String, dynamic>> profileData;
 
-  OwnUserResponseDto({
-    required super.result,
-    required super.msg,
-    required this.userId,
-    required this.isBot,
-    required this.fullName,
-    required this.timezone,
-    this.avatarUrl,
-    required this.email,
-    required this.role,
-    required this.isActive,
-    required this.isOwner,
-    required this.isAdmin,
-    required this.isGuest,
-    required this.profileData,
-  });
 
   factory OwnUserResponseDto.fromJson(Map<String, dynamic> json) => _$OwnUserResponseDtoFromJson(json);
 

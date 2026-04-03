@@ -15,7 +15,7 @@ class TokenInterceptor extends Interceptor {
 
   static bool _isHandlingAuthExpired = false;
 
-  static const Set<int> _authExpiredStatusCodes = <int>{401, 403, 419};
+  static const Set<int> _authExpiredStatusCodes = <int>{401};
   static const List<String> _authExcludedPaths = <String>[
     '/fetch_api_key',
     '/server_settings',

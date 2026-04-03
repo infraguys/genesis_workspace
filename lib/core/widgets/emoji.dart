@@ -25,26 +25,28 @@ class UnicodeEmojiWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int? codePoint;
+    List<int>? codePoints;
 
     try {
-      // Убираем лишние пробелы и проверяем hex-паттерн
+      // Trim extra whitespace and support both a single-codepoint hex value
+      // and a hyphen-separated sequence (e.g. "1f469-200d-1f4bb").
       final cleaned = emojiDisplay.emojiUnicode.trim();
       final hexPattern = RegExp(r'^[0-9a-fA-F]+$');
+      final sequencePattern = RegExp(r'^[0-9a-fA-F]+(?:-[0-9a-fA-F]+)+$');
 
       if (hexPattern.hasMatch(cleaned)) {
-        codePoint = int.parse(cleaned, radix: 16);
+        codePoints = [int.parse(cleaned, radix: 16)];
+      } else if (sequencePattern.hasMatch(cleaned)) {
+        codePoints = cleaned.split('-').map((hex) => int.parse(hex, radix: 16)).toList();
       }
     } catch (_) {
-      // Игнорируем — codePoint останется null
+      // Ignore parse errors and keep codePoints as null.
     }
 
-    // Если не удалось распарсить, показываем символ замены
-    codePoint ??= 0xFFFD; // '�'
+    // Fall back to the replacement character if parsing fails.
+    codePoints ??= [0xFFFD]; // '�'
 
-    final emojiChar = String.fromCharCode(codePoint);
-    final emojiStr = String.fromCharCodes([codePoint]);
-    final unicode = emojiStr;
+    final unicode = String.fromCharCodes(codePoints);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

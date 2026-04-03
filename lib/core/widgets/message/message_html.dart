@@ -1,3 +1,4 @@
+import 'package:any_link_preview/any_link_preview.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,34 +15,54 @@ import 'package:genesis_workspace/core/widgets/authorized_image.dart';
 import 'package:genesis_workspace/core/widgets/authorized_media.dart';
 import 'package:genesis_workspace/core/widgets/emoji.dart';
 import 'package:genesis_workspace/core/widgets/message/message_spoiler.dart';
-import 'package:genesis_workspace/core/widgets/user_avatar.dart';
+import 'package:genesis_workspace/core/widgets/message/user_popup_profile.dart';
 import 'package:genesis_workspace/domain/download_files/entities/download_file_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
-import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
-import 'package:genesis_workspace/domain/users/usecases/get_user_by_id_use_case.dart';
-import 'package:genesis_workspace/features/all_chats/bloc/all_chats_cubit.dart';
 import 'package:genesis_workspace/features/download_files/bloc/download_files_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/app_shell_controller.dart';
-import 'package:genesis_workspace/navigation/router.dart';
-import 'package:go_router/go_router.dart';
-import 'package:skeletonizer/skeletonizer.dart';
+import 'package:html/dom.dart' as dom;
 
 class WorkspaceHtmlFactory extends WidgetFactory {}
 
 class MessageHtml extends StatelessWidget {
   final String content;
   final Function(String) onSelectedTextChanged;
+
   MessageHtml({super.key, required this.content, required this.onSelectedTextChanged});
 
-  final GetUserByIdUseCase _getUserByIdUseCase = getIt<GetUserByIdUseCase>();
+  final AppShellController appShellController = getIt<AppShellController>();
 
-  Future<DmUserEntity> getUserById(int userId) async {
-    final UserEntity user = await _getUserByIdUseCase.call(userId);
-    return user.toDmUser();
+  List<String> _extractPreviewLinks() {
+    final document = dom.Document.html(content);
+    final links = <String>{};
+
+    for (final anchor in document.querySelectorAll('a[href]')) {
+      final rawHref = anchor.attributes['href']?.trim();
+      if (rawHref == null || rawHref.isEmpty || rawHref.startsWith('/user_uploads/')) {
+        continue;
+      }
+
+      final uri = parseUrlWithBase(rawHref);
+      if (uri == null || !isAllowedUrlScheme(uri, allowContactSchemes: false)) {
+        continue;
+      }
+
+      if (uri.path.startsWith('/user_uploads/') && !isExternalToBase(uri)) {
+        continue;
+      }
+
+      links.add(uri.toString());
+    }
+
+    return links.take(2).toList(growable: false);
   }
 
-  final AppShellController appShellController = getIt<AppShellController>();
+  String _toCssRgba(Color color) {
+    final int red = (color.r * 255).round();
+    final int green = (color.g * 255).round();
+    final int blue = (color.b * 255).round();
+    return 'rgba($red, $green, $blue, ${color.a.toStringAsFixed(3)})';
+  }
 
   String? _buildImageUrl(String? raw) {
     if (raw == null) return null;
@@ -101,9 +122,28 @@ class MessageHtml extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isTabletOrSmaller = currentSize(context) <= .tablet;
+    final previewLinks = _extractPreviewLinks();
     final Widget html = HtmlWidget(
       content,
       customStylesBuilder: (element) {
+        const Set<String> quoteClasses = {'quote', 'language-quote'};
+        bool hasQuoteClass(dom.Element node) => node.classes.any(quoteClasses.contains);
+        bool isQuoteCodeNode(dom.Element node) => node.localName == 'code' && hasQuoteClass(node);
+
+        final bool isQuoteCodeBlock = element.localName == 'pre' && element.children.any(isQuoteCodeNode);
+        final bool isQuoteElement = element.localName == 'blockquote' || hasQuoteClass(element) || isQuoteCodeBlock;
+
+        if (isQuoteElement) {
+          final quoteBorderColor = _toCssRgba(theme.colorScheme.primary.withValues(alpha: 0.72));
+          final quoteTextColor = _toCssRgba(theme.colorScheme.onSurface.withValues(alpha: 0.88));
+          return {
+            'margin': '8px 0',
+            'padding': '2px 0 2px 10px',
+            'border-left': '3px solid $quoteBorderColor',
+            'color': quoteTextColor,
+          };
+        }
+
         return null;
       },
       textStyle: TextStyle(overflow: TextOverflow.ellipsis),
@@ -278,89 +318,9 @@ class MessageHtml extends StatelessWidget {
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: FutureBuilder<DmUserEntity>(
-                    future: getUserById(userId),
-                    builder: (context, AsyncSnapshot<DmUserEntity> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        if (snapshot.hasError) {
-                          return Center(child: Text(context.t.error));
-                        }
-                      }
-                      final DmUserEntity user = snapshot.data ?? UserEntity.fake().toDmUser();
-                      return Skeletonizer(
-                        enabled: snapshot.connectionState == ConnectionState.waiting,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            UserAvatar(avatarUrl: user.avatarUrl),
-                            SelectableText(
-                              user.fullName,
-                              style: theme.textTheme.bodyMedium!.copyWith(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SelectableText(user.email, style: theme.textTheme.bodySmall),
-                            const SizedBox(height: 12),
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(6),
-                                  onTap: () {
-                                    context.pop();
-                                    if (currentSize(context) > ScreenSize.lTablet) {
-                                      appShellController.goToBranch(AppShellBranchIndex.messenger);
-                                      context.read<AllChatsCubit>().selectDmChat(user);
-                                    } else {
-                                      context.pushNamed(
-                                        Routes.chat,
-                                        pathParameters: {'userId': user.userId.toString()},
-                                      );
-                                    }
-                                  },
-                                  child: Ink(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: theme.colorScheme.outlineVariant),
-                                      borderRadius: BorderRadius.circular(6),
-                                      color: theme.colorScheme.surface,
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Open chat",
-                                          style: theme.textTheme.labelLarge!.copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          Icons.chat_bubble_outline,
-                                          size: 14,
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                  child: UserPopupProfile(userId: userId),
                 ),
                 child: mentionChip,
               ),
@@ -390,8 +350,10 @@ class MessageHtml extends StatelessWidget {
       },
     );
 
+    final Widget contentWidget = _MessageHtmlWithPreviews(html: html, previewLinks: previewLinks);
+
     if (platformInfo.isMobile) {
-      return html;
+      return contentWidget;
     }
 
     return SelectionArea(
@@ -401,7 +363,143 @@ class MessageHtml extends StatelessWidget {
       contextMenuBuilder: (BuildContext context, SelectableRegionState state) {
         return const SizedBox.shrink();
       },
-      child: html,
+      child: contentWidget,
+    );
+  }
+}
+
+class _MessageHtmlWithPreviews extends StatelessWidget {
+  const _MessageHtmlWithPreviews({
+    required this.html,
+    required this.previewLinks,
+  });
+
+  final Widget html;
+  final List<String> previewLinks;
+
+  @override
+  Widget build(BuildContext context) {
+    if (previewLinks.isEmpty) return html;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        html,
+        const SizedBox(height: 8),
+        ...previewLinks.map((link) => _LinkPreviewCard(link: link)),
+      ],
+    );
+  }
+}
+
+class _LinkPreviewCard extends StatelessWidget {
+  const _LinkPreviewCard({required this.link});
+
+  final String link;
+
+  Widget _buildFallbackPreviewImage(ThemeData theme) {
+    final host = Uri.tryParse(link)?.host;
+    final fallbackUrl = host == null || host.isEmpty ? null : 'https://www.google.com/s2/favicons?domain=$host&sz=128';
+
+    if (fallbackUrl == null) {
+      return Container(
+        color: theme.colorScheme.surfaceContainerHigh,
+        child: Icon(Icons.link_rounded, color: theme.colorScheme.onSurfaceVariant),
+      );
+    }
+
+    return Image.network(
+      fallbackUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: theme.colorScheme.surfaceContainerHigh,
+          child: Icon(Icons.link_rounded, color: theme.colorScheme.onSurfaceVariant),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: AnyLinkPreview.builder(
+        link: link,
+        cache: const Duration(hours: 12),
+        placeholderWidget: Container(
+          height: 104,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        itemBuilder: (context, metadata, imageProvider, svgImage) {
+          final title = (metadata.title ?? '').trim().isNotEmpty
+              ? metadata.title!.trim()
+              : (metadata.siteName ?? metadata.url ?? link);
+          final description = (metadata.desc ?? '').trim();
+
+          return InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () async {
+              final uri = Uri.tryParse(link);
+              if (uri != null) {
+                await launchUrlSafely(context, uri);
+              }
+            },
+            child: Container(
+              height: 104,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 104,
+                    height: 104,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+                      child: imageProvider != null
+                          ? Image(image: imageProvider, fit: BoxFit.cover)
+                          : (svgImage ?? _buildFallbackPreviewImage(theme)),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          if (description.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

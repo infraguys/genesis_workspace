@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/all_chats/entities/folder_item_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -5,21 +6,6 @@ part 'folder_item_dto.g.dart';
 
 @JsonSerializable()
 class FolderItemDto {
-  @JsonKey(name: "uuid")
-  final String uuid;
-  @JsonKey(name: "folder_uuid")
-  final String folderUuid;
-  @JsonKey(name: "chat_id")
-  final int chatId;
-  @JsonKey(name: "order_index")
-  final int? orderIndex;
-  @JsonKey(name: "pinned_at")
-  final String? pinnedAt;
-  @JsonKey(name: "created_at")
-  final String createdAt;
-  @JsonKey(name: "updated_at")
-  final String updatedAt;
-
   FolderItemDto({
     required this.uuid,
     required this.folderUuid,
@@ -30,6 +16,21 @@ class FolderItemDto {
     required this.updatedAt,
   });
 
+  @JsonKey(name: 'uuid')
+  final String uuid;
+  @JsonKey(name: 'folder_uuid')
+  final String folderUuid;
+  @JsonKey(name: 'chat_id')
+  final int chatId;
+  @JsonKey(name: 'order_index')
+  final int? orderIndex;
+  @JsonKey(name: 'pinned_at', fromJson: dateTimeFromJson)
+  final DateTime? pinnedAt;
+  @JsonKey(name: 'created_at', fromJson: dateTimeFromJson)
+  final DateTime? createdAt;
+  @JsonKey(name: 'updated_at', fromJson: dateTimeFromJson)
+  final DateTime? updatedAt;
+
   factory FolderItemDto.fromJson(Map<String, dynamic> json) => _$FolderItemDtoFromJson(json);
 
   FolderItemEntity toEntity() => FolderItemEntity(
@@ -37,9 +38,9 @@ class FolderItemDto {
     folderUuid: folderUuid,
     chatId: chatId,
     orderIndex: orderIndex,
-    pinnedAt: pinnedAt != null ? DateTime.tryParse(pinnedAt!) : null,
-    createdAt: DateTime.tryParse(createdAt),
-    updatedAt: DateTime.tryParse(updatedAt),
+    pinnedAt: pinnedAt,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
   );
 }
 

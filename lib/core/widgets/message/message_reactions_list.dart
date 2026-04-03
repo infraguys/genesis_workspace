@@ -68,14 +68,15 @@ class MessageReactionsList extends StatelessWidget {
                       size: 16,
                     ),
                     const SizedBox(width: 4.0),
-                    Text(
-                      reaction.count.toString(),
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: isMyReaction ? FontWeight.w600 : FontWeight.w400,
+                    if (reaction.count > 1)
+                      Text(
+                        reaction.count.toString(),
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: isMyReaction ? FontWeight.w600 : FontWeight.w400,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

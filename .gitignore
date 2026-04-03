@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .tool_home/
+.gradle-home/
 
 # IntelliJ related
 *.iml
@@ -68,3 +69,5 @@ update_script.sh
 firebase-debug.log
 
 .agents/
+
+lib/firebase_options.dart

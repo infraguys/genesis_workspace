@@ -154,6 +154,9 @@ class _TopicItemState extends State<TopicItem> {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           mouseCursor: SystemMouseCursors.click,
+          overlayColor: .resolveWith(
+            (states) => states.contains(WidgetState.hovered) ? cardColors.active : null,
+          ),
           onTap: () {
             context.read<MessengerCubit>().selectChat(
               widget.chat,
@@ -165,9 +168,13 @@ class _TopicItemState extends State<TopicItem> {
               final isSelected = widget.topic.name == state.selectedTopic;
               return Container(
                 height: 76,
-                padding: EdgeInsetsGeometry.only(left: 38, right: 8, bottom: 12),
+                padding: EdgeInsets.symmetric(vertical: 8).copyWith(
+                  left: 38,
+                  right: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected ? cardColors.active : cardColors.base,
+                  borderRadius: .circular(8),
+                  color: isSelected ? cardColors.active : null,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -195,15 +202,18 @@ class _TopicItemState extends State<TopicItem> {
                                 Row(
                                   spacing: 4,
                                   children: [
-                                    Tooltip(
-                                      message: widget.topic.name,
-                                      child: Text(
-                                        "# ${widget.topic.name}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.labelMedium?.copyWith(
-                                          fontSize: 14,
-                                          color: textColors.text100,
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(maxWidth: 235),
+                                      child: Tooltip(
+                                        message: widget.topic.name,
+                                        child: Text(
+                                          "# ${widget.topic.name}",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelMedium?.copyWith(
+                                            fontSize: 14,
+                                            color: textColors.text100,
+                                          ),
                                         ),
                                       ),
                                     ),

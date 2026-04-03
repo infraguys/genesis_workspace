@@ -3,8 +3,14 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'stream_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class StreamDto {
+  StreamDto({
+    required this.streamId,
+    required this.name,
+    required this.subscriberCount,
+  });
+
   @JsonKey(name: 'stream_id')
   final int streamId;
   @JsonKey(name: 'name')
@@ -12,9 +18,11 @@ class StreamDto {
   @JsonKey(name: 'subscriber_count')
   final int subscriberCount;
 
-  StreamDto({required this.streamId, required this.name, required this.subscriberCount});
-
   factory StreamDto.fromJson(Map<String, dynamic> json) => _$StreamDtoFromJson(json);
 
-  StreamEntity toEntity() => StreamEntity(streamId: streamId, name: name, subscriberCount: subscriberCount);
+  StreamEntity toEntity() => StreamEntity(
+    streamId: streamId,
+    name: name,
+    subscriberCount: subscriberCount,
+  );
 }

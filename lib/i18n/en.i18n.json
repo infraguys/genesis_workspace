@@ -68,7 +68,11 @@
     "chat_sorting_title": "Chat sorting settings",
     "chat_sorting_prioritize_directs": "Show unread personal chats above other unread chats",
     "chat_sorting_prioritize_unmuted": "Show unread unmuted channels above muted unread ones",
-    "theme_settings": "Theme settings"
+    "theme_settings": "Theme settings",
+    "theme": "Theme",
+    "dark_mode": "Dark mode",
+    "light_mode": "Light mode",
+    "palette": "Palette"
   },
   "date_labels": {
     "today": "Today",
@@ -109,6 +113,12 @@
     "active_call_in": "Call in \"{name}\"",
     "active_call": "Active call",
     "resume_call": "Return to call",
+    "switch_call_dialog": {
+      "title": "An active call is already running",
+      "description": "Stay in the current call or end it and join the new one?",
+      "stay_in_current": "Stay in current call",
+      "end_and_join": "End and join new call"
+    },
     "create_call_dialog": {
       "title": "Create call",
       "video_title": "Create video call",
@@ -285,6 +295,7 @@
   "notifications": "Notifications",
   "chats": "Chats",
   "calendar": "Calendar",
+  "status": "Status",
   "email": "Email",
   "groups": "Groups",
   "calls": "Calls",
@@ -351,10 +362,25 @@
     "title": "Personal information",
     "share_profile": "Share profile",
     "link_copied": "Profile link copied to clipboard",
+    "no_status_text": "No status text",
     "user_id": "User ID",
     "timezone": "Time zone",
     "team_and_position": "Team > Position",
-    "manager": "Manager"
+    "manager": "Manager",
+    "status_dialog": {
+      "hint": "Set your status",
+      "cancel": "Cancel",
+      "save": "Save",
+      "presets": {
+        "busy": "Busy",
+        "in_meeting": "In a meeting",
+        "on_the_road": "On the road",
+        "sick": "Sick",
+        "on_vacation": "On vacation",
+        "working_remotely": "Working remotely",
+        "in_office": "In the office"
+      }
+    }
   },
   "profile": "Profile",
   "messageReadersTitle": {
@@ -377,5 +403,6 @@
     "unmute": "Unmute topic"
   },
   "selected_count": "Selected ({n})",
-  "show_spoiler": "Show spoiler"
+  "show_spoiler": "Show spoiler",
+  "open_chat": "Open chat"
 }

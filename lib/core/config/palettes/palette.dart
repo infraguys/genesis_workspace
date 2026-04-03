@@ -19,6 +19,7 @@ abstract interface class ThemePalette {
   final NoticeColors lightNoticeColors;
   final NoticeColors darkNoticeColors;
   final Color darkTextFieldBackground;
+  final Color lightTextFieldBackground;
 
   const ThemePalette({
     required this.id,
@@ -36,6 +37,7 @@ abstract interface class ThemePalette {
     required this.lightNoticeColors,
     required this.darkNoticeColors,
     required this.darkTextFieldBackground,
+    required this.lightTextFieldBackground,
   });
 
   ColorScheme colorSchemeFor(Brightness brightness) {
@@ -79,12 +81,14 @@ class IconColors extends ThemeExtension<IconColors> {
   final Color disable;
   final Color hover;
   final Color active;
+  final Color hoverBackground;
 
   const IconColors({
     required this.base,
     required this.disable,
     required this.hover,
     required this.active,
+    required this.hoverBackground,
   });
 
   @override
@@ -93,12 +97,14 @@ class IconColors extends ThemeExtension<IconColors> {
     Color? disable,
     Color? hover,
     Color? active,
+    Color? hoverBackground,
   }) {
     return IconColors(
       base: base ?? this.base,
       disable: disable ?? this.disable,
       hover: hover ?? this.hover,
       active: active ?? this.active,
+      hoverBackground: hoverBackground ?? this.hoverBackground,
     );
   }
 
@@ -110,6 +116,7 @@ class IconColors extends ThemeExtension<IconColors> {
       disable: Color.lerp(disable, other.disable, t)!,
       hover: Color.lerp(hover, other.hover, t)!,
       active: Color.lerp(active, other.active, t)!,
+      hoverBackground: Color.lerp(hoverBackground, other.hoverBackground, t)!,
     );
   }
 }
@@ -154,12 +161,10 @@ class TextColors extends ThemeExtension<TextColors> {
 class CardColors extends ThemeExtension<CardColors> {
   final Color base;
   final Color active;
-  final Color onBackgroundCard;
 
   const CardColors({
     required this.base,
     required this.active,
-    required this.onBackgroundCard,
   });
 
   @override
@@ -171,7 +176,6 @@ class CardColors extends ThemeExtension<CardColors> {
     return CardColors(
       base: base ?? this.base,
       active: active ?? this.active,
-      onBackgroundCard: onBackgroundCard ?? this.onBackgroundCard,
     );
   }
 
@@ -181,7 +185,6 @@ class CardColors extends ThemeExtension<CardColors> {
     return CardColors(
       base: Color.lerp(base, other.base, t)!,
       active: Color.lerp(active, other.active, t)!,
-      onBackgroundCard: Color.lerp(onBackgroundCard, other.onBackgroundCard, t)!,
     );
   }
 }

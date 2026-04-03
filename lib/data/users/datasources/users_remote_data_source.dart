@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
+import 'package:genesis_workspace/data/common/dto/exception_dto.dart';
 import 'package:genesis_workspace/data/users/api/users_api_client.dart';
 import 'package:genesis_workspace/data/users/dto/channel_by_id_dto.dart';
 import 'package:genesis_workspace/data/users/dto/channel_members_dto.dart';
@@ -10,11 +11,13 @@ import 'package:genesis_workspace/data/users/dto/presences_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/topics_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/typing_request_dto.dart';
+import 'package:genesis_workspace/data/users/dto/update_my_status_dto.dart';
 import 'package:genesis_workspace/data/users/dto/update_presence_request_dto.dart';
 import 'package:genesis_workspace/data/users/dto/update_presence_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_presence_dto.dart';
+import 'package:genesis_workspace/data/users/dto/user_status_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:injectable/injectable.dart';
 
@@ -35,4 +38,6 @@ abstract class UsersRemoteDataSource {
   Future<UpdateSubscriptionSettingsResponseDto> updateSubscriptionSettings(
     UpdateSubscriptionSettingsRequestDto body,
   );
+  Future<void> updateMyStatus(UpdateMyStatusRequestDto body);
+  Future<UserStatusDto> getUserStatus(UserStatusRequestDto body);
 }

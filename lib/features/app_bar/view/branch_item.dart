@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:genesis_workspace/core/config/colors.dart';
 
 class BranchItem extends StatelessWidget {
   const BranchItem({
@@ -21,9 +22,10 @@ class BranchItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color baseOverlay = theme.colorScheme.onSurface;
+    final IconColors iconColors = theme.extension<IconColors>()!;
 
     return Material(
-      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+      color: isSelected ? iconColors.hoverBackground : Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),
@@ -32,6 +34,7 @@ class BranchItem extends StatelessWidget {
         onTap: onPressed,
         mouseCursor: SystemMouseCursors.click,
         borderRadius: BorderRadius.circular(borderRadius),
+        hoverColor: iconColors.hoverBackground,
         overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
           if (states.contains(MaterialState.pressed)) {
             return baseOverlay.withOpacity(0.16);

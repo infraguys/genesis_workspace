@@ -74,7 +74,11 @@
     "chat_sorting_title": "Настройки сортировки чатов",
     "chat_sorting_prioritize_directs": "Показывать личные непрочитанные чаты выше других непрочитанных чатов",
     "chat_sorting_prioritize_unmuted": "Показывать непрочитанные незаглушенные каналы выше заглушенных непрочитанных",
-    "theme_settings": "Настройки темы"
+    "theme_settings": "Настройки темы",
+    "theme": "Тема",
+    "dark_mode": "Темный режим",
+    "light_mode": "Светлый режим",
+    "palette": "Палитра"
   },
   "date_labels": {
     "today": "Сегодня",
@@ -115,6 +119,12 @@
     "active_call_in": "Идёт звонок в \"{name}\"",
     "active_call": "Идёт звонок",
     "resume_call": "Вернуться в звонок",
+    "switch_call_dialog": {
+      "title": "Уже есть активный звонок",
+      "description": "Остаться в текущем звонке или завершить его и перейти в новый?",
+      "stay_in_current": "Остаться в текущем",
+      "end_and_join": "Завершить и перейти"
+    },
     "create_call_dialog": {
       "title": "Создать звонок",
       "video_title": "Создать видеозвонок",
@@ -293,6 +303,7 @@
   "notifications": "Уведомления",
   "chats": "Чаты",
   "calendar": "Календарь",
+  "status": "Статус",
   "email": "Почта",
   "groups": "Группы",
   "calls": "Звонки",
@@ -359,10 +370,25 @@
     "title": "Личная информация",
     "share_profile": "Поделиться профилем",
     "link_copied": "Ссылка на профиль скопирована в буфер обмена",
+    "no_status_text": "Нет статуса",
     "user_id": "ID пользователя",
     "timezone": "Часовой пояс",
     "team_and_position": "Команда > Должность",
-    "manager": "Руководитель"
+    "manager": "Руководитель",
+    "status_dialog": {
+      "hint": "Установите статус",
+      "cancel": "Отменить",
+      "save": "Сохранить",
+      "presets": {
+        "busy": "Занят/а",
+        "in_meeting": "На встрече",
+        "on_the_road": "В дороге",
+        "sick": "Болею",
+        "on_vacation": "В отпуске",
+        "working_remotely": "Работаю удалённо",
+        "in_office": "В офисе"
+      }
+    }
   },
   "profile": "Профиль",
   "messageReadersTitle": {
@@ -387,5 +413,6 @@
     "unmute": "Включить уведомления в теме"
   },
   "selected_count": "Выбрано ({n})",
-  "show_spoiler": "Показать спойлер"
+  "show_spoiler": "Показать спойлер",
+  "open_chat": "Открыть чат"
 }

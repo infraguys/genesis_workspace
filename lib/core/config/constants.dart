@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genesis_workspace/core/models/emoji.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppConstants {
@@ -18,8 +19,9 @@ class AppConstants {
 
   static const String mailCalendarUuid = "00000000-0000-0000-0000-000000000001";
 
-  static late String baseUrl;
+  static String baseUrl = '';
   static int? selectedOrganizationId;
+  static late String appVersion;
 
   static const String versionConfigUrl = 'https://repository.genesis-core.tech/genesis_workspace/workspace-index.json';
   static const String versionConfigShaUrl =
@@ -38,6 +40,7 @@ class AppConstants {
 
   static Future<void> init() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
     final String? savedBaseUrl = prefs.getString(SharedPrefsKeys.baseUrl);
     final int? savedOrganizationId = prefs.getInt(SharedPrefsKeys.selectedOrganizationId);
@@ -47,6 +50,7 @@ class AppConstants {
     } else {
       baseUrl = '';
     }
+    appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
     selectedOrganizationId = savedOrganizationId;
   }
 
@@ -106,6 +110,7 @@ class SharedPrefsKeys {
   static const String prioritizePersonalUnread = 'prioritizePersonalUnread';
   static const String prioritizeUnmutedUnreadChannels = 'prioritizeUnmutedUnreadChannels';
   static const String videoAudioHintDismissed = 'videoAudioHintDismissed';
+  static const String pendingNotificationTapPayload = 'pendingNotificationTapPayload';
 }
 
 class AssetsConstants {

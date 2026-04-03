@@ -10,9 +10,11 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/widgets/message/message_item.dart';
 import 'package:genesis_workspace/core/widgets/message/unread_marker.dart';
 import 'package:genesis_workspace/core/widgets/topic_separator.dart';
+import 'package:genesis_workspace/domain/chats/entities/chat_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
 import 'package:genesis_workspace/features/profile/bloc/profile_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:intl/intl.dart';
@@ -31,6 +33,7 @@ class MessagesList extends StatefulWidget {
   final int myUserId;
   final void Function(int messageId, {String? quote})? onTapQuote;
   final void Function(UpdateMessageRequestEntity body)? onTapEditMessage;
+  final VoidCallback? onScrollToBottomPressed;
   final bool isSelectMode;
   final List<MessageEntity> selectedMessages;
   final int? focusedMessageId;
@@ -55,6 +58,7 @@ class MessagesList extends StatefulWidget {
     this.focusedMessageId,
     this.foundNewest = true,
     this.foundOldest = false,
+    this.onScrollToBottomPressed,
   });
 
   @override
@@ -73,6 +77,7 @@ class _MessagesListState extends State<MessagesList> {
   late final ItemPositionsListener _itemPositionsListener;
   late final ScrollOffsetListener _scrollOffsetListener;
   StreamSubscription<double>? _scrollOffsetSubscription;
+  ChatEntity? chat;
 
   bool showEmojiPicker = false;
 
@@ -83,7 +88,7 @@ class _MessagesListState extends State<MessagesList> {
   void initState() {
     super.initState();
     _reversed = widget.messages.reversed.toList(growable: true);
-
+    chat = context.read<MessengerCubit>().state.selectedChat;
     _itemScrollController = ItemScrollController();
     _itemPositionsListener = ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onItemPositionsChanged);
@@ -91,7 +96,6 @@ class _MessagesListState extends State<MessagesList> {
     _scrollOffsetSubscription = _scrollOffsetListener.changes.listen(_onScrollOffsetChanged);
 
     _myUser = context.read<ProfileCubit>().state.user;
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToFirstUnreadIfNeeded();
     });
@@ -102,7 +106,6 @@ class _MessagesListState extends State<MessagesList> {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.messages, widget.messages)) {
       _reversed = widget.messages.reversed.toList(growable: true);
-      // _scrollToFirstUnreadIfNeeded();
     }
   }
 
@@ -255,6 +258,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void _scrollToBottom() {
+    widget.onScrollToBottomPressed?.call();
     if (_itemScrollController.isAttached) {
       _itemScrollController.scrollTo(
         index: 0,
@@ -311,7 +315,7 @@ class _MessagesListState extends State<MessagesList> {
                         mainAxisSize: .min,
                         spacing: 8.0,
                         children: [
-                          if (_firstUnreadIndexInReversed != null && index == _firstUnreadIndexInReversed!)
+                          if (chat?.firstUnreadMessageId == currentMessage.id)
                             UnreadMessagesMarker(unreadCount: unreadCount),
                           if (isNewTopic) TopicSeparator(message: currentMessage),
                           if (isNewDay) MessageDayLabel(label: _getDayLabel(context, messageDate)),

@@ -861,6 +861,11 @@ class MessengerCubit extends Cubit<MessengerState> {
     _onProfileStateChanged(_profileCubit.state);
   }
 
+  void syncSelectedOrganization(int organizationId) {
+    if (_selectedOrganizationId == organizationId) return;
+    resetState(organizationId);
+  }
+
   void applyChatSortingPreferences({
     required bool prioritizePersonalUnread,
     required bool prioritizeUnmutedUnreadChannels,

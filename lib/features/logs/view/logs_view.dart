@@ -25,6 +25,7 @@ class _LogsViewState extends State<LogsView> {
 
   Map<int, RealTimeConnection> connections = {};
   List<RealTimeConnection> activeConnections = [];
+  String _fcmToken = '';
 
   @override
   void initState() {

@@ -20,7 +20,7 @@ class ServiceItem extends StatelessWidget {
       padding: .all(12),
       decoration: BoxDecoration(
         borderRadius: .circular(8),
-        color: cardColors.onBackgroundCard,
+        color: cardColors.active,
       ),
       child: Column(
         spacing: 20,

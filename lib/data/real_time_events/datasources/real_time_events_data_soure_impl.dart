@@ -38,4 +38,22 @@ class RealTimeEventsDataSourceImpl implements RealTimeEventsDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<void> registerFcmToken(RegisterFcmTokenDto body) async {
+    try {
+      await _apiClient.registerFCMToken(token: body.bouncerToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> registerApnsToken(RegisterApnsTokenDto body) async {
+    try {
+      await _apiClient.registerApnsToken(token: body.bouncerToken, appId: body.appId);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

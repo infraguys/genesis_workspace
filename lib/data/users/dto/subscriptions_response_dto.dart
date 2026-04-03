@@ -5,11 +5,15 @@ part 'subscriptions_response_dto.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class SubscriptionsResponseDto {
+  SubscriptionsResponseDto({
+    required this.msg,
+    required this.result,
+    required this.subscriptions,
+  });
+
   final String msg;
   final String result;
   final List<SubscriptionDto> subscriptions;
-
-  SubscriptionsResponseDto({required this.msg, required this.result, required this.subscriptions});
 
   factory SubscriptionsResponseDto.fromJson(Map<String, dynamic> json) => _$SubscriptionsResponseDtoFromJson(json);
 

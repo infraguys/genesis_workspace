@@ -20,6 +20,9 @@ import 'package:genesis_workspace/core/utils/message_input_intents/mention_navig
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/utils/web_drop.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
+import 'package:genesis_workspace/core/widgets/buttons/open_infopanel_button.dart';
+import 'package:genesis_workspace/core/widgets/chat_context_menu_overlay.dart';
+import 'package:genesis_workspace/core/widgets/click_cursor.dart';
 import 'package:genesis_workspace/core/widgets/message/chat_text_editing_controller.dart';
 import 'package:genesis_workspace/core/widgets/message/mention_suggestions.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input.dart';
@@ -34,6 +37,8 @@ import 'package:genesis_workspace/domain/messages/entities/message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/update_message_entity.dart';
 import 'package:genesis_workspace/domain/messages/entities/upload_file_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/features/all_chats/view/select_folders_dialog.dart';
+import 'package:genesis_workspace/features/call/bloc/call_cubit.dart';
 import 'package:genesis_workspace/features/chat/bloc/chat_cubit.dart';
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
@@ -77,6 +82,37 @@ class _ChatViewState extends State<ChatView>
   final GlobalKey _mentionKey = GlobalKey();
   bool isDraftPasted = false;
   DraftEntity? draftForThisChat;
+
+  void _openContextMenu(BuildContext context, Offset globalPosition) {
+    ChatContextMenuOverlay.show(
+      context: context,
+      globalPosition: globalPosition,
+      child: _ChatViewContextMenu(
+        onAddToFolder: () async {
+          ChatContextMenuOverlay.close();
+          final folders = context.read<MessengerCubit>().state.folders;
+          await showDialog(
+            context: context,
+            builder: (context) => SelectFoldersDialog(
+              onSave: (selectedFolderIds) async {
+                await context.read<MessengerCubit>().setFoldersForChat(
+                  selectedFolderIds,
+                  widget.chatId!,
+                );
+              },
+              folders: folders,
+              loadSelectedFolderIds: () => context.read<MessengerCubit>().getFolderIdsForChat(
+                widget.chatId!,
+              ),
+            ),
+          );
+        },
+        onReadAll: () async {
+          await context.read<MessengerCubit>().readAllMessages(widget.chatId!);
+        },
+      ),
+    );
+  }
 
   Future<void> sendMessage({required List<MessageEntity> selectedMessages}) async {
     final messageContent = messageController.text;
@@ -171,9 +207,7 @@ class _ChatViewState extends State<ChatView>
     switch (state) {
       case AppLifecycleState.resumed:
         await context.read<ChatCubit>().getUnreadMessages();
-        break;
       default:
-        break;
     }
     super.didChangeAppLifecycleState(state);
   }
@@ -305,18 +339,58 @@ class _ChatViewState extends State<ChatView>
                                         ),
                                       ),
                                     )
-                                  : IconButton(
-                                      onPressed: widget.leadingOnPressed,
-                                      icon: Assets.icons.moreVert.svg(
-                                        colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
+                                  : Center(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        shape: CircleBorder(),
+                                        clipBehavior: .hardEdge,
+                                        child: InkResponse(
+                                          onTapDown: (details) {
+                                            _openContextMenu(context, details.globalPosition);
+                                          },
+                                          containedInkWell: true,
+                                          child: ClickCursor(
+                                            child: SizedBox.square(
+                                              dimension: 48,
+                                              child: Center(
+                                                child: Assets.icons.moreVert.svg(
+                                                  colorFilter: ColorFilter.mode(
+                                                    textColors.text30,
+                                                    BlendMode.srcIn,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
+                              // : IconButton(
+                              //     onPressed: widget.leadingOnPressed,
+                              //     icon: Assets.icons.moreVert.svg(
+                              //       colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
+                              //     ),
+                              //   ),
                               actions: [
                                 DownloadFilesButton(),
                                 IconButton(
                                   onPressed: () async {
                                     final meetingLink = await createCall(context, startWithVideoMuted: true);
                                     if (meetingLink.isNotEmpty) {
+                                      if (platformInfo.isLinux) {
+                                        await launchUrlSafely(
+                                          context,
+                                          Uri.parse(meetingLink),
+                                          allowContactSchemes: false,
+                                        );
+                                      } else if (isTabletOrSmaller) {
+                                        context.pushNamed(Routes.call, extra: meetingLink);
+                                      } else {
+                                        context.read<CallCubit>().openCall(
+                                          meetUrl: meetingLink,
+                                          meetLocationName: '',
+                                        );
+                                      }
                                       await context.read<ChatCubit>().sendMessage(content: meetingLink);
                                     }
                                   },
@@ -326,18 +400,7 @@ class _ChatViewState extends State<ChatView>
                                     colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
                                   ),
                                 ),
-                                // if (!isTabletOrSmaller)
-                                IconButton(
-                                  onPressed: () async {
-                                    final meetingLink = await createCall(context, startWithVideoMuted: false);
-                                    if (meetingLink.isNotEmpty) {
-                                      await context.read<ChatCubit>().sendMessage(content: meetingLink);
-                                    }
-                                  },
-                                  icon: Assets.icons.videocam.svg(
-                                    colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
-                                  ),
-                                ),
+                                if (!isTabletOrSmaller) OpenInfoPanelButton(onPressed: widget.leadingOnPressed),
                               ],
                               title: Builder(
                                 builder: (context) {
@@ -416,22 +479,28 @@ class _ChatViewState extends State<ChatView>
                                         if (!isTabletOrSmaller) UserAvatar(avatarUrl: userEntity.avatarUrl),
                                         BlocBuilder<ChatCubit, ChatState>(
                                           builder: (context, state) {
-                                            return GestureDetector(
-                                              onTap: () {
-                                                context.pushNamed(
-                                                  Routes.chatInfo,
-                                                  pathParameters: GoRouterState.of(context).pathParameters,
-                                                );
-                                              },
-                                              child: Column(
-                                                crossAxisAlignment: .start,
-                                                children: [
-                                                  Text(
-                                                    userEntity.fullName,
-                                                    style: titleTextStyle,
-                                                  ),
-                                                  userStatus,
-                                                ],
+                                            return ClickCursor(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  if (isTabletOrSmaller) {
+                                                    context.pushNamed(
+                                                      Routes.chatInfo,
+                                                      pathParameters: GoRouterState.of(context).pathParameters,
+                                                    );
+                                                  } else {
+                                                    widget.leadingOnPressed?.call();
+                                                  }
+                                                },
+                                                child: Column(
+                                                  crossAxisAlignment: .start,
+                                                  children: [
+                                                    Text(
+                                                      userEntity.fullName,
+                                                      style: titleTextStyle,
+                                                    ),
+                                                    userStatus,
+                                                  ],
+                                                ),
                                               ),
                                             );
                                           },
@@ -540,6 +609,11 @@ class _ChatViewState extends State<ChatView>
                                                     widget.chatId!,
                                                   );
                                                 }
+                                              },
+                                              onScrollToBottomPressed: () async {
+                                                await context.read<ChatCubit>().getMessages(
+                                                  myUserId: _myUser.userId,
+                                                );
                                               },
                                               isSelectMode: messagesSelectState.isActive,
                                               selectedMessages: selectedMessages,
@@ -842,6 +916,105 @@ class _ChatViewState extends State<ChatView>
           },
         );
       },
+    );
+  }
+}
+
+class _ChatViewContextMenu extends StatelessWidget {
+  const _ChatViewContextMenu({
+    super.key,
+    this.onAddToFolder,
+    this.onReadAll,
+  });
+
+  final VoidCallback? onAddToFolder;
+  final VoidCallback? onReadAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColors = theme.extension<TextColors>()!;
+    final iconColors = theme.extension<IconColors>()!;
+    final iconColor = ColorFilter.mode(iconColors.base, BlendMode.srcIn);
+
+    return Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
+      children: [
+        _ChatContextMenuAction(
+          textColor: textColors.text100,
+          icon: Assets.icons.folder,
+          iconColor: iconColor,
+          label: context.t.folders.addToFolder,
+          onTap: onAddToFolder,
+        ),
+        if (onReadAll != null)
+          _ChatContextMenuAction(
+            textColor: textColors.text100,
+            icon: Assets.icons.readReceipt,
+            iconColor: iconColor,
+            label: context.t.readAllMessages,
+            onTap: onReadAll,
+          ),
+      ],
+    );
+  }
+}
+
+class _ChatContextMenuAction extends StatelessWidget {
+  const _ChatContextMenuAction({
+    required this.textColor,
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    this.onTap,
+  });
+
+  final Color textColor;
+  final SvgGenImage icon;
+  final ColorFilter iconColor;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = TextTheme.of(context);
+    const iconSize = 20.0;
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 36.0),
+      child: Material(
+        child: InkWell(
+          mouseCursor: SystemMouseCursors.click,
+          borderRadius: .circular(8),
+          onTap: onTap,
+          child: Padding(
+            padding: const .symmetric(horizontal: 12.0, vertical: 6.0),
+            child: Row(
+              spacing: 12.0,
+              children: [
+                SizedBox(
+                  width: iconSize,
+                  height: iconSize,
+                  child: icon.svg(
+                    width: iconSize,
+                    height: iconSize,
+                    colorFilter: iconColor,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(fontWeight: .w500, color: textColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

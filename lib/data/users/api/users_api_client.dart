@@ -12,6 +12,7 @@ import 'package:genesis_workspace/data/users/dto/update_presence_response_dto.da
 import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_by_id_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/user_presence_dto.dart';
+import 'package:genesis_workspace/data/users/dto/user_status_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -78,5 +79,18 @@ abstract class UsersApiClient {
     @Query('new_user_input') bool? newUserInput,
     @Query('status') PresenceStatus status,
     @Query('ping_only') bool? pingOnly,
+  );
+
+  @FormUrlEncoded()
+  @POST('/users/me/status')
+  Future<void> updateMyStatus({
+    @Field('status_text') String? statusText,
+    @Field('emoji_name') String? emojiName,
+    @Field('emoji_code') String? emojiCode,
+  });
+
+  @GET('/users/{user_id}/status')
+  Future<UserStatusResponseDto> getUserStatus(
+    @Path('user_id') int userId,
   );
 }

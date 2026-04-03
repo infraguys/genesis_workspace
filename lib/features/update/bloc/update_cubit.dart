@@ -9,7 +9,6 @@ import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/domain/common/entities/version_config_entity.dart';
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_sha_use_case.dart';
 import 'package:genesis_workspace/domain/common/usecases/get_version_config_use_case.dart';
-import 'package:genesis_workspace/flavor.dart';
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -68,10 +67,8 @@ class UpdateCubit extends Cubit<UpdateState> {
 
       final bool isSecured = shaResponseTrimmed == sha256;
 
-      final releaseChannel = Flavor.isStage ? response.latest.dev : response.latest.stable;
-      final minSupportedShortVersion = Flavor.isStage
-          ? response.policy.update.minVersion.minShortDev
-          : response.policy.update.minVersion.minShortStable;
+      final releaseChannel = response.latest.stable;
+      final minSupportedShortVersion = response.policy.update.minVersion.minShortStable;
 
       final latestShortVersion = releaseChannel.shortVersion;
       final isNewUpdateAvailable = compareVersions(currentVersion, latestShortVersion) < 0;

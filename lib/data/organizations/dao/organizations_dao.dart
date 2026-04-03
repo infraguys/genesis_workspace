@@ -16,6 +16,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     required String baseUrl,
     required Set<int> unreadMessages,
     String? meetingUrl,
+    String? emojiServerUrl,
     int? maxStreamNameLength,
     int? maxStreamDescriptionLength,
   }) {
@@ -33,6 +34,7 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
             baseUrl: Value(refactoredBaseUrl),
             unreadMessages: Value(unreadMessages),
             meetingUrl: meetingUrl != null ? Value(meetingUrl) : const Value.absent(),
+            emojiServerUrl: emojiServerUrl != null ? Value(emojiServerUrl) : const Value.absent(),
             maxStreamNameLength: Value(maxStreamNameLength),
             maxStreamDescriptionLength: Value(maxStreamDescriptionLength),
           ),
@@ -47,6 +49,9 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
           baseUrl: refactoredBaseUrl,
           unreadMessages: Value(unreadMessages),
           meetingUrl: Value(meetingUrl),
+          emojiServerUrl: Value(emojiServerUrl),
+          maxStreamNameLength: Value(maxStreamNameLength),
+          maxStreamDescriptionLength: Value(maxStreamDescriptionLength),
         ),
         mode: InsertMode.insert,
       );
@@ -75,6 +80,20 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     return org?.id;
   }
 
+  Future<int?> getOrganizationIdByComparableUrl(String url) async {
+    final String? normalizedTarget = _normalizeUrlForComparison(url);
+    if (normalizedTarget == null) return null;
+
+    final List<Organization> allOrganizations = await getAllOrganizations();
+    for (final organization in allOrganizations) {
+      final String? normalizedOrganizationUrl = _normalizeUrlForComparison(organization.baseUrl);
+      if (normalizedOrganizationUrl == normalizedTarget) {
+        return organization.id;
+      }
+    }
+    return null;
+  }
+
   Future<void> updateMeetingUrl({
     required int organizationId,
     required String? meetingUrl,
@@ -99,10 +118,46 @@ class OrganizationsDao extends DatabaseAccessor<AppDatabase> with _$Organization
     );
   }
 
+  Future<void> updateEmojiServerUrl({
+    required int organizationId,
+    required String? emojiServerUrl,
+  }) {
+    return (update(organizations)..where((t) => t.id.equals(organizationId))).write(
+      OrganizationsCompanion(
+        emojiServerUrl: Value(emojiServerUrl),
+      ),
+    );
+  }
+
   String _normalizeBaseUrl(String value) {
     if (value.endsWith('/')) {
       return value.substring(0, value.length - 1);
     }
     return value;
+  }
+
+  String? _normalizeUrlForComparison(String value) {
+    final String trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+
+    Uri? parsed = Uri.tryParse(trimmed);
+    if (parsed == null || parsed.host.isEmpty) {
+      final String withScheme = trimmed.startsWith('http://') || trimmed.startsWith('https://')
+          ? trimmed
+          : 'https://$trimmed';
+      parsed = Uri.tryParse(withScheme);
+    }
+
+    if (parsed == null || parsed.host.isEmpty) {
+      return _normalizeBaseUrl(trimmed).toLowerCase();
+    }
+
+    final String scheme = parsed.scheme.isEmpty ? 'https' : parsed.scheme.toLowerCase();
+    final String host = parsed.host.toLowerCase();
+    final int port = parsed.hasPort ? parsed.port : -1;
+    final bool isDefaultPort = (scheme == 'http' && port == 80) || (scheme == 'https' && port == 443);
+    final String normalizedPort = port > 0 && !isDefaultPort ? ':$port' : '';
+
+    return '$scheme://$host$normalizedPort';
   }
 }

@@ -60,7 +60,8 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     final double maxDialogWidth = 520;
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final double dialogWidth = math.min(screenWidth - 32, maxDialogWidth);
-    final BorderRadius dialogRadius = BorderRadius.circular(16);
+    final BorderRadius dialogRadius = BorderRadius.circular(12);
+    final theme = Theme.of(context);
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -109,7 +110,10 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                     ],
                   ),
                 ),
-                const Divider(height: 1),
+                Divider(
+                  height: 1,
+                  color: theme.dividerColor,
+                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: TextField(
@@ -118,18 +122,6 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
                       labelText: context.t.folders.nameLabel,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.black12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 1.8,
-                        ),
-                      ),
                     ),
                     onSubmitted: (_) {
                       if (isCreateEnabled) {
@@ -184,7 +176,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: selectedColor?.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.black12),
                     ),
                     child: Row(

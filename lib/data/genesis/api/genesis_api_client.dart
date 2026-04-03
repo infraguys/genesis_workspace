@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:genesis_workspace/data/all_chats/dto/create_folder_dto.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_dto.dart';
 import 'package:genesis_workspace/data/all_chats/dto/folder_item_dto.dart';
+import 'package:genesis_workspace/data/all_chats/dto/update_folder_dto.dart';
 import 'package:genesis_workspace/data/genesis/dto/genesis_service_dto.dart';
 import 'package:retrofit/retrofit.dart';
 

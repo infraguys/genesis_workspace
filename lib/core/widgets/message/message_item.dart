@@ -117,7 +117,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin, Ope
       return;
     }
 
-    final String normalizedMeetingLink = meetingUri.toString();
+    final String normalizedMeetingLink = '${meetingUri.toString()}';
     final screenSize = currentSize(context);
     final router = GoRouter.of(context);
     try {
@@ -212,6 +212,12 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin, Ope
   }
 
   void onCopy() async {
+    final selection = selectedText.trim();
+    if (selection.isNotEmpty) {
+      await Clipboard.setData(ClipboardData(text: selectedText));
+      return;
+    }
+
     final message = await messagesCubit.getMessageById(messageId: widget.message.id, applyMarkdown: false);
     await Clipboard.setData(ClipboardData(text: message.content));
   }
@@ -438,7 +444,7 @@ class _MessageItemState extends State<MessageItem> with ForwardMessageMixin, Ope
                                 )
                               : null,
                           child: Column(
-                            crossAxisAlignment: .start,
+                            crossAxisAlignment: widget.message.isCall ? .center : .start,
                             mainAxisSize: .min,
                             children: [
                               Row(

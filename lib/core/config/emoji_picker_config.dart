@@ -1,16 +1,37 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
+
+List<CategoryEmoji> buildLimitedEmojiSet(
+  Locale locale,
+  Set<String> allowedCodes,
+) {
+  final base = getDefaultEmojiLocale(locale);
+
+  return base
+      .map(
+        (c) => CategoryEmoji(
+          c.category,
+          c.emoji.where((e) => allowedCodes.contains(emojiToCode(e.emoji))).toList(),
+        ),
+      )
+      .where((c) => c.emoji.isNotEmpty)
+      .toList();
+}
 
 Config emojiPickerConfig(
   BuildContext context, {
   required ThemeData theme,
+  Set<String>? allowedCodes,
 }) {
   final height = context.read<EmojiKeyboardCubit>().state.keyboardHeight;
   return Config(
     height: height,
+    emojiSet: allowedCodes == null ? null : (locale) => buildLimitedEmojiSet(locale, allowedCodes),
     skinToneConfig: SkinToneConfig(
       dialogBackgroundColor: theme.colorScheme.surface,
     ),

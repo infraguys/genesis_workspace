@@ -255,6 +255,14 @@
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -522,7 +530,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -531,9 +539,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -658,7 +667,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -667,9 +676,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -763,7 +773,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -772,9 +782,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -865,7 +876,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -874,9 +885,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -962,7 +974,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -971,9 +983,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1059,7 +1072,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1068,9 +1081,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1158,7 +1172,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1167,9 +1181,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1314,7 +1329,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1323,9 +1338,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1344,7 +1360,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.9.0;
+				FLUTTER_BUILD_NAME = 1.10.6;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1353,9 +1369,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.6;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

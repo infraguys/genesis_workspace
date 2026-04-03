@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/enums/presence_status.dart';
+import 'package:genesis_workspace/domain/users/entities/update_my_status_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/update_presence_request_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_status_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_own_user_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/get_user_status_use_case.dart';
+import 'package:genesis_workspace/domain/users/usecases/update_my_status_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/update_presence_use_case.dart';
 import 'package:injectable/injectable.dart';
 
@@ -13,18 +18,66 @@ part 'profile_state.dart';
 
 @LazySingleton()
 class ProfileCubit extends Cubit<ProfileState> {
-  ProfileCubit(this._getOwnUserUseCase, this._updatePresenceUseCase)
-    : super(ProfileState(user: null, lastPresenceUpdateId: -1, myPresence: PresenceStatus.idle));
+  ProfileCubit(
+    this._getOwnUserUseCase,
+    this._updatePresenceUseCase,
+    this._getUserStatusUseCase,
+    this._updateMyStatusUseCase,
+  ) : super(ProfileState(user: null, lastPresenceUpdateId: -1, myPresence: PresenceStatus.idle));
 
   final GetOwnUserUseCase _getOwnUserUseCase;
+  final GetUserStatusUseCase _getUserStatusUseCase;
+  final UpdateMyStatusUseCase _updateMyStatusUseCase;
   final UpdatePresenceUseCase _updatePresenceUseCase;
 
   Future<void> getOwnUser() async {
     try {
-      final response = await _getOwnUserUseCase.call();
-      emit(state.copyWith(user: response));
+      final user = await _getOwnUserUseCase.call();
+      emit(state.copyWith(user: user));
+      await getUserStatus();
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> getUserStatus() async {
+    try {
+      final user = state.user;
+      if (user == null) return;
+      final statusResponse = await _getUserStatusUseCase.call(UserStatusRequestEntity(userId: user.userId));
+      final userWithStatus = user.copyWith(
+        status: statusResponse,
+      );
+      emit(state.copyWith(user: userWithStatus));
+    } catch (e) {
+      if (kDebugMode) {
+        inspect(e);
+      }
+    }
+  }
+
+  Future<void> updateStatus(UpdateMyStatusRequestEntity body) async {
+    final user = state.user;
+    if (user == null) {
+      return;
+    }
+    final prevStatus = user.status;
+
+    try {
+      final updatedStatus = UserStatusEntity(
+        statusText: body.statusText,
+        emojiName: body.emojiName,
+        emojiCode: body.emojiCode,
+      );
+
+      emit(state.copyWith(user: user.copyWith(status: updatedStatus)));
+      await _updateMyStatusUseCase.call(body);
     } catch (e) {
       inspect(e);
+      emit(state.copyWith(user: user.copyWith(status: prevStatus)));
+      rethrow;
     }
   }
 

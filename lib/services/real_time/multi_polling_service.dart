@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:genesis_workspace/domain/organizations/entities/organization_entity.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/get_all_organizations_use_case.dart';
+import 'package:genesis_workspace/domain/organizations/usecases/update_organization_emoji_server_url_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_organization_meeting_url_use_case.dart';
 import 'package:genesis_workspace/domain/organizations/usecases/update_stream_settings_use_case.dart';
 import 'package:genesis_workspace/domain/real_time_events/entities/connection_entity.dart';
@@ -31,6 +32,7 @@ class MultiPollingService {
   final GetCsrftokenUseCase _getCsrftokenUseCase;
   final GetSessionIdUseCase _getSessionIdUseCase;
   final RealTimeConnectionFactory _connectionFactory;
+  final UpdateOrganizationEmojiServerUrlUseCase _updateOrganizationEmojiServerUrlUseCase;
   final UpdateOrganizationMeetingUrlUseCase _updateOrganizationMeetingUrlUseCase;
   final UpdateStreamSettingsUseCase _updateStreamSettingsUseCase;
 
@@ -40,6 +42,7 @@ class MultiPollingService {
     this._getCsrftokenUseCase,
     this._getSessionIdUseCase,
     this._connectionFactory,
+    this._updateOrganizationEmojiServerUrlUseCase,
     this._updateOrganizationMeetingUrlUseCase,
     this._updateStreamSettingsUseCase,
   );
@@ -116,7 +119,7 @@ class MultiPollingService {
   }
 
   Future<void> addConnection(int organizationId, String baseUrl) async {
-    if (_activeConnections.containsKey(organizationId) && (_activeConnections[organizationId]?.isActive ?? false)) {
+    if (_activeConnections[organizationId]?.isActive ?? false) {
       return;
     }
 
@@ -140,6 +143,7 @@ class MultiPollingService {
       registerQueueUseCase: registerQueueUseCase,
       getEventsByQueueIdUseCase: getEventsByQueueIdUseCase,
       deleteQueueUseCase: deleteQueueUseCase,
+      updateOrganizationEmojiServerUrlUseCase: _updateOrganizationEmojiServerUrlUseCase,
       updateOrganizationMeetingUrlUseCase: _updateOrganizationMeetingUrlUseCase,
       updateStreamSettingsUseCase: _updateStreamSettingsUseCase,
     );
