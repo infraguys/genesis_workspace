@@ -43,7 +43,7 @@ class MessageHtml extends StatelessWidget {
       }
 
       final uri = parseUrlWithBase(rawHref);
-      if (uri == null || !isAllowedUrlScheme(uri)) {
+      if (uri == null || !isAllowedUrlScheme(uri, allowContactSchemes: false)) {
         continue;
       }
 
