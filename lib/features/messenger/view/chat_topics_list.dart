@@ -11,12 +11,14 @@ class ChatTopicsList extends StatefulWidget {
     this.selectedChat,
     required this.listPadding,
     required this.onDismissed,
+    this.onUpdate,
   });
 
   final bool isPending;
   final ChatEntity? selectedChat;
   final double listPadding;
   final VoidCallback onDismissed;
+  final ValueChanged<DismissUpdateDetails>? onUpdate;
 
   @override
   State<ChatTopicsList> createState() => _ChatTopicsListState();
@@ -52,6 +54,7 @@ class _ChatTopicsListState extends State<ChatTopicsList> {
       key: const ValueKey('topics_list'),
       direction: DismissDirection.startToEnd,
       onDismissed: (_) => widget.onDismissed(),
+      onUpdate: widget.onUpdate,
       child: SizedBox(
         width: sizeOf.width - 70,
         height: sizeOf.height,
