@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/features/theme/bloc/theme_cubit.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
 class ThemeSettingsView extends StatelessWidget {
   const ThemeSettingsView({super.key});
@@ -9,12 +10,13 @@ class ThemeSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = context.t;
     final isMobile = currentSize(context) <= .tablet;
 
     return Scaffold(
       backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Theme Settings'),
+        title: Text(t.settings.themeSettings),
       ),
       body: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
@@ -24,13 +26,13 @@ class ThemeSettingsView extends StatelessWidget {
             children: [
               ListTile(
                 title: Text(
-                  'Theme',
+                  t.settings.theme,
                   style: theme.textTheme.titleMedium,
                 ),
               ),
               SwitchListTile(
                 secondary: Icon(isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined),
-                title: Text(isDark ? 'Dark mode' : 'Light mode'),
+                title: Text(isDark ? t.settings.darkMode : t.settings.lightMode),
                 value: isDark,
                 onChanged: (value) {
                   cubit.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
@@ -39,7 +41,7 @@ class ThemeSettingsView extends StatelessWidget {
               const Divider(),
               ListTile(
                 title: Text(
-                  'Palette',
+                  t.settings.palette,
                   style: theme.textTheme.titleMedium,
                 ),
               ),

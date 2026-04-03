@@ -74,7 +74,11 @@
     "chat_sorting_title": "Настройки сортировки чатов",
     "chat_sorting_prioritize_directs": "Показывать личные непрочитанные чаты выше других непрочитанных чатов",
     "chat_sorting_prioritize_unmuted": "Показывать непрочитанные незаглушенные каналы выше заглушенных непрочитанных",
-    "theme_settings": "Настройки темы"
+    "theme_settings": "Настройки темы",
+    "theme": "Тема",
+    "dark_mode": "Темный режим",
+    "light_mode": "Светлый режим",
+    "palette": "Палитра"
   },
   "date_labels": {
     "today": "Сегодня",
