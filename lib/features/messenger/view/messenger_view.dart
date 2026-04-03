@@ -493,40 +493,50 @@ class _MessengerViewState extends State<MessengerView>
                                   children: [
                                     NotificationListener<UserScrollNotification>(
                                       onNotification: _onUserScroll,
-                                      child: PinnedChatsSection(
-                                        visibleChats: visibleChats,
-                                        pinnedMeta: state.pinnedChats,
-                                        listPadding: listPadding,
-                                        chatsController: _chatsController,
-                                        selectedChatId: state.selectedChat?.id,
-                                        showTopics: _showTopics,
-                                        isEditPinning: _isEditPinning,
-                                        folderUuid: state.selectedFolderIndex < state.folders.length
-                                            ? state.folders[state.selectedFolderIndex].uuid
-                                            : null,
-                                        onChatTap: (chat) async {
-                                          if (isTabletOrSmaller) {
-                                            if (chat.type == ChatType.channel) {
-                                              setState(() {
-                                                _showTopics = true;
-                                              });
-                                            } else {
-                                              openChat(
-                                                context,
-                                                chatId: chat.id,
-                                                membersIds: chat.dmIds?.toSet() ?? {},
-                                                messageId: chat.firstUnreadMessageId,
-                                              );
-                                            }
-                                          } else {
-                                            context.read<MessengerCubit>().selectChat(chat);
+                                      child: PopScope(
+                                        canPop: _showTopics == false,
+                                        onPopInvokedWithResult: (didPop, result) {
+                                          if (_showTopics) {
+                                            setState(() {
+                                              _showTopics = false;
+                                            });
                                           }
                                         },
-                                        onPinningSaved: (chats) {
-                                          setState(() {
-                                            _updatedPinnedChats = chats;
-                                          });
-                                        },
+                                        child: PinnedChatsSection(
+                                          visibleChats: visibleChats,
+                                          pinnedMeta: state.pinnedChats,
+                                          listPadding: listPadding,
+                                          chatsController: _chatsController,
+                                          selectedChatId: state.selectedChat?.id,
+                                          showTopics: _showTopics,
+                                          isEditPinning: _isEditPinning,
+                                          folderUuid: state.selectedFolderIndex < state.folders.length
+                                              ? state.folders[state.selectedFolderIndex].uuid
+                                              : null,
+                                          onChatTap: (chat) async {
+                                            if (isTabletOrSmaller) {
+                                              if (chat.type == ChatType.channel) {
+                                                setState(() {
+                                                  _showTopics = true;
+                                                });
+                                              } else {
+                                                openChat(
+                                                  context,
+                                                  chatId: chat.id,
+                                                  membersIds: chat.dmIds?.toSet() ?? {},
+                                                  messageId: chat.firstUnreadMessageId,
+                                                );
+                                              }
+                                            } else {
+                                              context.read<MessengerCubit>().selectChat(chat);
+                                            }
+                                          },
+                                          onPinningSaved: (chats) {
+                                            setState(() {
+                                              _updatedPinnedChats = chats;
+                                            });
+                                          },
+                                        ),
                                       ),
                                     ),
                                     Positioned(

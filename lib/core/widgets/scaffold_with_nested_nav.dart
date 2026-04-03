@@ -149,6 +149,7 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       drawer: AppMobileDrawer(),
+      drawerEnableOpenDragGesture: false,
       bottomNavigationBar: isTabletOrSmaller
           ? MediaQuery.removeViewPadding(
               context: context,
