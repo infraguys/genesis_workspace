@@ -1,18 +1,32 @@
 // auth_interceptor.dart
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/config/constants.dart';
-
-import '../../services/token_storage/token_storage.dart';
+import 'package:genesis_workspace/services/token_storage/token_storage.dart';
 
 class SessionIdInterceptor extends Interceptor {
   final TokenStorage _tokenStorage;
   SessionIdInterceptor(this._tokenStorage);
 
+  String _resolveStorageBaseUrl(RequestOptions options) {
+    final String candidate = options.baseUrl.trim();
+    if (candidate.isNotEmpty && !candidate.contains('placeholder.local')) {
+      try {
+        final Uri uri = Uri.parse(candidate);
+        if (uri.hasScheme && uri.host.isNotEmpty) {
+          final String portPart = uri.hasPort ? ':${uri.port}' : '';
+          return '${uri.scheme}://${uri.host}$portPart';
+        }
+      } catch (_) {}
+    }
+    return AppConstants.baseUrl.trim();
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
       final bool skipBaseUrlRewrite = options.extra['skipBaseUrlInterceptor'] == true;
-      final sessionId = await _tokenStorage.getSessionId(AppConstants.baseUrl); // __Host-sessionid
+      final String storageBaseUrl = _resolveStorageBaseUrl(options);
+      final sessionId = await _tokenStorage.getSessionId(storageBaseUrl); // __Host-sessionid
 
       // Текущий Cookie (если уже что-то есть — не перетираем)
       final existingCookie = (options.headers['Cookie'] as String?)?.trim();
@@ -27,7 +41,7 @@ class SessionIdInterceptor extends Interceptor {
         cookieParts.add('__Host-sessionid=$sessionId');
         if (!skipBaseUrlRewrite && !options.baseUrl.contains('/workspace/')) {
           // Referer полезен и для GET сессии
-          options.baseUrl = '${AppConstants.baseUrl}/json';
+          options.baseUrl = '$storageBaseUrl/json';
         }
       }
       if (cookieParts.isNotEmpty) {

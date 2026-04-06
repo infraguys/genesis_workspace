@@ -223,7 +223,7 @@ class MultiPollingService {
     final String? csrfToken = await _getCsrftokenUseCase.call(baseUrl);
     final String? sessionId = await _getSessionIdUseCase.call(baseUrl);
 
-    final bool hasToken = token != null && token.trim().isNotEmpty;
+    final bool hasToken = token != null && token.trim().isNotEmpty && token.contains(':');
     final bool hasSessionCookies =
         (csrfToken != null && csrfToken.isNotEmpty) && (sessionId != null && sessionId.isNotEmpty);
     return hasToken || hasSessionCookies;

@@ -116,7 +116,7 @@ class AuthCubit extends Cubit<AuthState> {
     final String? csrfToken = await _getCsrftokenUseCase.call(baseUrl);
 
     final bool hasCredentials =
-        (token != null && token.isNotEmpty) ||
+        (token != null && token.trim().isNotEmpty && token.contains(':')) ||
         ((sessionId != null && sessionId.isNotEmpty) && (csrfToken != null && csrfToken.isNotEmpty));
 
     final int? selectedOrganizationId = _sharedPreferences.getInt(
@@ -283,21 +283,29 @@ class AuthCubit extends Cubit<AuthState> {
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       } else {
         final cookies = response.headers['set-cookie'];
-        if (cookies != null) {
-          String? csrfToken;
-          String? sessionId;
-
-          for (final cookie in cookies) {
-            if (cookie.startsWith('__Host-csrftoken')) {
-              csrfToken = RegExp(r'__Host-csrftoken=([^;]+)').firstMatch(cookie)?.group(1);
-            } else if (cookie.startsWith('__Host-sessionid')) {
-              sessionId = RegExp(r'__Host-sessionid=([^;]+)').firstMatch(cookie)?.group(1);
-            }
-          }
-
-          await _saveCsrftokenUseCase.call(baseUrl: _baseUrl, csrftoken: csrfToken ?? '');
-          await _saveSessionIdUseCase.call(baseUrl: _baseUrl, sessionId: sessionId ?? '');
+        if (cookies == null || cookies.isEmpty) {
+          throw const FormatException('No auth cookies returned from login endpoint.');
         }
+
+        String? csrfToken;
+        String? sessionId;
+
+        for (final cookie in cookies) {
+          if (cookie.startsWith('__Host-csrftoken')) {
+            csrfToken = RegExp(r'__Host-csrftoken=([^;]+)').firstMatch(cookie)?.group(1);
+          } else if (cookie.startsWith('__Host-sessionid')) {
+            sessionId = RegExp(r'__Host-sessionid=([^;]+)').firstMatch(cookie)?.group(1);
+          }
+        }
+
+        final bool hasCookieCredentials =
+            csrfToken != null && csrfToken.isNotEmpty && sessionId != null && sessionId.isNotEmpty;
+        if (!hasCookieCredentials) {
+          throw const FormatException('Auth cookies are incomplete (__Host-csrftoken/__Host-sessionid).');
+        }
+
+        await _saveCsrftokenUseCase.call(baseUrl: _baseUrl, csrftoken: csrfToken);
+        await _saveSessionIdUseCase.call(baseUrl: _baseUrl, sessionId: sessionId);
         await _ensureRealTimeConnectionForOrganization(organization);
         emit(state.copyWith(isAuthorized: true, errorMessage: null));
       }
@@ -412,16 +420,18 @@ class AuthCubit extends Cubit<AuthState> {
       AppConstants.setSelectedOrganizationId(organization.id);
       emit(state.copyWith(hasBaseUrl: true, selectedOrganization: organization));
 
-      String? token;
-
-      for (OrganizationEntity organization in allOrganizations) {
-        if (token == null) {
-          final tokenResponse = await _getTokenUseCase.call(organization.baseUrl);
-          token = tokenResponse;
+      bool hasAnyBasicToken = false;
+      for (final OrganizationEntity organization in allOrganizations) {
+        final String? tokenResponse = await _getTokenUseCase.call(organization.baseUrl);
+        final bool hasValidBasicToken =
+            tokenResponse != null && tokenResponse.trim().isNotEmpty && tokenResponse.contains(':');
+        if (hasValidBasicToken) {
+          hasAnyBasicToken = true;
+          break;
         }
       }
 
-      if (token != null) {
+      if (hasAnyBasicToken) {
         isAuthorized = true;
         emit(state.copyWith(isPending: false, isAuthorized: isAuthorized, errorMessage: null));
         return;
@@ -435,7 +445,7 @@ class AuthCubit extends Cubit<AuthState> {
           final String? csrf = await _getCsrftokenUseCase.call(_baseUrl);
           final String? sessionId = await _getSessionIdUseCase.call(_baseUrl);
 
-          if (csrf != null && sessionId != null) {
+          if (csrf != null && csrf.isNotEmpty && sessionId != null && sessionId.isNotEmpty) {
             isAuthorized = true;
           }
           emit(state.copyWith(errorMessage: null));

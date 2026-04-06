@@ -9,10 +9,22 @@ class OrgTokenInterceptor extends Interceptor {
 
   OrgTokenInterceptor({required this.tokenStorage, required this.baseUrl});
 
+  String _storageBaseUrl() {
+    final String candidate = baseUrl.trim();
+    try {
+      final Uri uri = Uri.parse(candidate);
+      if (uri.hasScheme && uri.host.isNotEmpty) {
+        final String portPart = uri.hasPort ? ':${uri.port}' : '';
+        return '${uri.scheme}://${uri.host}$portPart';
+      }
+    } catch (_) {}
+    return candidate;
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final String? raw = await tokenStorage.getToken(baseUrl); // "email:api_key"
+      final String? raw = await tokenStorage.getToken(_storageBaseUrl()); // "email:api_key"
       if (raw != null && raw.contains(':')) {
         final String basic = base64Encode(utf8.encode(raw));
         options.headers['Authorization'] = 'Basic $basic';

@@ -7,6 +7,18 @@ class OrgSessionIdInterceptor extends Interceptor {
 
   OrgSessionIdInterceptor({required this.tokenStorage, required this.baseUrl});
 
+  String _storageBaseUrl() {
+    final String candidate = baseUrl.trim();
+    try {
+      final Uri uri = Uri.parse(candidate);
+      if (uri.hasScheme && uri.host.isNotEmpty) {
+        final String portPart = uri.hasPort ? ':${uri.port}' : '';
+        return '${uri.scheme}://${uri.host}$portPart';
+      }
+    } catch (_) {}
+    return candidate;
+  }
+
   String _normalizeCookie(String cookie) {
     final Set<String> seen = <String>{};
     final List<String> parts = cookie
@@ -26,7 +38,8 @@ class OrgSessionIdInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final String? sessionId = await tokenStorage.getSessionId(baseUrl);
+      final String scopedBaseUrl = _storageBaseUrl();
+      final String? sessionId = await tokenStorage.getSessionId(scopedBaseUrl);
 
       final String? existingCookie = (options.headers['Cookie'] as String?)?.trim();
       final List<String> cookieParts = <String>[];

@@ -7,10 +7,23 @@ class OrgCsrfCookieInterceptor extends Interceptor {
 
   OrgCsrfCookieInterceptor({required this.tokenStorage, required this.baseUrl});
 
+  String _storageBaseUrl() {
+    final String candidate = baseUrl.trim();
+    try {
+      final Uri uri = Uri.parse(candidate);
+      if (uri.hasScheme && uri.host.isNotEmpty) {
+        final String portPart = uri.hasPort ? ':${uri.port}' : '';
+        return '${uri.scheme}://${uri.host}$portPart';
+      }
+    } catch (_) {}
+    return candidate;
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final String? csrfToken = await tokenStorage.getCsrftoken(baseUrl);
+      final String scopedBaseUrl = _storageBaseUrl();
+      final String? csrfToken = await tokenStorage.getCsrftoken(scopedBaseUrl);
 
       final String? existingCookie = (options.headers['Cookie'] as String?)?.trim();
       final List<String> cookieParts = <String>[];
@@ -22,7 +35,7 @@ class OrgCsrfCookieInterceptor extends Interceptor {
       if (csrfToken != null && csrfToken.isNotEmpty) {
         cookieParts.add('__Host-csrftoken=$csrfToken');
         options.headers['X-CSRFToken'] = csrfToken;
-        options.headers['Referer'] = baseUrl;
+        options.headers['Referer'] = scopedBaseUrl;
       }
 
       if (cookieParts.isNotEmpty) {
