@@ -157,4 +157,15 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<void> addSubscribersToChannel(AddSubscribersToChannelDto body) async {
+    try {
+      final subscriptions = [body.toSubscription];
+      final response = await apiClient.addSubscribersToChannel(subscriptions, body.userIds);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

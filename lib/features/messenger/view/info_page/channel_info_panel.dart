@@ -174,7 +174,7 @@ class _ChannelMembersPage extends StatelessWidget {
                           context.t.group.members,
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
-                        // IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
+                        IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
                       ],
                     ),
                   ),
@@ -187,10 +187,10 @@ class _ChannelMembersPage extends StatelessWidget {
                             return AppProgressIndicator();
                           }
                           return ListView.separated(
-                            itemCount: state.users.length,
+                            itemCount: state.channelUsers.length,
                             separatorBuilder: (context, index) => SizedBox(height: 4),
                             itemBuilder: (context, index) {
-                              final user = state.users[index];
+                              final user = state.channelUsers[index];
                               return _MemberItem(
                                 user: user,
                                 onTap: () => onOpenMemberDetails(context, user),

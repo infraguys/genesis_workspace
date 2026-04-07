@@ -1,7 +1,8 @@
+import 'package:genesis_workspace/data/common/dto/exception_dto.dart';
 import 'package:genesis_workspace/data/users/datasources/users_remote_data_source.dart';
 import 'package:genesis_workspace/data/users/dto/subscriptions_response_dto.dart';
 import 'package:genesis_workspace/data/users/dto/users_dto.dart';
-import 'package:genesis_workspace/data/common/dto/exception_dto.dart';
+import 'package:genesis_workspace/domain/users/entities/add_subscribers_to_channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_members_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
@@ -164,6 +165,16 @@ class UsersRepositoryImpl implements UsersRepository {
     try {
       final response = await usersRemoteDataSource.getUserStatus(body.toDto());
       return response.toEntity();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> addSubscribersToChannel(AddSubscribersToChannelEntity body) async {
+    try {
+      final response = await usersRemoteDataSource.addSubscribersToChannel(body.toDto());
+      return response;
     } catch (e) {
       rethrow;
     }
