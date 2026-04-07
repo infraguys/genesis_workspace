@@ -8,6 +8,7 @@ import 'package:genesis_workspace/domain/common/entities/exception_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
+import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:go_router/go_router.dart';
 
 class AddSubscriberToChannelDialog extends StatefulWidget {
@@ -110,6 +111,7 @@ class _AddSubscriberToChannelDialogState extends State<AddSubscriberToChannelDia
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = theme.extension<TextColors>()!;
+    final t = context.t;
     final users = _availableUsers;
 
     return Dialog(
@@ -121,7 +123,7 @@ class _AddSubscriberToChannelDialogState extends State<AddSubscriberToChannelDia
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Добавить участников',
+                t.channel.addSubscribersDialog.title,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -135,7 +137,7 @@ class _AddSubscriberToChannelDialogState extends State<AddSubscriberToChannelDia
                   controller: _searchController,
                   decoration: InputDecoration(
                     isDense: true,
-                    hintText: 'Найти',
+                    hintText: t.channel.addSubscribersDialog.searchHint,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                     suffixIcon: Padding(
                       padding: const EdgeInsets.only(right: 4),
@@ -163,7 +165,7 @@ class _AddSubscriberToChannelDialogState extends State<AddSubscriberToChannelDia
                   child: users.isEmpty
                       ? Center(
                           child: Text(
-                            'Пользователи не найдены',
+                            t.channel.addSubscribersDialog.noUsersFound,
                             style: theme.textTheme.bodyMedium?.copyWith(color: textColors.text30),
                           ),
                         )
@@ -247,12 +249,14 @@ class _AddSubscriberToChannelDialogState extends State<AddSubscriberToChannelDia
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text('Добавить (${_selectedIds.length})'),
+                        : Text(
+                            t.channel.addSubscribersDialog.add(count: _selectedIds.length),
+                          ),
                   ),
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                    child: const Text('Отменить'),
+                    child: Text(t.general.cancel),
                   ),
                 ],
               ),

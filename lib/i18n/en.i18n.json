@@ -212,6 +212,12 @@
     "channelName": "Channel name",
     "muteChannel": "Mute channel",
     "unmuteChannel": "Unmute channel",
+    "add_subscribers_dialog": {
+      "title": "Add participants",
+      "search_hint": "Find",
+      "no_users_found": "No users found",
+      "add": "Add ({count})"
+    },
     "create_dialog": {
       "title": "New channel",
       "name_label": "Channel name",

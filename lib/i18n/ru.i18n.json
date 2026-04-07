@@ -220,6 +220,12 @@
     "channelName": "Название канала",
     "muteChannel": "Заглушить канал",
     "unmuteChannel": "Включить уведомления канала",
+    "add_subscribers_dialog": {
+      "title": "Добавить участников",
+      "search_hint": "Найти",
+      "no_users_found": "Пользователи не найдены",
+      "add": "Добавить ({count})"
+    },
     "create_dialog": {
       "title": "Новый канал",
       "name_label": "Название канала",
