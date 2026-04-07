@@ -175,6 +175,8 @@ class UsersRepositoryImpl implements UsersRepository {
     try {
       final response = await usersRemoteDataSource.addSubscribersToChannel(body.toDto());
       return response;
+    } on ServerExceptionDto catch (e) {
+      throw e.toEntity();
     } catch (e) {
       rethrow;
     }

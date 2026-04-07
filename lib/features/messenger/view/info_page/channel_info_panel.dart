@@ -10,6 +10,7 @@ import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/info_panel/info_panel_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/info_page/add_subscriber_to_channel_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 
@@ -81,10 +82,10 @@ class _ChannelMembersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColors = Theme.of(context).extension<TextColors>()!;
-    final isMobile = currentSize(context) <= .tablet;
+    final isTabletOrSmaller = currentSize(context) <= .tablet;
 
     return Scaffold(
-      backgroundColor: isMobile ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
+      backgroundColor: isTabletOrSmaller ? theme.scaffoldBackgroundColor : theme.colorScheme.surface,
       appBar: AppBar(
         title: Text(
           context.t.messengerView.channelInfo,
@@ -174,7 +175,27 @@ class _ChannelMembersPage extends StatelessWidget {
                           context.t.group.members,
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
-                        IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
+                        IconButton(
+                          onPressed: () async {
+                            final membersState = context.read<ChannelMembersInfoCubit>().state;
+                            final chatState = context.read<ChannelChatCubit>().state;
+                            final channel = chatState.channel;
+                            if (membersState is! ChannelMembersLoadedState || channel == null) {
+                              return;
+                            }
+                            await showDialog<bool>(
+                              context: context,
+                              useRootNavigator: true,
+                              builder: (_) => AddSubscriberToChannelDialog(
+                                streamName: channel.name,
+                                users: membersState.users,
+                                channelUsers: membersState.channelUsers,
+                                channelMembersInfoCubit: context.read<ChannelMembersInfoCubit>(),
+                              ),
+                            );
+                          },
+                          icon: Assets.icons.personAdd.svg(width: 25),
+                        ),
                       ],
                     ),
                   ),

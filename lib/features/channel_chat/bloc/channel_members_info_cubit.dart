@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:genesis_workspace/domain/users/entities/add_subscribers_to_channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/add_subscribers_to_channel_use_case.dart';
@@ -48,6 +49,34 @@ class ChannelMembersInfoCubit extends Cubit<ChannelMembersInfoState> {
       if (kDebugMode) {
         inspect(e);
       }
+    }
+  }
+
+  Future<void> addSubscribersToChannel({
+    required String streamName,
+    required List<int> userIds,
+  }) async {
+    final currentState = state;
+    try {
+      await _addSubscribersToChannelUseCase(
+        AddSubscribersToChannelEntity(
+          streamName: streamName,
+          userIds: userIds,
+        ),
+      );
+
+      if (currentState is ChannelMembersLoadedState) {
+        final updatedChannelUserIds = {
+          ...currentState.channelUsers.map((user) => user.userId),
+          ...userIds,
+        };
+        final updatedChannelUsers = currentState.users
+            .where((user) => updatedChannelUserIds.contains(user.userId))
+            .toList(growable: false);
+        emit(ChannelMembersLoadedState(users: currentState.users, channelUsers: updatedChannelUsers));
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }

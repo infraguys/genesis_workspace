@@ -162,8 +162,20 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   Future<void> addSubscribersToChannel(AddSubscribersToChannelDto body) async {
     try {
       final subscriptions = [body.toSubscription];
-      final response = await apiClient.addSubscribersToChannel(subscriptions, body.userIds);
+      final response = await apiClient.addSubscribersToChannel(
+        subscriptions: jsonEncode(subscriptions),
+        principals: body.principals,
+      );
       return response;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        throw ServerExceptionDto.fromJson(data);
+      }
+      if (data is Map) {
+        throw ServerExceptionDto.fromJson(Map<String, dynamic>.from(data));
+      }
+      rethrow;
     } catch (e) {
       rethrow;
     }
