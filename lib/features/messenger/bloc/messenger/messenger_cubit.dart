@@ -10,7 +10,6 @@ import 'package:genesis_workspace/core/config/constants.dart';
 import 'package:genesis_workspace/core/enums/chat_type.dart';
 import 'package:genesis_workspace/core/enums/folder_system_type.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
-import 'package:genesis_workspace/core/enums/subscription_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
@@ -1063,17 +1062,24 @@ class MessengerCubit extends Cubit<MessengerState> {
     );
   }
 
-  void _onSubscriptionEvents(SubscriptionEventEntity event) {
+  void _onSubscriptionEvents(SubscriptionEventEntity event) async {
     final int? organizationId = AppConstants.selectedOrganizationId;
     if (organizationId != event.organizationId) return;
-    if (event.op == SubscriptionOp.update && event.property == SubscriptionProperty.isMuted) {
-      List<ChatEntity> updatedChats = [...state.chats];
-      ChatEntity chat = updatedChats.firstWhere((chat) => chat.streamId == event.streamId);
-      final indexOfChat = updatedChats.indexOf(chat);
-      chat = chat.copyWith(isMuted: event.value.raw == true);
-      updatedChats[indexOfChat] = chat;
-      emit(state.copyWith(chats: updatedChats));
-      _sortChats();
+    if (event is SubscriptionUpdateEventEntity) {
+      if (event.property == SubscriptionProperty.isMuted) {
+        List<ChatEntity> updatedChats = [...state.chats];
+        ChatEntity chat = updatedChats.firstWhere((chat) => chat.streamId == event.streamId);
+        final indexOfChat = updatedChats.indexOf(chat);
+        chat = chat.copyWith(isMuted: event.value.raw == true);
+        updatedChats[indexOfChat] = chat;
+        emit(state.copyWith(chats: updatedChats));
+        _sortChats();
+      }
+    }
+    if (event is SubscriptionAddEventEntity) {
+      event.subscriptions.forEach((subscription) async {
+        await addChannelById(subscription.streamId);
+      });
     }
   }
 
