@@ -1077,9 +1077,9 @@ class MessengerCubit extends Cubit<MessengerState> {
       }
     }
     if (event is SubscriptionAddEventEntity) {
-      event.subscriptions.forEach((subscription) async {
+      for (final subscription in event.subscriptions) {
         await addChannelById(subscription.streamId);
-      });
+      }
     }
   }
 
