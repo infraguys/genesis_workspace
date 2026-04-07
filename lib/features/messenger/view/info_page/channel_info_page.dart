@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/appbar_container.dart';
 import 'package:genesis_workspace/core/widgets/profile_info_tile.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
@@ -22,6 +24,8 @@ class ChannelInfoPage extends StatefulWidget {
 }
 
 class _ChannelInfoPageState extends State<ChannelInfoPage> {
+  bool _isLoadingDialogUsers = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +45,56 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
       },
       extra: user,
     );
+  }
+
+  Future<void> _onAddSubscriberPressed() async {
+    if (_isLoadingDialogUsers) {
+      return;
+    }
+
+    final membersState = context.read<ChannelMembersInfoCubit>().state;
+    final chatState = context.read<ChannelChatCubit>().state;
+    final channel = chatState.channel;
+    if (membersState is! ChannelMembersLoadedState || channel == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingDialogUsers = true;
+    });
+
+    try {
+      final allUsers = await context.read<ChannelMembersInfoCubit>().getAllUsersForDialog();
+      if (mounted) {
+        setState(() {
+          _isLoadingDialogUsers = false;
+        });
+      }
+      if (!mounted) {
+        return;
+      }
+      await showDialog<bool>(
+        context: context,
+        useRootNavigator: true,
+        builder: (_) => AddSubscriberToChannelDialog(
+          streamName: channel.name,
+          users: allUsers,
+          channelUsers: membersState.channelUsers,
+          channelMembersInfoCubit: context.read<ChannelMembersInfoCubit>(),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      showErrorSnackBar(context, exception: e);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingDialogUsers = false;
+        });
+      }
+    }
   }
 
   @override
@@ -114,25 +168,10 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                       IconButton(
-                        onPressed: () async {
-                          final membersState = context.read<ChannelMembersInfoCubit>().state;
-                          final chatState = context.read<ChannelChatCubit>().state;
-                          final channel = chatState.channel;
-                          if (membersState is! ChannelMembersLoadedState || channel == null) {
-                            return;
-                          }
-                          await showDialog<bool>(
-                            context: context,
-                            useRootNavigator: true,
-                            builder: (_) => AddSubscriberToChannelDialog(
-                              streamName: channel.name,
-                              users: membersState.users,
-                              channelUsers: membersState.channelUsers,
-                              channelMembersInfoCubit: context.read<ChannelMembersInfoCubit>(),
-                            ),
-                          );
-                        },
-                        icon: Assets.icons.personAdd.svg(width: 25),
+                        onPressed: _isLoadingDialogUsers ? null : _onAddSubscriberPressed,
+                        icon: _isLoadingDialogUsers
+                            ? CupertinoActivityIndicator()
+                            : Assets.icons.personAdd.svg(width: 25),
                       ),
                     ],
                   ),
