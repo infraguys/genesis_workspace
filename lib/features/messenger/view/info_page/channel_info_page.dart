@@ -129,11 +129,6 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                               users: membersState.users,
                               channelUsers: membersState.channelUsers,
                               channelMembersInfoCubit: context.read<ChannelMembersInfoCubit>(),
-                              // onAdded: () async {
-                              //   await context.read<ChannelChatCubit>().getChannel(
-                              //     streamId: channel.streamId,
-                              //   );
-                              // },
                             ),
                           );
                         },
