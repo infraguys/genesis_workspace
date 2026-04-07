@@ -4,7 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/domain/users/entities/add_subscribers_to_channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/users_entity.dart';
+import 'package:genesis_workspace/domain/users/entities/user_entity.dart';
 import 'package:genesis_workspace/domain/users/usecases/add_subscribers_to_channel_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart';
 import 'package:genesis_workspace/domain/users/usecases/get_users_use_case.dart';
@@ -29,22 +31,18 @@ class ChannelMembersInfoCubit extends Cubit<ChannelMembersInfoState> {
 
   Future<void> getUsers(Set<int> ids) async {
     emit(ChannelMembersInfoLoadingState());
+    if (ids.isEmpty) {
+      emit(ChannelMembersLoadedState(users: const [], channelUsers: const []));
+      return;
+    }
+
     try {
-      final allUsers = await _getUsersUseCase(UsersRequestEntity());
+      final users = await _getUsersUseCase(
+        UsersRequestEntity(userIds: ids.toList(growable: false)),
+      );
       final response = await _getAllPresencesUseCase();
-      final dmUsers = allUsers.map((user) {
-        if (response.presences.containsKey(user.email)) {
-          final presence = response.presences[user.email]!;
-          final dmUser = user.toDmUser();
-          return dmUser.copyWith(
-            presenceStatus: presence.aggregated!.status,
-            presenceTimestamp: presence.aggregated!.timestamp,
-          );
-        }
-        return user.toDmUser();
-      });
-      final channelUsers = dmUsers.where((user) => ids.contains(user.userId));
-      emit(ChannelMembersLoadedState(users: dmUsers.toList(), channelUsers: channelUsers.toList()));
+      final dmUsers = _mapUsersWithPresence(users: users, presences: response);
+      emit(ChannelMembersLoadedState(users: dmUsers, channelUsers: dmUsers));
     } catch (e) {
       if (kDebugMode) {
         inspect(e);
@@ -52,10 +50,20 @@ class ChannelMembersInfoCubit extends Cubit<ChannelMembersInfoState> {
     }
   }
 
+  Future<List<DmUserEntity>> getAllUsersForDialog() async {
+    final users = await _getUsersUseCase(UsersRequestEntity());
+    final response = await _getAllPresencesUseCase();
+    return _mapUsersWithPresence(users: users, presences: response);
+  }
+
   Future<void> addSubscribersToChannel({
     required String streamName,
     required List<int> userIds,
   }) async {
+    if (userIds.isEmpty) {
+      return;
+    }
+
     final currentState = state;
     try {
       await _addSubscribersToChannelUseCase(
@@ -66,17 +74,33 @@ class ChannelMembersInfoCubit extends Cubit<ChannelMembersInfoState> {
       );
 
       if (currentState is ChannelMembersLoadedState) {
-        final updatedChannelUserIds = {
+        final updatedIds = <int>{
           ...currentState.channelUsers.map((user) => user.userId),
           ...userIds,
         };
-        final updatedChannelUsers = currentState.users
-            .where((user) => updatedChannelUserIds.contains(user.userId))
-            .toList(growable: false);
-        emit(ChannelMembersLoadedState(users: currentState.users, channelUsers: updatedChannelUsers));
+        await getUsers(updatedIds);
       }
     } catch (e) {
       rethrow;
     }
+  }
+
+  List<DmUserEntity> _mapUsersWithPresence({
+    required List<UserEntity> users,
+    required PresencesResponseEntity presences,
+  }) {
+    return users
+        .map((user) {
+          if (presences.presences.containsKey(user.email)) {
+            final presence = presences.presences[user.email]!;
+            final dmUser = user.toDmUser();
+            return dmUser.copyWith(
+              presenceStatus: presence.aggregated!.status,
+              presenceTimestamp: presence.aggregated!.timestamp,
+            );
+          }
+          return user.toDmUser();
+        })
+        .toList(growable: false);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:genesis_workspace/core/config/colors.dart';
@@ -5,6 +6,7 @@ import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
 import 'package:genesis_workspace/core/widgets/app_progress_indicator.dart';
 import 'package:genesis_workspace/core/widgets/profile_info_tile.dart';
+import 'package:genesis_workspace/core/widgets/snackbar.dart';
 import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
@@ -69,7 +71,7 @@ class _ChannelInfoPanelState extends State<ChannelInfoPanel> {
   }
 }
 
-class _ChannelMembersPage extends StatelessWidget {
+class _ChannelMembersPage extends StatefulWidget {
   const _ChannelMembersPage({
     required this.onClose,
     required this.onOpenMemberDetails,
@@ -77,6 +79,63 @@ class _ChannelMembersPage extends StatelessWidget {
 
   final VoidCallback onClose;
   final void Function(BuildContext context, DmUserEntity user) onOpenMemberDetails;
+
+  @override
+  State<_ChannelMembersPage> createState() => _ChannelMembersPageState();
+}
+
+class _ChannelMembersPageState extends State<_ChannelMembersPage> {
+  bool _isLoadingDialogUsers = false;
+
+  Future<void> _onAddSubscriberPressed() async {
+    if (_isLoadingDialogUsers) {
+      return;
+    }
+
+    final membersState = context.read<ChannelMembersInfoCubit>().state;
+    final chatState = context.read<ChannelChatCubit>().state;
+    final channel = chatState.channel;
+    if (membersState is! ChannelMembersLoadedState || channel == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingDialogUsers = true;
+    });
+
+    try {
+      final allUsers = await context.read<ChannelMembersInfoCubit>().getAllUsersForDialog();
+      if (mounted) {
+        setState(() {
+          _isLoadingDialogUsers = false;
+        });
+      }
+      if (!mounted) {
+        return;
+      }
+      await showDialog<bool>(
+        context: context,
+        useRootNavigator: true,
+        builder: (_) => AddSubscriberToChannelDialog(
+          streamName: channel.name,
+          users: allUsers,
+          channelUsers: membersState.channelUsers,
+          channelMembersInfoCubit: context.read<ChannelMembersInfoCubit>(),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      showErrorSnackBar(context, exception: e);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingDialogUsers = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +152,7 @@ class _ChannelMembersPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: onClose,
+            onPressed: widget.onClose,
             icon: Assets.icons.close.svg(),
           ),
         ],
@@ -176,25 +235,10 @@ class _ChannelMembersPage extends StatelessWidget {
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
                         IconButton(
-                          onPressed: () async {
-                            final membersState = context.read<ChannelMembersInfoCubit>().state;
-                            final chatState = context.read<ChannelChatCubit>().state;
-                            final channel = chatState.channel;
-                            if (membersState is! ChannelMembersLoadedState || channel == null) {
-                              return;
-                            }
-                            await showDialog<bool>(
-                              context: context,
-                              useRootNavigator: true,
-                              builder: (_) => AddSubscriberToChannelDialog(
-                                streamName: channel.name,
-                                users: membersState.users,
-                                channelUsers: membersState.channelUsers,
-                                channelMembersInfoCubit: context.read<ChannelMembersInfoCubit>(),
-                              ),
-                            );
-                          },
-                          icon: Assets.icons.personAdd.svg(width: 25),
+                          onPressed: _isLoadingDialogUsers ? null : _onAddSubscriberPressed,
+                          icon: _isLoadingDialogUsers
+                              ? CupertinoActivityIndicator()
+                              : Assets.icons.personAdd.svg(width: 25),
                         ),
                       ],
                     ),
@@ -214,7 +258,7 @@ class _ChannelMembersPage extends StatelessWidget {
                               final user = state.channelUsers[index];
                               return _MemberItem(
                                 user: user,
-                                onTap: () => onOpenMemberDetails(context, user),
+                                onTap: () => widget.onOpenMemberDetails(context, user),
                               );
                             },
                           );
