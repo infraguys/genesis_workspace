@@ -8,4 +8,5 @@ class AddSubscribersToChannelDto {
   });
 
   Map<String, String> get toSubscription => {"name": streamName};
+  String get principals => '[${userIds.join(',')}]';
 }

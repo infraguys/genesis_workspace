@@ -60,10 +60,10 @@ abstract class UsersApiClient {
 
   @FormUrlEncoded()
   @POST('/users/me/subscriptions')
-  Future<void> addSubscribersToChannel(
-    @Field('subscriptions') List<Map<String, String>> subscriptions,
-    @Field('principals') List<int> principals,
-  );
+  Future<void> addSubscribersToChannel({
+    @Field('subscriptions') required String subscriptions,
+    @Field('principals') required String principals,
+  });
 
   @GET('/users/me/{stream_id}/topics')
   Future<TopicsResponseDto> getChannelTopics(@Path('stream_id') int streamId);

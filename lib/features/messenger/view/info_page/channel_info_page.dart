@@ -8,6 +8,7 @@ import 'package:genesis_workspace/core/widgets/user_avatar.dart';
 import 'package:genesis_workspace/domain/users/entities/dm_user_entity.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.dart';
 import 'package:genesis_workspace/features/channel_chat/bloc/channel_members_info_cubit.dart';
+import 'package:genesis_workspace/features/messenger/view/info_page/add_subscriber_to_channel_dialog.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
 import 'package:genesis_workspace/navigation/router.dart';
@@ -112,7 +113,32 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                         context.t.group.members,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
-                      IconButton(onPressed: () {}, icon: Assets.icons.personAdd.svg(width: 25)),
+                      IconButton(
+                        onPressed: () async {
+                          final membersState = context.read<ChannelMembersInfoCubit>().state;
+                          final chatState = context.read<ChannelChatCubit>().state;
+                          final channel = chatState.channel;
+                          if (membersState is! ChannelMembersLoadedState || channel == null) {
+                            return;
+                          }
+                          await showDialog<bool>(
+                            context: context,
+                            useRootNavigator: true,
+                            builder: (_) => AddSubscriberToChannelDialog(
+                              streamName: channel.name,
+                              users: membersState.users,
+                              channelUsers: membersState.channelUsers,
+                              channelMembersInfoCubit: context.read<ChannelMembersInfoCubit>(),
+                              // onAdded: () async {
+                              //   await context.read<ChannelChatCubit>().getChannel(
+                              //     streamId: channel.streamId,
+                              //   );
+                              // },
+                            ),
+                          );
+                        },
+                        icon: Assets.icons.personAdd.svg(width: 25),
+                      ),
                     ],
                   ),
                 ),
@@ -126,10 +152,10 @@ class _ChannelInfoPageState extends State<ChannelInfoPage> {
                           return Center(child: CircularProgressIndicator());
                         }
                         return ListView.separated(
-                          itemCount: state.users.length,
+                          itemCount: state.channelUsers.length,
                           separatorBuilder: (context, index) => SizedBox(height: 4),
                           itemBuilder: (context, index) {
-                            final user = state.users[index];
+                            final user = state.channelUsers[index];
                             return _MemberItem(
                               user: user,
                               onTap: () => _openMemberDetails(user),
