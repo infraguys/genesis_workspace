@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 import 'package:genesis_workspace/core/dependency_injection/di.dart';
 import 'package:genesis_workspace/data/common/dto/exception_dto.dart';
 import 'package:genesis_workspace/data/users/api/users_api_client.dart';
+import 'package:genesis_workspace/data/users/dto/add_subscribers_to_channel_dto.dart';
 import 'package:genesis_workspace/data/users/dto/channel_by_id_dto.dart';
 import 'package:genesis_workspace/data/users/dto/channel_members_dto.dart';
 import 'package:genesis_workspace/data/users/dto/own_user_response_dto.dart';
@@ -40,4 +42,5 @@ abstract class UsersRemoteDataSource {
   );
   Future<void> updateMyStatus(UpdateMyStatusRequestDto body);
   Future<UserStatusDto> getUserStatus(UserStatusRequestDto body);
+  Future<void> addSubscribersToChannel(AddSubscribersToChannelDto body);
 }

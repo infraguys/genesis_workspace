@@ -1,3 +1,4 @@
+import 'package:genesis_workspace/domain/users/entities/add_subscribers_to_channel_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_by_id_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/channel_members_entity.dart';
 import 'package:genesis_workspace/domain/users/entities/presences_response_entity.dart';
@@ -30,4 +31,5 @@ abstract class UsersRepository {
   );
   Future<void> updateMyStatus(UpdateMyStatusRequestEntity body);
   Future<UserStatusEntity> getUserStatus(UserStatusRequestEntity body);
+  Future<void> addSubscribersToChannel(AddSubscribersToChannelEntity body);
 }

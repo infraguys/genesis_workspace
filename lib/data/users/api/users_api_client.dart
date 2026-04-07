@@ -58,6 +58,13 @@ abstract class UsersApiClient {
     @Query('include_subscribers') bool includeSubscribers,
   );
 
+  @FormUrlEncoded()
+  @POST('/users/me/subscriptions')
+  Future<void> addSubscribersToChannel(
+    @Field('subscriptions') List<Map<String, String>> subscriptions,
+    @Field('principals') List<int> principals,
+  );
+
   @GET('/users/me/{stream_id}/topics')
   Future<TopicsResponseDto> getChannelTopics(@Path('stream_id') int streamId);
 

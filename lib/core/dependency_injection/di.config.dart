@@ -202,6 +202,8 @@ import 'package:genesis_workspace/domain/users/repositories/users_repository.dar
     as _i125;
 import 'package:genesis_workspace/domain/users/usecases/add_recent_dm_use_case.dart'
     as _i812;
+import 'package:genesis_workspace/domain/users/usecases/add_subscribers_to_channel_use_case.dart'
+    as _i747;
 import 'package:genesis_workspace/domain/users/usecases/get_all_presences_use_case.dart'
     as _i837;
 import 'package:genesis_workspace/domain/users/usecases/get_channel_by_id_use_case.dart'
@@ -566,6 +568,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i688.UpdateMyStatusUseCase>(
       () => _i688.UpdateMyStatusUseCase(gh<_i125.UsersRepository>()),
     );
+    gh.factory<_i747.AddSubscribersToChannelUseCase>(
+      () => _i747.AddSubscribersToChannelUseCase(gh<_i125.UsersRepository>()),
+    );
     gh.factory<_i837.GetAllPresencesUseCase>(
       () => _i837.GetAllPresencesUseCase(gh<_i125.UsersRepository>()),
     );
@@ -691,6 +696,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i325.ChannelMembersInfoCubit(
         getUsersUseCase: gh<_i194.GetUsersUseCase>(),
         getAllPresenceUseCase: gh<_i837.GetAllPresencesUseCase>(),
+        addSubscribersToChannelUseCase:
+            gh<_i747.AddSubscribersToChannelUseCase>(),
       ),
     );
     gh.factory<_i627.DraftsCubit>(
