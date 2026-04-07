@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:genesis_workspace/core/enums/message_flag.dart';
 import 'package:genesis_workspace/core/enums/message_type.dart';
-import 'package:genesis_workspace/core/enums/subscription_op.dart';
 import 'package:genesis_workspace/core/enums/update_message_flags_op.dart';
 import 'package:genesis_workspace/data/messages/dto/narrow_operator.dart';
 import 'package:genesis_workspace/data/users/dto/update_subscription_settings_dto.dart';
@@ -282,21 +281,23 @@ class ChannelsCubit extends Cubit<ChannelsState> {
   }
 
   void _onSubscriptionEvents(SubscriptionEventEntity event) {
-    List<ChannelEntity> channels = [...state.channels];
-    ChannelEntity channel = channels.firstWhere(
-      (channel) => channel.streamId == event.streamId,
-      orElse: ChannelEntity.fake,
-    );
-    final int indexOfChannel = channels.indexOf(channel);
-    if (event.op == SubscriptionOp.update && event.property == SubscriptionProperty.isMuted) {
-      if (event.value.raw == true) {
-        channel = channel.copyWith(isMuted: true);
-      } else {
-        channel = channel.copyWith(isMuted: false);
+    if (event is SubscriptionUpdateEventEntity) {
+      List<ChannelEntity> channels = [...state.channels];
+      ChannelEntity channel = channels.firstWhere(
+        (channel) => channel.streamId == event.streamId,
+        orElse: ChannelEntity.fake,
+      );
+      final int indexOfChannel = channels.indexOf(channel);
+      if (event.property == SubscriptionProperty.isMuted) {
+        if (event.value.raw == true) {
+          channel = channel.copyWith(isMuted: true);
+        } else {
+          channel = channel.copyWith(isMuted: false);
+        }
+        channels[indexOfChannel] = channel;
+        emit(state.copyWith(channels: channels));
+        _sortChannels();
       }
-      channels[indexOfChannel] = channel;
-      emit(state.copyWith(channels: channels));
-      _sortChannels();
     }
   }
 

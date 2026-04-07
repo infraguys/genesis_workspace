@@ -112,17 +112,18 @@ sealed class SubscriptionValue {
 
   /// Парсит значение из JSON-поля `value`.
   /// Допустимы только bool или String.
-  static SubscriptionValue fromJson(Object? json) {
+  static SubscriptionValue? fromJson(Object? json) {
     if (json is bool) return BoolSubscriptionValue(json);
     if (json is String) return StringSubscriptionValue(json);
-    throw ArgumentError(
-      'Unsupported value type for SubscriptionValue. Expected bool or String, got: $json',
-    );
+    return null;
+    // throw ArgumentError(
+    //   'Unsupported value type for SubscriptionValue. Expected bool or String, got: $json',
+    // );
   }
 
   /// Преобразует в JSON-значение для поля `value`.
   /// Возвращает либо bool, либо String.
-  static Object toJson(SubscriptionValue value) => value.raw;
+  // static Object toJson(SubscriptionValue value) => value.raw;
 }
 
 class BoolSubscriptionValue extends SubscriptionValue {
