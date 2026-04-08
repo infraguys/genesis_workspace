@@ -61,6 +61,14 @@ class WorkspaceApp extends StatelessWidget {
             locale: TranslationProvider.of(context).flutterLocale,
             title: 'Workspace',
             routerConfig: router,
+            builder: (context, child) {
+              return GestureDetector(
+                onSecondaryLongPress: () {
+                  router.pushNamed(Routes.talkerScreen);
+                },
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
             // debugShowMaterialGrid: true,
             theme: buildThemeForPalette(
               paletteId: state.selectedPaletteId,

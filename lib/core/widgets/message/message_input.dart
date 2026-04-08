@@ -597,7 +597,7 @@ class _MessageInputState extends State<MessageInput> {
                     child: EmojiPicker(
                       textEditingController: widget.controller,
                       onEmojiSelected: (_, _) {
-                        widget.focusNode.requestFocus();
+                        // widget.focusNode.requestFocus();
                       },
                       config: emojiPickerConfig(context, theme: theme),
                     ),
