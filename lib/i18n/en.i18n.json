@@ -410,5 +410,12 @@
   },
   "selected_count": "Selected ({n})",
   "show_spoiler": "Show spoiler",
-  "open_chat": "Open chat"
+  "open_chat": "Open chat",
+  "editor": {
+    "quote": "Quote",
+    "numberedList": "Numbered list",
+    "bulletedList": "Bulleted list",
+    "link": "Link",
+    "code": "Code"
+  }
 }

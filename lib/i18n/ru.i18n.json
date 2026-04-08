@@ -420,5 +420,12 @@
   },
   "selected_count": "Выбрано ({n})",
   "show_spoiler": "Показать спойлер",
-  "open_chat": "Открыть чат"
+  "open_chat": "Открыть чат",
+  "editor": {
+    "quote": "Цитата",
+    "numberedList": "Нум. список",
+    "bulletedList": "Ненум. список",
+    "link": "Ссылка",
+    "code": "Код"
+  }
 }
