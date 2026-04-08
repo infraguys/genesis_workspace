@@ -49,6 +49,7 @@ import 'package:genesis_workspace/features/channel_chat/bloc/channel_chat_cubit.
 import 'package:genesis_workspace/features/download_files/view/download_files_button.dart';
 import 'package:genesis_workspace/features/drafts/bloc/drafts_cubit.dart';
 import 'package:genesis_workspace/features/emoji_keyboard/bloc/emoji_keyboard_cubit.dart';
+import 'package:genesis_workspace/features/messages/bloc/messages/messages_cubit.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/create_chat/create_chat_cubit.dart';
 import 'package:genesis_workspace/features/messenger/bloc/messenger/messenger_cubit.dart';
@@ -692,6 +693,17 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                   onReply: () {
                                     final messagesIds = selectedMessages.map((message) => message.id).toList();
                                     replyMultiMessages(messagesIds);
+                                  },
+                                  onDelete: () async {
+                                    try {
+                                      final messageIds = selectedMessages.map((message) => message.id).toList();
+                                      for (final messageId in messageIds) {
+                                        await context.read<MessagesCubit>().deleteMessage(messageId);
+                                      }
+                                      context.read<MessagesSelectCubit>().clearForwardMessages();
+                                    } on DioException catch (e) {
+                                      showErrorSnackBar(context, exception: e);
+                                    }
                                   },
                                 ),
                               ),
