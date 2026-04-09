@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.10.8
+- Add subscriber to a channel feature
+- Logs screen navigation on secondaryLongPress
+- New MD buttons
+- Multi delete messages feature
+
 # 1.10.7
 - Links preview in message body
 - Emoji list synced with backend list
