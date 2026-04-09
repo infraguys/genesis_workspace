@@ -33,20 +33,20 @@ class MessageInputContextMenu extends StatelessWidget {
           editableTextState.pasteText(SelectionChangedCause.toolbar);
         },
       ),
-      MessageInputContextMenuItem(
-        icon: Assets.icons.addLink,
-        label: context.t.editor.link,
-        onPressed: () {
-          final value = editableTextState.textEditingValue;
-          _applyMarkdownResult(
-            editableTextState,
-            insertLinkEdit(
-              text: value.text,
-              selection: value.selection,
-            ),
-          );
-        },
-      ),
+      // MessageInputContextMenuItem(
+      //   icon: Assets.icons.addLink,
+      //   label: context.t.editor.link,
+      //   onPressed: () {
+      //     final value = editableTextState.textEditingValue;
+      //     _applyMarkdownResult(
+      //       editableTextState,
+      //       insertLinkEdit(
+      //         text: value.text,
+      //         selection: value.selection,
+      //       ),
+      //     );
+      //   },
+      // ),
       MessageInputContextMenuItem(
         icon: Assets.icons.formatBold,
         label: context.t.contextMenu.bold,

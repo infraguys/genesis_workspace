@@ -123,12 +123,12 @@ class _FormatIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconColors = Theme.of(context).extension<IconColors>()!;
-    final color = Theme.of(context).colorScheme.onSurface;
+    final color = iconColors.base;
     if (item.icon != null) {
       return item.icon!.svg(
         width: 18,
         height: 18,
-        colorFilter: ColorFilter.mode(iconColors.base, BlendMode.srcIn),
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
       );
     }
     if (item.materialIcon != null) {

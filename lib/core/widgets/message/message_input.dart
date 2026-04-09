@@ -646,16 +646,16 @@ class _MessageInputState extends State<MessageInput> {
                               child: Row(
                                 spacing: 16,
                                 children: [
-                                  TapEffectIcon(
-                                    padding: .zero,
-                                    onTap: _insertLink,
-                                    child: Assets.icons.addLink.svg(
-                                      colorFilter: ColorFilter.mode(
-                                        iconColors.base,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                  ),
+                                  // TapEffectIcon(
+                                  //   padding: .zero,
+                                  //   onTap: _insertLink,
+                                  //   child: Assets.icons.addLink.svg(
+                                  //     colorFilter: ColorFilter.mode(
+                                  //       iconColors.base,
+                                  //       BlendMode.srcIn,
+                                  //     ),
+                                  //   ),
+                                  // ),
                                   TapEffectIcon(
                                     padding: .zero,
                                     onTap: () => _applyInlineFormat(
@@ -664,7 +664,7 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                     child: Assets.icons.formatBold.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
                                     ),
@@ -677,7 +677,7 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                     child: Assets.icons.formatItalic.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
                                     ),
@@ -690,7 +690,7 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                     child: Assets.icons.strikethroughS.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
                                     ),
@@ -732,7 +732,7 @@ class _MessageInputState extends State<MessageInput> {
                                     onTap: _insertSpoiler,
                                     child: Assets.icons.spoiler.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
                                     ),
