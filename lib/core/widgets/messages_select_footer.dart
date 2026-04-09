@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/features/messages/bloc/messages_select/messages_select_cubit.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
@@ -22,7 +21,6 @@ class MessagesSelectFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final iconColors = theme.extension<IconColors>()!;
     final isTabletOrSmaller = currentSize(context) <= ScreenSize.tablet;
     return Padding(
       padding: const EdgeInsets.only(bottom: 40),
@@ -42,7 +40,9 @@ class MessagesSelectFooter extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: count == 0 ? null : onForward,
                       iconAlignment: .start,
-                      icon: Assets.icons.forward.svg(),
+                      icon: Assets.icons.forwardIcon.svg(
+                        colorFilter: ColorFilter.mode(theme.colorScheme.onPrimary, .srcIn),
+                      ),
                       label: Text(
                         context.t.contextMenu.forwardCount(
                           n: count,
@@ -52,7 +52,9 @@ class MessagesSelectFooter extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: count == 0 ? null : onReply,
                       iconAlignment: .start,
-                      icon: Assets.icons.forwardLeft.svg(),
+                      icon: Assets.icons.replyIcon.svg(
+                        colorFilter: ColorFilter.mode(theme.colorScheme.onPrimary, .srcIn),
+                      ),
                       label: Text(
                         context.t.contextMenu.replyCount(
                           n: count,
