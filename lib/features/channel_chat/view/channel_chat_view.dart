@@ -695,12 +695,11 @@ class _ChannelChatViewState extends State<ChannelChatView>
                                     replyMultiMessages(messagesIds);
                                   },
                                   onDelete: () async {
+                                    final messageIds = selectedMessages.map((message) => message.id).toList();
                                     try {
-                                      final messageIds = selectedMessages.map((message) => message.id).toList();
-                                      for (final messageId in messageIds) {
-                                        await context.read<MessagesCubit>().deleteMessage(messageId);
-                                      }
                                       context.read<MessagesSelectCubit>().clearForwardMessages();
+                                      final messagesCubit = context.read<MessagesCubit>();
+                                      await Future.wait(messageIds.map((id) => messagesCubit.deleteMessage(id)));
                                     } on DioException catch (e) {
                                       showErrorSnackBar(context, exception: e);
                                     }
