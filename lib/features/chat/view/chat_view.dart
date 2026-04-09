@@ -677,9 +677,8 @@ class _ChatViewState extends State<ChatView>
                                     final messageIds = selectedMessages.map((message) => message.id).toList();
                                     try {
                                       context.read<MessagesSelectCubit>().clearForwardMessages();
-                                      for (final messageId in messageIds) {
-                                        await context.read<MessagesCubit>().deleteMessage(messageId);
-                                      }
+                                      final messagesCubit = context.read<MessagesCubit>();
+                                      await Future.wait(messageIds.map((id) => messagesCubit.deleteMessage(id)));
                                     } on DioException catch (e) {
                                       showErrorSnackBar(context, exception: e);
                                     }
