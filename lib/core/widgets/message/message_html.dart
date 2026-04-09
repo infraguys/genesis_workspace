@@ -25,11 +25,14 @@ import 'package:html/dom.dart' as dom;
 class WorkspaceHtmlFactory extends WidgetFactory {}
 
 class MessageHtml extends StatelessWidget {
+  MessageHtml({
+    super.key,
+    required this.content,
+    required this.onSelectedTextChanged,
+  });
+
   final String content;
   final Function(String) onSelectedTextChanged;
-
-  MessageHtml({super.key, required this.content, required this.onSelectedTextChanged});
-
   final AppShellController appShellController = getIt<AppShellController>();
 
   List<String> _extractPreviewLinks() {
@@ -118,6 +121,340 @@ class MessageHtml extends StatelessWidget {
     return null;
   }
 
+  Future<bool> _handleTapUrl(BuildContext context, String? url) async {
+    final String rawUrl = url?.trim() ?? '';
+    if (rawUrl.isEmpty) return true;
+
+    if (rawUrl.startsWith('/user_uploads/')) {
+      await context.read<DownloadFilesCubit>().download(rawUrl);
+      return true;
+    }
+
+    final Uri? targetUri = parseUrlWithBase(rawUrl);
+    if (targetUri == null) return true;
+
+    if (targetUri.path.startsWith('/user_uploads/') && !isExternalToBase(targetUri)) {
+      await context.read<DownloadFilesCubit>().download(targetUri.path);
+      return true;
+    }
+
+    if (isAllowedUrlScheme(targetUri)) {
+      await launchUrlSafely(context, targetUri);
+    }
+    return true;
+  }
+
+  Widget _buildTableCell({
+    required BuildContext context,
+    required ThemeData theme,
+    required bool isTabletOrSmaller,
+    required dom.Element? cell,
+    required bool isHeader,
+  }) {
+    final TextStyle textStyle =
+        (isHeader ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium)?.copyWith(
+          fontWeight: isHeader ? FontWeight.w700 : FontWeight.w400,
+        ) ??
+        const TextStyle();
+
+    return Container(
+      alignment: Alignment.topLeft,
+      constraints: const BoxConstraints(minWidth: 80),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: cell == null
+          ? const SizedBox.shrink()
+          : HtmlWidget(
+              cell.innerHtml,
+              textStyle: textStyle,
+              factoryBuilder: () => WorkspaceHtmlFactory(),
+              onTapUrl: (String? url) => _handleTapUrl(context, url),
+              customStylesBuilder: (element) {
+                if (element.localName == 'p') {
+                  return {
+                    'margin': '0',
+                  };
+                }
+                return null;
+              },
+              customWidgetBuilder: (element) {
+                return _buildCustomWidget(
+                  element: element,
+                  context: context,
+                  theme: theme,
+                  isTabletOrSmaller: isTabletOrSmaller,
+                  allowTable: false,
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildMarkdownTable({
+    required BuildContext context,
+    required ThemeData theme,
+    required bool isTabletOrSmaller,
+    required dom.Element tableElement,
+  }) {
+    final rowElements = tableElement.querySelectorAll('tr');
+    final tableRows = <({dom.Element row, List<dom.Element> cells})>[];
+    for (final row in rowElements) {
+      final cells = row.children.where((child) => child.localName == 'th' || child.localName == 'td').toList();
+      if (cells.isNotEmpty) {
+        tableRows.add((row: row, cells: cells));
+      }
+    }
+
+    if (tableRows.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final int maxColumns = tableRows.map((tableRow) => tableRow.cells.length).max;
+    final Set<dom.Element> headerRows = tableElement.querySelectorAll('thead tr').toSet();
+
+    final Color borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.55);
+    const Color rowColor = Colors.transparent;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Table(
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              border: TableBorder(
+                horizontalInside: BorderSide(color: borderColor),
+                verticalInside: BorderSide(color: borderColor),
+              ),
+              columnWidths: Map<int, TableColumnWidth>.fromEntries(
+                List.generate(maxColumns, (index) => MapEntry(index, const IntrinsicColumnWidth())),
+              ),
+              children: [
+                for (int rowIndex = 0; rowIndex < tableRows.length; rowIndex++)
+                  TableRow(
+                    decoration: BoxDecoration(
+                      color: rowColor,
+                    ),
+                    children: [
+                      for (int colIndex = 0; colIndex < maxColumns; colIndex++)
+                        _buildTableCell(
+                          context: context,
+                          theme: theme,
+                          isTabletOrSmaller: isTabletOrSmaller,
+                          cell: colIndex < tableRows[rowIndex].cells.length
+                              ? tableRows[rowIndex].cells[colIndex]
+                              : null,
+                          isHeader: headerRows.contains(tableRows[rowIndex].row),
+                        ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget? _buildCustomWidget({
+    required dom.Element element,
+    required BuildContext context,
+    required ThemeData theme,
+    required bool isTabletOrSmaller,
+    bool allowTable = true,
+  }) {
+    if (allowTable && element.localName == 'table') {
+      return _buildMarkdownTable(
+        context: context,
+        theme: theme,
+        isTabletOrSmaller: isTabletOrSmaller,
+        tableElement: element,
+      );
+    }
+
+    if (element.attributes.containsValue('image/png') ||
+        element.attributes.containsValue('image/jpeg') ||
+        element.attributes.containsValue('image/gif') ||
+        element.attributes.containsValue('image/webp')) {
+      final src = element.parentNode?.attributes['href'];
+      final thumbnailSrc = element.attributes['src'];
+      final size = extractDimensionsFromUrl(thumbnailSrc ?? '');
+      final String? imageUrl = _buildImageUrl(src);
+      final String thumbnailUrl = _buildThumbnailUrl(thumbnailSrc) ?? '';
+      if (imageUrl == null) return const SizedBox.shrink();
+      return AuthorizedImage(
+        url: imageUrl,
+        thumbnailUrl: thumbnailUrl.isEmpty ? imageUrl : thumbnailUrl,
+        width: size?.width,
+        height: isTabletOrSmaller ? null : size?.height,
+        fit: isTabletOrSmaller ? .fitWidth : .contain,
+      );
+    }
+
+    if (element.attributes.containsKey('href') &&
+        element.attributes.values.any((value) => value.contains('/user_uploads/')) &&
+        !element.attributes.containsKey('title')) {
+      final String fileUrl = element.attributes['href'] ?? '';
+      final String rawFileName = element.nodes.first.parentNode?.text ?? 'File';
+      final fileExtension = extractFileExtension(fileUrl);
+
+      if (AppConstants.prioritizedVideoFileExtensions.contains(fileExtension)) {
+        return AuthorizedMedia(fileUrl: fileUrl);
+      }
+
+      return BlocBuilder<DownloadFilesCubit, DownloadFilesState>(
+        builder: (context, state) {
+          final file = state.files.firstWhereOrNull((file) => file.pathToFile == fileUrl);
+          final bool isDownloaded = file is DownloadedFileEntity;
+          final bool isDownloading = file is DownloadingFileEntity;
+          return InkWell(
+            onTap: () async {
+              if (isDownloaded) {
+                await context.read<DownloadFilesCubit>().openFile(file.localFilePath);
+              } else if (!isDownloading) {
+                await context.read<DownloadFilesCubit>().download(fileUrl);
+              }
+            },
+            child: Container(
+              constraints: const BoxConstraints(
+                maxWidth: 220,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.insert_drive_file_outlined,
+                    color: isDownloaded ? AppColors.green : theme.colorScheme.primary,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      rawFileName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelMedium,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  isDownloading
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            value: file.progress / file.total,
+                          ),
+                        )
+                      : Icon(
+                          isDownloaded ? Icons.check : Icons.arrow_downward_rounded,
+                          size: 18,
+                          color: isDownloaded ? AppColors.green : theme.colorScheme.primary,
+                        ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+    if (element.classes.contains('emoji')) {
+      final emojiUnicode = element.classes
+          .firstWhere((className) => className.contains('emoji-'))
+          .replaceAll('emoji-', '');
+
+      final emoji = ":${element.attributes['title']!.replaceAll(' ', '_')}:";
+
+      return InlineCustomWidget(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0),
+          child: UnicodeEmojiWidget(
+            emojiDisplay: UnicodeEmojiDisplay(emojiName: emoji, emojiUnicode: emojiUnicode),
+            size: 14,
+          ),
+        ),
+      );
+    }
+    if (element.classes.contains('user-mention')) {
+      final mention = element.nodes[0].text ?? '';
+      final mentionChip = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+        ),
+        child: Text(
+          mention,
+          style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
+        ),
+      );
+
+      if (element.classes.contains('channel-wildcard-mention')) {
+        return InlineCustomWidget(child: mentionChip);
+      }
+
+      final userIdAttr = element.attributes['data-user-id'];
+      final userId = int.tryParse(userIdAttr ?? '');
+
+      if (userId == null) {
+        return InlineCustomWidget(child: mentionChip);
+      }
+
+      return InlineCustomWidget(
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: CustomPopup(
+            rootNavigator: true,
+            contentPadding: EdgeInsets.zero,
+            content: Container(
+              width: 200,
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: UserPopupProfile(userId: userId),
+            ),
+            child: mentionChip,
+          ),
+        ),
+      );
+    }
+    if (element.classes.contains('spoiler-header')) {
+      return Column(
+        children: [
+          InlineCustomWidget(
+            child: Text(
+              "${context.t.contextMenu.spoiler}: ${element.text.replaceAll('\n', '')}",
+              style: theme.textTheme.labelMedium,
+            ),
+          ),
+          SizedBox(
+            height: 2,
+          ),
+        ],
+      );
+    }
+    if (element.classes.contains('spoiler-content')) {
+      final content = element.text;
+      return MessageSpoiler(content: content);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -148,205 +485,14 @@ class MessageHtml extends StatelessWidget {
       },
       textStyle: TextStyle(overflow: TextOverflow.ellipsis),
       factoryBuilder: () => WorkspaceHtmlFactory(),
-      onTapUrl: (String? url) async {
-        final String rawUrl = url?.trim() ?? '';
-        if (rawUrl.isEmpty) return true;
-
-        if (rawUrl.startsWith('/user_uploads/')) {
-          await context.read<DownloadFilesCubit>().download(rawUrl);
-          return true;
-        }
-
-        final Uri? targetUri = parseUrlWithBase(rawUrl);
-        if (targetUri == null) return true;
-
-        if (targetUri.path.startsWith('/user_uploads/') && !isExternalToBase(targetUri)) {
-          await context.read<DownloadFilesCubit>().download(targetUri.path);
-          return true;
-        }
-
-        if (isAllowedUrlScheme(targetUri)) {
-          await launchUrlSafely(context, targetUri);
-        }
-        return true;
-      },
+      onTapUrl: (String? url) => _handleTapUrl(context, url),
       customWidgetBuilder: (element) {
-        if (element.attributes.containsValue('image/png') ||
-            element.attributes.containsValue('image/jpeg') ||
-            element.attributes.containsValue('image/gif') ||
-            element.attributes.containsValue('image/webp')) {
-          final src = element.parentNode?.attributes['href'];
-          final thumbnailSrc = element.attributes['src'];
-          final size = extractDimensionsFromUrl(thumbnailSrc ?? '');
-          final String? imageUrl = _buildImageUrl(src);
-          final String thumbnailUrl = _buildThumbnailUrl(thumbnailSrc) ?? '';
-          if (imageUrl == null) return const SizedBox.shrink();
-          return AuthorizedImage(
-            url: imageUrl,
-            thumbnailUrl: thumbnailUrl.isEmpty ? imageUrl : thumbnailUrl,
-            width: size?.width,
-            height: isTabletOrSmaller ? null : size?.height,
-            fit: isTabletOrSmaller ? .fitWidth : .contain,
-          );
-        }
-
-        if (element.attributes.containsKey('href') &&
-            element.attributes.values.any((value) => value.contains('/user_uploads/')) &&
-            !element.attributes.containsKey('title')) {
-          final String fileUrl = element.attributes['href'] ?? '';
-          final String rawFileName = element.nodes.first.parentNode?.text ?? 'File';
-          final fileExtension = extractFileExtension(fileUrl);
-
-          if (AppConstants.prioritizedVideoFileExtensions.contains(fileExtension)) {
-            return AuthorizedMedia(fileUrl: fileUrl);
-          }
-
-          return BlocBuilder<DownloadFilesCubit, DownloadFilesState>(
-            builder: (context, state) {
-              final file = state.files.firstWhereOrNull((file) => file.pathToFile == fileUrl);
-              final bool isDownloaded = file is DownloadedFileEntity;
-              final bool isDownloading = file is DownloadingFileEntity;
-              return InkWell(
-                onTap: () async {
-                  if (isDownloaded) {
-                    await context.read<DownloadFilesCubit>().openFile(file.localFilePath);
-                  } else if (!isDownloading) {
-                    await context.read<DownloadFilesCubit>().download(fileUrl);
-                  }
-                },
-                child: Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: 220,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.insert_drive_file_outlined,
-                        color: isDownloaded ? AppColors.green : theme.colorScheme.primary,
-                        size: 22,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          rawFileName,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelMedium,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      isDownloading
-                          ? SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                value: file.progress / file.total,
-                              ),
-                            )
-                          : Icon(
-                              isDownloaded ? Icons.check : Icons.arrow_downward_rounded,
-                              size: 18,
-                              color: isDownloaded ? AppColors.green : theme.colorScheme.primary,
-                            ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        }
-        if (element.classes.contains('emoji')) {
-          final emojiUnicode = element.classes
-              .firstWhere((className) => className.contains('emoji-'))
-              .replaceAll('emoji-', '');
-
-          final emoji = ":${element.attributes['title']!.replaceAll(' ', '_')}:";
-
-          return InlineCustomWidget(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: UnicodeEmojiWidget(
-                emojiDisplay: UnicodeEmojiDisplay(emojiName: emoji, emojiUnicode: emojiUnicode),
-                size: 14,
-              ),
-            ),
-          );
-        }
-        if (element.classes.contains('user-mention')) {
-          final mention = element.nodes[0].text ?? '';
-          final mentionChip = Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
-            ),
-            child: Text(
-              mention,
-              style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
-            ),
-          );
-
-          if (element.classes.contains('channel-wildcard-mention')) {
-            return InlineCustomWidget(child: mentionChip);
-          }
-
-          final userIdAttr = element.attributes['data-user-id'];
-          final userId = int.tryParse(userIdAttr ?? '');
-
-          if (userId == null) {
-            return InlineCustomWidget(child: mentionChip);
-          }
-
-          return InlineCustomWidget(
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: CustomPopup(
-                rootNavigator: true,
-                contentPadding: EdgeInsets.zero,
-                content: Container(
-                  width: 200,
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: UserPopupProfile(userId: userId),
-                ),
-                child: mentionChip,
-              ),
-            ),
-          );
-        }
-        if (element.classes.contains('spoiler-header')) {
-          return Column(
-            children: [
-              InlineCustomWidget(
-                child: Text(
-                  "${context.t.contextMenu.spoiler}: ${element.text.replaceAll('\n', '')}",
-                  style: theme.textTheme.labelMedium,
-                ),
-              ),
-              SizedBox(
-                height: 2,
-              ),
-            ],
-          );
-        }
-        if (element.classes.contains('spoiler-content')) {
-          final _content = element.text;
-          return MessageSpoiler(content: _content);
-        }
-        return null;
+        return _buildCustomWidget(
+          element: element,
+          context: context,
+          theme: theme,
+          isTabletOrSmaller: isTabletOrSmaller,
+        );
       },
     );
 
@@ -369,10 +515,7 @@ class MessageHtml extends StatelessWidget {
 }
 
 class _MessageHtmlWithPreviews extends StatelessWidget {
-  const _MessageHtmlWithPreviews({
-    required this.html,
-    required this.previewLinks,
-  });
+  const _MessageHtmlWithPreviews({required this.html, required this.previewLinks});
 
   final Widget html;
   final List<String> previewLinks;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/markdown_editor_helper.dart';
 import 'package:genesis_workspace/core/widgets/message/message_input_context_menu_button.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 import 'package:genesis_workspace/i18n/generated/strings.g.dart';
@@ -33,32 +33,138 @@ class MessageInputContextMenu extends StatelessWidget {
           editableTextState.pasteText(SelectionChangedCause.toolbar);
         },
       ),
+      // MessageInputContextMenuItem(
+      //   icon: Assets.icons.addLink,
+      //   label: context.t.editor.link,
+      //   onPressed: () {
+      //     final value = editableTextState.textEditingValue;
+      //     _applyMarkdownResult(
+      //       editableTextState,
+      //       insertLinkEdit(
+      //         text: value.text,
+      //         selection: value.selection,
+      //       ),
+      //     );
+      //   },
+      // ),
       MessageInputContextMenuItem(
         icon: Assets.icons.formatBold,
         label: context.t.contextMenu.bold,
         onPressed: () {
-          _applyInlineFormat(editableTextState, prefix: '**', suffix: '**');
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            applyInlineFormatEdit(
+              text: value.text,
+              selection: value.selection,
+              prefix: '**',
+              suffix: '**',
+            ),
+          );
         },
       ),
       MessageInputContextMenuItem(
         icon: Assets.icons.formatItalic,
         label: context.t.contextMenu.italic,
         onPressed: () {
-          _applyInlineFormat(editableTextState, prefix: '*', suffix: '*');
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            applyInlineFormatEdit(
+              text: value.text,
+              selection: value.selection,
+              prefix: '*',
+              suffix: '*',
+            ),
+          );
         },
       ),
       MessageInputContextMenuItem(
         icon: Assets.icons.strikethroughS,
         label: context.t.contextMenu.strikethrough,
         onPressed: () {
-          _applyInlineFormat(editableTextState, prefix: '~~', suffix: '~~');
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            applyInlineFormatEdit(
+              text: value.text,
+              selection: value.selection,
+              prefix: '~~',
+              suffix: '~~',
+            ),
+          );
+        },
+      ),
+      MessageInputContextMenuItem(
+        icon: Assets.icons.formatListNumbered,
+        label: context.t.editor.numberedList,
+        onPressed: () {
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            insertListEdit(
+              text: value.text,
+              selection: value.selection,
+              ordered: true,
+            ),
+          );
+        },
+      ),
+      MessageInputContextMenuItem(
+        icon: Assets.icons.formatListBulleted,
+        label: context.t.editor.bulletedList,
+        onPressed: () {
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            insertListEdit(
+              text: value.text,
+              selection: value.selection,
+              ordered: false,
+            ),
+          );
+        },
+      ),
+      MessageInputContextMenuItem(
+        materialIcon: Icons.format_quote_outlined,
+        label: context.t.editor.quote,
+        onPressed: () {
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            insertQuoteEdit(
+              text: value.text,
+              selection: value.selection,
+            ),
+          );
         },
       ),
       MessageInputContextMenuItem(
         icon: Assets.icons.spoiler,
         label: context.t.contextMenu.spoiler,
         onPressed: () {
-          _insertSpoiler(editableTextState);
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            insertSpoilerEdit(
+              text: value.text,
+              selection: value.selection,
+            ),
+          );
+        },
+      ),
+      MessageInputContextMenuItem(
+        icon: Assets.icons.frameSource,
+        label: context.t.editor.code,
+        onPressed: () {
+          final value = editableTextState.textEditingValue;
+          _applyMarkdownResult(
+            editableTextState,
+            insertCodeBlockEdit(
+              text: value.text,
+              selection: value.selection,
+            ),
+          );
         },
       ),
     ];
@@ -77,44 +183,11 @@ class MessageInputContextMenu extends StatelessWidget {
   }
 }
 
-void _insertSpoiler(EditableTextState state) {
-  final value = state.textEditingValue;
-  final result = buildSpoilerInsertion(
-    text: value.text,
-    selection: value.selection,
-  );
-
+void _applyMarkdownResult(EditableTextState state, MarkdownEditResult result) {
   state.userUpdateTextEditingValue(
-    value.copyWith(
+    state.textEditingValue.copyWith(
       text: result.text,
-      selection: TextSelection.collapsed(offset: result.cursorOffset),
-      composing: TextRange.empty,
-    ),
-    SelectionChangedCause.toolbar,
-  );
-  state.hideToolbar();
-}
-
-void _applyInlineFormat(
-  EditableTextState state, {
-  required String prefix,
-  required String suffix,
-}) {
-  final value = state.textEditingValue;
-  final selection = value.selection;
-  final text = value.text;
-  final start = selection.isValid ? selection.start : text.length;
-  final end = selection.isValid ? selection.end : text.length;
-  final hasSelection = selection.isValid && !selection.isCollapsed;
-  final selectedText = hasSelection ? text.substring(start, end) : '';
-  final replacement = hasSelection ? '$prefix$selectedText$suffix' : '$prefix$suffix';
-  final newText = text.replaceRange(start, end, replacement);
-  final cursorOffset = hasSelection ? start + replacement.length : start + prefix.length;
-
-  state.userUpdateTextEditingValue(
-    value.copyWith(
-      text: newText,
-      selection: TextSelection.collapsed(offset: cursorOffset),
+      selection: result.selection,
       composing: TextRange.empty,
     ),
     SelectionChangedCause.toolbar,

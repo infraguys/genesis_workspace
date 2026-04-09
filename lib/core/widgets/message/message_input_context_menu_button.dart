@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:genesis_workspace/core/config/palettes/palette.dart';
 import 'package:genesis_workspace/gen/assets.gen.dart';
 
 class MessageInputContextMenuItem {
@@ -8,14 +9,16 @@ class MessageInputContextMenuItem {
     this.type,
     this.label,
     this.icon,
+    this.materialIcon,
   });
 
   final VoidCallback? onPressed;
   final ContextMenuButtonType? type;
   final String? label;
   final SvgGenImage? icon;
+  final IconData? materialIcon;
 
-  bool get hasIcon => icon != null;
+  bool get hasIcon => icon != null || materialIcon != null;
 }
 
 class MessageInputContextMenuButton extends StatelessWidget {
@@ -35,9 +38,9 @@ class MessageInputContextMenuButton extends StatelessWidget {
     final TargetPlatform platform = Theme.of(context).platform;
     final bool isDesktop = _isDesktopPlatform(platform);
     final String label = _resolveMenuLabel(context, item);
-    final Widget iconChild = item.hasIcon ? _FormatIcon(icon: item.icon!) : const SizedBox.shrink();
+    final Widget iconChild = item.hasIcon ? _FormatIcon(item: item) : const SizedBox.shrink();
     final Widget child = item.hasIcon
-        ? (isDesktop ? _FormatIconLabel(icon: item.icon!, label: label) : iconChild)
+        ? (isDesktop ? _FormatIconLabel(item: item, label: label) : iconChild)
         : Text(label);
 
     late final Widget button;
@@ -112,29 +115,40 @@ Widget _wrapWithClickCursor(BuildContext context, Widget child) {
 
 class _FormatIcon extends StatelessWidget {
   const _FormatIcon({
-    required this.icon,
+    required this.item,
   });
 
-  final SvgGenImage icon;
+  final MessageInputContextMenuItem item;
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.onSurface;
-    return icon.svg(
-      width: 18,
-      height: 18,
-      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-    );
+    final iconColors = Theme.of(context).extension<IconColors>()!;
+    final color = iconColors.base;
+    if (item.icon != null) {
+      return item.icon!.svg(
+        width: 18,
+        height: 18,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      );
+    }
+    if (item.materialIcon != null) {
+      return Icon(
+        item.materialIcon,
+        size: 18,
+        color: color,
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 
 class _FormatIconLabel extends StatelessWidget {
   const _FormatIconLabel({
-    required this.icon,
+    required this.item,
     required this.label,
   });
 
-  final SvgGenImage icon;
+  final MessageInputContextMenuItem item;
   final String label;
 
   @override
@@ -150,7 +164,7 @@ class _FormatIconLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _FormatIcon(icon: icon),
+        _FormatIcon(item: item),
         const SizedBox(width: 8),
         Text(label, style: textStyle),
       ],

@@ -6,6 +6,7 @@ import 'package:genesis_workspace/core/config/colors.dart';
 import 'package:genesis_workspace/core/config/emoji_picker_config.dart';
 import 'package:genesis_workspace/core/config/screen_size.dart';
 import 'package:genesis_workspace/core/utils/helpers.dart';
+import 'package:genesis_workspace/core/utils/markdown_editor_helper.dart';
 import 'package:genesis_workspace/core/utils/message_input_intents/edit_message_intents.dart';
 import 'package:genesis_workspace/core/utils/platform_info/platform_info.dart';
 import 'package:genesis_workspace/core/widgets/message/attach_files_button.dart';
@@ -69,6 +70,22 @@ class MessageInput extends StatefulWidget {
 
 class _MessageInputState extends State<MessageInput> {
   bool _showMdActions = false;
+  String _lastText = '';
+  bool _isApplyingAutoList = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastText = widget.controller.text;
+  }
+
+  @override
+  void didUpdateWidget(covariant MessageInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _lastText = widget.controller.text;
+    }
+  }
 
   bool _isShiftPressed() {
     final keyboard = HardwareKeyboard.instance;
@@ -82,11 +99,16 @@ class _MessageInputState extends State<MessageInput> {
     final text = widget.controller.text;
     final newText = selection.isValid ? text.replaceRange(selection.start, selection.end, '\n') : '$text\n';
     final offset = selection.isValid ? selection.start + 1 : newText.length;
-
-    widget.controller.value = widget.controller.value.copyWith(
+    final continuation = buildListContinuationEdit(
       text: newText,
-      selection: TextSelection.collapsed(offset: offset),
-      composing: TextRange.empty,
+      cursorOffset: offset,
+    );
+    final finalText = continuation?.text ?? newText;
+    final finalOffset = continuation?.cursorOffset ?? offset;
+
+    _setControllerText(
+      text: finalText,
+      cursorOffset: finalOffset,
     );
   }
 
@@ -105,36 +127,128 @@ class _MessageInputState extends State<MessageInput> {
     required String prefix,
     required String suffix,
   }) {
-    final selection = widget.controller.selection;
-    final text = widget.controller.text;
-    final start = selection.isValid ? selection.start : text.length;
-    final end = selection.isValid ? selection.end : text.length;
-    final hasSelection = selection.isValid && !selection.isCollapsed;
-    final selectedText = hasSelection ? text.substring(start, end) : '';
-    final replacement = hasSelection ? '$prefix$selectedText$suffix' : '$prefix$suffix';
-    final newText = text.replaceRange(start, end, replacement);
-    final cursorOffset = hasSelection ? start + replacement.length : start + prefix.length;
-
-    widget.controller.value = widget.controller.value.copyWith(
-      text: newText,
-      selection: TextSelection.collapsed(offset: cursorOffset),
-      composing: TextRange.empty,
+    final result = applyInlineFormatEdit(
+      text: widget.controller.text,
+      selection: widget.controller.selection,
+      prefix: prefix,
+      suffix: suffix,
     );
+    _setControllerTextFromResult(result);
     widget.focusNode.requestFocus();
   }
 
   void _insertSpoiler() {
-    final result = buildSpoilerInsertion(
+    final result = insertSpoilerEdit(
       text: widget.controller.text,
       selection: widget.controller.selection,
     );
+    _setControllerTextFromResult(result);
+    widget.focusNode.requestFocus();
+  }
 
-    widget.controller.value = widget.controller.value.copyWith(
+  void _insertQuote() {
+    final result = insertQuoteEdit(
+      text: widget.controller.text,
+      selection: widget.controller.selection,
+    );
+    _setControllerTextFromResult(result);
+    widget.focusNode.requestFocus();
+  }
+
+  void _insertCodeBlock() {
+    final result = insertCodeBlockEdit(
+      text: widget.controller.text,
+      selection: widget.controller.selection,
+    );
+    _setControllerTextFromResult(result);
+    widget.focusNode.requestFocus();
+  }
+
+  void _insertLink() {
+    final result = insertLinkEdit(
+      text: widget.controller.text,
+      selection: widget.controller.selection,
+    );
+    _setControllerTextFromResult(result);
+    widget.focusNode.requestFocus();
+  }
+
+  void _insertList({
+    required bool ordered,
+  }) {
+    final result = insertListEdit(
+      text: widget.controller.text,
+      selection: widget.controller.selection,
+      ordered: ordered,
+    );
+    _setControllerTextFromResult(result);
+    widget.focusNode.requestFocus();
+  }
+
+  void _setControllerTextFromResult(MarkdownEditResult result) {
+    _setControllerText(
       text: result.text,
-      selection: TextSelection.collapsed(offset: result.cursorOffset),
+      cursorOffset: result.selection.extentOffset,
+      selection: result.selection,
+    );
+  }
+
+  void _setControllerText({
+    required String text,
+    required int cursorOffset,
+    TextSelection? selection,
+  }) {
+    final safeOffset = cursorOffset.clamp(0, text.length);
+    final safeSelection = selection == null
+        ? TextSelection.collapsed(offset: safeOffset)
+        : TextSelection(
+            baseOffset: selection.baseOffset.clamp(0, text.length),
+            extentOffset: selection.extentOffset.clamp(0, text.length),
+          );
+    _isApplyingAutoList = true;
+    widget.controller.value = widget.controller.value.copyWith(
+      text: text,
+      selection: safeSelection,
       composing: TextRange.empty,
     );
-    widget.focusNode.requestFocus();
+    _lastText = text;
+    _isApplyingAutoList = false;
+  }
+
+  void _onInputChanged(String text) {
+    if (_isApplyingAutoList) {
+      _lastText = text;
+      return;
+    }
+
+    final selection = widget.controller.selection;
+    final didInsertSingleNewLine =
+        selection.isValid &&
+        selection.isCollapsed &&
+        text.length == _lastText.length + 1 &&
+        selection.start > 0 &&
+        selection.start <= text.length &&
+        text[selection.start - 1] == '\n' &&
+        text.replaceRange(selection.start - 1, selection.start, '') == _lastText;
+
+    if (!didInsertSingleNewLine) {
+      _lastText = text;
+      return;
+    }
+
+    final continuation = buildListContinuationEdit(
+      text: text,
+      cursorOffset: selection.start,
+    );
+    if (continuation == null) {
+      _lastText = text;
+      return;
+    }
+
+    _setControllerText(
+      text: continuation.text,
+      cursorOffset: continuation.cursorOffset,
+    );
   }
 
   @override
@@ -370,6 +484,7 @@ class _MessageInputState extends State<MessageInput> {
                                               );
                                             }
                                           },
+                                          onChanged: _onInputChanged,
                                           contextMenuBuilder:
                                               (BuildContext context, EditableTextState editableTextState) {
                                                 return MessageInputContextMenu(
@@ -527,10 +642,20 @@ class _MessageInputState extends State<MessageInput> {
                       child: _showMdActions
                           ? Padding(
                               key: const ValueKey('md-actions'),
-                              padding: const EdgeInsets.only(bottom: 8),
+                              padding: .zero,
                               child: Row(
                                 spacing: 16,
                                 children: [
+                                  // TapEffectIcon(
+                                  //   padding: .zero,
+                                  //   onTap: _insertLink,
+                                  //   child: Assets.icons.addLink.svg(
+                                  //     colorFilter: ColorFilter.mode(
+                                  //       iconColors.base,
+                                  //       BlendMode.srcIn,
+                                  //     ),
+                                  //   ),
+                                  // ),
                                   TapEffectIcon(
                                     padding: .zero,
                                     onTap: () => _applyInlineFormat(
@@ -539,7 +664,7 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                     child: Assets.icons.formatBold.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
                                     ),
@@ -552,7 +677,7 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                     child: Assets.icons.formatItalic.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
                                     ),
@@ -565,9 +690,41 @@ class _MessageInputState extends State<MessageInput> {
                                     ),
                                     child: Assets.icons.strikethroughS.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
+                                    ),
+                                  ),
+                                  _EditorToolsVerticalDivider(),
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: () => _insertList(ordered: true),
+                                    child: Assets.icons.formatListNumbered.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        iconColors.base,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: () => _insertList(ordered: false),
+                                    child: Assets.icons.formatListBulleted.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        iconColors.base,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                  _EditorToolsVerticalDivider(),
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: _insertQuote,
+                                    child: Icon(
+                                      fontWeight: .w100,
+                                      weight: 100,
+                                      Icons.format_quote_outlined,
+                                      color: iconColors.base,
                                     ),
                                   ),
                                   TapEffectIcon(
@@ -575,7 +732,17 @@ class _MessageInputState extends State<MessageInput> {
                                     onTap: _insertSpoiler,
                                     child: Assets.icons.spoiler.svg(
                                       colorFilter: ColorFilter.mode(
-                                        theme.colorScheme.onSurface,
+                                        iconColors.base,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                  TapEffectIcon(
+                                    padding: .zero,
+                                    onTap: _insertCodeBlock,
+                                    child: Assets.icons.frameSource.svg(
+                                      colorFilter: ColorFilter.mode(
+                                        iconColors.base,
                                         BlendMode.srcIn,
                                       ),
                                     ),
@@ -641,6 +808,22 @@ class _SubmitButton extends StatelessWidget {
                   ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _EditorToolsVerticalDivider extends StatelessWidget {
+  const _EditorToolsVerticalDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColors = Theme.of(context).extension<IconColors>()!;
+    return SizedBox(
+      height: 24,
+      child: VerticalDivider(
+        width: 2,
+        color: iconColors.base,
       ),
     );
   }
