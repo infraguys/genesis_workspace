@@ -25,6 +25,8 @@ class CallWebView extends StatelessWidget {
     final theme = Theme.of(context);
     final userDisplayName = context.read<ProfileCubit>().state.user?.fullName ?? '';
 
+    print('$meetingLink&config.disableDeepLinking=true&userInfo.displayName="$userDisplayName"');
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -57,7 +59,7 @@ class CallWebView extends StatelessWidget {
             key: ValueKey<String>(meetingLink),
             initialUrlRequest: URLRequest(
               url: WebUri.uri(
-                Uri.parse('$meetingLink&config.disableDeepLinking=true&userInfo.displayName="$userDisplayName"'),
+                Uri.parse('$meetingLink#config.disableDeepLinking=true&userInfo.displayName="$userDisplayName"'),
               ),
             ),
             initialSettings: InAppWebViewSettings(

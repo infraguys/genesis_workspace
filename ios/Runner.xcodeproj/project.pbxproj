@@ -530,7 +530,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -539,7 +539,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -667,7 +667,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -676,7 +676,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -773,7 +773,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -782,7 +782,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -876,7 +876,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -885,7 +885,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -974,7 +974,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -983,7 +983,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -1072,7 +1072,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1081,7 +1081,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -1172,7 +1172,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1181,7 +1181,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -1329,7 +1329,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1338,7 +1338,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -1360,7 +1360,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 572L26ZP26;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.10.7;
+				FLUTTER_BUILD_NAME = 1.10.8;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Genesis Workspace";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -1369,7 +1369,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.10.7;
+				MARKETING_VERSION = 1.10.8;
 				PRODUCT_BUNDLE_IDENTIFIER = genesis.workspace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
